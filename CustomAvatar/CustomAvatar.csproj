@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{8207B0AC-FCA6-47AA-B634-795271F4E5D0}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>CustomAvatar</RootNamespace>
+    <AssemblyName>CustomAvatar</AssemblyName>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="IllusionPlugin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\IllusionPlugin.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AnimationModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AssetBundleModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.VRModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.VRModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.XRModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.XRModule.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AvatarBehaviour.cs" />
+    <Compile Include="CustomAvatar.cs" />
+    <Compile Include="AvatarAssetBundle.cs" />
+    <Compile Include="AvatarDescriptor.cs" />
+    <Compile Include="AvatarEventsPlayer.cs" />
+    <Compile Include="AvatarGameObject.cs" />
+    <Compile Include="AvatarLoadResult.cs" />
+    <Compile Include="AvatarsLoading.cs" />
+    <Compile Include="AvatarsManager.cs" />
+    <Compile Include="CustomAvatarSpawner.cs" />
+    <Compile Include="EventManager.cs" />
+    <Compile Include="IAvatar.cs" />
+    <Compile Include="IAvatarInput.cs" />
+    <Compile Include="PlayerAvatarInput.cs" />
+    <Compile Include="Plugin.cs" />
+    <Compile Include="PosRot.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="VRIK\Axis.cs" />
+    <Compile Include="VRIK\AxisTools.cs" />
+    <Compile Include="VRIK\DynamicBone.cs" />
+    <Compile Include="VRIK\DynamicBoneCollider.cs" />
+    <Compile Include="VRIK\FirstPersonExclusion.cs" />
+    <Compile Include="VRIK\Hierarchy.cs" />
+    <Compile Include="VRIK\IK.cs" />
+    <Compile Include="VRIK\IKManager.cs" />
+    <Compile Include="VRIK\IKManagerAdvanced.cs" />
+    <Compile Include="VRIK\IKSolver.cs" />
+    <Compile Include="VRIK\IKSolverVR.cs" />
+    <Compile Include="VRIK\Interp.cs" />
+    <Compile Include="VRIK\InterpolationMode.cs" />
+    <Compile Include="VRIK\QuaTools.cs" />
+    <Compile Include="VRIK\RotationLimit.cs" />
+    <Compile Include="VRIK\SolverManager.cs" />
+    <Compile Include="VRIK\V3Tools.cs" />
+    <Compile Include="VRIK\VRIK.cs" />
+    <Compile Include="VRIK\Warning.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="AfterBuild">
+    <Copy SourceFiles="$(OutputPath)CustomAvatar.dll" DestinationFolder="C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Plugins\" ContinueOnError="true" />
+  </Target>
+</Project>
