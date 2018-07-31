@@ -66,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AvatarBehaviour.cs" />
+    <Compile Include="AvatarLayer.cs" />
     <Compile Include="CustomAvatar.cs" />
     <Compile Include="AvatarAssetBundle.cs" />
     <Compile Include="AvatarDescriptor.cs" />
@@ -74,8 +75,9 @@
     <Compile Include="AvatarLoadResult.cs" />
     <Compile Include="AvatarsLoading.cs" />
     <Compile Include="AvatarsManager.cs" />
-    <Compile Include="CustomAvatarSpawner.cs" />
+    <Compile Include="AvatarSpawner.cs" />
     <Compile Include="EventManager.cs" />
+    <Compile Include="FirstPersonExclusion.cs" />
     <Compile Include="IAvatar.cs" />
     <Compile Include="IAvatarInput.cs" />
     <Compile Include="PlayerAvatarInput.cs" />
@@ -86,7 +88,6 @@
     <Compile Include="VRIK\AxisTools.cs" />
     <Compile Include="VRIK\DynamicBone.cs" />
     <Compile Include="VRIK\DynamicBoneCollider.cs" />
-    <Compile Include="VRIK\FirstPersonExclusion.cs" />
     <Compile Include="VRIK\Hierarchy.cs" />
     <Compile Include="VRIK\IK.cs" />
     <Compile Include="VRIK\IKManager.cs" />

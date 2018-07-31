@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 namespace CustomAvatar
 {
 	public class AvatarsManager
 	{
 		private readonly List<CustomAvatar> _avatars = new List<CustomAvatar>();
-		private readonly PlayerAvatarInput _playerAvatarInput = new PlayerAvatarInput();
+		private readonly PlayerAvatarInput _playerAvatarInput;
 		private CustomAvatar _currentAvatar;
 
 		public IEnumerable<IAvatar> Avatars
@@ -14,7 +15,7 @@ namespace CustomAvatar
 			get { return _avatars; }
 		}
 
-		public CustomAvatarSpawner Spawner { get; }
+		public AvatarSpawner Spawner { get; }
 
 		private CustomAvatar CurrentAvatar
 		{
@@ -28,7 +29,12 @@ namespace CustomAvatar
 		
 		public AvatarsManager(string customAvatarsPath)
 		{
-			Spawner = new CustomAvatarSpawner();
+			var mainSettingsModel = Resources.FindObjectsOfTypeAll<MainSettingsModel>().FirstOrDefault();
+			_playerAvatarInput = new PlayerAvatarInput(mainSettingsModel);
+			Spawner = new AvatarSpawner(mainSettingsModel == null
+				? Plugin.DefaultPlayerHeight
+				: mainSettingsModel.playerHeight);
+			
 			AvatarsLoading.GetAvatarsInPath(customAvatarsPath, AvatarPathsLoaded);
 			
 			void AvatarPathsLoaded(FileBrowserItem[] items)
@@ -39,8 +45,7 @@ namespace CustomAvatar
 					var newAvatar = new CustomAvatar(item.fullPath);
 					_avatars.Add(newAvatar);
 				}
-
-				Console.WriteLine("Found " + _avatars.Count);
+				
 				if (_avatars.Count == 0) return;
 				CurrentAvatar = _avatars[0];
 			}
@@ -49,6 +54,16 @@ namespace CustomAvatar
 		public IAvatar GetCurrentAvatar()
 		{
 			return CurrentAvatar;
+		}
+
+		public void SwitchToAvatar(IAvatar avatar)
+		{
+			var customAvatar = (CustomAvatar) avatar;
+			if (customAvatar == null) return;
+			if (_avatars.Contains(customAvatar))
+			{
+				CurrentAvatar = customAvatar;
+			}
 		}
 
 		public IAvatar SwitchToNextAvatar()
@@ -90,7 +105,7 @@ namespace CustomAvatar
 				Plugin.Log("Avatar " + loadedAvatar.FullPath + " failed to load");
 				return;
 			}
-
+			Plugin.Log("Loaded avatar " + loadedAvatar.Name + " by " + loadedAvatar.AuthorName);
 			Spawner.SpawnAvatar(_playerAvatarInput, loadedAvatar);
 		}
 	}

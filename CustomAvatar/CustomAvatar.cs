@@ -30,6 +30,24 @@ namespace CustomAvatar
 
 		public string FullPath { get; }
 
+		public float Height
+		{
+			get
+			{
+				if (_assetBundle == null || _assetBundle.AvatarGameObject == null) return Plugin.DefaultPlayerHeight;
+				return _assetBundle.AvatarGameObject.Height;
+			}
+		}
+
+		public bool AllowHeightCalibration
+		{
+			get
+			{
+				if (_assetBundle == null || _assetBundle.AvatarGameObject == null) return true;
+				return _assetBundle.AvatarGameObject.AllowHeightCalibration;
+			}
+		}
+
 		public GameObject GameObject
 		{
 			get

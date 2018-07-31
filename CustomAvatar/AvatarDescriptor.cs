@@ -6,5 +6,7 @@ namespace CustomAvatar
     {
         public string AvatarName;
         public string AuthorName;
+        public float Height = 1.75f;
+        public bool AllowHeightCalibration = true;
     }
 }

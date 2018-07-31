@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.XR;
 
 namespace CustomAvatar
@@ -23,9 +22,9 @@ namespace CustomAvatar
 			get { return GetXRNodeWorldPosRot(XRNode.RightHand); }
 		}
 
-		public PlayerAvatarInput()
+		public PlayerAvatarInput(MainSettingsModel mainSettingsModel)
 		{
-			_mainSettingsModel = Resources.FindObjectsOfTypeAll<MainSettingsModel>().FirstOrDefault();
+			_mainSettingsModel = mainSettingsModel;
 		}
 
 		private PosRot GetXRNodeWorldPosRot(XRNode node)

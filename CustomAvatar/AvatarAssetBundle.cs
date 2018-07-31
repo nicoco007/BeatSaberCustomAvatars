@@ -33,8 +33,7 @@ namespace CustomAvatar
 			{
 				AssetBundleLoaded(loadedCallback);
 			}
-
-			Console.WriteLine("Loading the asset bundle for " + FullPath);
+			
 			_assetBundleRequest = AssetBundle.LoadFromFileAsync(FullPath);
 			_assetBundleRequest.completed += Completed;
 		}
@@ -47,24 +46,24 @@ namespace CustomAvatar
 
 		private void AssetBundleLoaded(Action<AvatarLoadResult> loadedCallback)
 		{
-			Console.WriteLine("Loaded");
 			if (!_assetBundleRequest.isDone)
 			{
 				loadedCallback(AvatarLoadResult.Failed);
 				return;
 			}
 			
-			Console.WriteLine("Everything is cool so far");
 			AssetBundle = _assetBundleRequest.assetBundle;
-			AvatarGameObject = new AvatarGameObject(AssetBundle);
-			
-			if (AvatarGameObject.GameObject == null)
+			AvatarGameObject = new AvatarGameObject(AssetBundle, GameObjectLoaded);
+
+			void GameObjectLoaded(GameObject gameObject)
 			{
-				loadedCallback(AvatarLoadResult.Invalid);
+				if (gameObject == null)
+				{
+					loadedCallback(AvatarLoadResult.Invalid);
+				}
+				
+				loadedCallback(AvatarLoadResult.Completed);
 			}
-			
-			Console.WriteLine("It should have worked...");
-			loadedCallback(AvatarLoadResult.Completed);
 		}
 	}
 }
