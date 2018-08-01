@@ -4,9 +4,7 @@ using UnityEngine.XR;
 namespace CustomAvatar
 {
 	public class PlayerAvatarInput : IAvatarInput
-	{
-		private readonly MainSettingsModel _mainSettingsModel;
-		
+	{	
 		public PosRot HeadPosRot
 		{
 			get { return GetXRNodeWorldPosRot(XRNode.Head); }
@@ -22,20 +20,13 @@ namespace CustomAvatar
 			get { return GetXRNodeWorldPosRot(XRNode.RightHand); }
 		}
 
-		public PlayerAvatarInput(MainSettingsModel mainSettingsModel)
-		{
-			_mainSettingsModel = mainSettingsModel;
-		}
-
-		private PosRot GetXRNodeWorldPosRot(XRNode node)
+		private static PosRot GetXRNodeWorldPosRot(XRNode node)
 		{
 			var pos = InputTracking.GetLocalPosition(node);
 			var rot = InputTracking.GetLocalRotation(node);
 
-			var roomCenter = _mainSettingsModel == null ? Vector3.zero : _mainSettingsModel.roomCenter;
-			var roomRotation = _mainSettingsModel == null
-				? Quaternion.identity
-				: Quaternion.Euler(new Vector3(0f, _mainSettingsModel.roomRotation, 0f));
+			var roomCenter = BeatSaberUtil.GetRoomCenter();
+			var roomRotation = BeatSaberUtil.GetRoomRotation();
 			pos += roomCenter;
 			pos = roomRotation * pos;
 			rot *= roomRotation;

@@ -3,14 +3,14 @@ using UnityEngine;
 
 namespace CustomAvatar
 {
-	public class CustomAvatar : IAvatar
+	public class CustomAvatar
 	{
 		public string Name
 		{
 			get
 			{
-				if (_assetBundle == null || _assetBundle.AvatarGameObject == null) return null;
-				return _assetBundle.AvatarGameObject.AvatarName;
+				if (_assetBundle == null || _assetBundle.AvatarPrefab == null) return null;
+				return _assetBundle.AvatarPrefab.AvatarName;
 			}
 		}
 
@@ -18,8 +18,8 @@ namespace CustomAvatar
 		{
 			get
 			{
-				if (_assetBundle == null || _assetBundle.AvatarGameObject == null) return null;
-				return _assetBundle.AvatarGameObject.AuthorName;
+				if (_assetBundle == null || _assetBundle.AvatarPrefab == null) return null;
+				return _assetBundle.AvatarPrefab.AuthorName;
 			}
 		}
 
@@ -34,8 +34,8 @@ namespace CustomAvatar
 		{
 			get
 			{
-				if (_assetBundle == null || _assetBundle.AvatarGameObject == null) return Plugin.DefaultPlayerHeight;
-				return _assetBundle.AvatarGameObject.Height;
+				if (_assetBundle == null || _assetBundle.AvatarPrefab == null) return Plugin.DefaultPlayerHeight;
+				return _assetBundle.AvatarPrefab.Height;
 			}
 		}
 
@@ -43,8 +43,8 @@ namespace CustomAvatar
 		{
 			get
 			{
-				if (_assetBundle == null || _assetBundle.AvatarGameObject == null) return true;
-				return _assetBundle.AvatarGameObject.AllowHeightCalibration;
+				if (_assetBundle == null || _assetBundle.AvatarPrefab == null) return true;
+				return _assetBundle.AvatarPrefab.AllowHeightCalibration;
 			}
 		}
 
@@ -52,13 +52,13 @@ namespace CustomAvatar
 		{
 			get
 			{
-				return _assetBundle.AvatarGameObject?.GameObject;
+				return _assetBundle.AvatarPrefab?.Prefab;
 			}
 		}
 
 		private readonly AvatarAssetBundle _assetBundle;
 
-		public CustomAvatar(string fullPath)
+		internal CustomAvatar(string fullPath)
 		{
 			FullPath = fullPath;
 			_assetBundle = new AvatarAssetBundle(FullPath);

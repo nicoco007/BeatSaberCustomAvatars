@@ -8,7 +8,7 @@ namespace CustomAvatar
 		private AssetBundleCreateRequest _assetBundleRequest;
 
 		public string FullPath { get; }
-		public AvatarGameObject AvatarGameObject { get; private set; }
+		public AvatarPrefab AvatarPrefab { get; private set; }
 		public AssetBundle AssetBundle { get; private set; }
 		
 		public bool IsLoaded
@@ -53,7 +53,7 @@ namespace CustomAvatar
 			}
 			
 			AssetBundle = _assetBundleRequest.assetBundle;
-			AvatarGameObject = new AvatarGameObject(AssetBundle, GameObjectLoaded);
+			AvatarPrefab = new AvatarPrefab(AssetBundle, GameObjectLoaded);
 
 			void GameObjectLoaded(GameObject gameObject)
 			{

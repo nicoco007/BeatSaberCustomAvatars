@@ -1,16 +1,14 @@
 ﻿using System;
-using System.Linq;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace CustomAvatar
 {
-	public class AvatarGameObject
+	public class AvatarPrefab
 	{
 		private const string GameObjectName = "_CustomAvatar";
 		private AvatarDescriptor _descriptor;
 
-		public GameObject GameObject { get; private set; }
+		public GameObject Prefab { get; private set; }
 
 		public string AvatarName
 		{
@@ -38,7 +36,7 @@ namespace CustomAvatar
 			get { return _descriptor == null || _descriptor.AllowHeightCalibration; }
 		}
 
-		public AvatarGameObject(AssetBundle assetBundle, Action<GameObject> loadedCallback)
+		public AvatarPrefab(AssetBundle assetBundle, Action<GameObject> loadedCallback)
 		{
 			if (assetBundle == null) return;
 
@@ -47,13 +45,13 @@ namespace CustomAvatar
 			
 			void LoadAssetCompleted(AsyncOperation asyncOperation)
 			{
-				GameObject = (GameObject) assetBundleRequest.asset;
-				if (GameObject != null)
+				Prefab = (GameObject) assetBundleRequest.asset;
+				if (Prefab != null)
 				{
-					_descriptor = GameObject.GetComponent<AvatarDescriptor>();
+					_descriptor = Prefab.GetComponent<AvatarDescriptor>();
 				}
 				
-				loadedCallback(GameObject);
+				loadedCallback(Prefab);
 			}
 		}
 	}

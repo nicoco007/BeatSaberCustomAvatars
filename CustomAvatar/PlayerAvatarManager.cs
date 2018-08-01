@@ -1,0 +1,169 @@
+﻿using System;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using Object = UnityEngine.Object;
+
+namespace CustomAvatar
+{
+	public class PlayerAvatarManager
+	{
+		private readonly AvatarLoader _avatarLoader;
+		private readonly PlayerAvatarInput _playerAvatarInput;
+		private SpawnedAvatar _currentSpawnedPlayerAvatar;
+		private FirstPersonAvatar _currentSpawnedPlayerFirstPersonAvatar;
+		private float _prevPlayerHeight = MainSettingsModel.kDefaultPlayerHeight;
+		private Vector3 _startAvatarLocalScale = Vector3.one;
+
+		public event Action<CustomAvatar> AvatarChanged;
+
+		private CustomAvatar CurrentPlayerAvatar
+		{
+			get { return _currentSpawnedPlayerAvatar?.CustomAvatar; }
+			set
+			{
+				if (value == null) return;
+				if (CurrentPlayerAvatar == value) return;
+				value.Load(CustomAvatarLoaded);
+			}
+		}
+
+		public PlayerAvatarManager(AvatarLoader avatarLoader, CustomAvatar startAvatar = null)
+		{
+			_playerAvatarInput = new PlayerAvatarInput();
+			_avatarLoader = avatarLoader;
+
+			if (startAvatar != null)
+			{
+				CurrentPlayerAvatar = startAvatar;
+			}
+
+			Plugin.Instance.FirstPersonEnabledChanged += OnFirstPersonEnabledChanged;
+			SceneManager.activeSceneChanged += SceneManagerOnActiveSceneChanged;
+		}
+
+		~PlayerAvatarManager()
+		{
+			Plugin.Instance.FirstPersonEnabledChanged -= OnFirstPersonEnabledChanged;
+			SceneManager.activeSceneChanged -= SceneManagerOnActiveSceneChanged;
+		}
+
+		public CustomAvatar GetCurrentAvatar()
+		{
+			return CurrentPlayerAvatar;
+		}
+
+		public void SwitchToAvatar(CustomAvatar customAvatar)
+		{
+			CurrentPlayerAvatar = customAvatar;
+		}
+
+		public CustomAvatar SwitchToNextAvatar()
+		{
+			var avatars = _avatarLoader.Avatars;
+			if (avatars.Count == 0) return null;
+
+			if (CurrentPlayerAvatar == null)
+			{
+				CurrentPlayerAvatar = avatars[0];
+				return avatars[0];
+			}
+
+			var currentIndex = _avatarLoader.IndexOf(CurrentPlayerAvatar);
+			if (currentIndex < 0) currentIndex = 0;
+
+			var nextIndex = currentIndex + 1;
+			if (nextIndex >= avatars.Count)
+			{
+				nextIndex = 0;
+			}
+
+			var nextAvatar = avatars[nextIndex];
+			CurrentPlayerAvatar = nextAvatar;
+			return nextAvatar;
+		}
+
+		public CustomAvatar SwitchToPreviousAvatar()
+		{
+			var avatars = _avatarLoader.Avatars;
+			if (avatars.Count == 0) return null;
+
+			if (CurrentPlayerAvatar == null)
+			{
+				CurrentPlayerAvatar = avatars[0];
+				return avatars[0];
+			}
+
+			var currentIndex = _avatarLoader.IndexOf(CurrentPlayerAvatar);
+			if (currentIndex < 0) currentIndex = 0;
+
+			var nextIndex = currentIndex - 1;
+			if (nextIndex < 0)
+			{
+				nextIndex = avatars.Count - 1;
+			}
+
+			var nextAvatar = avatars[nextIndex];
+			CurrentPlayerAvatar = nextAvatar;
+			return nextAvatar;
+		}
+
+		private void CustomAvatarLoaded(CustomAvatar loadedAvatar, AvatarLoadResult result)
+		{
+			if (result != AvatarLoadResult.Completed)
+			{
+				Plugin.Log("Avatar " + loadedAvatar.FullPath + " failed to load");
+				return;
+			}
+
+			Plugin.Log("Loaded avatar " + loadedAvatar.Name + " by " + loadedAvatar.AuthorName);
+
+			if (_currentSpawnedPlayerAvatar?.GameObject != null)
+			{
+				Object.Destroy(_currentSpawnedPlayerAvatar.GameObject);
+				if (_currentSpawnedPlayerFirstPersonAvatar != null)
+				{
+					_currentSpawnedPlayerFirstPersonAvatar.DestroyClone();
+				}
+			}
+
+			_currentSpawnedPlayerAvatar = AvatarSpawner.SpawnAvatar(loadedAvatar, _playerAvatarInput);
+			AvatarLayers.SetChildrenToLayer(_currentSpawnedPlayerAvatar.GameObject, AvatarLayers.OnlyInThirdPerson);
+			_currentSpawnedPlayerFirstPersonAvatar = new FirstPersonAvatar(_currentSpawnedPlayerAvatar.GameObject,
+				Plugin.Instance.FirstPersonEnabled);
+
+			if (AvatarChanged != null)
+			{
+				AvatarChanged(loadedAvatar);
+			}
+
+			_startAvatarLocalScale = _currentSpawnedPlayerAvatar.GameObject.transform.localScale;
+			_prevPlayerHeight = MainSettingsModel.kDefaultPlayerHeight;
+			ResizePlayerAvatar();
+		}
+
+		private void OnFirstPersonEnabledChanged(bool firstPersonEnabled)
+		{
+			if (_currentSpawnedPlayerFirstPersonAvatar == null) return;
+			_currentSpawnedPlayerFirstPersonAvatar.Enabled = firstPersonEnabled;
+		}
+
+		private void SceneManagerOnActiveSceneChanged(Scene oldScene, Scene newScene)
+		{
+			ResizePlayerAvatar();
+		}
+
+		private void ResizePlayerAvatar()
+		{
+			if (_currentSpawnedPlayerAvatar?.GameObject == null) return;
+			if (!_currentSpawnedPlayerAvatar.CustomAvatar.AllowHeightCalibration) return;
+
+			var playerHeight = BeatSaberUtil.GetPlayerHeight();
+			if (playerHeight == _prevPlayerHeight) return;
+			_prevPlayerHeight = playerHeight;
+			_currentSpawnedPlayerAvatar.GameObject.transform.localScale =
+				_startAvatarLocalScale * (playerHeight / _currentSpawnedPlayerAvatar.CustomAvatar.Height);
+			Console.WriteLine("Resizing avatar to " + (playerHeight / _currentSpawnedPlayerAvatar.CustomAvatar.Height) +
+			                  "x scale");
+		}
+	}
+}
