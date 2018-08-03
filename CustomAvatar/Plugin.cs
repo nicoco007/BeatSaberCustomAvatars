@@ -56,7 +56,7 @@ namespace CustomAvatar
 
 		public string Name
 		{
-			get { return "Custom Avatar Plugin"; }
+			get { return "Custom Avatars Plugin"; }
 		}
 
 		public string Version
@@ -66,8 +66,8 @@ namespace CustomAvatar
 
 		public static void Log(string message)
 		{
-			Console.WriteLine("[CustomAvatarPlugin] " + message);
-			File.AppendAllText("CustomAvatarPlugin-log.txt", "[Custom Avatar Plugin] " + message + Environment.NewLine);
+			Console.WriteLine("[CustomAvatarsPlugin] " + message);
+			File.AppendAllText("CustomAvatarsPlugin-log.txt", "[Custom Avatars Plugin] " + message + Environment.NewLine);
 		}
 
 		public void OnApplicationStart()
@@ -75,7 +75,7 @@ namespace CustomAvatar
 			if (_init) return;
 			_init = true;
 			
-			File.WriteAllText("CustomAvatarPlugin-log.txt", string.Empty);
+			File.WriteAllText("CustomAvatarsPlugin-log.txt", string.Empty);
 			
 			AvatarLoader = new AvatarLoader(CustomAvatarsPath, AvatarsLoaded);
 			
