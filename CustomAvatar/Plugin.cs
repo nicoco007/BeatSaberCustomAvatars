@@ -61,7 +61,7 @@ namespace CustomAvatar
 
 		public string Version
 		{
-			get { return "3.0"; }
+			get { return "3.0-beta"; }
 		}
 
 		public static void Log(string message)
@@ -134,7 +134,7 @@ namespace CustomAvatar
 			}
 		}
 
-		private void SetCameraCullingMask()
+		private static void SetCameraCullingMask()
 		{
 			var mainCamera = Camera.main;
 			if (mainCamera == null) return;
