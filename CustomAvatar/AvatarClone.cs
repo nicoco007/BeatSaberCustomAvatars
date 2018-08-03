@@ -1,18 +1,21 @@
-﻿using System;
+﻿﻿using System;
 using System.Linq;
+using AvatarScriptPack;
 using UnityEngine;
 
 namespace CustomAvatar
 {
 	public class AvatarClone : MonoBehaviour
 	{
-		private static readonly Type[] AllowedTypes =
+		private static readonly Type[] BannedTypes =
 		{
-			typeof(Animator),
-			typeof(Transform),
-			typeof(MeshFilter),
-			typeof(MeshRenderer),
-			typeof(SkinnedMeshRenderer)
+			typeof(DynamicBone),
+			typeof(DynamicBoneCollider),
+			typeof(AudioSource),
+			typeof(AvatarBehaviour),
+			typeof(VRIK),
+			typeof(IKManagerAdvanced),
+			typeof(IKManager)
 		};
 
 		private Transform[] _parentTransforms;
@@ -82,16 +85,29 @@ namespace CustomAvatar
 		
 		private void RemoveOtherComponents()
 		{
-			foreach (var component in GetComponentsInChildren<Component>())
+			foreach (var component in GetComponentsInChildren<Component>(true))
 			{
+				if (component == null) continue;
 				if (component == this) continue;
+
+				if (IsComponentTypeAllowed(component)) continue;
 				
-				if (!AllowedTypes.Contains(component.GetType()))
-				{
-					Console.WriteLine("Attempting to destroy component: " + component.GetType());
-					Destroy(component);
-				}
+				Destroy(component);
 			}
+		}
+
+		private bool IsComponentTypeAllowed(Component component)
+		{
+			if (component == null) return true;
+			var type = component.GetType();
+			if (BannedTypes.Contains(type)) return false;
+			
+			foreach (var bannedType in BannedTypes)
+			{
+				if (type.IsSubclassOf(bannedType)) return false;
+			}
+
+			return true;
 		}
 	}
 }

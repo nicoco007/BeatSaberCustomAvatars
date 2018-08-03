@@ -16,6 +16,8 @@ namespace CustomAvatar
 
 			var behaviour = avatarGameObject.AddComponent<AvatarBehaviour>();
 			behaviour.Init(avatarInput);
+
+			avatarGameObject.AddComponent<AvatarEventsPlayer>();
 			
 			Object.DontDestroyOnLoad(avatarGameObject);
 

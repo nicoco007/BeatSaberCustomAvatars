@@ -120,10 +120,12 @@ namespace CustomAvatar
 		{
 			if (Input.GetKeyDown(KeyCode.PageUp))
 			{
+				if (PlayerAvatarManager == null) return;
 				PlayerAvatarManager.SwitchToNextAvatar();
 			}
 			else if (Input.GetKeyDown(KeyCode.PageDown))
 			{
+				if (PlayerAvatarManager == null) return;
 				PlayerAvatarManager.SwitchToPreviousAvatar();
 			}
 			else if (Input.GetKeyDown(KeyCode.Home))

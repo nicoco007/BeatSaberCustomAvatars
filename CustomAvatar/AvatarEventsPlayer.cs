@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace CustomAvatar
 {
-    internal class AvatarEventsPlayer : MonoBehaviour
+    public class AvatarEventsPlayer : MonoBehaviour
     {
         private EventManager _eventManager;
 

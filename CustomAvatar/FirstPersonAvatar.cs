@@ -44,6 +44,7 @@ namespace CustomAvatar
 		private void CopyParentAvatar()
 		{
 			CloneGameObject = Object.Instantiate(ParentGameObject);
+			CloneGameObject.name = ParentGameObject.name;
 			AvatarLayers.SetChildrenToLayer(CloneGameObject, AvatarLayers.OnlyInFirstPerson);
 			var clone = CloneGameObject.AddComponent<AvatarClone>();
 			clone.Init(ParentGameObject);
