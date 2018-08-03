@@ -29,7 +29,7 @@ namespace CustomAvatar
 			var roomRotation = BeatSaberUtil.GetRoomRotation();
 			pos += roomCenter;
 			pos = roomRotation * pos;
-			rot *= roomRotation;
+			rot = roomRotation * rot;
 			return new PosRot(pos, rot);
 		}
 	}

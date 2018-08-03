@@ -6,11 +6,17 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
+		0_11_2|Any CPU = 0_11_2|Any CPU
+		0_11_1|Any CPU = 0_11_1|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8207B0AC-FCA6-47AA-B634-795271F4E5D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8207B0AC-FCA6-47AA-B634-795271F4E5D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8207B0AC-FCA6-47AA-B634-795271F4E5D0}.Debug|Any CPU.ActiveCfg = Release|Any CPU
+		{8207B0AC-FCA6-47AA-B634-795271F4E5D0}.Debug|Any CPU.Build.0 = Release|Any CPU
 		{8207B0AC-FCA6-47AA-B634-795271F4E5D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8207B0AC-FCA6-47AA-B634-795271F4E5D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8207B0AC-FCA6-47AA-B634-795271F4E5D0}.0_11_2|Any CPU.ActiveCfg = 0_11_2|Any CPU
+		{8207B0AC-FCA6-47AA-B634-795271F4E5D0}.0_11_2|Any CPU.Build.0 = 0_11_2|Any CPU
+		{8207B0AC-FCA6-47AA-B634-795271F4E5D0}.0_11_1|Any CPU.ActiveCfg = 0_11_1|Any CPU
+		{8207B0AC-FCA6-47AA-B634-795271F4E5D0}.0_11_1|Any CPU.Build.0 = 0_11_1|Any CPU
 	EndGlobalSection
 EndGlobal

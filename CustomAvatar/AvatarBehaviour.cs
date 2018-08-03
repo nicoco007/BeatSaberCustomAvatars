@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace CustomAvatar
 {
@@ -38,6 +39,7 @@ namespace CustomAvatar
 			_right.position = rightPosRot.Position;
 			_right.rotation = rightPosRot.Rotation;
 			
+			if (_body == null) return;
 			_body.position = _head.position - (_head.transform.up * 0.1f);
 
 			var vel = new Vector3(_body.transform.localPosition.x - _prevBodyPos.x, 0.0f, _body.localPosition.z - _prevBodyPos.z);
