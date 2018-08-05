@@ -7,34 +7,7 @@ namespace CustomAvatar
 	{
 		private const string GameObjectName = "_CustomAvatar";
 		private AvatarDescriptor _descriptor;
-
-		public GameObject Prefab { get; private set; }
-
-		public string AvatarName
-		{
-			get
-			{
-				return _descriptor == null ? null : _descriptor.AvatarName;
-			}
-		}
-
-		public string AuthorName
-		{
-			get
-			{
-				return _descriptor == null ? null : _descriptor.AuthorName;
-			}
-		}
-
-		public float Height
-		{
-			get { return _descriptor == null ? Plugin.DefaultPlayerHeight : _descriptor.Height; }
-		}
-
-		public bool AllowHeightCalibration
-		{
-			get { return _descriptor == null || _descriptor.AllowHeightCalibration; }
-		}
+		private Transform _viewPoint;
 
 		public AvatarPrefab(AssetBundle assetBundle, Action<GameObject> loadedCallback)
 		{
@@ -53,6 +26,45 @@ namespace CustomAvatar
 				
 				loadedCallback(Prefab);
 			}
+		}
+
+		public GameObject Prefab { get; private set; }
+
+		public string AvatarName
+		{
+			get
+			{
+				return _descriptor == null ? null : _descriptor.Name;
+			}
+		}
+
+		public string AuthorName
+		{
+			get
+			{
+				return _descriptor == null ? null : _descriptor.Author;
+			}
+		}
+
+		public Transform ViewPoint
+		{
+			get
+			{
+				if (_viewPoint != null) return _viewPoint;
+				
+				_viewPoint = _descriptor == null ? null : _descriptor.ViewPoint;
+				if (_viewPoint == null)
+				{
+					_viewPoint = Prefab.transform.Find("Head");
+				}
+
+				return _viewPoint;
+			}
+		}
+
+		public bool AllowHeightCalibration
+		{
+			get { return _descriptor == null || _descriptor.AllowHeightCalibration; }
 		}
 	}
 }

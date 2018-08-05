@@ -17,8 +17,8 @@ namespace CustomAvatar
 		public void Init(IAvatarInput avatarInput)
 		{
 			_avatarInput = avatarInput;
-			
-			_head = gameObject.transform.Find("Head");
+
+			_head = GetHeadTransform();
 			_body = gameObject.transform.Find("Body");
 			_left = gameObject.transform.Find("LeftHand");
 			_right = gameObject.transform.Find("RightHand");
@@ -51,6 +51,17 @@ namespace CustomAvatar
 				Time.deltaTime * 10.0f);
 
 			_prevBodyPos = _body.transform.localPosition;
+		}
+
+		private Transform GetHeadTransform()
+		{
+			var descriptor = GetComponent<AvatarDescriptor>();
+			if (descriptor != null)
+			{
+				if (descriptor.ViewPoint != null) return descriptor.ViewPoint;
+			}
+
+			return gameObject.transform.Find("Head");
 		}
 	}
 }

@@ -10,7 +10,6 @@ namespace CustomAvatar
 		private readonly AvatarLoader _avatarLoader;
 		private readonly PlayerAvatarInput _playerAvatarInput;
 		private SpawnedAvatar _currentSpawnedPlayerAvatar;
-		private FirstPersonAvatar _currentSpawnedPlayerFirstPersonAvatar;
 		private float _prevPlayerHeight = MainSettingsModel.kDefaultPlayerHeight;
 		private Vector3 _startAvatarLocalScale = Vector3.one;
 
@@ -120,16 +119,9 @@ namespace CustomAvatar
 			if (_currentSpawnedPlayerAvatar?.GameObject != null)
 			{
 				Object.Destroy(_currentSpawnedPlayerAvatar.GameObject);
-				if (_currentSpawnedPlayerFirstPersonAvatar != null)
-				{
-					_currentSpawnedPlayerFirstPersonAvatar.DestroyClone();
-				}
 			}
 
 			_currentSpawnedPlayerAvatar = AvatarSpawner.SpawnAvatar(loadedAvatar, _playerAvatarInput);
-			AvatarLayers.SetChildrenToLayer(_currentSpawnedPlayerAvatar.GameObject, AvatarLayers.OnlyInThirdPerson);
-			_currentSpawnedPlayerFirstPersonAvatar = new FirstPersonAvatar(_currentSpawnedPlayerAvatar.GameObject,
-				Plugin.Instance.FirstPersonEnabled);
 
 			if (AvatarChanged != null)
 			{
@@ -137,14 +129,15 @@ namespace CustomAvatar
 			}
 
 			_startAvatarLocalScale = _currentSpawnedPlayerAvatar.GameObject.transform.localScale;
-			_prevPlayerHeight = MainSettingsModel.kDefaultPlayerHeight;
+			_prevPlayerHeight = -1;
 			ResizePlayerAvatar();
 		}
 
 		private void OnFirstPersonEnabledChanged(bool firstPersonEnabled)
 		{
-			if (_currentSpawnedPlayerFirstPersonAvatar == null) return;
-			_currentSpawnedPlayerFirstPersonAvatar.Enabled = firstPersonEnabled;
+			if (_currentSpawnedPlayerAvatar == null) return;
+			AvatarLayers.SetChildrenToLayer(_currentSpawnedPlayerAvatar.GameObject,
+				firstPersonEnabled ? 0 : AvatarLayers.OnlyInThirdPerson);
 		}
 
 		private void SceneManagerOnActiveSceneChanged(Scene oldScene, Scene newScene)
@@ -162,7 +155,7 @@ namespace CustomAvatar
 			_prevPlayerHeight = playerHeight;
 			_currentSpawnedPlayerAvatar.GameObject.transform.localScale =
 				_startAvatarLocalScale * (playerHeight / _currentSpawnedPlayerAvatar.CustomAvatar.Height);
-			Console.WriteLine("Resizing avatar to " + (playerHeight / _currentSpawnedPlayerAvatar.CustomAvatar.Height) +
+			Plugin.Log("Resizing avatar to " + (playerHeight / _currentSpawnedPlayerAvatar.CustomAvatar.Height) +
 			                  "x scale");
 		}
 	}

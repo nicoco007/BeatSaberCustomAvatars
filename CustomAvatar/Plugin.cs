@@ -10,7 +10,6 @@ namespace CustomAvatar
 {
 	public class Plugin : IPlugin
 	{
-		public const float DefaultPlayerHeight = 1.75f;
 		private const string CustomAvatarsPath = "CustomAvatars";
 		private const string FirstPersonEnabledKey = "avatarFirstPerson";
 		private const string PreviousAvatarKey = "previousAvatar";
@@ -61,7 +60,7 @@ namespace CustomAvatar
 
 		public string Version
 		{
-			get { return "3.0.0-beta"; }
+			get { return "3.1.0-beta"; }
 		}
 
 		public static void Log(string message)

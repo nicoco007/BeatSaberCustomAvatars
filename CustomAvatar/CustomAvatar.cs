@@ -5,6 +5,17 @@ namespace CustomAvatar
 {
 	public class CustomAvatar
 	{
+		private float? _height;
+		private readonly AvatarAssetBundle _assetBundle;
+
+		internal CustomAvatar(string fullPath)
+		{
+			FullPath = fullPath;
+			_assetBundle = new AvatarAssetBundle(FullPath);
+		}
+
+		public string FullPath { get; }
+		
 		public string Name
 		{
 			get
@@ -23,19 +34,26 @@ namespace CustomAvatar
 			}
 		}
 
-		public bool IsLoaded
+		public Transform ViewPoint
 		{
-			get { return _assetBundle.AssetBundle != null; }
+			get
+			{
+				if (_assetBundle == null || _assetBundle.AvatarPrefab == null) return null;
+				return _assetBundle.AvatarPrefab.ViewPoint;
+			}
 		}
-
-		public string FullPath { get; }
 
 		public float Height
 		{
 			get
 			{
-				if (_assetBundle == null || _assetBundle.AvatarPrefab == null) return Plugin.DefaultPlayerHeight;
-				return _assetBundle.AvatarPrefab.Height;
+				if (GameObject == null) return AvatarMeasurement.DefaultPlayerHeight;
+				if (_height == null)
+				{
+					_height = AvatarMeasurement.MeasureHeight(GameObject, _assetBundle.AvatarPrefab.ViewPoint);
+				}
+
+				return _height.Value;
 			}
 		}
 
@@ -48,20 +66,17 @@ namespace CustomAvatar
 			}
 		}
 
+		public bool IsLoaded
+		{
+			get { return _assetBundle.AssetBundle != null; }
+		}
+
 		public GameObject GameObject
 		{
 			get
 			{
 				return _assetBundle.AvatarPrefab?.Prefab;
 			}
-		}
-
-		private readonly AvatarAssetBundle _assetBundle;
-
-		internal CustomAvatar(string fullPath)
-		{
-			FullPath = fullPath;
-			_assetBundle = new AvatarAssetBundle(FullPath);
 		}
 
 		public void Load(Action<CustomAvatar, AvatarLoadResult> loadedCallback)
