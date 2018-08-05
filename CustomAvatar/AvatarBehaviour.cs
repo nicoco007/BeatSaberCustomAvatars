@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace CustomAvatar
 {
@@ -32,17 +31,23 @@ namespace CustomAvatar
 
 			_head.position = headPosRot.Position;
 			_head.rotation = headPosRot.Rotation;
-			
+
 			_left.position = leftPosRot.Position;
 			_left.rotation = leftPosRot.Rotation;
-			
+
 			_right.position = rightPosRot.Position;
 			_right.rotation = rightPosRot.Rotation;
-			
+
+			var vrPlatformHelper = PersistentSingleton<VRPlatformHelper>.instance;
+
+			vrPlatformHelper.AdjustPlatformSpecificControllerTransform(_left);
+			vrPlatformHelper.AdjustPlatformSpecificControllerTransform(_right);
+
 			if (_body == null) return;
 			_body.position = _head.position - (_head.transform.up * 0.1f);
 
-			var vel = new Vector3(_body.transform.localPosition.x - _prevBodyPos.x, 0.0f, _body.localPosition.z - _prevBodyPos.z);
+			var vel = new Vector3(_body.transform.localPosition.x - _prevBodyPos.x, 0.0f,
+				_body.localPosition.z - _prevBodyPos.z);
 
 			var rot = Quaternion.Euler(0.0f, _head.localEulerAngles.y, 0.0f);
 			var tiltAxis = Vector3.Cross(gameObject.transform.up, vel);
