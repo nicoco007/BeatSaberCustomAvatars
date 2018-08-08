@@ -12,7 +12,7 @@ namespace CustomAvatar
 		private Transform _right;
 
 		private Vector3 _prevBodyPos;
-		
+
 		public void Init(IAvatarInput avatarInput)
 		{
 			_avatarInput = avatarInput;
