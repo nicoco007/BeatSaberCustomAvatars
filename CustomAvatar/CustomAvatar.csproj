@@ -49,14 +49,6 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == '0.11.2|AnyCPU' ">
     <OutputPath>bin\0.11.2\</OutputPath>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == '0_11_2|AnyCPU' ">
-    <OutputPath>bin\0_11_2\</OutputPath>
-    <DefineConstants>BS_0_11_2</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == '0_11_1|AnyCPU' ">
-    <OutputPath>bin\0_11_1\</OutputPath>
-    <DefineConstants>BS_0_11_1</DefineConstants>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\Assembly-CSharp.dll</HintPath>
