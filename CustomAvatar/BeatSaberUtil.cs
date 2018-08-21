@@ -32,13 +32,8 @@ namespace CustomAvatar
 		private static void SceneManagerOnSceneLoaded(Scene scene, LoadSceneMode mode)
 		{
 			var originObject = GameObject.Find("Origin");
-			if (originObject == null)
+			if (originObject != null)
 			{
-				Console.WriteLine("Couldn't find Origin in " + scene.name);
-			}
-			else
-			{
-				Console.WriteLine("Found Origin in " + scene.name);
 				_originTransform = originObject.transform;
 			}
 		}

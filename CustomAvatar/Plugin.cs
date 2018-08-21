@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -16,6 +17,8 @@ namespace CustomAvatar
 		
 		private bool _init;
 		private bool _firstPersonEnabled;
+		
+		private WaitForSecondsRealtime _sceneLoadWait = new WaitForSecondsRealtime(0.1f);
 		
 		public Plugin()
 		{
@@ -60,7 +63,7 @@ namespace CustomAvatar
 
 		public string Version
 		{
-			get { return "3.1.2-beta"; }
+			get { return "3.1.3-beta"; }
 		}
 
 		public static void Log(string message)
@@ -79,12 +82,12 @@ namespace CustomAvatar
 			AvatarLoader = new AvatarLoader(CustomAvatarsPath, AvatarsLoaded);
 			
 			FirstPersonEnabled = PlayerPrefs.HasKey(FirstPersonEnabledKey);
-			SceneManager.activeSceneChanged += SceneManagerOnActiveSceneChanged;
+			SceneManager.sceneLoaded += SceneManagerOnSceneLoaded;
 		}
 
 		public void OnApplicationQuit()
 		{
-			SceneManager.activeSceneChanged -= SceneManagerOnActiveSceneChanged;
+			SceneManager.sceneLoaded -= SceneManagerOnSceneLoaded;
 
 			if (PlayerAvatarManager == null) return;
 			PlayerAvatarManager.AvatarChanged -= PlayerAvatarManagerOnAvatarChanged;
@@ -105,9 +108,9 @@ namespace CustomAvatar
 			PlayerAvatarManager.AvatarChanged += PlayerAvatarManagerOnAvatarChanged;
 		}
 
-		private void SceneManagerOnActiveSceneChanged(Scene oldScene, Scene newScene)
-		{	
-			SetCameraCullingMask();
+		private void SceneManagerOnSceneLoaded(Scene newScene, LoadSceneMode mode)
+		{
+			SharedCoroutineStarter.instance.StartCoroutine(SetCameraCullingMask());
 		}
 
 		private void PlayerAvatarManagerOnAvatarChanged(CustomAvatar newAvatar)
@@ -133,10 +136,11 @@ namespace CustomAvatar
 			}
 		}
 
-		private static void SetCameraCullingMask()
+		private IEnumerator SetCameraCullingMask()
 		{
+			yield return _sceneLoadWait;
 			var mainCamera = Camera.main;
-			if (mainCamera == null) return;
+			if (mainCamera == null) yield break;
 			mainCamera.cullingMask &= ~(1 << AvatarLayers.OnlyInThirdPerson);
 			mainCamera.cullingMask |= 1 << AvatarLayers.OnlyInFirstPerson;
 		}

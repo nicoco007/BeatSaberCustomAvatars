@@ -37,13 +37,13 @@ namespace CustomAvatar
 			}
 
 			Plugin.Instance.FirstPersonEnabledChanged += OnFirstPersonEnabledChanged;
-			SceneManager.activeSceneChanged += SceneManagerOnActiveSceneChanged;
+			SceneManager.sceneLoaded += SceneManagerOnSceneLoaded;
 		}
 
 		~PlayerAvatarManager()
 		{
 			Plugin.Instance.FirstPersonEnabledChanged -= OnFirstPersonEnabledChanged;
-			SceneManager.activeSceneChanged -= SceneManagerOnActiveSceneChanged;
+			SceneManager.sceneLoaded -= SceneManagerOnSceneLoaded;
 		}
 
 		public CustomAvatar GetCurrentAvatar()
@@ -141,9 +141,10 @@ namespace CustomAvatar
 				firstPersonEnabled ? 0 : AvatarLayers.OnlyInThirdPerson);
 		}
 
-		private void SceneManagerOnActiveSceneChanged(Scene oldScene, Scene newScene)
+		private void SceneManagerOnSceneLoaded(Scene newScene, LoadSceneMode mode)
 		{
 			ResizePlayerAvatar();
+			OnFirstPersonEnabledChanged(Plugin.Instance.FirstPersonEnabled);
 		}
 
 		private void ResizePlayerAvatar()
