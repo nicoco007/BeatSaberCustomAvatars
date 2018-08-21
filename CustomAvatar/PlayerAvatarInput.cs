@@ -1,5 +1,4 @@
-﻿using UnityEngine;
-using UnityEngine.XR;
+﻿using UnityEngine.XR;
 
 namespace CustomAvatar
 {

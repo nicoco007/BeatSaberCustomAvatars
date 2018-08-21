@@ -131,6 +131,7 @@ namespace CustomAvatar
 			_startAvatarLocalScale = _currentSpawnedPlayerAvatar.GameObject.transform.localScale;
 			_prevPlayerHeight = -1;
 			ResizePlayerAvatar();
+			OnFirstPersonEnabledChanged(Plugin.Instance.FirstPersonEnabled);
 		}
 
 		private void OnFirstPersonEnabledChanged(bool firstPersonEnabled)
