@@ -499,51 +499,6 @@ public class DynamicBone : MonoBehaviour
 			bool flag = particle.m_ParentIndex >= 0;
 			if (flag)
 			{
-				particle.m_PrevPosition += this.m_ObjectMove;
-				particle.m_Position += this.m_ObjectMove;
-				DynamicBone.Particle particle2 = this.m_Particles[particle.m_ParentIndex];
-				bool flag2 = particle.m_Transform != null;
-				float magnitude;
-				if (flag2)
-				{
-					magnitude = (particle2.m_Transform.position - particle.m_Transform.position).magnitude;
-				}
-				else
-				{
-					magnitude = particle2.m_Transform.localToWorldMatrix.MultiplyVector(particle.m_EndOffset).magnitude;
-				}
-				float num = Mathf.Lerp(1f, particle.m_Stiffness, this.m_Weight);
-				bool flag3 = num > 0f;
-				if (flag3)
-				{
-					Matrix4x4 localToWorldMatrix = particle2.m_Transform.localToWorldMatrix;
-					localToWorldMatrix.SetColumn(3, particle2.m_Position);
-					bool flag4 = particle.m_Transform != null;
-					Vector3 vector;
-					if (flag4)
-					{
-						vector = localToWorldMatrix.MultiplyPoint3x4(particle.m_Transform.localPosition);
-					}
-					else
-					{
-						vector = localToWorldMatrix.MultiplyPoint3x4(particle.m_EndOffset);
-					}
-					Vector3 vector2 = vector - particle.m_Position;
-					float magnitude2 = vector2.magnitude;
-					float num2 = magnitude * (1f - num) * 2f;
-					bool flag5 = magnitude2 > num2;
-					if (flag5)
-					{
-						particle.m_Position += vector2 * ((magnitude2 - num2) / magnitude2);
-					}
-				}
-				Vector3 vector3 = particle2.m_Position - particle.m_Position;
-				float magnitude3 = vector3.magnitude;
-				bool flag6 = magnitude3 > 0f;
-				if (flag6)
-				{
-					particle.m_Position += vector3 * ((magnitude3 - magnitude) / magnitude3);
-				}
 			}
 			else
 			{
