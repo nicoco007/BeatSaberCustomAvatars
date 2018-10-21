@@ -6,6 +6,7 @@ using System.Linq;
 using IllusionPlugin;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.XR;
 
 namespace CustomAvatar
 {
@@ -17,15 +18,60 @@ namespace CustomAvatar
 		
 		private bool _init;
 		private bool _firstPersonEnabled;
-		
-		private WaitForSecondsRealtime _sceneLoadWait = new WaitForSecondsRealtime(0.1f);
+        private static bool _isTrackerAsHand;
+        private static bool _isFullBodyTracking;
+
+        public static List<XRNodeState> Trackers = new List<XRNodeState>();
+        public static bool IsTrackerAsHand
+        {
+            get { return _isTrackerAsHand; }
+            set
+            {
+                _isTrackerAsHand = value;
+                List<XRNodeState> notes = new List<XRNodeState>();
+                Trackers = new List<XRNodeState>();
+                InputTracking.GetNodeStates(notes);
+                foreach (XRNodeState note in notes)
+                {
+                    if (note.nodeType != XRNode.HardwareTracker || !InputTracking.GetNodeName(note.uniqueID).Contains("LHR-"))
+                        continue;
+                    Trackers.Add(note);
+                }
+                if (Trackers.Capacity == 0)
+                    _isTrackerAsHand = false;
+                Console.WriteLine("IsFullBodyTracking : " + _isFullBodyTracking);
+            }
+        }
+
+        public static bool IsFullBodyTracking
+        {
+            get { return _isFullBodyTracking; }
+            set
+            {
+                _isFullBodyTracking = value;
+                List<XRNodeState> notes = new List<XRNodeState>();
+                Trackers = new List<XRNodeState>();
+                InputTracking.GetNodeStates(notes);
+                foreach (XRNodeState note in notes)
+                {
+                    if (note.nodeType != XRNode.HardwareTracker || !InputTracking.GetNodeName(note.uniqueID).Contains("LHR-"))
+                        continue;
+                    Trackers.Add(note);
+                }
+                if (Trackers.Capacity == 0)
+                    _isFullBodyTracking = false;
+                Console.WriteLine("IsFullBodyTracking : " + _isFullBodyTracking);
+            }
+        }
+
+        private WaitForSecondsRealtime _sceneLoadWait = new WaitForSecondsRealtime(0.1f);
 		
 		public Plugin()
 		{
 			Instance = this;
-		}
+        }
 
-		public event Action<bool> FirstPersonEnabledChanged;
+        public event Action<bool> FirstPersonEnabledChanged;
 
 		public static Plugin Instance { get; private set; }
 		public AvatarLoader AvatarLoader { get; private set; }
@@ -83,7 +129,8 @@ namespace CustomAvatar
 			
 			FirstPersonEnabled = PlayerPrefs.HasKey(FirstPersonEnabledKey);
 			SceneManager.sceneLoaded += SceneManagerOnSceneLoaded;
-		}
+            IsFullBodyTracking = true;
+        }
 
 		public void OnApplicationQuit()
 		{
@@ -106,7 +153,8 @@ namespace CustomAvatar
 			
 			PlayerAvatarManager = new PlayerAvatarManager(AvatarLoader, previousAvatar);
 			PlayerAvatarManager.AvatarChanged += PlayerAvatarManagerOnAvatarChanged;
-		}
+            IsFullBodyTracking = true;
+        }
 
 		private void SceneManagerOnSceneLoaded(Scene newScene, LoadSceneMode mode)
 		{
@@ -116,7 +164,8 @@ namespace CustomAvatar
 		private void PlayerAvatarManagerOnAvatarChanged(CustomAvatar newAvatar)
 		{
 			PlayerPrefs.SetString(PreviousAvatarKey, newAvatar.FullPath);
-		}
+            IsFullBodyTracking = IsFullBodyTracking;
+        }
 
 		public void OnUpdate()
 		{
@@ -133,8 +182,16 @@ namespace CustomAvatar
 			else if (Input.GetKeyDown(KeyCode.Home))
 			{
 				FirstPersonEnabled = !FirstPersonEnabled;
-			}
-		}
+            }
+            else if (Input.GetKeyDown(KeyCode.F6))
+            {
+                IsTrackerAsHand = !IsTrackerAsHand;
+            }
+            else if (Input.GetKeyDown(KeyCode.F5))
+            {
+                IsFullBodyTracking = !IsFullBodyTracking;
+            }
+        }
 
 		private IEnumerator SetCameraCullingMask()
 		{
@@ -154,7 +211,7 @@ namespace CustomAvatar
 		}
 
 		public void OnLevelWasLoaded(int level)
-		{
-		}
+        {
+        }
 	}
 }

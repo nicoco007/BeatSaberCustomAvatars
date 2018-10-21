@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace CustomAvatar
 {
@@ -13,6 +14,29 @@ namespace CustomAvatar
         private BeatmapObjectCallbackController _beatmapObjectCallbackController;
 
         private void Start()
+        {
+            SceneManager.sceneLoaded += SceneManagerOnSceneLoaded;
+        }
+
+        private void OnDestroy()
+        {
+            SceneManager.sceneLoaded -= SceneManagerOnSceneLoaded;
+            if (_scoreController == null) return;
+            _scoreController.noteWasCutEvent -= SliceCallBack;
+            _scoreController.noteWasMissedEvent -= NoteMissCallBack;
+            _scoreController.multiplierDidChangeEvent -= MultiplierCallBack;
+            _scoreController.comboDidChangeEvent -= ComboChangeEvent;
+
+            _saberCollisionManager.sparkleEffectDidStartEvent -= SaberStartCollide;
+            _saberCollisionManager.sparkleEffectDidEndEvent -= SaberEndCollide;
+
+            _gameEnergyCounter.gameEnergyDidReach0Event -= FailLevelCallBack;
+            
+
+            _beatmapObjectCallbackController.beatmapEventDidTriggerEvent -= OnBeatmapEventDidTriggerEvent;
+        }
+
+        private void SceneManagerOnSceneLoaded(Scene newScene, LoadSceneMode mode)
         {
             _eventManager = gameObject.GetComponent<EventManager>();
             if (_eventManager == null)
@@ -42,23 +66,6 @@ namespace CustomAvatar
 
             if (_beatmapObjectCallbackController != null)
                 _beatmapObjectCallbackController.beatmapEventDidTriggerEvent += OnBeatmapEventDidTriggerEvent;
-        }
-
-        private void OnDestroy()
-        {
-            if (_scoreController == null) return;
-            _scoreController.noteWasCutEvent -= SliceCallBack;
-            _scoreController.noteWasMissedEvent -= NoteMissCallBack;
-            _scoreController.multiplierDidChangeEvent -= MultiplierCallBack;
-            _scoreController.comboDidChangeEvent -= ComboChangeEvent;
-
-            _saberCollisionManager.sparkleEffectDidStartEvent -= SaberStartCollide;
-            _saberCollisionManager.sparkleEffectDidEndEvent -= SaberEndCollide;
-
-            _gameEnergyCounter.gameEnergyDidReach0Event -= FailLevelCallBack;
-            
-
-            _beatmapObjectCallbackController.beatmapEventDidTriggerEvent -= OnBeatmapEventDidTriggerEvent;
         }
 
         private void SliceCallBack(NoteData noteData, NoteCutInfo noteCutInfo, int multiplier)

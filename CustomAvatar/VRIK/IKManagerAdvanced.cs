@@ -163,6 +163,9 @@ namespace AvatarScriptPack
         [Range(-180f, 180f), Tooltip("Angular offset of the knee bending direction.")]
         public float LeftLeg_swivelOffset;
 
+        [Range(-180f, 180f), Tooltip("Rotation of the knee bend normal value.")]
+        public float LeftLeg_bendRotation;
+
 
         [Space(20)]
 
@@ -187,6 +190,9 @@ namespace AvatarScriptPack
 
         [Range(-180f, 180f), Tooltip("Angular offset of the knee bending direction.")]
         public float RightLeg_swivelOffset;
+
+        [Range(-180f, 180f), Tooltip("Rotation of the knee bend normal value.")]
+        public float RightLeg_bendRotation;
 
 
         [Space(20)]
@@ -292,6 +298,13 @@ namespace AvatarScriptPack
                         }
                     }
                 }
+            }
+            if (!CustomAvatar.Plugin.IsFullBodyTracking)
+            {
+                SetProperty(_VRIK.solver.leftLeg, "positionWeight", 0);
+                SetProperty(_VRIK.solver.leftLeg, "rotationWeight", 0);
+                SetProperty(_VRIK.solver.rightLeg, "positionWeight", 0);
+                SetProperty(_VRIK.solver.rightLeg, "rotationWeight", 0);
             }
         }
 

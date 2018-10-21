@@ -1530,16 +1530,29 @@ namespace AvatarScriptPack
 					Vector3 vector = Quaternion.Inverse(rotation) * point;
 					num = Mathf.Atan2(vector.x, vector.z) * 57.29578f * this.bendGoalWeight;
 				}
-				float num2 = this.swivelOffset + num;
+                if (bendGoal != null)
+                {
+                    this.bendNormal = bendGoal.position - thigh.solverPosition;
+                    this.bendNormal = RotateRound(this.bendNormal, new Vector3(), Vector3.up, bendRotation);
+                }
+
+                float num2 = this.swivelOffset + num;
 				if (num2 != 0f)
 				{
 					this.bendNormal = Quaternion.AngleAxis(num2, this.thigh.solverPosition - this.lastBone.solverPosition) * this.bendNormal;
 					this.thigh.solverRotation = Quaternion.AngleAxis(-num2, this.thigh.solverRotation * this.thigh.axis) * this.thigh.solverRotation;
 				}
-			}
+            }
 
-			// Token: 0x060003A7 RID: 935 RVA: 0x0001A624 File Offset: 0x00018A24
-			private void ApplyPositionOffset(Vector3 offset, float weight)
+            public static Vector3 RotateRound(Vector3 position, Vector3 center, Vector3 axis, float angle)
+            {
+                Vector3 point = Quaternion.AngleAxis(angle, axis) * (position - center);
+                Vector3 resultVec3 = center + point;
+                return resultVec3;
+            }
+
+            // Token: 0x060003A7 RID: 935 RVA: 0x0001A624 File Offset: 0x00018A24
+            private void ApplyPositionOffset(Vector3 offset, float weight)
 			{
 				if (weight <= 0f)
 				{
@@ -1632,8 +1645,12 @@ namespace AvatarScriptPack
 			[Range(-180f, 180f)]
 			public float swivelOffset;
 
-			// Token: 0x040002E9 RID: 745
-			[HideInInspector]
+            [Tooltip("Rotation of the knee bend normal value.")]
+            [Range(-180f, 180f)]
+            public float bendRotation;
+
+            // Token: 0x040002E9 RID: 745
+            [HideInInspector]
 			[NonSerialized]
 			public Vector3 IKPosition;
 

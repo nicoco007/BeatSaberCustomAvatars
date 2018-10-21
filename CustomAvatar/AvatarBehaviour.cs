@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace CustomAvatar
 {
@@ -10,8 +11,10 @@ namespace CustomAvatar
 		private Transform _body;
 		private Transform _left;
 		private Transform _right;
+        private Transform _leftLeg;
+        private Transform _rightLeg;
 
-		private Vector3 _prevBodyPos;
+        private Vector3 _prevBodyPos;
 
 		public void Init(IAvatarInput avatarInput)
 		{
@@ -21,41 +24,60 @@ namespace CustomAvatar
 			_body = gameObject.transform.Find("Body");
 			_left = gameObject.transform.Find("LeftHand");
 			_right = gameObject.transform.Find("RightHand");
-		}
+            _leftLeg = gameObject.transform.Find("LeftLeg");
+            _rightLeg = gameObject.transform.Find("RightLeg");
+        }
 
 		private void LateUpdate()
 		{
-			var headPosRot = _avatarInput.HeadPosRot;
-			var leftPosRot = _avatarInput.LeftPosRot;
-			var rightPosRot = _avatarInput.RightPosRot;
+            try
+            {
+                var headPosRot = _avatarInput.HeadPosRot;
+                var leftPosRot = _avatarInput.LeftPosRot;
+                var rightPosRot = _avatarInput.RightPosRot;
+                var leftLegPosRot = _avatarInput.LeftLegPosRot;
+                var rightLegPosRot = _avatarInput.RightLegPosRot;
 
-			_head.position = headPosRot.Position;
-			_head.rotation = headPosRot.Rotation;
+                _head.position = headPosRot.Position;
+                _head.rotation = headPosRot.Rotation;
 
-			_left.position = leftPosRot.Position;
-			_left.rotation = leftPosRot.Rotation;
+                _left.position = leftPosRot.Position;
+                _left.rotation = leftPosRot.Rotation;
 
-			_right.position = rightPosRot.Position;
-			_right.rotation = rightPosRot.Rotation;
+                _right.position = rightPosRot.Position;
+                _right.rotation = rightPosRot.Rotation;
 
-			var vrPlatformHelper = PersistentSingleton<VRPlatformHelper>.instance;
+                if (_leftLeg != null && _rightLeg != null)
+                {
+                    _leftLeg.position = leftLegPosRot.Position;
+                    _leftLeg.rotation = leftLegPosRot.Rotation;
 
-			vrPlatformHelper.AdjustPlatformSpecificControllerTransform(_left);
-			vrPlatformHelper.AdjustPlatformSpecificControllerTransform(_right);
+                    _rightLeg.position = rightLegPosRot.Position;
+                    _rightLeg.rotation = rightLegPosRot.Rotation;
+                }
 
-			if (_body == null) return;
-			_body.position = _head.position - (_head.transform.up * 0.1f);
+                var vrPlatformHelper = PersistentSingleton<VRPlatformHelper>.instance;
 
-			var vel = new Vector3(_body.transform.localPosition.x - _prevBodyPos.x, 0.0f,
-				_body.localPosition.z - _prevBodyPos.z);
+                vrPlatformHelper.AdjustPlatformSpecificControllerTransform(_left);
+                vrPlatformHelper.AdjustPlatformSpecificControllerTransform(_right);
 
-			var rot = Quaternion.Euler(0.0f, _head.localEulerAngles.y, 0.0f);
-			var tiltAxis = Vector3.Cross(gameObject.transform.up, vel);
-			_body.localRotation = Quaternion.Lerp(_body.localRotation,
-				Quaternion.AngleAxis(vel.magnitude * 1250.0f, tiltAxis) * rot,
-				Time.deltaTime * 10.0f);
+                if (_body == null) return;
+                _body.position = _head.position - (_head.transform.up * 0.1f);
 
-			_prevBodyPos = _body.transform.localPosition;
+                var vel = new Vector3(_body.transform.localPosition.x - _prevBodyPos.x, 0.0f,
+                    _body.localPosition.z - _prevBodyPos.z);
+
+                var rot = Quaternion.Euler(0.0f, _head.localEulerAngles.y, 0.0f);
+                var tiltAxis = Vector3.Cross(gameObject.transform.up, vel);
+                _body.localRotation = Quaternion.Lerp(_body.localRotation,
+                    Quaternion.AngleAxis(vel.magnitude * 1250.0f, tiltAxis) * rot,
+                    Time.deltaTime * 10.0f);
+
+                _prevBodyPos = _body.transform.localPosition;
+            } catch(Exception e)
+            {
+                Console.WriteLine("{0}\n{1}", e.Message, e.StackTrace);
+            }
 		}
 
 		private Transform GetHeadTransform()
