@@ -145,7 +145,8 @@ namespace CustomAvatar
 		{
 			ResizePlayerAvatar();
 			OnFirstPersonEnabledChanged(Plugin.Instance.FirstPersonEnabled);
-		}
+            _currentSpawnedPlayerAvatar?.GameObject.GetComponentInChildren<AvatarEventsPlayer>()?.Restart();
+        }
 
 		private void ResizePlayerAvatar()
 		{

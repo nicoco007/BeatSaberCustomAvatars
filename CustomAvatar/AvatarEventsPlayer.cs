@@ -12,17 +12,30 @@ namespace CustomAvatar
         private GameEnergyCounter _gameEnergyCounter;
         private BeatmapObjectCallbackController _beatmapObjectCallbackController;
 
+		public void Restart()
+		{
+			CancelInvoke("_Restart");
+			Invoke("_Restart", 0.5f);
+		}
+
+		private void _Restart()
+		{
+			OnDestroy();
+			Start();
+		}
+
         private void Start()
         {
             _eventManager = gameObject.GetComponent<EventManager>();
             if (_eventManager == null)
                 _eventManager = gameObject.AddComponent<EventManager>();
 
-            _eventManager.OnLevelStart.Invoke();
-
-            _scoreController = Resources.FindObjectsOfTypeAll<ScoreController>().FirstOrDefault();
+			_scoreController = Resources.FindObjectsOfTypeAll<ScoreController>().FirstOrDefault();
             if (_scoreController == null) return;
-            _saberCollisionManager =
+
+			_eventManager.OnLevelStart.Invoke();
+
+			_saberCollisionManager =
                 Resources.FindObjectsOfTypeAll<ObstacleSaberSparkleEffectManager>().FirstOrDefault();
             _gameEnergyCounter = Resources.FindObjectsOfTypeAll<GameEnergyCounter>().FirstOrDefault();
             _beatmapObjectCallbackController = Resources.FindObjectsOfTypeAll<BeatmapObjectCallbackController>().FirstOrDefault();
