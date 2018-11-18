@@ -39,7 +39,7 @@ namespace CustomAvatar
                 }
                 if (Trackers.Capacity == 0)
                     _isTrackerAsHand = false;
-                Console.WriteLine("IsFullBodyTracking : " + _isFullBodyTracking);
+                Console.WriteLine("IsTrackerAsHand : " + IsTrackerAsHand);
             }
         }
 
@@ -60,6 +60,15 @@ namespace CustomAvatar
                 }
                 if (Trackers.Capacity == 0)
                     _isFullBodyTracking = false;
+                var currentAvatar = Instance.PlayerAvatarManager.GetCurrentAvatar();
+                if (currentAvatar != null)
+                {
+                    var _IKManagerAdvanced = currentAvatar.GameObject.GetComponentInChildren<AvatarScriptPack.IKManagerAdvanced>(true);
+                    if (_IKManagerAdvanced != null)
+                    {
+                        _IKManagerAdvanced.CheckFullBodyTracking();
+                    }
+                }
                 Console.WriteLine("IsFullBodyTracking : " + _isFullBodyTracking);
             }
         }
@@ -109,7 +118,7 @@ namespace CustomAvatar
 
 		public string Version
 		{
-			get { return "3.1.3-beta"; }
+			get { return "3.2.0-beta"; }
 		}
 
 		public static void Log(string message)
@@ -153,7 +162,6 @@ namespace CustomAvatar
 			
 			PlayerAvatarManager = new PlayerAvatarManager(AvatarLoader, previousAvatar);
 			PlayerAvatarManager.AvatarChanged += PlayerAvatarManagerOnAvatarChanged;
-            IsFullBodyTracking = true;
         }
 
 		private void SceneManagerOnSceneLoaded(Scene newScene, LoadSceneMode mode)

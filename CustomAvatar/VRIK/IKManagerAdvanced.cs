@@ -298,13 +298,26 @@ namespace AvatarScriptPack
                         }
                     }
                 }
+                CheckFullBodyTracking();
             }
+        }
+
+        public void CheckFullBodyTracking()
+        {
+            VRIK _VRIK = base.gameObject.GetComponent<VRIK>();
             if (!CustomAvatar.Plugin.IsFullBodyTracking)
             {
-                SetProperty(_VRIK.solver.leftLeg, "positionWeight", 0);
-                SetProperty(_VRIK.solver.leftLeg, "rotationWeight", 0);
-                SetProperty(_VRIK.solver.rightLeg, "positionWeight", 0);
-                SetProperty(_VRIK.solver.rightLeg, "rotationWeight", 0);
+                _VRIK.solver.leftLeg.positionWeight = 0;
+                _VRIK.solver.leftLeg.rotationWeight = 0;
+                _VRIK.solver.rightLeg.positionWeight = 0;
+                _VRIK.solver.rightLeg.rotationWeight = 0;
+            }
+            else
+            {
+                _VRIK.solver.leftLeg.positionWeight = LeftLeg_positionWeight;
+                _VRIK.solver.leftLeg.rotationWeight = LeftLeg_rotationWeight;
+                _VRIK.solver.rightLeg.positionWeight = RightLeg_positionWeight;
+                _VRIK.solver.rightLeg.rotationWeight = RightLeg_rotationWeight;
             }
         }
 

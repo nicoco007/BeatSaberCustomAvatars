@@ -5,7 +5,7 @@ using UnityEngine.XR;
 
 namespace CustomAvatar
 {
-	public class PlayerAvatarInput : IAvatarInput
+	public class PlayerAvatarInput : IAvatarFullBodyInput
 	{	
         public PlayerAvatarInput()
         {
@@ -55,6 +55,17 @@ namespace CustomAvatar
             {
                 if (Plugin.IsFullBodyTracking && Plugin.Trackers.Capacity >= 2)
                     return GetTrackerWorldPosRot(Plugin.Trackers[1]);
+                else
+                    return new PosRot(new Vector3(), new Quaternion());
+            }
+        }
+
+        public PosRot PelvisPosRot
+        {
+            get
+            {
+                if (Plugin.IsFullBodyTracking && Plugin.Trackers.Capacity >= 3)
+                    return GetTrackerWorldPosRot(Plugin.Trackers[3]);
                 else
                     return new PosRot(new Vector3(), new Quaternion());
             }
