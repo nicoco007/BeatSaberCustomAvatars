@@ -214,14 +214,15 @@ namespace AvatarScriptPack {
 				}
 
 				// Stretching
-				float distanceToTarget = Vector3.Distance(upperArm.solverPosition, position);
-				float stretchF = distanceToTarget / armLength;
+				if (stretchCurve != null) {
+					float distanceToTarget = Vector3.Distance(upperArm.solverPosition, position);
+					float stretchF = distanceToTarget / armLength;
+					float m = stretchCurve.Evaluate(stretchF);
+					m *= positionWeight;
 
-				float m = stretchCurve.Evaluate(stretchF);
-				m *= positionWeight;
-
-				elbowAdd = (forearm.solverPosition - upperArm.solverPosition) * m;
-				handAdd = (hand.solverPosition - forearm.solverPosition) * m;
+					elbowAdd = (forearm.solverPosition - upperArm.solverPosition) * m;
+					handAdd = (hand.solverPosition - forearm.solverPosition) * m;
+				}
 
 				forearm.solverPosition += elbowAdd;
 				hand.solverPosition += elbowAdd + handAdd;
@@ -302,7 +303,7 @@ namespace AvatarScriptPack {
 						if (shoulderRotationWeight * positionWeight < 1f) sR = Quaternion.Lerp(Quaternion.identity, sR, shoulderRotationWeight * positionWeight);
 						VirtualBone.RotateBy(bones, sR);
 
-						//Stretching();
+						Stretching();
 
 						// Solve trigonometric
 						VirtualBone.SolveTrigonometric(bones, 1, 2, 3, position, GetBendNormal(position - upperArm.solverPosition), positionWeight);
@@ -321,7 +322,7 @@ namespace AvatarScriptPack {
 						r = Quaternion.Slerp(Quaternion.identity, r, 0.5f * shoulderRotationWeight * positionWeight);
 						VirtualBone.RotateBy(bones, r);
 
-						//Stretching();
+						Stretching();
 
 						VirtualBone.SolveTrigonometric(bones, 0, 2, 3, position, Vector3.Cross(forearm.solverPosition - shoulder.solverPosition, hand.solverPosition - shoulder.solverPosition), 0.5f * shoulderRotationWeight * positionWeight);
 						VirtualBone.SolveTrigonometric(bones, 1, 2, 3, position, GetBendNormal(position - upperArm.solverPosition), positionWeight);
@@ -341,7 +342,7 @@ namespace AvatarScriptPack {
 					break;
 					}
 				} else {
-					//Stretching();
+					Stretching();
 
 					// Solve arm trigonometric
 					VirtualBone.SolveTrigonometric(bones, 1, 2, 3, position, GetBendNormal(position - upperArm.solverPosition), positionWeight);
