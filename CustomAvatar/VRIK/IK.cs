@@ -1,51 +1,50 @@
-﻿using System;
+using UnityEngine;
+using System.Collections;
 
-namespace AvatarScriptPack
-{
-	// Token: 0x02000034 RID: 52
-	public abstract class IK : SolverManager
-	{
-		// Token: 0x0600017F RID: 383
+namespace AvatarScriptPack {
+
+	/// <summary>
+	/// Base abstract class for %IK solver components.
+	/// </summary>
+	public abstract class IK: SolverManager {
+		
+		#region Main Interface
+		
+		/// <summary>
+		/// Gets the %IK component's solver as IKSolver.
+		/// </summary>
 		public abstract IKSolver GetIKSolver();
+		
+		#endregion Main Interface
+		
+		/*
+		 * Updates the solver. If you need full control of the execution order of your IK solvers, disable this script and call UpdateSolver() instead.
+		 * */
+		protected override void UpdateSolver() {
+			if (!GetIKSolver().initiated) InitiateSolver();
+			if (!GetIKSolver().initiated) return;
 
-		// Token: 0x06000180 RID: 384 RVA: 0x00009B21 File Offset: 0x00007F21
-		protected override void UpdateSolver()
-		{
-			if (!this.GetIKSolver().initiated)
-			{
-				this.InitiateSolver();
-			}
-			if (!this.GetIKSolver().initiated)
-			{
-				return;
-			}
-			this.GetIKSolver().Update();
+			GetIKSolver().Update();
+		}
+		
+		/*
+		 * Initiates the %IK solver
+		 * */
+		protected override void InitiateSolver() {
+			if (GetIKSolver().initiated) return;
+			
+			GetIKSolver().Initiate(transform);
 		}
 
-		// Token: 0x06000181 RID: 385 RVA: 0x00009B55 File Offset: 0x00007F55
-		protected override void InitiateSolver()
-		{
-			if (this.GetIKSolver().initiated)
-			{
-				return;
-			}
-			this.GetIKSolver().Initiate(base.transform);
+		protected override void FixTransforms() {
+			if (!GetIKSolver().initiated) return;
+			GetIKSolver().FixTransforms();
 		}
 
-		// Token: 0x06000182 RID: 386 RVA: 0x00009B79 File Offset: 0x00007F79
-		protected override void FixTransforms()
-		{
-			if (!this.GetIKSolver().initiated)
-			{
-				return;
-			}
-			this.GetIKSolver().FixTransforms();
-		}
-
-		// Token: 0x06000183 RID: 387
+		// Open the User Manual url
 		protected abstract void OpenUserManual();
 
-		// Token: 0x06000184 RID: 388
+		// Open the Script Reference url
 		protected abstract void OpenScriptReference();
 	}
 }
