@@ -33,10 +33,9 @@ namespace CustomAvatar
 			_scoreController = Resources.FindObjectsOfTypeAll<ScoreController>().FirstOrDefault();
             if (_scoreController == null) return;
 
-			_eventManager.OnLevelStart.Invoke();
+			_eventManager.OnLevelStart?.Invoke();
 
-			_saberCollisionManager =
-                Resources.FindObjectsOfTypeAll<ObstacleSaberSparkleEffectManager>().FirstOrDefault();
+			_saberCollisionManager = Resources.FindObjectsOfTypeAll<ObstacleSaberSparkleEffectManager>().FirstOrDefault();
             _gameEnergyCounter = Resources.FindObjectsOfTypeAll<GameEnergyCounter>().FirstOrDefault();
             _beatmapObjectCallbackController = Resources.FindObjectsOfTypeAll<BeatmapObjectCallbackController>().FirstOrDefault();
 
@@ -78,11 +77,11 @@ namespace CustomAvatar
         {
             if (!noteCutInfo.allIsOK)
             {
-                _eventManager.OnComboBreak.Invoke();
+                _eventManager.OnComboBreak?.Invoke();
             }
             else
             {
-                _eventManager.OnSlice.Invoke();
+                _eventManager.OnSlice?.Invoke();
             }
         }
 
@@ -90,7 +89,7 @@ namespace CustomAvatar
         {
             if (noteData.noteType != NoteType.Bomb)
             {
-                _eventManager.OnComboBreak.Invoke();
+                _eventManager.OnComboBreak?.Invoke();
             }
         }
 
@@ -98,23 +97,23 @@ namespace CustomAvatar
         {
             if (multiplier > 1 && progress < 0.1f)
             {
-                _eventManager.MultiplierUp.Invoke();
+                _eventManager.MultiplierUp?.Invoke();
             }
         }
 
         private void SaberStartCollide(Saber.SaberType saber)
         {
-            _eventManager.SaberStartColliding.Invoke();
+            _eventManager.SaberStartColliding?.Invoke();
         }
 
         private void SaberEndCollide(Saber.SaberType saber)
         {
-            _eventManager.SaberStopColliding.Invoke();
+            _eventManager.SaberStopColliding?.Invoke();
         }
 
         private void FailLevelCallBack()
         {
-            _eventManager.OnLevelFail.Invoke();
+            _eventManager.OnLevelFail?.Invoke();
         }
 
         private void OnBeatmapEventDidTriggerEvent (BeatmapEventData beatmapEventData)
@@ -123,18 +122,18 @@ namespace CustomAvatar
             
             if (beatmapEventData.value > 0 && beatmapEventData.value < 4)
             {
-                _eventManager.OnBlueLightOn.Invoke();
+                _eventManager.OnBlueLightOn?.Invoke();
             }
 
             if (beatmapEventData.value > 4 && beatmapEventData.value < 8)
             {
-                _eventManager.OnRedLightOn.Invoke();
+                _eventManager.OnRedLightOn?.Invoke();
             }
         }
 
         private void ComboChangeEvent(int combo)
         {
-            _eventManager.OnComboChanged.Invoke(combo);
+            _eventManager.OnComboChanged?.Invoke(combo);
         }
     }
 }
