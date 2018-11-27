@@ -17,7 +17,8 @@ namespace CustomAvatar
 		
 		private bool _init;
 		private bool _firstPersonEnabled;
-		
+		private AvatarUI _avatarUI;
+
 		private WaitForSecondsRealtime _sceneLoadWait = new WaitForSecondsRealtime(0.1f);
 		
 		public Plugin()
@@ -34,7 +35,7 @@ namespace CustomAvatar
 		public bool FirstPersonEnabled
 		{
 			get { return _firstPersonEnabled; }
-			private set
+			set
 			{
 				if (_firstPersonEnabled == value) return;
 
@@ -80,6 +81,7 @@ namespace CustomAvatar
 			File.WriteAllText("CustomAvatarsPlugin-log.txt", string.Empty);
 			
 			AvatarLoader = new AvatarLoader(CustomAvatarsPath, AvatarsLoaded);
+			_avatarUI = new AvatarUI();
 			
 			FirstPersonEnabled = PlayerPrefs.HasKey(FirstPersonEnabledKey);
 			SceneManager.sceneLoaded += SceneManagerOnSceneLoaded;
