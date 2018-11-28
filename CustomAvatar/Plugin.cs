@@ -17,8 +17,8 @@ namespace CustomAvatar
 		
 		private bool _init;
 		private bool _firstPersonEnabled;
-		
-		private WaitForSecondsRealtime _sceneLoadWait = new WaitForSecondsRealtime(0.1f);
+
+	    private Camera _prevCamera;
 		
 		public Plugin()
 		{
@@ -66,7 +66,7 @@ namespace CustomAvatar
 			get { return "3.1.3-beta"; }
 		}
 
-		public static void Log(string message)
+		public static void Log(object message)
 		{
 			Console.WriteLine("[CustomAvatarsPlugin] " + message);
 			File.AppendAllText("CustomAvatarsPlugin-log.txt", "[Custom Avatars Plugin] " + message + Environment.NewLine);
@@ -82,13 +82,10 @@ namespace CustomAvatar
 			AvatarLoader = new AvatarLoader(CustomAvatarsPath, AvatarsLoaded);
 			
 			FirstPersonEnabled = PlayerPrefs.HasKey(FirstPersonEnabledKey);
-			SceneManager.sceneLoaded += SceneManagerOnSceneLoaded;
 		}
 
 		public void OnApplicationQuit()
 		{
-			SceneManager.sceneLoaded -= SceneManagerOnSceneLoaded;
-
 			if (PlayerAvatarManager == null) return;
 			PlayerAvatarManager.AvatarChanged -= PlayerAvatarManagerOnAvatarChanged;
 		}
@@ -108,11 +105,6 @@ namespace CustomAvatar
 			PlayerAvatarManager.AvatarChanged += PlayerAvatarManagerOnAvatarChanged;
 		}
 
-		private void SceneManagerOnSceneLoaded(Scene newScene, LoadSceneMode mode)
-		{
-			SharedCoroutineStarter.instance.StartCoroutine(SetCameraCullingMask());
-		}
-
 		private void PlayerAvatarManagerOnAvatarChanged(CustomAvatar newAvatar)
 		{
 			PlayerPrefs.SetString(PreviousAvatarKey, newAvatar.FullPath);
@@ -120,7 +112,15 @@ namespace CustomAvatar
 
 		public void OnUpdate()
 		{
-			if (Input.GetKeyDown(KeyCode.PageUp))
+		    Camera mainCamera = Camera.main;
+
+		    if (mainCamera != null && mainCamera != _prevCamera)
+		    {
+		        SetCameraCullingMask(mainCamera);
+		        _prevCamera = mainCamera;
+		    }
+
+		    if (Input.GetKeyDown(KeyCode.PageUp))
 			{
 				if (PlayerAvatarManager == null) return;
 				PlayerAvatarManager.SwitchToNextAvatar();
@@ -136,13 +136,12 @@ namespace CustomAvatar
 			}
 		}
 
-		private IEnumerator SetCameraCullingMask()
+		private void SetCameraCullingMask(Camera camera)
 		{
-			yield return _sceneLoadWait;
-			var mainCamera = Camera.main;
-			if (mainCamera == null) yield break;
-			mainCamera.cullingMask &= ~(1 << AvatarLayers.OnlyInThirdPerson);
-			mainCamera.cullingMask |= 1 << AvatarLayers.OnlyInFirstPerson;
+            Log("Adding third person culling mask to " + camera.name);
+
+		    camera.cullingMask &= ~(1 << AvatarLayers.OnlyInThirdPerson);
+		    camera.cullingMask |= 1 << AvatarLayers.OnlyInFirstPerson;
 		}
 
 		public void OnFixedUpdate()
