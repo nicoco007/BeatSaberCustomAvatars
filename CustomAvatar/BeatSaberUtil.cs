@@ -10,7 +10,7 @@ namespace CustomAvatar
 		private static Transform _originTransform;
 		private static MainSettingsModel _mainSettingsModel;
 		private static float _lastPlayerHeight = MainSettingsModel.kDefaultPlayerHeight;
-	    private static PlayerDataModelSO _playerDataModel;
+		private static PlayerDataModelSO _playerDataModel;
 
 		private static MainSettingsModel MainSettingsModel
 		{
@@ -32,9 +32,9 @@ namespace CustomAvatar
 
 		private static void SceneManagerOnSceneLoaded(Scene scene, LoadSceneMode mode)
 		{
-            _playerDataModel = Resources.FindObjectsOfTypeAll<PlayerDataModelSO>().FirstOrDefault();
+			_playerDataModel = Resources.FindObjectsOfTypeAll<PlayerDataModelSO>().FirstOrDefault();
 
-            var originObject = GameObject.Find("Origin");
+			var originObject = GameObject.Find("Origin");
 
 			if (originObject != null)
 			{
@@ -44,7 +44,7 @@ namespace CustomAvatar
 
 		public static float GetPlayerHeight()
 		{
-		    var playerHeight = _playerDataModel == null ? _lastPlayerHeight : _playerDataModel.currentLocalPlayer.playerSpecificSettings.playerHeight;
+			var playerHeight = _playerDataModel == null ? _lastPlayerHeight : _playerDataModel.currentLocalPlayer.playerSpecificSettings.playerHeight;
 
 			_lastPlayerHeight = playerHeight;
 			return playerHeight;
