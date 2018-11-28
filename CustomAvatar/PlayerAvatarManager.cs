@@ -150,16 +150,21 @@ namespace CustomAvatar
 
 		private void ResizePlayerAvatar()
 		{
-			if (_currentSpawnedPlayerAvatar?.GameObject == null) return;
-			if (!_currentSpawnedPlayerAvatar.CustomAvatar.AllowHeightCalibration) return;
+			if (_currentSpawnedPlayerAvatar?.GameObject == null || !_currentSpawnedPlayerAvatar.CustomAvatar.AllowHeightCalibration)
+				return;
 
 			var playerHeight = BeatSaberUtil.GetPlayerHeight();
-			if (playerHeight == _prevPlayerHeight) return;
+
+			if (playerHeight == _prevPlayerHeight)
+				return;
+
+			float scale = playerHeight / _currentSpawnedPlayerAvatar.CustomAvatar.Height;
+
+			_currentSpawnedPlayerAvatar.GameObject.transform.localScale = _startAvatarLocalScale * scale;
+
+			Plugin.Log("Resizing avatar to " + scale + "x scale");
+
 			_prevPlayerHeight = playerHeight;
-			_currentSpawnedPlayerAvatar.GameObject.transform.localScale =
-				_startAvatarLocalScale * (playerHeight / _currentSpawnedPlayerAvatar.CustomAvatar.Height);
-			Plugin.Log("Resizing avatar to " + (playerHeight / _currentSpawnedPlayerAvatar.CustomAvatar.Height) +
-							  "x scale");
 		}
 	}
 }
