@@ -123,12 +123,9 @@ namespace CustomAvatar
 
 			_currentSpawnedPlayerAvatar = AvatarSpawner.SpawnAvatar(loadedAvatar, _playerAvatarInput);
 
-			if (AvatarChanged != null)
-			{
-				AvatarChanged(loadedAvatar);
-			}
+		    AvatarChanged?.Invoke(loadedAvatar);
 
-			_startAvatarLocalScale = _currentSpawnedPlayerAvatar.GameObject.transform.localScale;
+		    _startAvatarLocalScale = _currentSpawnedPlayerAvatar.GameObject.transform.localScale;
 			_prevPlayerHeight = -1;
 			ResizePlayerAvatar();
 			OnFirstPersonEnabledChanged(Plugin.Instance.FirstPersonEnabled);
