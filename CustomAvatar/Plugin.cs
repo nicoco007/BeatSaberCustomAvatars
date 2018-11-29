@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -18,7 +17,7 @@ namespace CustomAvatar
 		private bool _init;
 		private bool _firstPersonEnabled;
 
-	    private Camera _prevCamera;
+	    private GameScenesManager _scenesManager;
 		
 		public Plugin()
 		{
@@ -48,11 +47,8 @@ namespace CustomAvatar
 				{
 					PlayerPrefs.DeleteKey(FirstPersonEnabledKey);
 				}
-
-				if (FirstPersonEnabledChanged != null)
-				{
-					FirstPersonEnabledChanged(value);
-				}
+                
+				FirstPersonEnabledChanged?.Invoke(value);
 			}
 		}
 
@@ -68,8 +64,10 @@ namespace CustomAvatar
 
 		public static void Log(object message)
 		{
-			Console.WriteLine("[CustomAvatarsPlugin] " + message);
-			File.AppendAllText("CustomAvatarsPlugin-log.txt", "[Custom Avatars Plugin] " + message + Environment.NewLine);
+		    string fullMsg = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.FFF}] [CustomAvatarsPlugin] {message}";
+
+            Debug.Log(fullMsg);
+			File.AppendAllText("CustomAvatarsPlugin-log.txt", fullMsg + Environment.NewLine);
 		}
 
 		public void OnApplicationStart()
@@ -82,15 +80,39 @@ namespace CustomAvatar
 			AvatarLoader = new AvatarLoader(CustomAvatarsPath, AvatarsLoaded);
 			
 			FirstPersonEnabled = PlayerPrefs.HasKey(FirstPersonEnabledKey);
-		}
+
+		    SceneManager.sceneLoaded += SceneLoaded;
+        }
 
 		public void OnApplicationQuit()
 		{
 			if (PlayerAvatarManager == null) return;
 			PlayerAvatarManager.AvatarChanged -= PlayerAvatarManagerOnAvatarChanged;
+		    SceneManager.sceneLoaded -= SceneLoaded;
+
+		    if (_scenesManager != null)
+		        _scenesManager.transitionDidFinishEvent -= SceneTransitionDidFinish;
 		}
 
-		private void AvatarsLoaded(IReadOnlyList<CustomAvatar> loadedAvatars)
+	    public void SceneLoaded(Scene scene, LoadSceneMode mode)
+	    {
+	        if (_scenesManager == null)
+	        {
+	            _scenesManager = Resources.FindObjectsOfTypeAll<GameScenesManager>().FirstOrDefault();
+
+	            if (_scenesManager != null)
+	                _scenesManager.transitionDidFinishEvent += SceneTransitionDidFinish;
+	        }
+	    }
+
+	    private void SceneTransitionDidFinish()
+	    {
+	        Camera mainCamera = Camera.main;
+
+	        SetCameraCullingMask(mainCamera);
+        }
+
+	    private void AvatarsLoaded(IReadOnlyList<CustomAvatar> loadedAvatars)
 		{
 			if (loadedAvatars.Count == 0)
 			{
@@ -112,14 +134,6 @@ namespace CustomAvatar
 
 		public void OnUpdate()
 		{
-		    Camera mainCamera = Camera.main;
-
-		    if (mainCamera != null && mainCamera != _prevCamera)
-		    {
-		        SetCameraCullingMask(mainCamera);
-		        _prevCamera = mainCamera;
-		    }
-
 		    if (Input.GetKeyDown(KeyCode.PageUp))
 			{
 				if (PlayerAvatarManager == null) return;
