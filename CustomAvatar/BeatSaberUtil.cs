@@ -35,7 +35,6 @@ namespace CustomAvatar
 			_playerDataModel = Resources.FindObjectsOfTypeAll<PlayerDataModelSO>().FirstOrDefault();
 
 			var originObject = GameObject.Find("Origin");
-
 			if (originObject != null)
 			{
 				_originTransform = originObject.transform;

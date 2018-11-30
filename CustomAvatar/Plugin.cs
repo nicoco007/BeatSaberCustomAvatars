@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace CustomAvatar
 		private bool _init;
 		private bool _firstPersonEnabled;
 
-	    private GameScenesManager _scenesManager;
+		private GameScenesManager _scenesManager;
 		
 		public Plugin()
 		{
@@ -47,8 +48,11 @@ namespace CustomAvatar
 				{
 					PlayerPrefs.DeleteKey(FirstPersonEnabledKey);
 				}
-                
-				FirstPersonEnabledChanged?.Invoke(value);
+
+				if (FirstPersonEnabledChanged != null)
+				{
+					FirstPersonEnabledChanged(value);
+				}
 			}
 		}
 
@@ -64,9 +68,9 @@ namespace CustomAvatar
 
 		public static void Log(object message)
 		{
-		    string fullMsg = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.FFF}] [CustomAvatarsPlugin] {message}";
+			string fullMsg = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.FFF}] [CustomAvatarsPlugin] {message}";
 
-            Debug.Log(fullMsg);
+			Debug.Log(fullMsg);
 			File.AppendAllText("CustomAvatarsPlugin-log.txt", fullMsg + Environment.NewLine);
 		}
 
@@ -80,39 +84,21 @@ namespace CustomAvatar
 			AvatarLoader = new AvatarLoader(CustomAvatarsPath, AvatarsLoaded);
 			
 			FirstPersonEnabled = PlayerPrefs.HasKey(FirstPersonEnabledKey);
-
-		    SceneManager.sceneLoaded += SceneLoaded;
-        }
+			SceneManager.sceneLoaded += SceneManagerOnSceneLoaded;
+		}
 
 		public void OnApplicationQuit()
 		{
+			SceneManager.sceneLoaded -= SceneManagerOnSceneLoaded;
+
 			if (PlayerAvatarManager == null) return;
 			PlayerAvatarManager.AvatarChanged -= PlayerAvatarManagerOnAvatarChanged;
-		    SceneManager.sceneLoaded -= SceneLoaded;
 
-		    if (_scenesManager != null)
-		        _scenesManager.transitionDidFinishEvent -= SceneTransitionDidFinish;
+			if (_scenesManager != null)
+				_scenesManager.transitionDidFinishEvent -= SceneTransitionDidFinish;
 		}
 
-	    public void SceneLoaded(Scene scene, LoadSceneMode mode)
-	    {
-	        if (_scenesManager == null)
-	        {
-	            _scenesManager = Resources.FindObjectsOfTypeAll<GameScenesManager>().FirstOrDefault();
-
-	            if (_scenesManager != null)
-	                _scenesManager.transitionDidFinishEvent += SceneTransitionDidFinish;
-	        }
-	    }
-
-	    private void SceneTransitionDidFinish()
-	    {
-	        Camera mainCamera = Camera.main;
-
-	        SetCameraCullingMask(mainCamera);
-        }
-
-	    private void AvatarsLoaded(IReadOnlyList<CustomAvatar> loadedAvatars)
+		private void AvatarsLoaded(IReadOnlyList<CustomAvatar> loadedAvatars)
 		{
 			if (loadedAvatars.Count == 0)
 			{
@@ -127,6 +113,24 @@ namespace CustomAvatar
 			PlayerAvatarManager.AvatarChanged += PlayerAvatarManagerOnAvatarChanged;
 		}
 
+		private void SceneManagerOnSceneLoaded(Scene newScene, LoadSceneMode mode)
+		{
+			if (_scenesManager == null)
+			{
+				_scenesManager = Resources.FindObjectsOfTypeAll<GameScenesManager>().FirstOrDefault();
+
+				if (_scenesManager != null)
+					_scenesManager.transitionDidFinishEvent += SceneTransitionDidFinish;
+			}
+		}
+
+		private void SceneTransitionDidFinish()
+		{
+			Camera mainCamera = Camera.main;
+
+			SetCameraCullingMask(mainCamera);
+		}
+
 		private void PlayerAvatarManagerOnAvatarChanged(CustomAvatar newAvatar)
 		{
 			PlayerPrefs.SetString(PreviousAvatarKey, newAvatar.FullPath);
@@ -134,7 +138,7 @@ namespace CustomAvatar
 
 		public void OnUpdate()
 		{
-		    if (Input.GetKeyDown(KeyCode.PageUp))
+			if (Input.GetKeyDown(KeyCode.PageUp))
 			{
 				if (PlayerAvatarManager == null) return;
 				PlayerAvatarManager.SwitchToNextAvatar();
@@ -152,10 +156,10 @@ namespace CustomAvatar
 
 		private void SetCameraCullingMask(Camera camera)
 		{
-            Log("Adding third person culling mask to " + camera.name);
+			Log("Adding third person culling mask to " + camera.name);
 
-		    camera.cullingMask &= ~(1 << AvatarLayers.OnlyInThirdPerson);
-		    camera.cullingMask |= 1 << AvatarLayers.OnlyInFirstPerson;
+			camera.cullingMask &= ~(1 << AvatarLayers.OnlyInThirdPerson);
+			camera.cullingMask |= 1 << AvatarLayers.OnlyInFirstPerson;
 		}
 
 		public void OnFixedUpdate()

@@ -123,9 +123,12 @@ namespace CustomAvatar
 
 			_currentSpawnedPlayerAvatar = AvatarSpawner.SpawnAvatar(loadedAvatar, _playerAvatarInput);
 
-		    AvatarChanged?.Invoke(loadedAvatar);
+			if (AvatarChanged != null)
+			{
+				AvatarChanged(loadedAvatar);
+			}
 
-		    _startAvatarLocalScale = _currentSpawnedPlayerAvatar.GameObject.transform.localScale;
+			_startAvatarLocalScale = _currentSpawnedPlayerAvatar.GameObject.transform.localScale;
 			_prevPlayerHeight = -1;
 			ResizePlayerAvatar();
 			OnFirstPersonEnabledChanged(Plugin.Instance.FirstPersonEnabled);
@@ -142,26 +145,21 @@ namespace CustomAvatar
 		{
 			ResizePlayerAvatar();
 			OnFirstPersonEnabledChanged(Plugin.Instance.FirstPersonEnabled);
-			_currentSpawnedPlayerAvatar?.GameObject.GetComponentInChildren<AvatarEventsPlayer>()?.Restart();
-		}
+            _currentSpawnedPlayerAvatar?.GameObject.GetComponentInChildren<AvatarEventsPlayer>()?.Restart();
+        }
 
 		private void ResizePlayerAvatar()
 		{
-			if (_currentSpawnedPlayerAvatar?.GameObject == null || !_currentSpawnedPlayerAvatar.CustomAvatar.AllowHeightCalibration)
-				return;
+			if (_currentSpawnedPlayerAvatar?.GameObject == null) return;
+			if (!_currentSpawnedPlayerAvatar.CustomAvatar.AllowHeightCalibration) return;
 
 			var playerHeight = BeatSaberUtil.GetPlayerHeight();
-
-			if (playerHeight == _prevPlayerHeight)
-				return;
-
-			float scale = playerHeight / _currentSpawnedPlayerAvatar.CustomAvatar.Height;
-
-			_currentSpawnedPlayerAvatar.GameObject.transform.localScale = _startAvatarLocalScale * scale;
-
-			Plugin.Log("Resizing avatar to " + scale + "x scale");
-
+			if (playerHeight == _prevPlayerHeight) return;
 			_prevPlayerHeight = playerHeight;
+			_currentSpawnedPlayerAvatar.GameObject.transform.localScale =
+				_startAvatarLocalScale * (playerHeight / _currentSpawnedPlayerAvatar.CustomAvatar.Height);
+			Plugin.Log("Resizing avatar to " + (playerHeight / _currentSpawnedPlayerAvatar.CustomAvatar.Height) +
+			                  "x scale");
 		}
 	}
 }
