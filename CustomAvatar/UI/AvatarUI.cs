@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using UnityEngine;
+using System;
 using UnityEngine.SceneManagement;
 using VRUI;
 using CustomUI.MenuButton;
@@ -25,9 +26,14 @@ namespace CustomAvatar
 
 		private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
 		{
-			if (scene.name == "Menu")
+			if (Plugin.Instance.AvatarLoader.Avatars.Count == 0)
+			{
+				Console.WriteLine("[CustomAvatarsPlugin] No avatars found. Button not created.");
+			}
+			else if (scene.name == "Menu")
 			{
 				AddMainButton();
+				Console.WriteLine("[CustomAvatarsPlugin] Creating Avatars Button.");
 			}
 		}
 
