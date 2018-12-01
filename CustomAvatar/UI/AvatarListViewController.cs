@@ -129,13 +129,15 @@ namespace CustomAvatar
 			{
 				tableCell.songName = avatar.Name;
 				tableCell.author = avatar.AuthorName;
+				tableCell.coverImage = avatar.CoverImage;
 			}
 			else
 			{
 				tableCell.songName = System.IO.Path.GetFileName(avatar.FullPath);
 				tableCell.author = "";
+				tableCell.coverImage = null;
 			}
-			tableCell.coverImage = null;
+			
 
 			return tableCell;
 		}

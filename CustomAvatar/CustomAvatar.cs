@@ -34,6 +34,15 @@ namespace CustomAvatar
 			}
 		}
 
+		public Sprite CoverImage
+		{
+			get
+			{
+				if (_assetBundle == null || _assetBundle.AvatarPrefab == null) return null;
+				return _assetBundle.AvatarPrefab.CoverImage;
+			}
+		}
+
 		public Transform ViewPoint
 		{
 			get

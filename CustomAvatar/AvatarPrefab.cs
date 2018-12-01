@@ -46,17 +46,25 @@ namespace CustomAvatar
 			}
 		}
 
+		public Sprite CoverImage
+		{
+			get
+			{
+				return _descriptor == null ? null : _descriptor.Cover;
+			}
+		}
+
 		public Transform ViewPoint
 		{
 			get
 			{
 				if (_viewPoint != null) return _viewPoint;
 				
-				_viewPoint = _descriptor == null ? null : _descriptor.ViewPoint;
-				if (_viewPoint == null)
-				{
+				//_viewPoint = _descriptor == null ? null : _descriptor.ViewPoint;
+				//if (_viewPoint == null)
+				//{
 					_viewPoint = Prefab.transform.Find("Head");
-				}
+				//}
 
 				return _viewPoint;
 			}

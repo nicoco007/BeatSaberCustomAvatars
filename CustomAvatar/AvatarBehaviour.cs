@@ -63,7 +63,7 @@ namespace CustomAvatar
 			var descriptor = GetComponent<AvatarDescriptor>();
 			if (descriptor != null)
 			{
-				if (descriptor.ViewPoint != null) return descriptor.ViewPoint;
+				//if (descriptor.ViewPoint != null) return descriptor.ViewPoint;
 			}
 
 			return gameObject.transform.Find("Head");
