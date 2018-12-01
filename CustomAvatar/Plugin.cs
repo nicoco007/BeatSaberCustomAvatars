@@ -20,7 +20,7 @@ namespace CustomAvatar
 		private AvatarUI _avatarUI;
 
 		private WaitForSecondsRealtime _sceneLoadWait = new WaitForSecondsRealtime(0.1f);
-
+		private GameScenesManager _scenesManager;
 		
 		public Plugin()
 		{
