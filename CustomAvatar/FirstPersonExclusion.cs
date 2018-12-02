@@ -29,12 +29,12 @@ namespace AvatarScriptPack
 			Plugin.Instance.FirstPersonEnabledChanged -= OnFirstPersonEnabledChanged;
 		}
 
-		private void OnFirstPersonEnabledChanged(bool firstPersonEnabled)
+		public void OnFirstPersonEnabledChanged(bool firstPersonEnabled)
 		{
 			for (var i = 0; i < Exclude.Length; i++)
 			{
 				var excludeObject = Exclude[i];
-				excludeObject.layer = firstPersonEnabled ? AvatarLayers.OnlyInThirdPerson : _startLayers[i];
+				excludeObject.layer = AvatarLayers.OnlyInThirdPerson;
 			}
 		}
 	}
