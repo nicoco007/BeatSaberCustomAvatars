@@ -125,22 +125,27 @@ namespace CustomAvatar
 			}
 
 			var avatar = Plugin.Instance.AvatarLoader.Avatars[row];
-			if (avatar.IsLoaded)
-			{
-				tableCell.songName = avatar.Name;
-				tableCell.author = avatar.AuthorName;
-				tableCell.coverImage = avatar.CoverImage;
-			}
-			else
-			{
-				tableCell.songName = System.IO.Path.GetFileName(avatar.FullPath);
-				tableCell.author = "";
-				tableCell.coverImage = null;
-			}
-			
 
+			avatar.Load(setTableCell);
+
+			void setTableCell(CustomAvatar _avatar, AvatarLoadResult _loadResult)
+			{
+				if (avatar.IsLoaded)
+				{
+					tableCell.songName = _avatar.Name;
+					tableCell.author = _avatar.AuthorName;
+					tableCell.coverImage = _avatar.CoverImage;
+				}
+				else
+				{
+					tableCell.songName = System.IO.Path.GetFileName(avatar.FullPath);
+					tableCell.author = "";
+					tableCell.coverImage = null;
+				}
+			}
 			return tableCell;
 		}
+
 
 		int TableView.IDataSource.NumberOfRows()
 		{
