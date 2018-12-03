@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using CustomAvatar;
 using UnityEngine;
 
@@ -9,6 +10,7 @@ namespace AvatarScriptPack
 		public GameObject[] Exclude;
 
 		private int[] _startLayers;
+		private bool _deadSwitch;
 
 		private void OnEnable()
 		{
@@ -31,6 +33,10 @@ namespace AvatarScriptPack
 
 		public void OnFirstPersonEnabledChanged(bool firstPersonEnabled)
 		{
+			if (_deadSwitch)
+			{
+				return;
+			}
 			for (var i = 0; i < Exclude.Length; i++)
 			{
 				var excludeObject = Exclude[i];
@@ -40,10 +46,11 @@ namespace AvatarScriptPack
 
 		public void SetVisible()
 		{
+			_deadSwitch = true;
 			for (var i = 0; i < Exclude.Length; i++)
 			{
 				var excludeObject = Exclude[i];
-				excludeObject.layer = AvatarLayers.OnlyInFirstPerson;
+				excludeObject.layer = _startLayers[i];
 			}
 		}
 	}
