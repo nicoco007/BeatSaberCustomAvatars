@@ -6,7 +6,7 @@ namespace CustomAvatar
 	public class CustomAvatar
 	{
 		private float? _height;
-		private readonly AvatarAssetBundle _assetBundle;
+		public readonly AvatarAssetBundle _assetBundle;
 
 		internal CustomAvatar(string fullPath)
 		{

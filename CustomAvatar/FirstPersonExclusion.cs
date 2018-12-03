@@ -37,5 +37,14 @@ namespace AvatarScriptPack
 				excludeObject.layer = AvatarLayers.OnlyInThirdPerson;
 			}
 		}
+
+		public void SetVisible()
+		{
+			for (var i = 0; i < Exclude.Length; i++)
+			{
+				var excludeObject = Exclude[i];
+				excludeObject.layer = AvatarLayers.OnlyInFirstPerson;
+			}
+		}
 	}
 }

@@ -126,6 +126,7 @@
     <Compile Include="SpawnedAvatar.cs" />
     <Compile Include="UI\AvatarListViewController.cs" />
     <Compile Include="UI\AvatarSettingsViewController.cs" />
+    <Compile Include="UI\AvatarPreviewController.cs" />
     <Compile Include="UI\GenericFlowCoordinator.cs" />
     <Compile Include="UI\AvatarUI.cs" />
     <Compile Include="VRIK\Axis.cs" />
