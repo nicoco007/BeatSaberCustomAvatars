@@ -23,8 +23,6 @@ namespace CustomAvatar
 		public GameObject _avatarPreview;
 		private GameObject _previewParent;
 		private GameObject PreviewAvatar;
-		//public AssetBundle _preview;
-		//private IReadOnlyList<CustomAvatar> _avatars = Plugin.Instance.AvatarLoader.Avatars;
 		private AvatarScriptPack.FirstPersonExclusion _exclusionScript;
 		private AvatarScriptPack.VRIK _VRIK;
 		private float _previewHeight;
@@ -235,7 +233,7 @@ namespace CustomAvatar
 				tableCell.author = __AvatarAuthors[row];
 				tableCell.coverImage = __AvatarCovers[row];
 			}
-			catch (Exception e)
+			catch
 			{
 				tableCell.songName = "If you see this yell at Assistant";
 				tableCell.author = "because she fucked up";
@@ -295,9 +293,6 @@ namespace CustomAvatar
 					_previewHeightOffset = bounds.min.y;
 					_previewScale = (1f / _previewHeight);
 				}
-
-				Console.WriteLine("Scaling preview by a factor of " + _previewScale + " (" + _previewHeight + ")");
-				Console.WriteLine("Offset " + _previewHeightOffset);
 
 				_previewParent.transform.Translate(0, 0.85f - (_previewHeightOffset), 0);
 				_previewParent.transform.localScale = new Vector3(_previewScale, _previewScale, _previewScale);
