@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,7 +8,6 @@ using CustomUI.BeatSaber;
 using CustomUI.Utilities;
 using TMPro;
 using System.Collections.Generic;
-using CustomAvatar.UI;
 
 namespace CustomAvatar
 {
@@ -40,7 +38,7 @@ namespace CustomAvatar
 		public string[] __AvatarPaths;
 		public Sprite[] __AvatarCovers;
 		public AvatarLoadResult[] __AvatarLoadResults;
-		private int PreviewStatus;
+		private bool PreviewStatus;
 		private int _loadedCount = 0;
 
 
@@ -59,8 +57,8 @@ namespace CustomAvatar
 		}
 
 		private void PreviewCurrent()
-        {
-            CurrentAvatar = PathToInt(Plugin.Instance.PlayerAvatarManager.GetCurrentAvatar().FullPath);
+		{
+			CurrentAvatar = PathToInt(Plugin.Instance.PlayerAvatarManager.GetCurrentAvatar().FullPath);
 			GeneratePreview(CurrentAvatar);
 		}
 
@@ -246,11 +244,11 @@ namespace CustomAvatar
 
 		public void GeneratePreview(int AvatarIndex)
 		{
-            if (PreviewStatus == 1)
+			if (PreviewStatus)
 			{
 				return;
 			}
-			PreviewStatus = 1;
+			PreviewStatus = true;
 			if (PreviewAvatar != null)
 			{
 				DestroyPreview();
@@ -300,8 +298,8 @@ namespace CustomAvatar
 
 				Destroy(_avatarPreview);
 				_avatarPreview = Instantiate(PreviewAvatar, _previewParent.transform);
-                _avatarPreview.AddComponent<AvatarPreviewRotation>();
-                _avatarPreview.SetActive(true);
+				_avatarPreview.AddComponent<AvatarPreviewRotation>();
+				_avatarPreview.SetActive(true);
 				_VRIK = _avatarPreview.GetComponentsInChildren<AvatarScriptPack.VRIK>().FirstOrDefault();
 				_exclusionScript = _avatarPreview.GetComponentsInChildren<AvatarScriptPack.FirstPersonExclusion>().FirstOrDefault();
 
@@ -325,7 +323,7 @@ namespace CustomAvatar
 			{
 				Console.WriteLine("Failed to load preview. Status " + __AvatarLoadResults[AvatarIndex]);
 			}
-			PreviewStatus = 0;
+			PreviewStatus = false;
 		}
 
 		int TableView.IDataSource.NumberOfRows()

@@ -128,6 +128,7 @@
     <Compile Include="UI\AvatarSettingsViewController.cs" />
     <Compile Include="UI\AvatarPreviewController.cs" />
     <Compile Include="UI\GenericFlowCoordinator.cs" />
+    <Compile Include="UI\AvatarPreviewRotation.cs" />
     <Compile Include="UI\AvatarUI.cs" />
     <Compile Include="VRIK\Axis.cs" />
     <Compile Include="VRIK\AxisTools.cs" />
@@ -150,6 +151,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
-    <Copy SourceFiles="$(OutputPath)CustomAvatar.dll" DestinationFolder="C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Plugins\" ContinueOnError="true" />
+    <Copy SourceFiles="$(OutputPath)CustomAvatar.dll" DestinationFolder="F:\Steam\steamapps\common\Beat Saber\Plugins\" ContinueOnError="true" />
   </Target>
 </Project>
