@@ -4,14 +4,9 @@ namespace CustomAvatar
 {
 	public class AvatarPreviewRotation : MonoBehaviour
 	{
-		public static bool rotatePreview = false;
+		public static bool rotatePreview;
 		public float rotationSpeed = 20f;
 		private Vector3 defaultRotation = new Vector3 (0, -120, 0);
-
-		void Awake()
-		{
-			Plugin.Log("AvatarPreviewRotation is awake");
-		}
 
 		public void Reset()
 		{
@@ -22,7 +17,7 @@ namespace CustomAvatar
 		{
 			if (rotatePreview)
 			{
-				transform.Rotate(Vector3.up * Time.deltaTime * rotationSpeed);
+				transform.Rotate(Vector3.up, Time.deltaTime * rotationSpeed, Space.World);
 			}
 		}
 	}

@@ -14,7 +14,8 @@ namespace CustomAvatar
 		private const string CustomAvatarsPath = "CustomAvatars";
 		private const string FirstPersonEnabledKey = "avatarFirstPerson";
 		private const string PreviousAvatarKey = "previousAvatar";
-		
+		private const string RotatePreviewEnabledKey = "rotatePreview";
+
 		private bool _init;
 		private bool _firstPersonEnabled;
 		private AvatarUI _avatarUI;
@@ -58,6 +59,26 @@ namespace CustomAvatar
 			}
 		}
 
+		public bool RotatePreviewEnabled
+		{
+			get { return AvatarPreviewRotation.rotatePreview; }
+			set
+			{
+				if (AvatarPreviewRotation.rotatePreview == value) return;
+
+				AvatarPreviewRotation.rotatePreview = value;
+
+				if (value)
+				{
+					PlayerPrefs.SetInt(RotatePreviewEnabledKey, 0);
+				}
+				else
+				{
+					PlayerPrefs.DeleteKey(RotatePreviewEnabledKey);
+				}
+			}
+		}
+
 		public string Name
 		{
 			get { return "Custom Avatars Plugin"; }
@@ -87,6 +108,7 @@ namespace CustomAvatar
 			_avatarUI = new AvatarUI();
 			
 			FirstPersonEnabled = PlayerPrefs.HasKey(FirstPersonEnabledKey);
+			RotatePreviewEnabled = PlayerPrefs.HasKey(RotatePreviewEnabledKey);
 			SceneManager.sceneLoaded += SceneManagerOnSceneLoaded;
 		}
 

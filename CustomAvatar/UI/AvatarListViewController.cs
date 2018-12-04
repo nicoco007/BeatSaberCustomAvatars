@@ -41,9 +41,6 @@ namespace CustomAvatar
 		private bool PreviewStatus;
 		private int _loadedCount = 0;
 
-
-
-
 		public Action onBackPressed;
 
 		protected override void DidActivate(bool firstActivation, ActivationType type)
@@ -103,16 +100,9 @@ namespace CustomAvatar
 			{
 				_AvatarIndex = i;
 				var avatar = AvatarList[_AvatarIndex];
-
-				try
-				{
-					avatar.Load(AddToArray);
-				}
-				catch (Exception e)
-				{
-					Console.WriteLine(e);
-				}
+				avatar.Load(AddToArray);
 			}
+
 			void AddToArray(CustomAvatar avatar, AvatarLoadResult _loadResult)
 			{
 				if (_loadResult != AvatarLoadResult.Completed)
@@ -130,7 +120,8 @@ namespace CustomAvatar
 				__AvatarLoadResults[AvatarIndex] = _loadResult;
 
 				_loadedCount++;
-				if (_loadedCount == AvatarList.Count())
+				//Console.WriteLine("(" + _loadedCount + "/" + ((int)AvatarList.Count() - 1) + ")");
+				if (_loadedCount == (AvatarList.Count() - 1))
 				{
 					_tableView.ReloadData();
 					PreviewCurrent();
@@ -142,7 +133,6 @@ namespace CustomAvatar
 		{
 			try
 			{
-
 				LoadAllAvatars();
 
 				_tableCellTemplate = Resources.FindObjectsOfTypeAll<LevelListTableCell>().First(x => x.name == "LevelListTableCell");
@@ -226,19 +216,30 @@ namespace CustomAvatar
 				tableCell = Instantiate(_tableCellTemplate);
 				tableCell.reuseIdentifier = "AvatarListCell";
 			}
-			try
+			if (__AvatarLoadResults[row] != AvatarLoadResult.Completed)
 			{
-				tableCell.songName = __AvatarNames[row];
-				tableCell.author = __AvatarAuthors[row];
-				tableCell.coverImage = __AvatarCovers[row];
+				tableCell.songName = "You have an avatar that failed to load";
+				tableCell.author = "Probaby a duplicate or something";
+				tableCell.coverImage = null;
+				return tableCell;
 			}
-			catch
+			else
 			{
-				tableCell.songName = "If you see this yell at Assistant";
-				tableCell.author = "because she fucked up";
-				tableCell.coverImage = Sprite.Create(Texture2D.blackTexture, new Rect(), Vector2.zero);
+				try
+				{
+					tableCell.songName = __AvatarNames[row];
+					tableCell.author = __AvatarAuthors[row];
+					tableCell.coverImage = __AvatarCovers[row];
+				}
+				catch (Exception e)
+				{
+					tableCell.songName = "If you see this yell at Assistant";
+					tableCell.author = "because she fucked up";
+					tableCell.coverImage = Sprite.Create(Texture2D.blackTexture, new Rect(), Vector2.zero);
+					Console.WriteLine(e);
+				}
+				return tableCell;
 			}
-			return tableCell;
 		}
 
 
@@ -321,7 +322,7 @@ namespace CustomAvatar
 			}
 			else
 			{
-				Console.WriteLine("Failed to load preview. Status " + __AvatarLoadResults[AvatarIndex]);
+				Console.WriteLine("Failed to load preview. Status: " + __AvatarLoadResults[AvatarIndex]);
 			}
 			PreviewStatus = false;
 		}

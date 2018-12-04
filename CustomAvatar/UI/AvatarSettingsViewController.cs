@@ -57,11 +57,11 @@ namespace CustomAvatar
 
 			boolRotatePreviewAvatar.GetValue += delegate
 			{
-				return AvatarPreviewRotation.rotatePreview;
+				return Plugin.Instance.RotatePreviewEnabled;
 			};
 			boolRotatePreviewAvatar.SetValue += delegate (bool value)
 			{
-				AvatarPreviewRotation.rotatePreview = value;
+				Plugin.Instance.RotatePreviewEnabled = value;
 			};
 			boolRotatePreviewAvatar.Init();
 
