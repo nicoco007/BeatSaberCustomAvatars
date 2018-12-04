@@ -9,6 +9,7 @@ using CustomUI.BeatSaber;
 using CustomUI.Utilities;
 using TMPro;
 using System.Collections.Generic;
+using CustomAvatar.UI;
 
 namespace CustomAvatar
 {
@@ -58,8 +59,8 @@ namespace CustomAvatar
 		}
 
 		private void PreviewCurrent()
-		{
-			CurrentAvatar = PathToInt(Plugin.Instance.PlayerAvatarManager.GetCurrentAvatar().FullPath);
+        {
+            CurrentAvatar = PathToInt(Plugin.Instance.PlayerAvatarManager.GetCurrentAvatar().FullPath);
 			GeneratePreview(CurrentAvatar);
 		}
 
@@ -245,7 +246,7 @@ namespace CustomAvatar
 
 		public void GeneratePreview(int AvatarIndex)
 		{
-			if (PreviewStatus == 1)
+            if (PreviewStatus == 1)
 			{
 				return;
 			}
@@ -299,6 +300,8 @@ namespace CustomAvatar
 
 				Destroy(_avatarPreview);
 				_avatarPreview = Instantiate(PreviewAvatar, _previewParent.transform);
+                _avatarPreview.AddComponent<AvatarPreviewRotation>();
+                _avatarPreview.SetActive(true);
 				_VRIK = _avatarPreview.GetComponentsInChildren<AvatarScriptPack.VRIK>().FirstOrDefault();
 				_exclusionScript = _avatarPreview.GetComponentsInChildren<AvatarScriptPack.FirstPersonExclusion>().FirstOrDefault();
 

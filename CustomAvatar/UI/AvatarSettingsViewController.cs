@@ -5,6 +5,7 @@ using CustomUI.BeatSaber;
 using CustomUI.Utilities;
 using CustomUI.Settings;
 using TMPro;
+using CustomAvatar.UI;
 
 namespace CustomAvatar
 {
@@ -38,18 +39,34 @@ namespace CustomAvatar
 			text.alignment = TextAlignmentOptions.Center;
 			relative_layout(text.rectTransform, 0f, 0.85f, 1f, 0.166f, 0.5f);
 
-			var boolFirstPerson = AddBool("Visible In First Person View", container);
-			relative_layout(boolFirstPerson.transform as RectTransform, 0, 0.66f, 1, 0.166f, 0);
-			boolFirstPerson.GetValue += delegate
-			{
-				return Plugin.Instance.FirstPersonEnabled;
-			};
-			boolFirstPerson.SetValue += delegate (bool value)
-			{
-				Plugin.Instance.FirstPersonEnabled = value;
-			};
-			boolFirstPerson.Init();
-		}
+            var boolFirstPerson = AddBool("Visible In First Person View", container);
+            relative_layout(boolFirstPerson.transform as RectTransform, 0, 0.66f, 1, 0.166f, 0);
+
+            var boolRotatePreviewAvatar = AddBool("Rotate Avatar Preview", container);
+            relative_layout(boolRotatePreviewAvatar.transform as RectTransform, 0, 0.55f, 1, 0.166f, 0);
+
+
+            boolFirstPerson.GetValue += delegate
+            {
+                return Plugin.Instance.FirstPersonEnabled;
+            };
+            boolFirstPerson.SetValue += delegate (bool value)
+            {
+                Plugin.Instance.FirstPersonEnabled = value;
+            };
+            boolFirstPerson.Init();
+
+
+            boolRotatePreviewAvatar.GetValue += delegate
+            {
+                return AvatarPreviewRotation.rotatePreview;
+            };
+            boolRotatePreviewAvatar.SetValue += delegate (bool value)
+            {
+                AvatarPreviewRotation.rotatePreview = value;
+            };
+            boolRotatePreviewAvatar.Init();
+        }
 
 		private class ImmediateBoolController : BoolViewController
 		{
