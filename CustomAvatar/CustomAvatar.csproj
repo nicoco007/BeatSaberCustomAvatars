@@ -130,7 +130,6 @@
     <Compile Include="UI\GenericFlowCoordinator.cs" />
     <Compile Include="UI\AvatarPreviewRotation.cs" />
     <Compile Include="UI\AvatarUI.cs" />
-    <Compile Include="VRIK\Axis.cs" />
     <Compile Include="VRIK\AxisTools.cs" />
     <Compile Include="VRIK\DynamicBone.cs" />
     <Compile Include="VRIK\DynamicBoneCollider.cs" />
@@ -140,11 +139,19 @@
     <Compile Include="VRIK\IKManagerAdvanced.cs" />
     <Compile Include="VRIK\IKSolver.cs" />
     <Compile Include="VRIK\IKSolverVR.cs" />
+    <Compile Include="VRIK\IKSolverVRArm.cs" />
+    <Compile Include="VRIK\IKSolverVRBodyPart.cs" />
+    <Compile Include="VRIK\IKSolverVRFootstep.cs" />
+    <Compile Include="VRIK\IKSolverVRLeg.cs" />
+    <Compile Include="VRIK\IKSolverVRLocomotion.cs" />
+    <Compile Include="VRIK\IKSolverVRSpine.cs" />
+    <Compile Include="VRIK\IKSolverVRUtilities.cs" />
     <Compile Include="VRIK\Interp.cs" />
     <Compile Include="VRIK\InterpolationMode.cs" />
     <Compile Include="VRIK\QuaTools.cs" />
     <Compile Include="VRIK\RotationLimit.cs" />
     <Compile Include="VRIK\SolverManager.cs" />
+    <Compile Include="VRIK\TwistRelaxer.cs" />
     <Compile Include="VRIK\V3Tools.cs" />
     <Compile Include="VRIK\VRIK.cs" />
     <Compile Include="VRIK\Warning.cs" />

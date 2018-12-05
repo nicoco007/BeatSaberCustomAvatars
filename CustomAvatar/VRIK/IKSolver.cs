@@ -1,449 +1,450 @@
-﻿using System;
 using UnityEngine;
+using System.Collections;
 
-namespace AvatarScriptPack
-{
-	// Token: 0x0200004B RID: 75
-	[Serializable]
-	public abstract class IKSolver
-	{
-		// Token: 0x06000245 RID: 581 RVA: 0x0000FDDC File Offset: 0x0000E1DC
-		public bool IsValid()
-		{
-			string empty = string.Empty;
-			return this.IsValid(ref empty);
+namespace AvatarScriptPack {
+
+	/// <summary>
+	/// The base abstract class for all %IK solvers
+	/// </summary>
+	[System.Serializable]
+	public abstract class IKSolver {
+		
+		#region Main Interface
+
+		/// <summary>
+		/// Determines whether this instance is valid or not.
+		/// </summary>
+		public bool IsValid() {
+			string message = string.Empty;
+			return IsValid(ref message);
 		}
 
-		// Token: 0x06000246 RID: 582
+		/// <summary>
+		/// Determines whether this instance is valid or not. If returns false, also fills in an error message.
+		/// </summary>
 		public abstract bool IsValid(ref string message);
+		
+		/// <summary>
+		/// Initiate the solver with specified root Transform. Use only if this %IKSolver is not a member of an %IK component.
+		/// </summary>
+		public void Initiate(Transform root) {
+			if (OnPreInitiate != null) OnPreInitiate();
 
-		// Token: 0x06000247 RID: 583 RVA: 0x0000FDF8 File Offset: 0x0000E1F8
-		public void Initiate(Transform root)
-		{
-			if (this.OnPreInitiate != null)
-			{
-				this.OnPreInitiate();
-			}
-			if (root == null)
-			{
-				Debug.LogError("Initiating IKSolver with null root Transform.");
-			}
+			if (root == null) Debug.LogError("Initiating IKSolver with null root Transform.");
 			this.root = root;
-			this.initiated = false;
-			string empty = string.Empty;
-			if (!this.IsValid(ref empty))
-			{
-				Warning.Log(empty, root, false);
+			initiated = false;
+
+			string message = string.Empty;
+			if (!IsValid(ref message)) {
+				Warning.Log(message, root, false);
 				return;
 			}
-			this.OnInitiate();
-			this.StoreDefaultLocalState();
-			this.initiated = true;
-			this.firstInitiation = false;
-			if (this.OnPostInitiate != null)
-			{
-				this.OnPostInitiate();
-			}
-		}
 
-		// Token: 0x06000248 RID: 584 RVA: 0x0000FE8C File Offset: 0x0000E28C
-		public void Update()
-		{
-			if (this.OnPreUpdate != null)
-			{
-				this.OnPreUpdate();
-			}
-			if (this.firstInitiation)
-			{
-				this.Initiate(this.root);
-			}
-			if (!this.initiated)
-			{
-				return;
-			}
-			this.OnUpdate();
-			if (this.OnPostUpdate != null)
-			{
-				this.OnPostUpdate();
-			}
-		}
 
-		// Token: 0x06000249 RID: 585 RVA: 0x0000FEEE File Offset: 0x0000E2EE
-		public virtual Vector3 GetIKPosition()
-		{
-			return this.IKPosition;
-		}
+			OnInitiate();
+			StoreDefaultLocalState();
+			initiated = true;
+			firstInitiation = false;
 
-		// Token: 0x0600024A RID: 586 RVA: 0x0000FEF6 File Offset: 0x0000E2F6
-		public void SetIKPosition(Vector3 position)
-		{
-			this.IKPosition = position;
+			if (OnPostInitiate != null) OnPostInitiate();
 		}
+		
+		/// <summary>
+		/// Updates the %IK solver. Use only if this %IKSolver is not a member of an %IK component or the %IK component has been disabled and you intend to manually control the updating.
+		/// </summary>
+		public void Update() {
+			if (OnPreUpdate != null) OnPreUpdate();
 
-		// Token: 0x0600024B RID: 587 RVA: 0x0000FEFF File Offset: 0x0000E2FF
-		public float GetIKPositionWeight()
-		{
-			return this.IKPositionWeight;
+			if (firstInitiation) Initiate(root); // when the IK component has been disabled in Awake, this will initiate it.
+			if (!initiated) return;
+
+			OnUpdate();
+
+			if (OnPostUpdate != null) OnPostUpdate();
 		}
+		
+		/// <summary>
+		/// The %IK position.
+		/// </summary>
+		[HideInInspector] public Vector3 IKPosition;
 
-		// Token: 0x0600024C RID: 588 RVA: 0x0000FF07 File Offset: 0x0000E307
-		public void SetIKPositionWeight(float weight)
-		{
-			this.IKPositionWeight = Mathf.Clamp(weight, 0f, 1f);
+		[Tooltip("The positional or the master weight of the solver.")]
+		/// <summary>
+		/// The %IK position weight or the master weight of the solver.
+		/// </summary>
+		[Range(0f, 1f)]
+		public float IKPositionWeight = 1f;
+		
+		/// <summary>
+		/// Gets the %IK position. NOTE: You are welcome to read IKPosition directly, this method is here only to match the Unity's built in %IK API.
+		/// </summary>
+		public virtual Vector3 GetIKPosition() {
+			return IKPosition;
 		}
-
-		// Token: 0x0600024D RID: 589 RVA: 0x0000FF1F File Offset: 0x0000E31F
-		public Transform GetRoot()
-		{
-			return this.root;
+		
+		/// <summary>
+		/// Sets the %IK position. NOTE: You are welcome to set IKPosition directly, this method is here only to match the Unity's built in %IK API.
+		/// </summary>
+		public void SetIKPosition(Vector3 position) {
+			IKPosition = position;
 		}
-
-		// Token: 0x17000035 RID: 53
-		// (get) Token: 0x0600024E RID: 590 RVA: 0x0000FF27 File Offset: 0x0000E327
-		// (set) Token: 0x0600024F RID: 591 RVA: 0x0000FF2F File Offset: 0x0000E32F
+		
+		/// <summary>
+		/// Gets the %IK position weight. NOTE: You are welcome to read IKPositionWeight directly, this method is here only to match the Unity's built in %IK API.
+		/// </summary>
+		public float GetIKPositionWeight() {
+			return IKPositionWeight;
+		}
+		
+		/// <summary>
+		/// Sets the %IK position weight. NOTE: You are welcome to set IKPositionWeight directly, this method is here only to match the Unity's built in %IK API.
+		/// </summary>
+		public void SetIKPositionWeight(float weight) {
+			IKPositionWeight = Mathf.Clamp(weight, 0f, 1f);
+		}
+		
+		/// <summary>
+		/// Gets the root Transform.
+		/// </summary>
+		public Transform GetRoot() {
+			return root;
+		}
+		
+		/// <summary>
+		/// Gets a value indicating whether this <see cref="IKSolver"/> has successfully initiated.
+		/// </summary>
 		public bool initiated { get; private set; }
 
-		// Token: 0x06000250 RID: 592
+		/// <summary>
+		/// Gets all the points used by the solver.
+		/// </summary>
 		public abstract IKSolver.Point[] GetPoints();
-
-		// Token: 0x06000251 RID: 593
+		
+		/// <summary>
+		/// Gets the point with the specified Transform.
+		/// </summary>
 		public abstract IKSolver.Point GetPoint(Transform transform);
 
-		// Token: 0x06000252 RID: 594
+		/// <summary>
+		/// Fixes all the Transforms used by the solver to their initial state.
+		/// </summary>
 		public abstract void FixTransforms();
 
-		// Token: 0x06000253 RID: 595
+		/// <summary>
+		/// Stores the default local state for the bones used by the solver.
+		/// </summary>
 		public abstract void StoreDefaultLocalState();
+		
+		/// <summary>
+		/// The most basic element type in the %IK chain that all other types extend from.
+		/// </summary>
+		[System.Serializable]
+		public class Point {
 
-		// Token: 0x06000254 RID: 596
-		protected abstract void OnInitiate();
+			/// <summary>
+			/// The transform.
+			/// </summary>
+			public Transform transform;
+			/// <summary>
+			/// The weight of this bone in the solver.
+			/// </summary>
+			[Range(0f, 1f)]
+			public float weight = 1f;
+			/// <summary>
+			/// Virtual position in the %IK solver.
+			/// </summary>
+			public Vector3 solverPosition;
+			/// <summary>
+			/// Virtual rotation in the %IK solver.
+			/// </summary>
+			public Quaternion solverRotation = Quaternion.identity;
+			/// <summary>
+			/// The default local position of the Transform.
+			/// </summary>
+			public Vector3 defaultLocalPosition;
+			/// <summary>
+			/// The default local rotation of the Transform.
+			/// </summary>
+			public Quaternion defaultLocalRotation;
 
-		// Token: 0x06000255 RID: 597
-		protected abstract void OnUpdate();
+			/// <summary>
+			/// Stores the default local state of the point.
+			/// </summary>
+			public void StoreDefaultLocalState() {
+				defaultLocalPosition = transform.localPosition;
+				defaultLocalRotation = transform.localRotation;
+			}
 
-		// Token: 0x06000256 RID: 598 RVA: 0x0000FF38 File Offset: 0x0000E338
-		protected void LogWarning(string message)
-		{
-			Warning.Log(message, this.root, true);
+			/// <summary>
+			/// Fixes the transform to it's default local state.
+			/// </summary>
+			public void FixTransform() {
+				if (transform.localPosition != defaultLocalPosition) transform.localPosition = defaultLocalPosition;
+				if (transform.localRotation != defaultLocalRotation) transform.localRotation = defaultLocalRotation;
+			}
+
+			/// <summary>
+			/// Updates the solverPosition (in world space).
+			/// </summary>
+			public void UpdateSolverPosition() {
+				solverPosition = transform.position;
+			}
+
+			/// <summary>
+			/// Updates the solverPosition (in local space).
+			/// </summary>
+			public void UpdateSolverLocalPosition() {
+				solverPosition = transform.localPosition;
+			}
+
+			/// <summary>
+			/// Updates the solverPosition/Rotation (in world space).
+			/// </summary>
+			public void UpdateSolverState() {
+				solverPosition = transform.position;
+				solverRotation = transform.rotation;
+			}
+
+			/// <summary>
+			/// Updates the solverPosition/Rotation (in local space).
+			/// </summary>
+			public void UpdateSolverLocalState() {
+				solverPosition = transform.localPosition;
+				solverRotation = transform.localRotation;
+			}
+		}
+		
+		/// <summary>
+		/// %Bone type of element in the %IK chain. Used in the case of skeletal Transform hierarchies.
+		/// </summary>
+		[System.Serializable]
+		public class Bone: Point {
+			
+			/// <summary>
+			/// The length of the bone.
+			/// </summary>
+			public float length;
+			/// <summary>
+			/// The sqr mag of the bone.
+			/// </summary>
+			public float sqrMag;
+			/// <summary>
+			/// Local axis to target/child bone.
+			/// </summary>
+			public Vector3 axis = -Vector3.right;
+			
+			/// <summary>
+			/// Gets the rotation limit component from the Transform if there is any.
+			/// </summary>
+			public RotationLimit rotationLimit {
+				get {
+					if (!isLimited) return null;
+					if (_rotationLimit == null) _rotationLimit = transform.GetComponent<RotationLimit>();
+					isLimited = _rotationLimit != null;
+					return _rotationLimit;
+				}
+				set {
+					_rotationLimit = value;
+					isLimited = value != null;
+				}
+			}
+				
+			/*
+			 * Swings the Transform's axis towards the swing target
+			 * */
+			public void Swing(Vector3 swingTarget, float weight = 1f) {
+				if (weight <= 0f) return;
+
+				Quaternion r = Quaternion.FromToRotation(transform.rotation * axis, swingTarget - transform.position);
+
+				if (weight >= 1f) {
+					transform.rotation = r * transform.rotation;
+					return;
+				}
+
+				transform.rotation = Quaternion.Lerp(Quaternion.identity, r, weight) * transform.rotation;
+			}
+
+			public static void SolverSwing(Bone[] bones, int index, Vector3 swingTarget, float weight = 1f) {
+				if (weight <= 0f) return;
+				
+				Quaternion r = Quaternion.FromToRotation(bones[index].solverRotation * bones[index].axis, swingTarget - bones[index].solverPosition);
+				
+				if (weight >= 1f) {
+					for (int i = index; i < bones.Length; i++) {
+						bones[i].solverRotation = r * bones[i].solverRotation;
+					}
+					return;
+				}
+				
+				for (int i = index; i < bones.Length; i++) {
+					bones[i].solverRotation = Quaternion.Lerp(Quaternion.identity, r, weight) * bones[i].solverRotation;
+				}
+			}
+
+			/*
+			 * Swings the Transform's axis towards the swing target on the XY plane only
+			 * */
+			public void Swing2D(Vector3 swingTarget, float weight = 1f) {
+				if (weight <= 0f) return;
+
+				Vector3 from = transform.rotation * axis;
+				Vector3 to = swingTarget - transform.position;
+
+				float angleFrom = Mathf.Atan2(from.x, from.y) * Mathf.Rad2Deg;
+				float angleTo = Mathf.Atan2(to.x, to.y) * Mathf.Rad2Deg;
+
+				transform.rotation = Quaternion.AngleAxis(Mathf.DeltaAngle(angleFrom, angleTo) * weight, Vector3.back) * transform.rotation;
+			}
+			
+			/*
+			 * Moves the bone to the solver position
+			 * */
+			public void SetToSolverPosition() {
+				transform.position = solverPosition;
+			}
+			
+			public Bone() {}
+			
+			public Bone (Transform transform) {
+				this.transform = transform;
+			}
+			
+			public Bone (Transform transform, float weight) {
+				this.transform = transform;
+				this.weight = weight;
+			}
+			
+			private RotationLimit _rotationLimit;
+			private bool isLimited = true;
+		}
+		
+		/// <summary>
+		/// %Node type of element in the %IK chain. Used in the case of mixed/non-hierarchical %IK systems
+		/// </summary>
+		[System.Serializable]
+		public class Node: Point {
+			
+			/// <summary>
+			/// Distance to child node.
+			/// </summary>
+			public float length;
+			/// <summary>
+			/// The effector position weight.
+			/// </summary>
+			public float effectorPositionWeight;
+			/// <summary>
+			/// The effector rotation weight.
+			/// </summary>
+			public float effectorRotationWeight;
+			/// <summary>
+			/// Position offset.
+			/// </summary>
+			public Vector3 offset;
+			
+			public Node() {}
+			
+			public Node (Transform transform) {
+				this.transform = transform;
+			}
+			
+			public Node (Transform transform, float weight) {
+				this.transform = transform;
+				this.weight = weight;
+			}
 		}
 
-		// Token: 0x06000257 RID: 599 RVA: 0x0000FF48 File Offset: 0x0000E348
-		public static Transform ContainsDuplicateBone(IKSolver.Bone[] bones)
-		{
-			for (int i = 0; i < bones.Length; i++)
-			{
-				for (int j = 0; j < bones.Length; j++)
-				{
-					if (i != j && bones[i].transform == bones[j].transform)
-					{
-						return bones[i].transform;
-					}
+		/// <summary>
+		/// Delegates solver update events.
+		/// </summary>
+		public delegate void UpdateDelegate();
+		/// <summary>
+		/// Delegates solver iteration events.
+		/// </summary>
+		public delegate void IterationDelegate(int i);
+
+		/// <summary>
+		/// Called before initiating the solver.
+		/// </summary>
+		public UpdateDelegate OnPreInitiate;
+		/// <summary>
+		/// Called after initiating the solver.
+		/// </summary>
+		public UpdateDelegate OnPostInitiate;
+		/// <summary>
+		/// Called before updating.
+		/// </summary>
+		public UpdateDelegate OnPreUpdate;
+		/// <summary>
+		/// Called after writing the solved pose
+		/// </summary>
+		public UpdateDelegate OnPostUpdate;
+		
+		#endregion Main Interface
+		
+		protected abstract void OnInitiate();
+		protected abstract void OnUpdate();
+
+		protected bool firstInitiation = true;
+		[SerializeField][HideInInspector] protected Transform root;
+		
+		protected void LogWarning(string message) {
+			Warning.Log(message, root, true);
+		}
+
+		#region Class Methods
+
+		/// <summary>
+		/// Checks if an array of objects contains any duplicates.
+		/// </summary>
+		public static Transform ContainsDuplicateBone(Bone[] bones) {
+			for (int i = 0; i < bones.Length; i++) {
+				for (int i2 = 0; i2 < bones.Length; i2++) {
+					if (i != i2 && bones[i].transform == bones[i2].transform) return bones[i].transform;
 				}
 			}
 			return null;
 		}
 
-		// Token: 0x06000258 RID: 600 RVA: 0x0000FFA8 File Offset: 0x0000E3A8
-		public static bool HierarchyIsValid(IKSolver.Bone[] bones)
-		{
-			for (int i = 1; i < bones.Length; i++)
-			{
-				if (!Hierarchy.IsAncestor(bones[i].transform, bones[i - 1].transform))
-				{
+		/*
+		 * Make sure the bones are in valid Hierarchy
+		 * */
+		public static bool HierarchyIsValid(IKSolver.Bone[] bones) {
+			for (int i = 1; i < bones.Length; i++) {
+				// If parent bone is not an ancestor of bone, the hierarchy is invalid
+				if (!Hierarchy.IsAncestor(bones[i].transform, bones[i - 1].transform)) {
 					return false;
 				}
 			}
 			return true;
 		}
 
-		// Token: 0x06000259 RID: 601 RVA: 0x0000FFE8 File Offset: 0x0000E3E8
-		protected static float PreSolveBones(ref IKSolver.Bone[] bones)
-		{
-			float num = 0f;
-			for (int i = 0; i < bones.Length; i++)
-			{
+		// Calculates bone lengths and axes, returns the length of the entire chain
+		protected static float PreSolveBones(ref Bone[] bones) {
+			float length = 0;
+			
+			for (int i = 0; i < bones.Length; i++) {
 				bones[i].solverPosition = bones[i].transform.position;
 				bones[i].solverRotation = bones[i].transform.rotation;
 			}
-			for (int j = 0; j < bones.Length; j++)
-			{
-				if (j < bones.Length - 1)
-				{
-					bones[j].sqrMag = (bones[j + 1].solverPosition - bones[j].solverPosition).sqrMagnitude;
-					bones[j].length = Mathf.Sqrt(bones[j].sqrMag);
-					num += bones[j].length;
-					bones[j].axis = Quaternion.Inverse(bones[j].solverRotation) * (bones[j + 1].solverPosition - bones[j].solverPosition);
-				}
-				else
-				{
-					bones[j].sqrMag = 0f;
-					bones[j].length = 0f;
+			
+			for (int i = 0; i < bones.Length; i++) {
+				if (i < bones.Length - 1) {
+					bones[i].sqrMag = (bones[i + 1].solverPosition - bones[i].solverPosition).sqrMagnitude;
+					bones[i].length = Mathf.Sqrt(bones[i].sqrMag);
+					length += bones[i].length;
+					
+					bones[i].axis = Quaternion.Inverse(bones[i].solverRotation) * (bones[i + 1].solverPosition - bones[i].solverPosition);
+				} else {
+					bones[i].sqrMag = 0f;
+					bones[i].length = 0f;
 				}
 			}
-			return num;
+			
+			return length;
 		}
 
-		// Token: 0x040001F8 RID: 504
-		[HideInInspector]
-		public Vector3 IKPosition;
-
-		// Token: 0x040001F9 RID: 505
-		[Tooltip("The positional or the master weight of the solver.")]
-		[Range(0f, 1f)]
-		public float IKPositionWeight = 1f;
-
-		// Token: 0x040001FB RID: 507
-		public IKSolver.UpdateDelegate OnPreInitiate;
-
-		// Token: 0x040001FC RID: 508
-		public IKSolver.UpdateDelegate OnPostInitiate;
-
-		// Token: 0x040001FD RID: 509
-		public IKSolver.UpdateDelegate OnPreUpdate;
-
-		// Token: 0x040001FE RID: 510
-		public IKSolver.UpdateDelegate OnPostUpdate;
-
-		// Token: 0x040001FF RID: 511
-		protected bool firstInitiation = true;
-
-		// Token: 0x04000200 RID: 512
-		[SerializeField]
-		[HideInInspector]
-		protected Transform root;
-
-		// Token: 0x0200004C RID: 76
-		[Serializable]
-		public class Point
-		{
-			// Token: 0x0600025B RID: 603 RVA: 0x00010121 File Offset: 0x0000E521
-			public void StoreDefaultLocalState()
-			{
-				this.defaultLocalPosition = this.transform.localPosition;
-				this.defaultLocalRotation = this.transform.localRotation;
-			}
-
-			// Token: 0x0600025C RID: 604 RVA: 0x00010148 File Offset: 0x0000E548
-			public void FixTransform()
-			{
-				if (this.transform.localPosition != this.defaultLocalPosition)
-				{
-					this.transform.localPosition = this.defaultLocalPosition;
-				}
-				if (this.transform.localRotation != this.defaultLocalRotation)
-				{
-					this.transform.localRotation = this.defaultLocalRotation;
-				}
-			}
-
-			// Token: 0x0600025D RID: 605 RVA: 0x000101AD File Offset: 0x0000E5AD
-			public void UpdateSolverPosition()
-			{
-				this.solverPosition = this.transform.position;
-			}
-
-			// Token: 0x0600025E RID: 606 RVA: 0x000101C0 File Offset: 0x0000E5C0
-			public void UpdateSolverLocalPosition()
-			{
-				this.solverPosition = this.transform.localPosition;
-			}
-
-			// Token: 0x0600025F RID: 607 RVA: 0x000101D3 File Offset: 0x0000E5D3
-			public void UpdateSolverState()
-			{
-				this.solverPosition = this.transform.position;
-				this.solverRotation = this.transform.rotation;
-			}
-
-			// Token: 0x06000260 RID: 608 RVA: 0x000101F7 File Offset: 0x0000E5F7
-			public void UpdateSolverLocalState()
-			{
-				this.solverPosition = this.transform.localPosition;
-				this.solverRotation = this.transform.localRotation;
-			}
-
-			// Token: 0x04000201 RID: 513
-			public Transform transform;
-
-			// Token: 0x04000202 RID: 514
-			[Range(0f, 1f)]
-			public float weight = 1f;
-
-			// Token: 0x04000203 RID: 515
-			public Vector3 solverPosition;
-
-			// Token: 0x04000204 RID: 516
-			public Quaternion solverRotation = Quaternion.identity;
-
-			// Token: 0x04000205 RID: 517
-			public Vector3 defaultLocalPosition;
-
-			// Token: 0x04000206 RID: 518
-			public Quaternion defaultLocalRotation;
-		}
-
-		// Token: 0x0200004D RID: 77
-		[Serializable]
-		public class Bone : IKSolver.Point
-		{
-			// Token: 0x06000261 RID: 609 RVA: 0x0001021B File Offset: 0x0000E61B
-			public Bone()
-			{
-			}
-
-			// Token: 0x06000262 RID: 610 RVA: 0x0001023A File Offset: 0x0000E63A
-			public Bone(Transform transform)
-			{
-				this.transform = transform;
-			}
-
-			// Token: 0x06000263 RID: 611 RVA: 0x00010260 File Offset: 0x0000E660
-			public Bone(Transform transform, float weight)
-			{
-				this.transform = transform;
-				this.weight = weight;
-			}
-
-			// Token: 0x17000036 RID: 54
-			// (get) Token: 0x06000264 RID: 612 RVA: 0x00010290 File Offset: 0x0000E690
-			// (set) Token: 0x06000265 RID: 613 RVA: 0x000102E4 File Offset: 0x0000E6E4
-			public RotationLimit rotationLimit
-			{
-				get
-				{
-					if (!this.isLimited)
-					{
-						return null;
-					}
-					if (this._rotationLimit == null)
-					{
-						this._rotationLimit = this.transform.GetComponent<RotationLimit>();
-					}
-					this.isLimited = (this._rotationLimit != null);
-					return this._rotationLimit;
-				}
-				set
-				{
-					this._rotationLimit = value;
-					this.isLimited = (value != null);
-				}
-			}
-
-			// Token: 0x06000266 RID: 614 RVA: 0x000102FC File Offset: 0x0000E6FC
-			public void Swing(Vector3 swingTarget, float weight = 1f)
-			{
-				if (weight <= 0f)
-				{
-					return;
-				}
-				Quaternion quaternion = Quaternion.FromToRotation(this.transform.rotation * this.axis, swingTarget - this.transform.position);
-				if (weight >= 1f)
-				{
-					this.transform.rotation = quaternion * this.transform.rotation;
-					return;
-				}
-				this.transform.rotation = Quaternion.Lerp(Quaternion.identity, quaternion, weight) * this.transform.rotation;
-			}
-
-			// Token: 0x06000267 RID: 615 RVA: 0x00010394 File Offset: 0x0000E794
-			public static void SolverSwing(IKSolver.Bone[] bones, int index, Vector3 swingTarget, float weight = 1f)
-			{
-				if (weight <= 0f)
-				{
-					return;
-				}
-				Quaternion quaternion = Quaternion.FromToRotation(bones[index].solverRotation * bones[index].axis, swingTarget - bones[index].solverPosition);
-				if (weight >= 1f)
-				{
-					for (int i = index; i < bones.Length; i++)
-					{
-						bones[i].solverRotation = quaternion * bones[i].solverRotation;
-					}
-					return;
-				}
-				for (int j = index; j < bones.Length; j++)
-				{
-					bones[j].solverRotation = Quaternion.Lerp(Quaternion.identity, quaternion, weight) * bones[j].solverRotation;
-				}
-			}
-
-			// Token: 0x06000268 RID: 616 RVA: 0x00010444 File Offset: 0x0000E844
-			public void Swing2D(Vector3 swingTarget, float weight = 1f)
-			{
-				if (weight <= 0f)
-				{
-					return;
-				}
-				Vector3 vector = this.transform.rotation * this.axis;
-				Vector3 vector2 = swingTarget - this.transform.position;
-				float current = Mathf.Atan2(vector.x, vector.y) * 57.29578f;
-				float target = Mathf.Atan2(vector2.x, vector2.y) * 57.29578f;
-				this.transform.rotation = Quaternion.AngleAxis(Mathf.DeltaAngle(current, target) * weight, Vector3.back) * this.transform.rotation;
-			}
-
-			// Token: 0x06000269 RID: 617 RVA: 0x000104E8 File Offset: 0x0000E8E8
-			public void SetToSolverPosition()
-			{
-				this.transform.position = this.solverPosition;
-			}
-
-			// Token: 0x04000207 RID: 519
-			public float length;
-
-			// Token: 0x04000208 RID: 520
-			public float sqrMag;
-
-			// Token: 0x04000209 RID: 521
-			public Vector3 axis = -Vector3.right;
-
-			// Token: 0x0400020A RID: 522
-			private RotationLimit _rotationLimit;
-
-			// Token: 0x0400020B RID: 523
-			private bool isLimited = true;
-		}
-
-		// Token: 0x0200004E RID: 78
-		[Serializable]
-		public class Node : IKSolver.Point
-		{
-			// Token: 0x0600026A RID: 618 RVA: 0x000104FB File Offset: 0x0000E8FB
-			public Node()
-			{
-			}
-
-			// Token: 0x0600026B RID: 619 RVA: 0x00010503 File Offset: 0x0000E903
-			public Node(Transform transform)
-			{
-				this.transform = transform;
-			}
-
-			// Token: 0x0600026C RID: 620 RVA: 0x00010512 File Offset: 0x0000E912
-			public Node(Transform transform, float weight)
-			{
-				this.transform = transform;
-				this.weight = weight;
-			}
-
-			// Token: 0x0400020C RID: 524
-			public float length;
-
-			// Token: 0x0400020D RID: 525
-			public float effectorPositionWeight;
-
-			// Token: 0x0400020E RID: 526
-			public float effectorRotationWeight;
-
-			// Token: 0x0400020F RID: 527
-			public Vector3 offset;
-		}
-
-		// Token: 0x0200004F RID: 79
-		// (Invoke) Token: 0x0600026E RID: 622
-		public delegate void UpdateDelegate();
-
-		// Token: 0x02000050 RID: 80
-		// (Invoke) Token: 0x06000272 RID: 626
-		public delegate void IterationDelegate(int i);
+		#endregion Class Methods
 	}
 }
+
