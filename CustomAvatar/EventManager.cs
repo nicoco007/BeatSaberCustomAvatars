@@ -11,6 +11,7 @@ namespace CustomAvatar
         public UnityEvent MultiplierUp;
         public UnityEvent SaberStartColliding;
         public UnityEvent SaberStopColliding;
+        public UnityEvent OnMenuEnter;
         public UnityEvent OnLevelStart;
         public UnityEvent OnLevelFail;
         public UnityEvent OnBlueLightOn;

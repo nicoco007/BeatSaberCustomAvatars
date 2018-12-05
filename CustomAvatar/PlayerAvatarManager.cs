@@ -150,6 +150,15 @@ namespace CustomAvatar
             _currentSpawnedPlayerAvatar?.GameObject.GetComponentInChildren<AvatarEventsPlayer>()?.Restart();
         }
 
+		public void OnSceneTransitioned(Scene newScene)
+		{
+			Plugin.Log("OnSceneTransitioned - " + newScene.name);
+			if (newScene.name.Equals("GameCore"))
+				_currentSpawnedPlayerAvatar?.GameObject.GetComponentInChildren<AvatarEventsPlayer>()?.LevelStartedEvent();
+			else if (newScene.name.Equals("Menu") || newScene.name.Equals("HealthWarning"))
+				_currentSpawnedPlayerAvatar?.GameObject.GetComponentInChildren<AvatarEventsPlayer>()?.MenuEnteredEvent();
+		}
+
 		private void ResizePlayerAvatar()
 		{
 			if (_currentSpawnedPlayerAvatar?.GameObject == null) return;
