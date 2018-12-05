@@ -132,6 +132,11 @@ namespace CustomAvatar
 			}
 
 			var previousAvatarPath = PlayerPrefs.GetString(PreviousAvatarKey, null);
+			if (!File.Exists(previousAvatarPath))
+			{
+				previousAvatarPath = AvatarLoader.Avatars[0].FullPath;
+			}
+
 			var previousAvatar = AvatarLoader.Avatars.FirstOrDefault(x => x.FullPath == previousAvatarPath);
 			
 			PlayerAvatarManager = new PlayerAvatarManager(AvatarLoader, previousAvatar);

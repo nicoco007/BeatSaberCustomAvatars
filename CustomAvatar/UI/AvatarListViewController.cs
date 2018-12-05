@@ -55,7 +55,7 @@ namespace CustomAvatar
 
 		private void PreviewCurrent()
 		{
-			CurrentAvatar = PathToInt(Plugin.Instance.PlayerAvatarManager.GetCurrentAvatar().FullPath);
+			CurrentAvatar = Plugin.Instance.AvatarLoader.IndexOf(Plugin.Instance.PlayerAvatarManager.GetCurrentAvatar());
 			GeneratePreview(CurrentAvatar);
 		}
 
@@ -78,14 +78,6 @@ namespace CustomAvatar
 			_tableView.SelectRow(currentRow);
 		}
 
-		private int PathToInt(string path)
-		{
-			for (int i = 0; i < AvatarList.Count; i++)
-				if (AvatarList[i].FullPath == path)
-					return i;
-			return -1;
-		}
-
 		public void LoadAllAvatars()
 		{
 			int _AvatarIndex = 0;
@@ -100,17 +92,35 @@ namespace CustomAvatar
 			{
 				_AvatarIndex = i;
 				var avatar = AvatarList[_AvatarIndex];
-				avatar.Load(AddToArray);
+				try
+				{
+#if DEBUG
+					Console.WriteLine("AddToArray -> " + _AvatarIndex);
+#endif
+					avatar.Load(AddToArray);
+#if DEBUG
+					Console.WriteLine("AddToArray => " + _AvatarIndex + " (" + Plugin.Instance.AvatarLoader.IndexOf(avatar) + ") | " + avatar.FullPath);
+#endif
+				}
+				catch (Exception e)
+				{
+#if DEBUG
+					Console.WriteLine(_AvatarIndex + " | " + e);
+#endif
+				}
 			}
 
 			void AddToArray(CustomAvatar avatar, AvatarLoadResult _loadResult)
 			{
+#if DEBUG
+				Console.WriteLine("AddToArray == " + AvatarLoadResult.Completed);
+#endif
 				if (_loadResult != AvatarLoadResult.Completed)
 				{
 					Plugin.Log("Avatar " + avatar.FullPath + " failed to load");
 					return;
 				}
-				AvatarIndex = PathToInt(avatar.FullPath);
+				AvatarIndex = Plugin.Instance.AvatarLoader.IndexOf(avatar);
 
 				__AvatarNames[AvatarIndex] = avatar.Name;
 				__AvatarAuthors[AvatarIndex] = avatar.AuthorName;
@@ -120,8 +130,11 @@ namespace CustomAvatar
 				__AvatarLoadResults[AvatarIndex] = _loadResult;
 
 				_loadedCount++;
-				//Console.WriteLine("(" + _loadedCount + "/" + ((int)AvatarList.Count() - 1) + ")");
-				if (_loadedCount == (AvatarList.Count() - 1))
+#if DEBUG
+				Console.WriteLine("(" + _loadedCount + "/" + ((int)AvatarList.Count()) + ") #" + AvatarIndex);
+#endif
+				//if (_loadedCount == (AvatarList.Count()))
+				if (true)
 				{
 					_tableView.ReloadData();
 					PreviewCurrent();
@@ -218,8 +231,8 @@ namespace CustomAvatar
 			}
 			if (__AvatarLoadResults[row] != AvatarLoadResult.Completed)
 			{
-				tableCell.songName = "You have an avatar that failed to load";
-				tableCell.author = "Probaby a duplicate or something";
+				tableCell.songName = System.IO.Path.GetFileName(AvatarList[row].FullPath) +" failed to load";
+				tableCell.author = "Make sure it's not a duplicate avatar.";
 				tableCell.coverImage = null;
 				return tableCell;
 			}
@@ -229,13 +242,13 @@ namespace CustomAvatar
 				{
 					tableCell.songName = __AvatarNames[row];
 					tableCell.author = __AvatarAuthors[row];
-					tableCell.coverImage = __AvatarCovers[row];
+					tableCell.coverImage = __AvatarCovers[row] ?? Sprite.Create(Texture2D.blackTexture, new Rect(), Vector2.zero);
 				}
 				catch (Exception e)
 				{
 					tableCell.songName = "If you see this yell at Assistant";
 					tableCell.author = "because she fucked up";
-					tableCell.coverImage = Sprite.Create(Texture2D.blackTexture, new Rect(), Vector2.zero);
+					tableCell.coverImage = null;
 					Console.WriteLine(e);
 				}
 				return tableCell;
