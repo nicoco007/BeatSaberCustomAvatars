@@ -17,9 +17,17 @@ namespace CustomAvatar
 		[SerializeField] private bool _allowHeightCalibration = true;
 
 		[SerializeField] private Sprite CoverImage;
-
-		public string Name => AvatarName;
-		public string Author => AuthorName;
+		
+		public string Name
+		{
+			get => AvatarName;
+			set => AvatarName = value;
+		}
+		public string Author
+		{
+			get => AuthorName;
+			set => AuthorName = value;
+		}
 		//public Transform ViewPoint => _viewPoint;
 		public bool AllowHeightCalibration => _allowHeightCalibration;
 		public Sprite Cover => CoverImage;
