@@ -139,6 +139,8 @@ namespace CustomAvatar
 			if (_currentSpawnedPlayerAvatar == null) return;
 			AvatarLayers.SetChildrenToLayer(_currentSpawnedPlayerAvatar.GameObject,
 				firstPersonEnabled ? 0 : AvatarLayers.OnlyInThirdPerson);
+			foreach (var ex in _currentSpawnedPlayerAvatar.GameObject.GetComponentsInChildren<AvatarScriptPack.FirstPersonExclusion>())
+				ex.OnFirstPersonEnabledChanged(firstPersonEnabled);
 		}
 
 		private void SceneManagerOnSceneLoaded(Scene newScene, LoadSceneMode mode)

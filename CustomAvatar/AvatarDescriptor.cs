@@ -12,13 +12,16 @@ namespace CustomAvatar
 		// ReSharper disable once InconsistentNaming
 		[SerializeField] private string AuthorName;
 
-		[SerializeField] private Transform _viewPoint;
+		//[SerializeField] private Transform _viewPoint;
 
 		[SerializeField] private bool _allowHeightCalibration = true;
 
+		[SerializeField] private Sprite CoverImage;
+
 		public string Name => AvatarName;
 		public string Author => AuthorName;
-		public Transform ViewPoint => _viewPoint;
+		//public Transform ViewPoint => _viewPoint;
 		public bool AllowHeightCalibration => _allowHeightCalibration;
+		public Sprite Cover => CoverImage;
 	}
 }

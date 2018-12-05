@@ -6,7 +6,7 @@ namespace CustomAvatar
 	public class CustomAvatar
 	{
 		private float? _height;
-		private readonly AvatarAssetBundle _assetBundle;
+		public readonly AvatarAssetBundle _assetBundle;
 
 		internal CustomAvatar(string fullPath)
 		{
@@ -31,6 +31,15 @@ namespace CustomAvatar
 			{
 				if (_assetBundle == null || _assetBundle.AvatarPrefab == null) return null;
 				return _assetBundle.AvatarPrefab.AuthorName;
+			}
+		}
+
+		public Sprite CoverImage
+		{
+			get
+			{
+				if (_assetBundle == null || _assetBundle.AvatarPrefab == null) return null;
+				return _assetBundle.AvatarPrefab.CoverImage;
 			}
 		}
 
