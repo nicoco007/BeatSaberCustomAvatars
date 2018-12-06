@@ -139,7 +139,7 @@
     </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="AfterBuild">
-    <Copy SourceFiles="$(OutputPath)CustomAvatar.dll" DestinationFolder="$(BeatSaberUnityProject)\Assets\" ContinueOnError="true" />
-  </Target>
+  <PropertyGroup>
+    <PostBuildEvent>copy "$(TargetDir)$(TargetName).dll" "$(BeatSaberUnityProject)\Assets\"</PostBuildEvent>
+  </PropertyGroup>
 </Project>
