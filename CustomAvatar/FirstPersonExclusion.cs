@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using CustomAvatar;
 using UnityEngine;
 
@@ -7,7 +7,7 @@ namespace AvatarScriptPack
 	public class FirstPersonExclusion : MonoBehaviour
 	{
 		public GameObject[] Exclude;
-
+#if PLUGIN
 		private int[] _startLayers;
 		private bool _deadSwitch;
 
@@ -52,5 +52,6 @@ namespace AvatarScriptPack
 				excludeObject.layer = _startLayers[i];
 			}
 		}
+#endif //PLUGIN
 	}
 }

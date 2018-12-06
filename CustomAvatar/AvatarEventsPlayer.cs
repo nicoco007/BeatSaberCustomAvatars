@@ -33,7 +33,7 @@ namespace CustomAvatar
 			_scoreController = Resources.FindObjectsOfTypeAll<ScoreController>().FirstOrDefault();
             if (_scoreController == null) return;
 
-			_eventManager.OnLevelStart?.Invoke();
+			//_eventManager.OnLevelStart?.Invoke(); // replaced by LevelStartedEvent()
 
 			_saberCollisionManager =
                 Resources.FindObjectsOfTypeAll<ObstacleSaberSparkleEffectManager>().FirstOrDefault();
@@ -135,6 +135,15 @@ namespace CustomAvatar
         private void ComboChangeEvent(int combo)
         {
             _eventManager.OnComboChanged?.Invoke(combo);
-        }
-    }
+		}
+
+		public void MenuEnteredEvent()
+		{
+			_eventManager.OnMenuEnter?.Invoke();
+		}
+		public void LevelStartedEvent()
+		{
+			_eventManager.OnLevelStart?.Invoke();
+		}
+	}
 }

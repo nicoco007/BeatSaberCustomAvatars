@@ -157,8 +157,9 @@ namespace CustomAvatar
 		private void SceneTransitionDidFinish()
 		{
 			Camera mainCamera = Camera.main;
-
 			SetCameraCullingMask(mainCamera);
+			
+			PlayerAvatarManager?.OnSceneTransitioned(SceneManager.GetActiveScene());
 		}
 
 		private void PlayerAvatarManagerOnAvatarChanged(CustomAvatar newAvatar)
@@ -170,13 +171,11 @@ namespace CustomAvatar
 		{
 			if (Input.GetKeyDown(KeyCode.PageUp))
 			{
-				if (PlayerAvatarManager == null) return;
-				PlayerAvatarManager.SwitchToNextAvatar();
+				PlayerAvatarManager?.SwitchToNextAvatar();
 			}
 			else if (Input.GetKeyDown(KeyCode.PageDown))
 			{
-				if (PlayerAvatarManager == null) return;
-				PlayerAvatarManager.SwitchToPreviousAvatar();
+				PlayerAvatarManager?.SwitchToPreviousAvatar();
 			}
 			else if (Input.GetKeyDown(KeyCode.Home))
 			{
