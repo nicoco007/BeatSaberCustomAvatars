@@ -125,6 +125,9 @@
     <Compile Include="..\CustomAvatar\VRIK\SolverManager.cs">
       <Link>VRIK\SolverManager.cs</Link>
     </Compile>
+    <Compile Include="..\CustomAvatar\VRIK\TwistRelaxer.cs">
+      <Link>VRIK\TwistRelaxer.cs</Link>
+    </Compile>
     <Compile Include="..\CustomAvatar\VRIK\V3Tools.cs">
       <Link>VRIK\V3Tools.cs</Link>
     </Compile>
