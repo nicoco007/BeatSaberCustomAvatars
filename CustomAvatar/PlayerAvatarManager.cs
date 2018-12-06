@@ -155,7 +155,7 @@ namespace CustomAvatar
 			Plugin.Log("OnSceneTransitioned - " + newScene.name);
 			if (newScene.name.Equals("GameCore"))
 				_currentSpawnedPlayerAvatar?.GameObject.GetComponentInChildren<AvatarEventsPlayer>()?.LevelStartedEvent();
-			else if (newScene.name.Equals("Menu") || newScene.name.Equals("HealthWarning"))
+			else if (newScene.name.Equals("Menu"))
 				_currentSpawnedPlayerAvatar?.GameObject.GetComponentInChildren<AvatarEventsPlayer>()?.MenuEnteredEvent();
 		}
 
