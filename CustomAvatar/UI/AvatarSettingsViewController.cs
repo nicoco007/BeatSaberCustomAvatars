@@ -56,7 +56,7 @@ namespace CustomAvatar
 
 			var labelMeasure = BeatSaberUI.CreateText(containerRect, $"Hand To Hand Length = {Mathf.Ceil(Plugin.Instance.AvatarTailor.PlayerArmLength * 100.0f) / 100.0f}", Vector2.zero);
 			relative_layout(labelMeasure.transform as RectTransform, 0f, 0.18f, 0.5f, 0.11f, 0, .5f);
-			BeatSaberUI.AddHintText(labelMeasure.transform as RectTransform, "Press this and T-Pose to measure your arms, needed to use 'Arms Length' resize");
+			BeatSaberUI.AddHintText(labelMeasure.transform as RectTransform, "Value used for 'Arms Length' resize, press on the 'MEASURE!' button and T-Pose");
 			labelMeasure.fontSize = 5f;
 			labelMeasure.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -75,6 +75,7 @@ namespace CustomAvatar
 				});
 			}, "Measure!");
 			relative_layout(buttonMeasure.transform as RectTransform, 0.65f, 0.18f, 0.35f, 0.11f, .5f, .5f);
+			BeatSaberUI.AddHintText(buttonMeasure.transform as RectTransform, "Press this and T-Pose to measure your arms, needed to use 'Arms Length' resize");
 
 			boolFirstPerson.GetTextForValue = (value) => (value != 0f) ? "ON" : "OFF";
 			boolFirstPerson.GetValue = () => Plugin.Instance.FirstPersonEnabled ? 1f : 0f;
