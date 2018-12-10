@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
@@ -9,9 +9,8 @@ namespace CustomAvatar
 	{
 		private readonly AvatarLoader _avatarLoader;
 		private readonly PlayerAvatarInput _playerAvatarInput;
+		private readonly AvatarTailor _avatarTailor;
 		private SpawnedAvatar _currentSpawnedPlayerAvatar;
-		private float _prevPlayerHeight = MainSettingsModel.kDefaultPlayerHeight;
-		private Vector3 _startAvatarLocalScale = Vector3.one;
 
 		public event Action<CustomAvatar> AvatarChanged;
 
@@ -26,10 +25,11 @@ namespace CustomAvatar
 			}
 		}
 
-		public PlayerAvatarManager(AvatarLoader avatarLoader, CustomAvatar startAvatar = null)
+		public PlayerAvatarManager(AvatarLoader avatarLoader, AvatarTailor avatarTailor, CustomAvatar startAvatar = null)
 		{
 			_playerAvatarInput = new PlayerAvatarInput();
 			_avatarLoader = avatarLoader;
+			_avatarTailor = avatarTailor;
 
 			if (startAvatar != null)
 			{
@@ -128,8 +128,7 @@ namespace CustomAvatar
 				AvatarChanged(loadedAvatar);
 			}
 
-			_startAvatarLocalScale = _currentSpawnedPlayerAvatar.GameObject.transform.localScale;
-			_prevPlayerHeight = -1;
+			_avatarTailor.OnAvatarLoaded(_currentSpawnedPlayerAvatar);
 			ResizePlayerAvatar();
 			OnFirstPersonEnabledChanged(Plugin.Instance.FirstPersonEnabled);
 		}
@@ -159,18 +158,12 @@ namespace CustomAvatar
 				_currentSpawnedPlayerAvatar?.GameObject.GetComponentInChildren<AvatarEventsPlayer>()?.MenuEnteredEvent();
 		}
 
-		private void ResizePlayerAvatar()
+		public void ResizePlayerAvatar()
 		{
 			if (_currentSpawnedPlayerAvatar?.GameObject == null) return;
 			if (!_currentSpawnedPlayerAvatar.CustomAvatar.AllowHeightCalibration) return;
 
-			var playerHeight = BeatSaberUtil.GetPlayerHeight();
-			if (playerHeight == _prevPlayerHeight) return;
-			_prevPlayerHeight = playerHeight;
-			_currentSpawnedPlayerAvatar.GameObject.transform.localScale =
-				_startAvatarLocalScale * (playerHeight / _currentSpawnedPlayerAvatar.CustomAvatar.Height);
-			Plugin.Log("Resizing avatar to " + (playerHeight / _currentSpawnedPlayerAvatar.CustomAvatar.Height) +
-			                  "x scale");
+			_avatarTailor.ResizeAvatar(_currentSpawnedPlayerAvatar);
 		}
 	}
 }

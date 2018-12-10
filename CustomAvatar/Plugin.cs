@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -32,6 +32,7 @@ namespace CustomAvatar
 
 		public static Plugin Instance { get; private set; }
 		public AvatarLoader AvatarLoader { get; private set; }
+		public AvatarTailor AvatarTailor { get; private set; }
 		public PlayerAvatarManager PlayerAvatarManager { get; private set; }
 
 		public bool FirstPersonEnabled
@@ -105,6 +106,7 @@ namespace CustomAvatar
 			File.WriteAllText("CustomAvatarsPlugin-log.txt", string.Empty);
 			
 			AvatarLoader = new AvatarLoader(CustomAvatarsPath, AvatarsLoaded);
+			AvatarTailor = new AvatarTailor();
 			_avatarUI = new AvatarUI();
 			
 			FirstPersonEnabled = PlayerPrefs.HasKey(FirstPersonEnabledKey);
@@ -139,7 +141,7 @@ namespace CustomAvatar
 
 			var previousAvatar = AvatarLoader.Avatars.FirstOrDefault(x => x.FullPath == previousAvatarPath);
 			
-			PlayerAvatarManager = new PlayerAvatarManager(AvatarLoader, previousAvatar);
+			PlayerAvatarManager = new PlayerAvatarManager(AvatarLoader, AvatarTailor, previousAvatar);
 			PlayerAvatarManager.AvatarChanged += PlayerAvatarManagerOnAvatarChanged;
 		}
 
