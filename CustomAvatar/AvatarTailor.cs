@@ -95,8 +95,7 @@ namespace CustomAvatar
 			// give up moving original foot floors
 			var originalFloor = GameObject.Find("MenuPlayersPlace") ?? GameObject.Find("Static/PlayersPlace");
 			if (originalFloor != null && originalFloor.activeSelf == true) floorOffset = 0f;
-
-			if (FloorMovePolicy == FloorMovePolicyType.AllowMove)
+			else if (FloorMovePolicy == FloorMovePolicyType.AllowMove)
 			{
 				float playerViewPointHeight = BeatSaberUtil.GetPlayerViewPointHeight();
 				float avatarViewPointHeight = avatar.CustomAvatar.ViewPoint?.position.y ?? playerViewPointHeight;
