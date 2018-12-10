@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -47,6 +47,11 @@ namespace CustomAvatar
 
 			_lastPlayerHeight = playerHeight;
 			return playerHeight;
+		}
+
+		public static float GetPlayerViewPointHeight()
+		{
+			return GetPlayerHeight() - MainSettingsModel.headPosToPlayerHeightOffset;
 		}
 
 		public static Vector3 GetRoomCenter()

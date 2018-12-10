@@ -1,8 +1,6 @@
-﻿using System.Linq;
 using UnityEngine;
 using VRUI;
 using CustomUI.BeatSaber;
-using CustomUI.Utilities;
 using CustomUI.Settings;
 using TMPro;
 
@@ -17,88 +15,89 @@ namespace CustomAvatar
 
 		private void FirstActivation()
 		{
-			RectTransform container = new GameObject("AvatarSettingsContainer", typeof(RectTransform)).transform as RectTransform;
-			container.SetParent(rectTransform, false);
-			container.anchorMin = new Vector2(0.05f, 0.0f);
-			container.anchorMax = new Vector2(0.95f, 1.0f);
-			container.sizeDelta = new Vector2(0, 0);
+			RectTransform containerRect = new GameObject("AvatarSettingsContainer", typeof(RectTransform)).transform as RectTransform;
+			containerRect.SetParent(rectTransform, false);
+			containerRect.anchorMin = new Vector2(0.05f, 0.0f);
+			containerRect.anchorMax = new Vector2(0.95f, 1.0f);
+			containerRect.sizeDelta = new Vector2(0, 0);
 
-			System.Action<RectTransform, float, float, float, float, float> relative_layout =
-				(RectTransform rt, float x, float y, float w, float h, float pivotx) =>
+			SubMenu container = new SubMenu(containerRect); 
+
+			System.Action<RectTransform, float, float, float, float, float, float> relative_layout =
+				(RectTransform rt, float x, float y, float w, float h, float pivotx, float pivoty) =>
 				{
 					rt.anchorMin = new Vector2(x, y);
 					rt.anchorMax = new Vector2(x + w, y + h);
-					rt.pivot = new Vector2(pivotx, 1f);
+					rt.pivot = new Vector2(pivotx, pivoty);
 					rt.sizeDelta = Vector2.zero;
 					rt.anchoredPosition = Vector2.zero;
 				};
 
-			TextMeshProUGUI text = BeatSaberUI.CreateText(container, "AVATAR SETTINGS", Vector2.zero);
+			TextMeshProUGUI text = BeatSaberUI.CreateText(containerRect, "AVATAR SETTINGS", Vector2.zero);
 			text.fontSize = 6.0f;
 			text.alignment = TextAlignmentOptions.Center;
-			relative_layout(text.rectTransform, 0f, 0.85f, 1f, 0.166f, 0.5f);
+			relative_layout(text.rectTransform, 0f, 0.85f, 1f, 0.166f, 0.5f, 1f);
 
-			var boolFirstPerson = AddBool("Visible In First Person View", container);
-			relative_layout(boolFirstPerson.transform as RectTransform, 0, 0.66f, 1, 0.166f, 0);
+			var boolFirstPerson = container.AddList("Visible In First Person View", new float[] { 0, 1 });
+			relative_layout(boolFirstPerson.transform as RectTransform, 0, 0.66f, 1, 0.166f, 0, 1f);
 
-			var boolRotatePreviewAvatar = AddBool("Rotate Avatar Preview", container);
-			relative_layout(boolRotatePreviewAvatar.transform as RectTransform, 0, 0.55f, 1, 0.166f, 0);
+			var boolRotatePreviewAvatar = container.AddList("Rotate Avatar Preview", new float[] { 0, 1 });
+			relative_layout(boolRotatePreviewAvatar.transform as RectTransform, 0, 0.55f, 1, 0.166f, 0, 1f);
 
-			boolFirstPerson.GetValue += delegate
+			var listResizePolicy = container.AddList("Resize Avatars To Player's", new float[] { 0, 1, 2 });
+			relative_layout(listResizePolicy.transform as RectTransform, 0, 0.44f, 1, 0.166f, 0, 1f);
+
+			var boolFloorMovePolicy = container.AddList("Floor Height Adjust", new float[] { 0, 1 });
+			relative_layout(boolFloorMovePolicy.transform as RectTransform, 0, 0.33f, 1, 0.166f, 0, 1f);
+
+			var labelMeasure = BeatSaberUI.CreateText(containerRect, $"Hand To Hand Length = {Mathf.Ceil(Plugin.Instance.AvatarTailor.PlayerArmLength * 100.0f) / 100.0f}", Vector2.zero);
+			relative_layout(labelMeasure.transform as RectTransform, 0f, 0.18f, 0.5f, 0.11f, 0, .5f);
+			labelMeasure.fontSize = 5f;
+			labelMeasure.alignment = TextAlignmentOptions.MidlineLeft;
+
+			var buttonMeasure = BeatSaberUI.CreateUIButton(containerRect, "QuitButton", () =>
 			{
-				return Plugin.Instance.FirstPersonEnabled;
-			};
-			boolFirstPerson.SetValue += delegate (bool value)
-			{
-				Plugin.Instance.FirstPersonEnabled = value;
-			};
+				labelMeasure.text = "Measuring ...";
+				Plugin.Instance.AvatarTailor.MeasurePlayerArmLength((value) =>
+				{
+					labelMeasure.text = $"Measuring ... {Mathf.Ceil(value * 100.0f) / 100.0f}";
+				},
+				(result) =>
+				{
+					labelMeasure.text = $"Hand To Hand Length = {Mathf.Ceil(result * 100.0f) / 100.0f}";
+					if (Plugin.Instance.AvatarTailor.ResizePolicy == AvatarTailor.ResizePolicyType.AlignArmLength)
+						Plugin.Instance.PlayerAvatarManager.ResizePlayerAvatar();
+				});
+			}, "Measure!");
+			relative_layout(buttonMeasure.transform as RectTransform, 0.65f, 0.18f, 0.35f, 0.11f, .5f, .5f);
+
+			boolFirstPerson.GetTextForValue = (value) => (value != 0f) ? "ON" : "OFF";
+			boolFirstPerson.GetValue = () => Plugin.Instance.FirstPersonEnabled ? 1f : 0f;
+			boolFirstPerson.SetValue = (value) => Plugin.Instance.FirstPersonEnabled = value != 0f;
 			boolFirstPerson.Init();
 
-
-			boolRotatePreviewAvatar.GetValue += delegate
-			{
-				return Plugin.Instance.RotatePreviewEnabled;
-			};
-			boolRotatePreviewAvatar.SetValue += delegate (bool value)
-			{
-				Plugin.Instance.RotatePreviewEnabled = value;
-			};
+			boolRotatePreviewAvatar.GetTextForValue = (value) => value != 0f ? "ON" : "OFF";
+			boolRotatePreviewAvatar.GetValue = () => Plugin.Instance.RotatePreviewEnabled ? 1f : 0f;
+			boolRotatePreviewAvatar.SetValue = (value) => Plugin.Instance.RotatePreviewEnabled = value != 0f;
 			boolRotatePreviewAvatar.Init();
 
-		}
-
-		private class ImmediateBoolController : BoolViewController
-		{
-			public override void IncButtonPressed()
+			listResizePolicy.GetTextForValue = (value) => new string[] { "Arms Length", "Height", "Never" }[(int)value];
+			listResizePolicy.GetValue = () => (int)Plugin.Instance.AvatarTailor.ResizePolicy;
+			listResizePolicy.SetValue = (value) =>
 			{
-				base.IncButtonPressed();
-				ApplySettings();
-			}
-			public override void DecButtonPressed()
+				Plugin.Instance.AvatarTailor.ResizePolicy = (AvatarTailor.ResizePolicyType)(int)value;
+				Plugin.Instance.PlayerAvatarManager.ResizePlayerAvatar();
+			};
+			listResizePolicy.Init();
+
+			boolFloorMovePolicy.GetTextForValue = (value) => (value != 0f) ? "ON" : "OFF";
+			boolFloorMovePolicy.GetValue = () => Plugin.Instance.AvatarTailor.FloorMovePolicy == AvatarTailor.FloorMovePolicyType.AllowMove ? 1f : 0f;
+			boolFloorMovePolicy.SetValue = (value) =>
 			{
-				base.DecButtonPressed();
-				ApplySettings();
-			}
-		}
-
-		private BoolViewController AddBool(string name, Transform parent)
-		{
-			return AddSettingController<SwitchSettingsController, ImmediateBoolController>(name, parent);
-		}
-
-		private T AddSettingController<TORIG, T>(string name, Transform parent) where T : Behaviour
-		{
-			var volumeSettings = Resources.FindObjectsOfTypeAll<WindowModeSettingsController>().FirstOrDefault();
-			GameObject newSettingsObject = MonoBehaviour.Instantiate(volumeSettings.gameObject, parent);
-			newSettingsObject.name = name;
-
-			WindowModeSettingsController volume = newSettingsObject.GetComponent<WindowModeSettingsController>();
-			T newToggleSettingsController = (T)ReflectionUtil.CopyComponent(volume, typeof(TORIG), typeof(T), newSettingsObject);
-			MonoBehaviour.DestroyImmediate(volume);
-
-			newSettingsObject.GetComponentInChildren<TMP_Text>().text = name;
-
-			return newToggleSettingsController;
+				Plugin.Instance.AvatarTailor.FloorMovePolicy = (value != 0f) ? AvatarTailor.FloorMovePolicyType.AllowMove : AvatarTailor.FloorMovePolicyType.NeverMove;
+				Plugin.Instance.PlayerAvatarManager.ResizePlayerAvatar();
+			};
+			boolFloorMovePolicy.Init();
 		}
 	}
 }

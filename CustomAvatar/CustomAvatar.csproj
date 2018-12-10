@@ -83,6 +83,7 @@
     <Compile Include="AvatarLayers.cs" />
     <Compile Include="AvatarLoader.cs" />
     <Compile Include="AvatarMeasurement.cs" />
+    <Compile Include="AvatarTailor.cs" />
     <Compile Include="BeatSaberUtil.cs" />
     <Compile Include="CustomAvatar.cs" />
     <Compile Include="AvatarAssetBundle.cs" />
