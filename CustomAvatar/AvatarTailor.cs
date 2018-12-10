@@ -36,13 +36,13 @@ namespace CustomAvatar
 
 		public ResizePolicyType ResizePolicy
 		{
-			get => (ResizePolicyType)PlayerPrefs.GetInt(_kResizePolicyKey, 0);
+			get => (ResizePolicyType)PlayerPrefs.GetInt(_kResizePolicyKey, 1);
 			set => PlayerPrefs.SetInt(_kResizePolicyKey, (int)value);
 		}
 
 		public FloorMovePolicyType FloorMovePolicy
 		{
-			get => (FloorMovePolicyType)PlayerPrefs.GetInt(_kFloorMovePolicyKey, 0);
+			get => (FloorMovePolicyType)PlayerPrefs.GetInt(_kFloorMovePolicyKey, 1);
 			set => PlayerPrefs.SetInt(_kFloorMovePolicyKey, (int)value);
 		}
 

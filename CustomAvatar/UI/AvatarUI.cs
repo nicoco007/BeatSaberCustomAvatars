@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using UnityEngine;
 using System;
 using UnityEngine.SceneManagement;
@@ -26,14 +26,17 @@ namespace CustomAvatar
 
 		private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
 		{
-			if (Plugin.Instance.AvatarLoader.Avatars.Count == 0)
+			if (scene.name == "Menu")
 			{
-				Console.WriteLine("[CustomAvatarsPlugin] No avatars found. Button not created.");
-			}
-			else if (scene.name == "Menu")
-			{
-				AddMainButton();
-				Console.WriteLine("[CustomAvatarsPlugin] Creating Avatars Button.");
+				if (Plugin.Instance.AvatarLoader.Avatars.Count == 0)
+				{
+					Console.WriteLine("[CustomAvatarsPlugin] No avatars found. Button not created.");
+				}
+				else
+				{
+					AddMainButton();
+					Console.WriteLine("[CustomAvatarsPlugin] Creating Avatars Button.");
+				}
 			}
 		}
 
