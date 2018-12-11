@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System;
 using AvatarScriptPack;
@@ -263,7 +263,7 @@ namespace AvatarScriptPack {
 						yaw -= yOA;
 						float yawLimitMin = isLeft? -20f: -50f;
 						float yawLimitMax = isLeft? 50f: 20f;
-						yaw = DamperValue(yaw, yawLimitMin - yOA, yawLimitMax - yOA, 0.7f); // back, forward
+						yaw = DamperValue(yaw, isLeft ? -60 : 0, isLeft ? 0 : 60, 0.7f); // back, forward
 
 						Vector3 f = shoulder.solverRotation * shoulder.axis;
 						Vector3 t = workingSpace * (Quaternion.AngleAxis(yaw, Vector3.up) * Vector3.forward);
@@ -415,9 +415,10 @@ namespace AvatarScriptPack {
 
 				b = chestRotation * b;
 
-				b += armDir;
-				b -= rotation * wristToPalmAxis;
-				b -= rotation * palmToThumbAxis * 0.5f;
+				b = Vector3.Slerp(b, armDir, 0.5f);
+				Vector3 vectorHand = (q * wristToPalmAxis * 0.15f + q * palmToThumbAxis * 0.85f) * -1.0f;
+				float handWeight = (Vector3.Dot(b, vectorHand) + 1.0f) * 0.5f * 0.75f; // to range of 0 - 0.75
+				b = Vector3.Slerp(b, vectorHand, handWeight);
 
 				if (bendGoalWeight > 0f) {
 					b = Vector3.Slerp(b, bendDirection, bendGoalWeight);
