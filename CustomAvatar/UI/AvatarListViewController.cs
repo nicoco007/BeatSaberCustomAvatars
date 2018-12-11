@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -282,10 +282,10 @@ namespace CustomAvatar
 				if (_VRIK != null)
 				{
 					//_center = _avatarPreview.GetComponentInChildren<Renderer>().bounds.center;
-					_previewHeight = _avatarPreview.GetComponentInChildren<Renderer>().bounds.size.y;
+					_previewHeight = (AvatarList[AvatarIndex].Height > 0) ? AvatarList[AvatarIndex].Height : _avatarPreview.GetComponentInChildren<Renderer>().bounds.size.y;
 					//_previewHeightOffset = _avatarPreview.GetComponentInChildren<Renderer>().bounds.min.y;
 					_previewHeightOffset = 0;
-					_previewScale = (1f / _previewHeight);
+					_previewScale = (0.85f / _previewHeight);
 				}
 				else
 				{
