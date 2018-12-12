@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -144,66 +144,64 @@ namespace CustomAvatar
 
 		private void FirstActivation()
 		{
-			try
+			LoadAllAvatars();
+
+			_tableCellTemplate = Resources.FindObjectsOfTypeAll<LevelListTableCell>().First(x => x.name == "LevelListTableCell");
+
+			RectTransform container = new GameObject("AvatarsListContainer", typeof(RectTransform)).transform as RectTransform;
+			container.SetParent(rectTransform, false);
+			container.sizeDelta = new Vector2(70f, 0f);
+
+			var tableViewObject = new GameObject("AvatarsListTableView");
+			tableViewObject.SetActive(false);
+			_tableView = tableViewObject.AddComponent<TableView>();
+			_tableView.gameObject.AddComponent<RectMask2D>();
+			_tableView.transform.SetParent(container, false);
+
+			(_tableView.transform as RectTransform).anchorMin = new Vector2(0f, 0f);
+			(_tableView.transform as RectTransform).anchorMax = new Vector2(1f, 1f);
+			(_tableView.transform as RectTransform).sizeDelta = new Vector2(0f, 60f);
+			(_tableView.transform as RectTransform).anchoredPosition = new Vector3(0f, 0f);
+
+			_tableView.SetPrivateField("_preallocatedCells", new TableView.CellsGroup[0]);
+			_tableView.SetPrivateField("_isInitialized", false);
+			_tableView.dataSource = this;
+
+			_tableView.didSelectRowEvent += _TableView_DidSelectRowEvent;
+
+			tableViewObject.SetActive(true);
+
+			_pageUpButton = Instantiate(Resources.FindObjectsOfTypeAll<Button>().First(x => (x.name == "PageUpButton")), container, false);
+			(_pageUpButton.transform as RectTransform).anchoredPosition = new Vector2(0f, 30f);
+			_pageUpButton.interactable = true;
+			_pageUpButton.onClick.AddListener(delegate ()
 			{
-				LoadAllAvatars();
+				_tableView.PageScrollUp();
+			});
 
-				_tableCellTemplate = Resources.FindObjectsOfTypeAll<LevelListTableCell>().First(x => x.name == "LevelListTableCell");
-
-				RectTransform container = new GameObject("AvatarsListContainer", typeof(RectTransform)).transform as RectTransform;
-				container.SetParent(rectTransform, false);
-				container.sizeDelta = new Vector2(70f, 0f);
-
-				_tableView = new GameObject("AvatarsListTableView").AddComponent<TableView>();
-				_tableView.gameObject.AddComponent<RectMask2D>();
-				_tableView.transform.SetParent(container, false);
-
-				(_tableView.transform as RectTransform).anchorMin = new Vector2(0f, 0f);
-				(_tableView.transform as RectTransform).anchorMax = new Vector2(1f, 1f);
-				(_tableView.transform as RectTransform).sizeDelta = new Vector2(0f, 60f);
-				(_tableView.transform as RectTransform).anchoredPosition = new Vector3(0f, 0f);
-
-				_tableView.SetPrivateField("_preallocatedCells", new TableView.CellsGroup[0]);
-				_tableView.SetPrivateField("_isInitialized", false);
-				_tableView.dataSource = this;
-
-				_tableView.didSelectRowEvent += _TableView_DidSelectRowEvent;
-
-				_pageUpButton = Instantiate(Resources.FindObjectsOfTypeAll<Button>().First(x => (x.name == "PageUpButton")), container, false);
-				(_pageUpButton.transform as RectTransform).anchoredPosition = new Vector2(0f, 30f);
-				_pageUpButton.interactable = true;
-				_pageUpButton.onClick.AddListener(delegate ()
-				{
-					_tableView.PageScrollUp();
-				});
-
-				_pageDownButton = Instantiate(Resources.FindObjectsOfTypeAll<Button>().First(x => (x.name == "PageDownButton")), container, false);
-				(_pageDownButton.transform as RectTransform).anchoredPosition = new Vector2(0f, -30f);
-				_pageDownButton.interactable = true;
-				_pageDownButton.onClick.AddListener(delegate ()
-				{
-					_tableView.PageScrollDown();
-				});
-
-				_versionNumber = BeatSaberUI.CreateText(rectTransform, Plugin.Instance.Version, new Vector2(-10f, 10f));
-				(_versionNumber.transform as RectTransform).anchorMax = new Vector2(1f, 0f);
-				(_versionNumber.transform as RectTransform).anchorMin = new Vector2(1f, 0f);
-				_versionNumber.fontSize = 5;
-				_versionNumber.color = Color.white;
-
-				if (_backButton == null)
-				{
-					_backButton = BeatSaberUI.CreateBackButton(rectTransform as RectTransform);
-
-					_backButton.onClick.AddListener(delegate ()
-					{
-						onBackPressed();
-						DestroyPreview();
-					});
-				}
-			} catch (Exception e)
+			_pageDownButton = Instantiate(Resources.FindObjectsOfTypeAll<Button>().First(x => (x.name == "PageDownButton")), container, false);
+			(_pageDownButton.transform as RectTransform).anchoredPosition = new Vector2(0f, -30f);
+			_pageDownButton.interactable = true;
+			_pageDownButton.onClick.AddListener(delegate ()
 			{
-				Console.WriteLine(e);
+				_tableView.PageScrollDown();
+			});
+
+			_versionNumber = BeatSaberUI.CreateText(rectTransform, Plugin.Instance.Version, new Vector2(-10f, 10f));
+			(_versionNumber.transform as RectTransform).anchorMax = new Vector2(1f, 0f);
+			(_versionNumber.transform as RectTransform).anchorMin = new Vector2(1f, 0f);
+			_versionNumber.fontSize = 5;
+			_versionNumber.color = Color.white;
+
+			if (_backButton == null)
+			{
+				_backButton = BeatSaberUI.CreateBackButton(rectTransform as RectTransform);
+
+				_backButton.onClick.AddListener(delegate ()
+				{
+					onBackPressed();
+					DestroyPreview();
+				});
 			}
 		}
 
