@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -14,7 +14,8 @@ namespace CustomAvatar
         public UnityEvent OnMenuEnter;
         public UnityEvent OnLevelStart;
         public UnityEvent OnLevelFail;
-        public UnityEvent OnBlueLightOn;
+		public UnityEvent OnLevelFinish;
+		public UnityEvent OnBlueLightOn;
         public UnityEvent OnRedLightOn;
 
         [Serializable]
