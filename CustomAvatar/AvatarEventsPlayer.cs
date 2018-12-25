@@ -1,4 +1,6 @@
-﻿using System.Linq;
+using System;
+using System.Linq;
+using System.Reflection;
 using UnityEngine;
 
 namespace CustomAvatar
@@ -11,6 +13,8 @@ namespace CustomAvatar
         private ObstacleSaberSparkleEffectManager _saberCollisionManager;
         private GameEnergyCounter _gameEnergyCounter;
         private BeatmapObjectCallbackController _beatmapObjectCallbackController;
+		private BeatmapDataModel _beatmapDataModel;
+		private int _lastNoteId = -1;
 
 		public void Restart()
 		{
@@ -39,6 +43,7 @@ namespace CustomAvatar
                 Resources.FindObjectsOfTypeAll<ObstacleSaberSparkleEffectManager>().FirstOrDefault();
             _gameEnergyCounter = Resources.FindObjectsOfTypeAll<GameEnergyCounter>().FirstOrDefault();
             _beatmapObjectCallbackController = Resources.FindObjectsOfTypeAll<BeatmapObjectCallbackController>().FirstOrDefault();
+			_beatmapDataModel = Resources.FindObjectsOfTypeAll<BeatmapDataModel>().FirstOrDefault();
 
             _scoreController.noteWasCutEvent += SliceCallBack;
             _scoreController.noteWasMissedEvent += NoteMissCallBack;
@@ -54,8 +59,15 @@ namespace CustomAvatar
             if (_gameEnergyCounter != null) _gameEnergyCounter.gameEnergyDidReach0Event += FailLevelCallBack;
 
             if (_beatmapObjectCallbackController != null)
-                _beatmapObjectCallbackController.beatmapEventDidTriggerEvent += OnBeatmapEventDidTriggerEvent;
-        }
+				_beatmapObjectCallbackController.beatmapEventDidTriggerEvent += OnBeatmapEventDidTriggerEvent;
+
+			_lastNoteId = -1;
+			if (_beatmapDataModel != null)
+			{
+				_beatmapDataModel.beatmapDataDidChangeEvent += BeatmapDataChangedCallback;
+				BeatmapDataChangedCallback();
+			}
+		}
 
         private void OnDestroy()
         {
@@ -69,12 +81,23 @@ namespace CustomAvatar
             _saberCollisionManager.sparkleEffectDidEndEvent -= SaberEndCollide;
 
             _gameEnergyCounter.gameEnergyDidReach0Event -= FailLevelCallBack;
-            
+
 
             _beatmapObjectCallbackController.beatmapEventDidTriggerEvent -= OnBeatmapEventDidTriggerEvent;
-        }
+			_beatmapDataModel.beatmapDataDidChangeEvent -= BeatmapDataChangedCallback;
+		}
 
-        private void SliceCallBack(NoteData noteData, NoteCutInfo noteCutInfo, int multiplier)
+		private void BeatmapDataChangedCallback()
+		{
+			if (_beatmapDataModel.beatmapData == null) return;
+			_lastNoteId = _beatmapDataModel.beatmapData.beatmapLinesData.Aggregate(new Tuple<float, int>(0, -1), (maxLine, lineData) => {
+				return lineData.beatmapObjectsData
+					.Where(obj => obj.beatmapObjectType == BeatmapObjectType.Note && (((NoteData)obj).noteType == NoteType.NoteA || ((NoteData)obj).noteType == NoteType.NoteB))
+					.Aggregate(maxLine, (maxNote, note) => maxNote.Item1 < note.time ? new Tuple<float, int>(note.time, note.id) : maxNote);
+			}).Item2;
+		}
+
+		private void SliceCallBack(NoteData noteData, NoteCutInfo noteCutInfo, int multiplier)
         {
             if (!noteCutInfo.allIsOK)
             {
@@ -84,6 +107,11 @@ namespace CustomAvatar
             {
                 _eventManager.OnSlice?.Invoke();
             }
+
+			if (noteData.id == _lastNoteId)
+			{
+				_eventManager.OnLevelFinish?.Invoke();
+			}
         }
 
         private void NoteMissCallBack(NoteData noteData, int multiplier)
