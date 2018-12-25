@@ -87,7 +87,7 @@ namespace CustomAvatar
 
 		public string Version
 		{
-			get { return "4.3.0"; }
+			get { return "4.4.0"; }
 		}
 
 		public static void Log(object message)
@@ -171,11 +171,11 @@ namespace CustomAvatar
 
 		public void OnUpdate()
 		{
-			if (Input.GetKeyDown(KeyCode.PageUp))
+			if (Input.GetKeyDown(KeyCode.PageDown))
 			{
 				PlayerAvatarManager?.SwitchToNextAvatar();
 			}
-			else if (Input.GetKeyDown(KeyCode.PageDown))
+			else if (Input.GetKeyDown(KeyCode.PageUp))
 			{
 				PlayerAvatarManager?.SwitchToPreviousAvatar();
 			}
