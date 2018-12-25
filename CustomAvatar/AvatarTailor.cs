@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -90,13 +91,23 @@ namespace CustomAvatar
 			// apply scale
 			avatar.GameObject.transform.localScale = _initialAvatarLocalScale * scale;
 
+			Plugin.Log("Avatar resized with scale: " + scale);
+
+			SharedCoroutineStarter.instance.StartCoroutine(FloorMendingWithDelay(avatar, animator, scale));
+		}
+
+		private IEnumerator FloorMendingWithDelay(SpawnedAvatar avatar, Animator animator, float scale)
+		{
+			yield return new WaitForEndOfFrame(); // wait for CustomFloorPlugin:PlatformManager:Start hides original platform
 			// compute offset
 			float floorOffset = 0f;
 			// give up moving original foot floors
 			var originalFloor = GameObject.Find("MenuPlayersPlace") ?? GameObject.Find("Static/PlayersPlace");
-			if (originalFloor != null && originalFloor.activeSelf == true) floorOffset = 0f;
-
-			if (FloorMovePolicy == FloorMovePolicyType.AllowMove)
+			if (originalFloor != null && originalFloor.activeSelf == true)
+			{
+				floorOffset = 0f;
+			}
+			else if (FloorMovePolicy == FloorMovePolicyType.AllowMove)
 			{
 				float playerViewPointHeight = BeatSaberUtil.GetPlayerViewPointHeight();
 				float avatarViewPointHeight = avatar.CustomAvatar.ViewPoint?.position.y ?? playerViewPointHeight;
@@ -112,27 +123,8 @@ namespace CustomAvatar
 			if (customFloor != null)
 			{
 				_initialPlatformPosition = _initialPlatformPosition ?? customFloor.transform.position;
-				var floorTailor = customFloor.AddComponent<FloorLevelTailor>();
-				floorTailor.destination = (Vector3.up * floorOffset) + _initialPlatformPosition ?? Vector3.zero;
-			}
-
-			Plugin.Log("Avatar resized with scale: " + scale + " floor-offset: " + floorOffset);
-		}
-
-		private class FloorLevelTailor : MonoBehaviour
-		{
-			public Vector3 destination;
-
-			private void LateFix()
-			{
-				transform.position = destination;
-				Plugin.Log("Custom Platform moved to: " + transform.position.y);
-				Destroy(this);
-			}
-
-			private void Start()
-			{
-				Invoke("LateFix", 0.1f);
+				customFloor.transform.position = (Vector3.up * floorOffset) + _initialPlatformPosition ?? Vector3.zero;
+				Plugin.Log("CustomFloor moved to " + customFloor.transform.position.y + " with offset " + floorOffset);
 			}
 		}
 
