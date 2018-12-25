@@ -33,6 +33,8 @@ namespace CustomAvatar
 					rt.anchoredPosition = Vector2.zero;
 				};
 
+			gameObject.SetActive(false);
+
 			TextMeshProUGUI text = BeatSaberUI.CreateText(containerRect, "AVATAR SETTINGS", Vector2.zero);
 			text.fontSize = 6.0f;
 			text.alignment = TextAlignmentOptions.Center;
@@ -59,6 +61,8 @@ namespace CustomAvatar
 			BeatSaberUI.AddHintText(labelMeasure.transform as RectTransform, "Value used for 'Arms Length' resize, press on the 'MEASURE!' button and T-Pose");
 			labelMeasure.fontSize = 5f;
 			labelMeasure.alignment = TextAlignmentOptions.MidlineLeft;
+
+			gameObject.SetActive(true);
 
 			var buttonMeasure = BeatSaberUI.CreateUIButton(containerRect, "QuitButton", () =>
 			{
