@@ -104,9 +104,9 @@ namespace CustomAvatar
 			var nextAvatar = avatars[nextIndex];
 			CurrentPlayerAvatar = nextAvatar;
 			return nextAvatar;
-        }
+		}
 
-        private void CustomAvatarLoaded(CustomAvatar loadedAvatar, AvatarLoadResult result)
+		private void CustomAvatarLoaded(CustomAvatar loadedAvatar, AvatarLoadResult result)
 		{
 			if (result != AvatarLoadResult.Completed)
 			{
@@ -146,8 +146,8 @@ namespace CustomAvatar
 		{
 			ResizePlayerAvatar();
 			OnFirstPersonEnabledChanged(Plugin.Instance.FirstPersonEnabled);
-            _currentSpawnedPlayerAvatar?.GameObject.GetComponentInChildren<AvatarEventsPlayer>()?.Restart();
-        }
+			_currentSpawnedPlayerAvatar?.GameObject.GetComponentInChildren<AvatarEventsPlayer>()?.Restart();
+		}
 
 		public void OnSceneTransitioned(Scene newScene)
 		{

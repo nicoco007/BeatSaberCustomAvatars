@@ -6,14 +6,14 @@ using UnityEngine.SceneManagement;
 
 namespace CustomAvatar
 {
-    public class AvatarEventsPlayer : MonoBehaviour
-    {
-        private EventManager _eventManager;
+	public class AvatarEventsPlayer : MonoBehaviour
+	{
+		private EventManager _eventManager;
 
-        private ScoreController _scoreController;
-        private ObstacleSaberSparkleEffectManager _saberCollisionManager;
-        private GameEnergyCounter _gameEnergyCounter;
-        private BeatmapObjectCallbackController _beatmapObjectCallbackController;
+		private ScoreController _scoreController;
+		private ObstacleSaberSparkleEffectManager _saberCollisionManager;
+		private GameEnergyCounter _gameEnergyCounter;
+		private BeatmapObjectCallbackController _beatmapObjectCallbackController;
 		private BeatmapDataModel _beatmapDataModel;
 		private int _lastNoteId = -1;
 
@@ -29,10 +29,10 @@ namespace CustomAvatar
 			Start();
 		}
 
-        private void Start()
-        {
-            SceneManager.sceneLoaded += SceneManagerOnSceneLoaded;
-        }
+		private void Start()
+		{
+			SceneManager.sceneLoaded += SceneManagerOnSceneLoaded;
+		}
 
 		private void OnDestroy()
 		{
@@ -53,36 +53,36 @@ namespace CustomAvatar
 		}
 
 		private void SceneManagerOnSceneLoaded(Scene newScene, LoadSceneMode mode)
-        {
-            _eventManager = gameObject.GetComponent<EventManager>();
-            if (_eventManager == null)
-                _eventManager = gameObject.AddComponent<EventManager>();
+		{
+			_eventManager = gameObject.GetComponent<EventManager>();
+			if (_eventManager == null)
+				_eventManager = gameObject.AddComponent<EventManager>();
 
 			_scoreController = Resources.FindObjectsOfTypeAll<ScoreController>().FirstOrDefault();
-            if (_scoreController == null) return;
+			if (_scoreController == null) return;
 
 			//_eventManager.OnLevelStart?.Invoke(); // replaced by LevelStartedEvent()
 
 			_saberCollisionManager =
-                Resources.FindObjectsOfTypeAll<ObstacleSaberSparkleEffectManager>().FirstOrDefault();
-            _gameEnergyCounter = Resources.FindObjectsOfTypeAll<GameEnergyCounter>().FirstOrDefault();
-            _beatmapObjectCallbackController = Resources.FindObjectsOfTypeAll<BeatmapObjectCallbackController>().FirstOrDefault();
+				Resources.FindObjectsOfTypeAll<ObstacleSaberSparkleEffectManager>().FirstOrDefault();
+			_gameEnergyCounter = Resources.FindObjectsOfTypeAll<GameEnergyCounter>().FirstOrDefault();
+			_beatmapObjectCallbackController = Resources.FindObjectsOfTypeAll<BeatmapObjectCallbackController>().FirstOrDefault();
 			_beatmapDataModel = Resources.FindObjectsOfTypeAll<BeatmapDataModel>().FirstOrDefault();
 
-            _scoreController.noteWasCutEvent += SliceCallBack;
-            _scoreController.noteWasMissedEvent += NoteMissCallBack;
-            _scoreController.multiplierDidChangeEvent += MultiplierCallBack;
-            _scoreController.comboDidChangeEvent += ComboChangeEvent;
+			_scoreController.noteWasCutEvent += SliceCallBack;
+			_scoreController.noteWasMissedEvent += NoteMissCallBack;
+			_scoreController.multiplierDidChangeEvent += MultiplierCallBack;
+			_scoreController.comboDidChangeEvent += ComboChangeEvent;
 
-            if (_saberCollisionManager != null)
-            {
-                _saberCollisionManager.sparkleEffectDidStartEvent += SaberStartCollide;
-                _saberCollisionManager.sparkleEffectDidEndEvent += SaberEndCollide;
-            }
+			if (_saberCollisionManager != null)
+			{
+				_saberCollisionManager.sparkleEffectDidStartEvent += SaberStartCollide;
+				_saberCollisionManager.sparkleEffectDidEndEvent += SaberEndCollide;
+			}
 
-            if (_gameEnergyCounter != null) _gameEnergyCounter.gameEnergyDidReach0Event += FailLevelCallBack;
+			if (_gameEnergyCounter != null) _gameEnergyCounter.gameEnergyDidReach0Event += FailLevelCallBack;
 
-            if (_beatmapObjectCallbackController != null)
+			if (_beatmapObjectCallbackController != null)
 				_beatmapObjectCallbackController.beatmapEventDidTriggerEvent += OnBeatmapEventDidTriggerEvent;
 
 			_lastNoteId = -1;
@@ -106,71 +106,71 @@ namespace CustomAvatar
 		}
 
 		private void SliceCallBack(NoteData noteData, NoteCutInfo noteCutInfo, int multiplier)
-        {
-            if (!noteCutInfo.allIsOK)
-            {
-                _eventManager.OnComboBreak?.Invoke();
-            }
-            else
-            {
-                _eventManager.OnSlice?.Invoke();
-            }
+		{
+			if (!noteCutInfo.allIsOK)
+			{
+				_eventManager.OnComboBreak?.Invoke();
+			}
+			else
+			{
+				_eventManager.OnSlice?.Invoke();
+			}
 
 			if (noteData.id == _lastNoteId)
 			{
 				_eventManager.OnLevelFinish?.Invoke();
 			}
-        }
+		}
 
-        private void NoteMissCallBack(NoteData noteData, int multiplier)
-        {
-            if (noteData.noteType != NoteType.Bomb)
-            {
-                _eventManager.OnComboBreak?.Invoke();
-            }
-        }
+		private void NoteMissCallBack(NoteData noteData, int multiplier)
+		{
+			if (noteData.noteType != NoteType.Bomb)
+			{
+				_eventManager.OnComboBreak?.Invoke();
+			}
+		}
 
-        private void MultiplierCallBack(int multiplier, float progress)
-        {
-            if (multiplier > 1 && progress < 0.1f)
-            {
-                _eventManager.MultiplierUp?.Invoke();
-            }
-        }
+		private void MultiplierCallBack(int multiplier, float progress)
+		{
+			if (multiplier > 1 && progress < 0.1f)
+			{
+				_eventManager.MultiplierUp?.Invoke();
+			}
+		}
 
-        private void SaberStartCollide(Saber.SaberType saber)
-        {
-            _eventManager.SaberStartColliding?.Invoke();
-        }
+		private void SaberStartCollide(Saber.SaberType saber)
+		{
+			_eventManager.SaberStartColliding?.Invoke();
+		}
 
-        private void SaberEndCollide(Saber.SaberType saber)
-        {
-            _eventManager.SaberStopColliding?.Invoke();
-        }
+		private void SaberEndCollide(Saber.SaberType saber)
+		{
+			_eventManager.SaberStopColliding?.Invoke();
+		}
 
-        private void FailLevelCallBack()
-        {
-            _eventManager.OnLevelFail?.Invoke();
-        }
+		private void FailLevelCallBack()
+		{
+			_eventManager.OnLevelFail?.Invoke();
+		}
 
-        private void OnBeatmapEventDidTriggerEvent (BeatmapEventData beatmapEventData)
-        {
-            if ((int) beatmapEventData.type >= 5) return;
-            
-            if (beatmapEventData.value > 0 && beatmapEventData.value < 4)
-            {
-                _eventManager.OnBlueLightOn?.Invoke();
-            }
+		private void OnBeatmapEventDidTriggerEvent (BeatmapEventData beatmapEventData)
+		{
+			if ((int) beatmapEventData.type >= 5) return;
+			
+			if (beatmapEventData.value > 0 && beatmapEventData.value < 4)
+			{
+				_eventManager.OnBlueLightOn?.Invoke();
+			}
 
-            if (beatmapEventData.value > 4 && beatmapEventData.value < 8)
-            {
-                _eventManager.OnRedLightOn?.Invoke();
-            }
-        }
+			if (beatmapEventData.value > 4 && beatmapEventData.value < 8)
+			{
+				_eventManager.OnRedLightOn?.Invoke();
+			}
+		}
 
-        private void ComboChangeEvent(int combo)
-        {
-            _eventManager.OnComboChanged?.Invoke(combo);
+		private void ComboChangeEvent(int combo)
+		{
+			_eventManager.OnComboChanged?.Invoke(combo);
 		}
 
 		public void MenuEnteredEvent()

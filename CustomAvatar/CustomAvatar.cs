@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 namespace CustomAvatar
@@ -90,13 +90,13 @@ namespace CustomAvatar
 
 		public void Load(Action<CustomAvatar, AvatarLoadResult> loadedCallback)
 		{
-            if (IsLoaded)
-            {
-                loadedCallback(this, AvatarLoadResult.Completed);
-                return;
-            }
+			if (IsLoaded)
+			{
+				loadedCallback(this, AvatarLoadResult.Completed);
+				return;
+			}
 
-            void Loaded(AvatarLoadResult result)
+			void Loaded(AvatarLoadResult result)
 			{
 				loadedCallback(this, result);
 			}
