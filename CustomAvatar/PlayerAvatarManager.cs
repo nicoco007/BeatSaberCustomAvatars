@@ -104,9 +104,9 @@ namespace CustomAvatar
 			var nextAvatar = avatars[nextIndex];
 			CurrentPlayerAvatar = nextAvatar;
 			return nextAvatar;
-		}
+        }
 
-		private void CustomAvatarLoaded(CustomAvatar loadedAvatar, AvatarLoadResult result)
+        private void CustomAvatarLoaded(CustomAvatar loadedAvatar, AvatarLoadResult result)
 		{
 			if (result != AvatarLoadResult.Completed)
 			{

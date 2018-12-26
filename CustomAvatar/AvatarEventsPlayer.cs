@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace CustomAvatar
 {
@@ -29,6 +30,29 @@ namespace CustomAvatar
 		}
 
         private void Start()
+        {
+            SceneManager.sceneLoaded += SceneManagerOnSceneLoaded;
+        }
+
+		private void OnDestroy()
+		{
+			if (_scoreController == null) return;
+			_scoreController.noteWasCutEvent -= SliceCallBack;
+			_scoreController.noteWasMissedEvent -= NoteMissCallBack;
+			_scoreController.multiplierDidChangeEvent -= MultiplierCallBack;
+			_scoreController.comboDidChangeEvent -= ComboChangeEvent;
+
+			_saberCollisionManager.sparkleEffectDidStartEvent -= SaberStartCollide;
+			_saberCollisionManager.sparkleEffectDidEndEvent -= SaberEndCollide;
+
+			_gameEnergyCounter.gameEnergyDidReach0Event -= FailLevelCallBack;
+
+
+			_beatmapObjectCallbackController.beatmapEventDidTriggerEvent -= OnBeatmapEventDidTriggerEvent;
+			_beatmapDataModel.beatmapDataDidChangeEvent -= BeatmapDataChangedCallback;
+		}
+
+		private void SceneManagerOnSceneLoaded(Scene newScene, LoadSceneMode mode)
         {
             _eventManager = gameObject.GetComponent<EventManager>();
             if (_eventManager == null)
@@ -69,23 +93,7 @@ namespace CustomAvatar
 			}
 		}
 
-        private void OnDestroy()
-        {
-            if (_scoreController == null) return;
-            _scoreController.noteWasCutEvent -= SliceCallBack;
-            _scoreController.noteWasMissedEvent -= NoteMissCallBack;
-            _scoreController.multiplierDidChangeEvent -= MultiplierCallBack;
-            _scoreController.comboDidChangeEvent -= ComboChangeEvent;
 
-            _saberCollisionManager.sparkleEffectDidStartEvent -= SaberStartCollide;
-            _saberCollisionManager.sparkleEffectDidEndEvent -= SaberEndCollide;
-
-            _gameEnergyCounter.gameEnergyDidReach0Event -= FailLevelCallBack;
-
-
-            _beatmapObjectCallbackController.beatmapEventDidTriggerEvent -= OnBeatmapEventDidTriggerEvent;
-			_beatmapDataModel.beatmapDataDidChangeEvent -= BeatmapDataChangedCallback;
-		}
 
 		private void BeatmapDataChangedCallback()
 		{
