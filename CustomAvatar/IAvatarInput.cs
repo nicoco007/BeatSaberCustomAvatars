@@ -5,7 +5,5 @@
 		PosRot HeadPosRot { get; }
 		PosRot LeftPosRot { get; }
 		PosRot RightPosRot { get; }
-        PosRot LeftLegPosRot { get; }
-        PosRot RightLegPosRot { get; }
     }
 }

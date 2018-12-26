@@ -18,15 +18,20 @@ namespace AvatarScriptPack
         [Tooltip("The hand target")]
         public Transform RightHandTarget;
 
+		[Space(20)]
 
-        [Space(20)]
+		[Tooltip("The toe/foot target.")]
+		public Transform LeftLeg_target;
+		[Tooltip("The toe/foot target.")]
+		public Transform RightLeg_target;
+		[Tooltip("The pelvis target, useful with seated rigs.")]
+		public Transform Spine_pelvisTarget;
+
+		[Space(20)]
 
         /*******************
          * Spine
          ******************/
-
-        [Tooltip("The pelvis target, useful with seated rigs.")]
-        public Transform Spine_pelvisTarget;
 
         [Range(0f, 1f), Tooltip("Positional weight of the head target.")]
         public float Spine_positionWeight = 1f;
@@ -145,9 +150,6 @@ namespace AvatarScriptPack
          * Left Leg
          ******************/
 
-        [Tooltip("The toe/foot target.")]
-        public Transform LeftLeg_target;
-
         [Tooltip("The knee will be bent towards this Transform if 'Bend Goal Weight' > 0.")]
         public Transform LeftLeg_bendGoal;
 
@@ -172,9 +174,6 @@ namespace AvatarScriptPack
         /*******************
          * Right Leg
          ******************/
-
-        [Tooltip("The toe/foot target.")]
-        public Transform RightLeg_target;
 
         [Tooltip("The knee will be bent towards this Transform if 'Bend Goal Weight' > 0.")]
         public Transform RightLeg_bendGoal;
@@ -298,19 +297,32 @@ namespace AvatarScriptPack
                         }
                     }
                 }
+                CheckFullBodyTracking();
             }
-#if PLUGIN
-			if (!CustomAvatar.Plugin.IsFullBodyTracking)
-            {
-                SetProperty(_VRIK.solver.leftLeg, "positionWeight", 0);
-                SetProperty(_VRIK.solver.leftLeg, "rotationWeight", 0);
-                SetProperty(_VRIK.solver.rightLeg, "positionWeight", 0);
-                SetProperty(_VRIK.solver.rightLeg, "rotationWeight", 0);
-            }
-#endif
         }
 
-        public static void SetProperty(object obj, string fieldName, object value)
+        public void CheckFullBodyTracking()
+        {
+#if PLUGIN
+            VRIK _VRIK = base.gameObject.GetComponent<VRIK>();
+            if (!CustomAvatar.Plugin.IsFullBodyTracking)
+            {
+                _VRIK.solver.leftLeg.positionWeight = 0;
+                _VRIK.solver.leftLeg.rotationWeight = 0;
+                _VRIK.solver.rightLeg.positionWeight = 0;
+                _VRIK.solver.rightLeg.rotationWeight = 0;
+            }
+            else
+            {
+                _VRIK.solver.leftLeg.positionWeight = LeftLeg_positionWeight;
+                _VRIK.solver.leftLeg.rotationWeight = LeftLeg_rotationWeight;
+                _VRIK.solver.rightLeg.positionWeight = RightLeg_positionWeight;
+                _VRIK.solver.rightLeg.rotationWeight = RightLeg_rotationWeight;
+            }
+#endif
+		}
+
+		public static void SetProperty(object obj, string fieldName, object value)
         {
             obj.GetType().GetField(fieldName).SetValue(obj, value);
         }
