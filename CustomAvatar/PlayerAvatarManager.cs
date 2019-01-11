@@ -51,6 +51,11 @@ namespace CustomAvatar
 			return CurrentPlayerAvatar;
 		}
 
+		public SpawnedAvatar GetSpawnedAvatar()
+		{
+			return _currentSpawnedPlayerAvatar;
+		}
+
 		public void SwitchToAvatar(CustomAvatar customAvatar)
 		{
 			CurrentPlayerAvatar = customAvatar;

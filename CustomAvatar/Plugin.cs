@@ -65,7 +65,7 @@ namespace CustomAvatar
 					Plugin.FullBodyTrackingType = (Plugin.TrackingType)Plugin.Trackers.Count;
 				else
 					Plugin.FullBodyTrackingType = Plugin.TrackingType.None;
-				var currentAvatar = Instance.PlayerAvatarManager.GetCurrentAvatar();
+				var currentAvatar = Instance.PlayerAvatarManager.GetSpawnedAvatar();
 				if (currentAvatar != null)
 				{
 					var _IKManagerAdvanced = currentAvatar.GameObject.GetComponentInChildren<AvatarScriptPack.IKManagerAdvanced>(true);
