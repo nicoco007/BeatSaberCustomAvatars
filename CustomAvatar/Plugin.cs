@@ -87,7 +87,7 @@ namespace CustomAvatar
 
 		public string Version
 		{
-			get { return "4.4.1"; }
+			get { return "4.4.2"; }
 		}
 
 		public static void Log(object message)
