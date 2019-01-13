@@ -41,18 +41,22 @@ namespace CustomAvatar
 			relative_layout(text.rectTransform, 0f, 0.85f, 1f, 0.166f, 0.5f, 1f);
 
 			var boolFirstPerson = container.AddList("Visible In First Person View", new float[] { 0, 1 });
+			boolFirstPerson.applyImmediately = true;
 			relative_layout(boolFirstPerson.transform as RectTransform, 0, 0.66f, 1, 0.166f, 0, 1f);
 			BeatSaberUI.AddHintText(boolFirstPerson.transform as RectTransform, "Allows you to see the avatar inside of VR");
 
 			var boolRotatePreviewAvatar = container.AddList("Rotate Avatar Preview", new float[] { 0, 1 });
+			boolRotatePreviewAvatar.applyImmediately = true;
 			relative_layout(boolRotatePreviewAvatar.transform as RectTransform, 0, 0.55f, 1, 0.166f, 0, 1f);
 			BeatSaberUI.AddHintText(boolRotatePreviewAvatar.transform as RectTransform, "Slowly rotate the preview model");
 
 			var listResizePolicy = container.AddList("Resize Avatars To Player's", new float[] { 0, 1, 2 });
+			listResizePolicy.applyImmediately = true;
 			relative_layout(listResizePolicy.transform as RectTransform, 0, 0.44f, 1, 0.166f, 0, 1f);
 			BeatSaberUI.AddHintText(listResizePolicy.transform as RectTransform, "Use 'Arms Length' to resize the avatar based on your proportions, 'Height' to resize based on your height, and 'Never' to not resize");
 
 			var boolFloorMovePolicy = container.AddList("Floor Height Adjust", new float[] { 0, 1 });
+			boolFloorMovePolicy.applyImmediately = true;
 			relative_layout(boolFloorMovePolicy.transform as RectTransform, 0, 0.33f, 1, 0.166f, 0, 1f);
 			BeatSaberUI.AddHintText(boolFloorMovePolicy.transform as RectTransform, "Move the floor to compensate for height when using 'Arms Length' resize, requires CustomPlatforms");
 
