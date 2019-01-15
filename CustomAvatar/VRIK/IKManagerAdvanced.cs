@@ -11,21 +11,37 @@ namespace AvatarScriptPack
 {
 	class IKManagerAdvanced : MonoBehaviour
 	{
+		[Space(5)]
+		[Header("IK Targets")]
 		[Tooltip("The head target.")]
 		public Transform HeadTarget;
-		[Tooltip("The hand target")]
+		[Tooltip("The hand target.")]
 		public Transform LeftHandTarget;
-		[Tooltip("The hand target")]
+		[Tooltip("The hand target.")]
 		public Transform RightHandTarget;
 
-		[Space(20)]
+		[Space(5)]
+		[Header("Full Body Tracking")]
+		[Tooltip("The pelvis target, useful with seated rigs.")]
+		public Transform Spine_pelvisTarget;
+		[Range(0f, 1f), Tooltip("Positional weight of the pelvis target.")]
+		public float Spine_pelvisPositionWeight;
+		[Range(0f, 1f), Tooltip("Rotational weight of the pelvis target.")]
+		public float Spine_pelvisRotationWeight;
 
 		[Tooltip("The toe/foot target.")]
 		public Transform LeftLeg_target;
+		[Range(0f, 1f), Tooltip("Positional weight of the toe/foot target.")]
+		public float LeftLeg_positionWeight;
+		[Range(0f, 1f), Tooltip("Rotational weight of the toe/foot target.")]
+		public float LeftLeg_rotationWeight;
+
 		[Tooltip("The toe/foot target.")]
 		public Transform RightLeg_target;
-		[Tooltip("The pelvis target, useful with seated rigs.")]
-		public Transform Spine_pelvisTarget;
+		[Range(0f, 1f), Tooltip("Positional weight of the toe/foot target.")]
+		public float RightLeg_positionWeight;
+		[Range(0f, 1f), Tooltip("Rotational weight of the toe/foot target.")]
+		public float RightLeg_rotationWeight;
 
 		[Space(20)]
 
@@ -34,16 +50,10 @@ namespace AvatarScriptPack
 		 ******************/
 
 		[Range(0f, 1f), Tooltip("Positional weight of the head target.")]
-		public float Spine_positionWeight = 1f;
+		public float Head_positionWeight = 1f;
 
 		[Range(0f, 1f), Tooltip("Rotational weight of the head target.")]
-		public float Spine_rotationWeight = 1f;
-
-		[Range(0f, 1f), Tooltip("Positional weight of the pelvis target.")]
-		public float Spine_pelvisPositionWeight;
-
-		[Range(0f, 1f), Tooltip("Rotational weight of the pelvis target.")]
-		public float Spine_pelvisRotationWeight;
+		public float Head_rotationWeight = 1f;
 
 		[Tooltip("If 'Chest Goal Weight' is greater than 0, the chest will be turned towards this Transform.")]
 		public Transform Spine_chestGoal;
@@ -153,12 +163,6 @@ namespace AvatarScriptPack
 		[Tooltip("The knee will be bent towards this Transform if 'Bend Goal Weight' > 0.")]
 		public Transform LeftLeg_bendGoal;
 
-		[Range(0f, 1f), Tooltip("Positional weight of the toe/foot target.")]
-		public float LeftLeg_positionWeight;
-
-		[Range(0f, 1f), Tooltip("Rotational weight of the toe/foot target.")]
-		public float LeftLeg_rotationWeight;
-
 		[Range(0f, 1f), Tooltip("If greater than 0, will bend the knee towards the 'Bend Goal' Transform.")]
 		public float LeftLeg_bendGoalWeight;
 
@@ -177,12 +181,6 @@ namespace AvatarScriptPack
 
 		[Tooltip("The knee will be bent towards this Transform if 'Bend Goal Weight' > 0.")]
 		public Transform RightLeg_bendGoal;
-
-		[Range(0f, 1f), Tooltip("Positional weight of the toe/foot target.")]
-		public float RightLeg_positionWeight;
-
-		[Range(0f, 1f), Tooltip("Rotational weight of the toe/foot target.")]
-		public float RightLeg_rotationWeight;
 
 		[Range(0f, 1f), Tooltip("If greater than 0, will bend the knee towards the 'Bend Goal' Transform.")]
 		public float RightLeg_bendGoalWeight;
