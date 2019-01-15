@@ -289,20 +289,32 @@ namespace CustomAvatar
 				{
 					foreach (Transform child in _avatarPreview.transform)
 					{
-						_center += child.gameObject.GetComponentInChildren<Renderer>().bounds.center;
+						try
+						{
+							_center += child.gameObject.GetComponentInChildren<Renderer>().bounds.center;
+						} catch
+						{
+							_center = Vector3.zero;
+						}
 					}
 					_center /= _avatarPreview.transform.childCount;
-
 					Bounds bounds = new Bounds(_center, Vector3.zero);
 
 					foreach (Transform child in _avatarPreview.transform)
 					{
-						bounds.Encapsulate(child.gameObject.GetComponentInChildren<Renderer>().bounds);
+						try
+						{
+							bounds.Encapsulate(child.gameObject.GetComponentInChildren<Renderer>().bounds);
+						} catch
+						{
+							bounds = new Bounds(_center, Vector3.one);
+						}
 					}
 
 					_previewHeight = bounds.size.y;
 					_previewHeightOffset = bounds.min.y;
 					_previewScale = (1f / _previewHeight);
+
 				}
 
 				_previewParent.transform.Translate(0, 0.85f - (_previewHeightOffset), 0);
