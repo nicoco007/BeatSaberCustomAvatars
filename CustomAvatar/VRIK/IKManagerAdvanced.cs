@@ -274,18 +274,16 @@ namespace AvatarScriptPack
 							try
 							{
 								SetProperty(_VRIK.solver.spine, propertyName[1], value);
-							} catch (Exception e) {
-								Console.WriteLine("Cannot SetProperty: Spine");
 							}
+							catch { }
 						}
 						else if ("LeftArm" == propertyName[0])
 						{
-							try {
-								SetProperty(_VRIK.solver.leftArm, propertyName[1], value);
-							} catch (Exception e)
+							try
 							{
-							Console.WriteLine("Cannot SetProperty: LeftArm");
+								SetProperty(_VRIK.solver.leftArm, propertyName[1], value);
 							}
+							catch { }
 						}
 						else if ("RightArm" == propertyName[0])
 						{
@@ -293,10 +291,7 @@ namespace AvatarScriptPack
 							{
 								SetProperty(_VRIK.solver.rightArm, propertyName[1], value);
 							}
-							catch (Exception e)
-							{
-								Console.WriteLine("Cannot SetProperty: RightArm");
-							}
+							catch { }
 						}
 						else if ("LeftLeg" == propertyName[0])
 						{
@@ -304,10 +299,7 @@ namespace AvatarScriptPack
 							{
 								SetProperty(_VRIK.solver.leftLeg, propertyName[1], value);
 							}
-							catch (Exception e)
-							{
-								Console.WriteLine("Cannot SetProperty: LeftLeg");
-							}
+							catch { }
 						}
 						else if ("RightLeg" == propertyName[0])
 						{
@@ -315,10 +307,7 @@ namespace AvatarScriptPack
 							{
 								SetProperty(_VRIK.solver.rightLeg, propertyName[1], value);
 							}
-							catch (Exception e)
-							{
-								Console.WriteLine("Cannot SetProperty: RightLeg");
-							}
+							catch { }
 						}
 						else if ("Locomotion" == propertyName[0])
 						{
@@ -326,10 +315,7 @@ namespace AvatarScriptPack
 							{
 								SetProperty(_VRIK.solver.locomotion, propertyName[1], value);
 							}
-							catch (Exception e)
-							{
-								Console.WriteLine("Cannot SetProperty: Locomotion");
-							}
+							catch { }
 						}
 					}
 				}
