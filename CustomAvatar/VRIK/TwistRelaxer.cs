@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 namespace AvatarScriptPack {
@@ -10,17 +10,17 @@ namespace AvatarScriptPack {
 
 		public IK ik;
 
-        [Tooltip("The child transform to use as a target. If not defined, defaults to first child of current transform or next child of parent.")]
-        public Transform child;
+		[Tooltip("The child transform to use as a target. If not defined, defaults to first child of current transform or next child of parent.")]
+		public Transform child;
 
-        [Tooltip("The weight of relaxing the twist of this Transform")] 
+		[Tooltip("The weight of relaxing the twist of this Transform")] 
 		[Range(0f, 1f)] public float weight = 1f;
 
 		[Tooltip("If 0.5, this Transform will be twisted half way from parent to child. If 1, the twist angle will be locked to the child and will rotate with along with it.")]
 		[Range(0f, 1f)] public float parentChildCrossfade = 0.5f;
 
-        [Tooltip("Rotation offset around the twist axis.")]
-        [Range(-180f, 180f)] public float twistAngleOffset;
+		[Tooltip("Rotation offset around the twist axis.")]
+		[Range(-180f, 180f)] public float twistAngleOffset;
 
 		/// <summary>
 		/// Rotate this Transform to relax it's twist angle relative to the "parent" and "child" Transforms.
@@ -28,9 +28,9 @@ namespace AvatarScriptPack {
 		public void Relax() {
 			if (weight <= 0f) return; // Nothing to do here
 
-            Quaternion rotation = transform.rotation;
-            Quaternion twistOffset = Quaternion.AngleAxis(twistAngleOffset, rotation * twistAxis);
-            rotation = twistOffset * rotation;
+			Quaternion rotation = transform.rotation;
+			Quaternion twistOffset = Quaternion.AngleAxis(twistAngleOffset, rotation * twistAxis);
+			rotation = twistOffset * rotation;
 			
 			// Find the world space relaxed axes of the parent and child
 			Vector3 relaxedAxisParent = twistOffset * parent.rotation * axisRelativeToParentDefault;
@@ -65,24 +65,24 @@ namespace AvatarScriptPack {
 			parent = transform.parent;
 
 			if (child == null)
-            {
-                if (transform.childCount == 0)
-                {
-                    var children = parent.GetComponentsInChildren<Transform>();
-                    for (int i = 0; i < children.Length; i++)
-                    {
-                        if (children[i] != transform)
-                        {
-                            child = children[i];
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    child = transform.GetChild(0);
-                }
-            }
+			{
+				if (transform.childCount == 0)
+				{
+					var children = parent.GetComponentsInChildren<Transform>();
+					for (int i = 0; i < children.Length; i++)
+					{
+						if (children[i] != transform)
+						{
+							child = children[i];
+							break;
+						}
+					}
+				}
+				else
+				{
+					child = transform.GetChild(0);
+				}
+			}
 
 			twistAxis = transform.InverseTransformDirection(child.position - transform.position);
 			axis = new Vector3(twistAxis.y, twistAxis.z, twistAxis.x);

@@ -51,6 +51,11 @@ namespace CustomAvatar
 			return CurrentPlayerAvatar;
 		}
 
+		public SpawnedAvatar GetSpawnedAvatar()
+		{
+			return _currentSpawnedPlayerAvatar;
+		}
+
 		public void SwitchToAvatar(CustomAvatar customAvatar)
 		{
 			CurrentPlayerAvatar = customAvatar;
@@ -146,8 +151,8 @@ namespace CustomAvatar
 		{
 			ResizePlayerAvatar();
 			OnFirstPersonEnabledChanged(Plugin.Instance.FirstPersonEnabled);
-            _currentSpawnedPlayerAvatar?.GameObject.GetComponentInChildren<AvatarEventsPlayer>()?.Restart();
-        }
+			_currentSpawnedPlayerAvatar?.GameObject.GetComponentInChildren<AvatarEventsPlayer>()?.Restart();
+		}
 
 		public void OnSceneTransitioned(Scene newScene)
 		{

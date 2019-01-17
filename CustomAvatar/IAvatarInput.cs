@@ -1,4 +1,4 @@
-﻿namespace CustomAvatar
+namespace CustomAvatar
 {
 	public interface IAvatarInput
 	{

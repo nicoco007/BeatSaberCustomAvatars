@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+using System;
+using UnityEngine;
 
 namespace CustomAvatar
 {
@@ -8,10 +9,21 @@ namespace CustomAvatar
 
 		private Transform _head;
 		private Transform _body;
-		private Transform _left;
-		private Transform _right;
+		private Transform _leftHand;
+		private Transform _rightHand;
+		private Transform _leftLeg;
+		private Transform _rightLeg;
+		private Transform _pelvis;
 
 		private Vector3 _prevBodyPos;
+
+		private Vector3 _prevLeftLegPos = default(Vector3);
+		private Vector3 _prevRightLegPos = default(Vector3);
+		private Quaternion _prevLeftLegRot = default(Quaternion);
+		private Quaternion _prevRightLegRot = default(Quaternion);
+
+		private Vector3 _prevPelvisPos = default(Vector3);
+		private Quaternion _prevPelvisRot = default(Quaternion);
 
 		public void Init(IAvatarInput avatarInput)
 		{
@@ -19,43 +31,79 @@ namespace CustomAvatar
 
 			_head = GetHeadTransform();
 			_body = gameObject.transform.Find("Body");
-			_left = gameObject.transform.Find("LeftHand");
-			_right = gameObject.transform.Find("RightHand");
+			_leftHand = gameObject.transform.Find("LeftHand");
+			_rightHand = gameObject.transform.Find("RightHand");
+			_leftLeg = gameObject.transform.Find("LeftLeg");
+			_rightLeg = gameObject.transform.Find("RightLeg");
+			_pelvis = gameObject.transform.Find("Pelvis");
 		}
 
 		private void LateUpdate()
 		{
-			var headPosRot = _avatarInput.HeadPosRot;
-			var leftPosRot = _avatarInput.LeftPosRot;
-			var rightPosRot = _avatarInput.RightPosRot;
+			try
+			{
+				var headPosRot = _avatarInput.HeadPosRot;
+				var leftPosRot = _avatarInput.LeftPosRot;
+				var rightPosRot = _avatarInput.RightPosRot;
 
-			_head.position = headPosRot.Position;
-			_head.rotation = headPosRot.Rotation;
+				_head.position = headPosRot.Position;
+				_head.rotation = headPosRot.Rotation;
 
-			_left.position = leftPosRot.Position;
-			_left.rotation = leftPosRot.Rotation;
+				_leftHand.position = leftPosRot.Position;
+				_leftHand.rotation = leftPosRot.Rotation;
 
-			_right.position = rightPosRot.Position;
-			_right.rotation = rightPosRot.Rotation;
+				_rightHand.position = rightPosRot.Position;
+				_rightHand.rotation = rightPosRot.Rotation;
 
-			var vrPlatformHelper = PersistentSingleton<VRPlatformHelper>.instance;
+				if (_leftLeg != null && _rightLeg != null && _avatarInput is IAvatarFullBodyInput)
+				{
+					var _fbinput = _avatarInput as IAvatarFullBodyInput;
+					var leftLegPosRot = _fbinput.LeftLegPosRot;
+					var rightLegPosRot = _fbinput.RightLegPosRot;
+					_prevLeftLegPos = Vector3.Lerp(_prevLeftLegPos, leftLegPosRot.Position, 15 * Time.deltaTime);
+					_prevLeftLegRot = Quaternion.Slerp(_prevLeftLegRot, leftLegPosRot.Rotation, 10 * Time.deltaTime);
+					_leftLeg.position = _prevLeftLegPos;
+					_leftLeg.rotation = _prevLeftLegRot;
 
-			vrPlatformHelper.AdjustPlatformSpecificControllerTransform(_left);
-			vrPlatformHelper.AdjustPlatformSpecificControllerTransform(_right);
+					_prevRightLegPos = Vector3.Lerp(_prevRightLegPos, rightLegPosRot.Position, 15 * Time.deltaTime);
+					_prevRightLegRot = Quaternion.Slerp(_prevRightLegRot, rightLegPosRot.Rotation, 10 * Time.deltaTime);
+					_rightLeg.position = _prevRightLegPos;
+					_rightLeg.rotation = _prevRightLegRot;
+				}
 
-			if (_body == null) return;
-			_body.position = _head.position - (_head.transform.up * 0.1f);
+				if(_pelvis != null && _avatarInput is IAvatarFullBodyInput)
+				{
+					var _fbinput = _avatarInput as IAvatarFullBodyInput;
+					var pelvisPosRot = _fbinput.PelvisPosRot;
 
-			var vel = new Vector3(_body.transform.localPosition.x - _prevBodyPos.x, 0.0f,
-				_body.localPosition.z - _prevBodyPos.z);
+					_prevPelvisPos = Vector3.Lerp(_prevPelvisPos, pelvisPosRot.Position, 17 * Time.deltaTime);
+					_prevPelvisRot = Quaternion.Slerp(_prevPelvisRot, pelvisPosRot.Rotation, 13 * Time.deltaTime);
+					_pelvis.position = _prevPelvisPos;
+					_pelvis.rotation = _prevPelvisRot;
+				}
 
-			var rot = Quaternion.Euler(0.0f, _head.localEulerAngles.y, 0.0f);
-			var tiltAxis = Vector3.Cross(gameObject.transform.up, vel);
-			_body.localRotation = Quaternion.Lerp(_body.localRotation,
-				Quaternion.AngleAxis(vel.magnitude * 1250.0f, tiltAxis) * rot,
-				Time.deltaTime * 10.0f);
+				var vrPlatformHelper = PersistentSingleton<VRPlatformHelper>.instance;
 
-			_prevBodyPos = _body.transform.localPosition;
+				vrPlatformHelper.AdjustPlatformSpecificControllerTransform(_leftHand);
+				vrPlatformHelper.AdjustPlatformSpecificControllerTransform(_rightHand);
+
+				if (_body == null) return;
+				_body.position = _head.position - (_head.transform.up * 0.1f);
+
+				var vel = new Vector3(_body.transform.localPosition.x - _prevBodyPos.x, 0.0f,
+					_body.localPosition.z - _prevBodyPos.z);
+
+				var rot = Quaternion.Euler(0.0f, _head.localEulerAngles.y, 0.0f);
+				var tiltAxis = Vector3.Cross(gameObject.transform.up, vel);
+				_body.localRotation = Quaternion.Lerp(_body.localRotation,
+					Quaternion.AngleAxis(vel.magnitude * 1250.0f, tiltAxis) * rot,
+					Time.deltaTime * 10.0f);
+
+				_prevBodyPos = _body.transform.localPosition;
+			} catch(Exception e)
+			{
+				Console.WriteLine("{0}\n{1}", e.Message, e.StackTrace);
+			}
 		}
 
 		private Transform GetHeadTransform()

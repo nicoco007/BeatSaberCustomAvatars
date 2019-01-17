@@ -93,6 +93,7 @@
     <Compile Include="AvatarLoadResult.cs" />
     <Compile Include="EventFilterBehaviour.cs" />
     <Compile Include="EventFilters.cs" />
+    <Compile Include="IAvatarFullBodyInput.cs" />
     <Compile Include="PlayerAvatarManager.cs" />
     <Compile Include="AvatarSpawner.cs" />
     <Compile Include="EventManager.cs" />
