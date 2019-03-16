@@ -282,7 +282,7 @@ namespace CustomAvatar
 				PreviewAvatar = __AvatarPrefabs[AvatarIndex];
 
 				_previewParent = new GameObject();
-				_previewParent.transform.Translate(2f, 0, 1f);
+				_previewParent.transform.Translate(2, 0, 1.15f);
 				_previewParent.transform.Rotate(0, -120, 0);
 				_avatarPreview = Instantiate(PreviewAvatar, _previewParent.transform);
 
@@ -328,7 +328,7 @@ namespace CustomAvatar
 
 				}
 
-				_previewParent.transform.Translate(0, 0.85f - (_previewHeightOffset), 0);
+				_previewParent.transform.Translate(0, 1 - (_previewHeightOffset), 0);
 				_previewParent.transform.localScale = new Vector3(_previewScale, _previewScale, _previewScale);
 
 				Destroy(_avatarPreview);
