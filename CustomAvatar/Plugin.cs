@@ -231,7 +231,11 @@ namespace CustomAvatar
 		private void SceneTransitionDidFinish()
 		{
 			Camera mainCamera = Camera.main;
-			SetCameraCullingMask(mainCamera);
+
+			if (mainCamera != null)
+			{
+				SetCameraCullingMask(mainCamera);
+			}
 			
 			PlayerAvatarManager?.OnSceneTransitioned(SceneManager.GetActiveScene());
 		}
