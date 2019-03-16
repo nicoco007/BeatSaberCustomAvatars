@@ -26,7 +26,7 @@ namespace CustomAvatar
 
 		private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
 		{
-			if (scene.name == "Menu")
+			if (scene.name == "MenuCore")
 			{
 				if (Plugin.Instance.AvatarLoader.Avatars.Count == 0)
 				{

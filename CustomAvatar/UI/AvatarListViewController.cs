@@ -73,9 +73,9 @@ namespace CustomAvatar
 		private void SelectRowWithAvatar(CustomAvatar avatar, bool reload, bool scroll)
 		{
 			int currentRow = Plugin.Instance.AvatarLoader.IndexOf(avatar);
-			if (scroll) _tableView.ScrollToRow(currentRow, false);
+			if (scroll) _tableView.ScrollToCellWithIdx(currentRow, TableView.ScrollPositionType.Center, false);
 			if (reload) _tableView.ReloadData();
-			_tableView.SelectRow(currentRow);
+			_tableView.SelectCellWithIdx(currentRow);
 		}
 
 		public void LoadAllAvatars()
@@ -167,7 +167,7 @@ namespace CustomAvatar
 			_tableView.SetPrivateField("_isInitialized", false);
 			_tableView.dataSource = this;
 
-			_tableView.didSelectRowEvent += _TableView_DidSelectRowEvent;
+			_tableView.didSelectCellWithIdxEvent += _TableView_DidSelectRowEvent;
 
 			tableViewObject.SetActive(true);
 
@@ -219,38 +219,49 @@ namespace CustomAvatar
 			Destroy(_previewParent);
 		}
 
-		TableCell TableView.IDataSource.CellForRow(int row)
+		TableCell TableView.IDataSource.CellForIdx(int row)
 		{
 			LevelListTableCell tableCell = _tableView.DequeueReusableCellForIdentifier("AvatarListCell") as LevelListTableCell;
 			if (tableCell == null)
 			{
 				tableCell = Instantiate(_tableCellTemplate);
+
+				// remove level type icons
+				tableCell.transform.Find("LevelTypeIcon0").gameObject.SetActive(false);
+				tableCell.transform.Find("LevelTypeIcon1").gameObject.SetActive(false);
+				tableCell.transform.Find("LevelTypeIcon2").gameObject.SetActive(false);
+
 				tableCell.reuseIdentifier = "AvatarListCell";
 			}
+
+			var cellInfo = new AvatarCellInfo();
+
 			if (__AvatarLoadResults[row] != AvatarLoadResult.Completed)
 			{
-				tableCell.songName = System.IO.Path.GetFileName(AvatarList[row].FullPath) +" failed to load";
-				tableCell.author = "Make sure it's not a duplicate avatar.";
-				tableCell.coverImage = null;
-				return tableCell;
+				cellInfo.name = System.IO.Path.GetFileName(AvatarList[row].FullPath) +" failed to load";
+				cellInfo.authorName = "Make sure it's not a duplicate avatar.";
+				cellInfo.coverImage = null;
 			}
 			else
 			{
 				try
 				{
-					tableCell.songName = __AvatarNames[row];
-					tableCell.author = __AvatarAuthors[row];
-					tableCell.coverImage = __AvatarCovers[row] ?? Sprite.Create(Texture2D.blackTexture, new Rect(), Vector2.zero);
+					cellInfo.name = __AvatarNames[row];
+					cellInfo.authorName = __AvatarAuthors[row];
+					cellInfo.coverImage = __AvatarCovers[row] ?? Sprite.Create(Texture2D.blackTexture, new Rect(), Vector2.zero);
 				}
 				catch (Exception e)
 				{
-					tableCell.songName = "If you see this yell at Assistant";
-					tableCell.author = "because she fucked up";
-					tableCell.coverImage = null;
+					cellInfo.name = "If you see this yell at Assistant";
+					cellInfo.authorName = "because she fucked up";
+					cellInfo.coverImage = null;
 					Console.WriteLine(e);
 				}
-				return tableCell;
 			}
+
+			tableCell.SetDataFromLevel(cellInfo);
+
+			return tableCell;
 		}
 
 
@@ -350,14 +361,14 @@ namespace CustomAvatar
 			PreviewStatus = false;
 		}
 
-		int TableView.IDataSource.NumberOfRows()
+		int TableView.IDataSource.NumberOfCells()
 		{
 			return AvatarList.Count;
 		}
 
-		float TableView.IDataSource.RowHeight()
+		float TableView.IDataSource.CellSize()
 		{
-			return 10f;
+			return 8.5f;
 		}
 	}
 }
