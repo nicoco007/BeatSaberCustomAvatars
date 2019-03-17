@@ -171,7 +171,7 @@ namespace CustomAvatar
 			_eventManager?.OnLevelFail?.Invoke();
 		}
 
-		private void OnBeatmapEventDidTriggerEvent (BeatmapEventData beatmapEventData)
+		private void OnBeatmapEventDidTriggerEvent(BeatmapEventData beatmapEventData)
 		{
 			if (beatmapEventData == null || (int) beatmapEventData.type >= 5) return;
 			
