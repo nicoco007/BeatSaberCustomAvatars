@@ -158,7 +158,7 @@ namespace CustomAvatar
 
 		public string Version
 		{
-			get { return "4.5.0"; }
+			get { return "4.6.0"; }
 		}
 
 		public static void Log(object message)
@@ -232,7 +232,7 @@ namespace CustomAvatar
 		{
 			Camera mainCamera = Camera.main;
 
-			if (mainCamera != null)
+			if (mainCamera)
 			{
 				SetCameraCullingMask(mainCamera);
 			}
