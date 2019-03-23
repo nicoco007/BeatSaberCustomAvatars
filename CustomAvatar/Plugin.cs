@@ -37,7 +37,7 @@ namespace CustomAvatar
 				InputTracking.GetNodeStates(notes);
 				foreach (XRNodeState note in notes)
 				{
-					if (note.nodeType != XRNode.HardwareTracker || !InputTracking.GetNodeName(note.uniqueID).Contains("LHR-"))
+					if (note.nodeType != XRNode.HardwareTracker || (!InputTracking.GetNodeName(note.uniqueID).Contains("LHR-") && !InputTracking.GetNodeName(note.uniqueID).Contains("Vive Controller MV S/N")))
 						continue;
 					Trackers.Add(note);
 				}
