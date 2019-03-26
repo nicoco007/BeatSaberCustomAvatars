@@ -152,6 +152,7 @@ namespace CustomAvatar
 			container.SetParent(rectTransform, false);
 			container.sizeDelta = new Vector2(70f, 0f);
 
+
 			var tableViewObject = new GameObject("AvatarsListTableView");
 			tableViewObject.SetActive(false);
 			_tableView = tableViewObject.AddComponent<TableView>();
@@ -282,8 +283,6 @@ namespace CustomAvatar
 				PreviewAvatar = __AvatarPrefabs[AvatarIndex];
 
 				_previewParent = new GameObject();
-				_previewParent.transform.Translate(2, 0, 1.15f);
-				_previewParent.transform.Rotate(0, -120, 0);
 				_avatarPreview = Instantiate(PreviewAvatar, _previewParent.transform);
 
 				_VRIK = _avatarPreview.GetComponentsInChildren<AvatarScriptPack.VRIK>().FirstOrDefault();
@@ -328,19 +327,26 @@ namespace CustomAvatar
 
 				}
 
-				_previewParent.transform.Translate(0, 1 - (_previewHeightOffset), 0);
-				_previewParent.transform.localScale = new Vector3(_previewScale, _previewScale, _previewScale);
-
 				Destroy(_avatarPreview);
 				_avatarPreview = Instantiate(PreviewAvatar, _previewParent.transform);
-				_avatarPreview.AddComponent<AvatarPreviewRotation>();
+				//_avatarPreview.AddComponent<AvatarPreviewRotation>();
 				_avatarPreview.SetActive(true);
 				_VRIK = _avatarPreview.GetComponentsInChildren<AvatarScriptPack.VRIK>().FirstOrDefault();
 				_exclusionScript = _avatarPreview.GetComponentsInChildren<AvatarScriptPack.FirstPersonExclusion>().FirstOrDefault();
 
-				if (_VRIK != null)
+				if (_VRIK)
 				{
-					Destroy(_VRIK);
+					Plugin.Log("Starting VRIK Setup for mirror");
+					var mirrorAvatar = new GameObject("AvatarMirror");
+					var mirrorBehaviour = mirrorAvatar.AddComponent<AvatarPreviewBehaviour>();
+					Plugin.Log("Sending IK targets");
+					mirrorBehaviour.SetVRTargets(
+						Plugin.Instance.PlayerAvatarManager.GetCurrentAvatar().GameObject.transform.Find("Body"),
+						Plugin.Instance.PlayerAvatarManager.GetCurrentAvatar().GameObject.transform.Find("Head/HeadTarget"),
+						Plugin.Instance.PlayerAvatarManager.GetCurrentAvatar().GameObject.transform.Find("LeftHand/LeftHandTarget"),
+						Plugin.Instance.PlayerAvatarManager.GetCurrentAvatar().GameObject.transform.Find("RightHand/RightHandTarget")
+						);
+					mirrorBehaviour.Init(_avatarPreview);
 				}
 				else
 				{

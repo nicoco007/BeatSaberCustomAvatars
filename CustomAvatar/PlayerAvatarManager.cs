@@ -8,7 +8,7 @@ namespace CustomAvatar
 	public class PlayerAvatarManager
 	{
 		private readonly AvatarLoader _avatarLoader;
-		private readonly PlayerAvatarInput _playerAvatarInput;
+		public readonly PlayerAvatarInput _playerAvatarInput;
 		private readonly AvatarTailor _avatarTailor;
 		private SpawnedAvatar _currentSpawnedPlayerAvatar;
 

@@ -131,25 +131,25 @@ namespace CustomAvatar
 			set;
 		}
 
-		public bool RotatePreviewEnabled
-		{
-			get { return AvatarPreviewRotation.rotatePreview; }
-			set
-			{
-				if (AvatarPreviewRotation.rotatePreview == value) return;
+		//public bool RotatePreviewEnabled
+		//{
+		//	get { return AvatarPreviewRotation.rotatePreview; }
+		//	set
+		//	{
+		//		if (AvatarPreviewRotation.rotatePreview == value) return;
 
-				AvatarPreviewRotation.rotatePreview = value;
+		//		AvatarPreviewRotation.rotatePreview = value;
 
-				if (value)
-				{
-					PlayerPrefs.SetInt(RotatePreviewEnabledKey, 0);
-				}
-				else
-				{
-					PlayerPrefs.DeleteKey(RotatePreviewEnabledKey);
-				}
-			}
-		}
+		//		if (value)
+		//		{
+		//			PlayerPrefs.SetInt(RotatePreviewEnabledKey, 0);
+		//		}
+		//		else
+		//		{
+		//			PlayerPrefs.DeleteKey(RotatePreviewEnabledKey);
+		//		}
+		//	}
+		//}
 
 		public string Name
 		{
@@ -181,7 +181,7 @@ namespace CustomAvatar
 			_avatarUI = new AvatarUI();
 			
 			FirstPersonEnabled = PlayerPrefs.HasKey(FirstPersonEnabledKey);
-			RotatePreviewEnabled = PlayerPrefs.HasKey(RotatePreviewEnabledKey);
+			//RotatePreviewEnabled = PlayerPrefs.HasKey(RotatePreviewEnabledKey);
 			SceneManager.sceneLoaded += SceneManagerOnSceneLoaded;
 		}
 

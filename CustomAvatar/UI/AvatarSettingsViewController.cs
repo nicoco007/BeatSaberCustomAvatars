@@ -91,8 +91,8 @@ namespace CustomAvatar
 			boolFirstPerson.Init();
 
 			boolRotatePreviewAvatar.GetTextForValue = (value) => value != 0f ? "ON" : "OFF";
-			boolRotatePreviewAvatar.GetValue = () => Plugin.Instance.RotatePreviewEnabled ? 1f : 0f;
-			boolRotatePreviewAvatar.SetValue = (value) => Plugin.Instance.RotatePreviewEnabled = value != 0f;
+			//boolRotatePreviewAvatar.GetValue = () => Plugin.Instance.RotatePreviewEnabled ? 1f : 0f;
+			//boolRotatePreviewAvatar.SetValue = (value) => Plugin.Instance.RotatePreviewEnabled = value != 0f;
 			boolRotatePreviewAvatar.Init();
 
 			listResizePolicy.GetTextForValue = (value) => new string[] { "Arms Length", "Height", "Never" }[(int)value];

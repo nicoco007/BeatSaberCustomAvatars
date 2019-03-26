@@ -10,8 +10,6 @@ namespace CustomAvatar
 {
 	class AvatarUI
 	{
-		private class AvatarListFlowCoordinator : GenericFlowCoordinator<AvatarListViewController, AvatarSettingsViewController, AvatarPreviewController> { }
-
 		private FlowCoordinator _flowCoordinator = null;
 
 		public AvatarUI()

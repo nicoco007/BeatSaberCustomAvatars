@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -15,7 +15,7 @@ namespace CustomAvatar
 	{
 		protected override void DidActivate(bool firstActivation, ActivationType activationType)
 		{
-			if (firstActivation) FirstActivation();
+			base.DidActivate(firstActivation, activationType);
 		}
 
 		private void FirstActivation()
