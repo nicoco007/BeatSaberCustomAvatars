@@ -56,7 +56,7 @@ namespace CustomAvatar
 		private void PreviewCurrent()
 		{
 			CurrentAvatar = Plugin.Instance.AvatarLoader.IndexOf(Plugin.Instance.PlayerAvatarManager.GetCurrentAvatar());
-			GeneratePreview(CurrentAvatar);
+			//GeneratePreview(CurrentAvatar);
 		}
 
 		protected override void DidDeactivate(DeactivationType deactivationType)
@@ -209,7 +209,7 @@ namespace CustomAvatar
 		private void _TableView_DidSelectRowEvent(TableView sender, int row)
 		{
 			Plugin.Instance.PlayerAvatarManager.SwitchToAvatar(Plugin.Instance.AvatarLoader.Avatars[row]);
-			GeneratePreview(row);
+			//GeneratePreview(row);
 			LastAvatar = row;
 		}
 

@@ -52,7 +52,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp" />
-    <Reference Include="BeatSaberCustomUI" />
+    <Reference Include="BeatSaberCustomUI, Version=1.3.7.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Z:\SteamLibrary\steamapps\common\Beat Saber\Plugins\BeatSaberCustomUI.dll</HintPath>
+    </Reference>
     <Reference Include="IllusionPlugin" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -104,6 +107,7 @@
     <Compile Include="UI\AvatarPreviewController.cs" />
     <Compile Include="UI\AvatarListFlowCoordinator.cs" />
     <Compile Include="UI\AvatarUI.cs" />
+    <Compile Include="UI\MirrorController.cs" />
     <Compile Include="VRIK\AxisTools.cs" />
     <Compile Include="VRIK\DynamicBone.cs" />
     <Compile Include="VRIK\DynamicBoneCollider.cs" />

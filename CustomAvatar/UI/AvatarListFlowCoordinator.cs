@@ -31,6 +31,7 @@ namespace CustomAvatar
 			if (activationType == FlowCoordinator.ActivationType.AddedToHierarchy)
 			{
 				ProvideInitialViewControllers(_contentViewController, _leftViewController, _rightViewController);
+				MirrorController.OnLoad();
 				MainScreen.transform.position = new Vector3(0, -100, 0); // "If it works it's not stupid" - Caeden117
 				_rightViewController.onBackPressed += backButton_DidFinish;
 			}
@@ -39,6 +40,7 @@ namespace CustomAvatar
 		private void backButton_DidFinish()
 		{
 			MainScreen.transform.position = MainScreenPosition;
+			Destroy(MirrorController.Instance.gameObject);
 		}
 
 		protected override void DidDeactivate(DeactivationType type)
