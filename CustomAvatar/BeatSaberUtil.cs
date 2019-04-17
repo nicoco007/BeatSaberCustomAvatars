@@ -51,7 +51,7 @@ namespace CustomAvatar
 
 		public static float GetPlayerViewPointHeight()
 		{
-			return GetPlayerHeight() - MainSettingsModel.headPosToPlayerHeightOffset;
+			return GetPlayerHeight() - MainSettingsModel.kHeadPosToPlayerHeightOffset;
 		}
 
 		public static Vector3 GetRoomCenter()

@@ -118,9 +118,14 @@ namespace AvatarScriptPack {
 				references = new References();
 
 				var animator = root.GetComponentInChildren<Animator>();
-				Debug.Log("Root: " + root + " " + root.name);
+				//Debug.Log("Root: " + root + " " + root.name);
 				if (animator == null || !animator.isHuman) {
-					Debug.LogWarning("VRIK needs a Humanoid Animator to auto-detect biped references. Please assign references manually.");
+#if PLUGIN
+					Debug.Log("VRIK needs a Humanoid Animator to auto-detect biped references. Please assign references manually.");
+#else
+					Debug.Log("VRIK needs a Humanoid Animator to auto-detect biped references. Please assign references manually.");
+#endif
+					GameObject.Destroy(root.GetComponent<VRIK>());
 					return false;
 				}
 
