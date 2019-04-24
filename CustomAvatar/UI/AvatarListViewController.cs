@@ -173,7 +173,7 @@ namespace CustomAvatar
 			tableViewObject.SetActive(true);
 
 			_pageUpButton = Instantiate(Resources.FindObjectsOfTypeAll<Button>().First(x => (x.name == "PageUpButton")), container, false);
-			(_pageUpButton.transform as RectTransform).anchoredPosition = new Vector2(0f, 30f);
+			(_pageUpButton.transform as RectTransform).anchoredPosition = new Vector2(0f, 40f);
 			_pageUpButton.interactable = true;
 			_pageUpButton.onClick.AddListener(delegate ()
 			{

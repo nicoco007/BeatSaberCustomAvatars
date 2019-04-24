@@ -57,7 +57,7 @@ namespace CustomAvatar
 				InputTracking.GetNodeStates(notes);
 				foreach (XRNodeState note in notes)
 				{
-					if (note.nodeType != XRNode.HardwareTracker || !InputTracking.GetNodeName(note.uniqueID).Contains("LHR-"))
+					if (note.nodeType != XRNode.HardwareTracker || !InputTracking.GetNodeName(note.uniqueID).Contains("LHR-") && !InputTracking.GetNodeName(note.uniqueID).Contains("Vive Controller MV S/N"))
 						continue;
 					Trackers.Add(note);
 				}
@@ -158,7 +158,7 @@ namespace CustomAvatar
 
 		public string Version
 		{
-			get { return "4.6.0"; }
+			get { return "4.6.2"; }
 		}
 
 		public static void Log(object message)
@@ -267,6 +267,23 @@ namespace CustomAvatar
 			else if (Input.GetKeyDown(KeyCode.F5))
 			{
 				IsFullBodyTracking = !IsFullBodyTracking;
+			}
+			else if (Input.GetKeyDown(KeyCode.End))
+			{
+				int policy = (int)Plugin.Instance.AvatarTailor.ResizePolicy + 1;
+				if (policy > 2) policy = 0;
+				Plugin.Instance.AvatarTailor.ResizePolicy = (AvatarTailor.ResizePolicyType)policy;
+				Log($"Set Resize Policy to {Plugin.Instance.AvatarTailor.ResizePolicy}");
+				Plugin.Instance.PlayerAvatarManager.ResizePlayerAvatar();
+			}
+			else if (Input.GetKeyDown(KeyCode.Insert))
+			{
+				if (Plugin.Instance.AvatarTailor.FloorMovePolicy == AvatarTailor.FloorMovePolicyType.AllowMove)
+					Plugin.Instance.AvatarTailor.FloorMovePolicy = AvatarTailor.FloorMovePolicyType.NeverMove;
+				else
+					Plugin.Instance.AvatarTailor.FloorMovePolicy = AvatarTailor.FloorMovePolicyType.AllowMove;
+				Log($"Set Floor Move Policy to {Plugin.Instance.AvatarTailor.FloorMovePolicy}");
+				Plugin.Instance.PlayerAvatarManager.ResizePlayerAvatar();
 			}
 		}
 
