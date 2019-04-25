@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CustomAvatar
 {
-	interface IAvatarFullBodyInput:IAvatarInput
+	public interface IAvatarFullBodyInput:IAvatarInput
 	{
 		PosRot LeftLegPosRot { get; }
 		PosRot RightLegPosRot { get; }
