@@ -41,6 +41,7 @@ namespace CustomAvatar
 		{
 			MainScreen.transform.position = MainScreenPosition;
 			Destroy(MirrorController.Instance.gameObject);
+			_rightViewController.onBackPressed -= backButton_DidFinish;
 		}
 
 		protected override void DidDeactivate(DeactivationType type)

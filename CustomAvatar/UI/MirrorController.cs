@@ -28,8 +28,14 @@ namespace CustomAvatar
 		void Awake()
 		{
 			var myLoadedAssetBundle = AssetBundle.LoadFromFile("CustomAvatars/Shaders/customavatars.assetbundle");
-			CutoutShader = myLoadedAssetBundle.LoadAsset<Shader>("Assets/Shaders/sh_custom_unlit_transparent.shader");
+			CutoutShader = myLoadedAssetBundle.LoadAsset<Shader>("Assets/Shaders/Custom/sh_custom_unlit_transparent_Luminance.shader");
 			StartCoroutine(SpawnMirror());
+			myLoadedAssetBundle.Unload(false);
+		}
+
+		void OnDestroy()
+		{
+			Destroy(mirrorCamObj);
 		}
 
 		IEnumerator SpawnMirror()
@@ -52,15 +58,19 @@ namespace CustomAvatar
 			_cam.stereoTargetEye = StereoTargetEyeMask.None;
 			_cam.enabled = true;
 			_cam.orthographic = true;
-			_cam.orthographicSize = 0.8f;
-			_cam.clearFlags = CameraClearFlags.Depth;
+			_cam.aspect = 1.4f;
+			_cam.orthographicSize = 1.25f;
+			_cam.clearFlags = CameraClearFlags.SolidColor;
+			_cam.backgroundColor = new Color(0, 0, 0, 0);
 			_cam.depthTextureMode = DepthTextureMode.Depth;
 
 			int layer1 = 3;
 			int layer2 = 4;
+			int layer3 = 0;
 			int layerMask1 = 1 << layer1;
 			int layerMask2 = 1 << layer2;
-			int finalMask = layerMask1 | layerMask2;
+			int layerMask3 = 1 << layer3;
+			int finalMask = layerMask1 | layerMask2 | layerMask3;
 
 
 			_cam.cullingMask = finalMask;
@@ -72,7 +82,7 @@ namespace CustomAvatar
 
 			mirrorCamObj.SetActive(true);
 
-			mirrorCamObj.transform.position = new Vector3(0, 1.3f, 5);
+			mirrorCamObj.transform.position = new Vector3(0, 1.25f, 1.45f);
 			mirrorCamObj.transform.rotation = Quaternion.Euler(0, 180, 0);
 
 
@@ -88,15 +98,17 @@ namespace CustomAvatar
 
 			_mirrorMaterial = new Material(CutoutShader);
 			_mirrorMaterial.SetTexture("_Tex", _camRenderTexture);
+			_mirrorMaterial.SetFloat("_Cutout", .005f);
 
 			_quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
 			DontDestroyOnLoad(_quad);
 			DestroyImmediate(_quad.GetComponent<Collider>());
 			_quad.GetComponent<MeshRenderer>().material = _mirrorMaterial;
 			_quad.transform.parent = mirrorCamObj.transform;
-			_quad.transform.localPosition = new Vector3(0,0,3);
-			_quad.transform.localEulerAngles = new Vector3(0, 180, 0);
-			_quad.transform.localScale = new Vector3(_cam.aspect*3, 3, 3);
+			_quad.transform.localPosition = new Vector3(0,0,-.05f);
+			_quad.transform.localEulerAngles = new Vector3(0, 0, 0);
+			_quad.transform.localScale = new Vector3(2.5f*_cam.aspect,2.5f,2.5f);
+			Console.WriteLine($"Mirror Resolution: {_cam.pixelWidth}x{_cam.pixelHeight}");
 		}
 	}
 }
