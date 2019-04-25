@@ -3,6 +3,8 @@ using VRUI;
 using CustomUI.BeatSaber;
 using CustomUI.Settings;
 using TMPro;
+using System.Collections.Generic;
+using CustomUI.Utilities;
 
 namespace CustomAvatar
 {
@@ -21,7 +23,8 @@ namespace CustomAvatar
 			containerRect.anchorMax = new Vector2(0.95f, 1.0f);
 			containerRect.sizeDelta = new Vector2(0, 0);
 
-			SubMenu container = new SubMenu(containerRect); 
+			SubMenu container = new SubMenu(containerRect);
+			List<ListViewController> loadedSettings = new List<ListViewController>();
 
 			System.Action<RectTransform, float, float, float, float, float, float> relative_layout =
 				(RectTransform rt, float x, float y, float w, float h, float pivotx, float pivoty) =>
@@ -35,27 +38,22 @@ namespace CustomAvatar
 
 			gameObject.SetActive(false);
 
-			TextMeshProUGUI text = BeatSaberUI.CreateText(containerRect, "AVATAR SETTINGS (buttons don't work, use the hotkeys)", Vector2.zero);
+			TextMeshProUGUI text = BeatSaberUI.CreateText(containerRect, "AVATAR SETTINGS (Klouder is cute)", Vector2.zero);
 			text.fontSize = 6.0f;
 			text.alignment = TextAlignmentOptions.Center;
 			relative_layout(text.rectTransform, 0f, 0.85f, 1f, 0.166f, 0.5f, 1f);
 
-			var boolFirstPerson = container.AddList("[HOME] Visible In First Person View", new float[] { 0, 1 });
+			var boolFirstPerson = container.AddList("Visible In First Person View", new float[] { 0, 1 });
 			boolFirstPerson.applyImmediately = true;
 			relative_layout(boolFirstPerson.transform as RectTransform, 0, 0.66f, 1, 0.166f, 0, 1f);
 			BeatSaberUI.AddHintText(boolFirstPerson.transform as RectTransform, "Allows you to see the avatar inside of VR");
 
-			var boolRotatePreviewAvatar = container.AddList("Rotate Avatar Preview", new float[] { 0, 1 });
-			boolRotatePreviewAvatar.applyImmediately = true;
-			relative_layout(boolRotatePreviewAvatar.transform as RectTransform, 0, 0.55f, 1, 0.166f, 0, 1f);
-			BeatSaberUI.AddHintText(boolRotatePreviewAvatar.transform as RectTransform, "Slowly rotate the preview model");
-
-			var listResizePolicy = container.AddList("[END] Resize Avatars To Player's", new float[] { 0, 1, 2 });
+			var listResizePolicy = container.AddList("Resize Avatars To Player's", new float[] { 0, 1, 2 });
 			listResizePolicy.applyImmediately = true;
 			relative_layout(listResizePolicy.transform as RectTransform, 0, 0.44f, 1, 0.166f, 0, 1f);
 			BeatSaberUI.AddHintText(listResizePolicy.transform as RectTransform, "Use 'Arms Length' to resize the avatar based on your proportions, 'Height' to resize based on your height, and 'Never' to not resize");
 
-			var boolFloorMovePolicy = container.AddList("[Insert] Floor Height Adjust", new float[] { 0, 1 });
+			var boolFloorMovePolicy = container.AddList("Floor Height Adjust", new float[] { 0, 1 });
 			boolFloorMovePolicy.applyImmediately = true;
 			relative_layout(boolFloorMovePolicy.transform as RectTransform, 0, 0.33f, 1, 0.166f, 0, 1f);
 			BeatSaberUI.AddHintText(boolFloorMovePolicy.transform as RectTransform, "Move the floor to compensate for height when using 'Arms Length' resize, requires CustomPlatforms");
@@ -89,11 +87,7 @@ namespace CustomAvatar
 			boolFirstPerson.GetValue = () => Plugin.Instance.FirstPersonEnabled ? 1f : 0f;
 			boolFirstPerson.SetValue = (value) => Plugin.Instance.FirstPersonEnabled = value != 0f;
 			boolFirstPerson.Init();
-
-			boolRotatePreviewAvatar.GetTextForValue = (value) => value != 0f ? "ON" : "OFF";
-			//boolRotatePreviewAvatar.GetValue = () => Plugin.Instance.RotatePreviewEnabled ? 1f : 0f;
-			//boolRotatePreviewAvatar.SetValue = (value) => Plugin.Instance.RotatePreviewEnabled = value != 0f;
-			boolRotatePreviewAvatar.Init();
+			loadedSettings.Add(boolFirstPerson);
 
 			listResizePolicy.GetTextForValue = (value) => new string[] { "Arms Length", "Height", "Never" }[(int)value];
 			listResizePolicy.GetValue = () => (int)Plugin.Instance.AvatarTailor.ResizePolicy;
@@ -103,6 +97,7 @@ namespace CustomAvatar
 				Plugin.Instance.PlayerAvatarManager.ResizePlayerAvatar();
 			};
 			listResizePolicy.Init();
+			loadedSettings.Add(listResizePolicy);
 
 			boolFloorMovePolicy.GetTextForValue = (value) => (value != 0f) ? "ON" : "OFF";
 			boolFloorMovePolicy.GetValue = () => Plugin.Instance.AvatarTailor.FloorMovePolicy == AvatarTailor.FloorMovePolicyType.AllowMove ? 1f : 0f;
@@ -112,6 +107,14 @@ namespace CustomAvatar
 				Plugin.Instance.PlayerAvatarManager.ResizePlayerAvatar();
 			};
 			boolFloorMovePolicy.Init();
+			loadedSettings.Add(boolFloorMovePolicy);
+
+			foreach (ListViewController list in loadedSettings)
+			{
+				list.InvokePrivateMethod("OnDisable", new object[] { });
+				list.InvokePrivateMethod("OnEnable", new object[] { });
+				Plugin.Log("Reset " + list.name);
+			}
 		}
 	}
 }
