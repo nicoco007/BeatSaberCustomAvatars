@@ -56,7 +56,6 @@ namespace CustomAvatar
 		private void PreviewCurrent()
 		{
 			CurrentAvatar = Plugin.Instance.AvatarLoader.IndexOf(Plugin.Instance.PlayerAvatarManager.GetCurrentAvatar());
-			//GeneratePreview(CurrentAvatar);
 		}
 
 		protected override void DidDeactivate(DeactivationType deactivationType)
@@ -201,7 +200,6 @@ namespace CustomAvatar
 				_backButton.onClick.AddListener(delegate ()
 				{
 					onBackPressed();
-					DestroyPreview();
 				});
 			}
 		}
@@ -211,13 +209,6 @@ namespace CustomAvatar
 			Plugin.Instance.PlayerAvatarManager.SwitchToAvatar(Plugin.Instance.AvatarLoader.Avatars[row]);
 			//GeneratePreview(row);
 			LastAvatar = row;
-		}
-
-		public void DestroyPreview()
-		{
-			Destroy(_avatarPreview);
-			PreviewAvatar = null;
-			Destroy(_previewParent);
 		}
 
 		TableCell TableView.IDataSource.CellForIdx(int row)
@@ -263,108 +254,6 @@ namespace CustomAvatar
 			tableCell.SetDataFromLevel(cellInfo);
 
 			return tableCell;
-		}
-
-
-		public void GeneratePreview(int AvatarIndex)
-		{
-			if (PreviewStatus)
-			{
-				return;
-			}
-			PreviewStatus = true;
-			if (PreviewAvatar != null)
-			{
-				DestroyPreview();
-			}
-
-			if (__AvatarLoadResults[AvatarIndex] == AvatarLoadResult.Completed)
-			{
-				PreviewAvatar = __AvatarPrefabs[AvatarIndex];
-
-				_previewParent = new GameObject();
-				_avatarPreview = Instantiate(PreviewAvatar, _previewParent.transform);
-
-				_VRIK = _avatarPreview.GetComponentsInChildren<AvatarScriptPack.VRIK>().FirstOrDefault();
-
-				if (_VRIK != null)
-				{
-					//_center = _avatarPreview.GetComponentInChildren<Renderer>().bounds.center;
-					_previewHeight = (AvatarList[AvatarIndex].Height > 0) ? AvatarList[AvatarIndex].Height : _avatarPreview.GetComponentInChildren<Renderer>().bounds.size.y;
-					//_previewHeightOffset = _avatarPreview.GetComponentInChildren<Renderer>().bounds.min.y;
-					_previewHeightOffset = 0;
-					_previewScale = (0.85f / _previewHeight);
-				}
-				else
-				{
-					foreach (Transform child in _avatarPreview.transform)
-					{
-						try
-						{
-							_center += child.gameObject.GetComponentInChildren<Renderer>().bounds.center;
-						} catch
-						{
-							_center = Vector3.zero;
-						}
-					}
-					_center /= _avatarPreview.transform.childCount;
-					Bounds bounds = new Bounds(_center, Vector3.zero);
-
-					foreach (Transform child in _avatarPreview.transform)
-					{
-						try
-						{
-							bounds.Encapsulate(child.gameObject.GetComponentInChildren<Renderer>().bounds);
-						} catch
-						{
-							bounds = new Bounds(_center, Vector3.one);
-						}
-					}
-
-					_previewHeight = bounds.size.y;
-					_previewHeightOffset = bounds.min.y;
-					_previewScale = (1f / _previewHeight);
-
-				}
-
-				Destroy(_avatarPreview);
-				_avatarPreview = Instantiate(PreviewAvatar, _previewParent.transform);
-				//_avatarPreview.AddComponent<AvatarPreviewRotation>();
-				_avatarPreview.SetActive(true);
-				_VRIK = _avatarPreview.GetComponentsInChildren<AvatarScriptPack.VRIK>().FirstOrDefault();
-				_exclusionScript = _avatarPreview.GetComponentsInChildren<AvatarScriptPack.FirstPersonExclusion>().FirstOrDefault();
-
-				if (_VRIK)
-				{
-					Plugin.Log("Starting VRIK Setup for mirror");
-					var mirrorAvatar = new GameObject("AvatarMirror");
-					var mirrorBehaviour = mirrorAvatar.AddComponent<AvatarPreviewBehaviour>();
-					Plugin.Log("Sending IK targets");
-					mirrorBehaviour.SetVRTargets(
-						Plugin.Instance.PlayerAvatarManager.GetCurrentAvatar().GameObject.transform.Find("Body"),
-						Plugin.Instance.PlayerAvatarManager.GetCurrentAvatar().GameObject.transform.Find("Head/HeadTarget"),
-						Plugin.Instance.PlayerAvatarManager.GetCurrentAvatar().GameObject.transform.Find("LeftHand/LeftHandTarget"),
-						Plugin.Instance.PlayerAvatarManager.GetCurrentAvatar().GameObject.transform.Find("RightHand/RightHandTarget")
-						);
-					mirrorBehaviour.Init(_avatarPreview);
-				}
-				else
-				{
-					_avatarPreview.transform.Find("LeftHand").transform.Translate(-0.333f, -0.475f, 0);
-					_avatarPreview.transform.Find("LeftHand").transform.Rotate(0, 0, -30);
-					_avatarPreview.transform.Find("RightHand").transform.Translate(0.333f, -0.475f, 0);
-					_avatarPreview.transform.Find("RightHand").transform.Rotate(0, 0, 30);
-				}
-				if (_exclusionScript != null)
-				{
-					_exclusionScript.SetVisible();
-				}
-			}
-			else
-			{
-				Console.WriteLine("Failed to load preview. Status: " + __AvatarLoadResults[AvatarIndex]);
-			}
-			PreviewStatus = false;
 		}
 
 		int TableView.IDataSource.NumberOfCells()
