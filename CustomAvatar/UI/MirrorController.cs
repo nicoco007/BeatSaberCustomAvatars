@@ -61,8 +61,8 @@ namespace CustomAvatar
 			_cam.aspect = 1.4f;
 			_cam.orthographicSize = 1.25f;
 			_cam.clearFlags = CameraClearFlags.SolidColor;
-			_cam.backgroundColor = new Color(0, 0, 0, 0);
-			_cam.depthTextureMode = DepthTextureMode.Depth;
+			_cam.backgroundColor = new Color(0, 0, 0, 5/255f);
+			_cam.farClipPlane = 10;
 
 			int layer1 = 3;
 			int layer2 = 4;
@@ -98,7 +98,7 @@ namespace CustomAvatar
 
 			_mirrorMaterial = new Material(CutoutShader);
 			_mirrorMaterial.SetTexture("_Tex", _camRenderTexture);
-			_mirrorMaterial.SetFloat("_Cutout", .005f);
+			_mirrorMaterial.SetFloat("_Cutout", .01f);
 
 			_quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
 			DontDestroyOnLoad(_quad);
