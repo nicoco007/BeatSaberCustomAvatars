@@ -232,7 +232,7 @@ namespace CustomAvatar
 			{
 				cellInfo.name = System.IO.Path.GetFileName(AvatarList[row].FullPath) +" failed to load";
 				cellInfo.authorName = "Make sure it's not a duplicate avatar.";
-				cellInfo.coverImage = null;
+				cellInfo.rawImageTexture = null;
 			}
 			else
 			{
@@ -240,18 +240,23 @@ namespace CustomAvatar
 				{
 					cellInfo.name = __AvatarNames[row];
 					cellInfo.authorName = __AvatarAuthors[row];
-					cellInfo.coverImage = __AvatarCovers[row] ?? Sprite.Create(Texture2D.blackTexture, new Rect(), Vector2.zero);
+					cellInfo.rawImageTexture = __AvatarCovers[row] ? __AvatarCovers[row].texture : Texture2D.blackTexture;
 				}
 				catch (Exception e)
 				{
 					cellInfo.name = "If you see this yell at Assistant";
 					cellInfo.authorName = "because she fucked up";
-					cellInfo.coverImage = null;
+					cellInfo.rawImageTexture = Texture2D.blackTexture;
 					Console.WriteLine(e);
 				}
 			}
 
-			tableCell.SetDataFromLevel(cellInfo);
+			tableCell.SetPrivateField("_beatmapCharacteristicAlphas", new float[0]);
+			tableCell.SetPrivateField("_beatmapCharacteristicImages", new UnityEngine.UI.Image[0]);
+
+			tableCell.GetPrivateField<TextMeshProUGUI>("_songNameText").text = cellInfo.name;
+			tableCell.GetPrivateField<TextMeshProUGUI>("_authorText").text = cellInfo?.authorName;
+			tableCell.GetPrivateField<UnityEngine.UI.RawImage>("_coverRawImage").texture = cellInfo.rawImageTexture;
 
 			return tableCell;
 		}
