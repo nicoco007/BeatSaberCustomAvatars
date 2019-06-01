@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
+using Logger = CustomAvatar.Util.Logger;
 
 namespace CustomAvatar
 {
@@ -121,7 +122,7 @@ namespace CustomAvatar
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine(e.Message + "\n" + e.StackTrace);
+				Logger.Log(e.Message + "\n" + e.StackTrace, Logger.LogLevel.Error);
 			}
 			return new PosRot(pos, rot);
 		}

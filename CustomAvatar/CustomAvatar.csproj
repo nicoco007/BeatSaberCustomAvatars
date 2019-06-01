@@ -114,6 +114,7 @@
     <Compile Include="UI\AvatarListFlowCoordinator.cs" />
     <Compile Include="UI\AvatarUI.cs" />
     <Compile Include="UI\MirrorController.cs" />
+    <Compile Include="Util\Logger.cs" />
     <Compile Include="Util\ReflectionUtil.cs" />
     <Compile Include="VRIK\AxisTools.cs" />
     <Compile Include="VRIK\DynamicBone.cs" />
@@ -143,6 +144,12 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="manifest.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\KlouOWO.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\KlouNom.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

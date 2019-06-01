@@ -1,10 +1,7 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
+using Logger = CustomAvatar.Util.Logger;
 
 namespace CustomAvatar
 {
@@ -108,7 +105,7 @@ namespace CustomAvatar
 			_quad.transform.localPosition = new Vector3(0,0,-.05f);
 			_quad.transform.localEulerAngles = new Vector3(0, 0, 0);
 			_quad.transform.localScale = new Vector3(2.5f*_cam.aspect,2.5f,2.5f);
-			Console.WriteLine($"Mirror Resolution: {_cam.pixelWidth}x{_cam.pixelHeight}");
+			Logger.Log($"Mirror Resolution: {_cam.pixelWidth}x{_cam.pixelHeight}");
 		}
 	}
 }

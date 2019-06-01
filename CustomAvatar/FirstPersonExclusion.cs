@@ -1,6 +1,9 @@
 using System.Linq;
 using CustomAvatar;
 using UnityEngine;
+#if PLUGIN
+using Logger = CustomAvatar.Util.Logger;
+#endif
 
 namespace AvatarScriptPack
 {
@@ -34,7 +37,7 @@ namespace AvatarScriptPack
 		{
 			try
 			{
-				System.Console.WriteLine("OnFirstPersonEnabledChanged - " + firstPersonEnabled);
+				Logger.Log("OnFirstPersonEnabledChanged - " + firstPersonEnabled);
 				if (_deadSwitch)
 				{
 					return;
@@ -47,7 +50,7 @@ namespace AvatarScriptPack
 			}
 			catch (System.Exception e)
 			{
-				Plugin.Log(e.StackTrace);
+				Logger.Log(e.StackTrace);
 			}
 		}
 

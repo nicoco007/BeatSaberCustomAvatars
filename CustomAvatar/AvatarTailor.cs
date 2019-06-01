@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Logger = CustomAvatar.Util.Logger;
 
 namespace CustomAvatar
 {
@@ -68,7 +69,7 @@ namespace CustomAvatar
 			var animator = FindAvatarAnimator(avatar.GameObject);
 			if (animator == null)
 			{
-				Plugin.Log("Tailor: Animator not found");
+				Logger.Log("Tailor: Animator not found");
 				return;
 			}
 
@@ -79,7 +80,7 @@ namespace CustomAvatar
 				float playerArmLength = PlayerArmLength;
 				_currentAvatarArmLength = _currentAvatarArmLength ?? AvatarMeasurement.MeasureArmLength(animator);
 				var avatarArmLength = _currentAvatarArmLength ?? playerArmLength;
-				Plugin.Log("Avatar arm length: " + avatarArmLength);
+				Logger.Log("Avatar arm length: " + avatarArmLength);
 
 				scale = playerArmLength / avatarArmLength;
 			}
@@ -91,7 +92,7 @@ namespace CustomAvatar
 			// apply scale
 			avatar.GameObject.transform.localScale = _initialAvatarLocalScale * scale;
 
-			Plugin.Log("Avatar resized with scale: " + scale);
+			Logger.Log("Avatar resized with scale: " + scale);
 
 			SharedCoroutineStarter.instance.StartCoroutine(FloorMendingWithDelay(avatar, animator, scale));
 		}
@@ -124,7 +125,7 @@ namespace CustomAvatar
 			{
 				_initialPlatformPosition = _initialPlatformPosition ?? customFloor.transform.position;
 				customFloor.transform.position = (Vector3.up * floorOffset) + _initialPlatformPosition ?? Vector3.zero;
-				Plugin.Log("CustomFloor moved to " + customFloor.transform.position.y + " with offset " + floorOffset);
+				Logger.Log("CustomFloor moved to " + customFloor.transform.position.y + " with offset " + floorOffset);
 			}
 		}
 

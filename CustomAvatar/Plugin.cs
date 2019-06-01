@@ -6,6 +6,7 @@ using IPA;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.XR;
+using Logger = CustomAvatar.Util.Logger;
 
 namespace CustomAvatar
 {
@@ -21,9 +22,6 @@ namespace CustomAvatar
 		private GameScenesManager _scenesManager;
 		private static bool _isTrackerAsHand;
 
-		internal static IPA.Logging.Logger Logger; //Conflicts with UnityEngine.Logger POG
-		public enum LogInfo { Info, Warning, Notice, Error, Fatal };
-
 		public static List<XRNodeState> Trackers = new List<XRNodeState>();
 		public static bool IsTrackerAsHand
 		{
@@ -31,18 +29,19 @@ namespace CustomAvatar
 			set
 			{
 				_isTrackerAsHand = value;
-				List<XRNodeState> notes = new List<XRNodeState>();
+				List<XRNodeState> nodes = new List<XRNodeState>();
 				Trackers = new List<XRNodeState>();
-				InputTracking.GetNodeStates(notes);
-				foreach (XRNodeState note in notes)
+				InputTracking.GetNodeStates(nodes);
+				foreach (XRNodeState node in nodes)
 				{
-					if (note.nodeType != XRNode.HardwareTracker || (!InputTracking.GetNodeName(note.uniqueID).Contains("LHR-") && !InputTracking.GetNodeName(note.uniqueID).Contains("Vive Controller MV S/N")))
+					Logger.Log($"XRNode: {InputTracking.GetNodeName(node.uniqueID)} - {node.nodeType}");
+					if (node.nodeType != XRNode.HardwareTracker || (!InputTracking.GetNodeName(node.uniqueID).Contains("LHR-") && !InputTracking.GetNodeName(node.uniqueID).Contains("Vive Controller MV S/N")))
 						continue;
-					Trackers.Add(note);
+					Trackers.Add(node);
 				}
 				if (Trackers.Count == 0)
 					_isTrackerAsHand = false;
-				Log("IsTrackerAsHand : " + IsTrackerAsHand);
+				Logger.Log("IsTrackerAsHand : " + IsTrackerAsHand);
 			}
 		}
 
@@ -51,14 +50,15 @@ namespace CustomAvatar
 			get { return Plugin.FullBodyTrackingType != Plugin.TrackingType.None; ; }
 			set
 			{
-				List<XRNodeState> notes = new List<XRNodeState>();
+				List<XRNodeState> nodes = new List<XRNodeState>();
 				Trackers = new List<XRNodeState>();
-				InputTracking.GetNodeStates(notes);
-				foreach (XRNodeState note in notes)
+				InputTracking.GetNodeStates(nodes);
+				foreach (XRNodeState node in nodes)
 				{
-					if (note.nodeType != XRNode.HardwareTracker || !InputTracking.GetNodeName(note.uniqueID).Contains("LHR-") && !InputTracking.GetNodeName(note.uniqueID).Contains("Vive Controller MV S/N"))
+					Logger.Log($"XRNode: {InputTracking.GetNodeName(node.uniqueID)} - {node.nodeType}");
+					if (node.nodeType != XRNode.HardwareTracker || !InputTracking.GetNodeName(node.uniqueID).Contains("LHR-") && !InputTracking.GetNodeName(node.uniqueID).Contains("Vive Controller MV S/N"))
 						continue;
-					Trackers.Add(note);
+					Trackers.Add(node);
 				}
 				if (Trackers.Count > 0 && Trackers.Count <= 3)
 					Plugin.FullBodyTrackingType = (Plugin.TrackingType)Plugin.Trackers.Count;
@@ -74,8 +74,8 @@ namespace CustomAvatar
 					}
 				}
 				bool isFullBodyTracking = Plugin.IsFullBodyTracking;
-				Console.WriteLine(string.Concat("IsFullBodyTracking : ", isFullBodyTracking.ToString()));
-				Console.WriteLine(string.Concat("FullBodyTrackingType: ", FullBodyTrackingType.ToString()));
+				Logger.Log(string.Concat("IsFullBodyTracking : ", isFullBodyTracking.ToString()));
+				Logger.Log(string.Concat("FullBodyTrackingType: ", FullBodyTrackingType.ToString()));
 			}
 		}
 
@@ -129,12 +129,12 @@ namespace CustomAvatar
 
 		public string Version
 		{
-			get { return "4.6.3"; }
+			get { return "4.7.0"; }
 		}
 
 		public void Init(IPA.Logging.Logger log)
 		{
-			Logger = log;
+			Util.Logger.logger = log;
 			Instance = this;
 
 			AvatarLoader = new AvatarLoader(CustomAvatarsPath, AvatarsLoaded);
@@ -161,7 +161,7 @@ namespace CustomAvatar
 		{
 			if (loadedAvatars.Count == 0)
 			{
-				Log("No custom avatars found in path " + Path.GetFullPath(CustomAvatarsPath));
+				Logger.Log("No custom avatars found in path " + Path.GetFullPath(CustomAvatarsPath));
 				return;
 			}
 
@@ -234,7 +234,7 @@ namespace CustomAvatar
 				int policy = (int)Plugin.Instance.AvatarTailor.ResizePolicy + 1;
 				if (policy > 2) policy = 0;
 				Plugin.Instance.AvatarTailor.ResizePolicy = (AvatarTailor.ResizePolicyType)policy;
-				Log($"Set Resize Policy to {Plugin.Instance.AvatarTailor.ResizePolicy}");
+				Logger.Log($"Set Resize Policy to {Plugin.Instance.AvatarTailor.ResizePolicy}");
 				Plugin.Instance.PlayerAvatarManager.ResizePlayerAvatar();
 			}
 			else if (Input.GetKeyDown(KeyCode.Insert))
@@ -243,14 +243,14 @@ namespace CustomAvatar
 					Plugin.Instance.AvatarTailor.FloorMovePolicy = AvatarTailor.FloorMovePolicyType.NeverMove;
 				else
 					Plugin.Instance.AvatarTailor.FloorMovePolicy = AvatarTailor.FloorMovePolicyType.AllowMove;
-				Log($"Set Floor Move Policy to {Plugin.Instance.AvatarTailor.FloorMovePolicy}");
+				Logger.Log($"Set Floor Move Policy to {Plugin.Instance.AvatarTailor.FloorMovePolicy}");
 				Plugin.Instance.PlayerAvatarManager.ResizePlayerAvatar();
 			}
 		}
 
 		private void SetCameraCullingMask(Camera camera)
 		{
-			Log("Adding third person culling mask to " + camera.name);
+			Logger.Log("Adding third person culling mask to " + camera.name);
 
 			camera.cullingMask &= ~(1 << AvatarLayers.OnlyInThirdPerson);
 			camera.cullingMask |= 1 << AvatarLayers.OnlyInFirstPerson;
@@ -269,32 +269,6 @@ namespace CustomAvatar
 		public void OnActiveSceneChanged(Scene prevScene, Scene nextScene)
 		{
 
-		}
-
-		public static void Log(string m)
-		{
-			Log(m, LogInfo.Info);
-		}
-
-		public static void Log(string m, LogInfo l)
-		{
-			Log(m, l, null);
-		}
-
-		public static void Log(string m, LogInfo l, string suggestedAction)
-		{
-			IPA.Logging.Logger.Level level = IPA.Logging.Logger.Level.Debug;
-			switch (l)
-			{
-				case LogInfo.Info: level = IPA.Logging.Logger.Level.Debug; break;
-				case LogInfo.Notice: level = IPA.Logging.Logger.Level.Notice; break;
-				case LogInfo.Warning: level = IPA.Logging.Logger.Level.Warning; break;
-				case LogInfo.Error: level = IPA.Logging.Logger.Level.Error; break;
-				case LogInfo.Fatal: level = IPA.Logging.Logger.Level.Critical; break;
-			}
-			Logger.Log(level, m);
-			if (suggestedAction != null)
-				Logger.Log(level, $"Suggested Action: {suggestedAction}");
 		}
 
 		public void OnApplicationStart()

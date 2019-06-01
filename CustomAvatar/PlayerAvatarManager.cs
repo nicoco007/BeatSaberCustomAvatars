@@ -1,7 +1,7 @@
 using System;
-using UnityEngine;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
+using Logger = CustomAvatar.Util.Logger;
 
 namespace CustomAvatar
 {
@@ -115,11 +115,11 @@ namespace CustomAvatar
 		{
 			if (result != AvatarLoadResult.Completed)
 			{
-				Plugin.Log("Avatar " + loadedAvatar.FullPath + " failed to load");
+				Logger.Log("Avatar " + loadedAvatar.FullPath + " failed to load");
 				return;
 			}
 
-			Plugin.Log("Loaded avatar " + loadedAvatar.Name + " by " + loadedAvatar.AuthorName);
+			Logger.Log("Loaded avatar " + loadedAvatar.Name + " by " + loadedAvatar.AuthorName);
 
 			if (_currentSpawnedPlayerAvatar?.GameObject != null)
 			{
@@ -128,10 +128,7 @@ namespace CustomAvatar
 
 			_currentSpawnedPlayerAvatar = AvatarSpawner.SpawnAvatar(loadedAvatar, _playerAvatarInput);
 
-			if (AvatarChanged != null)
-			{
-				AvatarChanged(loadedAvatar);
-			}
+			AvatarChanged?.Invoke(loadedAvatar);
 
 			_avatarTailor.OnAvatarLoaded(_currentSpawnedPlayerAvatar);
 			ResizePlayerAvatar();
@@ -156,7 +153,7 @@ namespace CustomAvatar
 
 		public void OnSceneTransitioned(Scene newScene)
 		{
-			Plugin.Log("OnSceneTransitioned - " + newScene.name);
+			Logger.Log("OnSceneTransitioned - " + newScene.name);
 			if (newScene.name.Equals("GameCore"))
 				_currentSpawnedPlayerAvatar?.GameObject.GetComponentInChildren<AvatarEventsPlayer>()?.LevelStartedEvent();
 			else if (newScene.name.Equals("MenuCore"))

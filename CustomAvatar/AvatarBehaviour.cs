@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using Logger = CustomAvatar.Util.Logger;
 
 namespace CustomAvatar
 {
@@ -102,7 +103,7 @@ namespace CustomAvatar
 				_prevBodyPos = _body.transform.localPosition;
 			} catch(Exception e)
 			{
-				Console.WriteLine("{0}\n{1}", e.Message, e.StackTrace);
+				Logger.Log($"{e.Message}\n{e.StackTrace}", Logger.LogLevel.Error);
 			}
 		}
 

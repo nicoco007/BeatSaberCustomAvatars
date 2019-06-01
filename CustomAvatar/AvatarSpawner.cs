@@ -1,5 +1,5 @@
 using UnityEngine;
-using System.Linq;
+using Logger = CustomAvatar.Util.Logger;
 
 namespace CustomAvatar
 {
@@ -9,7 +9,7 @@ namespace CustomAvatar
 		{
 			if (customAvatar.GameObject == null)
 			{
-				Plugin.Log("Can't spawn " + customAvatar.FullPath + " because it hasn't been loaded!");
+				Logger.Log("Can't spawn " + customAvatar.FullPath + " because it hasn't been loaded!");
 				return null;
 			}
 

@@ -4,7 +4,7 @@ using CustomUI.BeatSaber;
 using CustomUI.Settings;
 using TMPro;
 using System.Collections.Generic;
-using CustomUI.Utilities;
+using Logger = CustomAvatar.Util.Logger;
 
 namespace CustomAvatar
 {
@@ -50,12 +50,12 @@ namespace CustomAvatar
 
 			var listResizePolicy = container.AddList("Resize Avatars To Player's", new float[] { 0, 1, 2 });
 			listResizePolicy.applyImmediately = true;
-			relative_layout(listResizePolicy.transform as RectTransform, 0, 0.44f, 1, 0.166f, 0, 1f);
+			relative_layout(listResizePolicy.transform as RectTransform, 0, 0.55f, 1, 0.166f, 0, 1f);
 			BeatSaberUI.AddHintText(listResizePolicy.transform as RectTransform, "Use 'Arms Length' to resize the avatar based on your proportions, 'Height' to resize based on your height, and 'Never' to not resize");
 
 			var boolFloorMovePolicy = container.AddList("Floor Height Adjust", new float[] { 0, 1 });
 			boolFloorMovePolicy.applyImmediately = true;
-			relative_layout(boolFloorMovePolicy.transform as RectTransform, 0, 0.33f, 1, 0.166f, 0, 1f);
+			relative_layout(boolFloorMovePolicy.transform as RectTransform, 0, 0.44f, 1, 0.166f, 0, 1f);
 			BeatSaberUI.AddHintText(boolFloorMovePolicy.transform as RectTransform, "Move the floor to compensate for height when using 'Arms Length' resize, requires CustomPlatforms");
 
 			var labelMeasure = BeatSaberUI.CreateText(containerRect, $"Hand To Hand Length = {Mathf.Ceil(Plugin.Instance.AvatarTailor.PlayerArmLength * 100.0f) / 100.0f}", Vector2.zero);
@@ -113,7 +113,7 @@ namespace CustomAvatar
 			{
 				list.InvokePrivateMethod("OnDisable", new object[] { });
 				list.InvokePrivateMethod("OnEnable", new object[] { });
-				Plugin.Log("Reset " + list.name);
+				Logger.Log("Reset " + list.name);
 			}
 		}
 	}

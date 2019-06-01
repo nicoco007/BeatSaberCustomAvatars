@@ -4,7 +4,7 @@ using System;
 using UnityEngine.SceneManagement;
 using VRUI;
 using CustomUI.MenuButton;
-using CustomUI.Utilities;
+using Logger = CustomAvatar.Util.Logger;
 
 namespace CustomAvatar
 {
@@ -28,12 +28,12 @@ namespace CustomAvatar
 			{
 				if (Plugin.Instance.AvatarLoader.Avatars.Count == 0)
 				{
-					Console.WriteLine("[CustomAvatarsPlugin] No avatars found. Button not created.");
+					Logger.Log("[CustomAvatarsPlugin] No avatars found. Button not created.");
 				}
 				else
 				{
 					AddMainButton();
-					Console.WriteLine("[CustomAvatarsPlugin] Creating Avatars Button.");
+					Logger.Log("[CustomAvatarsPlugin] Creating Avatars Button.");
 				}
 			}
 		}

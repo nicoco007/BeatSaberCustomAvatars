@@ -1,9 +1,6 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
+using Logger = CustomAvatar.Util.Logger;
 
 namespace CustomAvatar
 {
@@ -36,11 +33,11 @@ namespace CustomAvatar
 		{
 			if (!(body && head && leftHand && rightHand))
 			{
-				Plugin.Log("Something went wrong - IK Targets not found for player");
-				Plugin.Log("Body: " + body.name);
-				Plugin.Log("HeadTarget: " + head.name);
-				Plugin.Log("LeftHandTarget: " + leftHand.name);
-				Plugin.Log("RightHandTarget: " + rightHand.name);
+				Logger.Log("Something went wrong - IK Targets not found for player");
+				Logger.Log("Body: " + body.name);
+				Logger.Log("HeadTarget: " + head.name);
+				Logger.Log("LeftHandTarget: " + leftHand.name);
+				Logger.Log("RightHandTarget: " + rightHand.name);
 				isValid = false;
 				return;
 			}
@@ -53,22 +50,22 @@ namespace CustomAvatar
 
 		public void Init(GameObject avatarMirror)
 		{
-			Plugin.Log("Begin Mirror Init");
+			Logger.Log("Begin Mirror Init");
 			_avatarMirror = avatarMirror;
 			var _VRIK = _avatarMirror.GetComponentsInChildren<AvatarScriptPack.VRIK>().FirstOrDefault();
 
-			Plugin.Log("Obtaining IK Targets for Mirror");
+			Logger.Log("Obtaining IK Targets for Mirror");
 			_head = _avatarMirror.transform.Find("Head/HeadTarget").transform;
 			_leftHand = _avatarMirror.transform.Find("LeftHand/LeftHandTarget").transform;
 			_rightHand = _avatarMirror.transform.Find("RightHand/RightHandTarget").transform;
 
 			if (!(_head && _leftHand && _rightHand))
 			{
-				Plugin.Log("Something went wrong - IK Targets not found for mirror");
+				Logger.Log("Something went wrong - IK Targets not found for mirror");
 				isValid = false;
 			}
 
-			Plugin.Log("Setting IK Targets for mirror");
+			Logger.Log("Setting IK Targets for mirror");
 			_VRIK.solver.spine.headTarget = _head.transform;
 			_VRIK.solver.leftArm.target = _leftHand.transform;
 			_VRIK.solver.rightArm.target = _rightHand.transform;
