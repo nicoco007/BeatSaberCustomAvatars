@@ -35,7 +35,7 @@ namespace CustomAvatar
 
 			GameObject mirrorPlane = GameObject.CreatePrimitive(PrimitiveType.Plane);
 			mirrorPlane.name = "Stereo Mirror";
-			mirrorPlane.transform.parent = transform;
+			mirrorPlane.transform.SetParent(transform, false);
 			mirrorPlane.transform.localScale = MIRROR_SCALE;
 			mirrorPlane.transform.position = MIRROR_POSITION + new Vector3(0, MIRROR_SCALE.z * 5, 0); // plane is 10 units in size at scale 1
 			mirrorPlane.transform.rotation = MIRROR_ROTATION;
@@ -44,7 +44,8 @@ namespace CustomAvatar
 			renderer.sharedMaterial = new Material(stereoRenderShader);
 
 			GameObject stereoCameraHead = new GameObject("Stereo Camera Head [Stereo Mirror]");
-			stereoCameraHead.transform.parent = transform;
+			stereoCameraHead.transform.SetParent(transform, false);
+			stereoCameraHead.transform.localScale = new Vector3(1 / MIRROR_SCALE.x, 1 / MIRROR_SCALE.y, 1 / MIRROR_SCALE.z);
 
 			GameObject stereoCameraEyeObject = CopyCamera(stereoCameraHead.transform);
 			Camera stereoCameraEye = stereoCameraEyeObject.GetComponent<Camera>();
@@ -66,9 +67,11 @@ namespace CustomAvatar
 			cameraObject.tag = "Untagged";
 
 			while (cameraObject.transform.childCount > 0) DestroyImmediate(cameraObject.transform.GetChild(0).gameObject);
+
 			DestroyImmediate(cameraObject.GetComponent("CameraRenderCallbacksManager"));
 			DestroyImmediate(cameraObject.GetComponent("AudioListener"));
 			DestroyImmediate(cameraObject.GetComponent("MeshCollider"));
+			DestroyImmediate(cameraObject.GetComponent<VRRenderEventDetector>());
 
 			Camera camera = cameraObject.GetComponent<Camera>();
 

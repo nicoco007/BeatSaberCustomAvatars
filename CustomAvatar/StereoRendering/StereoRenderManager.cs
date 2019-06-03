@@ -87,7 +87,10 @@ namespace CustomAvatar.StereoRendering
 
             if (Camera.main != null)
             {
-                target = Camera.main;
+				var head = Camera.main.gameObject.AddComponent<VRRenderEventDetector>();
+				head.Initialize(0);
+
+				target = Camera.main;
             }
             else
             {
@@ -117,12 +120,29 @@ namespace CustomAvatar.StereoRendering
         private void OnApplicationQuit()
         {
             isApplicationQuitting = true;
-        }
+		}
 
-        /////////////////////////////////////////////////////////////////////////////////
-        // callbacks
+		/////////////////////////////////////////////////////////////////////////////////
+		// render related
 
-        public void AddToManager(StereoRenderer stereoRenderer)
+		public void InvokeStereoRenderers(VRRenderEventDetector detector)
+		{
+			// render registored stereo cameras
+			for (int renderIter = 0; renderIter < stereoRendererList.Count; renderIter++)
+			{
+				StereoRenderer stereoRenderer = stereoRendererList[renderIter];
+
+				if (stereoRenderer.shouldRender)
+				{
+					stereoRenderer.Render(detector);
+				}
+			}
+		}
+
+		/////////////////////////////////////////////////////////////////////////////////
+		// callbacks
+
+		public void AddToManager(StereoRenderer stereoRenderer)
         {
             stereoRendererList.Add(stereoRenderer);
         }
