@@ -1,7 +1,6 @@
-using System;
+using CustomAvatar.StereoRendering;
 using System.Collections;
 using UnityEngine;
-using Logger = CustomAvatar.Util.Logger;
 
 namespace CustomAvatar
 {
@@ -9,12 +8,11 @@ namespace CustomAvatar
 	{
 		public static MirrorController Instance;
 
-		GameObject mirrorCamObj;
-		Camera _cam;
-		RenderTexture _camRenderTexture;
-		GameObject _quad;
-		Material _mirrorMaterial;
-		Shader CutoutShader;
+		private static readonly Vector3 MIRROR_POSITION = new Vector3(0, 0, 2.499f); // origin is bottom center
+		private static readonly Quaternion MIRROR_ROTATION = Quaternion.Euler(-90f, 0, 0);
+		private static readonly Vector3 MIRROR_SCALE = new Vector3(0.3f, 1f, 0.24f);
+
+		private Shader stereoRenderShader;
 
 		public static void OnLoad()
 		{
@@ -24,88 +22,32 @@ namespace CustomAvatar
 
 		void Awake()
 		{
-			var myLoadedAssetBundle = AssetBundle.LoadFromFile("CustomAvatars/Shaders/customavatars.assetbundle");
-			CutoutShader = myLoadedAssetBundle.LoadAsset<Shader>("Assets/Shaders/Custom/sh_custom_unlit_transparent_Luminance.shader");
-			StartCoroutine(SpawnMirror());
-			myLoadedAssetBundle.Unload(false);
-		}
+			var shadersBundle = AssetBundle.LoadFromFile("CustomAvatars/Shaders/customavatars.assetbundle");
+			stereoRenderShader = shadersBundle.LoadAsset<Shader>("Assets/Shaders/StereoRenderShader-Unlit.shader");
 
-		void OnDestroy()
-		{
-			Destroy(mirrorCamObj);
+			StartCoroutine(SpawnMirror());
+			shadersBundle.Unload(false);
 		}
 
 		IEnumerator SpawnMirror()
 		{
 			yield return new WaitUntil(() => Camera.main);
 
-			mirrorCamObj = Instantiate(Camera.main.gameObject);
+			GameObject mirrorPlane = GameObject.CreatePrimitive(PrimitiveType.Plane);
+			mirrorPlane.transform.parent = transform;
+			mirrorPlane.transform.localScale = MIRROR_SCALE;
+			mirrorPlane.transform.position = MIRROR_POSITION + new Vector3(0, MIRROR_SCALE.z * 5, 0); // plane is 10 units in size at scale 1
+			mirrorPlane.transform.rotation = MIRROR_ROTATION;
 
-			mirrorCamObj.SetActive (false);
-			mirrorCamObj.name = "mirrorCamObj";
-			mirrorCamObj.tag = "Untagged";
-			mirrorCamObj.transform.parent = null;
+			Renderer renderer = mirrorPlane.GetComponent<Renderer>();
+			renderer.sharedMaterial = new Material(stereoRenderShader);
 
-			while (mirrorCamObj.transform.childCount > 0) DestroyImmediate(mirrorCamObj.transform.GetChild(0).gameObject);
-			DestroyImmediate(mirrorCamObj.GetComponent("CameraRenderCallbacksManager"));
-			DestroyImmediate(mirrorCamObj.GetComponent("AudioListener"));
-			DestroyImmediate(mirrorCamObj.GetComponent("MeshCollider"));
+			StereoRenderer stereoRenderer = mirrorPlane.AddComponent<StereoRenderer>();
+			stereoRenderer.isMirror = true;
+			stereoRenderer.useScissor = false;
 
-			_cam = mirrorCamObj.GetComponent<Camera>();
-			_cam.stereoTargetEye = StereoTargetEyeMask.None;
-			_cam.enabled = true;
-			_cam.orthographic = true;
-			_cam.aspect = 1.4f;
-			_cam.orthographicSize = 1.25f;
-			_cam.clearFlags = CameraClearFlags.SolidColor;
-			_cam.backgroundColor = new Color(0, 0, 0, 5/255f);
-			_cam.farClipPlane = 10;
-
-			int layer1 = 3;
-			int layer2 = 4;
-			int layer3 = 0;
-			int layerMask1 = 1 << layer1;
-			int layerMask2 = 1 << layer2;
-			int layerMask3 = 1 << layer3;
-			int finalMask = layerMask1 | layerMask2 | layerMask3;
-
-
-			_cam.cullingMask = finalMask;
-
-
-			var _liv = _cam.GetComponent<LIV.SDK.Unity.LIV>();
-			if (_liv)
-				Destroy(_liv);
-
-			mirrorCamObj.SetActive(true);
-
-			mirrorCamObj.transform.position = new Vector3(0, 1.25f, 1.45f);
-			mirrorCamObj.transform.rotation = Quaternion.Euler(0, 180, 0);
-
-
-			_camRenderTexture = new RenderTexture(1, 1, 24);
-			_camRenderTexture.width = _cam.pixelWidth;
-			_camRenderTexture.height = _cam.pixelHeight;
-			_camRenderTexture.useDynamicScale = false;
-			_camRenderTexture.Create();
-
-			_cam.targetTexture = _camRenderTexture;
-
-
-
-			_mirrorMaterial = new Material(CutoutShader);
-			_mirrorMaterial.SetTexture("_Tex", _camRenderTexture);
-			_mirrorMaterial.SetFloat("_Cutout", .01f);
-
-			_quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
-			DontDestroyOnLoad(_quad);
-			DestroyImmediate(_quad.GetComponent<Collider>());
-			_quad.GetComponent<MeshRenderer>().material = _mirrorMaterial;
-			_quad.transform.parent = mirrorCamObj.transform;
-			_quad.transform.localPosition = new Vector3(0,0,-.05f);
-			_quad.transform.localEulerAngles = new Vector3(0, 0, 0);
-			_quad.transform.localScale = new Vector3(2.5f*_cam.aspect,2.5f,2.5f);
-			Logger.Log($"Mirror Resolution: {_cam.pixelWidth}x{_cam.pixelHeight}");
+			stereoRenderer.canvasOriginPos = mirrorPlane.transform.position;
+			stereoRenderer.canvasOriginRot = mirrorPlane.transform.rotation;
 		}
 	}
 }
