@@ -1,6 +1,5 @@
 //========= Copyright 2016-2017, HTC Corporation. All rights reserved. ===========
 
-using System;
 using UnityEngine;
 
 namespace CustomAvatar.StereoRendering

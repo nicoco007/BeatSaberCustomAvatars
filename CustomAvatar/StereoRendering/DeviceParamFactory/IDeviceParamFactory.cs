@@ -1,4 +1,4 @@
-﻿//========= Copyright 2016-2017, HTC Corporation. All rights reserved. ===========
+//========= Copyright 2016-2017, HTC Corporation. All rights reserved. ===========
 using UnityEngine;
 
 namespace CustomAvatar.StereoRendering
