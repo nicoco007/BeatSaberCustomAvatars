@@ -8,9 +8,9 @@ namespace CustomAvatar
 	{
 		public static MirrorController Instance;
 
-		private static readonly Vector3 MIRROR_POSITION = new Vector3(0, 0, 2.499f); // origin is bottom center
+		private static readonly Vector3 MIRROR_POSITION = new Vector3(0, 0.4f, 2.5f); // origin is bottom center
 		private static readonly Quaternion MIRROR_ROTATION = Quaternion.Euler(-90f, 0, 0);
-		private static readonly Vector3 MIRROR_SCALE = new Vector3(0.3f, 1f, 0.24f);
+		private static readonly Vector3 MIRROR_SCALE = new Vector3(0.30f, 1f, 0.20f);
 
 		private Shader stereoRenderShader;
 
@@ -46,8 +46,7 @@ namespace CustomAvatar
 			stereoRenderer.isMirror = true;
 			stereoRenderer.useScissor = false;
 
-			stereoRenderer.canvasOriginPos = mirrorPlane.transform.position;
-			stereoRenderer.canvasOriginRot = mirrorPlane.transform.rotation;
+			stereoRenderer.canvasOrigin = mirrorPlane.transform;
 		}
 	}
 }

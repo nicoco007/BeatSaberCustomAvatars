@@ -151,7 +151,6 @@ namespace CustomAvatar.StereoRendering
         // other variables
 
         // flags
-        private bool canvasVisible = false;
         public bool shouldRender = true;
         public bool useObliqueClip = true;
         public bool useScissor = true;
@@ -181,10 +180,6 @@ namespace CustomAvatar.StereoRendering
         // for mirror rendering
         public bool isMirror = false;
         private Matrix4x4 reflectionMat;
-
-        // for callbacks
-        private Action preRenderListeners;
-        private Action postRenderListeners;
 
         #endregion
 
@@ -276,53 +271,35 @@ namespace CustomAvatar.StereoRendering
 
         private void OnWillRenderObject()
         {
-            if (Camera.current.GetComponent<VRRenderEventDetector>() != null)
+            if (Camera.current.GetComponent<VRRenderEventDetector>() != null && shouldRender)
             {
-                canvasVisible = true;
-            }
-        }
+				VRRenderEventDetector detector = Camera.current.GetComponent<VRRenderEventDetector>();
 
-        public void Render(VRRenderEventDetector detector)
-        {
-            // move stereo camera around based on HMD pose
-            MoveStereoCameraBasedOnHmdPose(detector);
+				MoveStereoCameraBasedOnHmdPose(detector);
 
-            // invoke pre-render events
-            if (preRenderListeners != null)
-                preRenderListeners.Invoke();
+				// invert backface culling when rendering a mirror
+				if (isMirror)
+					GL.invertCulling = true;
 
-            if (canvasVisible)
-            {
-                // invert backface culling when rendering a mirror
-                if (isMirror)
-                    GL.invertCulling = true;
+				// render the canvas
+				if (StereoRenderDevice.IsNotUnityNativeSupport(StereoRenderManager.Instance.hmdType))
+				{
+					RenderToOneStereoTexture(detector);
+				}
+				else
+				{
+					RenderToTwoStereoTextures(detector);
+				}
 
-                // render the canvas
-                if (StereoRenderDevice.IsNotUnityNativeSupport(StereoRenderManager.Instance.hmdType))
-                {
-                    RenderToOneStereoTexture(detector);
-                }
-                else
-                {
-                    RenderToTwoStereoTextures(detector);
-                }
-                
-                // reset backface culling
-                if (isMirror)
-                    GL.invertCulling = false;
+				// reset backface culling
+				if (isMirror)
+					GL.invertCulling = false;
 
-                // resume object layers
-                for (int i = 0; i < ignoreWhenRender.Count; i++)
-                    ignoreWhenRender[i].layer = ignoreObjOriginalLayer[i];
-
-                // finish this render pass, reset visibility
-                canvasVisible = false;
-            }
-
-            // invoke post-render events
-            if (postRenderListeners != null)
-                postRenderListeners.Invoke();
-        }
+				// resume object layers
+				for (int i = 0; i < ignoreWhenRender.Count; i++)
+					ignoreWhenRender[i].layer = ignoreObjOriginalLayer[i];
+			}
+		}
 
         public void MoveStereoCameraBasedOnHmdPose(VRRenderEventDetector detector)
         {
@@ -447,9 +424,9 @@ namespace CustomAvatar.StereoRendering
                 stereoCameraEye.projectionMatrix = stereoCameraEye.CalculateObliqueMatrix(clipPlane);
             }
 
-            // render
+			// render
             stereoCameraEye.targetTexture = targetTexture;
-            stereoCameraEye.Render();
+			stereoCameraEye.Render();
             stereoMaterial.SetTexture(textureName, targetTexture);
         }
 
@@ -594,30 +571,6 @@ namespace CustomAvatar.StereoRendering
         {
             leftProjMatrix = leftMat;
             rightProjMatrix = rightMat;
-        }
-
-        public void AddPreRenderListener(Action listener)
-        {
-            if (listener == null) { return; }
-            preRenderListeners += listener;
-        }
-
-        public void AddPostRenderListener(Action listener)
-        {
-            if (listener == null) { return; }
-            postRenderListeners += listener;
-        }
-
-        public void RemovePreRenderListener(Action listener)
-        {
-            if (listener == null) { return; }
-            preRenderListeners -= listener;
-        }
-
-        public void RemovePostRenderListener(Action listener)
-        {
-            if (listener == null) { return; }
-            postRenderListeners -= listener;
         }
 
         public bool IsEditing()

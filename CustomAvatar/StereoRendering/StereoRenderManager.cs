@@ -1,4 +1,4 @@
-﻿//========= Copyright 2016-2017, HTC Corporation. All rights reserved. ===========
+//========= Copyright 2016-2017, HTC Corporation. All rights reserved. ===========
 
 using System;
 using System.Collections.Generic;
@@ -139,23 +139,6 @@ namespace CustomAvatar.StereoRendering
         private void OnApplicationQuit()
         {
             isApplicationQuitting = true;
-        }
-
-        /////////////////////////////////////////////////////////////////////////////////
-        // render related
-
-        public void InvokeStereoRenderers(VRRenderEventDetector detector)
-        {
-            // render registored stereo cameras
-            for (int renderIter = 0; renderIter < stereoRendererList.Count; renderIter++)
-            {
-                StereoRenderer stereoRenderer = stereoRendererList[renderIter];
-
-                if (stereoRenderer.shouldRender)
-                {
-                    stereoRenderer.Render(detector);
-                }
-            }
         }
 
         /////////////////////////////////////////////////////////////////////////////////
