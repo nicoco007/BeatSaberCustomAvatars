@@ -220,14 +220,7 @@ namespace CustomAvatar.StereoRendering
 
         private void OnDestroy()
         {
-            if (IsEditing())
-            {
-                DestroyImmediate(stereoCameraHead);
-            }
-            else if (Application.isPlaying)
-            {
-                StereoRenderManager.Instance.RemoveFromManager(this);
-            }
+            StereoRenderManager.Instance.RemoveFromManager(this);
         }
 
         private void CreateStereoCameraRig()
@@ -271,25 +264,15 @@ namespace CustomAvatar.StereoRendering
 
         private void OnWillRenderObject()
         {
-            if (Camera.current.GetComponent<VRRenderEventDetector>() != null && shouldRender)
+            if (shouldRender && Camera.current == Camera.main)
             {
-				VRRenderEventDetector detector = Camera.current.GetComponent<VRRenderEventDetector>();
-
-				MoveStereoCameraBasedOnHmdPose(detector);
+				MoveStereoCameraBasedOnHmdPose(Camera.current);
 
 				// invert backface culling when rendering a mirror
 				if (isMirror)
 					GL.invertCulling = true;
 
-				// render the canvas
-				if (StereoRenderDevice.IsNotUnityNativeSupport(StereoRenderManager.Instance.hmdType))
-				{
-					RenderToOneStereoTexture(detector);
-				}
-				else
-				{
-					RenderToTwoStereoTextures(detector);
-				}
+				RenderToTwoStereoTextures(Camera.current);
 
 				// reset backface culling
 				if (isMirror)
@@ -301,10 +284,10 @@ namespace CustomAvatar.StereoRendering
 			}
 		}
 
-        public void MoveStereoCameraBasedOnHmdPose(VRRenderEventDetector detector)
+        public void MoveStereoCameraBasedOnHmdPose(Camera camera)
         {
-            Vector3 mainCamPos = detector.transform.position;
-            Quaternion mainCamRot = detector.transform.rotation;
+            Vector3 mainCamPos = camera.transform.position;
+            Quaternion mainCamRot = camera.transform.rotation;
 
             if (isMirror)
             {
@@ -339,7 +322,7 @@ namespace CustomAvatar.StereoRendering
             }
         }
 
-        private void RenderToTwoStereoTextures(VRRenderEventDetector detector)
+        private void RenderToTwoStereoTextures(Camera camera)
         {
             // get eye poses
             var leftEyeOffset = StereoRenderManager.Instance.paramFactory.GetEyeSeperation(0);
@@ -351,41 +334,16 @@ namespace CustomAvatar.StereoRendering
             // render stereo textures
             RenderEye(
                 leftEyeOffset, leftEyeRotation, 
-                leftProjMatrix, detector.unityCamera.worldToCameraMatrix, 
+                leftProjMatrix, camera.worldToCameraMatrix, 
                 leftEyeTexture, "_LeftEyeTexture");
 
-            var rightEyeWorldToCameraMatrix = detector.unityCamera.worldToCameraMatrix;
+            var rightEyeWorldToCameraMatrix = camera.worldToCameraMatrix;
             rightEyeWorldToCameraMatrix.m03 -= 2.0f * Mathf.Abs(leftEyeOffset.x);
 
             RenderEye(
                 rightEyeOffset, rightEyeRotation,
                 rightProjMatrix, rightEyeWorldToCameraMatrix,
                 rightEyeTexture, "_RightEyeTexture");
-        }
-
-        private void RenderToOneStereoTexture(VRRenderEventDetector detector)
-        {
-            // get eye poses
-            if (detector.eye == 0)
-            {
-                Vector3 leftEyeOffset = StereoRenderManager.Instance.paramFactory.GetEyeSeperation(0);
-                Quaternion leftEyeRotation = StereoRenderManager.Instance.paramFactory.GetEyeLocalRotation(0);
-
-                RenderEye(
-                    leftEyeOffset, leftEyeRotation,
-                    leftProjMatrix, detector.unityCamera.worldToCameraMatrix,
-                    leftEyeTexture, "_MainTexture");
-            }
-            else
-            {
-                Vector3 rightEyeOffset = StereoRenderManager.Instance.paramFactory.GetEyeSeperation(1);
-                Quaternion rightEyeRotation = StereoRenderManager.Instance.paramFactory.GetEyeLocalRotation(1);
-
-                RenderEye(
-                   rightEyeOffset, rightEyeRotation,
-                   rightProjMatrix, detector.unityCamera.worldToCameraMatrix,
-                   rightEyeTexture, "_MainTexture");
-            }
         }
 
         private void RenderEye(

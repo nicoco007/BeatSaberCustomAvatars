@@ -1,6 +1,5 @@
 //========= Copyright 2016-2017, HTC Corporation. All rights reserved. ===========
 
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -57,9 +56,7 @@ namespace CustomAvatar.StereoRendering
             }
 
             // pop warning if no VR device detected
-#if (!(UNITY_ANDROID && VIVE_STEREO_WAVEVR))
             if (!UnityEngine.XR.XRSettings.enabled) { Debug.LogError("VR is not enabled for this application."); }
-#endif
 
             // get HMD head
             Camera head = GetHmdRig();
@@ -88,34 +85,15 @@ namespace CustomAvatar.StereoRendering
         {
             Camera target = null;
 
-#if (UNITY_ANDROID && VIVE_STEREO_WAVEVR)
-            if (WaveVR_Render.Instance != null)
-            {
-                var left = WaveVR_Render.Instance.lefteye.gameObject.AddComponent<VRRenderEventDetector>();
-                left.Initialize(0);
-
-                var right = WaveVR_Render.Instance.righteye.gameObject.AddComponent<VRRenderEventDetector>();
-                right.Initialize(1);
-
-                target = WaveVR_Render.Instance.GetComponent<Camera>();
-            }
-            else
-            {
-                Debug.LogError("No WaveVR_Render found.");
-            }
-#else
             if (Camera.main != null)
             {
-                var head = Camera.main.gameObject.AddComponent<VRRenderEventDetector>();
-                head.Initialize(0);
-
                 target = Camera.main;
             }
             else
             {
                 Debug.LogError("No Camera tagged as \"MainCamera\" found.");
             }
-#endif
+
             return target;
         }
 
