@@ -14,15 +14,8 @@ namespace CustomAvatar.StereoRendering
         // flags
         private static bool isApplicationQuitting = false;
 
-        // device types
-        public HmdType hmdType;
-
         // factory for device-specific things
         public IDeviceParamFactory paramFactory;
-
-        // the camera that represents HMD
-        private static GameObject mainCameraParent;
-        private static Camera mainCamera;
 
         // all current stereo renderers
         public List<StereoRenderer> stereoRendererList = new List<StereoRenderer>();
@@ -72,13 +65,6 @@ namespace CustomAvatar.StereoRendering
             {
                 instance = head.gameObject.AddComponent<StereoRenderManager>();
             }
-
-            // record camera components
-            if (Active)
-            {
-                mainCamera = head;
-                mainCameraParent = head.transform.parent.gameObject;
-            }
         }
 
         private static Camera GetHmdRig()
@@ -105,15 +91,7 @@ namespace CustomAvatar.StereoRendering
             // if not yet initialized
             if (paramFactory == null)
             {
-                // get device type
-                hmdType = StereoRenderDevice.GetHmdType();
-
-                // create parameter factory
-                paramFactory = StereoRenderDevice.InitParamFactory(hmdType);
-                if (paramFactory == null)
-                {
-                    Debug.LogError("Current VR device is unsupported.");
-                }
+				paramFactory = new UnityXRParamFactory();
             }
         }
 
