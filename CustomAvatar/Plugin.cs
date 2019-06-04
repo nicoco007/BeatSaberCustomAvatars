@@ -196,6 +196,7 @@ namespace CustomAvatar
 			if (mainCamera)
 			{
 				SetCameraCullingMask(mainCamera);
+				mainCamera.nearClipPlane = 0.01f;
 			}
 			
 			PlayerAvatarManager?.OnSceneTransitioned(SceneManager.GetActiveScene());
