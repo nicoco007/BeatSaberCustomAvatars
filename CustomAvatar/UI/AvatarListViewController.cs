@@ -17,7 +17,7 @@ namespace CustomAvatar
 		private TableView _tableView;
 		private LevelListTableCell _tableCellTemplate;
 		private IReadOnlyList<CustomAvatar> AvatarList = Plugin.Instance.AvatarLoader.Avatars;
-		private CustomAvatar[] _loadedAvatars;
+		private readonly List<CustomAvatar> _loadedAvatars = new List<CustomAvatar>();
 
 		public Action onBackPressed;
 
@@ -50,62 +50,40 @@ namespace CustomAvatar
 
 		public void LoadAllAvatars()
 		{
-			int loadedCount = 0;
+			_loadedAvatars.Clear();
 
-			_loadedAvatars = new CustomAvatar[AvatarList.Count];
-
-			for (int i = 0; i < AvatarList.Count(); i++)
+			for (int i = 0; i < AvatarList.Count; i++)
 			{
 				var avatar = AvatarList[i];
 
 				try
 				{
-#if DEBUG
-					Logger.Log("AddToArray -> " + _AvatarIndex);
-#endif
-					avatar.Load(AddToArray);
-#if DEBUG
-					Logger.Log("AddToArray => " + _AvatarIndex + " (" + Plugin.Instance.AvatarLoader.IndexOf(avatar) + ") | " + avatar.FullPath);
-#endif
+					Logger.Log("Loading avatar from " + avatar.AssetBundle.FullPath, Logger.LogLevel.Notice);
+					avatar.Load(OnAvatarLoaded);
 				}
 				catch (Exception e)
 				{
-#if DEBUG
-					Logger.Log(_AvatarIndex + " | " + e);
-#endif
-				}
-			}
-
-			void AddToArray(CustomAvatar avatar, AvatarLoadResult _loadResult)
-			{
-#if DEBUG
-				Logger.Log("AddToArray == " + AvatarLoadResult.Completed);
-#endif
-				if (_loadResult != AvatarLoadResult.Completed)
-				{
-					Logger.Log("Avatar " + avatar.FullPath + " failed to load");
-					return;
-				}
-
-				int avatarIndex = Plugin.Instance.AvatarLoader.IndexOf(avatar);
-				_loadedAvatars[avatarIndex] = avatar;
-
-				loadedCount++;
-#if DEBUG
-				Logger.Log("(" + _loadedCount + "/" + ((int)AvatarList.Count()) + ") #" + AvatarIndex);
-#endif
-				//if (_loadedCount == (AvatarList.Count()))
-				if (true)
-				{
-					_tableView.ReloadData();
+					Logger.Log("Failed to load avatar: " + e.Message, Logger.LogLevel.Error);
 				}
 			}
 		}
 
+		private void OnAvatarLoaded(CustomAvatar avatar, AvatarLoadResult _loadResult)
+		{
+			if (_loadResult != AvatarLoadResult.Completed)
+			{
+				Logger.Log("Avatar " + avatar.FullPath + " failed to load");
+				return;
+			}
+
+			_loadedAvatars.Add(avatar);
+			_loadedAvatars.Sort((a, b) => string.Compare(a.Name, b.Name));
+
+			_tableView.ReloadData();
+		}
+
 		private void FirstActivation()
 		{
-			LoadAllAvatars();
-
 			_tableCellTemplate = Resources.FindObjectsOfTypeAll<LevelListTableCell>().First(x => x.name == "LevelListTableCell");
 
 			RectTransform container = new GameObject("AvatarsListContainer", typeof(RectTransform)).transform as RectTransform;
@@ -162,6 +140,8 @@ namespace CustomAvatar
 					onBackPressed();
 				});
 			}
+
+			LoadAllAvatars();
 		}
 
 		private void _TableView_DidSelectRowEvent(TableView sender, int row)
@@ -172,6 +152,7 @@ namespace CustomAvatar
 		TableCell TableView.IDataSource.CellForIdx(int row)
 		{
 			LevelListTableCell tableCell = _tableView.DequeueReusableCellForIdentifier("AvatarListCell") as LevelListTableCell;
+
 			if (tableCell == null)
 			{
 				tableCell = Instantiate(_tableCellTemplate);
@@ -196,7 +177,7 @@ namespace CustomAvatar
 
 		int TableView.IDataSource.NumberOfCells()
 		{
-			return AvatarList.Count;
+			return _loadedAvatars.Count;
 		}
 
 		float TableView.IDataSource.CellSize()
