@@ -5,7 +5,6 @@ using UnityEngine.UI;
 using VRUI;
 using HMUI;
 using CustomUI.BeatSaber;
-using CustomUI.Utilities;
 using TMPro;
 using System.Collections.Generic;
 using Logger = CustomAvatar.Util.Logger;
@@ -15,32 +14,10 @@ namespace CustomAvatar
 	class AvatarListViewController : VRUIViewController, TableView.IDataSource
 	{
 		private Button _backButton;
-		private Button _pageUpButton;
-		private Button _pageDownButton;
-		private TextMeshProUGUI _versionNumber;
 		private TableView _tableView;
 		private LevelListTableCell _tableCellTemplate;
-		public GameObject _avatarPreview;
-		private GameObject _previewParent;
-		private GameObject PreviewAvatar;
-		private AvatarScriptPack.FirstPersonExclusion _exclusionScript;
-		private AvatarScriptPack.VRIK _VRIK;
-		private float _previewHeight;
-		private float _previewHeightOffset;
-		private float _previewScale;
-		private Vector3 _center = Vector3.zero;
 		private IReadOnlyList<CustomAvatar> AvatarList = Plugin.Instance.AvatarLoader.Avatars;
-		private int LastAvatar = -1;
-		private int CurrentAvatar;
-		private int AvatarIndex;
-		public GameObject[] __AvatarPrefabs;
-		public string[] __AvatarNames;
-		public string[] __AvatarAuthors;
-		public string[] __AvatarPaths;
-		public Sprite[] __AvatarCovers;
-		public AvatarLoadResult[] __AvatarLoadResults;
-		private bool PreviewStatus;
-		private int _loadedCount = 0;
+		private CustomAvatar[] _loadedAvatars;
 
 		public Action onBackPressed;
 
@@ -51,12 +28,6 @@ namespace CustomAvatar
 			SelectRowWithAvatar(Plugin.Instance.PlayerAvatarManager.GetCurrentAvatar(), false, true);
 
 			Plugin.Instance.PlayerAvatarManager.AvatarChanged += OnAvatarChanged;
-			PreviewCurrent();
-		}
-
-		private void PreviewCurrent()
-		{
-			CurrentAvatar = Plugin.Instance.AvatarLoader.IndexOf(Plugin.Instance.PlayerAvatarManager.GetCurrentAvatar());
 		}
 
 		protected override void DidDeactivate(DeactivationType deactivationType)
@@ -67,7 +38,6 @@ namespace CustomAvatar
 		private void OnAvatarChanged(CustomAvatar avatar)
 		{
 			SelectRowWithAvatar(avatar, true, false);
-			PreviewCurrent();
 		}
 
 		private void SelectRowWithAvatar(CustomAvatar avatar, bool reload, bool scroll)
@@ -80,18 +50,14 @@ namespace CustomAvatar
 
 		public void LoadAllAvatars()
 		{
-			int _AvatarIndex = 0;
-			__AvatarPrefabs = new GameObject[AvatarList.Count()];
-			__AvatarNames = new string[AvatarList.Count()];
-			__AvatarAuthors = new string[AvatarList.Count()];
-			__AvatarPaths = new string[AvatarList.Count()];
-			__AvatarCovers = new Sprite[AvatarList.Count()];
-			__AvatarLoadResults = new AvatarLoadResult[AvatarList.Count()];
+			int loadedCount = 0;
+
+			_loadedAvatars = new CustomAvatar[AvatarList.Count];
 
 			for (int i = 0; i < AvatarList.Count(); i++)
 			{
-				_AvatarIndex = i;
-				var avatar = AvatarList[_AvatarIndex];
+				var avatar = AvatarList[i];
+
 				try
 				{
 #if DEBUG
@@ -120,16 +86,11 @@ namespace CustomAvatar
 					Logger.Log("Avatar " + avatar.FullPath + " failed to load");
 					return;
 				}
-				AvatarIndex = Plugin.Instance.AvatarLoader.IndexOf(avatar);
 
-				__AvatarNames[AvatarIndex] = avatar.Name;
-				__AvatarAuthors[AvatarIndex] = avatar.AuthorName;
-				__AvatarCovers[AvatarIndex] = avatar.CoverImage;
-				__AvatarPaths[AvatarIndex] = avatar.FullPath;
-				__AvatarPrefabs[AvatarIndex] = avatar.GameObject;
-				__AvatarLoadResults[AvatarIndex] = _loadResult;
+				int avatarIndex = Plugin.Instance.AvatarLoader.IndexOf(avatar);
+				_loadedAvatars[avatarIndex] = avatar;
 
-				_loadedCount++;
+				loadedCount++;
 #if DEBUG
 				Logger.Log("(" + _loadedCount + "/" + ((int)AvatarList.Count()) + ") #" + AvatarIndex);
 #endif
@@ -137,7 +98,6 @@ namespace CustomAvatar
 				if (true)
 				{
 					_tableView.ReloadData();
-					PreviewCurrent();
 				}
 			}
 		}
@@ -151,7 +111,6 @@ namespace CustomAvatar
 			RectTransform container = new GameObject("AvatarsListContainer", typeof(RectTransform)).transform as RectTransform;
 			container.SetParent(rectTransform, false);
 			container.sizeDelta = new Vector2(70f, 0f);
-
 
 			var tableViewObject = new GameObject("AvatarsListTableView");
 			tableViewObject.SetActive(false);
@@ -172,27 +131,27 @@ namespace CustomAvatar
 
 			tableViewObject.SetActive(true);
 
-			_pageUpButton = Instantiate(Resources.FindObjectsOfTypeAll<Button>().First(x => (x.name == "PageUpButton")), container, false);
-			(_pageUpButton.transform as RectTransform).anchoredPosition = new Vector2(0f, 40f);
-			_pageUpButton.interactable = true;
-			_pageUpButton.onClick.AddListener(delegate ()
+			Button pageUpButton = Instantiate(Resources.FindObjectsOfTypeAll<Button>().First(x => (x.name == "PageUpButton")), container, false);
+			(pageUpButton.transform as RectTransform).anchoredPosition = new Vector2(0f, 40f);
+			pageUpButton.interactable = true;
+			pageUpButton.onClick.AddListener(delegate ()
 			{
 				_tableView.PageScrollUp();
 			});
 
-			_pageDownButton = Instantiate(Resources.FindObjectsOfTypeAll<Button>().First(x => (x.name == "PageDownButton")), container, false);
-			(_pageDownButton.transform as RectTransform).anchoredPosition = new Vector2(0f, -30f);
-			_pageDownButton.interactable = true;
-			_pageDownButton.onClick.AddListener(delegate ()
+			Button pageDownButton = Instantiate(Resources.FindObjectsOfTypeAll<Button>().First(x => (x.name == "PageDownButton")), container, false);
+			(pageDownButton.transform as RectTransform).anchoredPosition = new Vector2(0f, -30f);
+			pageDownButton.interactable = true;
+			pageDownButton.onClick.AddListener(delegate ()
 			{
 				_tableView.PageScrollDown();
 			});
 
-			_versionNumber = BeatSaberUI.CreateText(rectTransform, Plugin.Instance.Version, new Vector2(-10f, 10f));
-			(_versionNumber.transform as RectTransform).anchorMax = new Vector2(1f, 0f);
-			(_versionNumber.transform as RectTransform).anchorMin = new Vector2(1f, 0f);
-			_versionNumber.fontSize = 5;
-			_versionNumber.color = Color.white;
+			TextMeshProUGUI versionNumber = BeatSaberUI.CreateText(rectTransform, Plugin.Instance.Version, new Vector2(-10f, 10f));
+			(versionNumber.transform as RectTransform).anchorMax = new Vector2(1f, 0f);
+			(versionNumber.transform as RectTransform).anchorMin = new Vector2(1f, 0f);
+			versionNumber.fontSize = 5;
+			versionNumber.color = Color.white;
 
 			if (_backButton == null)
 			{
@@ -208,8 +167,6 @@ namespace CustomAvatar
 		private void _TableView_DidSelectRowEvent(TableView sender, int row)
 		{
 			Plugin.Instance.PlayerAvatarManager.SwitchToAvatar(Plugin.Instance.AvatarLoader.Avatars[row]);
-			//GeneratePreview(row);
-			LastAvatar = row;
 		}
 
 		TableCell TableView.IDataSource.CellForIdx(int row)
@@ -227,37 +184,12 @@ namespace CustomAvatar
 				tableCell.reuseIdentifier = "AvatarListCell";
 			}
 
-			var cellInfo = new AvatarCellInfo();
-
-			if (__AvatarLoadResults[row] != AvatarLoadResult.Completed)
-			{
-				cellInfo.name = System.IO.Path.GetFileName(AvatarList[row].FullPath) +" failed to load";
-				cellInfo.authorName = "Make sure it's not a duplicate avatar.";
-				cellInfo.rawImageTexture = null;
-			}
-			else
-			{
-				try
-				{
-					cellInfo.name = __AvatarNames[row];
-					cellInfo.authorName = __AvatarAuthors[row];
-					cellInfo.rawImageTexture = __AvatarCovers[row] ? __AvatarCovers[row].texture : Texture2D.blackTexture;
-				}
-				catch (Exception e)
-				{
-					cellInfo.name = "If you see this yell at Assistant";
-					cellInfo.authorName = "because she fucked up";
-					cellInfo.rawImageTexture = Texture2D.blackTexture;
-					Logger.Log(e.StackTrace, Logger.LogLevel.Error);
-				}
-			}
+			tableCell.SetText(_loadedAvatars[row]?.Name ?? "No Name");
+			tableCell.SetSubText(_loadedAvatars[row]?.AuthorName ?? "Unknown Author");
+			tableCell.SetIcon(_loadedAvatars[row]?.CoverImage?.texture ?? Texture2D.blackTexture);
 
 			tableCell.SetPrivateField("_beatmapCharacteristicAlphas", new float[0]);
 			tableCell.SetPrivateField("_beatmapCharacteristicImages", new UnityEngine.UI.Image[0]);
-
-			tableCell.GetPrivateField<TextMeshProUGUI>("_songNameText").text = cellInfo.name;
-			tableCell.GetPrivateField<TextMeshProUGUI>("_authorText").text = cellInfo?.authorName;
-			tableCell.GetPrivateField<UnityEngine.UI.RawImage>("_coverRawImage").texture = cellInfo.rawImageTexture;
 
 			return tableCell;
 		}
