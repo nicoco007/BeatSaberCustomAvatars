@@ -52,11 +52,11 @@ namespace CustomAvatar
 			}
 		}
 
-		public float Height
+		public float EyeHeight
 		{
 			get
 			{
-				if (GameObject == null) return AvatarMeasurement.DefaultPlayerHeight;
+				if (GameObject == null) return MainSettingsModel.kDefaultPlayerHeight - MainSettingsModel.kHeadPosToPlayerHeightOffset;
 				if (_height == null)
 				{
 					_height = AvatarMeasurement.MeasureHeight(GameObject, _assetBundle.AvatarPrefab.ViewPoint);
