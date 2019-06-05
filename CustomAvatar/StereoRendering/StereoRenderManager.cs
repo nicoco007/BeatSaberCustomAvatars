@@ -36,6 +36,16 @@ namespace CustomAvatar.StereoRendering
             }
         }
 
+		public static void Initialize(Camera camera)
+		{
+			if (instance == null)
+			{
+				Destroy(camera.gameObject.GetComponent<CameraRenderCallbacksManager>());
+				instance = camera.gameObject.AddComponent<StereoRenderManager>();
+				camera.gameObject.AddComponent<VRRenderEventDetector>().Initialize(0);
+			}
+		}
+
         private static void Initialize()
         {
             if (Active || isApplicationQuitting) { return; }
@@ -70,13 +80,14 @@ namespace CustomAvatar.StereoRendering
         private static Camera GetHmdRig()
         {
             Camera target = null;
+			Camera mainCamera = Camera.main;
 
-            if (Camera.main != null)
+            if (mainCamera != null)
             {
-				var head = Camera.main.gameObject.AddComponent<VRRenderEventDetector>();
+				var head = mainCamera.gameObject.AddComponent<VRRenderEventDetector>();
 				head.Initialize(0);
 
-				target = Camera.main;
+				target = mainCamera;
             }
             else
             {

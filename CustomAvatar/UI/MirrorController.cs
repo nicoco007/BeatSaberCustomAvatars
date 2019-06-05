@@ -47,39 +47,17 @@ namespace CustomAvatar
 			stereoCameraHead.transform.SetParent(transform, false);
 			stereoCameraHead.transform.localScale = new Vector3(1 / MIRROR_SCALE.x, 1 / MIRROR_SCALE.y, 1 / MIRROR_SCALE.z);
 
-			GameObject stereoCameraEyeObject = CopyCamera(stereoCameraHead.transform);
-			Camera stereoCameraEye = stereoCameraEyeObject.GetComponent<Camera>();
-			stereoCameraEye.enabled = false;
+			GameObject stereoCameraEyeObject = new GameObject("Stereo Camera Eye [Stereo Mirror]");
+			Camera stereoCameraEye = stereoCameraEyeObject.AddComponent<Camera>();
+			stereoCameraEye.CopyFrom(Camera.main);
 
 			StereoRenderer stereoRenderer = mirrorPlane.AddComponent<StereoRenderer>();
 			stereoRenderer.stereoCameraHead = stereoCameraHead;
 			stereoRenderer.stereoCameraEye = stereoCameraEye;
 			stereoRenderer.isMirror = true;
 			stereoRenderer.useScissor = false;
-			stereoRenderer.canvasOrigin = mirrorPlane.transform;
-		}
-
-		private GameObject CopyCamera(Transform parent)
-		{
-			GameObject cameraObject = Instantiate(Camera.main.gameObject, parent);
-
-			cameraObject.name = "Stereo Camera Eye [Stereo Mirror]";
-			cameraObject.tag = "Untagged";
-
-			while (cameraObject.transform.childCount > 0) DestroyImmediate(cameraObject.transform.GetChild(0).gameObject);
-
-			DestroyImmediate(cameraObject.GetComponent("CameraRenderCallbacksManager"));
-			DestroyImmediate(cameraObject.GetComponent("AudioListener"));
-			DestroyImmediate(cameraObject.GetComponent("MeshCollider"));
-			DestroyImmediate(cameraObject.GetComponent<VRRenderEventDetector>());
-
-			Camera camera = cameraObject.GetComponent<Camera>();
-
-			var _liv = camera.GetComponent<LIV.SDK.Unity.LIV>();
-			if (_liv)
-				Destroy(_liv);
-
-			return cameraObject;
+			stereoRenderer.canvasOriginPos = mirrorPlane.transform.position + new Vector3(-10f, 0, 0);
+			stereoRenderer.canvasOriginRot = mirrorPlane.transform.rotation;
 		}
 	}
 }
