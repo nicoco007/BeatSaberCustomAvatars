@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using CustomAvatar.StereoRendering;
 using IPA;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -180,6 +181,8 @@ namespace CustomAvatar
 
 		public void OnSceneLoaded(Scene newScene, LoadSceneMode mode)
 		{
+			StereoRenderManager.Initialize(Resources.FindObjectsOfTypeAll<Camera>().FirstOrDefault(c => c.name == "MenuMainCamera"));
+
 			if (_scenesManager == null)
 			{
 				_scenesManager = Resources.FindObjectsOfTypeAll<GameScenesManager>().FirstOrDefault();
