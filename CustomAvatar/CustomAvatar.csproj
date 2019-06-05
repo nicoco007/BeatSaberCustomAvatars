@@ -107,6 +107,11 @@
     <Compile Include="PosRot.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SpawnedAvatar.cs" />
+    <Compile Include="StereoRendering\DeviceParamFactory\IDeviceParamFactory.cs" />
+    <Compile Include="StereoRendering\DeviceParamFactory\UnityXRParamFactory.cs" />
+    <Compile Include="StereoRendering\StereoRenderer.cs" />
+    <Compile Include="StereoRendering\StereoRenderManager.cs" />
+    <Compile Include="StereoRendering\VREventDetector.cs" />
     <Compile Include="UI\AvatarCellInfo.cs" />
     <Compile Include="UI\AvatarListViewController.cs" />
     <Compile Include="UI\AvatarSettingsViewController.cs" />
