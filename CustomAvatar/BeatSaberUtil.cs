@@ -43,7 +43,7 @@ namespace CustomAvatar
 
 		public static float GetPlayerHeight()
 		{
-			var playerHeight = _playerDataModel == null ? _lastPlayerHeight : _playerDataModel.currentLocalPlayer.playerSpecificSettings.playerHeight;
+			var playerHeight = _playerDataModel == null ? _lastPlayerHeight : _playerDataModel.currentLocalPlayer.playerSpecificSettings.playerHeight * Plugin.PLAYER_SCALE;
 
 			_lastPlayerHeight = playerHeight;
 			return playerHeight;

@@ -215,8 +215,13 @@ namespace CustomAvatar
 
 		public void OnUpdate()
 		{
-			//Camera.main.transform.parent.localScale = Vector3.one * PLAYER_SCALE;
-			//Camera.main.transform.localScale = Vector3.one * 1 / PLAYER_SCALE;
+			Camera mainCamera = Camera.main;
+
+			if (mainCamera != null)
+			{
+				mainCamera.transform.parent.localScale = Vector3.one * PLAYER_SCALE;
+				mainCamera.transform.localScale = Vector3.one * 1 / PLAYER_SCALE;
+			}
 
 			if (Input.GetKeyDown(KeyCode.PageDown))
 			{
