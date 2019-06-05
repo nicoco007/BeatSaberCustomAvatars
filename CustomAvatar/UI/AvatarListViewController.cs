@@ -42,7 +42,7 @@ namespace CustomAvatar
 
 		private void SelectRowWithAvatar(CustomAvatar avatar, bool reload, bool scroll)
 		{
-			int currentRow = Plugin.Instance.AvatarLoader.IndexOf(avatar);
+			int currentRow =  _loadedAvatars.IndexOf(avatar);
 			if (scroll) _tableView.ScrollToCellWithIdx(currentRow, TableView.ScrollPositionType.Center, false);
 			if (reload) _tableView.ReloadData();
 			_tableView.SelectCellWithIdx(currentRow);
@@ -146,7 +146,7 @@ namespace CustomAvatar
 
 		private void _TableView_DidSelectRowEvent(TableView sender, int row)
 		{
-			Plugin.Instance.PlayerAvatarManager.SwitchToAvatar(Plugin.Instance.AvatarLoader.Avatars[row]);
+			Plugin.Instance.PlayerAvatarManager.SwitchToAvatar(_loadedAvatars[row]);
 		}
 
 		TableCell TableView.IDataSource.CellForIdx(int row)
