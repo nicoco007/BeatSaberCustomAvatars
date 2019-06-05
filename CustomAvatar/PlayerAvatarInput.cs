@@ -92,7 +92,7 @@ namespace CustomAvatar
 
 			var roomCenter = BeatSaberUtil.GetRoomCenter();
 			var roomRotation = BeatSaberUtil.GetRoomRotation();
-			pos = roomRotation * pos;
+			pos = roomRotation * pos * Plugin.PLAYER_SCALE;
 			pos += roomCenter;
 			rot = roomRotation * rot;
 			return new PosRot(pos, rot);

@@ -10,7 +10,7 @@ namespace CustomAvatar
 		private readonly AvatarLoader _avatarLoader;
 		public readonly PlayerAvatarInput _playerAvatarInput;
 		private readonly AvatarTailor _avatarTailor;
-		private SpawnedAvatar _currentSpawnedPlayerAvatar;
+		public SpawnedAvatar _currentSpawnedPlayerAvatar;
 
 		public event Action<CustomAvatar> AvatarChanged;
 

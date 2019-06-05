@@ -12,6 +12,8 @@ namespace CustomAvatar
 {
 	public class Plugin : IBeatSaberPlugin
 	{
+		public static float PLAYER_SCALE = 1.0f;
+
 		private const string CustomAvatarsPath = "CustomAvatars";
 		private const string FirstPersonEnabledKey = "avatarFirstPerson";
 		private const string PreviousAvatarKey = "previousAvatar";
@@ -210,13 +212,18 @@ namespace CustomAvatar
 
 		public void OnUpdate()
 		{
+			//Camera.main.transform.parent.localScale = Vector3.one * PLAYER_SCALE;
+			//Camera.main.transform.localScale = Vector3.one * 1 / PLAYER_SCALE;
+
 			if (Input.GetKeyDown(KeyCode.PageDown))
 			{
-				PlayerAvatarManager?.SwitchToNextAvatar();
+				PLAYER_SCALE /= 1.1f;
+				//PlayerAvatarManager?.SwitchToNextAvatar();
 			}
 			else if (Input.GetKeyDown(KeyCode.PageUp))
 			{
-				PlayerAvatarManager?.SwitchToPreviousAvatar();
+				PLAYER_SCALE *= 1.1f;
+				//PlayerAvatarManager?.SwitchToPreviousAvatar();
 			}
 			else if (Input.GetKeyDown(KeyCode.Home))
 			{
