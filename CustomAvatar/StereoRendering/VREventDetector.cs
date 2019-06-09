@@ -10,16 +10,21 @@ namespace CustomAvatar.StereoRendering
 	{
 		public Camera unityCamera;
 		public int eye;
+		private bool initialized = false;
 
 		public void Initialize(int e)
 		{
 			unityCamera = GetComponent<Camera>();
 			eye = e;
+			initialized = true;
 		}
 
 		private void OnPreRender()
 		{
-			StereoRenderManager.Instance.InvokeStereoRenderers(this);
+			if (initialized)
+			{
+				StereoRenderManager.Instance.InvokeStereoRenderers(this);
+			}
 		}
 	}
 }
