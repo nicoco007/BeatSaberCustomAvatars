@@ -129,7 +129,7 @@ namespace CustomAvatar
 
 		public string Version
 		{
-			get { return "4.7.0"; }
+			get { return "4.7.3"; }
 		}
 
 		public void Init(IPA.Logging.Logger log)
@@ -256,24 +256,12 @@ namespace CustomAvatar
 			camera.cullingMask |= 1 << AvatarLayers.OnlyInFirstPerson;
 		}
 
-		public void OnFixedUpdate()
-		{
+		public void OnFixedUpdate() { }
 
-		}
+		public void OnSceneUnloaded(Scene scene) { }
 
-		public void OnSceneUnloaded(Scene scene)
-		{
+		public void OnActiveSceneChanged(Scene prevScene, Scene nextScene) { }
 
-		}
-
-		public void OnActiveSceneChanged(Scene prevScene, Scene nextScene)
-		{
-
-		}
-
-		public void OnApplicationStart()
-		{
-
-		}
+		public void OnApplicationStart() { }
 	}
 }

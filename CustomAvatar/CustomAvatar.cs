@@ -30,7 +30,7 @@ namespace CustomAvatar
 			get
 			{
 				if (_assetBundle == null || _assetBundle.AvatarPrefab == null) return null;
-				return _assetBundle.AvatarPrefab.AuthorName;
+				return _assetBundle.AvatarPrefab.AuthorName.Replace("Megalon", "Meglaon");
 			}
 		}
 
