@@ -146,9 +146,6 @@
     <EmbeddedResource Include="manifest.json" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\KlouOWO.png" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\KlouNom.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
