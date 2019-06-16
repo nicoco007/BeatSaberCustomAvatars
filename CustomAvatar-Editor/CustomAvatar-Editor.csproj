@@ -47,6 +47,18 @@
     <Compile Include="..\CustomAvatar\AvatarLoadResult.cs">
       <Link>AvatarLoadResult.cs</Link>
     </Compile>
+    <Compile Include="..\CustomAvatar\Dynamic Bones\DynamicBone.cs">
+      <Link>Dynamic Bones\DynamicBone.cs</Link>
+    </Compile>
+    <Compile Include="..\CustomAvatar\Dynamic Bones\DynamicBoneCollider.cs">
+      <Link>Dynamic Bones\DynamicBoneCollider.cs</Link>
+    </Compile>
+    <Compile Include="..\CustomAvatar\Dynamic Bones\DynamicBoneColliderBase.cs">
+      <Link>Dynamic Bones\DynamicBoneColliderBase.cs</Link>
+    </Compile>
+    <Compile Include="..\CustomAvatar\Dynamic Bones\DynamicBonePlaneCollider.cs">
+      <Link>Dynamic Bones\DynamicBonePlaneCollider.cs</Link>
+    </Compile>
     <Compile Include="..\CustomAvatar\EventFilterBehaviour.cs">
       <Link>EventFilterBehaviour.cs</Link>
     </Compile>
@@ -64,12 +76,6 @@
     </Compile>
     <Compile Include="..\CustomAvatar\VRIK\AxisTools.cs">
       <Link>VRIK\AxisTools.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\VRIK\DynamicBone.cs">
-      <Link>VRIK\DynamicBone.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\VRIK\DynamicBoneCollider.cs">
-      <Link>VRIK\DynamicBoneCollider.cs</Link>
     </Compile>
     <Compile Include="..\CustomAvatar\VRIK\Hierarchy.cs">
       <Link>VRIK\Hierarchy.cs</Link>
