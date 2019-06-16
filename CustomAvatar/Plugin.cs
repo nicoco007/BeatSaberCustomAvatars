@@ -56,7 +56,7 @@ namespace CustomAvatar
 				foreach (XRNodeState node in nodes)
 				{
 					Logger.Log($"XRNode: {InputTracking.GetNodeName(node.uniqueID)} - {node.nodeType}");
-					if (node.nodeType != XRNode.HardwareTracker || !InputTracking.GetNodeName(node.uniqueID).Contains("LHR-") && !InputTracking.GetNodeName(node.uniqueID).Contains("Vive Controller MV S/N"))
+					if (node.nodeType != XRNode.HardwareTracker || !(InputTracking.GetNodeName(node.uniqueID).Contains("LHR-") || InputTracking.GetNodeName(node.uniqueID).Contains("d4vr")) && !InputTracking.GetNodeName(node.uniqueID).Contains("Vive Controller MV S/N"))
 						continue;
 					Trackers.Add(node);
 				}
