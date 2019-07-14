@@ -41,7 +41,7 @@ namespace CustomAvatar
 				}
 				if (Trackers.Count == 0)
 					_isTrackerAsHand = false;
-				Logger.Log("IsTrackerAsHand : " + IsTrackerAsHand);
+				//Logger.Log("IsTrackerAsHand : " + IsTrackerAsHand);
 			}
 		}
 
@@ -129,7 +129,7 @@ namespace CustomAvatar
 
 		public string Version
 		{
-			get { return "4.7.3"; }
+			get { return "4.7.4"; }
 		}
 
 		public void Init(IPA.Logging.Logger log)

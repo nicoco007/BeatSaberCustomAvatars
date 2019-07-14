@@ -119,7 +119,6 @@
     <Compile Include="UI\AvatarUI.cs" />
     <Compile Include="UI\MirrorController.cs" />
     <Compile Include="Util\Logger.cs" />
-    <Compile Include="Util\ReflectionUtil.cs" />
     <Compile Include="VRIK\AxisTools.cs" />
     <Compile Include="VRIK\Hierarchy.cs" />
     <Compile Include="VRIK\IK.cs" />
