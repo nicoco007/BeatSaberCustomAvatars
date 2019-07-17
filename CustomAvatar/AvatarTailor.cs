@@ -86,7 +86,7 @@ namespace CustomAvatar
 			}
 			else if (ResizePolicy == ResizePolicyType.AlignHeight)
 			{
-				scale = (BeatSaberUtil.GetPlayerHeight() - MainSettingsModel.kHeadPosToPlayerHeightOffset) / avatar.CustomAvatar.EyeHeight;
+				scale = (BeatSaberUtil.GetPlayerHeight() - MainSettingsModel.kHeadPosToPlayerHeightOffset) / avatar.CustomAvatar.Height;
 			}
 
 			// apply scale

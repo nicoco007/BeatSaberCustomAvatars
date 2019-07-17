@@ -31,7 +31,7 @@ namespace CustomAvatar
 		{
 			get
 			{
-				if (GameObject == null) return AvatarMeasurement.DefaultPlayerHeight;
+				if (GameObject == null) return MainSettingsModel.kDefaultPlayerHeight - MainSettingsModel.kHeadPosToPlayerHeightOffset;
 				if (_height == null)
 				{
 					_height = AvatarMeasurement.MeasureHeight(GameObject, ViewPoint);
