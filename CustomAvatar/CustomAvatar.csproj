@@ -23,32 +23,8 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == '0.11.1 Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <DefineConstants>TRACE;PLUGIN</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <OutputPath>bin\0.11.1 Release\</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == '0.11.2 Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <DefineConstants>TRACE;PLUGIN</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <OutputPath>bin\0.11.2 Release\</OutputPath>
-  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>PLUGIN</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == '0.11.1|AnyCPU' ">
-    <OutputPath>bin\0.11.1\</OutputPath>
-    <DefineConstants>PLUGIN</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == '0.11.2|AnyCPU' ">
-    <OutputPath>bin\0.11.2\</OutputPath>
     <DefineConstants>PLUGIN</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
@@ -174,6 +150,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetDir)$(TargetName).dll" "Z:\SteamLibrary\steamapps\common\Beat Saber\Plugins"</PostBuildEvent>
+    <PostBuildEvent>copy "$(TargetPath)" "%25BEATSABERDIR%25\Plugins"</PostBuildEvent>
   </PropertyGroup>
 </Project>
