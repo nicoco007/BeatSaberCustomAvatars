@@ -94,10 +94,10 @@
     <Compile Include="AvatarEventsPlayer.cs" />
     <Compile Include="AvatarPrefab.cs" />
     <Compile Include="AvatarLoadResult.cs" />
-    <Compile Include="Dynamic Bones\DynamicBone.cs" />
-    <Compile Include="Dynamic Bones\DynamicBoneCollider.cs" />
-    <Compile Include="Dynamic Bones\DynamicBoneColliderBase.cs" />
-    <Compile Include="Dynamic Bones\DynamicBonePlaneCollider.cs" />
+    <Compile Include="DynamicBone\DynamicBone.cs" />
+    <Compile Include="DynamicBone\DynamicBoneCollider.cs" />
+    <Compile Include="DynamicBone\DynamicBoneColliderBase.cs" />
+    <Compile Include="DynamicBone\DynamicBonePlaneCollider.cs" />
     <Compile Include="EventFilterBehaviour.cs" />
     <Compile Include="EventFilters.cs" />
     <Compile Include="IAvatarFullBodyInput.cs" />
