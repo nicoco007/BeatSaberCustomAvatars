@@ -4,9 +4,9 @@ namespace CustomAvatar
 {
 	class AvatarCellInfo
 	{
-		public string name { get; set; }
-		public Texture2D rawImageTexture { get; set; }
-		public string authorName { get; set; }
+		public string Name { get; set; }
+		public Texture2D RawImageTexture { get; set; }
+		public string AuthorName { get; set; }
 
 	}
 }

@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 using VRUI;
 using CustomUI.MenuButton;
 using Logger = CustomAvatar.Util.Logger;
+using IPA.Utilities;
 
 namespace CustomAvatar
 {

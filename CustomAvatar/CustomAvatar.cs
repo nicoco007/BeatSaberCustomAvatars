@@ -5,86 +5,39 @@ namespace CustomAvatar
 {
 	public class CustomAvatar
 	{
-		public AvatarAssetBundle AssetBundle { get; }
+		private const string GameObjectName = "_CustomAvatar";
+
 		private float? _height;
+		private AssetBundleCreateRequest assetBundleCreateRequest;
+		private AssetBundleRequest assetBundleRequest;
+		private AvatarDescriptor descriptor;
 
 		internal CustomAvatar(string fullPath)
 		{
 			FullPath = fullPath;
-			AssetBundle = new AvatarAssetBundle(FullPath);
 		}
+
 
 		public string FullPath { get; }
-		
-		public string Name
-		{
-			get
-			{
-				if (AssetBundle == null || AssetBundle.AvatarPrefab == null) return null;
-				return AssetBundle.AvatarPrefab.AvatarName;
-			}
-		}
+		public GameObject GameObject { get; private set; }
+		public bool IsLoaded { get; private set; }
+		public string Name => descriptor?.Name;
+		public string AuthorName => descriptor?.Author;
+		public Sprite CoverImage => descriptor?.Cover;
+		public bool AllowHeightCalibration => descriptor != null ? descriptor.AllowHeightCalibration : true;
+		public Transform ViewPoint { get; private set; }
 
-		public string AuthorName
+		public float Height
 		{
 			get
 			{
-				if (AssetBundle == null || AssetBundle.AvatarPrefab == null) return null;
-				return AssetBundle.AvatarPrefab.AuthorName;
-			}
-		}
-
-		public Sprite CoverImage
-		{
-			get
-			{
-				if (AssetBundle == null || AssetBundle.AvatarPrefab == null) return null;
-				return AssetBundle.AvatarPrefab.CoverImage;
-			}
-		}
-
-		public Transform ViewPoint
-		{
-			get
-			{
-				if (AssetBundle == null || AssetBundle.AvatarPrefab == null) return null;
-				return AssetBundle.AvatarPrefab.ViewPoint;
-			}
-		}
-
-		public float EyeHeight
-		{
-			get
-			{
-				if (GameObject == null) return MainSettingsModel.kDefaultPlayerHeight - MainSettingsModel.kHeadPosToPlayerHeightOffset;
+				if (GameObject == null) return AvatarMeasurement.DefaultPlayerHeight;
 				if (_height == null)
 				{
-					_height = AvatarMeasurement.MeasureHeight(GameObject, AssetBundle.AvatarPrefab.ViewPoint);
+					_height = AvatarMeasurement.MeasureHeight(GameObject, ViewPoint);
 				}
 
 				return _height.Value;
-			}
-		}
-
-		public bool AllowHeightCalibration
-		{
-			get
-			{
-				if (AssetBundle == null || AssetBundle.AvatarPrefab == null) return true;
-				return AssetBundle.AvatarPrefab.AllowHeightCalibration;
-			}
-		}
-
-		public bool IsLoaded
-		{
-			get { return AssetBundle.AssetBundle != null; }
-		}
-
-		public GameObject GameObject
-		{
-			get
-			{
-				return AssetBundle.AvatarPrefab?.Prefab;
 			}
 		}
 
@@ -96,12 +49,36 @@ namespace CustomAvatar
 				return;
 			}
 
-			void Loaded(AvatarLoadResult result)
+			assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(FullPath);
+			assetBundleCreateRequest.completed += asyncOperation => AssetBundleLoaded(loadedCallback);
+		}
+
+		private void AssetBundleLoaded(Action<CustomAvatar, AvatarLoadResult> loadedCallback)
+		{
+			if (!assetBundleCreateRequest.isDone || assetBundleCreateRequest.assetBundle == null)
 			{
-				loadedCallback(this, result);
+				loadedCallback(this, AvatarLoadResult.Failed);
+				return;
 			}
 
-			AssetBundle.LoadAssetBundle(Loaded);
+			assetBundleRequest = assetBundleCreateRequest.assetBundle.LoadAssetWithSubAssetsAsync<GameObject>(GameObjectName);
+			assetBundleRequest.completed += asyncOperation => AssetLoaded(loadedCallback);
+		}
+
+		private void AssetLoaded(Action<CustomAvatar, AvatarLoadResult> loadedCallback)
+		{
+			GameObject = (GameObject)assetBundleRequest.asset;
+
+			if (GameObject == null)
+			{
+				loadedCallback(this, AvatarLoadResult.Invalid);
+			}
+
+			descriptor = GameObject.GetComponent<AvatarDescriptor>();
+			ViewPoint = GameObject.transform.Find("Head");
+
+			IsLoaded = true;
+			loadedCallback(this, AvatarLoadResult.Completed);
 		}
 	}
 }

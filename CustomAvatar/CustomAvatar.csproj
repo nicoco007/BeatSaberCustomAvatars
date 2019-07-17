@@ -1,5 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CustomAvatar</RootNamespace>
     <AssemblyName>CustomAvatar</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -22,117 +22,81 @@
     <DefineConstants>TRACE;DEBUG;PLUGIN</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == '0.11.1 Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <DefineConstants>TRACE;PLUGIN</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <OutputPath>bin\0.11.1 Release\</OutputPath>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == '0.11.2 Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <DefineConstants>TRACE;PLUGIN</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <OutputPath>bin\0.11.2 Release\</OutputPath>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>PLUGIN</DefineConstants>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == '0.11.1|AnyCPU' ">
-    <OutputPath>bin\0.11.1\</OutputPath>
-    <DefineConstants>PLUGIN</DefineConstants>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == '0.11.2|AnyCPU' ">
-    <OutputPath>bin\0.11.2\</OutputPath>
-    <DefineConstants>PLUGIN</DefineConstants>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\..\..\..\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>lib\Assembly-CSharp.dll</HintPath>
     </Reference>
-    <Reference Include="BeatSaberCustomUI, Version=1.3.7.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\SteamLibrary\steamapps\common\Beat Saber\Plugins\BeatSaberCustomUI.dll</HintPath>
+    <Reference Include="BeatSaberCustomUI">
+      <HintPath>lib\BeatSaberCustomUI.dll</HintPath>
     </Reference>
     <Reference Include="IPA.Injector">
-      <HintPath>..\..\..\..\..\..\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\IPA.Injector.dll</HintPath>
+      <HintPath>lib\IPA.Injector.dll</HintPath>
     </Reference>
     <Reference Include="IPA.Loader">
-      <HintPath>..\..\..\..\..\..\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\IPA.Loader.dll</HintPath>
+      <HintPath>lib\IPA.Loader.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="Unity.TextMeshPro">
-      <HintPath>..\..\..\..\..\..\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\Unity.TextMeshPro.dll</HintPath>
+      <HintPath>lib\Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>..\..\..\..\..\..\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>lib\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AnimationModule">
-      <HintPath>..\..\..\..\..\..\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
+      <HintPath>lib\UnityEngine.AnimationModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AssetBundleModule">
-      <HintPath>..\..\..\..\..\..\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
+      <HintPath>lib\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AudioModule">
-      <HintPath>..\..\..\..\..\..\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
+      <HintPath>lib\UnityEngine.AudioModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\..\..\..\..\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.ImageConversionModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
+      <HintPath>lib\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ParticleSystemModule">
-      <HintPath>..\..\..\..\..\..\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.ParticleSystemModule.dll</HintPath>
+      <HintPath>lib\UnityEngine.ParticleSystemModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>..\..\..\..\..\..\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+      <HintPath>lib\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>..\..\..\..\..\..\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <HintPath>lib\UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.VRModule">
-      <HintPath>..\..\..\..\..\..\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.VRModule.dll</HintPath>
+      <HintPath>lib\UnityEngine.VRModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.XRModule">
-      <HintPath>..\..\..\..\..\..\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.XRModule.dll</HintPath>
+      <HintPath>lib\UnityEngine.XRModule.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AvatarBehaviour.cs" />
-    <Compile Include="AvatarClone.cs" />
     <Compile Include="AvatarLayers.cs" />
     <Compile Include="AvatarLoader.cs" />
     <Compile Include="AvatarMeasurement.cs" />
-    <Compile Include="AvatarPreviewBehaviour.cs" />
     <Compile Include="AvatarTailor.cs" />
     <Compile Include="BeatSaberUtil.cs" />
     <Compile Include="CustomAvatar.cs" />
-    <Compile Include="AvatarAssetBundle.cs" />
     <Compile Include="AvatarDescriptor.cs" />
     <Compile Include="AvatarEventsPlayer.cs" />
-    <Compile Include="AvatarPrefab.cs" />
     <Compile Include="AvatarLoadResult.cs" />
+    <Compile Include="DynamicBone\DynamicBone.cs" />
+    <Compile Include="DynamicBone\DynamicBoneCollider.cs" />
+    <Compile Include="DynamicBone\DynamicBoneColliderBase.cs" />
+    <Compile Include="DynamicBone\DynamicBonePlaneCollider.cs" />
     <Compile Include="EventFilterBehaviour.cs" />
     <Compile Include="EventFilters.cs" />
     <Compile Include="IAvatarFullBodyInput.cs" />
     <Compile Include="PlayerAvatarManager.cs" />
-    <Compile Include="AvatarSpawner.cs" />
     <Compile Include="EventManager.cs" />
     <Compile Include="FirstPersonExclusion.cs" />
     <Compile Include="IAvatarInput.cs" />
@@ -148,16 +112,13 @@
     <Compile Include="StereoRendering\VREventDetector.cs" />
     <Compile Include="UI\AvatarCellInfo.cs" />
     <Compile Include="UI\AvatarListViewController.cs" />
-    <Compile Include="UI\AvatarPreviewController.cs" />
     <Compile Include="UI\AvatarSettingsViewController.cs" />
+    <Compile Include="UI\AvatarPreviewController.cs" />
     <Compile Include="UI\AvatarListFlowCoordinator.cs" />
     <Compile Include="UI\AvatarUI.cs" />
     <Compile Include="UI\MirrorController.cs" />
     <Compile Include="Util\Logger.cs" />
-    <Compile Include="Util\ReflectionUtil.cs" />
     <Compile Include="VRIK\AxisTools.cs" />
-    <Compile Include="VRIK\DynamicBone.cs" />
-    <Compile Include="VRIK\DynamicBoneCollider.cs" />
     <Compile Include="VRIK\Hierarchy.cs" />
     <Compile Include="VRIK\IK.cs" />
     <Compile Include="VRIK\IKManager.cs" />
@@ -184,8 +145,14 @@
   <ItemGroup>
     <EmbeddedResource Include="manifest.json" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\KlouNom.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Helpers\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetDir)$(TargetName).dll" "%25BEATSABERDIR%25\Plugins"</PostBuildEvent>
+    <PostBuildEvent>copy "$(TargetPath)" "%25BEATSABERDIR%25\Plugins"</PostBuildEvent>
   </PropertyGroup>
 </Project>

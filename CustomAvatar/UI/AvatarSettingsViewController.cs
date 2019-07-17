@@ -5,6 +5,7 @@ using CustomUI.Settings;
 using TMPro;
 using System.Collections.Generic;
 using Logger = CustomAvatar.Util.Logger;
+using IPA.Utilities;
 
 namespace CustomAvatar
 {
