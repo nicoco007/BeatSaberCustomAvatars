@@ -20,27 +20,7 @@ namespace CustomAvatar
 		private TextMeshProUGUI _versionNumber;
 		private TableView _tableView;
 		private LevelListTableCell _tableCellTemplate;
-		public GameObject _avatarPreview;
-		private GameObject _previewParent;
-		private GameObject PreviewAvatar;
-		private AvatarScriptPack.FirstPersonExclusion _exclusionScript;
-		private AvatarScriptPack.VRIK _VRIK;
-		private float _previewHeight;
-		private float _previewHeightOffset;
-		private float _previewScale;
-		private Vector3 _center = Vector3.zero;
 		private IReadOnlyList<CustomAvatar> AvatarList = Plugin.Instance.AvatarLoader.Avatars;
-		private int LastAvatar = -1;
-		private int CurrentAvatar;
-		private int AvatarIndex;
-		public GameObject[] __AvatarPrefabs;
-		public string[] __AvatarNames;
-		public string[] __AvatarAuthors;
-		public string[] __AvatarPaths;
-		public Sprite[] __AvatarCovers;
-		public AvatarLoadResult[] __AvatarLoadResults;
-		private bool PreviewStatus;
-		private int _loadedCount = 0;
 
 		public Action onBackPressed;
 
@@ -51,12 +31,6 @@ namespace CustomAvatar
 			SelectRowWithAvatar(Plugin.Instance.PlayerAvatarManager.CurrentPlayerAvatar, false, true);
 
 			Plugin.Instance.PlayerAvatarManager.AvatarChanged += OnAvatarChanged;
-			PreviewCurrent();
-		}
-
-		private void PreviewCurrent()
-		{
-			CurrentAvatar = Plugin.Instance.AvatarLoader.IndexOf(Plugin.Instance.PlayerAvatarManager.CurrentPlayerAvatar);
 		}
 
 		protected override void DidDeactivate(DeactivationType deactivationType)
@@ -67,7 +41,6 @@ namespace CustomAvatar
 		private void OnAvatarChanged(CustomAvatar avatar)
 		{
 			SelectRowWithAvatar(avatar, true, false);
-			PreviewCurrent();
 		}
 
 		private void SelectRowWithAvatar(CustomAvatar avatar, bool reload, bool scroll)
@@ -78,74 +51,27 @@ namespace CustomAvatar
 			_tableView.SelectCellWithIdx(currentRow);
 		}
 
-		public void LoadAllAvatars()
+		private void LoadAllAvatars()
 		{
-			int _AvatarIndex = 0;
-			__AvatarPrefabs = new GameObject[AvatarList.Count()];
-			__AvatarNames = new string[AvatarList.Count()];
-			__AvatarAuthors = new string[AvatarList.Count()];
-			__AvatarPaths = new string[AvatarList.Count()];
-			__AvatarCovers = new Sprite[AvatarList.Count()];
-			__AvatarLoadResults = new AvatarLoadResult[AvatarList.Count()];
-
-			for (int i = 0; i < AvatarList.Count(); i++)
+			for (int i = 0; i < AvatarList.Count; i++)
 			{
-				_AvatarIndex = i;
-				var avatar = AvatarList[_AvatarIndex];
-				try
-				{
-#if DEBUG
-					Logger.Log("AddToArray -> " + _AvatarIndex);
-#endif
-					avatar.Load(AddToArray);
-#if DEBUG
-					Logger.Log("AddToArray => " + _AvatarIndex + " (" + Plugin.Instance.AvatarLoader.IndexOf(avatar) + ") | " + avatar.FullPath);
-#endif
-				}
-				catch (Exception e)
-				{
-#if DEBUG
-					Logger.Log(_AvatarIndex + " | " + e);
-#endif
-				}
+				AvatarList[i].Load(OnAvatarLoaded);
+			}
+		}
+
+		private void OnAvatarLoaded(CustomAvatar avatar, AvatarLoadResult loadResult)
+		{
+			if (loadResult != AvatarLoadResult.Completed)
+			{
+				Logger.Log("Avatar " + avatar.FullPath + " failed to load");
+				return;
 			}
 
-			void AddToArray(CustomAvatar avatar, AvatarLoadResult _loadResult)
-			{
-#if DEBUG
-				Logger.Log("AddToArray == " + AvatarLoadResult.Completed);
-#endif
-				if (_loadResult != AvatarLoadResult.Completed)
-				{
-					Logger.Log("Avatar " + avatar.FullPath + " failed to load");
-					return;
-				}
-				AvatarIndex = Plugin.Instance.AvatarLoader.IndexOf(avatar);
-
-				__AvatarNames[AvatarIndex] = avatar.Name;
-				__AvatarAuthors[AvatarIndex] = avatar.AuthorName;
-				__AvatarCovers[AvatarIndex] = avatar.CoverImage;
-				__AvatarPaths[AvatarIndex] = avatar.FullPath;
-				__AvatarPrefabs[AvatarIndex] = avatar.GameObject;
-				__AvatarLoadResults[AvatarIndex] = _loadResult;
-
-				_loadedCount++;
-#if DEBUG
-				Logger.Log("(" + _loadedCount + "/" + ((int)AvatarList.Count()) + ") #" + AvatarIndex);
-#endif
-				//if (_loadedCount == (AvatarList.Count()))
-				if (true)
-				{
-					_tableView.ReloadData();
-					PreviewCurrent();
-				}
-			}
+			_tableView.ReloadData();
 		}
 
 		private void FirstActivation()
 		{
-			LoadAllAvatars();
-
 			_tableCellTemplate = Resources.FindObjectsOfTypeAll<LevelListTableCell>().First(x => x.name == "LevelListTableCell");
 
 			RectTransform container = new GameObject("AvatarsListContainer", typeof(RectTransform)).transform as RectTransform;
@@ -203,13 +129,13 @@ namespace CustomAvatar
 					onBackPressed();
 				});
 			}
+
+			LoadAllAvatars();
 		}
 
 		private void _TableView_DidSelectRowEvent(TableView sender, int row)
 		{
 			Plugin.Instance.PlayerAvatarManager.SwitchToAvatar(Plugin.Instance.AvatarLoader.Avatars[row]);
-			//GeneratePreview(row);
-			LastAvatar = row;
 		}
 
 		TableCell TableView.IDataSource.CellForIdx(int row)
@@ -218,46 +144,31 @@ namespace CustomAvatar
 			if (tableCell == null)
 			{
 				tableCell = Instantiate(_tableCellTemplate);
-
-				// remove level type icons
-				tableCell.transform.Find("LevelTypeIcon0").gameObject.SetActive(false);
-				tableCell.transform.Find("LevelTypeIcon1").gameObject.SetActive(false);
-				tableCell.transform.Find("LevelTypeIcon2").gameObject.SetActive(false);
-
 				tableCell.reuseIdentifier = "AvatarListCell";
 			}
 
 			var cellInfo = new AvatarCellInfo();
+			CustomAvatar avatar = AvatarList[row];
 
-			if (__AvatarLoadResults[row] != AvatarLoadResult.Completed)
+			if (!avatar.IsLoaded)
 			{
-				cellInfo.name = System.IO.Path.GetFileName(AvatarList[row].FullPath) +" failed to load";
-				cellInfo.authorName = "Make sure it's not a duplicate avatar.";
-				cellInfo.rawImageTexture = null;
+				cellInfo.Name = System.IO.Path.GetFileName(avatar.FullPath) + " failed to load";
+				cellInfo.AuthorName = "Make sure it's not a duplicate avatar.";
+				cellInfo.RawImageTexture = Texture2D.blackTexture;
 			}
 			else
 			{
-				try
-				{
-					cellInfo.name = __AvatarNames[row];
-					cellInfo.authorName = __AvatarAuthors[row];
-					cellInfo.rawImageTexture = __AvatarCovers[row] ? __AvatarCovers[row].texture : Texture2D.blackTexture;
-				}
-				catch (Exception e)
-				{
-					cellInfo.name = "If you see this yell at Assistant";
-					cellInfo.authorName = "because she fucked up";
-					cellInfo.rawImageTexture = Texture2D.blackTexture;
-					Logger.Log(e.StackTrace, Logger.LogLevel.Error);
-				}
+				cellInfo.Name = avatar.Name;
+				cellInfo.AuthorName = avatar.AuthorName;
+				cellInfo.RawImageTexture = avatar.CoverImage ? avatar.CoverImage.texture : Texture2D.blackTexture;
 			}
 
 			tableCell.SetPrivateField("_beatmapCharacteristicAlphas", new float[0]);
 			tableCell.SetPrivateField("_beatmapCharacteristicImages", new UnityEngine.UI.Image[0]);
 
-			tableCell.GetPrivateField<TextMeshProUGUI>("_songNameText").text = cellInfo.name;
-			tableCell.GetPrivateField<TextMeshProUGUI>("_authorText").text = cellInfo?.authorName;
-			tableCell.GetPrivateField<UnityEngine.UI.RawImage>("_coverRawImage").texture = cellInfo.rawImageTexture;
+			tableCell.GetPrivateField<TextMeshProUGUI>("_songNameText").text = cellInfo.Name;
+			tableCell.GetPrivateField<TextMeshProUGUI>("_authorText").text = cellInfo?.AuthorName;
+			tableCell.GetPrivateField<UnityEngine.UI.RawImage>("_coverRawImage").texture = cellInfo.RawImageTexture;
 
 			return tableCell;
 		}
