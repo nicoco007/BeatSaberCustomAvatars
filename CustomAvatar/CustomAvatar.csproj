@@ -80,18 +80,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AvatarBehaviour.cs" />
-    <Compile Include="AvatarClone.cs" />
     <Compile Include="AvatarLayers.cs" />
     <Compile Include="AvatarLoader.cs" />
     <Compile Include="AvatarMeasurement.cs" />
-    <Compile Include="AvatarPreviewBehaviour.cs" />
     <Compile Include="AvatarTailor.cs" />
     <Compile Include="BeatSaberUtil.cs" />
     <Compile Include="CustomAvatar.cs" />
-    <Compile Include="AvatarAssetBundle.cs" />
     <Compile Include="AvatarDescriptor.cs" />
     <Compile Include="AvatarEventsPlayer.cs" />
-    <Compile Include="AvatarPrefab.cs" />
     <Compile Include="AvatarLoadResult.cs" />
     <Compile Include="DynamicBone\DynamicBone.cs" />
     <Compile Include="DynamicBone\DynamicBoneCollider.cs" />
@@ -147,6 +143,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\KlouNom.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Helpers\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
