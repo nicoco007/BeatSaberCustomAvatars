@@ -48,7 +48,7 @@ namespace CustomAvatar
 		{
 			if (firstActivation) FirstActivation();
 
-			SelectRowWithAvatar(Plugin.Instance.PlayerAvatarManager.GetCurrentAvatar(), false, true);
+			SelectRowWithAvatar(Plugin.Instance.PlayerAvatarManager.CurrentPlayerAvatar, false, true);
 
 			Plugin.Instance.PlayerAvatarManager.AvatarChanged += OnAvatarChanged;
 			PreviewCurrent();
@@ -56,7 +56,7 @@ namespace CustomAvatar
 
 		private void PreviewCurrent()
 		{
-			CurrentAvatar = Plugin.Instance.AvatarLoader.IndexOf(Plugin.Instance.PlayerAvatarManager.GetCurrentAvatar());
+			CurrentAvatar = Plugin.Instance.AvatarLoader.IndexOf(Plugin.Instance.PlayerAvatarManager.CurrentPlayerAvatar);
 		}
 
 		protected override void DidDeactivate(DeactivationType deactivationType)

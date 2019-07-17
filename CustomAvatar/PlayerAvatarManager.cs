@@ -7,23 +7,12 @@ namespace CustomAvatar
 {
 	public class PlayerAvatarManager
 	{
+		private readonly PlayerAvatarInput _playerAvatarInput;
 		private readonly AvatarLoader _avatarLoader;
-		public readonly PlayerAvatarInput _playerAvatarInput;
 		private readonly AvatarTailor _avatarTailor;
-		public SpawnedAvatar _currentSpawnedPlayerAvatar;
+		private SpawnedAvatar _currentSpawnedPlayerAvatar;
 
 		public event Action<CustomAvatar> AvatarChanged;
-
-		private CustomAvatar CurrentPlayerAvatar
-		{
-			get { return _currentSpawnedPlayerAvatar?.CustomAvatar; }
-			set
-			{
-				if (value == null) return;
-				if (CurrentPlayerAvatar == value) return;
-				value.Load(CustomAvatarLoaded);
-			}
-		}
 
 		public PlayerAvatarManager(AvatarLoader avatarLoader, AvatarTailor avatarTailor, CustomAvatar startAvatar = null)
 		{
@@ -33,22 +22,21 @@ namespace CustomAvatar
 
 			if (startAvatar != null)
 			{
-				CurrentPlayerAvatar = startAvatar;
+				SwitchToAvatar(startAvatar);
 			}
 
 			Plugin.Instance.FirstPersonEnabledChanged += OnFirstPersonEnabledChanged;
-			SceneManager.sceneLoaded += SceneManagerOnSceneLoaded;
+			Plugin.Instance.SceneTransitioned += OnSceneTransitioned;
+			SceneManager.sceneLoaded += OnSceneLoaded;
 		}
+
+		public CustomAvatar CurrentPlayerAvatar => _currentSpawnedPlayerAvatar?.CustomAvatar;
 
 		~PlayerAvatarManager()
 		{
 			Plugin.Instance.FirstPersonEnabledChanged -= OnFirstPersonEnabledChanged;
-			SceneManager.sceneLoaded -= SceneManagerOnSceneLoaded;
-		}
-
-		public CustomAvatar GetCurrentAvatar()
-		{
-			return CurrentPlayerAvatar;
+			Plugin.Instance.SceneTransitioned -= OnSceneTransitioned;
+			SceneManager.sceneLoaded -= OnSceneLoaded;
 		}
 
 		public SpawnedAvatar GetSpawnedAvatar()
@@ -58,7 +46,10 @@ namespace CustomAvatar
 
 		public void SwitchToAvatar(CustomAvatar customAvatar)
 		{
-			CurrentPlayerAvatar = customAvatar;
+			if (customAvatar == null) return;
+			if (CurrentPlayerAvatar == customAvatar) return;
+
+			customAvatar.Load(OnCustomAvatarLoaded);
 		}
 
 		public CustomAvatar SwitchToNextAvatar()
@@ -68,7 +59,7 @@ namespace CustomAvatar
 
 			if (CurrentPlayerAvatar == null)
 			{
-				CurrentPlayerAvatar = avatars[0];
+				SwitchToAvatar(avatars[0]);
 				return avatars[0];
 			}
 
@@ -82,7 +73,7 @@ namespace CustomAvatar
 			}
 
 			var nextAvatar = avatars[nextIndex];
-			CurrentPlayerAvatar = nextAvatar;
+			SwitchToAvatar(nextAvatar);
 			return nextAvatar;
 		}
 
@@ -93,7 +84,7 @@ namespace CustomAvatar
 
 			if (CurrentPlayerAvatar == null)
 			{
-				CurrentPlayerAvatar = avatars[0];
+				SwitchToAvatar(avatars[0]);
 				return avatars[0];
 			}
 
@@ -107,11 +98,19 @@ namespace CustomAvatar
 			}
 
 			var nextAvatar = avatars[nextIndex];
-			CurrentPlayerAvatar = nextAvatar;
+			SwitchToAvatar(nextAvatar);
 			return nextAvatar;
 		}
 
-		private void CustomAvatarLoaded(CustomAvatar loadedAvatar, AvatarLoadResult result)
+		public void ResizePlayerAvatar()
+		{
+			if (_currentSpawnedPlayerAvatar?.GameObject == null) return;
+			if (!_currentSpawnedPlayerAvatar.CustomAvatar.AllowHeightCalibration) return;
+
+			_avatarTailor.ResizeAvatar(_currentSpawnedPlayerAvatar);
+		}
+
+		private void OnCustomAvatarLoaded(CustomAvatar loadedAvatar, AvatarLoadResult result)
 		{
 			if (result != AvatarLoadResult.Completed)
 			{
@@ -126,7 +125,7 @@ namespace CustomAvatar
 				Object.Destroy(_currentSpawnedPlayerAvatar.GameObject);
 			}
 
-			_currentSpawnedPlayerAvatar = AvatarSpawner.SpawnAvatar(loadedAvatar, _playerAvatarInput);
+			_currentSpawnedPlayerAvatar = SpawnAvatar(loadedAvatar, _playerAvatarInput);
 
 			AvatarChanged?.Invoke(loadedAvatar);
 
@@ -144,14 +143,14 @@ namespace CustomAvatar
 				ex.OnFirstPersonEnabledChanged(firstPersonEnabled);
 		}
 
-		private void SceneManagerOnSceneLoaded(Scene newScene, LoadSceneMode mode)
+		private void OnSceneLoaded(Scene newScene, LoadSceneMode mode)
 		{
 			ResizePlayerAvatar();
 			OnFirstPersonEnabledChanged(Plugin.Instance.FirstPersonEnabled);
 			_currentSpawnedPlayerAvatar?.GameObject.GetComponentInChildren<AvatarEventsPlayer>()?.Restart();
 		}
 
-		public void OnSceneTransitioned(Scene newScene)
+		private void OnSceneTransitioned(Scene newScene)
 		{
 			Logger.Log("OnSceneTransitioned - " + newScene.name);
 			if (newScene.name.Equals("GameCore"))
@@ -160,12 +159,60 @@ namespace CustomAvatar
 				_currentSpawnedPlayerAvatar?.GameObject.GetComponentInChildren<AvatarEventsPlayer>()?.MenuEnteredEvent();
 		}
 
-		public void ResizePlayerAvatar()
+		private static SpawnedAvatar SpawnAvatar(CustomAvatar customAvatar, IAvatarInput avatarInput)
 		{
-			if (_currentSpawnedPlayerAvatar?.GameObject == null) return;
-			if (!_currentSpawnedPlayerAvatar.CustomAvatar.AllowHeightCalibration) return;
+			if (customAvatar.GameObject == null)
+			{
+				Logger.Log("Can't spawn " + customAvatar.FullPath + " because it hasn't been loaded!");
+				return null;
+			}
 
-			_avatarTailor.ResizeAvatar(_currentSpawnedPlayerAvatar);
+			var avatarGameObject = Object.Instantiate(customAvatar.GameObject);
+
+			var behaviour = avatarGameObject.AddComponent<AvatarBehaviour>();
+			behaviour.Init(avatarInput);
+
+			avatarGameObject.AddComponent<AvatarEventsPlayer>();
+
+			/* Don't have the patience to make this work rn
+			 
+			var mainCamera = Camera.main;
+
+			foreach (Camera cam in avatarGameObject.GetComponentsInChildren<Camera>())
+			{
+				if(mainCamera)
+				{
+					var newCamObj = Object.Instantiate(mainCamera, cam.transform);
+					newCamObj.tag = "Untagged";
+					while (newCamObj.transform.childCount > 0) Object.DestroyImmediate(newCamObj.transform.GetChild(0).gameObject);
+					Object.DestroyImmediate(newCamObj.GetComponent("CameraRenderCallbacksManager"));
+					Object.DestroyImmediate(newCamObj.GetComponent("AudioListener"));
+					Object.DestroyImmediate(newCamObj.GetComponent("MeshCollider"));
+
+					var newCam = newCamObj.GetComponent<Camera>();
+					newCam.stereoTargetEye = StereoTargetEyeMask.None;
+					newCam.cullingMask = cam.cullingMask;
+
+					var _liv = newCam.GetComponent<LIV.SDK.Unity.LIV>();
+					if (_liv)
+						Object.Destroy(_liv);
+
+					var _screenCamera = new GameObject("Screen Camera").AddComponent<ScreenCameraBehaviour>();
+
+					if (_previewMaterial == null)
+						_previewMaterial = new Material(Shader.Find("Hidden/BlitCopyWithDepth"));
+
+
+					cam.enabled = false;
+				}
+			}
+			*/
+
+			Object.DontDestroyOnLoad(avatarGameObject);
+
+			var spawnedAvatar = new SpawnedAvatar(customAvatar, avatarGameObject);
+
+			return spawnedAvatar;
 		}
 	}
 }

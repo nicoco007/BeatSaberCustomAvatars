@@ -80,6 +80,7 @@ namespace CustomAvatar
 		}
 
 		public event Action<bool> FirstPersonEnabledChanged;
+		public event Action<Scene> SceneTransitioned;
 
 		public static Plugin Instance { get; private set; }
 		public AvatarLoader AvatarLoader { get; private set; }
@@ -185,7 +186,10 @@ namespace CustomAvatar
 				_scenesManager = Resources.FindObjectsOfTypeAll<GameScenesManager>().FirstOrDefault();
 
 				if (_scenesManager != null)
+				{
 					_scenesManager.transitionDidFinishEvent += SceneTransitionDidFinish;
+					_scenesManager.transitionDidFinishEvent += () => SceneTransitioned.Invoke(SceneManager.GetActiveScene());
+				}
 			}
 		}
 
@@ -197,8 +201,6 @@ namespace CustomAvatar
 			{
 				SetCameraCullingMask(mainCamera);
 			}
-			
-			PlayerAvatarManager?.OnSceneTransitioned(SceneManager.GetActiveScene());
 		}
 
 		private void PlayerAvatarManagerOnAvatarChanged(CustomAvatar newAvatar)
