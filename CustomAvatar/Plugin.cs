@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using AvatarScriptPack;
 using CustomAvatar.StereoRendering;
 using IPA;
 using UnityEngine;
@@ -24,6 +25,8 @@ namespace CustomAvatar
 
 		private GameScenesManager _scenesManager;
 		private static bool _isTrackerAsHand;
+
+		private GameObject go;
 
 		public static List<XRNodeState> Trackers = new List<XRNodeState>();
 		public static bool IsTrackerAsHand
@@ -75,6 +78,8 @@ namespace CustomAvatar
 					{
 						_IKManagerAdvanced.CheckFullBodyTracking();
 					}
+
+					
 				}
 				bool isFullBodyTracking = Plugin.IsFullBodyTracking;
 				Logger.Log(string.Concat("IsFullBodyTracking : ", isFullBodyTracking.ToString()));
@@ -178,19 +183,30 @@ namespace CustomAvatar
 			
 			PlayerAvatarManager = new PlayerAvatarManager(AvatarLoader, AvatarTailor, previousAvatar);
 			PlayerAvatarManager.AvatarChanged += PlayerAvatarManagerOnAvatarChanged;
-			IsFullBodyTracking = true;
 		}
 
 		public void OnSceneLoaded(Scene newScene, LoadSceneMode mode)
 		{
-			StereoRenderManager.Initialize(Resources.FindObjectsOfTypeAll<Camera>().FirstOrDefault(c => c.name == "MenuMainCamera"));
+			string cameraName = "MenuMainCamera";
+			Camera mainMenuCamera = Resources.FindObjectsOfTypeAll<Camera>().FirstOrDefault(c => c.name == cameraName);
+
+			if (mainMenuCamera)
+			{
+				StereoRenderManager.Initialize(mainMenuCamera);
+			}
+			else
+			{
+				Debug.LogWarning($"Could not find camera with name {cameraName}!");
+			}
 
 			if (_scenesManager == null)
 			{
 				_scenesManager = Resources.FindObjectsOfTypeAll<GameScenesManager>().FirstOrDefault();
 
 				if (_scenesManager != null)
+				{
 					_scenesManager.transitionDidFinishEvent += SceneTransitionDidFinish;
+				}
 			}
 		}
 
@@ -198,10 +214,35 @@ namespace CustomAvatar
 		{
 			Camera mainCamera = Camera.main;
 
+			if (PlayerAvatarInput.LeftLegCorrection.Rotation == Quaternion.identity)
+			{
+				Console.WriteLine("Scene transition finished");
+				var tempInput = new PlayerAvatarInput();
+				var normal = Vector3.up;
+
+				PosRot leftFoot = tempInput.LeftLegPosRot;
+				Vector3 leftFootForward = leftFoot.Rotation * Vector3.up; // forward on feet trackers is y (up)
+				Vector3 leftFootStraightForward = Vector3.ProjectOnPlane(leftFootForward, normal); // get projection of forward vector on xz plane (floor)
+				Quaternion leftRotationCorrection = Quaternion.Inverse(leftFoot.Rotation) * Quaternion.LookRotation(Vector3.up, leftFootStraightForward); // get difference between world rotation and flat forward rotation
+				PlayerAvatarInput.LeftLegCorrection = new PosRot(leftFoot.Position.y * Vector3.down, leftRotationCorrection);
+
+				PosRot rightFoot = tempInput.RightLegPosRot;
+				Vector3 rightFootForward = rightFoot.Rotation * Vector3.up;
+			    Vector3 rightFootStraightForward = Vector3.ProjectOnPlane(rightFootForward, normal);
+				Quaternion rightRotationCorrection = Quaternion.Inverse(rightFoot.Rotation) * Quaternion.LookRotation(Vector3.up, rightFootStraightForward);
+				PlayerAvatarInput.RightLegCorrection = new PosRot(rightFoot.Position.y * Vector3.down, rightRotationCorrection);
+			}
+
+			IsFullBodyTracking = true;
+
 			if (mainCamera)
 			{
 				SetCameraCullingMask(mainCamera);
 				mainCamera.nearClipPlane = 0.01f;
+			}
+			else
+			{
+				Debug.LogWarning("Could not find main camera!");
 			}
 			
 			PlayerAvatarManager?.OnSceneTransitioned(SceneManager.GetActiveScene());
@@ -269,7 +310,7 @@ namespace CustomAvatar
 			Logger.Log("Adding third person culling mask to " + camera.name);
 
 			camera.cullingMask &= ~(1 << AvatarLayers.OnlyInThirdPerson);
-			camera.cullingMask |= 1 << AvatarLayers.OnlyInFirstPerson;
+			camera.cullingMask |= 1 << AvatarLayers.Global;
 		}
 
 		public void OnFixedUpdate()

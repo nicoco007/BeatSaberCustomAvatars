@@ -205,6 +205,7 @@ namespace CustomAvatar.StereoRendering
 			// use first material from renderer as stereo material
 			Renderer renderer = GetComponent<Renderer>();
 			stereoMaterial = renderer.materials[0];
+			stereoMaterial.SetFloat("_Cutout", 0.01f);
 
 			// create render textures as target of stereo rendering
 			CreateRenderTextures(
@@ -233,14 +234,14 @@ namespace CustomAvatar.StereoRendering
 
 		private void CreateRenderTextures(int sceneWidth, int sceneHeight, int aaLevel = 4)
 		{
-			int depth = 24;
+			int depth = 32;
 			int w = (int)(textureResolutionScale * sceneWidth);
 			int h = (int)(textureResolutionScale * sceneHeight);
 
-			leftEyeTexture = new RenderTexture(w, h, depth);
+			leftEyeTexture = new RenderTexture(w, h, depth, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
 			leftEyeTexture.antiAliasing = aaLevel;
 
-			rightEyeTexture = new RenderTexture(w, h, depth);
+			rightEyeTexture = new RenderTexture(w, h, depth, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
 			rightEyeTexture.antiAliasing = aaLevel;
 		}
 

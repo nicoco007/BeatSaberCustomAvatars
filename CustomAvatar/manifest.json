@@ -2,11 +2,11 @@
   "$schema": "https://raw.githubusercontent.com/nike4613/ModSaber-MetadataFileSchema/master/Schema.json",
   "author": "Steven 🎀",
   "description": "A plugin to let you use custom avatars in Beat Saber.",
-  "gameVersion": "1.0.0",
+  "gameVersion": "1.1.0",
   "id": "Custom Avatars",
   "icon":  "CustomAvatar.Resources.KlouNom.png",
   "name": "Custom Avatars",
-  "version": "4.7.0",
+  "version": "4.7.4",
   "features": [],
   "dependsOn": {
     "CustomUI":  "^1.5.8"

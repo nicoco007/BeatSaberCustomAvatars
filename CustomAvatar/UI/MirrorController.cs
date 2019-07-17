@@ -8,9 +8,9 @@ namespace CustomAvatar
 	{
 		public static MirrorController Instance;
 
-		private static readonly Vector3 MIRROR_POSITION = new Vector3(0, 0.4f, 2.5f); // origin is bottom center
+		private static readonly Vector3 MIRROR_POSITION = new Vector3(0, 0, 1.5f); // origin is bottom center
 		private static readonly Quaternion MIRROR_ROTATION = Quaternion.Euler(-90f, 0, 0);
-		private static readonly Vector3 MIRROR_SCALE = new Vector3(0.30f, 1f, 0.20f);
+		private static readonly Vector3 MIRROR_SCALE = new Vector3(0.50f, 1f, 0.25f);
 
 		private Shader stereoRenderShader;
 
@@ -25,7 +25,15 @@ namespace CustomAvatar
 			var shadersBundle = AssetBundle.LoadFromFile("CustomAvatars/Shaders/customavatars.assetbundle");
 			stereoRenderShader = shadersBundle.LoadAsset<Shader>("Assets/Shaders/StereoRenderShader-Unlit.shader");
 
-			StartCoroutine(SpawnMirror());
+			if (stereoRenderShader)
+			{
+				StartCoroutine(SpawnMirror());
+			}
+			else
+			{
+				Debug.LogError("Failed to load mirror shader!");
+			}
+
 			shadersBundle.Unload(false);
 		}
 
@@ -43,21 +51,28 @@ namespace CustomAvatar
 			Renderer renderer = mirrorPlane.GetComponent<Renderer>();
 			renderer.sharedMaterial = new Material(stereoRenderShader);
 
-			GameObject stereoCameraHead = new GameObject("Stereo Camera Head [Stereo Mirror]");
-			stereoCameraHead.transform.SetParent(transform, false);
-			stereoCameraHead.transform.localScale = new Vector3(1 / MIRROR_SCALE.x, 1 / MIRROR_SCALE.y, 1 / MIRROR_SCALE.z);
+			if (true)
+			{
+				GameObject stereoCameraHead = new GameObject("Stereo Camera Head [Stereo Mirror]");
+				stereoCameraHead.transform.SetParent(transform, false);
+				stereoCameraHead.transform.localScale = new Vector3(1 / MIRROR_SCALE.x, 1 / MIRROR_SCALE.y, 1 / MIRROR_SCALE.z);
 
-			GameObject stereoCameraEyeObject = new GameObject("Stereo Camera Eye [Stereo Mirror]");
-			Camera stereoCameraEye = stereoCameraEyeObject.AddComponent<Camera>();
-			stereoCameraEye.CopyFrom(Camera.main);
+				GameObject stereoCameraEyeObject = new GameObject("Stereo Camera Eye [Stereo Mirror]");
+				Camera stereoCameraEye = stereoCameraEyeObject.AddComponent<Camera>();
+				stereoCameraEye.cullingMask = 0;
+				stereoCameraEye.cullingMask |= 1 << AvatarLayers.OnlyInThirdPerson;
+				stereoCameraEye.cullingMask |= 1 << AvatarLayers.Global;
+				stereoCameraEye.clearFlags = CameraClearFlags.SolidColor;
+				stereoCameraEye.backgroundColor = new Color(0, 0, 0, 1f);
 
-			StereoRenderer stereoRenderer = mirrorPlane.AddComponent<StereoRenderer>();
-			stereoRenderer.stereoCameraHead = stereoCameraHead;
-			stereoRenderer.stereoCameraEye = stereoCameraEye;
-			stereoRenderer.isMirror = true;
-			stereoRenderer.useScissor = false;
-			stereoRenderer.canvasOriginPos = mirrorPlane.transform.position + new Vector3(-10f, 0, 0);
-			stereoRenderer.canvasOriginRot = mirrorPlane.transform.rotation;
+				StereoRenderer stereoRenderer = mirrorPlane.AddComponent<StereoRenderer>();
+				stereoRenderer.stereoCameraHead = stereoCameraHead;
+				stereoRenderer.stereoCameraEye = stereoCameraEye;
+				stereoRenderer.isMirror = true;
+				stereoRenderer.useScissor = false;
+				stereoRenderer.canvasOriginPos = mirrorPlane.transform.position + new Vector3(-10f, 0, 0);
+				stereoRenderer.canvasOriginRot = mirrorPlane.transform.rotation;
+			}
 		}
 	}
 }

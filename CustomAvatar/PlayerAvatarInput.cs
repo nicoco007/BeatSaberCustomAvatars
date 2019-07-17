@@ -7,7 +7,10 @@ using Logger = CustomAvatar.Util.Logger;
 namespace CustomAvatar
 {
 	public class PlayerAvatarInput : IAvatarFullBodyInput
-	{	
+	{
+		public static PosRot LeftLegCorrection { get; set; } = new PosRot(Vector3.zero, Quaternion.identity);
+		public static PosRot RightLegCorrection { get; set; } = new PosRot(Vector3.zero, Quaternion.identity);
+
 		public PlayerAvatarInput()
 		{
 		}
@@ -45,7 +48,8 @@ namespace CustomAvatar
 			{
 				if (Plugin.FullBodyTrackingType >= Plugin.TrackingType.Feet && Plugin.Trackers.Count >= 2)
 				{
-					return GetTrackerWorldPosRot(Plugin.Trackers[0]);
+					PosRot pr = GetTrackerWorldPosRot(Plugin.Trackers[0]);
+					return new PosRot(pr.Position + LeftLegCorrection.Position, pr.Rotation * LeftLegCorrection.Rotation);
 				}
 				else
 					return new PosRot(new Vector3(), new Quaternion());
@@ -58,7 +62,8 @@ namespace CustomAvatar
 			{
 				if (Plugin.FullBodyTrackingType >= Plugin.TrackingType.Feet && Plugin.Trackers.Count >= 2)
 				{
-					return GetTrackerWorldPosRot(Plugin.Trackers[1]);
+					PosRot pr = GetTrackerWorldPosRot(Plugin.Trackers[1]);
+					return new PosRot(pr.Position + RightLegCorrection.Position, pr.Rotation * RightLegCorrection.Rotation);
 				}
 				else
 					return new PosRot(new Vector3(), new Quaternion());
@@ -114,7 +119,7 @@ namespace CustomAvatar
 					{
 						var roomCenter = BeatSaberUtil.GetRoomCenter();
 						var roomRotation = BeatSaberUtil.GetRoomRotation();
-						pos = roomRotation * pos;
+						pos = roomRotation * pos * Plugin.PLAYER_SCALE;
 						pos += roomCenter;
 						rot = roomRotation * rot;
 					}

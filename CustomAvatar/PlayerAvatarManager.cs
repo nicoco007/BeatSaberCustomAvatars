@@ -27,6 +27,7 @@ namespace CustomAvatar
 
 		public PlayerAvatarManager(AvatarLoader avatarLoader, AvatarTailor avatarTailor, CustomAvatar startAvatar = null)
 		{
+			Console.WriteLine("For PlayerAvatarManager");
 			_playerAvatarInput = new PlayerAvatarInput();
 			_avatarLoader = avatarLoader;
 			_avatarTailor = avatarTailor;
@@ -139,7 +140,7 @@ namespace CustomAvatar
 		{
 			if (_currentSpawnedPlayerAvatar == null) return;
 			AvatarLayers.SetChildrenToLayer(_currentSpawnedPlayerAvatar.GameObject,
-				firstPersonEnabled ? 0 : AvatarLayers.OnlyInThirdPerson);
+				firstPersonEnabled ? AvatarLayers.Global : AvatarLayers.OnlyInThirdPerson);
 			foreach (var ex in _currentSpawnedPlayerAvatar.GameObject.GetComponentsInChildren<AvatarScriptPack.FirstPersonExclusion>())
 				ex.OnFirstPersonEnabledChanged(firstPersonEnabled);
 		}

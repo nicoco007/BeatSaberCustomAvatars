@@ -43,6 +43,8 @@ namespace CustomAvatar.StereoRendering
 				Destroy(camera.gameObject.GetComponent<CameraRenderCallbacksManager>());
 				instance = camera.gameObject.AddComponent<StereoRenderManager>();
 				camera.gameObject.AddComponent<VRRenderEventDetector>().Initialize(0);
+
+				Debug.Log("Initialized StereoRenderManager with camera " + camera);
 			}
 		}
 

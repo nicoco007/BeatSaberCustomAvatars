@@ -1,11 +1,11 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace CustomAvatar
 {
 	public static class AvatarLayers
 	{
-		public const int OnlyInThirdPerson = 3;
-		public const int OnlyInFirstPerson = 4;
+		public const int OnlyInThirdPerson = 30;
+		public const int Global = 31;
 
 		public static void SetChildrenToLayer(GameObject gameObject, int layer)
 		{
