@@ -10,6 +10,7 @@ namespace CustomAvatar
 	{
 		public static PosRot LeftLegCorrection { get; set; } = new PosRot(Vector3.zero, Quaternion.identity);
 		public static PosRot RightLegCorrection { get; set; } = new PosRot(Vector3.zero, Quaternion.identity);
+		public static PosRot PelvisCorrection { get; set; } = new PosRot(Vector3.zero, Quaternion.identity);
 
 		public PlayerAvatarInput()
 		{
@@ -48,8 +49,7 @@ namespace CustomAvatar
 			{
 				if (Plugin.FullBodyTrackingType >= Plugin.TrackingType.Feet && Plugin.Trackers.Count >= 2)
 				{
-					PosRot pr = GetTrackerWorldPosRot(Plugin.Trackers[0]);
-					return new PosRot(pr.Position + LeftLegCorrection.Position, pr.Rotation * LeftLegCorrection.Rotation);
+					return GetTrackerWorldPosRot(Plugin.Trackers[0]) + LeftLegCorrection;
 				}
 				else
 					return new PosRot(new Vector3(), new Quaternion());
@@ -62,8 +62,7 @@ namespace CustomAvatar
 			{
 				if (Plugin.FullBodyTrackingType >= Plugin.TrackingType.Feet && Plugin.Trackers.Count >= 2)
 				{
-					PosRot pr = GetTrackerWorldPosRot(Plugin.Trackers[1]);
-					return new PosRot(pr.Position + RightLegCorrection.Position, pr.Rotation * RightLegCorrection.Rotation);
+					return GetTrackerWorldPosRot(Plugin.Trackers[1]) + RightLegCorrection;
 				}
 				else
 					return new PosRot(new Vector3(), new Quaternion());
@@ -76,13 +75,13 @@ namespace CustomAvatar
 			{
 				if (Plugin.FullBodyTrackingType == Plugin.TrackingType.Hips && Plugin.Trackers.Count >= 1)
 				{
-					return GetTrackerWorldPosRot(Plugin.Trackers[0]);
+					return GetTrackerWorldPosRot(Plugin.Trackers[0]) + PelvisCorrection;
 				}
 				else
 				{
 					if (Plugin.FullBodyTrackingType == Plugin.TrackingType.Full && Plugin.Trackers.Count >= 3)
 					{
-						return GetTrackerWorldPosRot(Plugin.Trackers[2]);
+						return GetTrackerWorldPosRot(Plugin.Trackers[2]) + PelvisCorrection;
 					}
 					else
 						return new PosRot(new Vector3(), new Quaternion());

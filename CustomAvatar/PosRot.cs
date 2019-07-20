@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace CustomAvatar
 {
@@ -11,6 +11,15 @@ namespace CustomAvatar
 		{
 			Position = position;
 			Rotation = rotation;
+		}
+
+		public static PosRot operator +(PosRot a, PosRot b) {
+			return new PosRot(a.Position + b.Position, a.Rotation * b.Rotation);
+		}
+
+		public override string ToString()
+		{
+			return $"PosRot({{Position={Position}, Rotation={Rotation}}})";
 		}
 	}
 }

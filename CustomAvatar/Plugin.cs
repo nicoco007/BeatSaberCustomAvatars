@@ -220,6 +220,7 @@ namespace CustomAvatar
 			{
 				Console.WriteLine("Scene transition finished");
 				var tempInput = new PlayerAvatarInput();
+				var eyeHeight = tempInput.HeadPosRot.Position.y;
 				var normal = Vector3.up;
 
 				PosRot leftFoot = tempInput.LeftLegPosRot;
@@ -233,6 +234,18 @@ namespace CustomAvatar
 			    Vector3 rightFootStraightForward = Vector3.ProjectOnPlane(rightFootForward, normal);
 				Quaternion rightRotationCorrection = Quaternion.Inverse(rightFoot.Rotation) * Quaternion.LookRotation(Vector3.up, rightFootStraightForward);
 				PlayerAvatarInput.RightLegCorrection = new PosRot(rightFoot.Position.y * Vector3.down, rightRotationCorrection);
+
+				// using "standard" 8 head high body proportions w/ eyes at 1/2 head height
+				// http://carvinginnyc.com/wp-content/uploads/2018/09/aa94d39c207ade6ea850c86728296530.jpg
+				// head height is multiplied by 3 to allow nice numbers
+				PosRot pelvis = tempInput.PelvisPosRot;
+				Debug.Log("Pelvis Y: " + tempInput.PelvisPosRot.Position.y);
+				Debug.Log("Head Y: " + tempInput.HeadPosRot.Position.y);
+				Vector3 wantedPelvisPosition = new Vector3(0, eyeHeight / 22.5f * 14f, 0);
+				Vector3 pelvisPositionCorrection = wantedPelvisPosition - Vector3.up * pelvis.Position.y;
+				PlayerAvatarInput.PelvisCorrection = new PosRot(pelvisPositionCorrection, Quaternion.identity);
+
+				Debug.Log($"Pelvis correction: " + PlayerAvatarInput.PelvisCorrection);
 			}
 
 			IsFullBodyTracking = true;
