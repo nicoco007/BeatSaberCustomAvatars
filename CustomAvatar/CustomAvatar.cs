@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 namespace CustomAvatar
@@ -8,15 +9,12 @@ namespace CustomAvatar
 		private const string GameObjectName = "_CustomAvatar";
 
 		private float? eyeheight;
-		private AssetBundleCreateRequest assetBundleCreateRequest;
-		private AssetBundleRequest assetBundleRequest;
 		private AvatarDescriptor descriptor;
 
 		internal CustomAvatar(string fullPath)
 		{
 			FullPath = fullPath;
 		}
-
 
 		public string FullPath { get; }
 		public GameObject GameObject { get; private set; }
@@ -49,24 +47,23 @@ namespace CustomAvatar
 				return;
 			}
 
-			assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(FullPath);
-			assetBundleCreateRequest.completed += asyncOperation => AssetBundleLoaded(loadedCallback);
+			SharedCoroutineStarter.instance.StartCoroutine(LoadAvatar(loadedCallback));
 		}
 
-		private void AssetBundleLoaded(Action<CustomAvatar, AvatarLoadResult> loadedCallback)
+		private IEnumerator LoadAvatar(Action<CustomAvatar, AvatarLoadResult> loadedCallback)
 		{
-			if (!assetBundleCreateRequest.isDone || assetBundleCreateRequest.assetBundle == null)
+			AssetBundleCreateRequest createRequest = AssetBundle.LoadFromFileAsync(FullPath);
+			yield return createRequest;
+
+			if (!createRequest.isDone || createRequest.assetBundle == null)
 			{
 				loadedCallback(this, AvatarLoadResult.Failed);
-				return;
+				yield break;
 			}
 
-			assetBundleRequest = assetBundleCreateRequest.assetBundle.LoadAssetWithSubAssetsAsync<GameObject>(GameObjectName);
-			assetBundleRequest.completed += asyncOperation => AssetLoaded(loadedCallback);
-		}
+			AssetBundleRequest assetBundleRequest = createRequest.assetBundle.LoadAssetWithSubAssetsAsync<GameObject>(GameObjectName);
+			yield return assetBundleRequest;
 
-		private void AssetLoaded(Action<CustomAvatar, AvatarLoadResult> loadedCallback)
-		{
 			GameObject = (GameObject)assetBundleRequest.asset;
 
 			if (GameObject == null)
