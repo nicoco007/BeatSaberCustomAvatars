@@ -61,13 +61,13 @@ namespace CustomAvatar
 					var _fbinput = _avatarInput as IAvatarFullBodyInput;
 					var leftLegPosRot = _fbinput.LeftLegPosRot;
 					var rightLegPosRot = _fbinput.RightLegPosRot;
-					_prevLeftLegPos = Vector3.Lerp(_prevLeftLegPos, leftLegPosRot.Position, 15 * Time.deltaTime);
-					_prevLeftLegRot = Quaternion.Slerp(_prevLeftLegRot, leftLegPosRot.Rotation, 10 * Time.deltaTime);
+					_prevLeftLegPos = Vector3.Lerp(_prevLeftLegPos, leftLegPosRot.Position, 1 / Time.deltaTime * 0.0018f);
+					_prevLeftLegRot = Quaternion.Slerp(_prevLeftLegRot, leftLegPosRot.Rotation, 1 / Time.deltaTime * 0.0012f);
 					_leftLeg.position = _prevLeftLegPos;
 					_leftLeg.rotation = _prevLeftLegRot;
 
-					_prevRightLegPos = Vector3.Lerp(_prevRightLegPos, rightLegPosRot.Position, 15 * Time.deltaTime);
-					_prevRightLegRot = Quaternion.Slerp(_prevRightLegRot, rightLegPosRot.Rotation, 10 * Time.deltaTime);
+					_prevRightLegPos = Vector3.Lerp(_prevRightLegPos, rightLegPosRot.Position, 1 / Time.deltaTime * 0.0018f);
+					_prevRightLegRot = Quaternion.Slerp(_prevRightLegRot, rightLegPosRot.Rotation, 1 / Time.deltaTime * 0.0012f);
 					_rightLeg.position = _prevRightLegPos;
 					_rightLeg.rotation = _prevRightLegRot;
 				}
@@ -77,8 +77,8 @@ namespace CustomAvatar
 					var _fbinput = _avatarInput as IAvatarFullBodyInput;
 					var pelvisPosRot = _fbinput.PelvisPosRot;
 
-					_prevPelvisPos = Vector3.Lerp(_prevPelvisPos, pelvisPosRot.Position, 17 * Time.deltaTime);
-					_prevPelvisRot = Quaternion.Slerp(_prevPelvisRot, pelvisPosRot.Rotation, 13 * Time.deltaTime);
+					_prevPelvisPos = Vector3.Lerp(_prevPelvisPos, pelvisPosRot.Position, 1 / Time.deltaTime * 0.0018f);
+					_prevPelvisRot = Quaternion.Slerp(_prevPelvisRot, pelvisPosRot.Rotation, 1 / Time.deltaTime * 0.0012f);
 					_pelvis.position = _prevPelvisPos;
 					_pelvis.rotation = _prevPelvisRot;
 				}
