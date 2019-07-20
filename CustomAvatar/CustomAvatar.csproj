@@ -133,7 +133,6 @@
     <Compile Include="VRIK\IKSolverVRSpine.cs" />
     <Compile Include="VRIK\IKSolverVRUtilities.cs" />
     <Compile Include="VRIK\Interp.cs" />
-    <Compile Include="VRIK\InterpolationMode.cs" />
     <Compile Include="VRIK\QuaTools.cs" />
     <Compile Include="VRIK\RotationLimit.cs" />
     <Compile Include="VRIK\SolverManager.cs" />

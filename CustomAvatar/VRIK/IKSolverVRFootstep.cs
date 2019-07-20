@@ -6,8 +6,6 @@ namespace AvatarScriptPack {
 
 	public partial class IKSolverVR: IKSolver {
 
-		// TODO Rename file to IKSolverVRFootstep
-
 		[System.Serializable]
 		public class Footstep {
 
@@ -32,7 +30,8 @@ namespace AvatarScriptPack {
 			public Footstep (Quaternion rootRotation, Vector3 footPosition, Quaternion footRotation, Vector3 characterSpaceOffset) {
 				this.characterSpaceOffset = characterSpaceOffset;
 				Reset(rootRotation, footPosition, footRotation);
-			}
+                footRelativeToRoot = Quaternion.Inverse(rootRotation) * rotation;
+            }
 
 			public void Reset(Quaternion rootRotation, Vector3 footPosition, Quaternion footRotation) {
 				position = footPosition;
@@ -43,7 +42,6 @@ namespace AvatarScriptPack {
 				stepToRot = rotation;
 				stepToRootRot = rootRotation;
 				stepProgress = 1f;
-				footRelativeToRoot = Quaternion.Inverse(rootRotation) * rotation;
 			}
 
 			public void StepTo(Vector3 p, Quaternion rootRotation) {

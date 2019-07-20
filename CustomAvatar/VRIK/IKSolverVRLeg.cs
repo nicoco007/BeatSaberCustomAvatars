@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections;
 using System;
-using AvatarScriptPack;
 
 namespace AvatarScriptPack {
 	
@@ -52,6 +51,25 @@ namespace AvatarScriptPack {
 			/// </summary>
 			[Range(-180f, 180f)] public float swivelOffset;
 
+			[Tooltip("If 0, the bend plane will be locked to the rotation of the pelvis and rotating the foot will have no effect on the knee direction. If 1, to the target rotation of the leg so that the knee will bend towards the forward axis of the foot. Values in between will be slerped between the two.")]
+			/// <summary>
+			/// If 0, the bend plane will be locked to the rotation of the pelvis and rotating the foot will have no effect on the knee direction. If 1, to the target rotation of the leg so that the knee will bend towards the forward axis of the foot. Values in between will be slerped between the two.
+			/// </summary>
+			[Range(0f, 1f)] public float bendToTargetWeight = 0.5f;
+
+			[Tooltip("Use this to make the leg shorter/longer.")]
+			/// <summary>
+			/// Use this to make the leg shorter/longer.
+			/// </summary>
+			[Range(0.01f, 2f)]
+			public float legLengthMlp = 1f;
+
+			[Tooltip("Evaluates stretching of the leg by target distance relative to leg length. Value at time 1 represents stretching amount at the point where distance to the target is equal to leg length. Value at time 1 represents stretching amount at the point where distance to the target is double the leg length. Value represents the amount of stretching. Linear stretching would be achieved with a linear curve going up by 45 degrees. Increase the range of stretching by moving the last key up and right at the same amount. Smoothing in the curve can help reduce knee snapping (start stretching the arm slightly before target distance reaches leg length).")]
+			/// <summary>
+			/// Evaluates stretching of the leg by target distance relative to leg length. Value at time 1 represents stretching amount at the point where distance to the target is equal to leg length. Value at time 1 represents stretching amount at the point where distance to the target is double the leg length. Value represents the amount of stretching. Linear stretching would be achieved with a linear curve going up by 45 degrees. Increase the range of stretching by moving the last key up and right at the same amount. Smoothing in the curve can help reduce knee snapping (start stretching the arm slightly before target distance reaches leg length).
+			/// </summary>
+			public AnimationCurve stretchCurve = new AnimationCurve();
+
 			/// <summary>
 			/// Target position of the toe/foot. Will be overwritten if target is assigned.
 			/// </summary>
@@ -96,8 +114,11 @@ namespace AvatarScriptPack {
 			private Quaternion footRotation = Quaternion.identity;
 			private Vector3 bendNormal;
 			private Quaternion calfRelToThigh = Quaternion.identity;
+			private Quaternion thighRelToFoot = Quaternion.identity;
+			private Vector3 bendNormalRelToPelvis;
+			private Vector3 bendNormalRelToTarget;
 
-			protected override void OnRead(Vector3[] positions, Quaternion[] rotations, bool hasChest, bool hasNeck, bool hasShoulders, bool hasToes, int rootIndex, int index) {
+			protected override void OnRead(Vector3[] positions, Quaternion[] rotations, bool hasChest, bool hasNeck, bool hasShoulders, bool hasToes, bool hasLegs, int rootIndex, int index) {
 				Vector3 thighPos = positions[index];
 				Quaternion thighRot = rotations[index];
 				Vector3 calfPos = positions[index + 1];
@@ -128,6 +149,10 @@ namespace AvatarScriptPack {
 						IKRotation = footRot;
 					}
 
+					bendNormal = Vector3.Cross(calfPos - thighPos, footPos - calfPos);
+					bendNormalRelToPelvis = Quaternion.Inverse(rootRotation) * bendNormal;
+					bendNormalRelToTarget = Quaternion.Inverse(IKRotation) * bendNormal;
+
 					rotation = IKRotation;
 				}
 
@@ -156,7 +181,7 @@ namespace AvatarScriptPack {
 				rotation = lastBone.solverRotation;
 
 				if (rotationWeight > 0f) {
-					ApplyRotationOffset(AvatarScriptPack.QuaTools.FromToRotation(rotation, IKRotation), rotationWeight);
+					ApplyRotationOffset(QuaTools.FromToRotation(rotation, IKRotation), rotationWeight);
 				}
 
 				if (positionWeight > 0f) {
@@ -165,9 +190,19 @@ namespace AvatarScriptPack {
 
 				thighRelativeToPelvis = Quaternion.Inverse(rootRotation) * (thigh.solverPosition - rootPosition);
 				calfRelToThigh = Quaternion.Inverse(thigh.solverRotation) * calf.solverRotation;
+				thighRelToFoot = Quaternion.Inverse(lastBone.solverRotation) * thigh.solverRotation;
 
 				// Calculate bend plane normal
-				bendNormal = Vector3.Cross(calf.solverPosition - thigh.solverPosition, foot.solverPosition - calf.solverPosition);
+				// This was used before version 1.8
+				//bendNormal = Vector3.Cross(calf.solverPosition - thigh.solverPosition, foot.solverPosition - calf.solverPosition);
+
+				if (bendToTargetWeight <= 0f) {
+					bendNormal = rootRotation * bendNormalRelToPelvis;
+				} else if (bendToTargetWeight >= 1f) {
+					bendNormal = rotation * bendNormalRelToTarget;	
+				} else {
+					bendNormal = Vector3.Slerp(rootRotation * bendNormalRelToPelvis, rotation * bendNormalRelToTarget, bendToTargetWeight);
+				}
 			}
 
 			public override void ApplyOffsets() {
@@ -220,7 +255,9 @@ namespace AvatarScriptPack {
 				footPosition = position + offset * (footPosition - position);
 			}
 
-			public void Solve() {
+			public void Solve(bool stretch) {
+				if (stretch) Stretching();
+
 				// Foot pass
 				VirtualBone.SolveTrigonometric(bones, 0, 1, 2, footPosition, bendNormal, 1f);
 
@@ -234,6 +271,17 @@ namespace AvatarScriptPack {
 
 				VirtualBone.SolveTrigonometric(bones, 0, 2, 3, position, b, 1f);
 
+				// Fix thigh twist relative to target rotation
+				if (bendToTargetWeight > 0f) {
+					Quaternion thighRotation = rotation * thighRelToFoot;
+					Quaternion f = Quaternion.FromToRotation(thighRotation * thigh.axis, calf.solverPosition - thigh.solverPosition);
+					if (bendToTargetWeight < 1f) {
+						thigh.solverRotation = Quaternion.Slerp(thigh.solverRotation, f * thighRotation, bendToTargetWeight);
+					} else {
+						thigh.solverRotation = f * thighRotation;
+					}
+				}
+
 				// Fix calf twist relative to thigh
 				Quaternion calfRotation = thigh.solverRotation * calfRelToThigh;
 				Quaternion fromTo = Quaternion.FromToRotation(calfRotation * calf.axis, foot.solverPosition - calf.solverPosition);
@@ -243,11 +291,49 @@ namespace AvatarScriptPack {
 				toes.solverRotation = rotation;
 			}
 
+			private void Stretching() {
+				// Adjusting leg length
+				float legLength = thigh.length + calf.length;
+				Vector3 kneeAdd = Vector3.zero;
+				Vector3 footAdd = Vector3.zero;
+
+				if (legLengthMlp != 1f) {
+					legLength *= legLengthMlp;
+					kneeAdd = (calf.solverPosition - thigh.solverPosition) * (legLengthMlp - 1f);
+					footAdd = (foot.solverPosition - calf.solverPosition) * (legLengthMlp - 1f);
+					calf.solverPosition += kneeAdd;
+					foot.solverPosition += kneeAdd + footAdd;
+					if (hasToes) toes.solverPosition += kneeAdd + footAdd;
+				}
+
+				// Stretching
+				float distanceToTarget = Vector3.Distance(thigh.solverPosition, footPosition);
+				float stretchF = distanceToTarget / legLength;
+
+				float m = stretchCurve.Evaluate(stretchF);
+				//m *= positionWeight;
+
+				kneeAdd = (calf.solverPosition - thigh.solverPosition) * m;
+				footAdd = (foot.solverPosition - calf.solverPosition) * m;
+
+				calf.solverPosition += kneeAdd;
+				foot.solverPosition += kneeAdd + footAdd;
+				if (hasToes) toes.solverPosition += kneeAdd + footAdd;
+			}
+
 			public override void Write(ref Vector3[] solvedPositions, ref Quaternion[] solvedRotations) {
 				solvedRotations[index] = thigh.solverRotation;
 				solvedRotations[index + 1] = calf.solverRotation;
 				solvedRotations[index + 2] = foot.solverRotation;
-				if (hasToes) solvedRotations[index + 3] = toes.solverRotation;
+
+				solvedPositions[index] = thigh.solverPosition;
+				solvedPositions[index + 1] = calf.solverPosition;
+				solvedPositions[index + 2] = foot.solverPosition;
+
+				if (hasToes) {
+					solvedRotations[index + 3] = toes.solverRotation;
+					solvedPositions[index + 3] = toes.solverPosition;
+				}
 			}
 
 			public override void ResetOffsets() {

@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections;
 using System;
-using AvatarScriptPack;
 using UnityEngine.Serialization;
 
 namespace AvatarScriptPack {
@@ -199,7 +198,9 @@ namespace AvatarScriptPack {
 			public Quaternion anchorRotation { get; private set; }
 
 			private Quaternion headRotation = Quaternion.identity;
+            private Quaternion pelvisRotation = Quaternion.identity;
 			private Quaternion anchorRelativeToHead = Quaternion.identity;
+            private Quaternion anchorRelativeToPelvis = Quaternion.identity;
 			private Quaternion pelvisRelativeRotation = Quaternion.identity;
 			private Quaternion chestRelativeRotation = Quaternion.identity;
 			private Vector3 headDeltaPosition;
@@ -209,11 +210,12 @@ namespace AvatarScriptPack {
 			private float length;
 			private bool hasChest;
 			private bool hasNeck;
+            private bool hasLegs;
 			private float headHeight;
 			private float sizeMlp;
 			private Vector3 chestForward;
 
-			protected override void OnRead(Vector3[] positions, Quaternion[] rotations, bool hasChest, bool hasNeck, bool hasShoulders, bool hasToes, int rootIndex, int index) {
+			protected override void OnRead(Vector3[] positions, Quaternion[] rotations, bool hasChest, bool hasNeck, bool hasShoulders, bool hasToes, bool hasLegs, int rootIndex, int index) {
 				Vector3 pelvisPos = positions[index];
 				Quaternion pelvisRot = rotations[index];
 				Vector3 spinePos = positions[index + 1];
@@ -224,6 +226,8 @@ namespace AvatarScriptPack {
 				Quaternion neckRot = rotations[index + 3];
 				Vector3 headPos = positions[index + 4];
 				Quaternion headRot = rotations[index + 4];
+
+                this.hasLegs = hasLegs;
 
 				if (!hasChest) {
 					chestPos = spinePos;
@@ -261,6 +265,7 @@ namespace AvatarScriptPack {
 					headRotationOffset = Quaternion.identity;
 
 					anchorRelativeToHead = Quaternion.Inverse(headRot) * rotations[0];
+                    anchorRelativeToPelvis = Quaternion.Inverse(pelvisRot) * rotations[0];
 					
 					// Forward and up axes
 					pelvisRelativeRotation = Quaternion.Inverse(headRot) * pelvisRot;
@@ -276,8 +281,8 @@ namespace AvatarScriptPack {
 					IKRotationPelvis = pelvisRot;
 					goalPositionChest = chestPos + rotations[0] * Vector3.forward;
 				}
-
-				bones[0].Read(pelvisPos, pelvisRot);
+                
+                bones[0].Read(pelvisPos, pelvisRot);
 				bones[1].Read(spinePos, spineRot);
 				if (hasChest) bones[chestIndex].Read(chestPos, chestRot);
 				if (hasNeck) bones[neckIndex].Read(neckPos, neckRot);
@@ -304,7 +309,9 @@ namespace AvatarScriptPack {
 
 				headPosition = V3Tools.Lerp(head.solverPosition, IKPositionHead, positionWeight);
 				headRotation = QuaTools.Lerp(head.solverRotation, IKRotationHead, rotationWeight);
-			}
+
+                pelvisRotation = QuaTools.Lerp(pelvis.solverRotation, IKRotationPelvis, rotationWeight);
+            }
 
 			public override void ApplyOffsets() {
 				headPosition += headPositionOffset;
@@ -331,8 +338,8 @@ namespace AvatarScriptPack {
 				headDeltaPosition = headPosition - head.solverPosition;
 				pelvisDeltaRotation = QuaTools.FromToRotation(pelvis.solverRotation, headRotation * pelvisRelativeRotation);
 
-				anchorRotation = headRotation * anchorRelativeToHead;
-			}
+				anchorRotation = pelvisTarget != null ? pelvisRotation * anchorRelativeToPelvis : headRotation * anchorRelativeToHead;
+            }
 
 			private void CalculateChestTargetRotation(VirtualBone rootBone, Arm[] arms) {
 				chestTargetRotation = headRotation * chestRelativeRotation;
@@ -364,20 +371,18 @@ namespace AvatarScriptPack {
 					rootBone.solverRotation = Quaternion.AngleAxis(rotation, rootBone.readRotation * Vector3.up) * rootBone.solverRotation;		
 				}
 
-
 				Vector3 animatedPelvisPos = pelvis.solverPosition;
 				Vector3 rootUp = rootBone.solverRotation * Vector3.up;
 
-				// Translate pelvis to make the head's position & rotation match with the head target
-				TranslatePelvis(legs, headDeltaPosition, pelvisDeltaRotation);
+                // Translate pelvis to make the head's position & rotation match with the head target
+                TranslatePelvis(legs, headDeltaPosition, pelvisDeltaRotation);
 
-				// Solve a FABRIK pass to squash/stretch the spine
-				FABRIKPass(animatedPelvisPos, rootUp);
+                FABRIKPass(animatedPelvisPos, rootUp);
 
-				// Bend the spine to look towards chest target rotation
-				Bend(bones, pelvisIndex, chestIndex, chestTargetRotation, chestRotationOffset, chestClampWeight, false, neckStiffness);
-
-				if (chestGoalWeight > 0f) {
+                // Bend the spine to look towards chest target rotation
+                Bend(bones, pelvisIndex, chestIndex, chestTargetRotation, chestRotationOffset, chestClampWeight, false, neckStiffness);
+                
+                if (chestGoalWeight > 0f) {
 					Quaternion c = Quaternion.FromToRotation(bones[chestIndex].solverRotation * chestForward, goalPositionChest - bones[chestIndex].solverPosition) * bones[chestIndex].solverRotation;
 					Bend(bones, pelvisIndex, chestIndex, c, chestRotationOffset, chestClampWeight, false, chestGoalWeight);
 				}
@@ -388,13 +393,14 @@ namespace AvatarScriptPack {
 
 				Bend(bones, neckIndex, headIndex, headRotation, headClampWeight, true, 1f);
 
-				SolvePelvis ();
-			}
+                SolvePelvis ();
+            }
 
 			private void FABRIKPass(Vector3 animatedPelvisPos, Vector3 rootUp) {
-				Vector3 startPos = Vector3.Lerp(pelvis.solverPosition, animatedPelvisPos, maintainPelvisPosition) + pelvisPositionOffset - chestPositionOffset;
-				Vector3 endPos = headPosition - chestPositionOffset;
-				Vector3 startOffset = rootUp * (bones[bones.Length - 1].solverPosition - bones[0].solverPosition).magnitude;
+                Vector3 startPos = Vector3.Lerp(pelvis.solverPosition, animatedPelvisPos, maintainPelvisPosition) + pelvisPositionOffset;// - chestPositionOffset;
+                Vector3 endPos = headPosition - chestPositionOffset;
+				//Vector3 startOffset = rootUp * (bones[bones.Length - 1].solverPosition - bones[0].solverPosition).magnitude;
+				Vector3 startOffset =bones[bones.Length - 1].solverPosition - bones[0].solverPosition;
 
 				VirtualBone.SolveFABRIK(bones, startPos, endPos, 1f, 1f, 1, mag, startOffset);
 			}
@@ -406,19 +412,20 @@ namespace AvatarScriptPack {
 					
 					Vector3 delta = ((IKPositionPelvis + pelvisPositionOffset) - pelvis.solverPosition) * pelvisPositionWeight;
 					foreach (VirtualBone bone in bones) bone.solverPosition += delta;
-					
-					Vector3 bendNormal = anchorRotation * Vector3.right;
 
+                    Vector3 bendNormal = anchorRotation * Vector3.right;
+                    
 					if (hasChest && hasNeck) {
-						VirtualBone.SolveTrigonometric(bones, pelvisIndex, spineIndex, headIndex, headPosition, bendNormal, pelvisPositionWeight * 0.6f);
-						VirtualBone.SolveTrigonometric(bones, spineIndex, chestIndex, headIndex, headPosition, bendNormal, pelvisPositionWeight * 0.6f);
-						VirtualBone.SolveTrigonometric(bones, chestIndex, neckIndex, headIndex, headPosition, bendNormal, pelvisPositionWeight * 1f);
-					} else if (hasChest && !hasNeck) {
+                        VirtualBone.SolveTrigonometric(bones, pelvisIndex, spineIndex, headIndex, headPosition, bendNormal, pelvisPositionWeight * 0.6f);
+                        VirtualBone.SolveTrigonometric(bones, pelvisIndex, chestIndex, headIndex, headPosition, bendNormal, pelvisPositionWeight * 0.6f);
+                        VirtualBone.SolveTrigonometric(bones, pelvisIndex, neckIndex, headIndex, headPosition, bendNormal, pelvisPositionWeight * 1f);
+                    } else if (hasChest && !hasNeck) {
+                        VirtualBone.SolveTrigonometric(bones, pelvisIndex, spineIndex, headIndex, headPosition, bendNormal, pelvisPositionWeight * 0.75f); // 0.75f
+						VirtualBone.SolveTrigonometric(bones, pelvisIndex, chestIndex, headIndex, headPosition, bendNormal, pelvisPositionWeight * 1f);
+                    }
+                    else if (!hasChest && hasNeck) {
 						VirtualBone.SolveTrigonometric(bones, pelvisIndex, spineIndex, headIndex, headPosition, bendNormal, pelvisPositionWeight * 0.75f);
-						VirtualBone.SolveTrigonometric(bones, spineIndex, chestIndex, headIndex, headPosition, bendNormal, pelvisPositionWeight * 1f);
-					} else if (!hasChest && hasNeck) {
-						VirtualBone.SolveTrigonometric(bones, pelvisIndex, spineIndex, headIndex, headPosition, bendNormal, pelvisPositionWeight * 0.75f);
-						VirtualBone.SolveTrigonometric(bones, spineIndex, neckIndex, headIndex, headPosition, bendNormal, pelvisPositionWeight * 1f);
+						VirtualBone.SolveTrigonometric(bones, pelvisIndex, neckIndex, headIndex, headPosition, bendNormal, pelvisPositionWeight * 1f);
 					} else if (!hasNeck && !hasChest) {
 						VirtualBone.SolveTrigonometric(bones, pelvisIndex, spineIndex, headIndex, headPosition, bendNormal, pelvisPositionWeight);
 					}
@@ -486,7 +493,7 @@ namespace AvatarScriptPack {
 
 			// Move the pelvis so that the head would remain fixed to the anchor
 			public void InverseTranslateToHead(Leg[] legs, bool limited, bool useCurrentLegMag, Vector3 offset, float w) {
-				Vector3 delta = (headPosition + offset - head.solverPosition) * w * (1f - pelvisPositionWeight);
+				Vector3 delta = (headPosition + offset - head.solverPosition) * w;// * (1f - pelvisPositionWeight); This makes the head lose it's target when pelvisPositionWeight is between 0 and 1.
 
 				Vector3 p = pelvis.solverPosition + delta;
 				MovePosition( limited? LimitPelvisPosition(legs, p, useCurrentLegMag): p);
@@ -512,17 +519,13 @@ namespace AvatarScriptPack {
 				float backOffset = deltaY * -moveBodyBackWhenCrouching * headHeight;
 				deltaPosition += m * backOffset;
 
-				/*
-				if (backOffset < 0f) {
-					foreach (Leg leg in legs) leg.heelPositionOffset += Vector3.up * backOffset * backOffset; // TODO Ignoring root rotation
-				}
-				*/
-
-				MovePosition (LimitPelvisPosition(legs, pelvis.solverPosition + deltaPosition * bodyPosStiffness, false));
+                MovePosition (LimitPelvisPosition(legs, pelvis.solverPosition + deltaPosition * bodyPosStiffness, false));
 			}
 
 			// Limit the position of the pelvis so that the feet/toes would remain fixed
 			private Vector3 LimitPelvisPosition(Leg[] legs, Vector3 pelvisPosition, bool useCurrentLegMag, int it = 2) {
+                if (!hasLegs) return pelvisPosition;
+
 				// Cache leg current mag
 				if (useCurrentLegMag) {
 					foreach (Leg leg in legs) {
@@ -567,21 +570,41 @@ namespace AvatarScriptPack {
 
 			// Bending the spine to the head effector
 			private void Bend(VirtualBone[] bones, int firstIndex, int lastIndex, Quaternion targetRotation, Quaternion rotationOffset, float clampWeight, bool uniformWeight, float w) {
-				if (w <= 0f) return;
-				if (bones.Length == 0) return;
-				int bonesCount = (lastIndex + 1) - firstIndex;
-				if (bonesCount < 1) return;
+                if (w <= 0f) return;
+                if (bones.Length == 0) return;
+                int bonesCount = (lastIndex + 1) - firstIndex;
+                if (bonesCount < 1) return;
 
-				Quaternion r = QuaTools.FromToRotation(bones[lastIndex].solverRotation, targetRotation);
-				r = QuaTools.ClampRotation(r, clampWeight, 2);
+                Quaternion r = QuaTools.FromToRotation(bones[lastIndex].solverRotation, targetRotation);
+                r = QuaTools.ClampRotation(r, clampWeight, 2);
+                float step = uniformWeight ? 1f / bonesCount : 0f;
 
-				float step = uniformWeight? 1f / bonesCount: 0f;
-				
-				for (int i = firstIndex; i < lastIndex + 1; i++) {
-					if (!uniformWeight) step = Mathf.Clamp(((i - firstIndex) + 1) / bonesCount, 0, 1f);
-					VirtualBone.RotateAroundPoint(bones, i, bones[i].solverPosition, Quaternion.Slerp(Quaternion.Slerp(Quaternion.identity, rotationOffset, step), r, step * w));
-				}
-			}
+                for (int i = firstIndex; i < lastIndex + 1; i++)
+                {
+                    
+                    if (!uniformWeight)
+                    {
+                        if (bonesCount == 1)
+                        {
+                            step = 1f;
+                        } else if (bonesCount == 2)
+                        {
+                            step = i == 0 ? 0.2f : 0.8f;
+                        } else if (bonesCount == 3)
+                        {
+                            if (i == 0) step = 0.15f;
+                            else if (i == 1) step = 0.4f;
+                            else step = 0.45f;
+                        } else if (bonesCount > 3)
+                        {
+                            step = 1f / bonesCount;
+                        }
+                    }
+
+                    //if (!uniformWeight) step = Mathf.Clamp(((i - firstIndex) + 1) / bonesCount, 0, 1f);
+                    VirtualBone.RotateAroundPoint(bones, i, bones[i].solverPosition, Quaternion.Slerp(Quaternion.Slerp(Quaternion.identity, rotationOffset, step), r, step * w));
+                }
+            }
 		}
 	}
 }

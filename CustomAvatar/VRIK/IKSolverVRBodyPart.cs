@@ -1,10 +1,8 @@
 using UnityEngine;
 using System.Collections;
 using System;
-using AvatarScriptPack;
 
-namespace AvatarScriptPack
-{
+namespace AvatarScriptPack {
 	
 	/// <summary>
 	/// Hybrid %IK solver designed for mapping a character to a VR headset and 2 hand controllers 
@@ -17,7 +15,7 @@ namespace AvatarScriptPack
 		[System.Serializable]
 		public abstract class BodyPart {
 
-			protected abstract void OnRead(Vector3[] positions, Quaternion[] rotations, bool hasChest, bool hasNeck, bool hasShoulders, bool hasToes, int rootIndex, int index);
+			protected abstract void OnRead(Vector3[] positions, Quaternion[] rotations, bool hasChest, bool hasNeck, bool hasShoulders, bool hasToes, bool hasLegs, int rootIndex, int index);
 			public abstract void PreSolve();
 			public abstract void Write(ref Vector3[] solvedPositions, ref Quaternion[] solvedRotations);
 			public abstract void ApplyOffsets();
@@ -32,13 +30,13 @@ namespace AvatarScriptPack
 			protected Quaternion rootRotation = Quaternion.identity;
 			protected int index = -1;
 
-			public void Read(Vector3[] positions, Quaternion[] rotations, bool hasChest, bool hasNeck, bool hasShoulders, bool hasToes, int rootIndex, int index) {
+			public void Read(Vector3[] positions, Quaternion[] rotations, bool hasChest, bool hasNeck, bool hasShoulders, bool hasToes, bool hasLegs, int rootIndex, int index) {
 				this.index = index;
 
 				rootPosition = positions[rootIndex];
 				rootRotation = rotations[rootIndex];
 
-				OnRead(positions, rotations, hasChest, hasNeck, hasShoulders, hasToes, rootIndex, index);
+				OnRead(positions, rotations, hasChest, hasNeck, hasShoulders, hasToes, hasLegs, rootIndex, index);
 
 				mag = VirtualBone.PreSolve(ref bones);
 				sqrMag = mag * mag;

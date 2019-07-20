@@ -1,8 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-namespace AvatarScriptPack
-{
+namespace AvatarScriptPack {
 
 	/// <summary>
 	/// Manages solver initiation and updating

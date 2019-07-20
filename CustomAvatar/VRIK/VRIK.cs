@@ -16,33 +16,57 @@ namespace AvatarScriptPack {
 		/// </summary>
 		[System.Serializable]
 		public class References {
-			public Transform root;
-			public Transform pelvis;
-			public Transform spine;
-			public Transform chest; // Optional
-			public Transform neck; // Optional
-			public Transform head;
-			public Transform leftShoulder; // Optional
-			public Transform leftUpperArm;
-			public Transform leftForearm;
-			public Transform leftHand;
-			public Transform rightShoulder; // Optional
-			public Transform rightUpperArm;
-			public Transform rightForearm;
-			public Transform rightHand;
-			public Transform leftThigh;
-			public Transform leftCalf;
-			public Transform leftFoot;
-			public Transform leftToes; // Optional
-			public Transform rightThigh;
-			public Transform rightCalf;
-			public Transform rightFoot;
-			public Transform rightToes; // Optional
+            public Transform root;			// 0
+			public Transform pelvis;		// 1
+			public Transform spine;         // 2
 
-			/// <summary>
-			/// Returns an array of all the Transforms in the definition.
-			/// </summary>
-			public Transform[] GetTransforms() {
+            [Tooltip("Optional")]
+            public Transform chest;         // 3 Optional
+
+            [Tooltip("Optional")]
+            public Transform neck; 			// 4 Optional
+			public Transform head;          // 5
+
+            [Tooltip("Optional")]
+            public Transform leftShoulder;	// 6 Optional
+			public Transform leftUpperArm;	// 7
+			public Transform leftForearm;	// 8
+			public Transform leftHand;      // 9
+
+            [Tooltip("Optional")]
+            public Transform rightShoulder;	// 10 Optional
+			public Transform rightUpperArm;	// 11
+			public Transform rightForearm;	// 12
+			public Transform rightHand;     // 13
+
+            [Tooltip("VRIK also supports legless characters.If you do not wish to use legs, leave all leg references empty.")]
+            public Transform leftThigh;     // 14 Optional
+
+            [Tooltip("VRIK also supports legless characters.If you do not wish to use legs, leave all leg references empty.")]
+            public Transform leftCalf;      // 15 Optional
+
+            [Tooltip("VRIK also supports legless characters.If you do not wish to use legs, leave all leg references empty.")]
+            public Transform leftFoot;      // 16 Optional
+
+            [Tooltip("Optional")]
+			public Transform leftToes;      // 17 Optional
+
+            [Tooltip("VRIK also supports legless characters.If you do not wish to use legs, leave all leg references empty.")]
+            public Transform rightThigh;    // 18 Optional
+
+            [Tooltip("VRIK also supports legless characters.If you do not wish to use legs, leave all leg references empty.")]
+            public Transform rightCalf;     // 19 Optional
+
+            [Tooltip("VRIK also supports legless characters.If you do not wish to use legs, leave all leg references empty.")]
+            public Transform rightFoot;     // 20 Optional
+
+            [Tooltip("Optional")]
+            public Transform rightToes;		// 21 Optional
+
+            /// <summary>
+            /// Returns an array of all the Transforms in the definition.
+            /// </summary>
+            public Transform[] GetTransforms() {
 				return new Transform[22] {
 					root, pelvis, spine, chest, neck, head, leftShoulder, leftUpperArm, leftForearm, leftHand, rightShoulder, rightUpperArm, rightForearm, rightHand, leftThigh, leftCalf, leftFoot, leftToes, rightThigh, rightCalf, rightFoot, rightToes
 				};
@@ -63,17 +87,32 @@ namespace AvatarScriptPack {
 						leftHand == null ||
 						rightUpperArm == null ||
 						rightForearm == null ||
-						rightHand == null ||
-						leftThigh == null ||
-						leftCalf == null ||
-						leftFoot == null ||
-						rightThigh == null ||
-						rightCalf == null ||
-						rightFoot == null
+						rightHand == null
 					) return false;
 
-					// Shoulder, toe and neck bones are optional
-					return true;
+                    // If all leg bones are null, it is valid
+                    bool noLegBones =
+                        leftThigh == null &&
+                        leftCalf == null &&
+                        leftFoot == null &&
+                        rightThigh == null &&
+                        rightCalf == null &&
+                        rightFoot == null;
+
+                    if (noLegBones) return true;
+
+                    bool atLeastOneLegBoneMissing =
+                        leftThigh == null ||
+                        leftCalf == null ||
+                        leftFoot == null ||
+                        rightThigh == null ||
+                        rightCalf == null ||
+                        rightFoot == null;
+
+                    if (atLeastOneLegBoneMissing) return false;
+
+                    // Shoulder, toe and neck bones are optional
+                    return true;
 				}
 			}
 
@@ -118,14 +157,8 @@ namespace AvatarScriptPack {
 				references = new References();
 
 				var animator = root.GetComponentInChildren<Animator>();
-				//Debug.Log("Root: " + root + " " + root.name);
 				if (animator == null || !animator.isHuman) {
-#if PLUGIN
-					Debug.Log("VRIK needs a Humanoid Animator to auto-detect biped references. Please assign references manually.");
-#else
-					Debug.Log("VRIK needs a Humanoid Animator to auto-detect biped references. Please assign references manually.");
-#endif
-					GameObject.Destroy(root.GetComponent<VRIK>());
+					Debug.LogWarning("VRIK needs a Humanoid Animator to auto-detect biped references. Please assign references manually.");
 					return false;
 				}
 
@@ -176,11 +209,11 @@ namespace AvatarScriptPack {
 			Application.OpenURL("https://www.youtube.com/watch?v=6Pfx7lYQiIA&feature=youtu.be");
 		}
 
-		/// <summary>
-		/// The biped definition.
-		/// </summary>
-		[ContextMenuItem("Auto-detect References", "AutoDetectReferences")]
-		[Tooltip("Bone mapping. Right-click on the component header and select 'Auto-detect References' of fill in manually if not a Humanoid character.")]
+        /// <summary>
+        /// Bone mapping. Right-click on the component header and select 'Auto-detect References' of fill in manually if not a Humanoid character. Chest, neck, shoulder and toe bones are optional. VRIK also supports legless characters. If you do not wish to use legs, leave all leg references empty.
+        /// </summary>
+        [ContextMenuItem("Auto-detect References", "AutoDetectReferences")]
+		[Tooltip("Bone mapping. Right-click on the component header and select 'Auto-detect References' of fill in manually if not a Humanoid character. Chest, neck, shoulder and toe bones are optional. VRIK also supports legless characters. If you do not wish to use legs, leave all leg references empty.")]
 		public References references = new References();
 		
 		/// <summary>
@@ -214,6 +247,16 @@ namespace AvatarScriptPack {
 			if (references.isFilled) solver.SetToReferences(references);
 
 			base.InitiateSolver();
+		}
+
+		protected override void UpdateSolver() {
+			if (references.root != null && references.root.localScale == Vector3.zero) {
+				Debug.LogError("VRIK Root Transform's scale is zero, can not update VRIK. Make sure you have not calibrated the character to a zero scale.", transform);
+				enabled = false;
+				return;
+			}
+
+			base.UpdateSolver();
 		}
 	}
 }

@@ -1,8 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-namespace AvatarScriptPack
-{
+namespace AvatarScriptPack {
 	
 	/// <summary>
 	/// Helper methods for dealing with 3-dimensional vectors.
