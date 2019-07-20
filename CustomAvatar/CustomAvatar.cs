@@ -7,7 +7,7 @@ namespace CustomAvatar
 	{
 		private const string GameObjectName = "_CustomAvatar";
 
-		private float? _height;
+		private float? eyeheight;
 		private AssetBundleCreateRequest assetBundleCreateRequest;
 		private AssetBundleRequest assetBundleRequest;
 		private AvatarDescriptor descriptor;
@@ -27,17 +27,17 @@ namespace CustomAvatar
 		public bool AllowHeightCalibration => descriptor != null ? descriptor.AllowHeightCalibration : true;
 		public Transform ViewPoint { get; private set; }
 
-		public float Height
+		public float EyeHeight
 		{
 			get
 			{
-				if (GameObject == null) return MainSettingsModel.kDefaultPlayerHeight - MainSettingsModel.kHeadPosToPlayerHeightOffset;
-				if (_height == null)
+				if (GameObject == null) return BeatSaberUtil.GetPlayerViewPointHeight();
+				if (eyeheight == null)
 				{
-					_height = AvatarMeasurement.MeasureHeight(GameObject, ViewPoint);
+					eyeheight = AvatarMeasurement.MeasureEyeHeight(GameObject, ViewPoint);
 				}
 
-				return _height.Value;
+				return eyeheight.Value;
 			}
 		}
 

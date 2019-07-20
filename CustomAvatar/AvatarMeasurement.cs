@@ -8,7 +8,7 @@ namespace CustomAvatar
 		private const float MinHeight = 1.4f;
 		private const float MaxHeight = 4f;
 		
-		public static float MeasureHeight(GameObject avatarGameObject, Transform viewPoint)
+		public static float MeasureEyeHeight(GameObject avatarGameObject, Transform viewPoint)
 		{
 			var localPosition = avatarGameObject.transform.InverseTransformPoint(viewPoint.position);
 			var eyeHeight = localPosition.y;
