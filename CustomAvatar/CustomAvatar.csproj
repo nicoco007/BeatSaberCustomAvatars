@@ -149,6 +149,12 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\KlouNom.png" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\hat-wizard-pale.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\hat-wizard-error.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy "$(TargetDir)$(TargetName).dll" "Z:\SteamLibrary\steamapps\common\Beat Saber\Plugins"</PostBuildEvent>

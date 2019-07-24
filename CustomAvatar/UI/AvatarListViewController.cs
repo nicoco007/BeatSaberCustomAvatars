@@ -39,8 +39,9 @@ namespace CustomAvatar
 		public string[] __AvatarPaths;
 		public Sprite[] __AvatarCovers;
 		public AvatarLoadResult[] __AvatarLoadResults;
-		private bool PreviewStatus;
 		private int _loadedCount = 0;
+		private Sprite _defaultImage;
+		private Sprite _defaultImageError;
 
 		public Action onBackPressed;
 
@@ -81,6 +82,8 @@ namespace CustomAvatar
 		public void LoadAllAvatars()
 		{
 			int _AvatarIndex = 0;
+			_defaultImage = UIUtilities.LoadSpriteFromResources("CustomAvatar.Resources.hat-wizard-pale.png");
+			_defaultImageError = UIUtilities.LoadSpriteFromResources("CustomAvatar.Resources.hat-wizard-error.png");
 			__AvatarPrefabs = new GameObject[AvatarList.Count()];
 			__AvatarNames = new string[AvatarList.Count()];
 			__AvatarAuthors = new string[AvatarList.Count()];
@@ -233,7 +236,7 @@ namespace CustomAvatar
 			{
 				cellInfo.name = System.IO.Path.GetFileName(AvatarList[row].FullPath) +" failed to load";
 				cellInfo.authorName = "Make sure it's not a duplicate avatar.";
-				cellInfo.rawImageTexture = null;
+				cellInfo.rawImageTexture = _defaultImageError.texture;
 			}
 			else
 			{
@@ -241,13 +244,13 @@ namespace CustomAvatar
 				{
 					cellInfo.name = __AvatarNames[row];
 					cellInfo.authorName = __AvatarAuthors[row];
-					cellInfo.rawImageTexture = __AvatarCovers[row] ? __AvatarCovers[row].texture : Texture2D.blackTexture;
+					cellInfo.rawImageTexture = __AvatarCovers[row] ? __AvatarCovers[row].texture : _defaultImage.texture;
 				}
 				catch (Exception e)
 				{
 					cellInfo.name = "If you see this yell at Assistant";
 					cellInfo.authorName = "because she fucked up";
-					cellInfo.rawImageTexture = Texture2D.blackTexture;
+					cellInfo.rawImageTexture = _defaultImageError.texture;
 					Logger.Log(e.StackTrace, Logger.LogLevel.Error);
 				}
 			}
