@@ -129,7 +129,7 @@ namespace CustomAvatar
 
 		public string Version
 		{
-			get { return "4.7.4"; }
+			get { return "4.7.5"; }
 		}
 
 		public void Init(IPA.Logging.Logger log)
