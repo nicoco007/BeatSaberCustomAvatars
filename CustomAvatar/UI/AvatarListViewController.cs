@@ -83,7 +83,9 @@ namespace CustomAvatar
 		{
 			int _AvatarIndex = 0;
 			_defaultImage = UIUtilities.LoadSpriteFromResources("CustomAvatar.Resources.hat-wizard-pale.png");
+			_defaultImage.texture.wrapMode = TextureWrapMode.Clamp;
 			_defaultImageError = UIUtilities.LoadSpriteFromResources("CustomAvatar.Resources.hat-wizard-error.png");
+			_defaultImageError.texture.wrapMode = TextureWrapMode.Clamp;
 			__AvatarPrefabs = new GameObject[AvatarList.Count()];
 			__AvatarNames = new string[AvatarList.Count()];
 			__AvatarAuthors = new string[AvatarList.Count()];
@@ -133,6 +135,11 @@ namespace CustomAvatar
 				__AvatarLoadResults[AvatarIndex] = _loadResult;
 
 				_loadedCount++;
+
+				if (avatar.CoverImage)
+				{
+					avatar.CoverImage.texture.wrapMode = TextureWrapMode.Clamp;
+				}
 #if DEBUG
 				Logger.Log("(" + _loadedCount + "/" + ((int)AvatarList.Count()) + ") #" + AvatarIndex);
 #endif

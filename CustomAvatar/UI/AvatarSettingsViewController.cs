@@ -42,7 +42,7 @@ namespace CustomAvatar
 			TextMeshProUGUI text = BeatSaberUI.CreateText(containerRect, "AVATAR SETTINGS (Klouder is cute)", Vector2.zero);
 			text.fontSize = 6.0f;
 			text.alignment = TextAlignmentOptions.Center;
-			relative_layout(text.rectTransform, 0f, 0.85f, 1f, 0.166f, 0.5f, 1f);
+			relative_layout(text.rectTransform, 0f, 0.83f, 1f, 0.166f, 0.5f, 1f);
 
 			var boolFirstPerson = container.AddList("Visible In First Person View", new float[] { 0, 1 });
 			boolFirstPerson.applyImmediately = true;

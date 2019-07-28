@@ -10,6 +10,6 @@
   "features": [],
   "dependsOn": {
     "CustomUI": "^1.5.11",
-    "BSIPA": "^3.12.23"
+    "BSIPA": "^3.12.22"
   }
 }
