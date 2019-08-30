@@ -46,7 +46,7 @@ namespace CustomAvatar
 		private void SelectRowWithAvatar(CustomAvatar avatar, bool reload, bool scroll)
 		{
 			int currentRow = Plugin.Instance.AvatarLoader.IndexOf(avatar);
-			if (scroll) _tableView.ScrollToCellWithIdx(currentRow, TableView.ScrollPositionType.Center, false);
+			if (scroll) _tableView.ScrollToCellWithIdx(currentRow, TableViewScroller.ScrollPositionType.Center, false);
 			if (reload) _tableView.ReloadData();
 			_tableView.SelectCellWithIdx(currentRow);
 		}
@@ -81,6 +81,10 @@ namespace CustomAvatar
 
 			var tableViewObject = new GameObject("AvatarsListTableView");
 			tableViewObject.SetActive(false);
+
+			var scrollRect = tableViewObject.AddComponent<ScrollRect>();
+			scrollRect.viewport = tableViewObject.transform as RectTransform;
+
 			_tableView = tableViewObject.AddComponent<TableView>();
 			_tableView.gameObject.AddComponent<RectMask2D>();
 			_tableView.transform.SetParent(container, false);
@@ -91,29 +95,21 @@ namespace CustomAvatar
 			(_tableView.transform as RectTransform).anchoredPosition = new Vector3(0f, 0f);
 
 			_tableView.SetPrivateField("_preallocatedCells", new TableView.CellsGroup[0]);
-			_tableView.SetPrivateField("_isInitialized", false);
-			_tableView.dataSource = this;
 
+			_pageUpButton = Instantiate(Resources.FindObjectsOfTypeAll<Button>().First(x => (x.name == "PageUpButton")), container, false);
+			(_pageUpButton.transform as RectTransform).anchoredPosition = new Vector2(0f, 40f);
+			_tableView.SetPrivateField("_pageUpButton", _pageUpButton);
+
+			_pageDownButton = Instantiate(Resources.FindObjectsOfTypeAll<Button>().First(x => (x.name == "PageDownButton")), container, false);
+			(_pageDownButton.transform as RectTransform).anchoredPosition = new Vector2(0f, -30f);
+			_tableView.SetPrivateField("_pageDownButton", _pageDownButton);
+
+			_tableView.dataSource = this;
 			_tableView.didSelectCellWithIdxEvent += _TableView_DidSelectRowEvent;
 
 			tableViewObject.SetActive(true);
 
-			_pageUpButton = Instantiate(Resources.FindObjectsOfTypeAll<Button>().First(x => (x.name == "PageUpButton")), container, false);
-			(_pageUpButton.transform as RectTransform).anchoredPosition = new Vector2(0f, 40f);
-			_pageUpButton.interactable = true;
-			_pageUpButton.onClick.AddListener(delegate ()
-			{
-				_tableView.PageScrollUp();
-			});
-
-			_pageDownButton = Instantiate(Resources.FindObjectsOfTypeAll<Button>().First(x => (x.name == "PageDownButton")), container, false);
-			(_pageDownButton.transform as RectTransform).anchoredPosition = new Vector2(0f, -30f);
-			_pageDownButton.interactable = true;
-			_pageDownButton.onClick.AddListener(delegate ()
-			{
-				_tableView.PageScrollDown();
-			});
-
+			
 			_versionNumber = BeatSaberUI.CreateText(rectTransform, Plugin.Instance.Version, new Vector2(-10f, 10f));
 			(_versionNumber.transform as RectTransform).anchorMax = new Vector2(1f, 0f);
 			(_versionNumber.transform as RectTransform).anchorMin = new Vector2(1f, 0f);
@@ -138,7 +134,7 @@ namespace CustomAvatar
 			Plugin.Instance.PlayerAvatarManager.SwitchToAvatar(Plugin.Instance.AvatarLoader.Avatars[row]);
 		}
 
-		TableCell TableView.IDataSource.CellForIdx(int row)
+		TableCell TableView.IDataSource.CellForIdx(TableView tableView, int row)
 		{
 			LevelListTableCell tableCell = _tableView.DequeueReusableCellForIdentifier("AvatarListCell") as LevelListTableCell;
 			if (tableCell == null)

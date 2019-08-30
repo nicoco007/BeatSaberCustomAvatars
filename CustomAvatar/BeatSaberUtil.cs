@@ -24,27 +24,14 @@ namespace CustomAvatar
 				return _mainSettingsModel;
 			}
 		}
-		
-		static BeatSaberUtil()
-		{
-			SceneManager.sceneLoaded += SceneManagerOnSceneLoaded;
-		}
-
-		private static void SceneManagerOnSceneLoaded(Scene scene, LoadSceneMode mode)
-		{
-			_playerDataModel = Resources.FindObjectsOfTypeAll<PlayerDataModelSO>().FirstOrDefault();
-
-			//var originObject = GameObject.Find("Origin");
-			//if (originObject != null)
-			//{
-			//	_originTransform = originObject.transform;
-			//}
-		}
 
 		public static float GetPlayerHeight()
 		{
-			var playerHeight = _playerDataModel == null ? _lastPlayerHeight : _playerDataModel.currentLocalPlayer.playerSpecificSettings.playerHeight * Plugin.PLAYER_SCALE;
+			if (!_playerDataModel)
+				_playerDataModel = Resources.FindObjectsOfTypeAll<PlayerDataModelSO>().FirstOrDefault();
 
+			var playerHeight = _playerDataModel == null ? _lastPlayerHeight : _playerDataModel.playerData.playerSpecificSettings.playerHeight * Plugin.PLAYER_SCALE;
+			
 			_lastPlayerHeight = playerHeight;
 			return playerHeight;
 		}
