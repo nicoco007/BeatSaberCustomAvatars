@@ -2,13 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using AvatarScriptPack;
 using CustomAvatar.StereoRendering;
 using IPA;
+using IPA.Logging;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.XR;
-using Logger = CustomAvatar.Util.Logger;
 
 namespace CustomAvatar
 {
@@ -24,11 +22,11 @@ namespace CustomAvatar
 		private AvatarUI _avatarUI;
 
 		private GameScenesManager _scenesManager;
-		private static bool _isTrackerAsHand;
+		//private static bool _isTrackerAsHand;
 
-		private GameObject go;
+		//private GameObject go;
 
-		public static List<XRNodeState> Trackers = new List<XRNodeState>();
+		/*public static List<XRNodeState> Trackers = new List<XRNodeState>();
 		public static bool IsTrackerAsHand
 		{
 			get { return _isTrackerAsHand; }
@@ -85,7 +83,7 @@ namespace CustomAvatar
 				Logger.Log(string.Concat("IsFullBodyTracking : ", isFullBodyTracking.ToString()));
 				Logger.Log(string.Concat("FullBodyTrackingType: ", FullBodyTrackingType.ToString()));
 			}
-		}
+		}*/
 
 		public event Action<bool> FirstPersonEnabledChanged;
 		public event Action<Scene> SceneTransitioned;
@@ -141,9 +139,11 @@ namespace CustomAvatar
 			get { return "4.7.4"; }
 		}
 
-		public void Init(IPA.Logging.Logger log)
+		public static IPA.Logging.Logger Logger { get; private set; }
+
+		public void Init(IPA.Logging.Logger logger)
 		{
-			Util.Logger.logger = log;
+			Logger = logger;
 			Instance = this;
 
 			AvatarLoader = new AvatarLoader(CustomAvatarsPath, AvatarsLoaded);
@@ -170,7 +170,7 @@ namespace CustomAvatar
 		{
 			if (loadedAvatars.Count == 0)
 			{
-				Logger.Log("No custom avatars found in path " + Path.GetFullPath(CustomAvatarsPath));
+				Logger.Warn("No custom avatars found in path " + Path.GetFullPath(CustomAvatarsPath));
 				return;
 			}
 
@@ -197,7 +197,7 @@ namespace CustomAvatar
 			}
 			else
 			{
-				Debug.LogWarning($"Could not find camera with name {cameraName}!");
+				Plugin.Logger.Error($"Could not find camera with name {cameraName}!");
 			}
 
 			if (_scenesManager == null)
@@ -216,39 +216,35 @@ namespace CustomAvatar
 		{
 			Camera mainCamera = Camera.main;
 
-			if (PlayerAvatarInput.LeftLegCorrection.Rotation == Quaternion.identity)
+			if (TrackedDeviceManager.LeftLegCorrection.Rotation == Quaternion.identity)
 			{
-				Console.WriteLine("Scene transition finished");
-				var tempInput = new PlayerAvatarInput();
-				var eyeHeight = tempInput.HeadPosRot.Position.y;
+				var tempInput = PersistentSingleton<TrackedDeviceManager>.instance;
+
+				TrackedDeviceState head = tempInput.Head;
+				TrackedDeviceState leftFoot = tempInput.LeftFoot;
+				TrackedDeviceState rightFoot = tempInput.RightFoot;
+				TrackedDeviceState pelvis = tempInput.Waist;
+
+				var eyeHeight = head.Position.y;
 				var normal = Vector3.up;
 
-				PosRot leftFoot = tempInput.LeftLegPosRot;
 				Vector3 leftFootForward = leftFoot.Rotation * Vector3.up; // forward on feet trackers is y (up)
 				Vector3 leftFootStraightForward = Vector3.ProjectOnPlane(leftFootForward, normal); // get projection of forward vector on xz plane (floor)
 				Quaternion leftRotationCorrection = Quaternion.Inverse(leftFoot.Rotation) * Quaternion.LookRotation(Vector3.up, leftFootStraightForward); // get difference between world rotation and flat forward rotation
-				PlayerAvatarInput.LeftLegCorrection = new PosRot(leftFoot.Position.y * Vector3.down, leftRotationCorrection);
+				TrackedDeviceManager.LeftLegCorrection = new PosRot(leftFoot.Position.y * Vector3.down, leftRotationCorrection);
 
-				PosRot rightFoot = tempInput.RightLegPosRot;
 				Vector3 rightFootForward = rightFoot.Rotation * Vector3.up;
 			    Vector3 rightFootStraightForward = Vector3.ProjectOnPlane(rightFootForward, normal);
 				Quaternion rightRotationCorrection = Quaternion.Inverse(rightFoot.Rotation) * Quaternion.LookRotation(Vector3.up, rightFootStraightForward);
-				PlayerAvatarInput.RightLegCorrection = new PosRot(rightFoot.Position.y * Vector3.down, rightRotationCorrection);
+				TrackedDeviceManager.RightLegCorrection = new PosRot(rightFoot.Position.y * Vector3.down, rightRotationCorrection);
 
 				// using "standard" 8 head high body proportions w/ eyes at 1/2 head height
 				// http://carvinginnyc.com/wp-content/uploads/2018/09/aa94d39c207ade6ea850c86728296530.jpg
 				// head height is multiplied by 3 to allow nice numbers
-				PosRot pelvis = tempInput.PelvisPosRot;
-				Debug.Log("Pelvis Y: " + tempInput.PelvisPosRot.Position.y);
-				Debug.Log("Head Y: " + tempInput.HeadPosRot.Position.y);
 				Vector3 wantedPelvisPosition = new Vector3(0, eyeHeight / 22.5f * 14f, 0);
 				Vector3 pelvisPositionCorrection = wantedPelvisPosition - Vector3.up * pelvis.Position.y;
-				PlayerAvatarInput.PelvisCorrection = new PosRot(pelvisPositionCorrection, Quaternion.identity);
-
-				Debug.Log($"Pelvis correction: " + PlayerAvatarInput.PelvisCorrection);
+				TrackedDeviceManager.PelvisCorrection = new PosRot(pelvisPositionCorrection, Quaternion.identity);
 			}
-
-			IsFullBodyTracking = true;
 
 			if (mainCamera)
 			{
@@ -257,14 +253,13 @@ namespace CustomAvatar
 			}
 			else
 			{
-				Debug.LogWarning("Could not find main camera!");
+				Logger.Error("Could not find main camera!");
 			}
 		}
 
 		private void PlayerAvatarManagerOnAvatarChanged(CustomAvatar newAvatar)
 		{
 			PlayerPrefs.SetString(PreviousAvatarKey, newAvatar.FullPath);
-			IsFullBodyTracking = IsFullBodyTracking;
 		}
 
 		public void OnUpdate()
@@ -291,20 +286,12 @@ namespace CustomAvatar
 			{
 				FirstPersonEnabled = !FirstPersonEnabled;
 			}
-			else if (Input.GetKeyDown(KeyCode.F6))
-			{
-				IsTrackerAsHand = !IsTrackerAsHand;
-			}
-			else if (Input.GetKeyDown(KeyCode.F5))
-			{
-				IsFullBodyTracking = !IsFullBodyTracking;
-			}
 			else if (Input.GetKeyDown(KeyCode.End))
 			{
 				int policy = (int)Plugin.Instance.AvatarTailor.ResizePolicy + 1;
 				if (policy > 2) policy = 0;
 				Plugin.Instance.AvatarTailor.ResizePolicy = (AvatarTailor.ResizePolicyType)policy;
-				Logger.Log($"Set Resize Policy to {Plugin.Instance.AvatarTailor.ResizePolicy}");
+				Logger.Info($"Set Resize Policy to {Plugin.Instance.AvatarTailor.ResizePolicy}");
 				Plugin.Instance.PlayerAvatarManager.ResizePlayerAvatar();
 			}
 			else if (Input.GetKeyDown(KeyCode.Insert))
@@ -313,14 +300,14 @@ namespace CustomAvatar
 					Plugin.Instance.AvatarTailor.FloorMovePolicy = AvatarTailor.FloorMovePolicyType.NeverMove;
 				else
 					Plugin.Instance.AvatarTailor.FloorMovePolicy = AvatarTailor.FloorMovePolicyType.AllowMove;
-				Logger.Log($"Set Floor Move Policy to {Plugin.Instance.AvatarTailor.FloorMovePolicy}");
+				Logger.Info($"Set Floor Move Policy to {Plugin.Instance.AvatarTailor.FloorMovePolicy}");
 				Plugin.Instance.PlayerAvatarManager.ResizePlayerAvatar();
 			}
 		}
 
 		private void SetCameraCullingMask(Camera camera)
 		{
-			Logger.Log("Adding third person culling mask to " + camera.name);
+			Logger.Debug("Adding third person culling mask to " + camera.name);
 
 			camera.cullingMask &= ~(1 << AvatarLayers.OnlyInThirdPerson);
 			camera.cullingMask |= 1 << AvatarLayers.Global;

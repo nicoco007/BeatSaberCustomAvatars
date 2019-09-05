@@ -44,7 +44,7 @@ namespace CustomAvatar.StereoRendering
 				instance = camera.gameObject.AddComponent<StereoRenderManager>();
 				camera.gameObject.AddComponent<VRRenderEventDetector>().Initialize(0);
 
-				Debug.Log("Initialized StereoRenderManager with camera " + camera);
+				Plugin.Logger.Info("Initialized StereoRenderManager with camera " + camera);
 			}
 		}
 
@@ -57,18 +57,18 @@ namespace CustomAvatar.StereoRendering
             if (instances.Length > 0)
             {
                 instance = instances[0];
-                if (instances.Length > 1) { Debug.LogError("Multiple StereoRenderManager is not supported."); }
+                if (instances.Length > 1) { Plugin.Logger.Error("Multiple StereoRenderManager is not supported."); }
             }
 
             // pop warning if no VR device detected
-            if (!UnityEngine.XR.XRSettings.enabled) { Debug.LogError("VR is not enabled for this application."); }
+            if (!UnityEngine.XR.XRSettings.enabled) { Plugin.Logger.Error("VR is not enabled for this application."); }
 
             // get HMD head
             Camera head = GetHmdRig();
             if (head == null) { return; }
             if (head.transform.parent == null)
             {
-                Debug.LogError("HMD rig is not of proper hierarchy. You need a \"rig\" object as its root.");
+                Plugin.Logger.Error("HMD rig is not of proper hierarchy. You need a \"rig\" object as its root.");
                 return;
             }
 
@@ -93,7 +93,7 @@ namespace CustomAvatar.StereoRendering
             }
             else
             {
-                Debug.LogError("No Camera tagged as \"MainCamera\" found.");
+                Plugin.Logger.Error("No Camera tagged as \"MainCamera\" found.");
             }
 
             return target;

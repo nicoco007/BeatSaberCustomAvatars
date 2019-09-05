@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Logger = CustomAvatar.Util.Logger;
+using static IPA.Logging.Logger;
 
 namespace CustomAvatar
 {
@@ -69,7 +69,7 @@ namespace CustomAvatar
 			var animator = FindAvatarAnimator(avatar.GameObject);
 			if (animator == null)
 			{
-				Logger.Log("Tailor: Animator not found");
+				Plugin.Logger.Log(Level.Error, "Tailor: Animator not found");
 				return;
 			}
 
@@ -80,7 +80,7 @@ namespace CustomAvatar
 				float playerArmLength = PlayerArmLength;
 				_currentAvatarArmLength = _currentAvatarArmLength ?? AvatarMeasurement.MeasureArmLength(animator);
 				var avatarArmLength = _currentAvatarArmLength ?? playerArmLength;
-				Logger.Log("Avatar arm length: " + avatarArmLength);
+				Plugin.Logger.Log(Level.Debug, "Avatar arm length: " + avatarArmLength);
 
 				scale = playerArmLength / avatarArmLength;
 			}
@@ -92,7 +92,7 @@ namespace CustomAvatar
 			// apply scale
 			avatar.GameObject.transform.localScale = _initialAvatarLocalScale * scale;
 
-			Logger.Log("Avatar resized with scale: " + scale);
+			Plugin.Logger.Log(Level.Info, "Avatar resized with scale: " + scale);
 
 			SharedCoroutineStarter.instance.StartCoroutine(FloorMendingWithDelay(avatar, animator, scale));
 		}
@@ -125,7 +125,7 @@ namespace CustomAvatar
 			{
 				_initialPlatformPosition = _initialPlatformPosition ?? customFloor.transform.position;
 				customFloor.transform.position = (Vector3.up * floorOffset) + _initialPlatformPosition ?? Vector3.zero;
-				Logger.Log("CustomFloor moved to " + customFloor.transform.position.y + " with offset " + floorOffset);
+				Plugin.Logger.Log(Level.Info, "CustomFloor moved to " + customFloor.transform.position.y + " with offset " + floorOffset);
 			}
 		}
 
@@ -147,7 +147,7 @@ namespace CustomAvatar
 
 		private class PlayerArmLengthMeasurement : MonoBehaviour
 		{
-			private PlayerAvatarInput playerInput = new PlayerAvatarInput();
+			private TrackedDeviceManager playerInput = PersistentSingleton<TrackedDeviceManager>.instance;
 			private const float initialValue = 0.5f;
 			private float maxHandToHandLength = initialValue;
 			private float updateTime = 0;
@@ -156,7 +156,7 @@ namespace CustomAvatar
 
 			void Scan()
 			{
-				var handToHandLength = Vector3.Distance(playerInput.LeftPosRot.Position, playerInput.RightPosRot.Position);
+				var handToHandLength = Vector3.Distance(playerInput.LeftHand.Position, playerInput.RightHand.Position);
 				if (maxHandToHandLength < handToHandLength)
 				{
 					maxHandToHandLength = handToHandLength;

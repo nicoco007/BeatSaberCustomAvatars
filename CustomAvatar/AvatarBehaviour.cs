@@ -1,13 +1,11 @@
+using AvatarScriptPack;
 using System;
 using UnityEngine;
-using Logger = CustomAvatar.Util.Logger;
 
 namespace CustomAvatar
 {
 	public class AvatarBehaviour : MonoBehaviour
 	{
-		private IAvatarInput _avatarInput;
-
 		private Transform _head;
 		private Transform _body;
 		private Transform _leftHand;
@@ -26,9 +24,18 @@ namespace CustomAvatar
 		private Vector3 _prevPelvisPos = default(Vector3);
 		private Quaternion _prevPelvisRot = default(Quaternion);
 
-		public void Init(IAvatarInput avatarInput)
+		private VRIK _vrik;
+		private IKManagerAdvanced _ikManagerAdvanced;
+		private TrackedDeviceManager _trackedDevices;
+
+		public void Start()
 		{
-			_avatarInput = avatarInput;
+			_vrik = GetComponentInChildren<VRIK>();
+			_ikManagerAdvanced = GetComponentInChildren<IKManagerAdvanced>();
+			_trackedDevices = PersistentSingleton<TrackedDeviceManager>.instance;
+
+			_trackedDevices.DeviceAdded += (device) => UpdateVrikReferences();
+			_trackedDevices.DeviceRemoved += (device) => UpdateVrikReferences();
 
 			_head = GetHeadTransform();
 			_body = gameObject.transform.Find("Body");
@@ -37,15 +44,57 @@ namespace CustomAvatar
 			_leftLeg = gameObject.transform.Find("LeftLeg");
 			_rightLeg = gameObject.transform.Find("RightLeg");
 			_pelvis = gameObject.transform.Find("Pelvis");
+
+			UpdateVrikReferences();
+		}
+
+		private void UpdateVrikReferences()
+		{
+			Plugin.Logger.Debug("Updating VRIK references");
+
+			if (_trackedDevices.LeftFoot.Found)
+			{
+				_vrik.solver.leftLeg.positionWeight = _ikManagerAdvanced.LeftLeg_positionWeight;
+				_vrik.solver.leftLeg.rotationWeight = _ikManagerAdvanced.LeftLeg_rotationWeight;
+			}
+			else
+			{
+				_vrik.solver.leftLeg.positionWeight = 0;
+				_vrik.solver.leftLeg.rotationWeight = 0;
+			}
+
+			if (_trackedDevices.RightFoot.Found)
+			{
+				_vrik.solver.rightLeg.positionWeight = _ikManagerAdvanced.RightLeg_positionWeight;
+				_vrik.solver.rightLeg.rotationWeight = _ikManagerAdvanced.RightLeg_positionWeight;
+			}
+			else
+			{
+				_vrik.solver.rightLeg.positionWeight = 0;
+				_vrik.solver.rightLeg.rotationWeight = 0;
+			}
+
+			if (_trackedDevices.Waist.Found)
+			{
+				_vrik.solver.spine.pelvisTarget = _ikManagerAdvanced.Spine_pelvisTarget;
+				_vrik.solver.spine.pelvisPositionWeight = _ikManagerAdvanced.Spine_pelvisPositionWeight;
+				_vrik.solver.spine.pelvisRotationWeight = _ikManagerAdvanced.Spine_pelvisRotationWeight;
+			}
+			else
+			{
+				_vrik.solver.spine.pelvisTarget = null;
+				_vrik.solver.spine.pelvisPositionWeight = 0;
+				_vrik.solver.spine.pelvisRotationWeight = 0;
+			}
 		}
 
 		private void LateUpdate()
 		{
 			try
 			{
-				var headPosRot = _avatarInput.HeadPosRot;
-				var leftPosRot = _avatarInput.LeftPosRot;
-				var rightPosRot = _avatarInput.RightPosRot;
+				TrackedDeviceState headPosRot = _trackedDevices.Head;
+				TrackedDeviceState leftPosRot = _trackedDevices.LeftHand;
+				TrackedDeviceState rightPosRot = _trackedDevices.RightHand;
 
 				_head.position = headPosRot.Position;
 				_head.rotation = headPosRot.Rotation;
@@ -56,29 +105,32 @@ namespace CustomAvatar
 				_rightHand.position = rightPosRot.Position;
 				_rightHand.rotation = rightPosRot.Rotation;
 
-				if (_leftLeg != null && _rightLeg != null && _avatarInput is IAvatarFullBodyInput)
+				if (_leftLeg != null)
 				{
-					var _fbinput = _avatarInput as IAvatarFullBodyInput;
-					var leftLegPosRot = _fbinput.LeftLegPosRot;
-					var rightLegPosRot = _fbinput.RightLegPosRot;
-					_prevLeftLegPos = Vector3.Lerp(_prevLeftLegPos, leftLegPosRot.Position, 1 / Time.deltaTime * 0.0018f);
-					_prevLeftLegRot = Quaternion.Slerp(_prevLeftLegRot, leftLegPosRot.Rotation, 1 / Time.deltaTime * 0.0012f);
+					var leftLegPosRot = _trackedDevices.LeftFoot;
+
+					_prevLeftLegPos = Vector3.Lerp(_prevLeftLegPos, leftLegPosRot.Position, 15 * Time.deltaTime);
+					_prevLeftLegRot = Quaternion.Slerp(_prevLeftLegRot, leftLegPosRot.Rotation, 10 * Time.deltaTime);
 					_leftLeg.position = _prevLeftLegPos;
 					_leftLeg.rotation = _prevLeftLegRot;
+				}
 
-					_prevRightLegPos = Vector3.Lerp(_prevRightLegPos, rightLegPosRot.Position, 1 / Time.deltaTime * 0.0018f);
-					_prevRightLegRot = Quaternion.Slerp(_prevRightLegRot, rightLegPosRot.Rotation, 1 / Time.deltaTime * 0.0012f);
+				if (_rightLeg != null)
+				{
+					var rightLegPosRot = _trackedDevices.RightFoot;
+
+					_prevRightLegPos = Vector3.Lerp(_prevRightLegPos, rightLegPosRot.Position, 15 * Time.deltaTime);
+					_prevRightLegRot = Quaternion.Slerp(_prevRightLegRot, rightLegPosRot.Rotation, 10 * Time.deltaTime);
 					_rightLeg.position = _prevRightLegPos;
 					_rightLeg.rotation = _prevRightLegRot;
 				}
 
-				if(_pelvis != null && _avatarInput is IAvatarFullBodyInput)
+				if (_pelvis != null && _trackedDevices.Waist.Found)
 				{
-					var _fbinput = _avatarInput as IAvatarFullBodyInput;
-					var pelvisPosRot = _fbinput.PelvisPosRot;
+					var pelvisPosRot = _trackedDevices.Waist;
 
-					_prevPelvisPos = Vector3.Lerp(_prevPelvisPos, pelvisPosRot.Position, 1 / Time.deltaTime * 0.0018f);
-					_prevPelvisRot = Quaternion.Slerp(_prevPelvisRot, pelvisPosRot.Rotation, 1 / Time.deltaTime * 0.0012f);
+					_prevPelvisPos = Vector3.Lerp(_prevPelvisPos, pelvisPosRot.Position, 17 * Time.deltaTime);
+					_prevPelvisRot = Quaternion.Slerp(_prevPelvisRot, pelvisPosRot.Rotation, 13 * Time.deltaTime);
 					_pelvis.position = _prevPelvisPos;
 					_pelvis.rotation = _prevPelvisRot;
 				}
@@ -103,7 +155,7 @@ namespace CustomAvatar
 				_prevBodyPos = _body.transform.localPosition;
 			} catch(Exception e)
 			{
-				Logger.Log($"{e.Message}\n{e.StackTrace}", Logger.LogLevel.Error);
+				Plugin.Logger.Error($"{e.Message}\n{e.StackTrace}");
 			}
 		}
 

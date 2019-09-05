@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
@@ -319,49 +317,7 @@ namespace AvatarScriptPack
 						}
 					}
 				}
-				CheckFullBodyTracking();
 			}
-		}
-
-		public void CheckFullBodyTracking()
-		{
-#if PLUGIN
-			VRIK _VRIK = base.gameObject.GetComponent<VRIK>();
-
-			_VRIK.solver.spine.pelvisPositionWeight = 0f;
-			_VRIK.solver.spine.pelvisRotationWeight = 0f;
-			_VRIK.solver.leftLeg.positionWeight = 0f;
-			_VRIK.solver.leftLeg.rotationWeight = 0f;
-			_VRIK.solver.rightLeg.positionWeight = 0f;
-			_VRIK.solver.rightLeg.rotationWeight = 0f;
-			switch (CustomAvatar.Plugin.FullBodyTrackingType)
-			{
-				case CustomAvatar.Plugin.TrackingType.Hips:
-					{
-						_VRIK.solver.spine.pelvisPositionWeight = this.Spine_pelvisPositionWeight;
-						_VRIK.solver.spine.pelvisRotationWeight = this.Spine_pelvisRotationWeight;
-						break;
-					}
-				case CustomAvatar.Plugin.TrackingType.Feet:
-					{
-						_VRIK.solver.leftLeg.positionWeight = this.LeftLeg_positionWeight;
-						_VRIK.solver.leftLeg.rotationWeight = this.LeftLeg_rotationWeight;
-						_VRIK.solver.rightLeg.positionWeight = this.RightLeg_positionWeight;
-						_VRIK.solver.rightLeg.rotationWeight = this.RightLeg_rotationWeight;
-						break;
-					}
-				case CustomAvatar.Plugin.TrackingType.Full:
-					{
-						_VRIK.solver.spine.pelvisPositionWeight = this.Spine_pelvisPositionWeight;
-						_VRIK.solver.spine.pelvisRotationWeight = this.Spine_pelvisRotationWeight;
-						_VRIK.solver.leftLeg.positionWeight = this.LeftLeg_positionWeight;
-						_VRIK.solver.leftLeg.rotationWeight = this.LeftLeg_rotationWeight;
-						_VRIK.solver.rightLeg.positionWeight = this.RightLeg_positionWeight;
-						_VRIK.solver.rightLeg.rotationWeight = this.RightLeg_rotationWeight;
-						break;
-					}
-			}
-#endif
 		}
 
 		public static void SetProperty(object obj, string fieldName, object value)

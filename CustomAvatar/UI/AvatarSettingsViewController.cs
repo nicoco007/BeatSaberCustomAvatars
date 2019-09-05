@@ -4,7 +4,6 @@ using CustomUI.BeatSaber;
 using CustomUI.Settings;
 using TMPro;
 using System.Collections.Generic;
-using Logger = CustomAvatar.Util.Logger;
 using IPA.Utilities;
 
 namespace CustomAvatar
@@ -114,7 +113,7 @@ namespace CustomAvatar
 			{
 				list.InvokePrivateMethod("OnDisable", new object[] { });
 				list.InvokePrivateMethod("OnEnable", new object[] { });
-				Logger.Log("Reset " + list.name);
+				Plugin.Logger.Debug("Reset " + list.name);
 			}
 		}
 	}

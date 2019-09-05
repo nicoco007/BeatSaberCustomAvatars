@@ -8,7 +8,6 @@ using CustomUI.BeatSaber;
 using CustomUI.Utilities;
 using TMPro;
 using System.Collections.Generic;
-using Logger = CustomAvatar.Util.Logger;
 
 namespace CustomAvatar
 {
@@ -63,7 +62,7 @@ namespace CustomAvatar
 		{
 			if (loadResult != AvatarLoadResult.Completed)
 			{
-				Logger.Log("Avatar " + avatar.FullPath + " failed to load");
+				Plugin.Logger.Error("Avatar " + avatar.FullPath + " failed to load");
 				return;
 			}
 

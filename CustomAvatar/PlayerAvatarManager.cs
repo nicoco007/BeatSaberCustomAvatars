@@ -1,13 +1,11 @@
 using System;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
-using Logger = CustomAvatar.Util.Logger;
 
 namespace CustomAvatar
 {
 	public class PlayerAvatarManager
 	{
-		private readonly PlayerAvatarInput _playerAvatarInput;
 		private readonly AvatarLoader _avatarLoader;
 		private readonly AvatarTailor _avatarTailor;
 		public SpawnedAvatar _currentSpawnedPlayerAvatar;
@@ -17,7 +15,6 @@ namespace CustomAvatar
 		public PlayerAvatarManager(AvatarLoader avatarLoader, AvatarTailor avatarTailor, CustomAvatar startAvatar = null)
 		{
 			Console.WriteLine("For PlayerAvatarManager");
-			_playerAvatarInput = new PlayerAvatarInput();
 			_avatarLoader = avatarLoader;
 			_avatarTailor = avatarTailor;
 
@@ -115,18 +112,18 @@ namespace CustomAvatar
 		{
 			if (result != AvatarLoadResult.Completed)
 			{
-				Logger.Log("Avatar " + loadedAvatar.FullPath + " failed to load");
+				Plugin.Logger.Error("Avatar " + loadedAvatar.FullPath + " failed to load");
 				return;
 			}
 
-			Logger.Log("Loaded avatar " + loadedAvatar.Name + " by " + loadedAvatar.AuthorName);
+			Plugin.Logger.Info("Loaded avatar " + loadedAvatar.Name + " by " + loadedAvatar.AuthorName);
 
 			if (_currentSpawnedPlayerAvatar?.GameObject != null)
 			{
 				Object.Destroy(_currentSpawnedPlayerAvatar.GameObject);
 			}
 
-			_currentSpawnedPlayerAvatar = SpawnAvatar(loadedAvatar, _playerAvatarInput);
+			_currentSpawnedPlayerAvatar = SpawnAvatar(loadedAvatar);
 
 			AvatarChanged?.Invoke(loadedAvatar);
 
@@ -153,26 +150,24 @@ namespace CustomAvatar
 
 		private void OnSceneTransitioned(Scene newScene)
 		{
-			Logger.Log("OnSceneTransitioned - " + newScene.name);
+			Plugin.Logger.Debug("OnSceneTransitioned - " + newScene.name);
 			if (newScene.name.Equals("GameCore"))
 				_currentSpawnedPlayerAvatar?.GameObject.GetComponentInChildren<AvatarEventsPlayer>()?.LevelStartedEvent();
 			else if (newScene.name.Equals("MenuCore"))
 				_currentSpawnedPlayerAvatar?.GameObject.GetComponentInChildren<AvatarEventsPlayer>()?.MenuEnteredEvent();
 		}
 
-		private static SpawnedAvatar SpawnAvatar(CustomAvatar customAvatar, IAvatarInput avatarInput)
+		private static SpawnedAvatar SpawnAvatar(CustomAvatar customAvatar)
 		{
 			if (customAvatar.GameObject == null)
 			{
-				Logger.Log("Can't spawn " + customAvatar.FullPath + " because it hasn't been loaded!");
+				Plugin.Logger.Error("Can't spawn " + customAvatar.FullPath + " because it hasn't been loaded!");
 				return null;
 			}
 
 			var avatarGameObject = Object.Instantiate(customAvatar.GameObject);
 
 			var behaviour = avatarGameObject.AddComponent<AvatarBehaviour>();
-			behaviour.Init(avatarInput);
-
 			avatarGameObject.AddComponent<AvatarEventsPlayer>();
 
 			/* Don't have the patience to make this work rn

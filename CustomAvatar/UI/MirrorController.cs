@@ -31,7 +31,7 @@ namespace CustomAvatar
 			}
 			else
 			{
-				Debug.LogError("Failed to load mirror shader!");
+				Plugin.Logger.Error("Failed to load mirror shader!");
 			}
 
 			shadersBundle.Unload(false);
