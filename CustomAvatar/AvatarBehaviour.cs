@@ -31,12 +31,14 @@ namespace CustomAvatar
 		private VRIK _vrik;
 		private IKManagerAdvanced _ikManagerAdvanced;
 		private TrackedDeviceManager _trackedDevices;
+		private VRPlatformHelper _vrPlatformHelper;
 
 		public void Start()
 		{
 			_vrik = GetComponentInChildren<VRIK>();
 			_ikManagerAdvanced = GetComponentInChildren<IKManagerAdvanced>();
 			_trackedDevices = PersistentSingleton<TrackedDeviceManager>.instance;
+			_vrPlatformHelper = PersistentSingleton<VRPlatformHelper>.instance;
 
 			_trackedDevices.DeviceAdded += (device) => UpdateVrikReferences();
 			_trackedDevices.DeviceRemoved += (device) => UpdateVrikReferences();
@@ -100,16 +102,29 @@ namespace CustomAvatar
 				TrackedDeviceState leftPosRot = _trackedDevices.LeftHand;
 				TrackedDeviceState rightPosRot = _trackedDevices.RightHand;
 
-				_head.position = headPosRot.Position;
-				_head.rotation = headPosRot.Rotation;
+				if (headPosRot.NodeState.tracked)
+				{
+					_head.position = headPosRot.Position;
+					_head.rotation = headPosRot.Rotation;
+				}
 
-				_leftHand.position = leftPosRot.Position;
-				_leftHand.rotation = leftPosRot.Rotation;
+				if (leftPosRot.NodeState.tracked)
+				{
+					_leftHand.position = leftPosRot.Position;
+					_leftHand.rotation = leftPosRot.Rotation;
 
-				_rightHand.position = rightPosRot.Position;
-				_rightHand.rotation = rightPosRot.Rotation;
+					_vrPlatformHelper.AdjustPlatformSpecificControllerTransform(_leftHand);
+				}
 
-				if (_leftLeg != null)
+				if (rightPosRot.NodeState.tracked)
+				{
+					_rightHand.position = rightPosRot.Position;
+					_rightHand.rotation = rightPosRot.Rotation;
+
+					_vrPlatformHelper.AdjustPlatformSpecificControllerTransform(_rightHand);
+				}
+
+				if (_leftLeg != null && _trackedDevices.LeftFoot.NodeState.tracked)
 				{
 					var leftLegPosRot = _trackedDevices.LeftFoot;
 					var correction = LeftLegCorrection ?? default;
@@ -120,7 +135,7 @@ namespace CustomAvatar
 					_leftLeg.rotation = _prevLeftLegRot;
 				}
 
-				if (_rightLeg != null)
+				if (_rightLeg != null && _trackedDevices.RightFoot.NodeState.tracked)
 				{
 					var rightLegPosRot = _trackedDevices.RightFoot;
 					var correction = RightLegCorrection ?? default;
@@ -131,7 +146,7 @@ namespace CustomAvatar
 					_rightLeg.rotation = _prevRightLegRot;
 				}
 
-				if (_pelvis != null)
+				if (_pelvis != null && _trackedDevices.Waist.NodeState.tracked)
 				{
 					var pelvisPosRot = _trackedDevices.Waist;
 					var correction = PelvisCorrection ?? default;
@@ -141,11 +156,6 @@ namespace CustomAvatar
 					_pelvis.position = _prevPelvisPos;
 					_pelvis.rotation = _prevPelvisRot;
 				}
-
-				var vrPlatformHelper = PersistentSingleton<VRPlatformHelper>.instance;
-
-				vrPlatformHelper.AdjustPlatformSpecificControllerTransform(_leftHand);
-				vrPlatformHelper.AdjustPlatformSpecificControllerTransform(_rightHand);
 
 				if (_body == null) return;
 				_body.position = _head.position - (_head.transform.up * 0.1f);
