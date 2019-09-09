@@ -9,10 +9,6 @@ namespace CustomAvatar
 {
 	public class TrackedDeviceManager : MonoBehaviour
 	{
-		public static PosRot LeftLegCorrection { get; set; } = new PosRot();
-		public static PosRot RightLegCorrection { get; set; } = new PosRot();
-		public static PosRot PelvisCorrection { get; set; } = new PosRot();
-
 		public TrackedDeviceState Head      { get; } = new TrackedDeviceState();
 		public TrackedDeviceState LeftHand  { get; } = new TrackedDeviceState();
 		public TrackedDeviceState RightHand { get; } = new TrackedDeviceState();
@@ -65,7 +61,7 @@ namespace CustomAvatar
 						break;
 
 					case XRNode.HardwareTracker:
-						// figure out tracker role using OpenVR
+						// try to figure out tracker role using OpenVR
 						string deviceName = InputTracking.GetNodeName(nodeStates[i].uniqueID);
 						uint openVRDeviceId = (uint)serialNumbers.ToList().FindIndex(s => !string.IsNullOrEmpty(s) && deviceName.Contains(s));
 						TrackedDeviceType role = OpenVR.OpenVRHelper.GetTrackedDeviceType(openVRDeviceId);
@@ -134,7 +130,11 @@ namespace CustomAvatar
 			{
 				if (deviceState.Found)
 				{
+					deviceState.Position = default;
+					deviceState.Rotation = default;
 					deviceState.Found = false;
+					deviceState.NodeState = default;
+					Plugin.Logger.Info($"Lost device with ID {deviceState.NodeState.uniqueID} that was used as {use}");
 					DeviceRemoved?.Invoke(deviceState);
 				}
 
@@ -142,24 +142,22 @@ namespace CustomAvatar
 			}
 
 			XRNodeState nodeState = (XRNodeState)possibleNodeState;
+			ulong previousId = deviceState.NodeState.uniqueID;
 
-			Vector3 position;
-			Quaternion rotation;
+			if (nodeState.tracked && nodeState.TryGetPosition(out var position) && nodeState.TryGetRotation(out var rotation))
+			{
+				deviceState.Position = position;
+				deviceState.Rotation = rotation;
+			}
 
-			nodeState.TryGetPosition(out position);
-			nodeState.TryGetRotation(out rotation);
-
-			deviceState.Position = position;
-			deviceState.Rotation = rotation;
 			deviceState.Found = true;
+			deviceState.NodeState = nodeState;
 
-			if (nodeState.uniqueID != deviceState.NodeState.uniqueID)
+			if (nodeState.uniqueID != previousId)
 			{
 				Plugin.Logger.Info($"Using device \"{InputTracking.GetNodeName(nodeState.uniqueID)}\" ({nodeState.uniqueID}) as {use}");
 				DeviceAdded?.Invoke(deviceState);
 			}
-			
-			deviceState.NodeState = nodeState;
 		}
 	}
 }

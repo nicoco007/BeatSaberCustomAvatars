@@ -216,14 +216,16 @@ namespace CustomAvatar
 		{
 			Camera mainCamera = Camera.main;
 
-			if (TrackedDeviceManager.LeftLegCorrection.Rotation == Quaternion.identity)
+			if (AvatarBehaviour.LeftLegCorrection == null)
 			{
-				var tempInput = PersistentSingleton<TrackedDeviceManager>.instance;
+				Logger.Info("Calibrating full body tracking");
 
-				TrackedDeviceState head = tempInput.Head;
-				TrackedDeviceState leftFoot = tempInput.LeftFoot;
-				TrackedDeviceState rightFoot = tempInput.RightFoot;
-				TrackedDeviceState pelvis = tempInput.Waist;
+				var input = PersistentSingleton<TrackedDeviceManager>.instance;
+
+				TrackedDeviceState head = input.Head;
+				TrackedDeviceState leftFoot = input.LeftFoot;
+				TrackedDeviceState rightFoot = input.RightFoot;
+				TrackedDeviceState pelvis = input.Waist;
 
 				var eyeHeight = head.Position.y;
 				var normal = Vector3.up;
@@ -231,19 +233,19 @@ namespace CustomAvatar
 				Vector3 leftFootForward = leftFoot.Rotation * Vector3.up; // forward on feet trackers is y (up)
 				Vector3 leftFootStraightForward = Vector3.ProjectOnPlane(leftFootForward, normal); // get projection of forward vector on xz plane (floor)
 				Quaternion leftRotationCorrection = Quaternion.Inverse(leftFoot.Rotation) * Quaternion.LookRotation(Vector3.up, leftFootStraightForward); // get difference between world rotation and flat forward rotation
-				TrackedDeviceManager.LeftLegCorrection = new PosRot(leftFoot.Position.y * Vector3.down, leftRotationCorrection);
+				AvatarBehaviour.LeftLegCorrection = new PosRot(leftFoot.Position.y * Vector3.down, leftRotationCorrection);
 
 				Vector3 rightFootForward = rightFoot.Rotation * Vector3.up;
 			    Vector3 rightFootStraightForward = Vector3.ProjectOnPlane(rightFootForward, normal);
 				Quaternion rightRotationCorrection = Quaternion.Inverse(rightFoot.Rotation) * Quaternion.LookRotation(Vector3.up, rightFootStraightForward);
-				TrackedDeviceManager.RightLegCorrection = new PosRot(rightFoot.Position.y * Vector3.down, rightRotationCorrection);
+				AvatarBehaviour.RightLegCorrection = new PosRot(rightFoot.Position.y * Vector3.down, rightRotationCorrection);
 
 				// using "standard" 8 head high body proportions w/ eyes at 1/2 head height
 				// http://carvinginnyc.com/wp-content/uploads/2018/09/aa94d39c207ade6ea850c86728296530.jpg
 				// head height is multiplied by 3 to allow nice numbers
 				Vector3 wantedPelvisPosition = new Vector3(0, eyeHeight / 22.5f * 14f, 0);
 				Vector3 pelvisPositionCorrection = wantedPelvisPosition - Vector3.up * pelvis.Position.y;
-				TrackedDeviceManager.PelvisCorrection = new PosRot(pelvisPositionCorrection, Quaternion.identity);
+				AvatarBehaviour.PelvisCorrection = new PosRot(pelvisPositionCorrection, Quaternion.identity);
 			}
 
 			if (mainCamera)

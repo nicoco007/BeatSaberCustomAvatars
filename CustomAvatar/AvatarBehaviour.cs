@@ -6,6 +6,10 @@ namespace CustomAvatar
 {
 	public class AvatarBehaviour : MonoBehaviour
 	{
+		public static PosRot? LeftLegCorrection { get; set; }
+		public static PosRot? RightLegCorrection { get; set; }
+		public static PosRot? PelvisCorrection { get; set; }
+
 		private Transform _head;
 		private Transform _body;
 		private Transform _leftHand;
@@ -50,7 +54,7 @@ namespace CustomAvatar
 
 		private void UpdateVrikReferences()
 		{
-			Plugin.Logger.Debug("Updating VRIK references");
+			Plugin.Logger.Info("Tracking device change detected, updating VRIK references");
 
 			if (_trackedDevices.LeftFoot.Found)
 			{
@@ -76,15 +80,15 @@ namespace CustomAvatar
 
 			if (_trackedDevices.Waist.Found)
 			{
-				_vrik.solver.spine.pelvisTarget = _ikManagerAdvanced.Spine_pelvisTarget;
 				_vrik.solver.spine.pelvisPositionWeight = _ikManagerAdvanced.Spine_pelvisPositionWeight;
 				_vrik.solver.spine.pelvisRotationWeight = _ikManagerAdvanced.Spine_pelvisRotationWeight;
+				_vrik.solver.plantFeet = false;
 			}
 			else
 			{
-				_vrik.solver.spine.pelvisTarget = null;
 				_vrik.solver.spine.pelvisPositionWeight = 0;
 				_vrik.solver.spine.pelvisRotationWeight = 0;
+				_vrik.solver.plantFeet = true;
 			}
 		}
 
@@ -108,9 +112,10 @@ namespace CustomAvatar
 				if (_leftLeg != null)
 				{
 					var leftLegPosRot = _trackedDevices.LeftFoot;
+					var correction = LeftLegCorrection ?? default;
 
-					_prevLeftLegPos = Vector3.Lerp(_prevLeftLegPos, leftLegPosRot.Position, 15 * Time.deltaTime);
-					_prevLeftLegRot = Quaternion.Slerp(_prevLeftLegRot, leftLegPosRot.Rotation, 10 * Time.deltaTime);
+					_prevLeftLegPos = Vector3.Lerp(_prevLeftLegPos, leftLegPosRot.Position + correction.Position, 15 * Time.deltaTime);
+					_prevLeftLegRot = Quaternion.Slerp(_prevLeftLegRot, leftLegPosRot.Rotation * correction.Rotation, 10 * Time.deltaTime);
 					_leftLeg.position = _prevLeftLegPos;
 					_leftLeg.rotation = _prevLeftLegRot;
 				}
@@ -118,19 +123,21 @@ namespace CustomAvatar
 				if (_rightLeg != null)
 				{
 					var rightLegPosRot = _trackedDevices.RightFoot;
+					var correction = RightLegCorrection ?? default;
 
-					_prevRightLegPos = Vector3.Lerp(_prevRightLegPos, rightLegPosRot.Position, 15 * Time.deltaTime);
-					_prevRightLegRot = Quaternion.Slerp(_prevRightLegRot, rightLegPosRot.Rotation, 10 * Time.deltaTime);
+					_prevRightLegPos = Vector3.Lerp(_prevRightLegPos, rightLegPosRot.Position + correction.Position, 15 * Time.deltaTime);
+					_prevRightLegRot = Quaternion.Slerp(_prevRightLegRot, rightLegPosRot.Rotation * correction.Rotation, 10 * Time.deltaTime);
 					_rightLeg.position = _prevRightLegPos;
 					_rightLeg.rotation = _prevRightLegRot;
 				}
 
-				if (_pelvis != null && _trackedDevices.Waist.Found)
+				if (_pelvis != null)
 				{
 					var pelvisPosRot = _trackedDevices.Waist;
+					var correction = PelvisCorrection ?? default;
 
-					_prevPelvisPos = Vector3.Lerp(_prevPelvisPos, pelvisPosRot.Position, 17 * Time.deltaTime);
-					_prevPelvisRot = Quaternion.Slerp(_prevPelvisRot, pelvisPosRot.Rotation, 13 * Time.deltaTime);
+					_prevPelvisPos = Vector3.Lerp(_prevPelvisPos, pelvisPosRot.Position + correction.Position, 17 * Time.deltaTime);
+					_prevPelvisRot = Quaternion.Slerp(_prevPelvisRot, pelvisPosRot.Rotation * correction.Rotation, 13 * Time.deltaTime);
 					_pelvis.position = _prevPelvisPos;
 					_pelvis.rotation = _prevPelvisRot;
 				}
