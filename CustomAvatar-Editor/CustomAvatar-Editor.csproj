@@ -9,9 +9,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CustomAvatar</RootNamespace>
     <AssemblyName>CustomAvatar</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -35,10 +36,24 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" />
-    <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" />
-    <Reference Include="UnityEngine.AnimationModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" />
-    <Reference Include="UnityEngine.PhysicsModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" />
+    <Reference Include="UnityEditor">
+      <HintPath>..\CustomAvatar\lib\UnityEditor.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\CustomAvatar\lib\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AnimationModule">
+      <HintPath>..\CustomAvatar\lib\UnityEngine.AnimationModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\CustomAvatar\lib\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>..\CustomAvatar\lib\UnityEngine.IMGUIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>..\CustomAvatar\lib\UnityEngine.PhysicsModule.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\CustomAvatar\AvatarDescriptor.cs">
@@ -70,6 +85,9 @@
     </Compile>
     <Compile Include="..\CustomAvatar\FirstPersonExclusion.cs">
       <Link>FirstPersonExclusion.cs</Link>
+    </Compile>
+    <Compile Include="..\CustomAvatar\PoseManager.cs">
+      <Link>PoseManager.cs</Link>
     </Compile>
     <Compile Include="..\CustomAvatar\Properties\AssemblyInfo.cs">
       <Link>Properties\AssemblyInfo.cs</Link>
@@ -119,9 +137,6 @@
     <Compile Include="..\CustomAvatar\VRIK\Interp.cs">
       <Link>VRIK\Interp.cs</Link>
     </Compile>
-    <Compile Include="..\CustomAvatar\VRIK\InterpolationMode.cs">
-      <Link>VRIK\InterpolationMode.cs</Link>
-    </Compile>
     <Compile Include="..\CustomAvatar\VRIK\QuaTools.cs">
       <Link>VRIK\QuaTools.cs</Link>
     </Compile>
@@ -143,6 +158,7 @@
     <Compile Include="..\CustomAvatar\VRIK\Warning.cs">
       <Link>VRIK\Warning.cs</Link>
     </Compile>
+    <Compile Include="PoseManagerEditor.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

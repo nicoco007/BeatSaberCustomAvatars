@@ -1,15 +1,16 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using CustomAvatar.StereoRendering;
-using IPA;
-using IPA.Logging;
-using UnityEngine;
-using UnityEngine.SceneManagement;
-
 namespace CustomAvatar
 {
+	using StereoRendering;
+	using IPA;
+	using IPA.Logging;
+	using System;
+	using System.Collections.Generic;
+	using System.IO;
+	using System.Linq;
+	using UnityEngine;
+	using UnityEngine.SceneManagement;
+	using Harmony;
+
 	public class Plugin : IBeatSaberPlugin
 	{
 		public static float PLAYER_SCALE = 1.0f;
@@ -22,68 +23,6 @@ namespace CustomAvatar
 		private AvatarUI _avatarUI;
 
 		private GameScenesManager _scenesManager;
-		//private static bool _isTrackerAsHand;
-
-		//private GameObject go;
-
-		/*public static List<XRNodeState> Trackers = new List<XRNodeState>();
-		public static bool IsTrackerAsHand
-		{
-			get { return _isTrackerAsHand; }
-			set
-			{
-				_isTrackerAsHand = value;
-				List<XRNodeState> nodes = new List<XRNodeState>();
-				Trackers = new List<XRNodeState>();
-				InputTracking.GetNodeStates(nodes);
-				foreach (XRNodeState node in nodes)
-				{
-					Logger.Log($"XRNode: {InputTracking.GetNodeName(node.uniqueID)} - {node.nodeType}");
-					if (node.nodeType != XRNode.HardwareTracker || (!InputTracking.GetNodeName(node.uniqueID).Contains("LHR-") && !InputTracking.GetNodeName(node.uniqueID).Contains("Vive Controller MV S/N")))
-						continue;
-					Trackers.Add(node);
-				}
-				if (Trackers.Count == 0)
-					_isTrackerAsHand = false;
-				//Logger.Log("IsTrackerAsHand : " + IsTrackerAsHand);
-			}
-		}
-
-		public static bool IsFullBodyTracking
-		{
-			get { return Plugin.FullBodyTrackingType != Plugin.TrackingType.None; ; }
-			set
-			{
-				List<XRNodeState> nodes = new List<XRNodeState>();
-				Trackers = new List<XRNodeState>();
-				InputTracking.GetNodeStates(nodes);
-				foreach (XRNodeState node in nodes)
-				{
-					Logger.Log($"XRNode: {InputTracking.GetNodeName(node.uniqueID)} - {node.nodeType}");
-					if (node.nodeType != XRNode.HardwareTracker || !(InputTracking.GetNodeName(node.uniqueID).Contains("LHR-") || InputTracking.GetNodeName(node.uniqueID).Contains("d4vr")) && !InputTracking.GetNodeName(node.uniqueID).Contains("Vive Controller MV S/N"))
-						continue;
-					Trackers.Add(node);
-				}
-				if (Trackers.Count > 0 && Trackers.Count <= 3)
-					Plugin.FullBodyTrackingType = (Plugin.TrackingType)Plugin.Trackers.Count;
-				else
-					Plugin.FullBodyTrackingType = Plugin.TrackingType.None;
-				var currentAvatar = Instance.PlayerAvatarManager.GetSpawnedAvatar();
-				if (currentAvatar != null)
-				{
-					var _IKManagerAdvanced = currentAvatar.GameObject.GetComponentInChildren<AvatarScriptPack.IKManagerAdvanced>(true);
-					if (_IKManagerAdvanced != null)
-					{
-						_IKManagerAdvanced.CheckFullBodyTracking();
-					}
-
-					
-				}
-				bool isFullBodyTracking = Plugin.IsFullBodyTracking;
-				Logger.Log(string.Concat("IsFullBodyTracking : ", isFullBodyTracking.ToString()));
-				Logger.Log(string.Concat("FullBodyTrackingType: ", FullBodyTrackingType.ToString()));
-			}
-		}*/
 
 		public event Action<bool> FirstPersonEnabledChanged;
 		public event Action<Scene> SceneTransitioned;
@@ -136,15 +75,25 @@ namespace CustomAvatar
 
 		public string Version
 		{
-			get { return "4.7.4"; }
+			get { return "4.8.0"; }
 		}
 
 		public static IPA.Logging.Logger Logger { get; private set; }
+
+		private HarmonyInstance harmonyInstance;
+		private OpenVRInputManager inputManager;
 
 		public void Init(IPA.Logging.Logger logger)
 		{
 			Logger = logger;
 			Instance = this;
+
+			harmonyInstance = HarmonyInstance.Create("beatsabercustomavatars");
+
+			Logger.Info("Applying Index controller patch");
+			harmonyInstance.PatchAll();
+
+			inputManager = PersistentSingleton<OpenVRInputManager>.instance;
 
 			AvatarLoader = new AvatarLoader(CustomAvatarsPath, AvatarsLoaded);
 			AvatarTailor = new AvatarTailor();
@@ -181,7 +130,7 @@ namespace CustomAvatar
 			}
 
 			var previousAvatar = AvatarLoader.Avatars.FirstOrDefault(x => x.FullPath == previousAvatarPath);
-			
+
 			PlayerAvatarManager = new PlayerAvatarManager(AvatarLoader, AvatarTailor, previousAvatar);
 			PlayerAvatarManager.AvatarChanged += PlayerAvatarManagerOnAvatarChanged;
 		}
@@ -216,11 +165,13 @@ namespace CustomAvatar
 		{
 			Camera mainCamera = Camera.main;
 
-			if (AvatarBehaviour.LeftLegCorrection == null)
+			Logger.Info("SceneTransitionDidFinish");
+
+			var input = PersistentSingleton<TrackedDeviceManager>.instance;
+
+			if (input.Head.Found && input.LeftFoot.Found && input.RightFoot.Found && input.Waist.Found && AvatarBehaviour.LeftLegCorrection == null)
 			{
 				Logger.Info("Calibrating full body tracking");
-
-				var input = PersistentSingleton<TrackedDeviceManager>.instance;
 
 				TrackedDeviceState head = input.Head;
 				TrackedDeviceState leftFoot = input.LeftFoot;
@@ -234,6 +185,10 @@ namespace CustomAvatar
 				Vector3 leftFootStraightForward = Vector3.ProjectOnPlane(leftFootForward, normal); // get projection of forward vector on xz plane (floor)
 				Quaternion leftRotationCorrection = Quaternion.Inverse(leftFoot.Rotation) * Quaternion.LookRotation(Vector3.up, leftFootStraightForward); // get difference between world rotation and flat forward rotation
 				AvatarBehaviour.LeftLegCorrection = new PosRot(leftFoot.Position.y * Vector3.down, leftRotationCorrection);
+
+				Plugin.Logger.Info("LeftLegCorrection: " + AvatarBehaviour.LeftLegCorrection);
+				Plugin.Logger.Info("Position: " + leftFoot.Position.y * Vector3.down);
+				Plugin.Logger.Info("Rotation: " + leftRotationCorrection);
 
 				Vector3 rightFootForward = rightFoot.Rotation * Vector3.up;
 			    Vector3 rightFootStraightForward = Vector3.ProjectOnPlane(rightFootForward, normal);
@@ -274,15 +229,32 @@ namespace CustomAvatar
 				mainCamera.transform.localScale = Vector3.one * 1 / PLAYER_SCALE;
 			}
 
-			if (Input.GetKeyDown(KeyCode.PageDown))
+			var up = inputManager.Up;
+			var down = inputManager.Down;
+			var reset = inputManager.Reset;
+
+			if (up.bState && up.bChanged)
+			{
+				PLAYER_SCALE *= 1.1f;
+			}
+
+			if (down.bState && down.bChanged)
 			{
 				PLAYER_SCALE /= 1.1f;
-				//PlayerAvatarManager?.SwitchToNextAvatar();
+			}
+
+			if (reset.bState && reset.bChanged)
+			{
+				PLAYER_SCALE = 1f;
+			}
+
+			if (Input.GetKeyDown(KeyCode.PageDown))
+			{
+				PlayerAvatarManager?.SwitchToNextAvatar();
 			}
 			else if (Input.GetKeyDown(KeyCode.PageUp))
 			{
-				PLAYER_SCALE *= 1.1f;
-				//PlayerAvatarManager?.SwitchToPreviousAvatar();
+				PlayerAvatarManager?.SwitchToPreviousAvatar();
 			}
 			else if (Input.GetKeyDown(KeyCode.Home))
 			{

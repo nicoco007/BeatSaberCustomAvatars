@@ -167,7 +167,7 @@ namespace CustomAvatar
 
 			var avatarGameObject = Object.Instantiate(customAvatar.GameObject);
 
-			var behaviour = avatarGameObject.AddComponent<AvatarBehaviour>();
+			avatarGameObject.AddComponent<AvatarBehaviour>();
 			avatarGameObject.AddComponent<AvatarEventsPlayer>();
 
 			/* Don't have the patience to make this work rn

@@ -30,10 +30,10 @@ namespace CustomAvatar
 			if (!_playerDataModel)
 				_playerDataModel = Resources.FindObjectsOfTypeAll<PlayerDataModelSO>().FirstOrDefault();
 
-			var playerHeight = _playerDataModel == null ? _lastPlayerHeight : _playerDataModel.playerData.playerSpecificSettings.playerHeight * Plugin.PLAYER_SCALE;
+			var playerHeight = _playerDataModel == null ? _lastPlayerHeight : _playerDataModel.playerData.playerSpecificSettings.playerHeight;
 			
 			_lastPlayerHeight = playerHeight;
-			return playerHeight;
+			return playerHeight * Plugin.PLAYER_SCALE;
 		}
 
 		public static float GetPlayerViewPointHeight()
