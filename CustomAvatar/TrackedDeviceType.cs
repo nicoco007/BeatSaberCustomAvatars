@@ -1,6 +1,6 @@
 using System;
 
-namespace CustomAvatar.OpenVR
+namespace CustomAvatar
 {
 	class TrackedDeviceTypeAttribute : Attribute
 	{

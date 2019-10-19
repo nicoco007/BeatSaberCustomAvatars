@@ -62,17 +62,17 @@
     <Compile Include="..\CustomAvatar\AvatarLoadResult.cs">
       <Link>AvatarLoadResult.cs</Link>
     </Compile>
-    <Compile Include="..\CustomAvatar\Dynamic Bones\DynamicBone.cs">
-      <Link>Dynamic Bones\DynamicBone.cs</Link>
+    <Compile Include="..\CustomAvatar\DynamicBone\DynamicBone.cs">
+      <Link>DynamicBone\DynamicBone.cs</Link>
     </Compile>
-    <Compile Include="..\CustomAvatar\Dynamic Bones\DynamicBoneCollider.cs">
-      <Link>Dynamic Bones\DynamicBoneCollider.cs</Link>
+    <Compile Include="..\CustomAvatar\DynamicBone\DynamicBoneCollider.cs">
+      <Link>DynamicBone\DynamicBoneCollider.cs</Link>
     </Compile>
-    <Compile Include="..\CustomAvatar\Dynamic Bones\DynamicBoneColliderBase.cs">
-      <Link>Dynamic Bones\DynamicBoneColliderBase.cs</Link>
+    <Compile Include="..\CustomAvatar\DynamicBone\DynamicBoneColliderBase.cs">
+      <Link>DynamicBone\DynamicBoneColliderBase.cs</Link>
     </Compile>
-    <Compile Include="..\CustomAvatar\Dynamic Bones\DynamicBonePlaneCollider.cs">
-      <Link>Dynamic Bones\DynamicBonePlaneCollider.cs</Link>
+    <Compile Include="..\CustomAvatar\DynamicBone\DynamicBonePlaneCollider.cs">
+      <Link>DynamicBone\DynamicBonePlaneCollider.cs</Link>
     </Compile>
     <Compile Include="..\CustomAvatar\EventFilterBehaviour.cs">
       <Link>EventFilterBehaviour.cs</Link>
@@ -160,6 +160,7 @@
     </Compile>
     <Compile Include="PoseManagerEditor.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>

@@ -1,20 +1,20 @@
+using CustomAvatar.StereoRendering;
+using IPA;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using DynamicOpenVR;
+using DynamicOpenVR.IO;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using Input = UnityEngine.Input;
+
 namespace CustomAvatar
 {
-	using StereoRendering;
-	using IPA;
-	using IPA.Logging;
-	using System;
-	using System.Collections.Generic;
-	using System.IO;
-	using System.Linq;
-	using UnityEngine;
-	using UnityEngine.SceneManagement;
-	using Harmony;
 
 	public class Plugin : IBeatSaberPlugin
 	{
-		public static float PLAYER_SCALE = 1.0f;
-
 		private const string CustomAvatarsPath = "CustomAvatars";
 		private const string FirstPersonEnabledKey = "avatarFirstPerson";
 		private const string PreviousAvatarKey = "previousAvatar";
@@ -80,20 +80,21 @@ namespace CustomAvatar
 
 		public static IPA.Logging.Logger Logger { get; private set; }
 
-		private HarmonyInstance harmonyInstance;
-		private OpenVRInputManager inputManager;
+		public static SkeletalInput LeftHandAnimAction;
+		public static SkeletalInput RightHandAnimAction;
+
+		public Plugin()
+		{
+			OpenVRActionManager actionManager = OpenVRActionManager.Instance;
+
+			LeftHandAnimAction = actionManager.RegisterAction(new SkeletalInput("/actions/customavatars/in/lefthandanim"));
+			RightHandAnimAction = actionManager.RegisterAction(new SkeletalInput("/actions/customavatars/in/righthandanim"));
+		}
 
 		public void Init(IPA.Logging.Logger logger)
 		{
 			Logger = logger;
 			Instance = this;
-
-			harmonyInstance = HarmonyInstance.Create("beatsabercustomavatars");
-
-			Logger.Info("Applying Index controller patch");
-			harmonyInstance.PatchAll();
-
-			inputManager = PersistentSingleton<OpenVRInputManager>.instance;
 
 			AvatarLoader = new AvatarLoader(CustomAvatarsPath, AvatarsLoaded);
 			AvatarTailor = new AvatarTailor();
@@ -186,19 +187,14 @@ namespace CustomAvatar
 				Quaternion leftRotationCorrection = Quaternion.Inverse(leftFoot.Rotation) * Quaternion.LookRotation(Vector3.up, leftFootStraightForward); // get difference between world rotation and flat forward rotation
 				AvatarBehaviour.LeftLegCorrection = new PosRot(leftFoot.Position.y * Vector3.down, leftRotationCorrection);
 
-				Plugin.Logger.Info("LeftLegCorrection: " + AvatarBehaviour.LeftLegCorrection);
-				Plugin.Logger.Info("Position: " + leftFoot.Position.y * Vector3.down);
-				Plugin.Logger.Info("Rotation: " + leftRotationCorrection);
-
 				Vector3 rightFootForward = rightFoot.Rotation * Vector3.up;
 			    Vector3 rightFootStraightForward = Vector3.ProjectOnPlane(rightFootForward, normal);
 				Quaternion rightRotationCorrection = Quaternion.Inverse(rightFoot.Rotation) * Quaternion.LookRotation(Vector3.up, rightFootStraightForward);
 				AvatarBehaviour.RightLegCorrection = new PosRot(rightFoot.Position.y * Vector3.down, rightRotationCorrection);
 
 				// using "standard" 8 head high body proportions w/ eyes at 1/2 head height
-				// http://carvinginnyc.com/wp-content/uploads/2018/09/aa94d39c207ade6ea850c86728296530.jpg
-				// head height is multiplied by 3 to allow nice numbers
-				Vector3 wantedPelvisPosition = new Vector3(0, eyeHeight / 22.5f * 14f, 0);
+				// reference: https://miro.medium.com/max/3200/1*cqTRyEGl26l4CImEmWz68Q.jpeg
+				Vector3 wantedPelvisPosition = new Vector3(0, eyeHeight / 15f * 10f, 0);
 				Vector3 pelvisPositionCorrection = wantedPelvisPosition - Vector3.up * pelvis.Position.y;
 				AvatarBehaviour.PelvisCorrection = new PosRot(pelvisPositionCorrection, Quaternion.identity);
 			}
@@ -221,33 +217,6 @@ namespace CustomAvatar
 
 		public void OnUpdate()
 		{
-			Camera mainCamera = Camera.main;
-
-			if (mainCamera != null)
-			{
-				mainCamera.transform.parent.localScale = Vector3.one * PLAYER_SCALE;
-				mainCamera.transform.localScale = Vector3.one * 1 / PLAYER_SCALE;
-			}
-
-			var up = inputManager.Up;
-			var down = inputManager.Down;
-			var reset = inputManager.Reset;
-
-			if (up.bState && up.bChanged)
-			{
-				PLAYER_SCALE *= 1.1f;
-			}
-
-			if (down.bState && down.bChanged)
-			{
-				PLAYER_SCALE /= 1.1f;
-			}
-
-			if (reset.bState && reset.bChanged)
-			{
-				PLAYER_SCALE = 1f;
-			}
-
 			if (Input.GetKeyDown(KeyCode.PageDown))
 			{
 				PlayerAvatarManager?.SwitchToNextAvatar();

@@ -1,7 +1,7 @@
-using CustomAvatar.OpenVR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DynamicOpenVR;
 using UnityEngine;
 using UnityEngine.XR;
 
@@ -26,7 +26,7 @@ namespace CustomAvatar
 		{
 			var nodeStates = new List<XRNodeState>();
 			var unassignedDevices = new Queue<XRNodeState>();
-			string[] serialNumbers = OpenVR.OpenVRWrapper.GetTrackedDeviceSerialNumbers();
+			string[] serialNumbers = OpenVRWrapper.GetTrackedDeviceSerialNumbers();
 			InputTracking.GetNodeStates(nodeStates);
 
 			XRNodeState? head      = null;
@@ -64,7 +64,7 @@ namespace CustomAvatar
 						// try to figure out tracker role using OpenVR
 						string deviceName = InputTracking.GetNodeName(nodeStates[i].uniqueID);
 						uint openVRDeviceId = (uint)serialNumbers.ToList().FindIndex(s => !string.IsNullOrEmpty(s) && deviceName.Contains(s));
-						TrackedDeviceType role = OpenVR.OpenVRWrapper.GetTrackedDeviceType(openVRDeviceId);
+						TrackedDeviceType role = OpenVRWrapper.GetTrackedDeviceType(openVRDeviceId);
 
 						switch (role)
 						{
@@ -149,7 +149,7 @@ namespace CustomAvatar
 				Vector3 origin = BeatSaberUtil.GetRoomCenter();
 				Quaternion originRotation = BeatSaberUtil.GetRoomRotation();
 
-				deviceState.Position = originRotation * position * Plugin.PLAYER_SCALE + originRotation * origin;
+				deviceState.Position = originRotation * position + originRotation * origin;
 				deviceState.Rotation = originRotation * rotation;
 			}
 
