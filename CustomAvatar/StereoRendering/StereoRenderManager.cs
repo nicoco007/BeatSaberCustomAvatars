@@ -18,7 +18,7 @@ namespace CustomAvatar.StereoRendering
         public IDeviceParamFactory paramFactory;
 
         // all current stereo renderers
-        public List<StereoRenderer> stereoRendererList = new List<StereoRenderer>();
+        public List<StereoRenderer> stereoRenderers = new List<StereoRenderer>();
 
         /////////////////////////////////////////////////////////////////////////////////
         // initialization
@@ -40,7 +40,6 @@ namespace CustomAvatar.StereoRendering
 		{
 			if (instance == null)
 			{
-				Destroy(camera.gameObject.GetComponent<CameraRenderCallbacksManager>());
 				instance = camera.gameObject.AddComponent<StereoRenderManager>();
 				camera.gameObject.AddComponent<VRRenderEventDetector>().Initialize(0);
 
@@ -119,9 +118,9 @@ namespace CustomAvatar.StereoRendering
 		public void InvokeStereoRenderers(VRRenderEventDetector detector)
 		{
 			// render registored stereo cameras
-			for (int renderIter = 0; renderIter < stereoRendererList.Count; renderIter++)
+			for (int renderIter = 0; renderIter < stereoRenderers.Count; renderIter++)
 			{
-				StereoRenderer stereoRenderer = stereoRendererList[renderIter];
+				StereoRenderer stereoRenderer = stereoRenderers[renderIter];
 
 				if (stereoRenderer.shouldRender)
 				{
@@ -135,12 +134,12 @@ namespace CustomAvatar.StereoRendering
 
 		public void AddToManager(StereoRenderer stereoRenderer)
         {
-            stereoRendererList.Add(stereoRenderer);
+            stereoRenderers.Add(stereoRenderer);
         }
 
         public void RemoveFromManager(StereoRenderer stereoRenderer)
         {
-            stereoRendererList.Remove(stereoRenderer);
+            stereoRenderers.Remove(stereoRenderer);
         }
     }
 }

@@ -116,7 +116,7 @@
     <Compile Include="StereoRendering\DeviceParamFactory\UnityXRParamFactory.cs" />
     <Compile Include="StereoRendering\StereoRenderer.cs" />
     <Compile Include="StereoRendering\StereoRenderManager.cs" />
-    <Compile Include="StereoRendering\VREventDetector.cs" />
+    <Compile Include="StereoRendering\VRRenderEventDetector.cs" />
     <Compile Include="TrackedDeviceManager.cs" />
     <Compile Include="TrackedDeviceState.cs" />
     <Compile Include="TrackedDeviceType.cs" />

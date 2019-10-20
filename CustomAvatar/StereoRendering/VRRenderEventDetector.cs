@@ -12,11 +12,11 @@ namespace CustomAvatar.StereoRendering
 		public int eye;
 		private bool initialized = false;
 
-		public void Initialize(int e)
+		public void Initialize(int eye)
 		{
-			unityCamera = GetComponent<Camera>();
-			eye = e;
-			initialized = true;
+			this.unityCamera = GetComponent<Camera>();
+			this.eye = eye;
+			this.initialized = true;
 		}
 
 		private void OnPreRender()
