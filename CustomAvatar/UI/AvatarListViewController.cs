@@ -1,181 +1,121 @@
-using System;
+using System.Collections.Generic;
 using System.Linq;
+using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberMarkupLanguage.Components;
+using BeatSaberMarkupLanguage.ViewControllers;
+using HMUI;
+using IPA.Utilities;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using VRUI;
-using HMUI;
-using CustomUI.BeatSaber;
-using CustomUI.Utilities;
-using TMPro;
-using System.Collections.Generic;
 
-namespace CustomAvatar
+namespace CustomAvatar.UI
 {
-	class AvatarListViewController : VRUIViewController, TableView.IDataSource
-	{
-		private Button _backButton;
-		private Button _pageUpButton;
-		private Button _pageDownButton;
-		private TextMeshProUGUI _versionNumber;
-		private TableView _tableView;
-		private LevelListTableCell _tableCellTemplate;
-		private IReadOnlyList<CustomAvatar> AvatarList = Plugin.Instance.AvatarLoader.Avatars;
+    public class AvatarListViewController : BSMLResourceViewController, TableView.IDataSource
+    {
+        public override string ResourceName => "CustomAvatar.Views.AvatarListViewController.bsml";
 
-		public Action onBackPressed;
+        [UIComponent("avatar-list")]
+        public CustomListTableData avatarList;
 
-		protected override void DidActivate(bool firstActivation, ActivationType type)
-		{
-			if (firstActivation) FirstActivation();
+        private List<CustomAvatar> loadedAvatars;
+        private LevelListTableCell tableCellTemplate;
+        
+        protected override void DidActivate(bool firstActivation, ActivationType type)
+        {
+            base.DidActivate(firstActivation, type);
 
-			SelectRowWithAvatar(Plugin.Instance.PlayerAvatarManager.CurrentPlayerAvatar, false, true);
+            Plugin.Instance.PlayerAvatarManager.AvatarChanged += OnAvatarChanged;
 
-			Plugin.Instance.PlayerAvatarManager.AvatarChanged += OnAvatarChanged;
-		}
+            if (firstActivation) FirstActivation();
+        }
 
-		protected override void DidDeactivate(DeactivationType deactivationType)
-		{
-			Plugin.Instance.PlayerAvatarManager.AvatarChanged -= OnAvatarChanged;
-		}
+        private void FirstActivation()
+        {
+	        tableCellTemplate = Resources.FindObjectsOfTypeAll<LevelListTableCell>().First(x => x.name == "LevelListTableCell");
+            loadedAvatars = new List<CustomAvatar>();
+	        avatarList.tableView.dataSource = this;
 
-		private void OnAvatarChanged(CustomAvatar avatar)
-		{
-			SelectRowWithAvatar(avatar, true, false);
-		}
+	        foreach (CustomAvatar avatar in Plugin.Instance.AvatarLoader.Avatars)
+	        {
+		        avatar.Load(OnAvatarLoaded);
+	        }
+        }
 
-		private void SelectRowWithAvatar(CustomAvatar avatar, bool reload, bool scroll)
-		{
-			int currentRow = Plugin.Instance.AvatarLoader.IndexOf(avatar);
-			if (scroll) _tableView.ScrollToCellWithIdx(currentRow, TableViewScroller.ScrollPositionType.Center, false);
-			if (reload) _tableView.ReloadData();
-			_tableView.SelectCellWithIdx(currentRow);
-		}
+        protected override void DidDeactivate(DeactivationType deactivationType)
+        {
+	        base.DidDeactivate(deactivationType);
 
-		private void LoadAllAvatars()
-		{
-			for (int i = 0; i < AvatarList.Count; i++)
-			{
-				AvatarList[i].Load(OnAvatarLoaded);
-			}
-		}
+	        Plugin.Instance.PlayerAvatarManager.AvatarChanged -= OnAvatarChanged;
+        }
 
-		private void OnAvatarLoaded(CustomAvatar avatar, AvatarLoadResult loadResult)
-		{
-			if (loadResult != AvatarLoadResult.Completed)
-			{
-				Plugin.Logger.Error("Avatar " + avatar.FullPath + " failed to load");
-				return;
-			}
+        [UIAction("avatar-click")]
+        private void OnAvatarClicked(TableView table, int row)
+        {
+	        Plugin.Instance.PlayerAvatarManager.SwitchToAvatar(loadedAvatars[row]);
+        }
 
-			_tableView.ReloadData();
-		}
+        private void OnAvatarLoaded(CustomAvatar avatar, AvatarLoadResult loadResult)
+        {
+	        if (loadResult != AvatarLoadResult.Completed)
+	        {
+		        Plugin.Logger.Error("Avatar " + avatar.FullPath + " failed to load");
+		        return;
+	        }
 
-		private void FirstActivation()
-		{
-			_tableCellTemplate = Resources.FindObjectsOfTypeAll<LevelListTableCell>().First(x => x.name == "LevelListTableCell");
+	        loadedAvatars.Add(avatar);
 
-			RectTransform container = new GameObject("AvatarsListContainer", typeof(RectTransform)).transform as RectTransform;
-			container.SetParent(rectTransform, false);
-			container.sizeDelta = new Vector2(70f, 0f);
+	        ReloadData();
+        }
 
+        private void OnAvatarChanged(CustomAvatar avatar)
+        {
+	        ReloadData();
+        }
 
-			var tableViewObject = new GameObject("AvatarsListTableView");
-			tableViewObject.SetActive(false);
+        private void ReloadData()
+        {
+	        int currentRow = loadedAvatars.IndexOf(Plugin.Instance.PlayerAvatarManager.CurrentPlayerAvatar);
 
-			var scrollRect = tableViewObject.AddComponent<ScrollRect>();
-			scrollRect.viewport = tableViewObject.transform as RectTransform;
+            avatarList.tableView.ReloadData();
+            avatarList.tableView.ScrollToCellWithIdx(currentRow, TableViewScroller.ScrollPositionType.Center, true);
+            avatarList.tableView.SelectCellWithIdx(currentRow);
+        }
 
-			_tableView = tableViewObject.AddComponent<TableView>();
-			_tableView.gameObject.AddComponent<RectMask2D>();
-			_tableView.transform.SetParent(container, false);
+        public float CellSize()
+        {
+	        return 8.5f;
+        }
 
-			(_tableView.transform as RectTransform).anchorMin = new Vector2(0f, 0f);
-			(_tableView.transform as RectTransform).anchorMax = new Vector2(1f, 1f);
-			(_tableView.transform as RectTransform).sizeDelta = new Vector2(0f, 60f);
-			(_tableView.transform as RectTransform).anchoredPosition = new Vector3(0f, 0f);
+        public int NumberOfCells()
+        {
+	        return loadedAvatars.Count;
+        }
 
-			_tableView.SetPrivateField("_preallocatedCells", new TableView.CellsGroup[0]);
+        public TableCell CellForIdx(TableView tableView, int idx)
+        {
+	        LevelListTableCell tableCell = avatarList.tableView.DequeueReusableCellForIdentifier("AvatarListCell") as LevelListTableCell;
 
-			_pageUpButton = Instantiate(Resources.FindObjectsOfTypeAll<Button>().First(x => (x.name == "PageUpButton")), container, false);
-			(_pageUpButton.transform as RectTransform).anchoredPosition = new Vector2(0f, 40f);
-			_tableView.SetPrivateField("_pageUpButton", _pageUpButton);
+	        if (!tableCell)
+	        {
+		        tableCell = Instantiate(tableCellTemplate);
 
-			_pageDownButton = Instantiate(Resources.FindObjectsOfTypeAll<Button>().First(x => (x.name == "PageDownButton")), container, false);
-			(_pageDownButton.transform as RectTransform).anchoredPosition = new Vector2(0f, -30f);
-			_tableView.SetPrivateField("_pageDownButton", _pageDownButton);
+		        tableCell.SetPrivateField("_beatmapCharacteristicAlphas", new float[0]);
+		        tableCell.SetPrivateField("_beatmapCharacteristicImages", new UnityEngine.UI.Image[0]);
 
-			_tableView.dataSource = this;
-			_tableView.didSelectCellWithIdxEvent += _TableView_DidSelectRowEvent;
+		        foreach (Behaviour behaviour in tableCellTemplate.GetPrivateField<UnityEngine.UI.Image[]>("_beatmapCharacteristicImages"))
+			        behaviour.enabled = false;
 
-			tableViewObject.SetActive(true);
+		        tableCell.reuseIdentifier = "CustomAvatarsTableCell";
+	        }
 
-			
-			_versionNumber = BeatSaberUI.CreateText(rectTransform, Plugin.Instance.Version, new Vector2(-10f, 10f));
-			(_versionNumber.transform as RectTransform).anchorMax = new Vector2(1f, 0f);
-			(_versionNumber.transform as RectTransform).anchorMin = new Vector2(1f, 0f);
-			_versionNumber.fontSize = 5;
-			_versionNumber.color = Color.white;
+	        CustomAvatar avatar = loadedAvatars[idx];
 
-			if (_backButton == null)
-			{
-				_backButton = BeatSaberUI.CreateBackButton(rectTransform as RectTransform);
+	        tableCell.GetPrivateField<TextMeshProUGUI>("_songNameText").text = avatar.Name;
+	        tableCell.GetPrivateField<TextMeshProUGUI>("_authorText").text = avatar.AuthorName;
+	        tableCell.GetPrivateField<RawImage>("_coverRawImage").texture = avatar.CoverImage?.texture ?? Texture2D.blackTexture;
 
-				_backButton.onClick.AddListener(delegate ()
-				{
-					onBackPressed();
-				});
-			}
-
-			LoadAllAvatars();
-		}
-
-		private void _TableView_DidSelectRowEvent(TableView sender, int row)
-		{
-			Plugin.Instance.PlayerAvatarManager.SwitchToAvatar(Plugin.Instance.AvatarLoader.Avatars[row]);
-		}
-
-		TableCell TableView.IDataSource.CellForIdx(TableView tableView, int row)
-		{
-			LevelListTableCell tableCell = _tableView.DequeueReusableCellForIdentifier("AvatarListCell") as LevelListTableCell;
-			if (tableCell == null)
-			{
-				tableCell = Instantiate(_tableCellTemplate);
-				tableCell.reuseIdentifier = "AvatarListCell";
-			}
-
-			var cellInfo = new AvatarCellInfo();
-			CustomAvatar avatar = AvatarList[row];
-
-			if (!avatar.IsLoaded)
-			{
-				cellInfo.Name = System.IO.Path.GetFileName(avatar.FullPath) + " failed to load";
-				cellInfo.AuthorName = "Make sure it's not a duplicate avatar.";
-				cellInfo.RawImageTexture = Texture2D.blackTexture;
-			}
-			else
-			{
-				cellInfo.Name = avatar.Name;
-				cellInfo.AuthorName = avatar.AuthorName;
-				cellInfo.RawImageTexture = avatar.CoverImage ? avatar.CoverImage.texture : Texture2D.blackTexture;
-			}
-
-			tableCell.SetPrivateField("_beatmapCharacteristicAlphas", new float[0]);
-			tableCell.SetPrivateField("_beatmapCharacteristicImages", new UnityEngine.UI.Image[0]);
-
-			tableCell.GetPrivateField<TextMeshProUGUI>("_songNameText").text = cellInfo.Name;
-			tableCell.GetPrivateField<TextMeshProUGUI>("_authorText").text = cellInfo?.AuthorName;
-			tableCell.GetPrivateField<UnityEngine.UI.RawImage>("_coverRawImage").texture = cellInfo.RawImageTexture;
-
-			return tableCell;
-		}
-
-		int TableView.IDataSource.NumberOfCells()
-		{
-			return AvatarList.Count;
-		}
-
-		float TableView.IDataSource.CellSize()
-		{
-			return 8.5f;
-		}
-	}
+	        return tableCell;
+        }
+    }
 }

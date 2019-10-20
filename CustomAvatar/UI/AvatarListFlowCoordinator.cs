@@ -1,16 +1,15 @@
 using System;
+using BeatSaberMarkupLanguage;
 using VRUI;
-using CustomUI.BeatSaber;
-using CustomUI.Utilities;
 using UnityEngine;
 
-namespace CustomAvatar
+namespace CustomAvatar.UI
 {
 	class AvatarListFlowCoordinator : FlowCoordinator
 	{
 		private AvatarPreviewController _contentViewController;
 		private AvatarSettingsViewController _leftViewController;
-		public AvatarListViewController _rightViewController;
+		public VRUIViewController _rightViewController;
 		public Func<AvatarListViewController, string> OnContentCreated;
 
 		private Vector3 MainScreenPosition;
@@ -26,14 +25,16 @@ namespace CustomAvatar
 				_contentViewController = BeatSaberUI.CreateViewController<AvatarPreviewController>();
 				_leftViewController = BeatSaberUI.CreateViewController<AvatarSettingsViewController>();
 				_rightViewController = BeatSaberUI.CreateViewController<AvatarListViewController>();
-				title = OnContentCreated(_rightViewController);
+
+				// title = OnContentCreated(_rightViewController);
 			}
-			if (activationType == FlowCoordinator.ActivationType.AddedToHierarchy)
+
+			if (activationType == ActivationType.AddedToHierarchy)
 			{
 				ProvideInitialViewControllers(_contentViewController, _leftViewController, _rightViewController);
 				MirrorController.OnLoad();
 				MainScreen.transform.position = new Vector3(0, -100, 0); // "If it works it's not stupid" - Caeden117
-				_rightViewController.onBackPressed += backButton_DidFinish;
+				//_rightViewController.onBackPressed += backButton_DidFinish;
 			}
 		}
 
@@ -41,7 +42,7 @@ namespace CustomAvatar
 		{
 			MainScreen.transform.position = MainScreenPosition;
 			Destroy(MirrorController.Instance.gameObject);
-			_rightViewController.onBackPressed -= backButton_DidFinish;
+			//_rightViewController.onBackPressed -= backButton_DidFinish;
 		}
 
 		protected override void DidDeactivate(DeactivationType type)

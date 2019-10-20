@@ -34,6 +34,12 @@
     <Reference Include="BeatSaberCustomUI">
       <HintPath>lib\BeatSaberCustomUI.dll</HintPath>
     </Reference>
+    <Reference Include="BSML">
+      <HintPath>lib\BSML.dll</HintPath>
+    </Reference>
+    <Reference Include="BS_Utils">
+      <HintPath>lib\BS_Utils.dll</HintPath>
+    </Reference>
     <Reference Include="DynamicOpenVR">
       <HintPath>lib\DynamicOpenVR.dll</HintPath>
     </Reference>
@@ -116,12 +122,12 @@
     <Compile Include="TrackedDeviceState.cs" />
     <Compile Include="TrackedDeviceType.cs" />
     <Compile Include="UI\AvatarCellInfo.cs" />
-    <Compile Include="UI\AvatarListViewController.cs" />
     <Compile Include="UI\AvatarSettingsViewController.cs" />
     <Compile Include="UI\AvatarPreviewController.cs" />
     <Compile Include="UI\AvatarListFlowCoordinator.cs" />
     <Compile Include="UI\AvatarUI.cs" />
     <Compile Include="UI\MirrorController.cs" />
+    <Compile Include="UI\AvatarListViewController.cs" />
     <Compile Include="VRIK\AxisTools.cs" />
     <Compile Include="VRIK\Hierarchy.cs" />
     <Compile Include="VRIK\IK.cs" />
@@ -147,6 +153,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="manifest.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Views\AvatarListViewController.bsml" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
