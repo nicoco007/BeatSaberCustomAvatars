@@ -6,7 +6,7 @@ using TMPro;
 using System.Collections.Generic;
 using IPA.Utilities;
 
-namespace CustomAvatar
+namespace CustomAvatar.UI
 {
 	class AvatarSettingsViewController : VRUIViewController
 	{
@@ -58,7 +58,7 @@ namespace CustomAvatar
 			relative_layout(boolFloorMovePolicy.transform as RectTransform, 0, 0.44f, 1, 0.166f, 0, 1f);
 			BeatSaberUI.AddHintText(boolFloorMovePolicy.transform as RectTransform, "Move the floor to compensate for height when using 'Arms Length' resize, requires CustomPlatforms");
 
-			var labelMeasure = BeatSaberUI.CreateText(containerRect, $"Hand To Hand Length = {Mathf.Ceil(Plugin.Instance.AvatarTailor.PlayerArmLength * 100.0f) / 100.0f}", Vector2.zero);
+			var labelMeasure = BeatSaberUI.CreateText(containerRect, $"Hand To Hand Length = {Mathf.Ceil(AvatarManager.Instance.AvatarTailor.PlayerArmLength * 100.0f) / 100.0f}", Vector2.zero);
 			relative_layout(labelMeasure.transform as RectTransform, 0f, 0.18f, 0.5f, 0.11f, 0, .5f);
 			BeatSaberUI.AddHintText(labelMeasure.transform as RectTransform, "Value used for 'Arms Length' resize, press on the 'MEASURE!' button and T-Pose");
 			labelMeasure.fontSize = 5f;
@@ -69,15 +69,15 @@ namespace CustomAvatar
 			var buttonMeasure = BeatSaberUI.CreateUIButton(containerRect, "QuitButton", () =>
 			{
 				labelMeasure.text = "Measuring ...";
-				Plugin.Instance.AvatarTailor.MeasurePlayerArmLength((value) =>
+				AvatarManager.Instance.AvatarTailor.MeasurePlayerArmLength((value) =>
 				{
 					labelMeasure.text = $"Measuring ... {Mathf.Ceil(value * 100.0f) / 100.0f}";
 				},
 				(result) =>
 				{
 					labelMeasure.text = $"Hand To Hand Length = {Mathf.Ceil(result * 100.0f) / 100.0f}";
-					if (Plugin.Instance.AvatarTailor.ResizePolicy == AvatarTailor.ResizePolicyType.AlignArmLength)
-						Plugin.Instance.PlayerAvatarManager.ResizePlayerAvatar();
+					if (AvatarManager.Instance.AvatarTailor.ResizePolicy == AvatarTailor.ResizePolicyType.AlignArmLength)
+						AvatarManager.Instance.ResizePlayerAvatar();
 				});
 			}, "Measure!");
 			relative_layout(buttonMeasure.transform as RectTransform, 0.65f, 0.18f, 0.35f, 0.11f, .5f, .5f);
@@ -90,21 +90,21 @@ namespace CustomAvatar
 			loadedSettings.Add(boolFirstPerson);
 
 			listResizePolicy.GetTextForValue = (value) => new string[] { "Arms Length", "Height", "Never" }[(int)value];
-			listResizePolicy.GetValue = () => (int)Plugin.Instance.AvatarTailor.ResizePolicy;
+			listResizePolicy.GetValue = () => (int)AvatarManager.Instance.AvatarTailor.ResizePolicy;
 			listResizePolicy.SetValue = (value) =>
 			{
-				Plugin.Instance.AvatarTailor.ResizePolicy = (AvatarTailor.ResizePolicyType)(int)value;
-				Plugin.Instance.PlayerAvatarManager.ResizePlayerAvatar();
+				AvatarManager.Instance.AvatarTailor.ResizePolicy = (AvatarTailor.ResizePolicyType)(int)value;
+				AvatarManager.Instance.ResizePlayerAvatar();
 			};
 			listResizePolicy.Init();
 			loadedSettings.Add(listResizePolicy);
 
 			boolFloorMovePolicy.GetTextForValue = (value) => (value != 0f) ? "ON" : "OFF";
-			boolFloorMovePolicy.GetValue = () => Plugin.Instance.AvatarTailor.FloorMovePolicy == AvatarTailor.FloorMovePolicyType.AllowMove ? 1f : 0f;
+			boolFloorMovePolicy.GetValue = () => AvatarManager.Instance.AvatarTailor.FloorMovePolicy == AvatarTailor.FloorMovePolicyType.AllowMove ? 1f : 0f;
 			boolFloorMovePolicy.SetValue = (value) =>
 			{
-				Plugin.Instance.AvatarTailor.FloorMovePolicy = (value != 0f) ? AvatarTailor.FloorMovePolicyType.AllowMove : AvatarTailor.FloorMovePolicyType.NeverMove;
-				Plugin.Instance.PlayerAvatarManager.ResizePlayerAvatar();
+				AvatarManager.Instance.AvatarTailor.FloorMovePolicy = (value != 0f) ? AvatarTailor.FloorMovePolicyType.AllowMove : AvatarTailor.FloorMovePolicyType.NeverMove;
+				AvatarManager.Instance.ResizePlayerAvatar();
 			};
 			boolFloorMovePolicy.Init();
 			loadedSettings.Add(boolFloorMovePolicy);

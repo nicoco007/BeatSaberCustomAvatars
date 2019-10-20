@@ -1,11 +1,12 @@
 using CustomAvatar.StereoRendering;
 using IPA;
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
+using CustomAvatar.UI;
+using CustomUI.MenuButton;
 using DynamicOpenVR;
 using DynamicOpenVR.IO;
+using IPA.Utilities;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Input = UnityEngine.Input;
@@ -15,12 +16,9 @@ namespace CustomAvatar
 
 	public class Plugin : IBeatSaberPlugin
 	{
-		private const string CustomAvatarsPath = "CustomAvatars";
 		private const string FirstPersonEnabledKey = "avatarFirstPerson";
-		private const string PreviousAvatarKey = "previousAvatar";
 
 		private bool _firstPersonEnabled;
-		private AvatarUI _avatarUI;
 
 		private GameScenesManager _scenesManager;
 
@@ -28,9 +26,6 @@ namespace CustomAvatar
 		public event Action<Scene> SceneTransitioned;
 
 		public static Plugin Instance { get; private set; }
-		public AvatarLoader AvatarLoader { get; private set; }
-		public AvatarTailor AvatarTailor { get; private set; }
-		public PlayerAvatarManager PlayerAvatarManager { get; private set; }
 
 		public bool FirstPersonEnabled
 		{
@@ -54,30 +49,6 @@ namespace CustomAvatar
 			}
 		}
 
-		public enum TrackingType
-		{
-			None,
-			Hips,
-			Feet,
-			Full
-		}
-
-		public static Plugin.TrackingType FullBodyTrackingType
-		{
-			get;
-			set;
-		}
-
-		public string Name
-		{
-			get { return "Custom Avatars"; }
-		}
-
-		public string Version
-		{
-			get { return "4.8.0"; }
-		}
-
 		public static IPA.Logging.Logger Logger { get; private set; }
 
 		public static SkeletalInput LeftHandAnimAction;
@@ -96,9 +67,8 @@ namespace CustomAvatar
 			Logger = logger;
 			Instance = this;
 
-			AvatarLoader = new AvatarLoader(CustomAvatarsPath, AvatarsLoaded);
-			AvatarTailor = new AvatarTailor();
-			_avatarUI = new AvatarUI();
+			AvatarManager.Instance.LoadAvatars();
+			AvatarManager.Instance.LoadAvatarFromSettings();
 
 			FirstPersonEnabled = PlayerPrefs.HasKey(FirstPersonEnabledKey);
 			//RotatePreviewEnabled = PlayerPrefs.HasKey(RotatePreviewEnabledKey);
@@ -109,31 +79,8 @@ namespace CustomAvatar
 		{
 			SceneManager.sceneLoaded -= OnSceneLoaded;
 
-			if (PlayerAvatarManager == null) return;
-			PlayerAvatarManager.AvatarChanged -= PlayerAvatarManagerOnAvatarChanged;
-
 			if (_scenesManager != null)
 				_scenesManager.transitionDidFinishEvent -= SceneTransitionDidFinish;
-		}
-
-		private void AvatarsLoaded(IReadOnlyList<CustomAvatar> loadedAvatars)
-		{
-			if (loadedAvatars.Count == 0)
-			{
-				Logger.Warn("No custom avatars found in path " + Path.GetFullPath(CustomAvatarsPath));
-				return;
-			}
-
-			var previousAvatarPath = PlayerPrefs.GetString(PreviousAvatarKey, null);
-			if (!File.Exists(previousAvatarPath))
-			{
-				previousAvatarPath = AvatarLoader.Avatars[0].FullPath;
-			}
-
-			var previousAvatar = AvatarLoader.Avatars.FirstOrDefault(x => x.FullPath == previousAvatarPath);
-
-			PlayerAvatarManager = new PlayerAvatarManager(AvatarLoader, AvatarTailor, previousAvatar);
-			PlayerAvatarManager.AvatarChanged += PlayerAvatarManagerOnAvatarChanged;
 		}
 
 		public void OnSceneLoaded(Scene newScene, LoadSceneMode mode)
@@ -147,7 +94,7 @@ namespace CustomAvatar
 			}
 			else
 			{
-				Plugin.Logger.Error($"Could not find camera with name {cameraName}!");
+				Logger.Error($"Could not find camera with name {cameraName}!");
 			}
 
 			if (_scenesManager == null)
@@ -157,8 +104,18 @@ namespace CustomAvatar
 				if (_scenesManager != null)
 				{
 					_scenesManager.transitionDidFinishEvent += SceneTransitionDidFinish;
-					_scenesManager.transitionDidFinishEvent += () => SceneTransitioned.Invoke(SceneManager.GetActiveScene());
+					_scenesManager.transitionDidFinishEvent += () => SceneTransitioned?.Invoke(SceneManager.GetActiveScene());
 				}
+			}
+
+			if (newScene.name == "MenuCore")
+			{
+				MenuButtonUI.AddButton("Avatars", delegate ()
+				{
+					var mainFlowCoordinator = Resources.FindObjectsOfTypeAll<MainFlowCoordinator>().First();
+					var flowCoordinator = new GameObject("AvatarListFlowCoordinator").AddComponent<AvatarListFlowCoordinator>();
+					mainFlowCoordinator.InvokePrivateMethod("PresentFlowCoordinator", flowCoordinator, null, false, false);
+				});
 			}
 		}
 
@@ -210,20 +167,17 @@ namespace CustomAvatar
 			}
 		}
 
-		private void PlayerAvatarManagerOnAvatarChanged(CustomAvatar newAvatar)
-		{
-			PlayerPrefs.SetString(PreviousAvatarKey, newAvatar.FullPath);
-		}
-
 		public void OnUpdate()
 		{
+			AvatarManager avatarManager = AvatarManager.Instance;
+
 			if (Input.GetKeyDown(KeyCode.PageDown))
 			{
-				PlayerAvatarManager?.SwitchToNextAvatar();
+				avatarManager?.SwitchToNextAvatar();
 			}
 			else if (Input.GetKeyDown(KeyCode.PageUp))
 			{
-				PlayerAvatarManager?.SwitchToPreviousAvatar();
+				avatarManager?.SwitchToPreviousAvatar();
 			}
 			else if (Input.GetKeyDown(KeyCode.Home))
 			{
@@ -231,20 +185,20 @@ namespace CustomAvatar
 			}
 			else if (Input.GetKeyDown(KeyCode.End))
 			{
-				int policy = (int)Plugin.Instance.AvatarTailor.ResizePolicy + 1;
+				int policy = (int)avatarManager.AvatarTailor.ResizePolicy + 1;
 				if (policy > 2) policy = 0;
-				Plugin.Instance.AvatarTailor.ResizePolicy = (AvatarTailor.ResizePolicyType)policy;
-				Logger.Info($"Set Resize Policy to {Plugin.Instance.AvatarTailor.ResizePolicy}");
-				Plugin.Instance.PlayerAvatarManager.ResizePlayerAvatar();
+				avatarManager.AvatarTailor.ResizePolicy = (AvatarTailor.ResizePolicyType)policy;
+				Logger.Info($"Set Resize Policy to {avatarManager.AvatarTailor.ResizePolicy}");
+				avatarManager.ResizePlayerAvatar();
 			}
 			else if (Input.GetKeyDown(KeyCode.Insert))
 			{
-				if (Plugin.Instance.AvatarTailor.FloorMovePolicy == AvatarTailor.FloorMovePolicyType.AllowMove)
-					Plugin.Instance.AvatarTailor.FloorMovePolicy = AvatarTailor.FloorMovePolicyType.NeverMove;
+				if (avatarManager.AvatarTailor.FloorMovePolicy == AvatarTailor.FloorMovePolicyType.AllowMove)
+					avatarManager.AvatarTailor.FloorMovePolicy = AvatarTailor.FloorMovePolicyType.NeverMove;
 				else
-					Plugin.Instance.AvatarTailor.FloorMovePolicy = AvatarTailor.FloorMovePolicyType.AllowMove;
-				Logger.Info($"Set Floor Move Policy to {Plugin.Instance.AvatarTailor.FloorMovePolicy}");
-				Plugin.Instance.PlayerAvatarManager.ResizePlayerAvatar();
+					avatarManager.AvatarTailor.FloorMovePolicy = AvatarTailor.FloorMovePolicyType.AllowMove;
+				Logger.Info($"Set Floor Move Policy to {avatarManager.AvatarTailor.FloorMovePolicy}");
+				avatarManager.ResizePlayerAvatar();
 			}
 		}
 

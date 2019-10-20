@@ -59,9 +59,6 @@
     <Compile Include="..\CustomAvatar\AvatarDescriptor.cs">
       <Link>AvatarDescriptor.cs</Link>
     </Compile>
-    <Compile Include="..\CustomAvatar\AvatarLoadResult.cs">
-      <Link>AvatarLoadResult.cs</Link>
-    </Compile>
     <Compile Include="..\CustomAvatar\DynamicBone\DynamicBone.cs">
       <Link>DynamicBone\DynamicBone.cs</Link>
     </Compile>

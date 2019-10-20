@@ -1,5 +1,6 @@
 using System;
-using System.Collections;
+using CustomAvatar.Exceptions;
+using System.Linq;
 using UnityEngine;
 
 namespace CustomAvatar
@@ -7,75 +8,53 @@ namespace CustomAvatar
 	public class CustomAvatar
 	{
 		private const string GameObjectName = "_CustomAvatar";
-
-		private float? eyeheight;
-		private AvatarDescriptor descriptor;
-
-		internal CustomAvatar(string fullPath)
-		{
-			FullPath = fullPath;
-		}
+		private float? eyeHeight;
 
 		public string FullPath { get; }
-		public GameObject GameObject { get; private set; }
-		public bool IsLoaded { get; private set; }
-		public string Name => descriptor?.Name;
-		public string AuthorName => descriptor?.Author;
-		public Sprite CoverImage => descriptor?.Cover;
-		public bool AllowHeightCalibration => descriptor != null ? descriptor.AllowHeightCalibration : true;
-		public Transform ViewPoint { get; private set; }
+		public GameObject GameObject { get; }
+		public AvatarDescriptor Descriptor { get; }
+		public Transform ViewPoint { get; }
 
 		public float EyeHeight
 		{
 			get
 			{
 				if (GameObject == null) return BeatSaberUtil.GetPlayerViewPointHeight();
-				if (eyeheight == null)
+				if (eyeHeight == null)
 				{
-					eyeheight = AvatarMeasurement.MeasureEyeHeight(GameObject, ViewPoint);
+					eyeHeight = AvatarMeasurement.MeasureEyeHeight(GameObject, ViewPoint);
 				}
 
-				return eyeheight.Value;
+				return eyeHeight.Value;
 			}
 		}
 
-		public void Load(Action<CustomAvatar, AvatarLoadResult> loadedCallback)
+		public CustomAvatar(string fullPath, GameObject avatarGameObject)
 		{
-			if (IsLoaded)
-			{
-				loadedCallback(this, AvatarLoadResult.Completed);
-				return;
-			}
-
-			SharedCoroutineStarter.instance.StartCoroutine(LoadAvatar(loadedCallback));
+			FullPath = fullPath ?? throw new ArgumentNullException(nameof(avatarGameObject));
+			GameObject = avatarGameObject ?? throw new ArgumentNullException(nameof(avatarGameObject));
+			Descriptor = avatarGameObject.GetComponent<AvatarDescriptor>() ?? throw new AvatarLoadException($"Avatar at '{fullPath}' does not have an AvatarDescriptor");
+			ViewPoint = avatarGameObject.transform.Find("Head") ?? throw new AvatarLoadException($"Avatar '{Descriptor.Name}' does not have a Head transform");
 		}
 
-		private IEnumerator LoadAvatar(Action<CustomAvatar, AvatarLoadResult> loadedCallback)
+		public static CustomAvatar FromFile(string filePath)
 		{
-			AssetBundleCreateRequest createRequest = AssetBundle.LoadFromFileAsync(FullPath);
-			yield return createRequest;
+			AssetBundle assetBundle = AssetBundle.LoadFromFile(filePath);
 
-			if (!createRequest.isDone || createRequest.assetBundle == null)
+			if (assetBundle == null)
 			{
-				loadedCallback(this, AvatarLoadResult.Failed);
-				yield break;
+				throw new AvatarLoadException("Could not load asset bundle");
 			}
 
-			AssetBundleRequest assetBundleRequest = createRequest.assetBundle.LoadAssetWithSubAssetsAsync<GameObject>(GameObjectName);
-			yield return assetBundleRequest;
+			GameObject[] gameObjects = assetBundle.LoadAssetWithSubAssets<GameObject>(GameObjectName);
+			var avatarGameObject = gameObjects.FirstOrDefault();
 
-			GameObject = (GameObject)assetBundleRequest.asset;
-
-			if (GameObject == null)
+			if (avatarGameObject == null)
 			{
-				loadedCallback(this, AvatarLoadResult.Invalid);
+				throw new AvatarLoadException("Avatar game object not found");
 			}
 
-			descriptor = GameObject.GetComponent<AvatarDescriptor>();
-			ViewPoint = GameObject.transform.Find("Head");
-
-			IsLoaded = true;
-			loadedCallback(this, AvatarLoadResult.Completed);
+			return new CustomAvatar(filePath, avatarGameObject);
 		}
 	}
 }

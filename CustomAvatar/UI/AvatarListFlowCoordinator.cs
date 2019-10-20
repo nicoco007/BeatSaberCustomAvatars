@@ -1,5 +1,6 @@
-using System;
+using System.Linq;
 using BeatSaberMarkupLanguage;
+using CustomUI.Utilities;
 using VRUI;
 using UnityEngine;
 
@@ -7,46 +8,44 @@ namespace CustomAvatar.UI
 {
 	class AvatarListFlowCoordinator : FlowCoordinator
 	{
-		private AvatarPreviewController _contentViewController;
-		private AvatarSettingsViewController _leftViewController;
-		public VRUIViewController _rightViewController;
-		public Func<AvatarListViewController, string> OnContentCreated;
-
-		private Vector3 MainScreenPosition;
-		private GameObject MainScreen;
+		private GameObject mainScreen;
+		private Vector3 mainScreenScale;
+		private DismissableNavigationController rightNavigationController;
 
 		protected override void DidActivate(bool firstActivation, ActivationType activationType)
 		{
-			MainScreen = GameObject.Find("MainScreen");
-			MainScreenPosition = MainScreen.transform.position;
+			mainScreen = GameObject.Find("MainScreen");
+			mainScreenScale = mainScreen.transform.localScale;
 
 			if (firstActivation)
 			{
-				_contentViewController = BeatSaberUI.CreateViewController<AvatarPreviewController>();
-				_leftViewController = BeatSaberUI.CreateViewController<AvatarSettingsViewController>();
-				_rightViewController = BeatSaberUI.CreateViewController<AvatarListViewController>();
+				title = "Custom Avatars";
 
-				// title = OnContentCreated(_rightViewController);
+				VRUIViewController contentViewController = BeatSaberUI.CreateViewController<MirrorController>();
+				VRUIViewController leftViewController = BeatSaberUI.CreateViewController<AvatarSettingsViewController>();
+				VRUIViewController rightViewController = BeatSaberUI.CreateViewController<AvatarListViewController>();
+
+				rightNavigationController = BeatSaberUI.CreateDismissableNavigationController();
+
+				SetViewControllerToNavigationConctroller(rightNavigationController, rightViewController);
+				ProvideInitialViewControllers(contentViewController, leftViewController, rightNavigationController);
+				
+				mainScreen.transform.localScale = Vector3.zero;
 			}
 
-			if (activationType == ActivationType.AddedToHierarchy)
-			{
-				ProvideInitialViewControllers(_contentViewController, _leftViewController, _rightViewController);
-				MirrorController.OnLoad();
-				MainScreen.transform.position = new Vector3(0, -100, 0); // "If it works it's not stupid" - Caeden117
-				//_rightViewController.onBackPressed += backButton_DidFinish;
-			}
+			rightNavigationController.didFinishEvent += OnFinishEvent;
 		}
 
-		private void backButton_DidFinish()
+		protected override void DidDeactivate(DeactivationType deactivationType)
 		{
-			MainScreen.transform.position = MainScreenPosition;
-			Destroy(MirrorController.Instance.gameObject);
-			//_rightViewController.onBackPressed -= backButton_DidFinish;
+			rightNavigationController.didFinishEvent -= OnFinishEvent;
 		}
 
-		protected override void DidDeactivate(DeactivationType type)
+		private void OnFinishEvent(DismissableNavigationController navigationController)
 		{
+			mainScreen.transform.localScale = mainScreenScale;
+			var mainFlowCoordinator = Resources.FindObjectsOfTypeAll<MainFlowCoordinator>().First();
+			mainFlowCoordinator.InvokePrivateMethod("DismissFlowCoordinator", new object[] { this, null, false });
 		}
 	}
 }

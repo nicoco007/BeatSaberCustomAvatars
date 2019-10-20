@@ -18,14 +18,14 @@ namespace CustomAvatar.UI
         [UIComponent("avatar-list")]
         public CustomListTableData avatarList;
 
-        private List<CustomAvatar> loadedAvatars;
+        private List<CustomAvatar> avatars;
         private LevelListTableCell tableCellTemplate;
         
         protected override void DidActivate(bool firstActivation, ActivationType type)
         {
             base.DidActivate(firstActivation, type);
 
-            Plugin.Instance.PlayerAvatarManager.AvatarChanged += OnAvatarChanged;
+            AvatarManager.Instance.AvatarChanged += OnAvatarChanged;
 
             if (firstActivation) FirstActivation();
         }
@@ -33,49 +33,31 @@ namespace CustomAvatar.UI
         private void FirstActivation()
         {
 	        tableCellTemplate = Resources.FindObjectsOfTypeAll<LevelListTableCell>().First(x => x.name == "LevelListTableCell");
-            loadedAvatars = new List<CustomAvatar>();
+	        avatars = AvatarManager.Instance.Avatars;
 	        avatarList.tableView.dataSource = this;
-
-	        foreach (CustomAvatar avatar in Plugin.Instance.AvatarLoader.Avatars)
-	        {
-		        avatar.Load(OnAvatarLoaded);
-	        }
         }
 
         protected override void DidDeactivate(DeactivationType deactivationType)
         {
 	        base.DidDeactivate(deactivationType);
 
-	        Plugin.Instance.PlayerAvatarManager.AvatarChanged -= OnAvatarChanged;
+	        AvatarManager.Instance.AvatarChanged -= OnAvatarChanged;
         }
 
         [UIAction("avatar-click")]
         private void OnAvatarClicked(TableView table, int row)
         {
-	        Plugin.Instance.PlayerAvatarManager.SwitchToAvatar(loadedAvatars[row]);
+	        AvatarManager.Instance.SwitchToAvatar(avatars[row]);
         }
 
-        private void OnAvatarLoaded(CustomAvatar avatar, AvatarLoadResult loadResult)
-        {
-	        if (loadResult != AvatarLoadResult.Completed)
-	        {
-		        Plugin.Logger.Error("Avatar " + avatar.FullPath + " failed to load");
-		        return;
-	        }
-
-	        loadedAvatars.Add(avatar);
-
-	        ReloadData();
-        }
-
-        private void OnAvatarChanged(CustomAvatar avatar)
+        private void OnAvatarChanged(SpawnedAvatar avatar)
         {
 	        ReloadData();
         }
 
         private void ReloadData()
         {
-	        int currentRow = loadedAvatars.IndexOf(Plugin.Instance.PlayerAvatarManager.CurrentPlayerAvatar);
+	        int currentRow = avatars.IndexOf(AvatarManager.Instance.CurrentlySpawnedAvatar.CustomAvatar);
 
             avatarList.tableView.ReloadData();
             avatarList.tableView.ScrollToCellWithIdx(currentRow, TableViewScroller.ScrollPositionType.Center, true);
@@ -89,7 +71,7 @@ namespace CustomAvatar.UI
 
         public int NumberOfCells()
         {
-	        return loadedAvatars.Count;
+	        return avatars.Count;
         }
 
         public TableCell CellForIdx(TableView tableView, int idx)
@@ -109,11 +91,11 @@ namespace CustomAvatar.UI
 		        tableCell.reuseIdentifier = "CustomAvatarsTableCell";
 	        }
 
-	        CustomAvatar avatar = loadedAvatars[idx];
+	        CustomAvatar avatar = avatars[idx];
 
-	        tableCell.GetPrivateField<TextMeshProUGUI>("_songNameText").text = avatar.Name;
-	        tableCell.GetPrivateField<TextMeshProUGUI>("_authorText").text = avatar.AuthorName;
-	        tableCell.GetPrivateField<RawImage>("_coverRawImage").texture = avatar.CoverImage?.texture ?? Texture2D.blackTexture;
+	        tableCell.GetPrivateField<TextMeshProUGUI>("_songNameText").text = avatar.Descriptor.Name;
+	        tableCell.GetPrivateField<TextMeshProUGUI>("_authorText").text = avatar.Descriptor.Author;
+	        tableCell.GetPrivateField<RawImage>("_coverRawImage").texture = avatar.Descriptor.Cover?.texture ?? Texture2D.blackTexture;
 
 	        return tableCell;
         }
