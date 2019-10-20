@@ -57,10 +57,11 @@ namespace CustomAvatar.UI
 			renderer.sharedMaterial = new Material(stereoRenderShader);
 
 			GameObject stereoCameraHead = new GameObject("Stereo Camera Head [Stereo Mirror]");
-			stereoCameraHead.transform.SetParent(transform, false);
+			stereoCameraHead.transform.SetParent(mirrorPlane.transform, false);
 			stereoCameraHead.transform.localScale = new Vector3(1 / MirrorScale.x, 1 / MirrorScale.y, 1 / MirrorScale.z);
 
 			GameObject stereoCameraEyeObject = new GameObject("Stereo Camera Eye [Stereo Mirror]");
+			stereoCameraEyeObject.transform.SetParent(mirrorPlane.transform, false);
 			Camera stereoCameraEye = stereoCameraEyeObject.AddComponent<Camera>();
 			stereoCameraEye.cullingMask = 0;
 			stereoCameraEye.cullingMask |= 1 << AvatarLayers.OnlyInThirdPerson;
