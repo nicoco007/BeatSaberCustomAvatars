@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using CustomAvatar.Exceptions;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
@@ -11,8 +9,8 @@ namespace CustomAvatar
 {
 	public class AvatarManager
 	{
-		private const string CustomAvatarsPath = "CustomAvatars";
 		private const string PreviousAvatarKey = "previousAvatar";
+		private readonly string CustomAvatarsPath = Path.GetFullPath("CustomAvatars");
 
 		public static AvatarManager Instance
 		{
@@ -34,8 +32,6 @@ namespace CustomAvatar
 
 		public event Action<SpawnedAvatar> AvatarChanged;
 
-		public List<CustomAvatar> Avatars { get; private set; }
-
 		private AvatarManager()
 		{
             AvatarTailor = new AvatarTailor();
@@ -54,61 +50,56 @@ namespace CustomAvatar
 			SceneManager.sceneLoaded -= OnSceneLoaded;
 		}
 
-		public void LoadAvatars(bool forceReload = false)
+		public void GetAvatarsAsync(Action<CustomAvatar> success, Action<Exception> error)
 		{
-			if (Avatars == null || forceReload)
+			Plugin.Logger.Info("Loading all avatars from " + CustomAvatarsPath);
+
+			foreach (string filePath in Directory.GetFiles(CustomAvatarsPath, "*.avatar"))
 			{
-				Avatars = new List<CustomAvatar>();
-
-				Plugin.Logger.Info("Loading all Avatars");
-
-				foreach (string filePath in Directory.GetFiles("CustomAvatars", "*.avatar"))
-				{
-					try
-					{
-						CustomAvatar avatar = CustomAvatar.FromFile(filePath);
-						Plugin.Logger.Info($"Loaded avatar {avatar.Descriptor.Name} by {avatar.Descriptor.Author} from '{filePath}'");
-						Avatars.Add(avatar);
-					}
-					catch (AvatarLoadException ex)
-					{
-						Plugin.Logger.Error($"Failed to load avatar at '{filePath}': {ex.Message}");
-					}
-				}
+				SharedCoroutineStarter.instance.StartCoroutine(CustomAvatar.FromFileCoroutine(filePath, success, error));
 			}
 		}
 
-		public void LoadAvatarFromSettings()
+		public void LoadAvatarFromSettingsAsync()
 		{
-			if (Avatars.Count == 0)
-			{
-				Plugin.Logger.Warn("No custom Avatars found in path " + Path.GetFullPath(CustomAvatarsPath));
-				return;
-			}
-
 			var previousAvatarPath = PlayerPrefs.GetString(PreviousAvatarKey, null);
 
 			if (!File.Exists(previousAvatarPath))
 			{
-				previousAvatarPath = Avatars[0].FullPath;
+				previousAvatarPath = Directory.GetFiles(CustomAvatarsPath, "*.avatar").FirstOrDefault();
 			}
 
-			var previousAvatar = Avatars.FirstOrDefault(x => x.FullPath == previousAvatarPath);
+			if (string.IsNullOrEmpty(previousAvatarPath))
+			{
+				Plugin.Logger.Info("No avatars found");
+				return;
+			}
 
-            SwitchToAvatar(previousAvatar);
+			SwitchToAvatarAsync(previousAvatarPath);
 		}
 
-		public void SwitchToAvatar(CustomAvatar customAvatar)
+		public void SwitchToAvatarAsync(string filePath)
 		{
-			if (customAvatar == null) return;
-			if (CurrentlySpawnedAvatar?.CustomAvatar == customAvatar) return;
+			SharedCoroutineStarter.instance.StartCoroutine(CustomAvatar.FromFileCoroutine(filePath, avatar =>
+			{
+				SwitchToAvatar(avatar);
+			}, ex =>
+			{
+				Plugin.Logger.Error("Failed to load avatar: " + ex.Message);
+			}));
+		}
+
+		public void SwitchToAvatar(CustomAvatar avatar)
+		{
+			if (avatar == null) return;
+			if (CurrentlySpawnedAvatar?.CustomAvatar == avatar) return;
 
 			if (CurrentlySpawnedAvatar?.GameObject != null)
 			{
 				Object.Destroy(CurrentlySpawnedAvatar.GameObject);
 			}
 
-			CurrentlySpawnedAvatar = SpawnAvatar(customAvatar);
+			CurrentlySpawnedAvatar = SpawnAvatar(avatar);
 
 			AvatarChanged?.Invoke(CurrentlySpawnedAvatar);
 
@@ -116,55 +107,27 @@ namespace CustomAvatar
 			ResizePlayerAvatar();
 			OnFirstPersonEnabledChanged(Plugin.Instance.FirstPersonEnabled);
 
-			PlayerPrefs.SetString(PreviousAvatarKey, customAvatar.FullPath);
+			PlayerPrefs.SetString(PreviousAvatarKey, avatar.FullPath);
 		}
 
-		public CustomAvatar SwitchToNextAvatar()
+		public void SwitchToNextAvatar()
 		{
-			if (Avatars.Count == 0) return null;
+			string[] files = Directory.GetFiles(CustomAvatarsPath, "*.avatar");
+			int index = Array.IndexOf(files, CurrentlySpawnedAvatar.CustomAvatar.FullPath);
 
-			if (CurrentlySpawnedAvatar == null)
-			{
-				SwitchToAvatar(Avatars[0]);
-				return Avatars[0];
-			}
+			index = (index + 1) % files.Length;
 
-			var currentIndex = Avatars.IndexOf(CurrentlySpawnedAvatar.CustomAvatar);
-			if (currentIndex < 0) currentIndex = 0;
-
-			var nextIndex = currentIndex + 1;
-			if (nextIndex >= Avatars.Count)
-			{
-				nextIndex = 0;
-			}
-
-			var nextAvatar = Avatars[nextIndex];
-			SwitchToAvatar(nextAvatar);
-			return nextAvatar;
+			SwitchToAvatarAsync(files[index]);
 		}
 
-		public CustomAvatar SwitchToPreviousAvatar()
+		public void SwitchToPreviousAvatar()
 		{
-			if (Avatars.Count == 0) return null;
+			string[] files = Directory.GetFiles(CustomAvatarsPath, "*.avatar");
+			int index = Array.IndexOf(files, CurrentlySpawnedAvatar.CustomAvatar.FullPath);
 
-			if (CurrentlySpawnedAvatar == null)
-			{
-				SwitchToAvatar(Avatars[0]);
-				return Avatars[0];
-			}
+			index = (index + files.Length - 1) % files.Length;
 
-			var currentIndex = Avatars.IndexOf(CurrentlySpawnedAvatar.CustomAvatar);
-			if (currentIndex < 0) currentIndex = 0;
-
-			var nextIndex = currentIndex - 1;
-			if (nextIndex < 0)
-			{
-				nextIndex = Avatars.Count - 1;
-			}
-
-			var nextAvatar = Avatars[nextIndex];
-			SwitchToAvatar(nextAvatar);
-			return nextAvatar;
+			SwitchToAvatarAsync(files[index]);
 		}
 
 		public void ResizePlayerAvatar()
@@ -193,7 +156,6 @@ namespace CustomAvatar
 
 		private void OnSceneTransitioned(Scene newScene)
 		{
-			Plugin.Logger.Debug("OnSceneTransitioned - " + newScene.name);
 			if (newScene.name.Equals("GameCore"))
 				CurrentlySpawnedAvatar?.GameObject.GetComponentInChildren<AvatarEventsPlayer>()?.LevelStartedEvent();
 			else if (newScene.name.Equals("MenuCore"))
@@ -202,12 +164,6 @@ namespace CustomAvatar
 
 		private static SpawnedAvatar SpawnAvatar(CustomAvatar customAvatar)
 		{
-			if (customAvatar.GameObject == null)
-			{
-				Plugin.Logger.Error("Can't spawn " + customAvatar.FullPath + " because it hasn't been loaded!");
-				return null;
-			}
-
 			var avatarGameObject = Object.Instantiate(customAvatar.GameObject);
 
 			avatarGameObject.AddComponent<AvatarBehaviour>();

@@ -56,7 +56,7 @@ namespace CustomAvatar.UI
 			Renderer renderer = mirrorPlane.GetComponent<Renderer>();
 			renderer.sharedMaterial = new Material(stereoRenderShader);
 
-			GameObject stereoCameraHead = new GameObject("Stereo Camera Head [Stereo Mirror]");
+			/*GameObject stereoCameraHead = new GameObject("Stereo Camera Head [Stereo Mirror]");
 			stereoCameraHead.transform.SetParent(mirrorPlane.transform, false);
 			stereoCameraHead.transform.localScale = new Vector3(1 / MirrorScale.x, 1 / MirrorScale.y, 1 / MirrorScale.z);
 
@@ -75,7 +75,7 @@ namespace CustomAvatar.UI
 			stereoRenderer.isMirror = true;
 			stereoRenderer.useScissor = false;
 			stereoRenderer.canvasOriginPos = mirrorPlane.transform.position + new Vector3(-10f, 0, 0);
-			stereoRenderer.canvasOriginRot = mirrorPlane.transform.rotation;
+			stereoRenderer.canvasOriginRot = mirrorPlane.transform.rotation;*/
 		}
 	}
 }

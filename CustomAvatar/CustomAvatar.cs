@@ -1,6 +1,6 @@
 using System;
+using System.Collections.Generic;
 using CustomAvatar.Exceptions;
-using System.Linq;
 using UnityEngine;
 
 namespace CustomAvatar
@@ -37,24 +37,37 @@ namespace CustomAvatar
 			ViewPoint = avatarGameObject.transform.Find("Head") ?? throw new AvatarLoadException($"Avatar '{Descriptor.Name}' does not have a Head transform");
 		}
 
-		public static CustomAvatar FromFile(string filePath)
+		public static IEnumerator<AsyncOperation> FromFileCoroutine(string filePath, Action<CustomAvatar> success, Action<Exception> error)
 		{
-			AssetBundle assetBundle = AssetBundle.LoadFromFile(filePath);
+			Plugin.Logger.Info("Loading avatar from " + filePath);
 
-			if (assetBundle == null)
+			AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(filePath);
+			yield return assetBundleCreateRequest;
+
+			if (!assetBundleCreateRequest.isDone || assetBundleCreateRequest.assetBundle == null)
 			{
-				throw new AvatarLoadException("Could not load asset bundle");
+				error(new AvatarLoadException("Avatar game object not found"));
+				yield break;
 			}
 
-			GameObject[] gameObjects = assetBundle.LoadAssetWithSubAssets<GameObject>(GameObjectName);
-			var avatarGameObject = gameObjects.FirstOrDefault();
+			AssetBundleRequest assetBundleRequest = assetBundleCreateRequest.assetBundle.LoadAssetWithSubAssetsAsync<GameObject>(GameObjectName);
+			yield return assetBundleRequest;
+			assetBundleCreateRequest.assetBundle.Unload(false);
 
-			if (avatarGameObject == null)
+			if (!assetBundleRequest.isDone || assetBundleRequest.asset == null)
 			{
-				throw new AvatarLoadException("Avatar game object not found");
+				error(new AvatarLoadException("Could not load asset bundle"));
+				yield break;
 			}
-
-			return new CustomAvatar(filePath, avatarGameObject);
+				
+			try
+			{
+				success(new CustomAvatar(filePath, assetBundleRequest.asset as GameObject));
+			}
+			catch (Exception ex)
+			{
+				error(ex);
+			}
 		}
 	}
 }

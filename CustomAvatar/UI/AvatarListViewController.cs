@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using BeatSaberMarkupLanguage.Attributes;
@@ -19,7 +20,7 @@ namespace CustomAvatar.UI
         [UIComponent("up-button")] public Button upButton;
         [UIComponent("down-button")] public Button downButton;
 
-        private List<CustomAvatar> avatars;
+        private List<CustomAvatar> avatars = new List<CustomAvatar>();
         private LevelListTableCell tableCellTemplate;
         
         protected override void DidActivate(bool firstActivation, ActivationType type)
@@ -34,7 +35,17 @@ namespace CustomAvatar.UI
         private void FirstActivation()
         {
 	        tableCellTemplate = Resources.FindObjectsOfTypeAll<LevelListTableCell>().First(x => x.name == "LevelListTableCell");
-	        avatars = AvatarManager.Instance.Avatars;
+	        AvatarManager.Instance.GetAvatarsAsync(avatar =>
+	        {
+		        Plugin.Logger.Info("Loaded avatar " + avatar.Descriptor.Name);
+
+		        avatars.Add(avatar);
+
+		        ReloadData();
+	        }, ex =>
+	        {
+				Plugin.Logger.Error("Failed to load avatar: " + ex.Message);
+	        });
 
 	        avatarList.tableView.dataSource = this;
 	        avatarList.tableView.SetPrivateField("_pageUpButton", upButton);
@@ -75,8 +86,10 @@ namespace CustomAvatar.UI
 
         private void ReloadData()
         {
-	        int currentRow = avatars.IndexOf(AvatarManager.Instance.CurrentlySpawnedAvatar.CustomAvatar);
+	        avatars.Sort((a, b) => string.Compare(a.Descriptor.Name, b.Descriptor.Name, StringComparison.CurrentCulture));
 
+	        int currentRow = avatars.FindIndex(a => a.FullPath == AvatarManager.Instance.CurrentlySpawnedAvatar?.CustomAvatar.FullPath);
+			
             avatarList.tableView.ReloadData();
             avatarList.tableView.ScrollToCellWithIdx(currentRow, TableViewScroller.ScrollPositionType.Center, true);
             avatarList.tableView.SelectCellWithIdx(currentRow);

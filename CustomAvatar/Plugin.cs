@@ -67,8 +67,7 @@ namespace CustomAvatar
 			Logger = logger;
 			Instance = this;
 
-			AvatarManager.Instance.LoadAvatars();
-			AvatarManager.Instance.LoadAvatarFromSettings();
+			AvatarManager.Instance.LoadAvatarFromSettingsAsync();
 
 			FirstPersonEnabled = PlayerPrefs.HasKey(FirstPersonEnabledKey);
 			//RotatePreviewEnabled = PlayerPrefs.HasKey(RotatePreviewEnabledKey);
