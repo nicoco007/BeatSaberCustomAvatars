@@ -82,11 +82,13 @@ namespace CustomAvatar.UI
 	        {
 		        tableCell = Instantiate(tableCellTemplate);
 
+		        foreach (var image in tableCell.GetPrivateField<UnityEngine.UI.Image[]>("_beatmapCharacteristicImages"))
+		        {
+			        DestroyImmediate(image);
+		        }
+
 		        tableCell.SetPrivateField("_beatmapCharacteristicAlphas", new float[0]);
 		        tableCell.SetPrivateField("_beatmapCharacteristicImages", new UnityEngine.UI.Image[0]);
-
-		        foreach (Behaviour behaviour in tableCellTemplate.GetPrivateField<UnityEngine.UI.Image[]>("_beatmapCharacteristicImages"))
-			        behaviour.enabled = false;
 
 		        tableCell.reuseIdentifier = "CustomAvatarsTableCell";
 	        }
