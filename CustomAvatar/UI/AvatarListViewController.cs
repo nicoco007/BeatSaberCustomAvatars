@@ -14,9 +14,10 @@ namespace CustomAvatar.UI
     public class AvatarListViewController : BSMLResourceViewController, TableView.IDataSource
     {
         public override string ResourceName => "CustomAvatar.Views.AvatarListViewController.bsml";
-
-        [UIComponent("avatar-list")]
-        public CustomListTableData avatarList;
+		
+        [UIComponent("avatar-list")] public CustomListTableData avatarList;
+        [UIComponent("up-button")] public Button upButton;
+        [UIComponent("down-button")] public Button downButton;
 
         private List<CustomAvatar> avatars;
         private LevelListTableCell tableCellTemplate;
@@ -34,7 +35,24 @@ namespace CustomAvatar.UI
         {
 	        tableCellTemplate = Resources.FindObjectsOfTypeAll<LevelListTableCell>().First(x => x.name == "LevelListTableCell");
 	        avatars = AvatarManager.Instance.Avatars;
+
 	        avatarList.tableView.dataSource = this;
+	        avatarList.tableView.SetPrivateField("_pageUpButton", upButton);
+	        avatarList.tableView.SetPrivateField("_pageDownButton", downButton);
+
+	        TableViewScroller scroller = avatarList.tableView.GetPrivateField<TableViewScroller>("_scroller");
+
+			upButton.onClick.AddListener(() =>
+			{
+				scroller.PageScrollUp();
+				avatarList.tableView.RefreshScrollButtons();
+			});
+
+			downButton.onClick.AddListener(() =>
+			{
+				scroller.PageScrollDown();
+				avatarList.tableView.RefreshScrollButtons();
+			});
         }
 
         protected override void DidDeactivate(DeactivationType deactivationType)
