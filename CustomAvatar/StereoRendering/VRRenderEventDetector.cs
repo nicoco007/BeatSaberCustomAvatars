@@ -8,23 +8,16 @@ namespace CustomAvatar.StereoRendering
 	[DisallowMultipleComponent]
 	public class VRRenderEventDetector : MonoBehaviour
 	{
-		public Camera unityCamera;
-		public int eye;
-		private bool initialized = false;
+		public Camera Camera { get; private set; }
 
-		public void Initialize(int eye)
+		public void Start()
 		{
-			this.unityCamera = GetComponent<Camera>();
-			this.eye = eye;
-			this.initialized = true;
+			Camera = GetComponent<Camera>();
 		}
 
 		private void OnPreRender()
 		{
-			if (initialized)
-			{
-				StereoRenderManager.Instance.InvokeStereoRenderers(this);
-			}
+			StereoRenderManager.Instance.InvokeStereoRenderers(this);
 		}
 	}
 }

@@ -84,18 +84,6 @@ namespace CustomAvatar
 
 		public void OnSceneLoaded(Scene newScene, LoadSceneMode mode)
 		{
-			string cameraName = "MenuMainCamera";
-			Camera mainMenuCamera = Resources.FindObjectsOfTypeAll<Camera>().FirstOrDefault(c => c.name == cameraName);
-
-			if (mainMenuCamera)
-			{
-				StereoRenderManager.Initialize(mainMenuCamera);
-			}
-			else
-			{
-				Logger.Error($"Could not find camera with name {cameraName}!");
-			}
-
 			if (_scenesManager == null)
 			{
 				_scenesManager = Resources.FindObjectsOfTypeAll<GameScenesManager>().FirstOrDefault();
@@ -120,9 +108,14 @@ namespace CustomAvatar
 
 		private void SceneTransitionDidFinish()
 		{
-			Camera mainCamera = Camera.main;
-
-			Logger.Info("SceneTransitionDidFinish");
+			foreach (Camera camera in Camera.allCameras)
+			{
+				if (camera.gameObject.GetComponent<VRRenderEventDetector>() == null)
+				{
+					camera.gameObject.AddComponent<VRRenderEventDetector>();
+					Logger.Info($"Added {nameof(VRRenderEventDetector)} to {camera}");
+				}
+			}
 
 			var input = PersistentSingleton<TrackedDeviceManager>.instance;
 
@@ -154,6 +147,8 @@ namespace CustomAvatar
 				Vector3 pelvisPositionCorrection = wantedPelvisPosition - Vector3.up * pelvis.Position.y;
 				AvatarBehaviour.PelvisCorrection = new PosRot(pelvisPositionCorrection, Quaternion.identity);
 			}
+			
+			Camera mainCamera = Camera.main;
 
 			if (mainCamera)
 			{

@@ -59,8 +59,11 @@ namespace CustomAvatar.UI
 			mirrorPlane.transform.position = MirrorPosition + new Vector3(0, MirrorScale.z * 5, 0); // plane is 10 units in size at scale 1
 			mirrorPlane.transform.rotation = MirrorRotation;
 
+			Material material = new Material(stereoRenderShader);
+			material.SetFloat("_Cutout", 0.01f);
+			
 			Renderer renderer = mirrorPlane.GetComponent<Renderer>();
-			renderer.sharedMaterial = new Material(stereoRenderShader);
+			renderer.sharedMaterial = material;
 
 			GameObject stereoCameraHead = new GameObject("Stereo Camera Head [Stereo Mirror]");
 			stereoCameraHead.transform.SetParent(mirrorPlane.transform, false);
