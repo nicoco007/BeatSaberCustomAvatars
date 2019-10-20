@@ -21,7 +21,7 @@ namespace CustomAvatar.UI
 			{
 				title = "Custom Avatars";
 
-				VRUIViewController contentViewController = BeatSaberUI.CreateViewController<MirrorController>();
+				VRUIViewController contentViewController = BeatSaberUI.CreateViewController<MirrorViewController>();
 				VRUIViewController leftViewController = BeatSaberUI.CreateViewController<AvatarSettingsViewController>();
 				VRUIViewController rightViewController = BeatSaberUI.CreateViewController<AvatarListViewController>();
 
