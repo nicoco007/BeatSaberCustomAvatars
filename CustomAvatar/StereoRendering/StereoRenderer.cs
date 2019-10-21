@@ -318,7 +318,7 @@ namespace CustomAvatar.StereoRendering
 
         private void RenderToTwoStereoTextures(VRRenderEventDetector detector)
         {
-	        float ipd = 0.63f; // average IPD since XR can't figure that out
+	        float ipd = 0.06567926f;
 
             var leftEyeOffset = new Vector3(-ipd / 2, 0, 0);
             var rightEyeOffset = new Vector3(ipd / 2, 0, 0);
