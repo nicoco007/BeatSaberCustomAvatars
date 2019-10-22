@@ -70,14 +70,10 @@ namespace CustomAvatar
 			AvatarManager.Instance.LoadAvatarFromSettingsAsync();
 
 			FirstPersonEnabled = PlayerPrefs.HasKey(FirstPersonEnabledKey);
-			//RotatePreviewEnabled = PlayerPrefs.HasKey(RotatePreviewEnabledKey);
-			SceneManager.sceneLoaded += OnSceneLoaded;
 		}
 
 		public void OnApplicationQuit()
 		{
-			SceneManager.sceneLoaded -= OnSceneLoaded;
-
 			if (_scenesManager != null)
 				_scenesManager.transitionDidFinishEvent -= SceneTransitionDidFinish;
 		}
@@ -95,9 +91,11 @@ namespace CustomAvatar
 				}
 			}
 
+			Plugin.Logger.Info("OnSceneLoaded " + newScene.name);
+
 			if (newScene.name == "MenuCore")
 			{
-				MenuButtonUI.AddButton("Avatars", delegate ()
+				MenuButtonUI.AddButton("Avatars", () =>
 				{
 					var mainFlowCoordinator = Resources.FindObjectsOfTypeAll<MainFlowCoordinator>().First();
 					var flowCoordinator = new GameObject("AvatarListFlowCoordinator").AddComponent<AvatarListFlowCoordinator>();
