@@ -122,6 +122,7 @@
     <Compile Include="UI\AvatarListFlowCoordinator.cs" />
     <Compile Include="UI\AvatarListViewController.cs" />
     <Compile Include="UI\MirrorViewController.cs" />
+    <Compile Include="UI\SettingsViewController.cs" />
     <Compile Include="VRIK\AxisTools.cs" />
     <Compile Include="VRIK\Hierarchy.cs" />
     <Compile Include="VRIK\IK.cs" />
@@ -151,7 +152,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Views\AvatarListViewController.bsml" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Views\SettingsViewController.bsml" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy "$(TargetPath)" "%25BEATSABERDIR%25\Plugins"
