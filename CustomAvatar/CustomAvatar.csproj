@@ -91,7 +91,6 @@
     <Compile Include="AvatarBehaviour.cs" />
     <Compile Include="AvatarLayers.cs" />
     <Compile Include="AvatarManager.cs" />
-    <Compile Include="AvatarMeasurement.cs" />
     <Compile Include="AvatarTailor.cs" />
     <Compile Include="BeatSaberUtil.cs" />
     <Compile Include="CustomAvatar.cs" />

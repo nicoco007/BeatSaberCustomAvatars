@@ -13,9 +13,9 @@ namespace CustomAvatar
 		private float? _initialAvatarPositionY = null;
 		private Vector3 _initialAvatarLocalScale = Vector3.one;
 
-		private const string _kPlayerArmLengthKey = "CustomAvatar.Tailoring.PlayerArmLength";
-		private const string _kResizePolicyKey = "CustomAvatar.Tailoring.ResizePolicy";
-		private const string _kFloorMovePolicyKey = "CustomAvatar.Tailoring.FloorMovePolicy";
+		private const string kPlayerArmLengthKey = "CustomAvatar.Tailoring.PlayerArmLength";
+		private const string kResizePolicyKey = "CustomAvatar.Tailoring.ResizePolicy";
+		private const string kFloorMovePolicyKey = "CustomAvatar.Tailoring.FloorMovePolicy";
 
 		public enum ResizePolicyType
 		{
@@ -32,20 +32,20 @@ namespace CustomAvatar
 
 		public float PlayerArmLength
 		{
-			get => PlayerPrefs.GetFloat(_kPlayerArmLengthKey, BeatSaberUtil.GetPlayerHeight() * 0.88f);
-			private set => PlayerPrefs.SetFloat(_kPlayerArmLengthKey, value);
+			get => PlayerPrefs.GetFloat(kPlayerArmLengthKey, BeatSaberUtil.GetPlayerHeight() * 0.88f);
+			private set => PlayerPrefs.SetFloat(kPlayerArmLengthKey, value);
 		}
 
 		public ResizePolicyType ResizePolicy
 		{
-			get => (ResizePolicyType)PlayerPrefs.GetInt(_kResizePolicyKey, 1);
-			set => PlayerPrefs.SetInt(_kResizePolicyKey, (int)value);
+			get => (ResizePolicyType)PlayerPrefs.GetInt(kResizePolicyKey, 1);
+			set => PlayerPrefs.SetInt(kResizePolicyKey, (int)value);
 		}
 
 		public FloorMovePolicyType FloorMovePolicy
 		{
-			get => (FloorMovePolicyType)PlayerPrefs.GetInt(_kFloorMovePolicyKey, 1);
-			set => PlayerPrefs.SetInt(_kFloorMovePolicyKey, (int)value);
+			get => (FloorMovePolicyType)PlayerPrefs.GetInt(kFloorMovePolicyKey, 1);
+			set => PlayerPrefs.SetInt(kFloorMovePolicyKey, (int)value);
 		}
 
 		private Animator FindAvatarAnimator(GameObject gameObject)
@@ -78,7 +78,7 @@ namespace CustomAvatar
 			if (ResizePolicy == ResizePolicyType.AlignArmLength)
 			{
 				float playerArmLength = PlayerArmLength;
-				_currentAvatarArmLength = _currentAvatarArmLength ?? AvatarMeasurement.MeasureArmLength(animator);
+				_currentAvatarArmLength = _currentAvatarArmLength ?? MeasureAvatarArmSpan(animator);
 				var avatarArmLength = _currentAvatarArmLength ?? playerArmLength;
 				Plugin.Logger.Log(Level.Debug, "Avatar arm length: " + avatarArmLength);
 
@@ -86,7 +86,7 @@ namespace CustomAvatar
 			}
 			else if (ResizePolicy == ResizePolicyType.AlignHeight)
 			{
-				scale = BeatSaberUtil.GetPlayerViewPointHeight() / avatar.CustomAvatar.EyeHeight;
+				scale = BeatSaberUtil.GetPlayerEyeHeight() / avatar.CustomAvatar.eyeHeight;
 			}
 
 			// apply scale
@@ -110,8 +110,8 @@ namespace CustomAvatar
 			}
 			else if (FloorMovePolicy == FloorMovePolicyType.AllowMove)
 			{
-				float playerViewPointHeight = BeatSaberUtil.GetPlayerViewPointHeight();
-				float avatarViewPointHeight = avatar.CustomAvatar.ViewPoint?.position.y ?? playerViewPointHeight;
+				float playerViewPointHeight = BeatSaberUtil.GetPlayerEyeHeight();
+				float avatarViewPointHeight = avatar.CustomAvatar.viewPoint?.position.y ?? playerViewPointHeight;
 				_initialAvatarPositionY = _initialAvatarPositionY ?? animator.transform.position.y;
 				const float FloorLevelOffset = 0.04f; // a heuristic value from testing on oculus rift
 				floorOffset = playerViewPointHeight - (avatarViewPointHeight * scale) + FloorLevelOffset;
@@ -129,8 +129,9 @@ namespace CustomAvatar
 			}
 		}
 
-		public void MeasurePlayerArmLength(Action<float> onProgress, Action<float> onFinished)
+		public void MeasurePlayerArmSpan(Action<float> onProgress, Action<float> onFinished)
 		{
+            
 			var active = SceneManager.GetActiveScene().GetRootGameObjects()[0].GetComponent<PlayerArmLengthMeasurement>();
 			if (active != null)
 			{
@@ -143,6 +144,21 @@ namespace CustomAvatar
 				PlayerArmLength = result;
 				onFinished(result);
 			};
+		}
+
+		public static float MeasureAvatarArmSpan(Animator animator)
+		{
+			var indexFinger1 = animator.GetBoneTransform(HumanBodyBones.LeftIndexProximal).position;
+			var leftUpperArm = animator.GetBoneTransform(HumanBodyBones.LeftUpperArm).position;
+			var leftShoulder = animator.GetBoneTransform(HumanBodyBones.LeftShoulder).position;
+			var rightShoulder = animator.GetBoneTransform(HumanBodyBones.RightShoulder).position;
+			var leftElbow = animator.GetBoneTransform(HumanBodyBones.LeftLowerArm).position;
+			var leftHand = animator.GetBoneTransform(HumanBodyBones.LeftHand).position;
+
+			var shoulderLength = Vector3.Distance(leftUpperArm, leftShoulder) * 2.0f + Vector3.Distance(leftShoulder, rightShoulder);
+			var armLength = (Vector3.Distance(indexFinger1, leftHand) * 0.5f + Vector3.Distance(leftHand, leftElbow) + Vector3.Distance(leftElbow, leftUpperArm)) * 2.0f;
+
+			return shoulderLength + armLength;
 		}
 
 		private class PlayerArmLengthMeasurement : MonoBehaviour
@@ -168,6 +184,7 @@ namespace CustomAvatar
 					Destroy(this);
 					return;
 				}
+
 				onProgress?.Invoke(maxHandToHandLength);
 			}
 

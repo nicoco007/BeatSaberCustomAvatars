@@ -36,7 +36,7 @@ namespace CustomAvatar
 			return playerHeight;
 		}
 
-		public static float GetPlayerViewPointHeight()
+		public static float GetPlayerEyeHeight()
 		{
 			return GetPlayerHeight() - MainSettingsModel.kHeadPosToPlayerHeightOffset;
 		}

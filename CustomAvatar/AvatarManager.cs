@@ -107,13 +107,13 @@ namespace CustomAvatar
 			ResizePlayerAvatar();
 			OnFirstPersonEnabledChanged(Plugin.Instance.FirstPersonEnabled);
 
-			PlayerPrefs.SetString(PreviousAvatarKey, avatar.FullPath);
+			PlayerPrefs.SetString(PreviousAvatarKey, avatar.fullPath);
 		}
 
 		public void SwitchToNextAvatar()
 		{
 			string[] files = Directory.GetFiles(CustomAvatarsPath, "*.avatar");
-			int index = Array.IndexOf(files, CurrentlySpawnedAvatar.CustomAvatar.FullPath);
+			int index = Array.IndexOf(files, CurrentlySpawnedAvatar.CustomAvatar.fullPath);
 
 			index = (index + 1) % files.Length;
 
@@ -123,7 +123,7 @@ namespace CustomAvatar
 		public void SwitchToPreviousAvatar()
 		{
 			string[] files = Directory.GetFiles(CustomAvatarsPath, "*.avatar");
-			int index = Array.IndexOf(files, CurrentlySpawnedAvatar.CustomAvatar.FullPath);
+			int index = Array.IndexOf(files, CurrentlySpawnedAvatar.CustomAvatar.fullPath);
 
 			index = (index + files.Length - 1) % files.Length;
 
@@ -133,7 +133,7 @@ namespace CustomAvatar
 		public void ResizePlayerAvatar()
 		{
 			if (CurrentlySpawnedAvatar?.GameObject == null) return;
-			if (CurrentlySpawnedAvatar?.CustomAvatar.Descriptor.AllowHeightCalibration != true) return;
+			if (CurrentlySpawnedAvatar?.CustomAvatar.descriptor.AllowHeightCalibration != true) return;
 
 			AvatarTailor.ResizeAvatar(CurrentlySpawnedAvatar);
 		}
@@ -164,7 +164,7 @@ namespace CustomAvatar
 
 		private static SpawnedAvatar SpawnAvatar(CustomAvatar customAvatar)
 		{
-			var avatarGameObject = Object.Instantiate(customAvatar.GameObject);
+			var avatarGameObject = Object.Instantiate(customAvatar.gameObject);
 
 			avatarGameObject.AddComponent<AvatarBehaviour>();
 			avatarGameObject.AddComponent<AvatarEventsPlayer>();

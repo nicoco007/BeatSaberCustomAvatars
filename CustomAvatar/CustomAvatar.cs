@@ -7,34 +7,43 @@ namespace CustomAvatar
 {
 	public class CustomAvatar
 	{
-		private const string GameObjectName = "_CustomAvatar";
-		private float? eyeHeight;
+		private const float kMinIKAvatarHeight = 1.4f;
+		private const float kMaxIKAvatarHeight = 2.5f;
+		private const string kGameObjectName = "_CustomAvatar";
+		private float? _eyeHeight;
 
-		public string FullPath { get; }
-		public GameObject GameObject { get; }
-		public AvatarDescriptor Descriptor { get; }
-		public Transform ViewPoint { get; }
+		public string fullPath { get; }
+		public GameObject gameObject { get; }
+		public AvatarDescriptor descriptor { get; }
+		public Transform viewPoint { get; }
 
-		public float EyeHeight
+		public float eyeHeight
 		{
 			get
 			{
-				if (GameObject == null) return BeatSaberUtil.GetPlayerViewPointHeight();
-				if (eyeHeight == null)
+				if (gameObject == null) return BeatSaberUtil.GetPlayerEyeHeight();
+				if (_eyeHeight == null)
 				{
-					eyeHeight = AvatarMeasurement.MeasureEyeHeight(GameObject, ViewPoint);
+					var localPosition = gameObject.transform.InverseTransformPoint(viewPoint.position);
+					_eyeHeight = localPosition.y;
+			
+					//This is to handle cases where the head might be at 0,0,0, like in a non-IK avatar.
+					if (_eyeHeight < kMinIKAvatarHeight || _eyeHeight > kMaxIKAvatarHeight)
+					{
+						_eyeHeight = MainSettingsModel.kDefaultPlayerHeight;
+					}
 				}
 
-				return eyeHeight.Value;
+				return _eyeHeight.Value;
 			}
 		}
 
 		public CustomAvatar(string fullPath, GameObject avatarGameObject)
 		{
-			FullPath = fullPath ?? throw new ArgumentNullException(nameof(avatarGameObject));
-			GameObject = avatarGameObject ?? throw new ArgumentNullException(nameof(avatarGameObject));
-			Descriptor = avatarGameObject.GetComponent<AvatarDescriptor>() ?? throw new AvatarLoadException($"Avatar at '{fullPath}' does not have an AvatarDescriptor");
-			ViewPoint = avatarGameObject.transform.Find("Head") ?? throw new AvatarLoadException($"Avatar '{Descriptor.Name}' does not have a Head transform");
+			this.fullPath = fullPath ?? throw new ArgumentNullException(nameof(avatarGameObject));
+			gameObject = avatarGameObject ?? throw new ArgumentNullException(nameof(avatarGameObject));
+			descriptor = avatarGameObject.GetComponent<AvatarDescriptor>() ?? throw new AvatarLoadException($"Avatar at '{fullPath}' does not have an AvatarDescriptor");
+			viewPoint = avatarGameObject.transform.Find("Head") ?? throw new AvatarLoadException($"Avatar '{descriptor.Name}' does not have a Head transform");
 		}
 
 		public static IEnumerator<AsyncOperation> FromFileCoroutine(string filePath, Action<CustomAvatar> success, Action<Exception> error)
@@ -50,7 +59,7 @@ namespace CustomAvatar
 				yield break;
 			}
 
-			AssetBundleRequest assetBundleRequest = assetBundleCreateRequest.assetBundle.LoadAssetWithSubAssetsAsync<GameObject>(GameObjectName);
+			AssetBundleRequest assetBundleRequest = assetBundleCreateRequest.assetBundle.LoadAssetWithSubAssetsAsync<GameObject>(kGameObjectName);
 			yield return assetBundleRequest;
 			assetBundleCreateRequest.assetBundle.Unload(false);
 

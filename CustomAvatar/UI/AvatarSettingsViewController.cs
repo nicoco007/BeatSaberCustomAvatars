@@ -69,7 +69,7 @@ namespace CustomAvatar.UI
 			var buttonMeasure = BeatSaberUI.CreateUIButton(containerRect, "QuitButton", () =>
 			{
 				labelMeasure.text = "Measuring ...";
-				AvatarManager.Instance.AvatarTailor.MeasurePlayerArmLength((value) =>
+				AvatarManager.Instance.AvatarTailor.MeasurePlayerArmSpan((value) =>
 				{
 					labelMeasure.text = $"Measuring ... {Mathf.Ceil(value * 100.0f) / 100.0f}";
 				},
