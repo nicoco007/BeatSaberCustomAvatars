@@ -3,9 +3,9 @@
         <text text="AVATAR SETTINGS" align="Center" font-size="6"></text>
     </horizontal>
     <settings-container>
-        <checkbox-setting text="Visible in first person" value="visible-first-person-value" apply-on-change="true" on-change="visible-first-person-change"></checkbox-setting>
+        <bool-setting text="Visible in first person" value="visible-first-person-value" apply-on-change="true" on-change="visible-first-person-change"></bool-setting>
         <list-setting text="Resize avatars to player's" value="resize-value" apply-on-change="true" on-change="resize-change" options="resize-options"></list-setting>
-        <checkbox-setting text="Floor height adjust" value="floor-adjust-value" apply-on-change="true" on-change="floor-adjust-change"></checkbox-setting>
+        <bool-setting text="Floor height adjust" value="floor-adjust-value" apply-on-change="true" on-change="floor-adjust-change"></bool-setting>
         <horizontal pad-top="5" pad-bottom="5">
             <text text="Measure arm span" font-size="5" align="Left"></text>
             <button text="Measure" on-click="measure-arm-span-click"></button>
