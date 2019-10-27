@@ -66,34 +66,40 @@ namespace CustomAvatar
 
 			if (_trackedDevices.LeftFoot.Found)
 			{
+				_vrik.solver.leftLeg.target = _ikManagerAdvanced.LeftLeg_target;
 				_vrik.solver.leftLeg.positionWeight = _ikManagerAdvanced.LeftLeg_positionWeight;
 				_vrik.solver.leftLeg.rotationWeight = _ikManagerAdvanced.LeftLeg_rotationWeight;
 			}
 			else
 			{
+				_vrik.solver.leftLeg.target = null;
 				_vrik.solver.leftLeg.positionWeight = 0;
 				_vrik.solver.leftLeg.rotationWeight = 0;
 			}
 
 			if (_trackedDevices.RightFoot.Found)
 			{
+				_vrik.solver.rightLeg.target = _ikManagerAdvanced.RightLeg_target;
 				_vrik.solver.rightLeg.positionWeight = _ikManagerAdvanced.RightLeg_positionWeight;
 				_vrik.solver.rightLeg.rotationWeight = _ikManagerAdvanced.RightLeg_positionWeight;
 			}
 			else
 			{
+				_vrik.solver.rightLeg.target = null;
 				_vrik.solver.rightLeg.positionWeight = 0;
 				_vrik.solver.rightLeg.rotationWeight = 0;
 			}
 
 			if (_trackedDevices.Waist.Found)
 			{
+				_vrik.solver.spine.pelvisTarget = _ikManagerAdvanced.Spine_pelvisTarget;
 				_vrik.solver.spine.pelvisPositionWeight = _ikManagerAdvanced.Spine_pelvisPositionWeight;
 				_vrik.solver.spine.pelvisRotationWeight = _ikManagerAdvanced.Spine_pelvisRotationWeight;
 				_vrik.solver.plantFeet = false;
 			}
 			else
 			{
+				_vrik.solver.spine.pelvisTarget = null;
 				_vrik.solver.spine.pelvisPositionWeight = 0;
 				_vrik.solver.spine.pelvisRotationWeight = 0;
 				_vrik.solver.plantFeet = true;
