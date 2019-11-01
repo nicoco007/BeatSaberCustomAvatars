@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using CustomAvatar.Tracking;
+using CustomAvatar.Utilities;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using static IPA.Logging.Logger;

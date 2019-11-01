@@ -1,8 +1,8 @@
 using System;
 
-namespace CustomAvatar
+namespace CustomAvatar.Tracking
 {
-	class TrackedDeviceTypeAttribute : Attribute
+	internal class TrackedDeviceTypeAttribute : Attribute
 	{
 		public string Name { get; set; }
 
@@ -12,7 +12,7 @@ namespace CustomAvatar
 		}
 	}
 
-	public enum TrackedDeviceType
+	internal enum TrackedDeviceType
 	{
 		[TrackedDeviceType("")] Unknown,
 		[TrackedDeviceType("vive")] ViveHeadset,

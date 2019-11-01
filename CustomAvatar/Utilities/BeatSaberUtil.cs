@@ -1,9 +1,7 @@
-using System;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
-namespace CustomAvatar
+namespace CustomAvatar.Utilities
 {
 	public static class BeatSaberUtil
 	{

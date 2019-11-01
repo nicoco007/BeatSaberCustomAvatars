@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using CustomAvatar.Exceptions;
+using CustomAvatar.Utilities;
 using UnityEngine;
 
 namespace CustomAvatar

@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using DynamicOpenVR;
+using CustomAvatar.Utilities;
 using UnityEngine;
 using UnityEngine.XR;
 
-namespace CustomAvatar
+namespace CustomAvatar.Tracking
 {
-	public class TrackedDeviceManager : MonoBehaviour
+	internal class TrackedDeviceManager : MonoBehaviour
 	{
 		public TrackedDeviceState Head      { get; } = new TrackedDeviceState();
 		public TrackedDeviceState LeftHand  { get; } = new TrackedDeviceState();

@@ -1,9 +1,9 @@
 using UnityEngine;
 using UnityEngine.XR;
 
-namespace CustomAvatar
+namespace CustomAvatar.Tracking
 {
-	public class TrackedDeviceState
+	internal class TrackedDeviceState
 	{
 		public XRNodeState NodeState { get; set; }
 		public Vector3 Position { get; set; }

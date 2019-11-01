@@ -1,13 +1,9 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
-using DynamicOpenVR;
 using Valve.VR;
 
-namespace CustomAvatar
+namespace CustomAvatar.Tracking
 {
 	internal static class OpenVRWrapper
 	{

@@ -2,6 +2,7 @@ using CustomAvatar.StereoRendering;
 using IPA;
 using System;
 using System.Linq;
+using CustomAvatar.Tracking;
 using CustomAvatar.UI;
 using CustomUI.MenuButton;
 using DynamicOpenVR;

@@ -92,7 +92,7 @@
     <Compile Include="AvatarLayers.cs" />
     <Compile Include="AvatarManager.cs" />
     <Compile Include="AvatarTailor.cs" />
-    <Compile Include="BeatSaberUtil.cs" />
+    <Compile Include="Utilities\BeatSaberUtil.cs" />
     <Compile Include="CustomAvatar.cs" />
     <Compile Include="AvatarDescriptor.cs" />
     <Compile Include="AvatarEventsPlayer.cs" />
@@ -103,7 +103,7 @@
     <Compile Include="EventFilterBehaviour.cs" />
     <Compile Include="EventFilters.cs" />
     <Compile Include="Exceptions\AvatarLoadException.cs" />
-    <Compile Include="OpenVRWrapper.cs" />
+    <Compile Include="Tracking\OpenVRWrapper.cs" />
     <Compile Include="PoseManager.cs" />
     <Compile Include="EventManager.cs" />
     <Compile Include="FirstPersonExclusion.cs" />
@@ -114,9 +114,9 @@
     <Compile Include="StereoRendering\StereoRenderer.cs" />
     <Compile Include="StereoRendering\StereoRenderManager.cs" />
     <Compile Include="StereoRendering\VRRenderEventDetector.cs" />
-    <Compile Include="TrackedDeviceManager.cs" />
-    <Compile Include="TrackedDeviceState.cs" />
-    <Compile Include="TrackedDeviceType.cs" />
+    <Compile Include="Tracking\TrackedDeviceManager.cs" />
+    <Compile Include="Tracking\TrackedDeviceState.cs" />
+    <Compile Include="Tracking\TrackedDeviceType.cs" />
     <Compile Include="UI\AvatarSettingsViewController.cs" />
     <Compile Include="UI\AvatarListFlowCoordinator.cs" />
     <Compile Include="UI\AvatarListViewController.cs" />
@@ -154,6 +154,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Views\SettingsViewController.bsml" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy "$(TargetPath)" "%25BEATSABERDIR%25\Plugins"

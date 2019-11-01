@@ -1,4 +1,5 @@
 using AvatarScriptPack;
+using CustomAvatar.Tracking;
 using DynamicOpenVR.IO;
 using System;
 using UnityEngine;
@@ -81,7 +82,7 @@ namespace CustomAvatar
 			{
 				_vrik.solver.rightLeg.target = _ikManagerAdvanced.RightLeg_target;
 				_vrik.solver.rightLeg.positionWeight = _ikManagerAdvanced.RightLeg_positionWeight;
-				_vrik.solver.rightLeg.rotationWeight = _ikManagerAdvanced.RightLeg_positionWeight;
+				_vrik.solver.rightLeg.rotationWeight = _ikManagerAdvanced.RightLeg_rotationWeight;
 			}
 			else
 			{
