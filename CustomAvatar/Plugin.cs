@@ -92,8 +92,6 @@ namespace CustomAvatar
 				}
 			}
 
-			Plugin.Logger.Info("OnSceneLoaded " + newScene.name);
-
 			if (newScene.name == "MenuCore")
 			{
 				MenuButtonUI.AddButton("Avatars", () =>

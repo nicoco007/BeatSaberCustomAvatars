@@ -101,33 +101,35 @@ namespace CustomAvatar
 
 		private IEnumerator FloorMendingWithDelay(SpawnedAvatar avatar, Animator animator, float scale)
 		{
+			if (FloorMovePolicy == FloorMovePolicyType.NeverMove) yield break;
+
 			yield return new WaitForEndOfFrame(); // wait for CustomFloorPlugin:PlatformManager:Start hides original platform
-			// compute offset
-			float floorOffset = 0f;
-			// give up moving original foot floors
-			var originalFloor = GameObject.Find("MenuPlayersPlace") ?? GameObject.Find("Static/PlayersPlace");
-			if (originalFloor != null && originalFloor.activeSelf == true)
-			{
-				floorOffset = 0f;
-			}
-			else if (FloorMovePolicy == FloorMovePolicyType.AllowMove)
-			{
-				float playerViewPointHeight = BeatSaberUtil.GetPlayerEyeHeight();
-				float avatarViewPointHeight = avatar.CustomAvatar.viewPoint?.position.y ?? playerViewPointHeight;
-				_initialAvatarPositionY = _initialAvatarPositionY ?? animator.transform.position.y;
-				const float FloorLevelOffset = 0.04f; // a heuristic value from testing on oculus rift
-				floorOffset = playerViewPointHeight - (avatarViewPointHeight * scale) + FloorLevelOffset;
-			}
+
+			float playerViewPointHeight = BeatSaberUtil.GetPlayerEyeHeight();
+			float avatarViewPointHeight = avatar.CustomAvatar.viewPoint?.position.y ?? playerViewPointHeight;
+			_initialAvatarPositionY = _initialAvatarPositionY ?? animator.transform.position.y;
+			float floorOffset = playerViewPointHeight - avatarViewPointHeight * scale;
 
 			// apply offset
 			animator.transform.position = new Vector3(animator.transform.position.x, floorOffset + _initialAvatarPositionY ?? 0, animator.transform.position.z);
-
+			
+			var originalFloor = GameObject.Find("MenuPlayersPlace") ?? GameObject.Find("Static/PlayersPlace");
 			var customFloor = GameObject.Find("Platform Loader");
+
+			Plugin.Logger.Info("originalFloor " + originalFloor);
+
+			if (originalFloor != null)
+			{
+				Plugin.Logger.Info($"Moving original floor {Math.Abs(floorOffset)} m {(floorOffset >= 0 ? "up" : "down")}");
+				originalFloor.transform.position = new Vector3(0, floorOffset, 0);
+			}
+
 			if (customFloor != null)
 			{
+				Plugin.Logger.Info($"Moving Custom Platforms floor {Math.Abs(floorOffset)} m {(floorOffset >= 0 ? "up" : "down")}");
+
 				_initialPlatformPosition = _initialPlatformPosition ?? customFloor.transform.position;
 				customFloor.transform.position = (Vector3.up * floorOffset) + _initialPlatformPosition ?? Vector3.zero;
-				Plugin.Logger.Log(Level.Info, "CustomFloor moved to " + customFloor.transform.position.y + " with offset " + floorOffset);
 			}
 		}
 
