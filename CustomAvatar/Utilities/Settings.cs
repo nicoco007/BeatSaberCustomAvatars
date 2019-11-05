@@ -10,6 +10,7 @@ namespace CustomAvatar.Utilities
 		private const string kEnableFloorAdjustKey = "CustomAvatar.EnableFloorAdjust";
 		private const string kPreviousAvatarPathKey = "CustomAvatar.PreviousAvatarPath";
 		private const string kPlayerArmSpanKey = "CustomAvatar.PlayerArmSpan";
+		private const string kCalibrateFullBodyTrackingOnStartKey = "CustomAvatar.CalibrateFullBodyTrackingOnStart";
 
 		public static bool isAvatarVisibleInFirstPerson
 		{
@@ -39,6 +40,12 @@ namespace CustomAvatar.Utilities
 		{
 			get => PlayerPrefs.GetFloat(kPlayerArmSpanKey, 1.8f);
 			set => PlayerPrefs.SetFloat(kPlayerArmSpanKey, value);
+		}
+
+		public static bool calibrateFullBodyTrackingOnStart
+		{
+			get => Convert.ToBoolean(PlayerPrefs.GetInt(kCalibrateFullBodyTrackingOnStartKey, 0));
+			set => PlayerPrefs.SetInt(kCalibrateFullBodyTrackingOnStartKey, Convert.ToInt32(value));
 		}
 	}
 }

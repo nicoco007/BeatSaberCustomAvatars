@@ -33,6 +33,7 @@ namespace CustomAvatar.UI
 		[UIValue("visible-first-person-value")] private bool _visibleInFirstPerson;
 		[UIValue("resize-value")] private AvatarResizeMode _resizeMode;
 		[UIValue("floor-adjust-value")] private bool _floorHeightAdjust;
+		[UIValue("calibrate-fbt-on-start")] private bool _calibrateFullBodyTrackingOnStart;
 
 		#endregion
 
@@ -41,6 +42,7 @@ namespace CustomAvatar.UI
 			_visibleInFirstPerson = Settings.isAvatarVisibleInFirstPerson;
 			_resizeMode = Settings.resizeMode;
 			_floorHeightAdjust = Settings.enableFloorAdjust;
+			_calibrateFullBodyTrackingOnStart = Settings.calibrateFullBodyTrackingOnStart;
 
 			base.DidActivate(firstActivation, type);
 
@@ -94,6 +96,18 @@ namespace CustomAvatar.UI
 			MeasureArmSpan();
 		}
 
+		[UIAction("calibrate-fbt-click")]
+		private void OnCalibrateFullBodyTrackingClicked()
+		{
+			Plugin.Logger.Info("OnCalibrateFullBodyTrackingClicked");
+		}
+
+		[UIAction("calibrate-fbt-on-start-change")]
+		private void OnCalibrateFullBodyTrackingOnStartChanged(bool value)
+		{
+			Settings.calibrateFullBodyTrackingOnStart = value;
+		}
+
 		#endregion
 
 		#region Arm Span Measurement
@@ -113,10 +127,10 @@ namespace CustomAvatar.UI
 			_maxMeasuredArmSpan = kMinArmSpan;
 			_lastUpdateTime = Time.timeSinceLevelLoad;
 
-			InvokeRepeating(nameof(Scan), 0.0f, 0.1f);
+			InvokeRepeating(nameof(ScanArmSpan), 0.0f, 0.1f);
 		}
 
-		private void Scan()
+		private void ScanArmSpan()
 		{
 			var armSpan = Vector3.Distance(_playerInput.LeftHand.Position, _playerInput.RightHand.Position);
 
@@ -132,7 +146,7 @@ namespace CustomAvatar.UI
 			}
 			else
 			{
-				CancelInvoke(nameof(Scan));
+				CancelInvoke(nameof(ScanArmSpan));
 				_armSpanLabel.SetText($"{_maxMeasuredArmSpan:0.00} m");
 				Settings.playerArmSpan = _maxMeasuredArmSpan;
 				_isMeasuring = false;
