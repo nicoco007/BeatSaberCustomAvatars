@@ -3,9 +3,9 @@
         <text text="AVATAR SETTINGS" align="Center" font-size="6"></text>
     </horizontal>
     <settings-container>
-        <bool-setting text="Visible in First Person" hover-hint="Whether avatars are visible in-HMD or not." value="visible-first-person-value" apply-on-change="true" on-change="visible-first-person-change"></bool-setting>
+        <bool-setting text="Visible in First Person" value="visible-first-person-value" apply-on-change="true" on-change="visible-first-person-change"></bool-setting>
         <list-setting text="Resize Mode" value="resize-value" apply-on-change="true" on-change="resize-change" options="resize-options" formatter="resize-mode-formatter"></list-setting>
-        <bool-setting text="Floor Height Adjust" value="floor-adjust-value" apply-on-change="true" on-change="floor-adjust-change"></bool-setting>
+        <bool-setting text="Floor Height Adjust" hover-hint="Move the floor so avatars' feet are flat. Currently does not work well with full body tracking." value="floor-adjust-value" apply-on-change="true" on-change="floor-adjust-change"></bool-setting>
         <horizontal pad-top="5">
             <text text="Arm Span" font-size="5" align="Left"></text>
             <text id="arm-span" font-size="5" align="Left"></text>

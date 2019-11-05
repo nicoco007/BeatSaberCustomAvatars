@@ -99,7 +99,7 @@ namespace CustomAvatar.UI
 		[UIAction("calibrate-fbt-click")]
 		private void OnCalibrateFullBodyTrackingClicked()
 		{
-			Plugin.Logger.Info("OnCalibrateFullBodyTrackingClicked");
+			AvatarManager.Instance.AvatarTailor.CalibrateFullBodyTracking();
 		}
 
 		[UIAction("calibrate-fbt-on-start-change")]
