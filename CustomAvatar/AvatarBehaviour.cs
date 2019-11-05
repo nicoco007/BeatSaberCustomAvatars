@@ -41,11 +41,11 @@ namespace CustomAvatar
 		{
 			_vrik = GetComponentInChildren<VRIK>();
 			_ikManagerAdvanced = GetComponentInChildren<IKManagerAdvanced>();
+			_animator = GetComponentInChildren<Animator>() ?? throw new NullReferenceException("Avatar is missing an Animator");
+			_poseManager = GetComponentInChildren<PoseManager>();
+
 			_trackedDevices = PersistentSingleton<TrackedDeviceManager>.instance;
 			_vrPlatformHelper = PersistentSingleton<VRPlatformHelper>.instance;
-
-			_animator = GetComponentInChildren<Animator>();
-			_poseManager = GetComponentInChildren<PoseManager>();
 
 			_trackedDevices.DeviceAdded += (device) => UpdateVrikReferences();
 			_trackedDevices.DeviceRemoved += (device) => UpdateVrikReferences();
@@ -63,6 +63,8 @@ namespace CustomAvatar
 
 		private void UpdateVrikReferences()
 		{
+			if (!_ikManagerAdvanced) return;
+
 			Plugin.Logger.Info("Tracking device change detected, updating VRIK references");
 
 			if (_trackedDevices.LeftFoot.Found)

@@ -80,9 +80,6 @@
     <Compile Include="..\CustomAvatar\EventManager.cs">
       <Link>EventManager.cs</Link>
     </Compile>
-    <Compile Include="..\CustomAvatar\FirstPersonExclusion.cs">
-      <Link>FirstPersonExclusion.cs</Link>
-    </Compile>
     <Compile Include="..\CustomAvatar\PoseManager.cs">
       <Link>PoseManager.cs</Link>
     </Compile>
@@ -91,6 +88,9 @@
     </Compile>
     <Compile Include="..\CustomAvatar\VRIK\AxisTools.cs">
       <Link>VRIK\AxisTools.cs</Link>
+    </Compile>
+    <Compile Include="..\CustomAvatar\VRIK\FirstPersonExclusion.cs">
+      <Link>VRIK\FirstPersonExclusion.cs</Link>
     </Compile>
     <Compile Include="..\CustomAvatar\VRIK\Hierarchy.cs">
       <Link>VRIK\Hierarchy.cs</Link>

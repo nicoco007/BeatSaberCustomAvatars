@@ -12,6 +12,7 @@ using IPA.Utilities;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Input = UnityEngine.Input;
+using Logger = IPA.Logging.Logger;
 
 namespace CustomAvatar
 {
@@ -24,7 +25,7 @@ namespace CustomAvatar
 
 		public static Plugin Instance { get; private set; }
 
-		public static IPA.Logging.Logger Logger { get; private set; }
+		public static Logger Logger { get; private set; }
 
 		public static SkeletalInput LeftHandAnimAction;
 		public static SkeletalInput RightHandAnimAction;
@@ -37,7 +38,7 @@ namespace CustomAvatar
 			RightHandAnimAction = actionManager.RegisterAction(new SkeletalInput("/actions/customavatars/in/righthandanim"));
 		}
 
-		public void Init(IPA.Logging.Logger logger)
+		public void Init(Logger logger)
 		{
 			Logger = logger;
 			Instance = this;
