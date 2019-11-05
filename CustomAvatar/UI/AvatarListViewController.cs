@@ -20,26 +20,26 @@ namespace CustomAvatar.UI
         [UIComponent("up-button")] public Button upButton;
         [UIComponent("down-button")] public Button downButton;
 
-        private List<CustomAvatar> avatars = new List<CustomAvatar>();
-        private LevelListTableCell tableCellTemplate;
+        private List<CustomAvatar> _avatars = new List<CustomAvatar>();
+        private LevelListTableCell _tableCellTemplate;
         
         protected override void DidActivate(bool firstActivation, ActivationType type)
         {
             base.DidActivate(firstActivation, type);
 
-            AvatarManager.Instance.AvatarChanged += OnAvatarChanged;
+            AvatarManager.Instance.avatarChanged += OnAvatarChanged;
 
             if (firstActivation) FirstActivation();
         }
 
         private void FirstActivation()
         {
-	        tableCellTemplate = Resources.FindObjectsOfTypeAll<LevelListTableCell>().First(x => x.name == "LevelListTableCell");
+	        this._tableCellTemplate = Resources.FindObjectsOfTypeAll<LevelListTableCell>().First(x => x.name == "LevelListTableCell");
 	        AvatarManager.Instance.GetAvatarsAsync(avatar =>
 	        {
 		        Plugin.Logger.Info("Loaded avatar " + avatar.descriptor.Name);
 
-		        avatars.Add(avatar);
+		        this._avatars.Add(avatar);
 
 		        ReloadData();
 	        }, ex =>
@@ -70,13 +70,16 @@ namespace CustomAvatar.UI
         {
 	        base.DidDeactivate(deactivationType);
 
-	        AvatarManager.Instance.AvatarChanged -= OnAvatarChanged;
+	        AvatarManager.Instance.avatarChanged -= OnAvatarChanged;
         }
 
+		
+		// ReSharper disable UnusedMember.Local
+		// ReSharper disable once UnusedParameter.Local
         [UIAction("avatar-click")]
         private void OnAvatarClicked(TableView table, int row)
-        {
-	        AvatarManager.Instance.SwitchToAvatar(avatars[row]);
+		{
+	        AvatarManager.Instance.SwitchToAvatar(this._avatars[row]);
         }
 
         private void OnAvatarChanged(SpawnedAvatar avatar)
@@ -86,9 +89,9 @@ namespace CustomAvatar.UI
 
         private void ReloadData()
         {
-	        avatars.Sort((a, b) => string.Compare(a.descriptor.Name, b.descriptor.Name, StringComparison.CurrentCulture));
+	        this._avatars.Sort((a, b) => string.Compare(a.descriptor.Name, b.descriptor.Name, StringComparison.CurrentCulture));
 
-	        int currentRow = avatars.FindIndex(a => a.fullPath == AvatarManager.Instance.CurrentlySpawnedAvatar?.CustomAvatar.fullPath);
+	        int currentRow = this._avatars.FindIndex(a => a.fullPath == AvatarManager.Instance.CurrentlySpawnedAvatar?.customAvatar.fullPath);
 			
             avatarList.tableView.ReloadData();
             avatarList.tableView.ScrollToCellWithIdx(currentRow, TableViewScroller.ScrollPositionType.Center, true);
@@ -102,7 +105,7 @@ namespace CustomAvatar.UI
 
         public int NumberOfCells()
         {
-	        return avatars.Count;
+	        return this._avatars.Count;
         }
 
         public TableCell CellForIdx(TableView tableView, int idx)
@@ -111,7 +114,7 @@ namespace CustomAvatar.UI
 
 	        if (!tableCell)
 	        {
-		        tableCell = Instantiate(tableCellTemplate);
+		        tableCell = Instantiate(this._tableCellTemplate);
 
 		        foreach (var image in tableCell.GetPrivateField<UnityEngine.UI.Image[]>("_beatmapCharacteristicImages"))
 		        {
@@ -124,7 +127,7 @@ namespace CustomAvatar.UI
 		        tableCell.reuseIdentifier = "CustomAvatarsTableCell";
 	        }
 
-	        CustomAvatar avatar = avatars[idx];
+	        CustomAvatar avatar = this._avatars[idx];
 
 	        tableCell.GetPrivateField<TextMeshProUGUI>("_songNameText").text = avatar.descriptor.Name;
 	        tableCell.GetPrivateField<TextMeshProUGUI>("_authorText").text = avatar.descriptor.Author;

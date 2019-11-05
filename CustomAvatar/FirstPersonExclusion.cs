@@ -1,6 +1,10 @@
+using UnityEngine;
+
+#if PLUGIN
 using System.Linq;
 using CustomAvatar;
-using UnityEngine;
+using CustomAvatar.Utilities;
+#endif
 
 namespace AvatarScriptPack
 {
@@ -21,20 +25,13 @@ namespace AvatarScriptPack
 
 			_startLayers = Exclude.Select(x => x.layer).ToArray();
 
-			Plugin.Instance.FirstPersonEnabledChanged += OnFirstPersonEnabledChanged;
-			OnFirstPersonEnabledChanged(Plugin.Instance.FirstPersonEnabled);
+			OnFirstPersonEnabledChanged();
 		}
 
-		private void OnDisable()
-		{
-			Plugin.Instance.FirstPersonEnabledChanged -= OnFirstPersonEnabledChanged;
-		}
-
-		public void OnFirstPersonEnabledChanged(bool firstPersonEnabled)
+		public void OnFirstPersonEnabledChanged()
 		{
 			try
 			{
-				Plugin.Logger.Debug("OnFirstPersonEnabledChanged - " + firstPersonEnabled);
 				if (_deadSwitch)
 				{
 					return;

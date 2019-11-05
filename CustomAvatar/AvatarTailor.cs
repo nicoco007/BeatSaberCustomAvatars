@@ -1,9 +1,7 @@
 using System;
 using System.Collections;
-using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using static IPA.Logging.Logger;
 
 namespace CustomAvatar
@@ -14,41 +12,6 @@ namespace CustomAvatar
 		private Vector3? _initialPlatformPosition = null;
 		private float? _initialAvatarPositionY = null;
 		private Vector3 _initialAvatarLocalScale = Vector3.one;
-
-		private const string kPlayerArmLengthKey = "CustomAvatar.Tailoring.PlayerArmLength";
-		private const string kResizePolicyKey = "CustomAvatar.Tailoring.ResizePolicy";
-		private const string kFloorMovePolicyKey = "CustomAvatar.Tailoring.FloorMovePolicy";
-
-		public enum ResizePolicyType
-		{
-			AlignArmLength,
-			AlignHeight,
-			NeverResize
-		}
-
-		public enum FloorMovePolicyType
-		{
-			AllowMove,
-			NeverMove
-		}
-
-		public float PlayerArmLength
-		{
-			get => PlayerPrefs.GetFloat(kPlayerArmLengthKey, BeatSaberUtil.GetPlayerHeight() * 0.88f);
-			private set => PlayerPrefs.SetFloat(kPlayerArmLengthKey, value);
-		}
-
-		public ResizePolicyType ResizePolicy
-		{
-			get => (ResizePolicyType)PlayerPrefs.GetInt(kResizePolicyKey, 1);
-			set => PlayerPrefs.SetInt(kResizePolicyKey, (int)value);
-		}
-
-		public FloorMovePolicyType FloorMovePolicy
-		{
-			get => (FloorMovePolicyType)PlayerPrefs.GetInt(kFloorMovePolicyKey, 1);
-			set => PlayerPrefs.SetInt(kFloorMovePolicyKey, (int)value);
-		}
 
 		private Animator FindAvatarAnimator(GameObject gameObject)
 		{
@@ -61,14 +24,14 @@ namespace CustomAvatar
 
 		public void OnAvatarLoaded(SpawnedAvatar avatar)
 		{
-			_initialAvatarLocalScale = avatar.GameObject.transform.localScale;
+			_initialAvatarLocalScale = avatar.gameObject.transform.localScale;
 			_initialAvatarPositionY = null;
 			_currentAvatarArmLength = null;
 		}
 
 		public void ResizeAvatar(SpawnedAvatar avatar)
 		{
-			var animator = FindAvatarAnimator(avatar.GameObject);
+			var animator = FindAvatarAnimator(avatar.gameObject);
 			if (animator == null)
 			{
 				Plugin.Logger.Log(Level.Error, "Tailor: Animator not found");
@@ -77,22 +40,23 @@ namespace CustomAvatar
 
 			// compute scale
 			float scale = 1.0f;
-			if (ResizePolicy == ResizePolicyType.AlignArmLength)
+			AvatarResizeMode resizeMode = Settings.resizeMode;
+			if (resizeMode == AvatarResizeMode.ArmSpan)
 			{
-				float playerArmLength = PlayerArmLength;
+				float playerArmLength = Settings.playerArmSpan;
 				_currentAvatarArmLength = _currentAvatarArmLength ?? MeasureAvatarArmSpan(animator);
 				var avatarArmLength = _currentAvatarArmLength ?? playerArmLength;
 				Plugin.Logger.Log(Level.Debug, "Avatar arm length: " + avatarArmLength);
 
 				scale = playerArmLength / avatarArmLength;
 			}
-			else if (ResizePolicy == ResizePolicyType.AlignHeight)
+			else if (resizeMode == AvatarResizeMode.Height)
 			{
-				scale = BeatSaberUtil.GetPlayerEyeHeight() / avatar.CustomAvatar.eyeHeight;
+				scale = BeatSaberUtil.GetPlayerEyeHeight() / avatar.customAvatar.eyeHeight;
 			}
 
 			// apply scale
-			avatar.GameObject.transform.localScale = _initialAvatarLocalScale * scale;
+			avatar.gameObject.transform.localScale = _initialAvatarLocalScale * scale;
 
 			Plugin.Logger.Log(Level.Info, "Avatar resized with scale: " + scale);
 
@@ -101,12 +65,12 @@ namespace CustomAvatar
 
 		private IEnumerator FloorMendingWithDelay(SpawnedAvatar avatar, Animator animator, float scale)
 		{
-			if (FloorMovePolicy == FloorMovePolicyType.NeverMove) yield break;
+			if (!Settings.enableFloorAdjust) yield break;
 
 			yield return new WaitForEndOfFrame(); // wait for CustomFloorPlugin:PlatformManager:Start hides original platform
 
 			float playerViewPointHeight = BeatSaberUtil.GetPlayerEyeHeight();
-			float avatarViewPointHeight = avatar.CustomAvatar.viewPoint?.position.y ?? playerViewPointHeight;
+			float avatarViewPointHeight = avatar.customAvatar.viewPoint?.position.y ?? playerViewPointHeight;
 			_initialAvatarPositionY = _initialAvatarPositionY ?? animator.transform.position.y;
 			float floorOffset = playerViewPointHeight - avatarViewPointHeight * scale;
 
@@ -133,23 +97,6 @@ namespace CustomAvatar
 			}
 		}
 
-		public void MeasurePlayerArmSpan(Action<float> onProgress, Action<float> onFinished)
-		{
-            
-			var active = SceneManager.GetActiveScene().GetRootGameObjects()[0].GetComponent<PlayerArmLengthMeasurement>();
-			if (active != null)
-			{
-				GameObject.Destroy(active);
-			}
-			active = SceneManager.GetActiveScene().GetRootGameObjects()[0].AddComponent<PlayerArmLengthMeasurement>();
-			active.onProgress = onProgress;
-			active.onFinished = (result) =>
-			{
-				PlayerArmLength = result;
-				onFinished(result);
-			};
-		}
-
 		public static float MeasureAvatarArmSpan(Animator animator)
 		{
 			var indexFinger1 = animator.GetBoneTransform(HumanBodyBones.LeftIndexProximal).position;
@@ -163,44 +110,6 @@ namespace CustomAvatar
 			var armLength = (Vector3.Distance(indexFinger1, leftHand) * 0.5f + Vector3.Distance(leftHand, leftElbow) + Vector3.Distance(leftElbow, leftUpperArm)) * 2.0f;
 
 			return shoulderLength + armLength;
-		}
-
-		private class PlayerArmLengthMeasurement : MonoBehaviour
-		{
-			private TrackedDeviceManager playerInput = PersistentSingleton<TrackedDeviceManager>.instance;
-			private const float initialValue = 0.5f;
-			private float maxHandToHandLength = initialValue;
-			private float updateTime = 0;
-			public Action<float> onFinished = null;
-			public Action<float> onProgress = null;
-
-			void Scan()
-			{
-				var handToHandLength = Vector3.Distance(playerInput.LeftHand.Position, playerInput.RightHand.Position);
-				if (maxHandToHandLength < handToHandLength)
-				{
-					maxHandToHandLength = handToHandLength;
-					updateTime = Time.timeSinceLevelLoad;
-				}
-				else if (Time.timeSinceLevelLoad - updateTime > 2.0f)
-				{
-					onFinished?.Invoke(maxHandToHandLength);
-					Destroy(this);
-					return;
-				}
-
-				onProgress?.Invoke(maxHandToHandLength);
-			}
-
-			void Start()
-			{
-				InvokeRepeating("Scan", 1.0f, 0.2f);
-			}
-
-			void OnDestroy()
-			{
-				CancelInvoke();
-			}
 		}
 	}
 }

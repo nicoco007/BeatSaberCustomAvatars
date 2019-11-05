@@ -55,3 +55,17 @@ end_of_line = lf
 indent_style = tab
 tab_width = 4
 insert_final_newline = true
+
+[*.cs]
+
+# IDE0003: Supprimer une qualification
+dotnet_style_qualification_for_event = false:none
+
+# IDE0003: Supprimer une qualification
+dotnet_style_qualification_for_field = true:none
+
+# IDE0003: Supprimer une qualification
+dotnet_style_qualification_for_method = false:none
+
+# IDE0003: Supprimer une qualification
+dotnet_style_qualification_for_property = false:none

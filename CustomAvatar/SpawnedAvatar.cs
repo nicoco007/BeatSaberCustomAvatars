@@ -1,17 +1,24 @@
 using System;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace CustomAvatar
 {
 	public class SpawnedAvatar
 	{
-		public SpawnedAvatar(CustomAvatar customAvatar, GameObject gameObject)
+		public SpawnedAvatar(CustomAvatar customAvatar)
 		{
-			CustomAvatar = customAvatar ?? throw new ArgumentNullException(nameof(customAvatar));
-			GameObject = gameObject ?? throw new ArgumentNullException(nameof(gameObject));
+			this.customAvatar = customAvatar ?? throw new ArgumentNullException(nameof(customAvatar));
+			this.gameObject = Object.Instantiate(customAvatar.gameObject);
+			this.eventsPlayer = this.gameObject.AddComponent<AvatarEventsPlayer>();
+
+			this.gameObject.AddComponent<AvatarBehaviour>();
+
+			Object.DontDestroyOnLoad(this.gameObject);
 		}
 		
-		public CustomAvatar CustomAvatar { get; }
-		public GameObject GameObject { get; }
+		public CustomAvatar customAvatar { get; }
+		public GameObject gameObject { get; }
+        public AvatarEventsPlayer eventsPlayer { get; }
 	}
 }

@@ -42,9 +42,9 @@ namespace CustomAvatar
 		public CustomAvatar(string fullPath, GameObject avatarGameObject)
 		{
 			this.fullPath = fullPath ?? throw new ArgumentNullException(nameof(avatarGameObject));
-			gameObject = avatarGameObject ?? throw new ArgumentNullException(nameof(avatarGameObject));
-			descriptor = avatarGameObject.GetComponent<AvatarDescriptor>() ?? throw new AvatarLoadException($"Avatar at '{fullPath}' does not have an AvatarDescriptor");
-			viewPoint = avatarGameObject.transform.Find("Head") ?? throw new AvatarLoadException($"Avatar '{descriptor.Name}' does not have a Head transform");
+			this.gameObject = avatarGameObject ?? throw new ArgumentNullException(nameof(avatarGameObject));
+			this.descriptor = avatarGameObject.GetComponent<AvatarDescriptor>() ?? throw new AvatarLoadException($"Avatar at '{fullPath}' does not have an AvatarDescriptor");
+			this.viewPoint = avatarGameObject.transform.Find("Head") ?? throw new AvatarLoadException($"Avatar '{descriptor.Name}' does not have a Head transform");
 		}
 
 		public static IEnumerator<AsyncOperation> FromFileCoroutine(string filePath, Action<CustomAvatar> success, Action<Exception> error)

@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using CustomAvatar.Tracking;
 using CustomAvatar.UI;
+using CustomAvatar.Utilities;
 using CustomUI.MenuButton;
 using DynamicOpenVR;
 using DynamicOpenVR.IO;
@@ -17,38 +18,11 @@ namespace CustomAvatar
 
 	public class Plugin : IBeatSaberPlugin
 	{
-		private const string FirstPersonEnabledKey = "avatarFirstPerson";
-
-		private bool _firstPersonEnabled;
-
 		private GameScenesManager _scenesManager;
 
-		public event Action<bool> FirstPersonEnabledChanged;
 		public event Action<Scene> SceneTransitioned;
 
 		public static Plugin Instance { get; private set; }
-
-		public bool FirstPersonEnabled
-		{
-			get { return _firstPersonEnabled; }
-			set
-			{
-				if (_firstPersonEnabled == value) return;
-
-				_firstPersonEnabled = value;
-
-				if (value)
-				{
-					PlayerPrefs.SetInt(FirstPersonEnabledKey, 0);
-				}
-				else
-				{
-					PlayerPrefs.DeleteKey(FirstPersonEnabledKey);
-				}
-
-				FirstPersonEnabledChanged?.Invoke(value);
-			}
-		}
 
 		public static IPA.Logging.Logger Logger { get; private set; }
 
@@ -69,8 +43,6 @@ namespace CustomAvatar
 			Instance = this;
 
 			AvatarManager.Instance.LoadAvatarFromSettingsAsync();
-
-			FirstPersonEnabled = PlayerPrefs.HasKey(FirstPersonEnabledKey);
 		}
 
 		public void OnApplicationQuit()
@@ -172,24 +144,20 @@ namespace CustomAvatar
 			}
 			else if (Input.GetKeyDown(KeyCode.Home))
 			{
-				FirstPersonEnabled = !FirstPersonEnabled;
+				Settings.isAvatarVisibleInFirstPerson = !Settings.isAvatarVisibleInFirstPerson;
+				avatarManager.OnFirstPersonEnabledChanged();
 			}
 			else if (Input.GetKeyDown(KeyCode.End))
 			{
-				int policy = (int)avatarManager.AvatarTailor.ResizePolicy + 1;
-				if (policy > 2) policy = 0;
-				avatarManager.AvatarTailor.ResizePolicy = (AvatarTailor.ResizePolicyType)policy;
-				Logger.Info($"Set Resize Policy to {avatarManager.AvatarTailor.ResizePolicy}");
-				avatarManager.ResizePlayerAvatar();
+				Settings.resizeMode = (AvatarResizeMode) (((int)Settings.resizeMode + 1) % 3);
+				Logger.Info($"Set Resize Policy to {Settings.resizeMode}");
+				avatarManager.ResizeCurrentAvatar();
 			}
 			else if (Input.GetKeyDown(KeyCode.Insert))
 			{
-				if (avatarManager.AvatarTailor.FloorMovePolicy == AvatarTailor.FloorMovePolicyType.AllowMove)
-					avatarManager.AvatarTailor.FloorMovePolicy = AvatarTailor.FloorMovePolicyType.NeverMove;
-				else
-					avatarManager.AvatarTailor.FloorMovePolicy = AvatarTailor.FloorMovePolicyType.AllowMove;
-				Logger.Info($"Set Floor Move Policy to {avatarManager.AvatarTailor.FloorMovePolicy}");
-				avatarManager.ResizePlayerAvatar();
+				Settings.enableFloorAdjust = !Settings.enableFloorAdjust;
+				Logger.Info($"{(Settings.enableFloorAdjust ? "Enabled" : "Disabled")} floor adjust");
+				avatarManager.ResizeCurrentAvatar();
 			}
 		}
 
