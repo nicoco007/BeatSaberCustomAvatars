@@ -108,6 +108,12 @@ namespace CustomAvatar.UI
 			Settings.calibrateFullBodyTrackingOnStart = value;
 		}
 
+		[UIAction("clear-fbt-calibration-data-click")]
+		private void OnClearFullBodyTrackingCalibrationDataClicked()
+		{
+			AvatarManager.Instance.AvatarTailor.ClearFullBodyTrackingData();
+		}
+
 		#endregion
 
 		#region Arm Span Measurement

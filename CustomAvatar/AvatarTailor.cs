@@ -143,5 +143,12 @@ namespace CustomAvatar
 			Vector3 pelvisPositionCorrection = wantedPelvisPosition - Vector3.up * pelvis.Position.y;
 			AvatarBehaviour.PelvisCorrection = new PosRot(pelvisPositionCorrection, Quaternion.identity);
 		}
+
+		public void ClearFullBodyTrackingData()
+		{
+			AvatarBehaviour.LeftLegCorrection = default;
+			AvatarBehaviour.RightLegCorrection = default;
+			AvatarBehaviour.PelvisCorrection = default;
+		}
 	}
 }
