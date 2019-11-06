@@ -109,7 +109,6 @@
     <Compile Include="EventManager.cs" />
     <Compile Include="VRIK\FirstPersonExclusion.cs" />
     <Compile Include="Plugin.cs" />
-    <Compile Include="PosRot.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SpawnedAvatar.cs" />
     <Compile Include="StereoRendering\StereoRenderer.cs" />
