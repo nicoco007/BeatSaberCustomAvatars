@@ -12,7 +12,7 @@ pipeline {
         archiveArtifacts 'CustomAvatar/bin/Debug/CustomAvatar.dll'
         archiveArtifacts 'CustomAvatar-Editor/bin/Debug/CustomAvatar.dll'
       }
-    },
+    }
     stage('Build Release') {
       steps {
         bat 'msbuild /p:Configuration=Release /p:Platform="Any CPU"'
