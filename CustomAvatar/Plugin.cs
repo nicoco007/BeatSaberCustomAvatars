@@ -140,7 +140,6 @@ namespace CustomAvatar
 			Logger.Debug("Adding third person culling mask to " + camera.name);
 
 			camera.cullingMask &= ~(1 << AvatarLayers.OnlyInThirdPerson);
-			Logger.Info(Convert.ToString(camera.cullingMask, 2));
 		}
 
 		public void OnFixedUpdate() { }

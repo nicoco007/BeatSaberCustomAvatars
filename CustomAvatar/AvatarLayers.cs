@@ -6,7 +6,7 @@ namespace CustomAvatar
 	{
 		public const int OnlyInThirdPerson = 3;
 		public const int OnlyInFirstPerson = 4;
-		public const int AlwaysVisible = 31;
+		public const int AlwaysVisible = 10;
 
 		public static void SetChildrenToLayer(GameObject gameObject, int layer)
 		{
