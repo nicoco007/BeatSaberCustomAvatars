@@ -130,18 +130,18 @@ namespace CustomAvatar
 			Vector3 leftFootForward = leftFoot.Rotation * Vector3.up; // forward on feet trackers is y (up)
 			Vector3 leftFootStraightForward = Vector3.ProjectOnPlane(leftFootForward, normal); // get projection of forward vector on xz plane (floor)
 			Quaternion leftRotationCorrection = Quaternion.Inverse(leftFoot.Rotation) * Quaternion.LookRotation(Vector3.up, leftFootStraightForward); // get difference between world rotation and flat forward rotation
-			AvatarBehaviour.LeftLegCorrection = new PosRot(leftFoot.Position.y * Vector3.down, leftRotationCorrection);
+			AvatarBehaviour.LeftLegCorrection = new Pose(leftFoot.Position.y * Vector3.down, leftRotationCorrection);
 
 			Vector3 rightFootForward = rightFoot.Rotation * Vector3.up;
 			Vector3 rightFootStraightForward = Vector3.ProjectOnPlane(rightFootForward, normal);
 			Quaternion rightRotationCorrection = Quaternion.Inverse(rightFoot.Rotation) * Quaternion.LookRotation(Vector3.up, rightFootStraightForward);
-			AvatarBehaviour.RightLegCorrection = new PosRot(rightFoot.Position.y * Vector3.down, rightRotationCorrection);
+			AvatarBehaviour.RightLegCorrection = new Pose(rightFoot.Position.y * Vector3.down, rightRotationCorrection);
 
 			// using "standard" 8 head high body proportions w/ eyes at 1/2 head height
 			// reference: https://miro.medium.com/max/3200/1*cqTRyEGl26l4CImEmWz68Q.jpeg
 			Vector3 wantedPelvisPosition = new Vector3(0, eyeHeight / 15f * 10f, 0);
 			Vector3 pelvisPositionCorrection = wantedPelvisPosition - Vector3.up * pelvis.Position.y;
-			AvatarBehaviour.PelvisCorrection = new PosRot(pelvisPositionCorrection, Quaternion.identity);
+			AvatarBehaviour.PelvisCorrection = new Pose(pelvisPositionCorrection, Quaternion.identity);
 		}
 
 		public void ClearFullBodyTrackingData()
