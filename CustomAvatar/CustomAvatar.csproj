@@ -157,8 +157,4 @@
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetPath)" "%25BEATSABERDIR%25\Plugins"
-copy "$(TargetDir)$(TargetName).pdb" "%25BEATSABERDIR%25\Plugins"</PostBuildEvent>
-  </PropertyGroup>
 </Project>
