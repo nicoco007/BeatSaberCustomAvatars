@@ -139,7 +139,7 @@ namespace CustomAvatar
 		{
 			if (CurrentlySpawnedAvatar == null) return;
 			AvatarLayers.SetChildrenToLayer(CurrentlySpawnedAvatar.gameObject,
-				Settings.isAvatarVisibleInFirstPerson ? AvatarLayers.Global : AvatarLayers.OnlyInThirdPerson);
+				Settings.isAvatarVisibleInFirstPerson ? AvatarLayers.AlwaysVisible : AvatarLayers.OnlyInThirdPerson);
 			foreach (var ex in CurrentlySpawnedAvatar.gameObject.GetComponentsInChildren<AvatarScriptPack.FirstPersonExclusion>())
 				ex.OnFirstPersonEnabledChanged();
 		}

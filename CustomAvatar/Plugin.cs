@@ -109,15 +109,16 @@ namespace CustomAvatar
 
 			if (Input.GetKeyDown(KeyCode.PageDown))
 			{
-				avatarManager?.SwitchToNextAvatar();
+				avatarManager.SwitchToNextAvatar();
 			}
 			else if (Input.GetKeyDown(KeyCode.PageUp))
 			{
-				avatarManager?.SwitchToPreviousAvatar();
+				avatarManager.SwitchToPreviousAvatar();
 			}
 			else if (Input.GetKeyDown(KeyCode.Home))
 			{
 				Settings.isAvatarVisibleInFirstPerson = !Settings.isAvatarVisibleInFirstPerson;
+				Logger.Info($"{(Settings.isAvatarVisibleInFirstPerson ? "Enabled" : "Disabled")} first person visibility");
 				avatarManager.OnFirstPersonEnabledChanged();
 			}
 			else if (Input.GetKeyDown(KeyCode.End))
@@ -139,7 +140,7 @@ namespace CustomAvatar
 			Logger.Debug("Adding third person culling mask to " + camera.name);
 
 			camera.cullingMask &= ~(1 << AvatarLayers.OnlyInThirdPerson);
-			camera.cullingMask |= 1 << AvatarLayers.Global;
+			Logger.Info(Convert.ToString(camera.cullingMask, 2));
 		}
 
 		public void OnFixedUpdate() { }

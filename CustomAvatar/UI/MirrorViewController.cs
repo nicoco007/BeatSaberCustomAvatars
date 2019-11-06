@@ -74,7 +74,7 @@ namespace CustomAvatar.UI
 
 			Camera stereoCameraEye = stereoCameraEyeObject.AddComponent<Camera>();
 			stereoCameraEye.enabled = false;
-			stereoCameraEye.cullingMask = (1 << AvatarLayers.OnlyInThirdPerson) | (1 << AvatarLayers.Global);
+			stereoCameraEye.cullingMask = (1 << AvatarLayers.AlwaysVisible) | (1 << AvatarLayers.OnlyInThirdPerson);
 			stereoCameraEye.clearFlags = CameraClearFlags.SolidColor;
 			stereoCameraEye.backgroundColor = new Color(0, 0, 0, 1f);
 
