@@ -30,10 +30,13 @@ namespace CustomAvatar
 
 		public Plugin()
 		{
-			OpenVRActionManager actionManager = OpenVRActionManager.Instance;
+			if (OpenVRActionManager.IsRunning)
+			{
+				OpenVRActionManager actionManager = OpenVRActionManager.Instance;
 
-			LeftHandAnimAction = actionManager.RegisterAction(new SkeletalInput("/actions/customavatars/in/lefthandanim"));
-			RightHandAnimAction = actionManager.RegisterAction(new SkeletalInput("/actions/customavatars/in/righthandanim"));
+				LeftHandAnimAction = actionManager.RegisterAction(new SkeletalInput("/actions/customavatars/in/lefthandanim"));
+				RightHandAnimAction = actionManager.RegisterAction(new SkeletalInput("/actions/customavatars/in/righthandanim"));
+			}
 		}
 
 		public void Init(Logger logger)
