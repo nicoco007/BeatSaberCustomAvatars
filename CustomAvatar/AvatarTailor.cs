@@ -35,7 +35,7 @@ namespace CustomAvatar
 			var animator = FindAvatarAnimator(avatar.gameObject);
 			if (animator == null)
 			{
-				Plugin.Logger.Log(Level.Error, "Tailor: Animator not found");
+				Plugin.Logger.Warn("Tailor: Animator not found");
 				return;
 			}
 
