@@ -5,15 +5,14 @@
 ## Contributing
 Guidelines coming soon.
 
-To automatically copy the compiled DLL into Beat Saber's installation directory, add a file called `CustomAvatar.csproj.user` next to `CustomAvatar\CustomAvatar.csproj` and paste in the following:
+To automatically copy the compiled DLL into Beat Saber's installation directory, create a file called `CustomAvatar.csproj.user` next to `CustomAvatar\CustomAvatar.csproj` and paste in the following:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <BeatSaberDir>D:\SteamLibrary\steamapps\common\Beat Saber</BeatSaberDir>
+    <!-- Replace this with the path to your Beat Saber installation -->
+    <BeatSaberDir>C:\Program Files (x86)\Steam\steamapps\common\Beat Saber</BeatSaberDir>
   </PropertyGroup>
 </Project>
 ```
-
-Replace `<Beat Saber Install Location>` with your local Beat Saber installation's directory.
