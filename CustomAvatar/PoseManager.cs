@@ -96,7 +96,7 @@ namespace CustomAvatar
 
 			OpenHand_Left_MiddleProximal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftMiddleProximal));
 			OpenHand_Left_MiddleIntermediate = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftMiddleIntermediate));
-			OpenHand_Left_MiddleDistal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftThumbDistal));
+			OpenHand_Left_MiddleDistal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftMiddleDistal));
 
 			OpenHand_Left_RingProximal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftRingProximal));
 			OpenHand_Left_RingIntermediate = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftRingIntermediate));
@@ -139,7 +139,7 @@ namespace CustomAvatar
 
 			ClosedHand_Left_MiddleProximal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftMiddleProximal));
 			ClosedHand_Left_MiddleIntermediate = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftMiddleIntermediate));
-			ClosedHand_Left_MiddleDistal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftThumbDistal));
+			ClosedHand_Left_MiddleDistal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftMiddleDistal));
 
 			ClosedHand_Left_RingProximal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftRingProximal));
 			ClosedHand_Left_RingIntermediate = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftRingIntermediate));
