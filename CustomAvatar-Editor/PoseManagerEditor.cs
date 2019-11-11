@@ -2,7 +2,6 @@ using CustomAvatar;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 [CustomEditor(typeof(PoseManager))]
 public class PoseManagerEditor : Editor
