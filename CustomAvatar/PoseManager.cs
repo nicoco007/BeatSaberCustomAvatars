@@ -1,177 +1,161 @@
+using System;
+using System.Linq;
+using System.Reflection;
 using UnityEngine;
 
+// ReSharper disable InconsistentNaming
 namespace CustomAvatar
 {
 	public class PoseManager : MonoBehaviour
 	{
-		public Pose OpenHand_Left_ThumbProximal;
-		public Pose OpenHand_Left_ThumbIntermediate;
-		public Pose OpenHand_Left_ThumbDistal;
+		[HideInInspector] public Pose openHand_LeftThumbProximal;
+		[HideInInspector] public Pose openHand_LeftThumbIntermediate;
+		[HideInInspector] public Pose openHand_LeftThumbDistal;
 
-		public Pose OpenHand_Left_IndexProximal;
-		public Pose OpenHand_Left_IndexIntermediate;
-		public Pose OpenHand_Left_IndexDistal;
+		[HideInInspector] public Pose openHand_LeftIndexProximal;
+		[HideInInspector] public Pose openHand_LeftIndexIntermediate;
+		[HideInInspector] public Pose openHand_LeftIndexDistal;
 
-		public Pose OpenHand_Left_MiddleProximal;
-		public Pose OpenHand_Left_MiddleIntermediate;
-		public Pose OpenHand_Left_MiddleDistal;
+		[HideInInspector] public Pose openHand_LeftMiddleProximal;
+		[HideInInspector] public Pose openHand_LeftMiddleIntermediate;
+		[HideInInspector] public Pose openHand_LeftMiddleDistal;
 
-		public Pose OpenHand_Left_RingProximal;
-		public Pose OpenHand_Left_RingIntermediate;
-		public Pose OpenHand_Left_RingDistal;
+		[HideInInspector] public Pose openHand_LeftRingProximal;
+		[HideInInspector] public Pose openHand_LeftRingIntermediate;
+		[HideInInspector] public Pose openHand_LeftRingDistal;
 
-		public Pose OpenHand_Left_LittleProximal;
-		public Pose OpenHand_Left_LittleIntermediate;
-		public Pose OpenHand_Left_LittleDistal;
+		[HideInInspector] public Pose openHand_LeftLittleProximal;
+		[HideInInspector] public Pose openHand_LeftLittleIntermediate;
+		[HideInInspector] public Pose openHand_LeftLittleDistal;
 
-		public Pose OpenHand_Right_ThumbProximal;
-		public Pose OpenHand_Right_ThumbIntermediate;
-		public Pose OpenHand_Right_ThumbDistal;
+		[HideInInspector] public Pose openHand_RightThumbProximal;
+		[HideInInspector] public Pose openHand_RightThumbIntermediate;
+		[HideInInspector] public Pose openHand_RightThumbDistal;
 
-		public Pose OpenHand_Right_IndexProximal;
-		public Pose OpenHand_Right_IndexIntermediate;
-		public Pose OpenHand_Right_IndexDistal;
+		[HideInInspector] public Pose openHand_RightIndexProximal;
+		[HideInInspector] public Pose openHand_RightIndexIntermediate;
+		[HideInInspector] public Pose openHand_RightIndexDistal;
 
-		public Pose OpenHand_Right_MiddleProximal;
-		public Pose OpenHand_Right_MiddleIntermediate;
-		public Pose OpenHand_Right_MiddleDistal;
+		[HideInInspector] public Pose openHand_RightMiddleProximal;
+		[HideInInspector] public Pose openHand_RightMiddleIntermediate;
+		[HideInInspector] public Pose openHand_RightMiddleDistal;
 
-		public Pose OpenHand_Right_RingProximal;
-		public Pose OpenHand_Right_RingIntermediate;
-		public Pose OpenHand_Right_RingDistal;
+		[HideInInspector] public Pose openHand_RightRingProximal;
+		[HideInInspector] public Pose openHand_RightRingIntermediate;
+		[HideInInspector] public Pose openHand_RightRingDistal;
 
-		public Pose OpenHand_Right_LittleProximal;
-		public Pose OpenHand_Right_LittleIntermediate;
-		public Pose OpenHand_Right_LittleDistal;
+		[HideInInspector] public Pose openHand_RightLittleProximal;
+		[HideInInspector] public Pose openHand_RightLittleIntermediate;
+		[HideInInspector] public Pose openHand_RightLittleDistal;
 
-		public Pose ClosedHand_Left_ThumbProximal;
-		public Pose ClosedHand_Left_ThumbIntermediate;
-		public Pose ClosedHand_Left_ThumbDistal;
+		[HideInInspector] public Pose closedHand_LeftThumbProximal;
+		[HideInInspector] public Pose closedHand_LeftThumbIntermediate;
+		[HideInInspector] public Pose closedHand_LeftThumbDistal;
 
-		public Pose ClosedHand_Left_IndexProximal;
-		public Pose ClosedHand_Left_IndexIntermediate;
-		public Pose ClosedHand_Left_IndexDistal;
+		[HideInInspector] public Pose closedHand_LeftIndexProximal;
+		[HideInInspector] public Pose closedHand_LeftIndexIntermediate;
+		[HideInInspector] public Pose closedHand_LeftIndexDistal;
 
-		public Pose ClosedHand_Left_MiddleProximal;
-		public Pose ClosedHand_Left_MiddleIntermediate;
-		public Pose ClosedHand_Left_MiddleDistal;
+		[HideInInspector] public Pose closedHand_LeftMiddleProximal;
+		[HideInInspector] public Pose closedHand_LeftMiddleIntermediate;
+		[HideInInspector] public Pose closedHand_LeftMiddleDistal;
 
-		public Pose ClosedHand_Left_RingProximal;
-		public Pose ClosedHand_Left_RingIntermediate;
-		public Pose ClosedHand_Left_RingDistal;
+		[HideInInspector] public Pose closedHand_LeftRingProximal;
+		[HideInInspector] public Pose closedHand_LeftRingIntermediate;
+		[HideInInspector] public Pose closedHand_LeftRingDistal;
 
-		public Pose ClosedHand_Left_LittleProximal;
-		public Pose ClosedHand_Left_LittleIntermediate;
-		public Pose ClosedHand_Left_LittleDistal;
+		[HideInInspector] public Pose closedHand_LeftLittleProximal;
+		[HideInInspector] public Pose closedHand_LeftLittleIntermediate;
+		[HideInInspector] public Pose closedHand_LeftLittleDistal;
 
-		public Pose ClosedHand_Right_ThumbProximal;
-		public Pose ClosedHand_Right_ThumbIntermediate;
-		public Pose ClosedHand_Right_ThumbDistal;
+		[HideInInspector] public Pose closedHand_RightThumbProximal;
+		[HideInInspector] public Pose closedHand_RightThumbIntermediate;
+		[HideInInspector] public Pose closedHand_RightThumbDistal;
 
-		public Pose ClosedHand_Right_IndexProximal;
-		public Pose ClosedHand_Right_IndexIntermediate;
-		public Pose ClosedHand_Right_IndexDistal;
+		[HideInInspector] public Pose closedHand_RightIndexProximal;
+		[HideInInspector] public Pose closedHand_RightIndexIntermediate;
+		[HideInInspector] public Pose closedHand_RightIndexDistal;
 
-		public Pose ClosedHand_Right_MiddleProximal;
-		public Pose ClosedHand_Right_MiddleIntermediate;
-		public Pose ClosedHand_Right_MiddleDistal;
+		[HideInInspector] public Pose closedHand_RightMiddleProximal;
+		[HideInInspector] public Pose closedHand_RightMiddleIntermediate;
+		[HideInInspector] public Pose closedHand_RightMiddleDistal;
 
-		public Pose ClosedHand_Right_RingProximal;
-		public Pose ClosedHand_Right_RingIntermediate;
-		public Pose ClosedHand_Right_RingDistal;
+		[HideInInspector] public Pose closedHand_RightRingProximal;
+		[HideInInspector] public Pose closedHand_RightRingIntermediate;
+		[HideInInspector] public Pose closedHand_RightRingDistal;
 
-		public Pose ClosedHand_Right_LittleProximal;
-		public Pose ClosedHand_Right_LittleIntermediate;
-		public Pose ClosedHand_Right_LittleDistal;
+		[HideInInspector] public Pose closedHand_RightLittleProximal;
+		[HideInInspector] public Pose closedHand_RightLittleIntermediate;
+		[HideInInspector] public Pose closedHand_RightLittleDistal;
 
-		public void SetOpenHand(Animator animator)
+		public void SaveOpenHand(Animator animator)
 		{
-			OpenHand_Left_ThumbProximal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftThumbProximal));
-			OpenHand_Left_ThumbIntermediate = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftThumbIntermediate));
-			OpenHand_Left_ThumbDistal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftThumbDistal));
-
-			OpenHand_Left_IndexProximal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftIndexProximal));
-			OpenHand_Left_IndexIntermediate = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftIndexIntermediate));
-			OpenHand_Left_IndexDistal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftIndexDistal));
-
-			OpenHand_Left_MiddleProximal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftMiddleProximal));
-			OpenHand_Left_MiddleIntermediate = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftMiddleIntermediate));
-			OpenHand_Left_MiddleDistal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftMiddleDistal));
-
-			OpenHand_Left_RingProximal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftRingProximal));
-			OpenHand_Left_RingIntermediate = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftRingIntermediate));
-			OpenHand_Left_RingDistal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftRingDistal));
-
-			OpenHand_Left_LittleProximal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftLittleProximal));
-			OpenHand_Left_LittleIntermediate = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftLittleIntermediate));
-			OpenHand_Left_LittleDistal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftLittleDistal));
-
-			OpenHand_Right_ThumbProximal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightThumbProximal));
-			OpenHand_Right_ThumbIntermediate = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightThumbIntermediate));
-			OpenHand_Right_ThumbDistal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightThumbDistal));
-
-			OpenHand_Right_IndexProximal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightIndexProximal));
-			OpenHand_Right_IndexIntermediate = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightIndexIntermediate));
-			OpenHand_Right_IndexDistal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightIndexDistal));
-
-			OpenHand_Right_MiddleProximal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightMiddleProximal));
-			OpenHand_Right_MiddleIntermediate = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightMiddleIntermediate));
-			OpenHand_Right_MiddleDistal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightMiddleDistal));
-
-			OpenHand_Right_RingProximal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightRingProximal));
-			OpenHand_Right_RingIntermediate = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightRingIntermediate));
-			OpenHand_Right_RingDistal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightRingDistal));
-
-			OpenHand_Right_LittleProximal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightLittleProximal));
-			OpenHand_Right_LittleIntermediate = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightLittleIntermediate));
-			OpenHand_Right_LittleDistal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightLittleDistal));
+			SaveValues("openHand", animator);
 		}
 
-		public void SetClosedHand(Animator animator)
+		public void SaveClosedHand(Animator animator)
 		{
-			ClosedHand_Left_ThumbProximal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftThumbProximal));
-			ClosedHand_Left_ThumbIntermediate = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftThumbIntermediate));
-			ClosedHand_Left_ThumbDistal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftThumbDistal));
-
-			ClosedHand_Left_IndexProximal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftIndexProximal));
-			ClosedHand_Left_IndexIntermediate = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftIndexIntermediate));
-			ClosedHand_Left_IndexDistal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftIndexDistal));
-
-			ClosedHand_Left_MiddleProximal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftMiddleProximal));
-			ClosedHand_Left_MiddleIntermediate = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftMiddleIntermediate));
-			ClosedHand_Left_MiddleDistal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftMiddleDistal));
-
-			ClosedHand_Left_RingProximal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftRingProximal));
-			ClosedHand_Left_RingIntermediate = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftRingIntermediate));
-			ClosedHand_Left_RingDistal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftRingDistal));
-
-			ClosedHand_Left_LittleProximal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftLittleProximal));
-			ClosedHand_Left_LittleIntermediate = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftLittleIntermediate));
-			ClosedHand_Left_LittleDistal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.LeftLittleDistal));
-
-			ClosedHand_Right_ThumbProximal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightThumbProximal));
-			ClosedHand_Right_ThumbIntermediate = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightThumbIntermediate));
-			ClosedHand_Right_ThumbDistal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightThumbDistal));
-
-			ClosedHand_Right_IndexProximal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightIndexProximal));
-			ClosedHand_Right_IndexIntermediate = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightIndexIntermediate));
-			ClosedHand_Right_IndexDistal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightIndexDistal));
-
-			ClosedHand_Right_MiddleProximal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightMiddleProximal));
-			ClosedHand_Right_MiddleIntermediate = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightMiddleIntermediate));
-			ClosedHand_Right_MiddleDistal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightMiddleDistal));
-
-			ClosedHand_Right_RingProximal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightRingProximal));
-			ClosedHand_Right_RingIntermediate = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightRingIntermediate));
-			ClosedHand_Right_RingDistal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightRingDistal));
-
-			ClosedHand_Right_LittleProximal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightLittleProximal));
-			ClosedHand_Right_LittleIntermediate = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightLittleIntermediate));
-			ClosedHand_Right_LittleDistal = TransformToPose(animator.GetBoneTransform(HumanBodyBones.RightLittleDistal));
+			SaveValues("closedHand", animator);
 		}
 
-		public Pose TransformToPose(Transform transform)
+		public void ApplyOpenHand(Animator animator)
 		{
+			ApplyValues("openHand", animator);
+		}
+
+		public void ApplyClosedHand(Animator animator)
+		{
+			ApplyValues("closedHand", animator);
+		}
+
+		private void SaveValues(string prefix, Animator animator)
+		{
+			if (!animator.isHuman) return;
+
+			foreach (FieldInfo field in GetType().GetFields().Where(f => f.Name.StartsWith(prefix)))
+			{
+				string boneName = field.Name.Split('_')[1];
+
+				if (Enum.TryParse(boneName, out HumanBodyBones bone))
+				{
+					field.SetValue(this, TransformToLocalPose(animator.GetBoneTransform(bone)));
+				}
+				else
+				{
+					Debug.LogError($"Could not find HumanBodyBones.{boneName}");
+				}
+			}
+		}
+
+		private void ApplyValues(string prefix, Animator animator)
+		{
+			if (!animator.isHuman) return;
+
+			foreach (FieldInfo field in GetType().GetFields().Where(f => f.Name.StartsWith(prefix)))
+			{
+				string boneName = field.Name.Split('_')[1];
+
+				if (Enum.TryParse(boneName, out HumanBodyBones bone))
+				{
+					Pose bonePose = (Pose)field.GetValue(this);
+
+					if (bonePose.Equals(default)) continue;
+
+					Transform boneTransform = animator.GetBoneTransform(bone);
+					boneTransform.localPosition = bonePose.position;
+					boneTransform.localRotation = bonePose.rotation;
+				}
+				else
+				{
+					Debug.LogError($"Could not find HumanBodyBones.{boneName}");
+				}
+			}
+		}
+
+		private Pose TransformToLocalPose(Transform transform)
+		{
+			if (transform == null) return default;
+
 			return new Pose(transform.localPosition, transform.localRotation);
 		}
 	}

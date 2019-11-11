@@ -1,6 +1,8 @@
 using CustomAvatar;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [CustomEditor(typeof(PoseManager))]
 public class PoseManagerEditor : Editor
@@ -9,20 +11,42 @@ public class PoseManagerEditor : Editor
 	{
 		DrawDefaultInspector();
 
-		PoseManager script = (PoseManager)target;
+		PoseManager poseManager = (PoseManager)target;
+
+		GUILayout.BeginHorizontal();
 
 		if (GUILayout.Button("Save Open Hands Pose"))
 		{
-			Animator animator = script.gameObject.GetComponentInChildren<Animator>();
-			script.SetOpenHand(animator);
-			Debug.Log(script.OpenHand_Left_IndexProximal);
+			Animator animator = poseManager.gameObject.GetComponentInChildren<Animator>();
+			poseManager.SaveOpenHand(animator);
 		}
+
+		if (GUILayout.Button("Apply Open Hands Pose"))
+		{
+			Undo.RegisterCompleteObjectUndo(poseManager.gameObject, "Apply Open Hands Pose");
+			Animator animator = poseManager.gameObject.GetComponentInChildren<Animator>();
+			poseManager.ApplyOpenHand(animator);
+			EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+		}
+
+		GUILayout.EndHorizontal();
+
+		GUILayout.BeginHorizontal();
 
 		if (GUILayout.Button("Save Closed Hands Pose"))
 		{
-			Animator animator = script.gameObject.GetComponentInChildren<Animator>();
-			script.SetClosedHand(animator);
-			Debug.Log(script.ClosedHand_Left_IndexProximal);
+			Animator animator = poseManager.gameObject.GetComponentInChildren<Animator>();
+			poseManager.SaveClosedHand(animator);
 		}
+
+		if (GUILayout.Button("Apply Closed Hands Pose"))
+		{
+			Undo.RegisterCompleteObjectUndo(poseManager.gameObject, "Apply Closed Hands Pose");
+			Animator animator = poseManager.gameObject.GetComponentInChildren<Animator>();
+			poseManager.ApplyClosedHand(animator);
+			EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+		}
+
+		GUILayout.EndHorizontal();
 	}
 }
