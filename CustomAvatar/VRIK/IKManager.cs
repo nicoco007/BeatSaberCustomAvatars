@@ -6,22 +6,22 @@ using UnityEngine;
 
 namespace AvatarScriptPack
 {
-	class IKManager : MonoBehaviour
-	{
-		public Transform HeadTarget;
-		public Transform LeftHandTarget;
-		public Transform RightHandTarget;
+    class IKManager : MonoBehaviour
+    {
+        public Transform HeadTarget;
+        public Transform LeftHandTarget;
+        public Transform RightHandTarget;
 
-		public void Start()
-		{
-			var vrik = this.gameObject.GetComponent<VRIK>();
+        public void Start()
+        {
+            var vrik = this.gameObject.GetComponent<VRIK>();
 
-			if (vrik != null)
-			{
-				vrik.solver.spine.headTarget = HeadTarget;
-				vrik.solver.leftArm.target = LeftHandTarget;
-				vrik.solver.rightArm.target = RightHandTarget;
-			}
-		}
-	}
+            if (vrik != null)
+            {
+                vrik.solver.spine.headTarget = HeadTarget;
+                vrik.solver.leftArm.target = LeftHandTarget;
+                vrik.solver.rightArm.target = RightHandTarget;
+            }
+        }
+    }
 }

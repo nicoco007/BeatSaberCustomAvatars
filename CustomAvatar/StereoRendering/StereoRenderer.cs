@@ -187,7 +187,7 @@ namespace CustomAvatar.StereoRendering
             // initialize stereo camera rig
             if (stereoCameraHead == null)
                 CreateStereoCameraRig();
-			
+            
             // use first material from renderer as stereo material
             Renderer renderer = GetComponent<Renderer>();
             stereoMaterial = renderer.materials[0];
@@ -257,7 +257,7 @@ namespace CustomAvatar.StereoRendering
                 // invert backface culling when rendering a mirror
                 if (isMirror)
                     GL.invertCulling = true;
-				
+                
                 // render the canvas
                 RenderToTwoStereoTextures(detector);
                 
@@ -318,7 +318,7 @@ namespace CustomAvatar.StereoRendering
 
         private void RenderToTwoStereoTextures(VRRenderEventDetector detector)
         {
-	        float ipd = 0.06567926f;
+            float ipd = 0.06567926f;
 
             var leftEyeOffset = new Vector3(-ipd / 2, 0, 0);
             var rightEyeOffset = new Vector3(ipd / 2, 0, 0);
@@ -329,22 +329,22 @@ namespace CustomAvatar.StereoRendering
 
             if (!leftEyeTextures.ContainsKey(hash))
             {
-				leftEyeTextures.Add(hash, CreateRenderTexture(renderWidth, renderHeight));
+                leftEyeTextures.Add(hash, CreateRenderTexture(renderWidth, renderHeight));
             }
 
             if (!rightEyeTextures.ContainsKey(hash))
             {
-		        rightEyeTextures.Add(hash, CreateRenderTexture(renderWidth, renderHeight));
+                rightEyeTextures.Add(hash, CreateRenderTexture(renderWidth, renderHeight));
             }
 
             Matrix4x4 leftProjectionMatrix = detector.Camera.projectionMatrix;
             Matrix4x4 rightProjectionMatrix = detector.Camera.projectionMatrix;
 
-			if (detector.Camera.stereoEnabled)
-			{
-				leftProjectionMatrix = detector.Camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left);
-				rightProjectionMatrix = detector.Camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right);
-			}
+            if (detector.Camera.stereoEnabled)
+            {
+                leftProjectionMatrix = detector.Camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left);
+                rightProjectionMatrix = detector.Camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right);
+            }
 
             // render stereo textures
             RenderEye(
@@ -353,23 +353,23 @@ namespace CustomAvatar.StereoRendering
                 leftEyeTextures[hash], "_LeftEyeTexture");
 
             if (detector.Camera.stereoEnabled)
-			{
-				var rightEyeWorldToCameraMatrix = detector.Camera.worldToCameraMatrix;
-				rightEyeWorldToCameraMatrix.m03 -= ipd;
+            {
+                var rightEyeWorldToCameraMatrix = detector.Camera.worldToCameraMatrix;
+                rightEyeWorldToCameraMatrix.m03 -= ipd;
 
-				RenderEye(
-					rightEyeOffset,
-					rightProjectionMatrix, rightEyeWorldToCameraMatrix,
-					rightEyeTextures[hash], "_RightEyeTexture");
-			}
+                RenderEye(
+                    rightEyeOffset,
+                    rightProjectionMatrix, rightEyeWorldToCameraMatrix,
+                    rightEyeTextures[hash], "_RightEyeTexture");
+            }
         }
 
-		private RenderTexture CreateRenderTexture(int renderWidth, int renderHeight, int depth = 32, int aaLevel = 4)
-		{
-			var renderTexture = new RenderTexture(renderWidth, renderHeight, depth, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
-			renderTexture.antiAliasing = aaLevel;
-			return renderTexture;
-		}
+        private RenderTexture CreateRenderTexture(int renderWidth, int renderHeight, int depth = 32, int aaLevel = 4)
+        {
+            var renderTexture = new RenderTexture(renderWidth, renderHeight, depth, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
+            renderTexture.antiAliasing = aaLevel;
+            return renderTexture;
+        }
 
         private void RenderEye(
             Vector3 eyeOffset, 
@@ -449,7 +449,7 @@ namespace CustomAvatar.StereoRendering
 
         private Vector4 GetObliqueNearClipPlane()
         {
-	        Vector4 clipPlaneCameraSpace;
+            Vector4 clipPlaneCameraSpace;
 
             if (!isMirror)
             {

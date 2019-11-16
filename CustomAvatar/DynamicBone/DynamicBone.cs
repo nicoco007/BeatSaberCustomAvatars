@@ -5,15 +5,15 @@ using System.Collections.Generic;
 public class DynamicBone : MonoBehaviour
 {
 #if UNITY_5
-	[Tooltip("The root of the transform hierarchy to apply physics.")]
+    [Tooltip("The root of the transform hierarchy to apply physics.")]
 #endif
     public Transform m_Root = null;
-	
+    
 #if UNITY_5
-	[Tooltip("Internal physics simulation rate.")]
+    [Tooltip("Internal physics simulation rate.")]
 #endif
     public float m_UpdateRate = 60.0f;
-	
+    
     public enum UpdateMode
     {
         Normal,
@@ -21,84 +21,84 @@ public class DynamicBone : MonoBehaviour
         UnscaledTime
     }
     public UpdateMode m_UpdateMode = UpdateMode.Normal;
-	
+    
 #if UNITY_5
-	[Tooltip("How much the bones slowed down.")]
+    [Tooltip("How much the bones slowed down.")]
 #endif
     [Range(0, 1)]
     public float m_Damping = 0.1f;
     public AnimationCurve m_DampingDistrib = null;
-	
+    
 #if UNITY_5
-	[Tooltip("How much the force applied to return each bone to original orientation.")]
+    [Tooltip("How much the force applied to return each bone to original orientation.")]
 #endif
     [Range(0, 1)]
     public float m_Elasticity = 0.1f;
     public AnimationCurve m_ElasticityDistrib = null;
-	
+    
 #if UNITY_5
-	[Tooltip("How much bone's original orientation are preserved.")]
+    [Tooltip("How much bone's original orientation are preserved.")]
 #endif
     [Range(0, 1)]
     public float m_Stiffness = 0.1f;
     public AnimationCurve m_StiffnessDistrib = null;
-	
+    
 #if UNITY_5
-	[Tooltip("How much character's position change is ignored in physics simulation.")]
+    [Tooltip("How much character's position change is ignored in physics simulation.")]
 #endif
     [Range(0, 1)]
     public float m_Inert = 0;
     public AnimationCurve m_InertDistrib = null;
-	
+    
 #if UNITY_5
-	[Tooltip("Each bone can be a sphere to collide with colliders. Radius describe sphere's size.")]
+    [Tooltip("Each bone can be a sphere to collide with colliders. Radius describe sphere's size.")]
 #endif
     public float m_Radius = 0;
     public AnimationCurve m_RadiusDistrib = null;
 
 #if UNITY_5
-	[Tooltip("If End Length is not zero, an extra bone is generated at the end of transform hierarchy.")]
+    [Tooltip("If End Length is not zero, an extra bone is generated at the end of transform hierarchy.")]
 #endif
     public float m_EndLength = 0;
-	
+    
 #if UNITY_5
-	[Tooltip("If End Offset is not zero, an extra bone is generated at the end of transform hierarchy.")]
+    [Tooltip("If End Offset is not zero, an extra bone is generated at the end of transform hierarchy.")]
 #endif
     public Vector3 m_EndOffset = Vector3.zero;
-	
+    
 #if UNITY_5
-	[Tooltip("The force apply to bones. Partial force apply to character's initial pose is cancelled out.")]
+    [Tooltip("The force apply to bones. Partial force apply to character's initial pose is cancelled out.")]
 #endif
     public Vector3 m_Gravity = Vector3.zero;
-	
+    
 #if UNITY_5
-	[Tooltip("The force apply to bones.")]
+    [Tooltip("The force apply to bones.")]
 #endif
     public Vector3 m_Force = Vector3.zero;
-	
+    
 #if UNITY_5
-	[Tooltip("Collider objects interact with the bones.")]
+    [Tooltip("Collider objects interact with the bones.")]
 #endif
     public List<DynamicBoneColliderBase> m_Colliders = null;
-	
+    
 #if UNITY_5
-	[Tooltip("Bones exclude from physics simulation.")]
+    [Tooltip("Bones exclude from physics simulation.")]
 #endif
     public List<Transform> m_Exclusions = null;
-	
-	
+    
+    
     public enum FreezeAxis
     {
         None, X, Y, Z
     }
 #if UNITY_5
-	[Tooltip("Constrain bones to move on specified plane.")]
-#endif	
+    [Tooltip("Constrain bones to move on specified plane.")]
+#endif    
     public FreezeAxis m_FreezeAxis = FreezeAxis.None;
-	
+    
 #if UNITY_5
-	[Tooltip("Disable physics simulation automatically if character is far from camera or player.")]
-#endif		
+    [Tooltip("Disable physics simulation automatically if character is far from camera or player.")]
+#endif        
     public bool m_DistantDisable = false;
     public Transform m_ReferenceObject = null;
     public float m_DistanceToObject = 20;
@@ -327,7 +327,7 @@ public class DynamicBone : MonoBehaviour
             p.m_InitLocalPosition = b.localPosition;
             p.m_InitLocalRotation = b.localRotation;
         }
-        else 	// end bone
+        else     // end bone
         {
             Transform pb = m_Particles[parentIndex].m_Transform;
             if (m_EndLength > 0)
@@ -444,7 +444,7 @@ public class DynamicBone : MonoBehaviour
             {
                 p.m_Position = p.m_PrevPosition = p.m_Transform.position;
             }
-            else	// end bone
+            else    // end bone
             {
                 Transform pb = m_Particles[p.m_ParentIndex].m_Transform;
                 p.m_Position = p.m_PrevPosition = pb.TransformPoint(p.m_EndOffset);
@@ -458,8 +458,8 @@ public class DynamicBone : MonoBehaviour
         Vector3 force = m_Gravity;
         Vector3 fdir = m_Gravity.normalized;
         Vector3 rf = m_Root.TransformDirection(m_LocalGravity);
-        Vector3 pf = fdir * Mathf.Max(Vector3.Dot(rf, fdir), 0);	// project current gravity to rest gravity
-        force -= pf;	// remove projected gravity
+        Vector3 pf = fdir * Mathf.Max(Vector3.Dot(rf, fdir), 0);    // project current gravity to rest gravity
+        force -= pf;    // remove projected gravity
         force = (force + m_Force) * m_ObjectScale;
 
         for (int i = 0; i < m_Particles.Count; ++i)
@@ -618,7 +618,7 @@ public class DynamicBone : MonoBehaviour
 
     void ApplyParticlesToTransforms()
     {
-#if !UNITY_5_4_OR_NEWER	
+#if !UNITY_5_4_OR_NEWER    
         // detect negative scale
         Vector3 ax = Vector3.right;
         Vector3 ay = Vector3.up;
@@ -655,7 +655,7 @@ public class DynamicBone : MonoBehaviour
             Particle p = m_Particles[i];
             Particle p0 = m_Particles[p.m_ParentIndex];
 
-            if (p0.m_Transform.childCount <= 1)		// do not modify bone orientation if has more then one child
+            if (p0.m_Transform.childCount <= 1)        // do not modify bone orientation if has more then one child
             {
                 Vector3 v;
                 if (p.m_Transform != null)
@@ -663,14 +663,14 @@ public class DynamicBone : MonoBehaviour
                 else
                     v = p.m_EndOffset;
                 Vector3 v2 = p.m_Position - p0.m_Position;
-#if !UNITY_5_4_OR_NEWER					
+#if !UNITY_5_4_OR_NEWER                    
                 if (nx)
                     v2 = MirrorVector(v2, ax);
                 if (ny)
                     v2 = MirrorVector(v2, ay);
                 if (nz)
                     v2 = MirrorVector(v2, az);
-#endif					
+#endif                    
                 Quaternion rot = Quaternion.FromToRotation(p0.m_Transform.TransformDirection(v), v2);
                 p0.m_Transform.rotation = rot * p0.m_Transform.rotation;
             }

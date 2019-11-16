@@ -25,37 +25,37 @@ namespace CustomAvatar.StereoRendering
         {
             get
             {
-	            if (instance == null)
-	            {
-		            instance = new GameObject("StereoRenderManager").AddComponent<StereoRenderManager>();
-		            Plugin.Logger.Info("Initialized StereoRenderManager");
-	            }
+                if (instance == null)
+                {
+                    instance = new GameObject("StereoRenderManager").AddComponent<StereoRenderManager>();
+                    Plugin.Logger.Info("Initialized StereoRenderManager");
+                }
 
                 return instance;
             }
         }
 
-		/////////////////////////////////////////////////////////////////////////////////
-		// render related
+        /////////////////////////////////////////////////////////////////////////////////
+        // render related
 
-		public void InvokeStereoRenderers(VRRenderEventDetector detector)
-		{
-			// render registored stereo cameras
-			for (int renderIter = 0; renderIter < stereoRenderers.Count; renderIter++)
-			{
-				StereoRenderer stereoRenderer = stereoRenderers[renderIter];
+        public void InvokeStereoRenderers(VRRenderEventDetector detector)
+        {
+            // render registored stereo cameras
+            for (int renderIter = 0; renderIter < stereoRenderers.Count; renderIter++)
+            {
+                StereoRenderer stereoRenderer = stereoRenderers[renderIter];
 
-				if (stereoRenderer.shouldRender)
-				{
-					stereoRenderer.Render(detector);
-				}
-			}
-		}
+                if (stereoRenderer.shouldRender)
+                {
+                    stereoRenderer.Render(detector);
+                }
+            }
+        }
 
-		/////////////////////////////////////////////////////////////////////////////////
-		// callbacks
+        /////////////////////////////////////////////////////////////////////////////////
+        // callbacks
 
-		public void AddToManager(StereoRenderer stereoRenderer)
+        public void AddToManager(StereoRenderer stereoRenderer)
         {
             stereoRenderers.Add(stereoRenderer);
         }

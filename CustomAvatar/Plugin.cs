@@ -15,145 +15,145 @@ using Logger = IPA.Logging.Logger;
 
 namespace CustomAvatar
 {
-	public class Plugin : IBeatSaberPlugin
-	{
-		private GameScenesManager scenesManager;
+    public class Plugin : IBeatSaberPlugin
+    {
+        private GameScenesManager scenesManager;
 
-		public event Action<Scene> SceneTransitioned;
+        public event Action<Scene> SceneTransitioned;
 
-		public static Plugin Instance { get; private set; }
+        public static Plugin Instance { get; private set; }
 
-		public static Logger Logger { get; private set; }
+        public static Logger Logger { get; private set; }
 
-		public static SkeletalInput LeftHandAnimAction;
-		public static SkeletalInput RightHandAnimAction;
+        public static SkeletalInput LeftHandAnimAction;
+        public static SkeletalInput RightHandAnimAction;
 
-		public Plugin()
-		{
-			if (OpenVRActionManager.IsRunning)
-			{
-				OpenVRActionManager actionManager = OpenVRActionManager.Instance;
+        public Plugin()
+        {
+            if (OpenVRActionManager.IsRunning)
+            {
+                OpenVRActionManager actionManager = OpenVRActionManager.Instance;
 
-				LeftHandAnimAction = actionManager.RegisterAction(new SkeletalInput("/actions/customavatars/in/lefthandanim"));
-				RightHandAnimAction = actionManager.RegisterAction(new SkeletalInput("/actions/customavatars/in/righthandanim"));
-			}
-		}
+                LeftHandAnimAction = actionManager.RegisterAction(new SkeletalInput("/actions/customavatars/in/lefthandanim"));
+                RightHandAnimAction = actionManager.RegisterAction(new SkeletalInput("/actions/customavatars/in/righthandanim"));
+            }
+        }
 
-		public void Init(Logger logger)
-		{
-			Logger = logger;
-			Instance = this;
-			
-			SettingsManager.LoadSettings();
-			AvatarManager.Instance.LoadAvatarFromSettingsAsync();
-		}
+        public void Init(Logger logger)
+        {
+            Logger = logger;
+            Instance = this;
+            
+            SettingsManager.LoadSettings();
+            AvatarManager.Instance.LoadAvatarFromSettingsAsync();
+        }
 
-		public void OnApplicationQuit()
-		{
-			if (scenesManager != null)
-				scenesManager.transitionDidFinishEvent -= SceneTransitionDidFinish;
+        public void OnApplicationQuit()
+        {
+            if (scenesManager != null)
+                scenesManager.transitionDidFinishEvent -= SceneTransitionDidFinish;
 
-			SettingsManager.SaveSettings();
-		}
+            SettingsManager.SaveSettings();
+        }
 
-		public void OnSceneLoaded(Scene newScene, LoadSceneMode mode)
-		{
-			if (scenesManager == null)
-			{
-				scenesManager = Resources.FindObjectsOfTypeAll<GameScenesManager>().FirstOrDefault();
+        public void OnSceneLoaded(Scene newScene, LoadSceneMode mode)
+        {
+            if (scenesManager == null)
+            {
+                scenesManager = Resources.FindObjectsOfTypeAll<GameScenesManager>().FirstOrDefault();
 
-				if (scenesManager != null)
-				{
-					scenesManager.transitionDidFinishEvent += SceneTransitionDidFinish;
-					scenesManager.transitionDidFinishEvent += () => SceneTransitioned?.Invoke(SceneManager.GetActiveScene());
-				}
-			}
+                if (scenesManager != null)
+                {
+                    scenesManager.transitionDidFinishEvent += SceneTransitionDidFinish;
+                    scenesManager.transitionDidFinishEvent += () => SceneTransitioned?.Invoke(SceneManager.GetActiveScene());
+                }
+            }
 
-			if (newScene.name == "HealthWarning" && SettingsManager.Settings.CalibrateFullBodyTrackingOnStart)
-			{
-				AvatarManager.Instance.AvatarTailor.CalibrateFullBodyTracking();
-			}
+            if (newScene.name == "HealthWarning" && SettingsManager.Settings.CalibrateFullBodyTrackingOnStart)
+            {
+                AvatarManager.Instance.AvatarTailor.CalibrateFullBodyTracking();
+            }
 
-			if (newScene.name == "MenuCore")
-			{
-				MenuButtonUI.AddButton("Avatars", () =>
-				{
-					var mainFlowCoordinator = Resources.FindObjectsOfTypeAll<MainFlowCoordinator>().First();
-					var flowCoordinator = new GameObject("AvatarListFlowCoordinator").AddComponent<AvatarListFlowCoordinator>();
-					mainFlowCoordinator.InvokePrivateMethod("PresentFlowCoordinator", flowCoordinator, null, false, false);
-				});
-			}
-		}
+            if (newScene.name == "MenuCore")
+            {
+                MenuButtonUI.AddButton("Avatars", () =>
+                {
+                    var mainFlowCoordinator = Resources.FindObjectsOfTypeAll<MainFlowCoordinator>().First();
+                    var flowCoordinator = new GameObject("AvatarListFlowCoordinator").AddComponent<AvatarListFlowCoordinator>();
+                    mainFlowCoordinator.InvokePrivateMethod("PresentFlowCoordinator", flowCoordinator, null, false, false);
+                });
+            }
+        }
 
-		private void SceneTransitionDidFinish()
-		{
-			foreach (Camera camera in Camera.allCameras)
-			{
-				if (camera.gameObject.GetComponent<VRRenderEventDetector>() == null)
-				{
-					camera.gameObject.AddComponent<VRRenderEventDetector>();
-					Logger.Info($"Added {nameof(VRRenderEventDetector)} to {camera}");
-				}
-			}
-			
-			Camera mainCamera = Camera.main;
+        private void SceneTransitionDidFinish()
+        {
+            foreach (Camera camera in Camera.allCameras)
+            {
+                if (camera.gameObject.GetComponent<VRRenderEventDetector>() == null)
+                {
+                    camera.gameObject.AddComponent<VRRenderEventDetector>();
+                    Logger.Info($"Added {nameof(VRRenderEventDetector)} to {camera}");
+                }
+            }
+            
+            Camera mainCamera = Camera.main;
 
-			if (mainCamera)
-			{
-				SetCameraCullingMask(mainCamera);
-				mainCamera.nearClipPlane = SettingsManager.Settings.CameraNearClipPlane;
-			}
-			else
-			{
-				Logger.Error("Could not find main camera!");
-			}
-		}
+            if (mainCamera)
+            {
+                SetCameraCullingMask(mainCamera);
+                mainCamera.nearClipPlane = SettingsManager.Settings.CameraNearClipPlane;
+            }
+            else
+            {
+                Logger.Error("Could not find main camera!");
+            }
+        }
 
-		public void OnUpdate()
-		{
-			AvatarManager avatarManager = AvatarManager.Instance;
+        public void OnUpdate()
+        {
+            AvatarManager avatarManager = AvatarManager.Instance;
 
-			if (Input.GetKeyDown(KeyCode.PageDown))
-			{
-				avatarManager.SwitchToNextAvatar();
-			}
-			else if (Input.GetKeyDown(KeyCode.PageUp))
-			{
-				avatarManager.SwitchToPreviousAvatar();
-			}
-			else if (Input.GetKeyDown(KeyCode.Home))
-			{
-				SettingsManager.Settings.IsAvatarVisibleInFirstPerson = !SettingsManager.Settings.IsAvatarVisibleInFirstPerson;
-				Logger.Info($"{(SettingsManager.Settings.IsAvatarVisibleInFirstPerson ? "Enabled" : "Disabled")} first person visibility");
-				avatarManager.OnFirstPersonEnabledChanged();
-			}
-			else if (Input.GetKeyDown(KeyCode.End))
-			{
-				SettingsManager.Settings.ResizeMode = (AvatarResizeMode) (((int)SettingsManager.Settings.ResizeMode + 1) % 3);
-				Logger.Info($"Set resize mode to {SettingsManager.Settings.ResizeMode}");
-				avatarManager.ResizeCurrentAvatar();
-			}
-			else if (Input.GetKeyDown(KeyCode.Insert))
-			{
-				SettingsManager.Settings.EnableFloorAdjust = !SettingsManager.Settings.EnableFloorAdjust;
-				Logger.Info($"{(SettingsManager.Settings.EnableFloorAdjust ? "Enabled" : "Disabled")} floor adjust");
-				avatarManager.ResizeCurrentAvatar();
-			}
-		}
+            if (Input.GetKeyDown(KeyCode.PageDown))
+            {
+                avatarManager.SwitchToNextAvatar();
+            }
+            else if (Input.GetKeyDown(KeyCode.PageUp))
+            {
+                avatarManager.SwitchToPreviousAvatar();
+            }
+            else if (Input.GetKeyDown(KeyCode.Home))
+            {
+                SettingsManager.Settings.IsAvatarVisibleInFirstPerson = !SettingsManager.Settings.IsAvatarVisibleInFirstPerson;
+                Logger.Info($"{(SettingsManager.Settings.IsAvatarVisibleInFirstPerson ? "Enabled" : "Disabled")} first person visibility");
+                avatarManager.OnFirstPersonEnabledChanged();
+            }
+            else if (Input.GetKeyDown(KeyCode.End))
+            {
+                SettingsManager.Settings.ResizeMode = (AvatarResizeMode) (((int)SettingsManager.Settings.ResizeMode + 1) % 3);
+                Logger.Info($"Set resize mode to {SettingsManager.Settings.ResizeMode}");
+                avatarManager.ResizeCurrentAvatar();
+            }
+            else if (Input.GetKeyDown(KeyCode.Insert))
+            {
+                SettingsManager.Settings.EnableFloorAdjust = !SettingsManager.Settings.EnableFloorAdjust;
+                Logger.Info($"{(SettingsManager.Settings.EnableFloorAdjust ? "Enabled" : "Disabled")} floor adjust");
+                avatarManager.ResizeCurrentAvatar();
+            }
+        }
 
-		private void SetCameraCullingMask(Camera camera)
-		{
-			Logger.Debug("Adding third person culling mask to " + camera.name);
+        private void SetCameraCullingMask(Camera camera)
+        {
+            Logger.Debug("Adding third person culling mask to " + camera.name);
 
-			camera.cullingMask &= ~(1 << AvatarLayers.OnlyInThirdPerson);
-		}
+            camera.cullingMask &= ~(1 << AvatarLayers.OnlyInThirdPerson);
+        }
 
-		public void OnFixedUpdate() { }
+        public void OnFixedUpdate() { }
 
-		public void OnSceneUnloaded(Scene scene) { }
+        public void OnSceneUnloaded(Scene scene) { }
 
-		public void OnActiveSceneChanged(Scene prevScene, Scene nextScene) { }
+        public void OnActiveSceneChanged(Scene prevScene, Scene nextScene) { }
 
-		public void OnApplicationStart() { }
-	}
+        public void OnApplicationStart() { }
+    }
 }

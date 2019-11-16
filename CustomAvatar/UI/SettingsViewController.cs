@@ -12,153 +12,153 @@ using UnityEngine;
 // ReSharper disable NotAccessedField.Local
 namespace CustomAvatar.UI
 {
-	class SettingsViewController : BSMLResourceViewController
-	{
-		public override string ResourceName => "CustomAvatar.Views.SettingsViewController.bsml";
+    class SettingsViewController : BSMLResourceViewController
+    {
+        public override string ResourceName => "CustomAvatar.Views.SettingsViewController.bsml";
 
-		#region Components
+        #region Components
         
-		[UIComponent("arm-span")] private TextMeshProUGUI armSpanLabel;
+        [UIComponent("arm-span")] private TextMeshProUGUI armSpanLabel;
 
-		#endregion
+        #endregion
 
-		#region Properties
+        #region Properties
 
-		[UIValue("resize-options")] private readonly List<object> resizeModeOptions = new List<object> { AvatarResizeMode.None, AvatarResizeMode.Height, AvatarResizeMode.ArmSpan };
+        [UIValue("resize-options")] private readonly List<object> resizeModeOptions = new List<object> { AvatarResizeMode.None, AvatarResizeMode.Height, AvatarResizeMode.ArmSpan };
 
-		#endregion
+        #endregion
 
-		#region Values
+        #region Values
 
-		[UIValue("visible-first-person-value")] private bool visibleInFirstPerson;
-		[UIValue("resize-value")] private AvatarResizeMode resizeMode;
-		[UIValue("floor-adjust-value")] private bool floorHeightAdjust;
-		[UIValue("calibrate-fbt-on-start")] private bool calibrateFullBodyTrackingOnStart;
+        [UIValue("visible-first-person-value")] private bool visibleInFirstPerson;
+        [UIValue("resize-value")] private AvatarResizeMode resizeMode;
+        [UIValue("floor-adjust-value")] private bool floorHeightAdjust;
+        [UIValue("calibrate-fbt-on-start")] private bool calibrateFullBodyTrackingOnStart;
 
-		#endregion
+        #endregion
 
-		protected override void DidActivate(bool firstActivation, ActivationType type)
-		{
-			visibleInFirstPerson = SettingsManager.Settings.IsAvatarVisibleInFirstPerson;
-			resizeMode = SettingsManager.Settings.ResizeMode;
-			floorHeightAdjust = SettingsManager.Settings.EnableFloorAdjust;
-			calibrateFullBodyTrackingOnStart = SettingsManager.Settings.CalibrateFullBodyTrackingOnStart;
+        protected override void DidActivate(bool firstActivation, ActivationType type)
+        {
+            visibleInFirstPerson = SettingsManager.Settings.IsAvatarVisibleInFirstPerson;
+            resizeMode = SettingsManager.Settings.ResizeMode;
+            floorHeightAdjust = SettingsManager.Settings.EnableFloorAdjust;
+            calibrateFullBodyTrackingOnStart = SettingsManager.Settings.CalibrateFullBodyTrackingOnStart;
 
-			base.DidActivate(firstActivation, type);
+            base.DidActivate(firstActivation, type);
 
-			armSpanLabel.SetText($"{SettingsManager.Settings.PlayerArmSpan:0.00} m");
-		}
+            armSpanLabel.SetText($"{SettingsManager.Settings.PlayerArmSpan:0.00} m");
+        }
 
-		#region Actions
+        #region Actions
 
-		[UIAction("visible-first-person-change")]
-		private void OnVisibleInFirstPersonChanged(bool value)
-		{
-			SettingsManager.Settings.IsAvatarVisibleInFirstPerson = value;
+        [UIAction("visible-first-person-change")]
+        private void OnVisibleInFirstPersonChanged(bool value)
+        {
+            SettingsManager.Settings.IsAvatarVisibleInFirstPerson = value;
             AvatarManager.Instance.OnFirstPersonEnabledChanged();
-		}
+        }
 
-		[UIAction("resize-change")]
-		private void OnResizeModeChanged(AvatarResizeMode value)
-		{
-			SettingsManager.Settings.ResizeMode = value;
-			AvatarManager.Instance.ResizeCurrentAvatar();
-		}
+        [UIAction("resize-change")]
+        private void OnResizeModeChanged(AvatarResizeMode value)
+        {
+            SettingsManager.Settings.ResizeMode = value;
+            AvatarManager.Instance.ResizeCurrentAvatar();
+        }
 
-		[UIAction("floor-adjust-change")]
-		private void OnFloorHeightAdjustChanged(bool value)
-		{
-			SettingsManager.Settings.EnableFloorAdjust = value;
-			AvatarManager.Instance.ResizeCurrentAvatar();
-		}
+        [UIAction("floor-adjust-change")]
+        private void OnFloorHeightAdjustChanged(bool value)
+        {
+            SettingsManager.Settings.EnableFloorAdjust = value;
+            AvatarManager.Instance.ResizeCurrentAvatar();
+        }
 
-		[UIAction("resize-mode-formatter")]
-		private string ResizeModeFormatter(object value)
-		{
-			if (!(value is AvatarResizeMode)) return null;
+        [UIAction("resize-mode-formatter")]
+        private string ResizeModeFormatter(object value)
+        {
+            if (!(value is AvatarResizeMode)) return null;
 
-			switch ((AvatarResizeMode) value)
-			{
+            switch ((AvatarResizeMode) value)
+            {
                 case AvatarResizeMode.Height:
-					return "Height";
+                    return "Height";
                 case AvatarResizeMode.ArmSpan:
-	                return "Arm Span";
+                    return "Arm Span";
                 case AvatarResizeMode.None:
-	                return "Don't Resize";
-	            default:
-	                return null;
-			}
-		}
+                    return "Don't Resize";
+                default:
+                    return null;
+            }
+        }
 
-		[UIAction("measure-arm-span-click")]
-		private void OnMeasureArmSpanButtonClicked()
-		{
-			MeasureArmSpan();
-		}
+        [UIAction("measure-arm-span-click")]
+        private void OnMeasureArmSpanButtonClicked()
+        {
+            MeasureArmSpan();
+        }
 
-		[UIAction("calibrate-fbt-click")]
-		private void OnCalibrateFullBodyTrackingClicked()
-		{
-			AvatarManager.Instance.AvatarTailor.CalibrateFullBodyTracking();
-		}
+        [UIAction("calibrate-fbt-click")]
+        private void OnCalibrateFullBodyTrackingClicked()
+        {
+            AvatarManager.Instance.AvatarTailor.CalibrateFullBodyTracking();
+        }
 
-		[UIAction("calibrate-fbt-on-start-change")]
-		private void OnCalibrateFullBodyTrackingOnStartChanged(bool value)
-		{
-			SettingsManager.Settings.CalibrateFullBodyTrackingOnStart = value;
-		}
+        [UIAction("calibrate-fbt-on-start-change")]
+        private void OnCalibrateFullBodyTrackingOnStartChanged(bool value)
+        {
+            SettingsManager.Settings.CalibrateFullBodyTrackingOnStart = value;
+        }
 
-		[UIAction("clear-fbt-calibration-data-click")]
-		private void OnClearFullBodyTrackingCalibrationDataClicked()
-		{
-			AvatarManager.Instance.AvatarTailor.ClearFullBodyTrackingData();
-		}
+        [UIAction("clear-fbt-calibration-data-click")]
+        private void OnClearFullBodyTrackingCalibrationDataClicked()
+        {
+            AvatarManager.Instance.AvatarTailor.ClearFullBodyTrackingData();
+        }
 
-		#endregion
+        #endregion
 
-		#region Arm Span Measurement
-		
-		private const float KMinArmSpan = 0.5f;
+        #region Arm Span Measurement
+        
+        private const float KMinArmSpan = 0.5f;
 
-		private TrackedDeviceManager playerInput = PersistentSingleton<TrackedDeviceManager>.instance;
-		private bool isMeasuring;
-		private float maxMeasuredArmSpan;
-		private float lastUpdateTime;
+        private TrackedDeviceManager playerInput = PersistentSingleton<TrackedDeviceManager>.instance;
+        private bool isMeasuring;
+        private float maxMeasuredArmSpan;
+        private float lastUpdateTime;
 
-		private void MeasureArmSpan()
-		{
-			if (isMeasuring) return;
+        private void MeasureArmSpan()
+        {
+            if (isMeasuring) return;
 
-			isMeasuring = true;
-			maxMeasuredArmSpan = KMinArmSpan;
-			lastUpdateTime = Time.timeSinceLevelLoad;
+            isMeasuring = true;
+            maxMeasuredArmSpan = KMinArmSpan;
+            lastUpdateTime = Time.timeSinceLevelLoad;
 
-			InvokeRepeating(nameof(ScanArmSpan), 0.0f, 0.1f);
-		}
+            InvokeRepeating(nameof(ScanArmSpan), 0.0f, 0.1f);
+        }
 
-		private void ScanArmSpan()
-		{
-			var armSpan = Vector3.Distance(playerInput.LeftHand.Position, playerInput.RightHand.Position);
+        private void ScanArmSpan()
+        {
+            var armSpan = Vector3.Distance(playerInput.LeftHand.Position, playerInput.RightHand.Position);
 
-			if (armSpan > maxMeasuredArmSpan)
-			{
-				maxMeasuredArmSpan = armSpan;
-				lastUpdateTime = Time.timeSinceLevelLoad;
-			}
+            if (armSpan > maxMeasuredArmSpan)
+            {
+                maxMeasuredArmSpan = armSpan;
+                lastUpdateTime = Time.timeSinceLevelLoad;
+            }
 
-			if (Time.timeSinceLevelLoad - lastUpdateTime < 2.0f)
-			{
-				armSpanLabel.SetText($"Measuring... {maxMeasuredArmSpan:0.00} m");
-			}
-			else
-			{
-				CancelInvoke(nameof(ScanArmSpan));
-				armSpanLabel.SetText($"{maxMeasuredArmSpan:0.00} m");
-				SettingsManager.Settings.PlayerArmSpan = maxMeasuredArmSpan;
-				isMeasuring = false;
-			}
-		}
+            if (Time.timeSinceLevelLoad - lastUpdateTime < 2.0f)
+            {
+                armSpanLabel.SetText($"Measuring... {maxMeasuredArmSpan:0.00} m");
+            }
+            else
+            {
+                CancelInvoke(nameof(ScanArmSpan));
+                armSpanLabel.SetText($"{maxMeasuredArmSpan:0.00} m");
+                SettingsManager.Settings.PlayerArmSpan = maxMeasuredArmSpan;
+                isMeasuring = false;
+            }
+        }
 
-		#endregion
-	}
+        #endregion
+    }
 }
