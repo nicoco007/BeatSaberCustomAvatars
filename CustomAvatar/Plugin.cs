@@ -43,7 +43,8 @@ namespace CustomAvatar
 		{
 			Logger = logger;
 			Instance = this;
-
+			
+			SettingsManager.LoadSettings();
 			AvatarManager.Instance.LoadAvatarFromSettingsAsync();
 		}
 
@@ -51,6 +52,8 @@ namespace CustomAvatar
 		{
 			if (_scenesManager != null)
 				_scenesManager.transitionDidFinishEvent -= SceneTransitionDidFinish;
+
+			SettingsManager.SaveSettings();
 		}
 
 		public void OnSceneLoaded(Scene newScene, LoadSceneMode mode)
@@ -66,7 +69,7 @@ namespace CustomAvatar
 				}
 			}
 
-			if (newScene.name == "HealthWarning" && Settings.calibrateFullBodyTrackingOnStart)
+			if (newScene.name == "HealthWarning" && SettingsManager.Settings.CalibrateFullBodyTrackingOnStart)
 			{
 				AvatarManager.Instance.AvatarTailor.CalibrateFullBodyTracking();
 			}
@@ -98,6 +101,7 @@ namespace CustomAvatar
 			if (mainCamera)
 			{
 				SetCameraCullingMask(mainCamera);
+				mainCamera.nearClipPlane = SettingsManager.Settings.CameraNearClipPlane;
 			}
 			else
 			{
@@ -119,20 +123,20 @@ namespace CustomAvatar
 			}
 			else if (Input.GetKeyDown(KeyCode.Home))
 			{
-				Settings.isAvatarVisibleInFirstPerson = !Settings.isAvatarVisibleInFirstPerson;
-				Logger.Info($"{(Settings.isAvatarVisibleInFirstPerson ? "Enabled" : "Disabled")} first person visibility");
+				SettingsManager.Settings.IsAvatarVisibleInFirstPerson = !SettingsManager.Settings.IsAvatarVisibleInFirstPerson;
+				Logger.Info($"{(SettingsManager.Settings.IsAvatarVisibleInFirstPerson ? "Enabled" : "Disabled")} first person visibility");
 				avatarManager.OnFirstPersonEnabledChanged();
 			}
 			else if (Input.GetKeyDown(KeyCode.End))
 			{
-				Settings.resizeMode = (AvatarResizeMode) (((int)Settings.resizeMode + 1) % 3);
-				Logger.Info($"Set resize mode to {Settings.resizeMode}");
+				SettingsManager.Settings.ResizeMode = (AvatarResizeMode) (((int)SettingsManager.Settings.ResizeMode + 1) % 3);
+				Logger.Info($"Set resize mode to {SettingsManager.Settings.ResizeMode}");
 				avatarManager.ResizeCurrentAvatar();
 			}
 			else if (Input.GetKeyDown(KeyCode.Insert))
 			{
-				Settings.enableFloorAdjust = !Settings.enableFloorAdjust;
-				Logger.Info($"{(Settings.enableFloorAdjust ? "Enabled" : "Disabled")} floor adjust");
+				SettingsManager.Settings.EnableFloorAdjust = !SettingsManager.Settings.EnableFloorAdjust;
+				Logger.Info($"{(SettingsManager.Settings.EnableFloorAdjust ? "Enabled" : "Disabled")} floor adjust");
 				avatarManager.ResizeCurrentAvatar();
 			}
 		}

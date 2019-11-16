@@ -41,10 +41,10 @@ namespace CustomAvatar
 
 			// compute scale
 			float scale = 1.0f;
-			AvatarResizeMode resizeMode = Settings.resizeMode;
+			AvatarResizeMode resizeMode = SettingsManager.Settings.ResizeMode;
 			if (resizeMode == AvatarResizeMode.ArmSpan)
 			{
-				float playerArmLength = Settings.playerArmSpan;
+				float playerArmLength = SettingsManager.Settings.PlayerArmSpan;
 				_currentAvatarArmLength = _currentAvatarArmLength ?? MeasureAvatarArmSpan(animator);
 				var avatarArmLength = _currentAvatarArmLength ?? playerArmLength;
 				Plugin.Logger.Log(Level.Debug, "Avatar arm length: " + avatarArmLength);
@@ -70,7 +70,7 @@ namespace CustomAvatar
 
 			float floorOffset = 0f;
 
-			if (Settings.enableFloorAdjust)
+			if (SettingsManager.Settings.EnableFloorAdjust)
 			{
 				float playerViewPointHeight = BeatSaberUtil.GetPlayerEyeHeight();
 				float avatarViewPointHeight = avatar.customAvatar.viewPoint?.position.y ?? playerViewPointHeight;

@@ -56,6 +56,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libraries\IPA.Loader.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json.12.0.0.0">
+      <HintPath>..\Libraries\Newtonsoft.Json.12.0.0.0.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
@@ -129,6 +132,7 @@
     <Compile Include="Tracking\OpenVRWrapper.cs" />
     <Compile Include="PoseManager.cs" />
     <Compile Include="EventManager.cs" />
+    <Compile Include="Utilities\SettingsManager.cs" />
     <Compile Include="VRIK\FirstPersonExclusion.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

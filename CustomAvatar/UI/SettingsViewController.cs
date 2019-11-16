@@ -39,14 +39,14 @@ namespace CustomAvatar.UI
 
 		protected override void DidActivate(bool firstActivation, ActivationType type)
 		{
-			_visibleInFirstPerson = Settings.isAvatarVisibleInFirstPerson;
-			_resizeMode = Settings.resizeMode;
-			_floorHeightAdjust = Settings.enableFloorAdjust;
-			_calibrateFullBodyTrackingOnStart = Settings.calibrateFullBodyTrackingOnStart;
+			_visibleInFirstPerson = SettingsManager.Settings.IsAvatarVisibleInFirstPerson;
+			_resizeMode = SettingsManager.Settings.ResizeMode;
+			_floorHeightAdjust = SettingsManager.Settings.EnableFloorAdjust;
+			_calibrateFullBodyTrackingOnStart = SettingsManager.Settings.CalibrateFullBodyTrackingOnStart;
 
 			base.DidActivate(firstActivation, type);
 
-			_armSpanLabel.SetText($"{Settings.playerArmSpan:0.00} m");
+			_armSpanLabel.SetText($"{SettingsManager.Settings.PlayerArmSpan:0.00} m");
 		}
 
 		#region Actions
@@ -54,21 +54,21 @@ namespace CustomAvatar.UI
 		[UIAction("visible-first-person-change")]
 		private void OnVisibleInFirstPersonChanged(bool value)
 		{
-			Settings.isAvatarVisibleInFirstPerson = value;
+			SettingsManager.Settings.IsAvatarVisibleInFirstPerson = value;
             AvatarManager.Instance.OnFirstPersonEnabledChanged();
 		}
 
 		[UIAction("resize-change")]
 		private void OnResizeModeChanged(AvatarResizeMode value)
 		{
-			Settings.resizeMode = value;
+			SettingsManager.Settings.ResizeMode = value;
 			AvatarManager.Instance.ResizeCurrentAvatar();
 		}
 
 		[UIAction("floor-adjust-change")]
 		private void OnFloorHeightAdjustChanged(bool value)
 		{
-			Settings.enableFloorAdjust = value;
+			SettingsManager.Settings.EnableFloorAdjust = value;
 			AvatarManager.Instance.ResizeCurrentAvatar();
 		}
 
@@ -105,7 +105,7 @@ namespace CustomAvatar.UI
 		[UIAction("calibrate-fbt-on-start-change")]
 		private void OnCalibrateFullBodyTrackingOnStartChanged(bool value)
 		{
-			Settings.calibrateFullBodyTrackingOnStart = value;
+			SettingsManager.Settings.CalibrateFullBodyTrackingOnStart = value;
 		}
 
 		[UIAction("clear-fbt-calibration-data-click")]
@@ -154,7 +154,7 @@ namespace CustomAvatar.UI
 			{
 				CancelInvoke(nameof(ScanArmSpan));
 				_armSpanLabel.SetText($"{_maxMeasuredArmSpan:0.00} m");
-				Settings.playerArmSpan = _maxMeasuredArmSpan;
+				SettingsManager.Settings.PlayerArmSpan = _maxMeasuredArmSpan;
 				_isMeasuring = false;
 			}
 		}

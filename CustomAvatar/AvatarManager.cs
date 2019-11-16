@@ -59,7 +59,7 @@ namespace CustomAvatar
 
 		public void LoadAvatarFromSettingsAsync()
 		{
-			var previousAvatarPath = Settings.previousAvatarPath;
+			var previousAvatarPath = SettingsManager.Settings.PreviousAvatarPath;
 
 			if (!File.Exists(previousAvatarPath))
 			{
@@ -104,7 +104,7 @@ namespace CustomAvatar
 			ResizeCurrentAvatar();
 			OnFirstPersonEnabledChanged();
 
-			Settings.previousAvatarPath = avatar.fullPath;
+			SettingsManager.Settings.PreviousAvatarPath = avatar.fullPath;
 		}
 
 		public void SwitchToNextAvatar()
@@ -139,7 +139,7 @@ namespace CustomAvatar
 		{
 			if (CurrentlySpawnedAvatar == null) return;
 			AvatarLayers.SetChildrenToLayer(CurrentlySpawnedAvatar.gameObject,
-				Settings.isAvatarVisibleInFirstPerson ? AvatarLayers.AlwaysVisible : AvatarLayers.OnlyInThirdPerson);
+				SettingsManager.Settings.IsAvatarVisibleInFirstPerson ? AvatarLayers.AlwaysVisible : AvatarLayers.OnlyInThirdPerson);
 			foreach (var ex in CurrentlySpawnedAvatar.gameObject.GetComponentsInChildren<AvatarScriptPack.FirstPersonExclusion>())
 				ex.OnFirstPersonEnabledChanged();
 		}
