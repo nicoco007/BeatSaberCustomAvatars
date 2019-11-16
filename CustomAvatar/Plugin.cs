@@ -125,7 +125,7 @@ namespace CustomAvatar
             {
                 SettingsManager.Settings.IsAvatarVisibleInFirstPerson = !SettingsManager.Settings.IsAvatarVisibleInFirstPerson;
                 Logger.Info($"{(SettingsManager.Settings.IsAvatarVisibleInFirstPerson ? "Enabled" : "Disabled")} first person visibility");
-                avatarManager.OnFirstPersonEnabledChanged();
+                avatarManager.CurrentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
             }
             else if (Input.GetKeyDown(KeyCode.End))
             {

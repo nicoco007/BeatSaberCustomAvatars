@@ -91,18 +91,14 @@ namespace CustomAvatar
             if (avatar == null) return;
             if (CurrentlySpawnedAvatar?.CustomAvatar == avatar) return;
 
-            if (CurrentlySpawnedAvatar?.GameObject != null)
-            {
-                Object.Destroy(CurrentlySpawnedAvatar.GameObject);
-            }
+            CurrentlySpawnedAvatar?.Destroy();
 
             CurrentlySpawnedAvatar = SpawnAvatar(avatar);
 
             AvatarChanged?.Invoke(CurrentlySpawnedAvatar);
 
-            AvatarTailor.OnAvatarLoaded(CurrentlySpawnedAvatar);
             ResizeCurrentAvatar();
-            OnFirstPersonEnabledChanged();
+            CurrentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
 
             SettingsManager.Settings.PreviousAvatarPath = avatar.FullPath;
         }
@@ -129,25 +125,15 @@ namespace CustomAvatar
 
         public void ResizeCurrentAvatar()
         {
-            if (CurrentlySpawnedAvatar?.GameObject == null) return;
             if (CurrentlySpawnedAvatar?.CustomAvatar.Descriptor.AllowHeightCalibration != true) return;
 
             AvatarTailor.ResizeAvatar(CurrentlySpawnedAvatar);
         }
 
-        public void OnFirstPersonEnabledChanged()
-        {
-            if (CurrentlySpawnedAvatar == null) return;
-            AvatarLayers.SetChildrenToLayer(CurrentlySpawnedAvatar.GameObject,
-                SettingsManager.Settings.IsAvatarVisibleInFirstPerson ? AvatarLayers.AlwaysVisible : AvatarLayers.OnlyInThirdPerson);
-            foreach (var ex in CurrentlySpawnedAvatar.GameObject.GetComponentsInChildren<AvatarScriptPack.FirstPersonExclusion>())
-                ex.OnFirstPersonEnabledChanged();
-        }
-
         private void OnSceneLoaded(Scene newScene, LoadSceneMode mode)
         {
             ResizeCurrentAvatar();
-            OnFirstPersonEnabledChanged();
+            CurrentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
             CurrentlySpawnedAvatar?.EventsPlayer?.Restart();
         }
 

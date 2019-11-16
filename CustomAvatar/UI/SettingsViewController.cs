@@ -55,7 +55,7 @@ namespace CustomAvatar.UI
         private void OnVisibleInFirstPersonChanged(bool value)
         {
             SettingsManager.Settings.IsAvatarVisibleInFirstPerson = value;
-            AvatarManager.Instance.OnFirstPersonEnabledChanged();
+            AvatarManager.Instance.CurrentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
         }
 
         [UIAction("resize-change")]

@@ -3,15 +3,12 @@ using System.Collections;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
 using UnityEngine;
-using static IPA.Logging.Logger;
 
 namespace CustomAvatar
 {
     public class AvatarTailor
     {
         private Vector3? initialPlatformPosition = null;
-        private float? initialAvatarPositionY = null;
-        private Vector3 initialAvatarLocalScale = Vector3.one;
 
         private Animator FindAvatarAnimator(GameObject gameObject)
         {
@@ -22,21 +19,8 @@ namespace CustomAvatar
             return animator;
         }
 
-        public void OnAvatarLoaded(SpawnedAvatar avatar)
-        {
-            initialAvatarLocalScale = avatar.GameObject.transform.localScale;
-            initialAvatarPositionY = null;
-        }
-
         public void ResizeAvatar(SpawnedAvatar avatar)
         {
-            var animator = FindAvatarAnimator(avatar.GameObject);
-            if (animator == null)
-            {
-                Plugin.Logger.Warn("Tailor: Animator not found");
-                return;
-            }
-
             // compute scale
             float scale;
             AvatarResizeMode resizeMode = SettingsManager.Settings.ResizeMode;
@@ -60,14 +44,12 @@ namespace CustomAvatar
             }
 
             // apply scale
-            avatar.GameObject.transform.localScale = initialAvatarLocalScale * scale;
+            avatar.Scale = scale;
 
-            Plugin.Logger.Log(Level.Info, "Avatar resized with scale: " + scale);
-
-            SharedCoroutineStarter.instance.StartCoroutine(FloorMendingWithDelay(avatar, animator, scale));
+            SharedCoroutineStarter.instance.StartCoroutine(FloorMendingWithDelay(avatar, scale));
         }
 
-        private IEnumerator FloorMendingWithDelay(SpawnedAvatar avatar, Animator animator, float scale)
+        private IEnumerator FloorMendingWithDelay(SpawnedAvatar avatar, float scale)
         {
             yield return new WaitForEndOfFrame(); // wait for CustomFloorPlugin:PlatformManager:Start to hide original platform
 
@@ -76,13 +58,13 @@ namespace CustomAvatar
             if (SettingsManager.Settings.EnableFloorAdjust)
             {
                 float playerViewPointHeight = BeatSaberUtil.GetPlayerEyeHeight();
-                float avatarViewPointHeight = avatar.CustomAvatar.ViewPoint?.position.y ?? playerViewPointHeight;
-                initialAvatarPositionY = initialAvatarPositionY ?? animator.transform.position.y;
+                float avatarViewPointHeight = avatar.CustomAvatar.ViewPoint.position.y;
+
                 floorOffset = playerViewPointHeight - avatarViewPointHeight * scale;
             }
 
             // apply offset
-            animator.transform.position = new Vector3(animator.transform.position.x, floorOffset + initialAvatarPositionY ?? 0, animator.transform.position.z);
+			avatar.Position = new Vector3(0, floorOffset, 0);
             
             var originalFloor = GameObject.Find("MenuPlayersPlace") ?? GameObject.Find("Static/PlayersPlace");
             var customFloor = GameObject.Find("Platform Loader");
