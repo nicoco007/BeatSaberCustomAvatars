@@ -53,7 +53,7 @@ namespace CustomAvatar
 			_trackedDevices.DeviceAdded += (device) => UpdateVrikReferences();
 			_trackedDevices.DeviceRemoved += (device) => UpdateVrikReferences();
 
-			_head = GetHeadTransform();
+			_head = gameObject.transform.Find("Head");
 			_body = gameObject.transform.Find("Body");
 			_leftHand = gameObject.transform.Find("LeftHand");
 			_rightHand = gameObject.transform.Find("RightHand");
@@ -277,17 +277,6 @@ namespace CustomAvatar
 
 			boneTransform.localPosition = Vector3.Lerp(open.position, closed.position, position);
 			boneTransform.localRotation = Quaternion.Slerp(open.rotation, closed.rotation, position);
-		}
-
-		private Transform GetHeadTransform()
-		{
-			var descriptor = GetComponent<AvatarDescriptor>();
-			if (descriptor != null)
-			{
-				//if (descriptor.ViewPoint != null) return descriptor.ViewPoint;
-			}
-
-			return gameObject.transform.Find("Head");
 		}
 	}
 }
