@@ -16,30 +16,30 @@ namespace CustomAvatar.UI
     {
         public override string ResourceName => "CustomAvatar.Views.AvatarListViewController.bsml";
 		
-        [UIComponent("avatar-list")] public CustomListTableData avatarList;
-        [UIComponent("up-button")] public Button upButton;
-        [UIComponent("down-button")] public Button downButton;
+        [UIComponent("avatar-list")] public CustomListTableData AvatarList;
+        [UIComponent("up-button")] public Button UpButton;
+        [UIComponent("down-button")] public Button DownButton;
 
-        private List<CustomAvatar> _avatars = new List<CustomAvatar>();
-        private LevelListTableCell _tableCellTemplate;
+        private List<CustomAvatar> avatars = new List<CustomAvatar>();
+        private LevelListTableCell tableCellTemplate;
         
         protected override void DidActivate(bool firstActivation, ActivationType type)
         {
             base.DidActivate(firstActivation, type);
 
-            AvatarManager.Instance.avatarChanged += OnAvatarChanged;
+            AvatarManager.Instance.AvatarChanged += OnAvatarChanged;
 
             if (firstActivation) FirstActivation();
         }
 
         private void FirstActivation()
         {
-	        this._tableCellTemplate = Resources.FindObjectsOfTypeAll<LevelListTableCell>().First(x => x.name == "LevelListTableCell");
+	        tableCellTemplate = Resources.FindObjectsOfTypeAll<LevelListTableCell>().First(x => x.name == "LevelListTableCell");
 	        AvatarManager.Instance.GetAvatarsAsync(avatar =>
 	        {
-		        Plugin.Logger.Info("Loaded avatar " + avatar.descriptor.Name);
+		        Plugin.Logger.Info("Loaded avatar " + avatar.Descriptor.Name);
 
-		        this._avatars.Add(avatar);
+		        avatars.Add(avatar);
 
 		        ReloadData();
 	        }, ex =>
@@ -47,22 +47,22 @@ namespace CustomAvatar.UI
 				Plugin.Logger.Error("Failed to load avatar: " + ex.Message);
 	        });
 
-	        avatarList.tableView.dataSource = this;
-	        avatarList.tableView.SetPrivateField("_pageUpButton", upButton);
-	        avatarList.tableView.SetPrivateField("_pageDownButton", downButton);
+	        AvatarList.tableView.dataSource = this;
+	        AvatarList.tableView.SetPrivateField("_pageUpButton", UpButton);
+	        AvatarList.tableView.SetPrivateField("_pageDownButton", DownButton);
 
-	        TableViewScroller scroller = avatarList.tableView.GetPrivateField<TableViewScroller>("_scroller");
+	        TableViewScroller scroller = AvatarList.tableView.GetPrivateField<TableViewScroller>("_scroller");
 
-			upButton.onClick.AddListener(() =>
+			UpButton.onClick.AddListener(() =>
 			{
 				scroller.PageScrollUp();
-				avatarList.tableView.RefreshScrollButtons();
+				AvatarList.tableView.RefreshScrollButtons();
 			});
 
-			downButton.onClick.AddListener(() =>
+			DownButton.onClick.AddListener(() =>
 			{
 				scroller.PageScrollDown();
-				avatarList.tableView.RefreshScrollButtons();
+				AvatarList.tableView.RefreshScrollButtons();
 			});
         }
 
@@ -70,7 +70,7 @@ namespace CustomAvatar.UI
         {
 	        base.DidDeactivate(deactivationType);
 
-	        AvatarManager.Instance.avatarChanged -= OnAvatarChanged;
+	        AvatarManager.Instance.AvatarChanged -= OnAvatarChanged;
         }
 
 		
@@ -79,7 +79,7 @@ namespace CustomAvatar.UI
         [UIAction("avatar-click")]
         private void OnAvatarClicked(TableView table, int row)
 		{
-	        AvatarManager.Instance.SwitchToAvatar(this._avatars[row]);
+	        AvatarManager.Instance.SwitchToAvatar(avatars[row]);
         }
 
         private void OnAvatarChanged(SpawnedAvatar avatar)
@@ -89,13 +89,13 @@ namespace CustomAvatar.UI
 
         private void ReloadData()
         {
-	        this._avatars.Sort((a, b) => string.Compare(a.descriptor.Name, b.descriptor.Name, StringComparison.CurrentCulture));
+	        avatars.Sort((a, b) => string.Compare(a.Descriptor.Name, b.Descriptor.Name, StringComparison.CurrentCulture));
 
-	        int currentRow = this._avatars.FindIndex(a => a.fullPath == AvatarManager.Instance.CurrentlySpawnedAvatar?.customAvatar.fullPath);
+	        int currentRow = avatars.FindIndex(a => a.FullPath == AvatarManager.Instance.CurrentlySpawnedAvatar?.CustomAvatar.FullPath);
 			
-            avatarList.tableView.ReloadData();
-            avatarList.tableView.ScrollToCellWithIdx(currentRow, TableViewScroller.ScrollPositionType.Center, true);
-            avatarList.tableView.SelectCellWithIdx(currentRow);
+            AvatarList.tableView.ReloadData();
+            AvatarList.tableView.ScrollToCellWithIdx(currentRow, TableViewScroller.ScrollPositionType.Center, true);
+            AvatarList.tableView.SelectCellWithIdx(currentRow);
         }
 
         public float CellSize()
@@ -105,16 +105,16 @@ namespace CustomAvatar.UI
 
         public int NumberOfCells()
         {
-	        return this._avatars.Count;
+	        return avatars.Count;
         }
 
         public TableCell CellForIdx(TableView tableView, int idx)
         {
-	        LevelListTableCell tableCell = avatarList.tableView.DequeueReusableCellForIdentifier("AvatarListCell") as LevelListTableCell;
+	        LevelListTableCell tableCell = AvatarList.tableView.DequeueReusableCellForIdentifier("AvatarListCell") as LevelListTableCell;
 
 	        if (!tableCell)
 	        {
-		        tableCell = Instantiate(this._tableCellTemplate);
+		        tableCell = Instantiate(tableCellTemplate);
 
 		        foreach (var image in tableCell.GetPrivateField<UnityEngine.UI.Image[]>("_beatmapCharacteristicImages"))
 		        {
@@ -127,11 +127,11 @@ namespace CustomAvatar.UI
 		        tableCell.reuseIdentifier = "CustomAvatarsTableCell";
 	        }
 
-	        CustomAvatar avatar = this._avatars[idx];
+	        CustomAvatar avatar = avatars[idx];
 
-	        tableCell.GetPrivateField<TextMeshProUGUI>("_songNameText").text = avatar.descriptor.Name;
-	        tableCell.GetPrivateField<TextMeshProUGUI>("_authorText").text = avatar.descriptor.Author;
-	        tableCell.GetPrivateField<RawImage>("_coverRawImage").texture = avatar.descriptor.Cover?.texture ?? Texture2D.blackTexture;
+	        tableCell.GetPrivateField<TextMeshProUGUI>("_songNameText").text = avatar.Descriptor.Name;
+	        tableCell.GetPrivateField<TextMeshProUGUI>("_authorText").text = avatar.Descriptor.Author;
+	        tableCell.GetPrivateField<RawImage>("_coverRawImage").texture = avatar.Descriptor.Cover?.texture ?? Texture2D.blackTexture;
 
 	        return tableCell;
         }

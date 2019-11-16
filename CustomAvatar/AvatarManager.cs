@@ -9,27 +9,27 @@ namespace CustomAvatar
 {
 	public class AvatarManager
 	{
-		public static readonly string kCustomAvatarsPath = Path.GetFullPath("CustomAvatars");
+		public static readonly string CustomAvatarsPath = Path.GetFullPath("CustomAvatars");
 
 		public static AvatarManager Instance
 		{
 			get
 			{
-                if (_instance == null)
+                if (instance == null)
 				{
-                    _instance = new AvatarManager();
+                    instance = new AvatarManager();
 				}
 
-                return _instance;
+                return instance;
 			}
 		}
 
-		private static AvatarManager _instance;
+		private static AvatarManager instance;
         
 		public AvatarTailor AvatarTailor { get; }
 		public SpawnedAvatar CurrentlySpawnedAvatar { get; private set; }
 
-		public event Action<SpawnedAvatar> avatarChanged;
+		public event Action<SpawnedAvatar> AvatarChanged;
 
 		private AvatarManager()
 		{
@@ -49,9 +49,9 @@ namespace CustomAvatar
 
 		public void GetAvatarsAsync(Action<CustomAvatar> success, Action<Exception> error)
 		{
-			Plugin.Logger.Info("Loading all avatars from " + kCustomAvatarsPath);
+			Plugin.Logger.Info("Loading all avatars from " + CustomAvatarsPath);
 
-			foreach (string filePath in Directory.GetFiles(kCustomAvatarsPath, "*.avatar"))
+			foreach (string filePath in Directory.GetFiles(CustomAvatarsPath, "*.avatar"))
 			{
 				SharedCoroutineStarter.instance.StartCoroutine(CustomAvatar.FromFileCoroutine(filePath, success, error));
 			}
@@ -63,7 +63,7 @@ namespace CustomAvatar
 
 			if (!File.Exists(previousAvatarPath))
 			{
-				previousAvatarPath = Directory.GetFiles(kCustomAvatarsPath, "*.avatar").FirstOrDefault();
+				previousAvatarPath = Directory.GetFiles(CustomAvatarsPath, "*.avatar").FirstOrDefault();
 			}
 
 			if (string.IsNullOrEmpty(previousAvatarPath))
@@ -89,28 +89,28 @@ namespace CustomAvatar
 		public void SwitchToAvatar(CustomAvatar avatar)
 		{
 			if (avatar == null) return;
-			if (CurrentlySpawnedAvatar?.customAvatar == avatar) return;
+			if (CurrentlySpawnedAvatar?.CustomAvatar == avatar) return;
 
-			if (CurrentlySpawnedAvatar?.gameObject != null)
+			if (CurrentlySpawnedAvatar?.GameObject != null)
 			{
-				Object.Destroy(CurrentlySpawnedAvatar.gameObject);
+				Object.Destroy(CurrentlySpawnedAvatar.GameObject);
 			}
 
 			CurrentlySpawnedAvatar = SpawnAvatar(avatar);
 
-			avatarChanged?.Invoke(CurrentlySpawnedAvatar);
+			AvatarChanged?.Invoke(CurrentlySpawnedAvatar);
 
 			AvatarTailor.OnAvatarLoaded(CurrentlySpawnedAvatar);
 			ResizeCurrentAvatar();
 			OnFirstPersonEnabledChanged();
 
-			SettingsManager.Settings.PreviousAvatarPath = avatar.fullPath;
+			SettingsManager.Settings.PreviousAvatarPath = avatar.FullPath;
 		}
 
 		public void SwitchToNextAvatar()
 		{
-			string[] files = Directory.GetFiles(kCustomAvatarsPath, "*.avatar");
-			int index = Array.IndexOf(files, CurrentlySpawnedAvatar.customAvatar.fullPath);
+			string[] files = Directory.GetFiles(CustomAvatarsPath, "*.avatar");
+			int index = Array.IndexOf(files, CurrentlySpawnedAvatar.CustomAvatar.FullPath);
 
 			index = (index + 1) % files.Length;
 
@@ -119,8 +119,8 @@ namespace CustomAvatar
 
 		public void SwitchToPreviousAvatar()
 		{
-			string[] files = Directory.GetFiles(kCustomAvatarsPath, "*.avatar");
-			int index = Array.IndexOf(files, CurrentlySpawnedAvatar.customAvatar.fullPath);
+			string[] files = Directory.GetFiles(CustomAvatarsPath, "*.avatar");
+			int index = Array.IndexOf(files, CurrentlySpawnedAvatar.CustomAvatar.FullPath);
 
 			index = (index + files.Length - 1) % files.Length;
 
@@ -129,8 +129,8 @@ namespace CustomAvatar
 
 		public void ResizeCurrentAvatar()
 		{
-			if (CurrentlySpawnedAvatar?.gameObject == null) return;
-			if (CurrentlySpawnedAvatar?.customAvatar.descriptor.AllowHeightCalibration != true) return;
+			if (CurrentlySpawnedAvatar?.GameObject == null) return;
+			if (CurrentlySpawnedAvatar?.CustomAvatar.Descriptor.AllowHeightCalibration != true) return;
 
 			AvatarTailor.ResizeAvatar(CurrentlySpawnedAvatar);
 		}
@@ -138,9 +138,9 @@ namespace CustomAvatar
 		public void OnFirstPersonEnabledChanged()
 		{
 			if (CurrentlySpawnedAvatar == null) return;
-			AvatarLayers.SetChildrenToLayer(CurrentlySpawnedAvatar.gameObject,
+			AvatarLayers.SetChildrenToLayer(CurrentlySpawnedAvatar.GameObject,
 				SettingsManager.Settings.IsAvatarVisibleInFirstPerson ? AvatarLayers.AlwaysVisible : AvatarLayers.OnlyInThirdPerson);
-			foreach (var ex in CurrentlySpawnedAvatar.gameObject.GetComponentsInChildren<AvatarScriptPack.FirstPersonExclusion>())
+			foreach (var ex in CurrentlySpawnedAvatar.GameObject.GetComponentsInChildren<AvatarScriptPack.FirstPersonExclusion>())
 				ex.OnFirstPersonEnabledChanged();
 		}
 
@@ -148,15 +148,15 @@ namespace CustomAvatar
 		{
 			ResizeCurrentAvatar();
 			OnFirstPersonEnabledChanged();
-			CurrentlySpawnedAvatar?.eventsPlayer?.Restart();
+			CurrentlySpawnedAvatar?.EventsPlayer?.Restart();
 		}
 
 		private void OnSceneTransitioned(Scene newScene)
 		{
 			if (newScene.name.Equals("GameCore"))
-				CurrentlySpawnedAvatar?.eventsPlayer?.LevelStartedEvent();
+				CurrentlySpawnedAvatar?.EventsPlayer?.LevelStartedEvent();
 			else if (newScene.name.Equals("MenuCore"))
-				CurrentlySpawnedAvatar?.eventsPlayer.MenuEnteredEvent();
+				CurrentlySpawnedAvatar?.EventsPlayer.MenuEnteredEvent();
 		}
 
 		private static SpawnedAvatar SpawnAvatar(CustomAvatar customAvatar)

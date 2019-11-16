@@ -9,9 +9,9 @@ namespace CustomAvatar
 {
 	public class AvatarTailor
 	{
-		private Vector3? _initialPlatformPosition = null;
-		private float? _initialAvatarPositionY = null;
-		private Vector3 _initialAvatarLocalScale = Vector3.one;
+		private Vector3? initialPlatformPosition = null;
+		private float? initialAvatarPositionY = null;
+		private Vector3 initialAvatarLocalScale = Vector3.one;
 
 		private Animator FindAvatarAnimator(GameObject gameObject)
 		{
@@ -24,13 +24,13 @@ namespace CustomAvatar
 
 		public void OnAvatarLoaded(SpawnedAvatar avatar)
 		{
-			_initialAvatarLocalScale = avatar.gameObject.transform.localScale;
-			_initialAvatarPositionY = null;
+			initialAvatarLocalScale = avatar.GameObject.transform.localScale;
+			initialAvatarPositionY = null;
 		}
 
 		public void ResizeAvatar(SpawnedAvatar avatar)
 		{
-			var animator = FindAvatarAnimator(avatar.gameObject);
+			var animator = FindAvatarAnimator(avatar.GameObject);
 			if (animator == null)
 			{
 				Plugin.Logger.Warn("Tailor: Animator not found");
@@ -45,13 +45,13 @@ namespace CustomAvatar
 			{
 				case AvatarResizeMode.ArmSpan:
 					float playerArmLength = SettingsManager.Settings.PlayerArmSpan;
-					var avatarArmLength = avatar.customAvatar.GetArmSpan();
+					var avatarArmLength = avatar.CustomAvatar.GetArmSpan();
 
 					scale = playerArmLength / avatarArmLength;
 					break;
 
 				case AvatarResizeMode.Height:
-					scale = BeatSaberUtil.GetPlayerEyeHeight() / avatar.customAvatar.eyeHeight;
+					scale = BeatSaberUtil.GetPlayerEyeHeight() / avatar.CustomAvatar.EyeHeight;
 					break;
 
 				default:
@@ -60,7 +60,7 @@ namespace CustomAvatar
 			}
 
 			// apply scale
-			avatar.gameObject.transform.localScale = _initialAvatarLocalScale * scale;
+			avatar.GameObject.transform.localScale = initialAvatarLocalScale * scale;
 
 			Plugin.Logger.Log(Level.Info, "Avatar resized with scale: " + scale);
 
@@ -76,13 +76,13 @@ namespace CustomAvatar
 			if (SettingsManager.Settings.EnableFloorAdjust)
 			{
 				float playerViewPointHeight = BeatSaberUtil.GetPlayerEyeHeight();
-				float avatarViewPointHeight = avatar.customAvatar.viewPoint?.position.y ?? playerViewPointHeight;
-				_initialAvatarPositionY = _initialAvatarPositionY ?? animator.transform.position.y;
+				float avatarViewPointHeight = avatar.CustomAvatar.ViewPoint?.position.y ?? playerViewPointHeight;
+				initialAvatarPositionY = initialAvatarPositionY ?? animator.transform.position.y;
 				floorOffset = playerViewPointHeight - avatarViewPointHeight * scale;
 			}
 
 			// apply offset
-			animator.transform.position = new Vector3(animator.transform.position.x, floorOffset + _initialAvatarPositionY ?? 0, animator.transform.position.z);
+			animator.transform.position = new Vector3(animator.transform.position.x, floorOffset + initialAvatarPositionY ?? 0, animator.transform.position.z);
 			
 			var originalFloor = GameObject.Find("MenuPlayersPlace") ?? GameObject.Find("Static/PlayersPlace");
 			var customFloor = GameObject.Find("Platform Loader");
@@ -99,8 +99,8 @@ namespace CustomAvatar
 			{
 				Plugin.Logger.Info($"Moving Custom Platforms floor {Math.Abs(floorOffset)} m {(floorOffset >= 0 ? "up" : "down")}");
 
-				_initialPlatformPosition = _initialPlatformPosition ?? customFloor.transform.position;
-				customFloor.transform.position = (Vector3.up * floorOffset) + _initialPlatformPosition ?? Vector3.zero;
+				initialPlatformPosition = initialPlatformPosition ?? customFloor.transform.position;
+				customFloor.transform.position = (Vector3.up * floorOffset) + initialPlatformPosition ?? Vector3.zero;
 			}
 		}
 

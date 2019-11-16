@@ -6,19 +6,19 @@ namespace CustomAvatar
 {
 	public class SpawnedAvatar
 	{
-		public CustomAvatar customAvatar { get; }
-		public GameObject gameObject { get; }
-        public AvatarEventsPlayer eventsPlayer { get; }
+		public CustomAvatar CustomAvatar { get; }
+		public GameObject GameObject { get; }
+        public AvatarEventsPlayer EventsPlayer { get; }
 
 		public SpawnedAvatar(CustomAvatar customAvatar)
 		{
-			this.customAvatar = customAvatar ?? throw new ArgumentNullException(nameof(customAvatar));
-			this.gameObject = Object.Instantiate(customAvatar.gameObject);
-			this.eventsPlayer = this.gameObject.AddComponent<AvatarEventsPlayer>();
+			CustomAvatar = customAvatar ?? throw new ArgumentNullException(nameof(customAvatar));
+			GameObject = Object.Instantiate(customAvatar.GameObject);
+			EventsPlayer = GameObject.AddComponent<AvatarEventsPlayer>();
 
-			this.gameObject.AddComponent<AvatarBehaviour>();
+			GameObject.AddComponent<AvatarBehaviour>();
 
-			Object.DontDestroyOnLoad(this.gameObject);
+			Object.DontDestroyOnLoad(GameObject);
 		}
 	}
 }

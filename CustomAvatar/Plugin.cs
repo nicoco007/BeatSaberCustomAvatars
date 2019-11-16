@@ -17,7 +17,7 @@ namespace CustomAvatar
 {
 	public class Plugin : IBeatSaberPlugin
 	{
-		private GameScenesManager _scenesManager;
+		private GameScenesManager scenesManager;
 
 		public event Action<Scene> SceneTransitioned;
 
@@ -50,22 +50,22 @@ namespace CustomAvatar
 
 		public void OnApplicationQuit()
 		{
-			if (_scenesManager != null)
-				_scenesManager.transitionDidFinishEvent -= SceneTransitionDidFinish;
+			if (scenesManager != null)
+				scenesManager.transitionDidFinishEvent -= SceneTransitionDidFinish;
 
 			SettingsManager.SaveSettings();
 		}
 
 		public void OnSceneLoaded(Scene newScene, LoadSceneMode mode)
 		{
-			if (_scenesManager == null)
+			if (scenesManager == null)
 			{
-				_scenesManager = Resources.FindObjectsOfTypeAll<GameScenesManager>().FirstOrDefault();
+				scenesManager = Resources.FindObjectsOfTypeAll<GameScenesManager>().FirstOrDefault();
 
-				if (_scenesManager != null)
+				if (scenesManager != null)
 				{
-					_scenesManager.transitionDidFinishEvent += SceneTransitionDidFinish;
-					_scenesManager.transitionDidFinishEvent += () => SceneTransitioned?.Invoke(SceneManager.GetActiveScene());
+					scenesManager.transitionDidFinishEvent += SceneTransitionDidFinish;
+					scenesManager.transitionDidFinishEvent += () => SceneTransitioned?.Invoke(SceneManager.GetActiveScene());
 				}
 			}
 

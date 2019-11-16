@@ -8,45 +8,45 @@ namespace CustomAvatar
 {
 	public class CustomAvatar
 	{
-		private const float kMinIKAvatarHeight = 1.4f;
-		private const float kMaxIKAvatarHeight = 2.5f;
-		private const string kGameObjectName = "_CustomAvatar";
-		private float? _eyeHeight;
+		private const float MinIkAvatarHeight = 1.4f;
+		private const float MaxIkAvatarHeight = 2.5f;
+		private const string GameObjectName = "_CustomAvatar";
+		private float? eyeHeight;
 
-		public string fullPath { get; }
-		public GameObject gameObject { get; }
-		public AvatarDescriptor descriptor { get; }
-		public Transform viewPoint { get; }
+		public string FullPath { get; }
+		public GameObject GameObject { get; }
+		public AvatarDescriptor Descriptor { get; }
+		public Transform ViewPoint { get; }
 
-		public float eyeHeight
+		public float EyeHeight
 		{
 			get
 			{
-				if (gameObject == null) return BeatSaberUtil.GetPlayerEyeHeight();
-				if (_eyeHeight == null)
+				if (GameObject == null) return BeatSaberUtil.GetPlayerEyeHeight();
+				if (eyeHeight == null)
 				{
-					var localPosition = gameObject.transform.InverseTransformPoint(viewPoint.position);
-					_eyeHeight = localPosition.y;
+					var localPosition = GameObject.transform.InverseTransformPoint(ViewPoint.position);
+					eyeHeight = localPosition.y;
 			
 					//This is to handle cases where the head might be at 0,0,0, like in a non-IK avatar.
-					if (_eyeHeight < kMinIKAvatarHeight || _eyeHeight > kMaxIKAvatarHeight)
+					if (eyeHeight < MinIkAvatarHeight || eyeHeight > MaxIkAvatarHeight)
 					{
-						_eyeHeight = MainSettingsModel.kDefaultPlayerHeight;
+						eyeHeight = MainSettingsModel.kDefaultPlayerHeight;
 					}
 				}
 
-				return _eyeHeight.Value;
+				return eyeHeight.Value;
 			}
 		}
 
 		public CustomAvatar(string fullPath, GameObject avatarGameObject)
 		{
-			this.fullPath = fullPath ?? throw new ArgumentNullException(nameof(avatarGameObject));
-			this.gameObject = avatarGameObject ?? throw new ArgumentNullException(nameof(avatarGameObject));
-			this.descriptor = avatarGameObject.GetComponent<AvatarDescriptor>() ?? throw new AvatarLoadException($"Avatar at '{fullPath}' does not have an AvatarDescriptor");
-			this.viewPoint = avatarGameObject.transform.Find("Head") ?? throw new AvatarLoadException($"Avatar '{descriptor.Name}' does not have a Head transform");
+			FullPath = fullPath ?? throw new ArgumentNullException(nameof(avatarGameObject));
+			GameObject = avatarGameObject ?? throw new ArgumentNullException(nameof(avatarGameObject));
+			Descriptor = avatarGameObject.GetComponent<AvatarDescriptor>() ?? throw new AvatarLoadException($"Avatar at '{fullPath}' does not have an AvatarDescriptor");
+			ViewPoint = avatarGameObject.transform.Find("Head") ?? throw new AvatarLoadException($"Avatar '{Descriptor.Name}' does not have a Head transform");
 
-			this.gameObject.transform.localScale = Vector3.one * 0.56666666666f;
+			GameObject.transform.localScale = Vector3.one * 0.56666666666f;
 		}
 
 		public static IEnumerator<AsyncOperation> FromFileCoroutine(string filePath, Action<CustomAvatar> success, Action<Exception> error)
@@ -62,7 +62,7 @@ namespace CustomAvatar
 				yield break;
 			}
 
-			AssetBundleRequest assetBundleRequest = assetBundleCreateRequest.assetBundle.LoadAssetWithSubAssetsAsync<GameObject>(kGameObjectName);
+			AssetBundleRequest assetBundleRequest = assetBundleCreateRequest.assetBundle.LoadAssetWithSubAssetsAsync<GameObject>(GameObjectName);
 			yield return assetBundleRequest;
 			assetBundleCreateRequest.assetBundle.Unload(false);
 
@@ -88,17 +88,17 @@ namespace CustomAvatar
 		/// </summary>
 		public float GetArmSpan()
 		{
-			Animator animator = gameObject.GetComponentInChildren<Animator>();
+			Animator animator = GameObject.GetComponentInChildren<Animator>();
 
 			Vector3 leftShoulder = animator.GetBoneTransform(HumanBodyBones.LeftShoulder).position;
 			Vector3 leftUpperArm = animator.GetBoneTransform(HumanBodyBones.LeftUpperArm).position;
 			Vector3 leftLowerArm = animator.GetBoneTransform(HumanBodyBones.LeftLowerArm).position;
-			Vector3 leftHand = gameObject.transform.Find("LeftHand").position;
+			Vector3 leftHand = GameObject.transform.Find("LeftHand").position;
 
 			Vector3 rightShoulder = animator.GetBoneTransform(HumanBodyBones.RightShoulder).position;
 			Vector3 rightUpperArm = animator.GetBoneTransform(HumanBodyBones.RightUpperArm).position;
 			Vector3 rightLowerArm = animator.GetBoneTransform(HumanBodyBones.RightLowerArm).position;
-			Vector3 rightHand = gameObject.transform.Find("RightHand").position;
+			Vector3 rightHand = GameObject.transform.Find("RightHand").position;
 
 			float leftArmLength = Vector3.Distance(leftShoulder, leftUpperArm) + Vector3.Distance(leftUpperArm, leftLowerArm) + Vector3.Distance(leftLowerArm, leftHand);
 			float rightArmLength = Vector3.Distance(rightShoulder, rightUpperArm) + Vector3.Distance(rightUpperArm, rightLowerArm) + Vector3.Distance(rightLowerArm, rightHand);

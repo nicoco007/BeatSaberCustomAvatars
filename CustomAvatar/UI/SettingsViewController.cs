@@ -18,35 +18,35 @@ namespace CustomAvatar.UI
 
 		#region Components
         
-		[UIComponent("arm-span")] private TextMeshProUGUI _armSpanLabel;
+		[UIComponent("arm-span")] private TextMeshProUGUI armSpanLabel;
 
 		#endregion
 
 		#region Properties
 
-		[UIValue("resize-options")] private readonly List<object> _resizeModeOptions = new List<object> { AvatarResizeMode.None, AvatarResizeMode.Height, AvatarResizeMode.ArmSpan };
+		[UIValue("resize-options")] private readonly List<object> resizeModeOptions = new List<object> { AvatarResizeMode.None, AvatarResizeMode.Height, AvatarResizeMode.ArmSpan };
 
 		#endregion
 
 		#region Values
 
-		[UIValue("visible-first-person-value")] private bool _visibleInFirstPerson;
-		[UIValue("resize-value")] private AvatarResizeMode _resizeMode;
-		[UIValue("floor-adjust-value")] private bool _floorHeightAdjust;
-		[UIValue("calibrate-fbt-on-start")] private bool _calibrateFullBodyTrackingOnStart;
+		[UIValue("visible-first-person-value")] private bool visibleInFirstPerson;
+		[UIValue("resize-value")] private AvatarResizeMode resizeMode;
+		[UIValue("floor-adjust-value")] private bool floorHeightAdjust;
+		[UIValue("calibrate-fbt-on-start")] private bool calibrateFullBodyTrackingOnStart;
 
 		#endregion
 
 		protected override void DidActivate(bool firstActivation, ActivationType type)
 		{
-			_visibleInFirstPerson = SettingsManager.Settings.IsAvatarVisibleInFirstPerson;
-			_resizeMode = SettingsManager.Settings.ResizeMode;
-			_floorHeightAdjust = SettingsManager.Settings.EnableFloorAdjust;
-			_calibrateFullBodyTrackingOnStart = SettingsManager.Settings.CalibrateFullBodyTrackingOnStart;
+			visibleInFirstPerson = SettingsManager.Settings.IsAvatarVisibleInFirstPerson;
+			resizeMode = SettingsManager.Settings.ResizeMode;
+			floorHeightAdjust = SettingsManager.Settings.EnableFloorAdjust;
+			calibrateFullBodyTrackingOnStart = SettingsManager.Settings.CalibrateFullBodyTrackingOnStart;
 
 			base.DidActivate(firstActivation, type);
 
-			_armSpanLabel.SetText($"{SettingsManager.Settings.PlayerArmSpan:0.00} m");
+			armSpanLabel.SetText($"{SettingsManager.Settings.PlayerArmSpan:0.00} m");
 		}
 
 		#region Actions
@@ -118,44 +118,44 @@ namespace CustomAvatar.UI
 
 		#region Arm Span Measurement
 		
-		private const float kMinArmSpan = 0.5f;
+		private const float KMinArmSpan = 0.5f;
 
-		private TrackedDeviceManager _playerInput = PersistentSingleton<TrackedDeviceManager>.instance;
-		private bool _isMeasuring;
-		private float _maxMeasuredArmSpan;
-		private float _lastUpdateTime;
+		private TrackedDeviceManager playerInput = PersistentSingleton<TrackedDeviceManager>.instance;
+		private bool isMeasuring;
+		private float maxMeasuredArmSpan;
+		private float lastUpdateTime;
 
 		private void MeasureArmSpan()
 		{
-			if (_isMeasuring) return;
+			if (isMeasuring) return;
 
-			_isMeasuring = true;
-			_maxMeasuredArmSpan = kMinArmSpan;
-			_lastUpdateTime = Time.timeSinceLevelLoad;
+			isMeasuring = true;
+			maxMeasuredArmSpan = KMinArmSpan;
+			lastUpdateTime = Time.timeSinceLevelLoad;
 
 			InvokeRepeating(nameof(ScanArmSpan), 0.0f, 0.1f);
 		}
 
 		private void ScanArmSpan()
 		{
-			var armSpan = Vector3.Distance(_playerInput.LeftHand.Position, _playerInput.RightHand.Position);
+			var armSpan = Vector3.Distance(playerInput.LeftHand.Position, playerInput.RightHand.Position);
 
-			if (armSpan > _maxMeasuredArmSpan)
+			if (armSpan > maxMeasuredArmSpan)
 			{
-				_maxMeasuredArmSpan = armSpan;
-				_lastUpdateTime = Time.timeSinceLevelLoad;
+				maxMeasuredArmSpan = armSpan;
+				lastUpdateTime = Time.timeSinceLevelLoad;
 			}
 
-			if (Time.timeSinceLevelLoad - _lastUpdateTime < 2.0f)
+			if (Time.timeSinceLevelLoad - lastUpdateTime < 2.0f)
 			{
-				_armSpanLabel.SetText($"Measuring... {_maxMeasuredArmSpan:0.00} m");
+				armSpanLabel.SetText($"Measuring... {maxMeasuredArmSpan:0.00} m");
 			}
 			else
 			{
 				CancelInvoke(nameof(ScanArmSpan));
-				_armSpanLabel.SetText($"{_maxMeasuredArmSpan:0.00} m");
-				SettingsManager.Settings.PlayerArmSpan = _maxMeasuredArmSpan;
-				_isMeasuring = false;
+				armSpanLabel.SetText($"{maxMeasuredArmSpan:0.00} m");
+				SettingsManager.Settings.PlayerArmSpan = maxMeasuredArmSpan;
+				isMeasuring = false;
 			}
 		}
 
