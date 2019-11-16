@@ -9,7 +9,6 @@ namespace CustomAvatar
 {
 	public class AvatarTailor
 	{
-		private float? _currentAvatarArmLength = null;
 		private Vector3? _initialPlatformPosition = null;
 		private float? _initialAvatarPositionY = null;
 		private Vector3 _initialAvatarLocalScale = Vector3.one;
@@ -27,7 +26,6 @@ namespace CustomAvatar
 		{
 			_initialAvatarLocalScale = avatar.gameObject.transform.localScale;
 			_initialAvatarPositionY = null;
-			_currentAvatarArmLength = null;
 		}
 
 		public void ResizeAvatar(SpawnedAvatar avatar)
@@ -40,20 +38,25 @@ namespace CustomAvatar
 			}
 
 			// compute scale
-			float scale = 1.0f;
+			float scale;
 			AvatarResizeMode resizeMode = SettingsManager.Settings.ResizeMode;
-			if (resizeMode == AvatarResizeMode.ArmSpan)
-			{
-				float playerArmLength = SettingsManager.Settings.PlayerArmSpan;
-				_currentAvatarArmLength = _currentAvatarArmLength ?? MeasureAvatarArmSpan(animator);
-				var avatarArmLength = _currentAvatarArmLength ?? playerArmLength;
-				Plugin.Logger.Log(Level.Debug, "Avatar arm length: " + avatarArmLength);
 
-				scale = playerArmLength / avatarArmLength;
-			}
-			else if (resizeMode == AvatarResizeMode.Height)
+			switch (resizeMode)
 			{
-				scale = BeatSaberUtil.GetPlayerEyeHeight() / avatar.customAvatar.eyeHeight;
+				case AvatarResizeMode.ArmSpan:
+					float playerArmLength = SettingsManager.Settings.PlayerArmSpan;
+					var avatarArmLength = avatar.customAvatar.GetArmSpan();
+
+					scale = playerArmLength / avatarArmLength;
+					break;
+
+				case AvatarResizeMode.Height:
+					scale = BeatSaberUtil.GetPlayerEyeHeight() / avatar.customAvatar.eyeHeight;
+					break;
+
+				default:
+					scale = 1.0f;
+					break;
 			}
 
 			// apply scale
@@ -99,21 +102,6 @@ namespace CustomAvatar
 				_initialPlatformPosition = _initialPlatformPosition ?? customFloor.transform.position;
 				customFloor.transform.position = (Vector3.up * floorOffset) + _initialPlatformPosition ?? Vector3.zero;
 			}
-		}
-
-		public static float MeasureAvatarArmSpan(Animator animator)
-		{
-			var indexFinger1 = animator.GetBoneTransform(HumanBodyBones.LeftIndexProximal).position;
-			var leftUpperArm = animator.GetBoneTransform(HumanBodyBones.LeftUpperArm).position;
-			var leftShoulder = animator.GetBoneTransform(HumanBodyBones.LeftShoulder).position;
-			var rightShoulder = animator.GetBoneTransform(HumanBodyBones.RightShoulder).position;
-			var leftElbow = animator.GetBoneTransform(HumanBodyBones.LeftLowerArm).position;
-			var leftHand = animator.GetBoneTransform(HumanBodyBones.LeftHand).position;
-
-			var shoulderLength = Vector3.Distance(leftUpperArm, leftShoulder) * 2.0f + Vector3.Distance(leftShoulder, rightShoulder);
-			var armLength = (Vector3.Distance(indexFinger1, leftHand) * 0.5f + Vector3.Distance(leftHand, leftElbow) + Vector3.Distance(leftElbow, leftUpperArm)) * 2.0f;
-
-			return shoulderLength + armLength;
 		}
 
 		public void CalibrateFullBodyTracking()

@@ -6,6 +6,10 @@ namespace CustomAvatar
 {
 	public class SpawnedAvatar
 	{
+		public CustomAvatar customAvatar { get; }
+		public GameObject gameObject { get; }
+        public AvatarEventsPlayer eventsPlayer { get; }
+
 		public SpawnedAvatar(CustomAvatar customAvatar)
 		{
 			this.customAvatar = customAvatar ?? throw new ArgumentNullException(nameof(customAvatar));
@@ -16,9 +20,5 @@ namespace CustomAvatar
 
 			Object.DontDestroyOnLoad(this.gameObject);
 		}
-		
-		public CustomAvatar customAvatar { get; }
-		public GameObject gameObject { get; }
-        public AvatarEventsPlayer eventsPlayer { get; }
 	}
 }

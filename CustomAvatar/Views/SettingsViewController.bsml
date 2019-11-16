@@ -6,7 +6,7 @@
         <horizontal pad-top="2">
             <text text="Arm Span" font-size="5" align="Left"></text>
             <text id="arm-span" font-size="5" align="Left"></text>
-            <button text="Measure" on-click="measure-arm-span-click"></button>
+            <button text="Measure" on-click="measure-arm-span-click" hover-hint="For optimal results, hold your arms out to either side of your body and point the ends of the controllers outwards as far as possible (turn your hands if necessary)."></button>
         </horizontal>
         <horizontal pad-top="8">
             <text text="Full Body Calibration" font-size="5" align="Center"></text>
