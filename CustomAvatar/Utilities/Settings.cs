@@ -8,6 +8,6 @@ namespace CustomAvatar.Utilities
 		public string PreviousAvatarPath { get; set; }
 		public float PlayerArmSpan { get; set; } = 1.7f;
 		public bool CalibrateFullBodyTrackingOnStart { get; set; } = false;
-		public float CameraNearClipPlane { get; set; } = 0.3f;
+		public float CameraNearClipPlane { get; set; } = 0.03f;
 	}
 }
