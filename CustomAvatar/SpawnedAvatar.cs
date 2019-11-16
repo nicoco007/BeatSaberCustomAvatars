@@ -8,38 +8,18 @@ namespace CustomAvatar
 	public class SpawnedAvatar
 	{
 		public CustomAvatar CustomAvatar { get; }
+		public AvatarBehaviour Behaviour { get; }
 		public AvatarEventsPlayer EventsPlayer { get; }
 
-		public Vector3 Position
-		{
-			get => gameObject.transform.position - initialPosition;
-			set => gameObject.transform.position = initialPosition + value;
-		}
-
-		public float Scale
-        {
-	        get => gameObject.transform.localScale.y / initialScale.y;
-	        set
-	        {
-		        gameObject.transform.localScale = initialScale * value;
-		        Plugin.Logger.Info("Avatar resized with scale: " + value);
-	        }
-        }
-
         private readonly GameObject gameObject;
-        private readonly Vector3 initialPosition;
-        private readonly Vector3 initialScale;
 
         public SpawnedAvatar(CustomAvatar customAvatar)
         {
             CustomAvatar = customAvatar ?? throw new ArgumentNullException(nameof(customAvatar));
             gameObject = Object.Instantiate(customAvatar.GameObject);
 
-            initialPosition = gameObject.transform.position;
-            initialScale = gameObject.transform.localScale;
-
             EventsPlayer = gameObject.AddComponent<AvatarEventsPlayer>();
-            gameObject.AddComponent<AvatarBehaviour>();
+            Behaviour = gameObject.AddComponent<AvatarBehaviour>();
 
             Object.DontDestroyOnLoad(gameObject);
         }

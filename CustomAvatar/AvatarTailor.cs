@@ -44,12 +44,12 @@ namespace CustomAvatar
             }
 
             // apply scale
-            avatar.Scale = scale;
+            avatar.Behaviour.Scale = scale;
 
-            SharedCoroutineStarter.instance.StartCoroutine(FloorMendingWithDelay(avatar, scale));
+            SharedCoroutineStarter.instance.StartCoroutine(FloorMendingWithDelay(avatar));
         }
 
-        private IEnumerator FloorMendingWithDelay(SpawnedAvatar avatar, float scale)
+        private IEnumerator FloorMendingWithDelay(SpawnedAvatar avatar)
         {
             yield return new WaitForEndOfFrame(); // wait for CustomFloorPlugin:PlatformManager:Start to hide original platform
 
@@ -60,11 +60,11 @@ namespace CustomAvatar
                 float playerViewPointHeight = BeatSaberUtil.GetPlayerEyeHeight();
                 float avatarViewPointHeight = avatar.CustomAvatar.ViewPoint.position.y;
 
-                floorOffset = playerViewPointHeight - avatarViewPointHeight * scale;
+                floorOffset = playerViewPointHeight - avatarViewPointHeight * avatar.Behaviour.Scale;
             }
 
             // apply offset
-			avatar.Position = new Vector3(0, floorOffset, 0);
+			avatar.Behaviour.Position = new Vector3(0, floorOffset, 0);
             
             var originalFloor = GameObject.Find("MenuPlayersPlace") ?? GameObject.Find("Static/PlayersPlace");
             var customFloor = GameObject.Find("Platform Loader");

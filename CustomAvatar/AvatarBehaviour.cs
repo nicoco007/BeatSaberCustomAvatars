@@ -2,6 +2,7 @@ using AvatarScriptPack;
 using CustomAvatar.Tracking;
 using DynamicOpenVR.IO;
 using System;
+using CustomAvatar.Utilities;
 using UnityEngine;
 
 namespace CustomAvatar
@@ -11,6 +12,24 @@ namespace CustomAvatar
         public static Pose? LeftLegCorrection { get; set; }
         public static Pose? RightLegCorrection { get; set; }
         public static Pose? PelvisCorrection { get; set; }
+        public Vector3 Position
+        {
+	        get => transform.position - initialPosition;
+	        set => transform.position = initialPosition + value;
+        }
+
+        public float Scale
+        {
+	        get => transform.localScale.y / initialScale.y;
+	        set
+	        {
+		        transform.localScale = initialScale * value;
+		        Plugin.Logger.Info("Avatar resized with scale: " + value);
+	        }
+        }
+		
+        private Vector3 initialPosition;
+        private Vector3 initialScale;
 
         private Transform head;
         private Transform body;
@@ -40,8 +59,17 @@ namespace CustomAvatar
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
 
+		private void Awake()
+		{
+			initialPosition = transform.position;
+			initialScale = transform.localScale;
+		}
+
         private void Start()
         {
+			Console.WriteLine(initialPosition);
+			Console.WriteLine(initialScale);
+
             vrik = GetComponentInChildren<VRIK>();
             ikManagerAdvanced = GetComponentInChildren<IKManagerAdvanced>();
             animator = GetComponentInChildren<Animator>();
@@ -53,13 +81,13 @@ namespace CustomAvatar
             trackedDevices.DeviceAdded += (device) => UpdateVrikReferences();
             trackedDevices.DeviceRemoved += (device) => UpdateVrikReferences();
 
-            head = gameObject.transform.Find("Head");
-            body = gameObject.transform.Find("Body");
-            leftHand = gameObject.transform.Find("LeftHand");
-            rightHand = gameObject.transform.Find("RightHand");
-            leftLeg = gameObject.transform.Find("LeftLeg");
-            rightLeg = gameObject.transform.Find("RightLeg");
-            pelvis = gameObject.transform.Find("Pelvis");
+            head = transform.Find("Head");
+            body = transform.Find("Body");
+            leftHand = transform.Find("LeftHand");
+            rightHand = transform.Find("RightHand");
+            leftLeg = transform.Find("LeftLeg");
+            rightLeg = transform.Find("RightLeg");
+            pelvis = transform.Find("Pelvis");
 
             UpdateVrikReferences();
         }
@@ -70,65 +98,68 @@ namespace CustomAvatar
 
             try
             {
-                TrackedDeviceState headPosRot = trackedDevices.Head;
-                TrackedDeviceState leftPosRot = trackedDevices.LeftHand;
-                TrackedDeviceState rightPosRot = trackedDevices.RightHand;
+                TrackedDeviceState headPose = trackedDevices.Head;
+                TrackedDeviceState leftPose = trackedDevices.LeftHand;
+                TrackedDeviceState rightPose = trackedDevices.RightHand;
 
-                if (head && headPosRot != null && headPosRot.NodeState.tracked)
+                if (head && headPose != null && headPose.NodeState.tracked)
                 {
-                    head.position = headPosRot.Position;
-                    head.rotation = headPosRot.Rotation;
+                    head.position = headPose.Position;
+                    head.rotation = headPose.Rotation;
                 }
 
-                if (leftHand && leftPosRot != null && leftPosRot.NodeState.tracked)
+                if (leftHand && leftPose != null && leftPose.NodeState.tracked)
                 {
-                    leftHand.position = leftPosRot.Position;
-                    leftHand.rotation = leftPosRot.Rotation;
+                    leftHand.position = leftPose.Position;
+                    leftHand.rotation = leftPose.Rotation;
 
                     vrPlatformHelper.AdjustPlatformSpecificControllerTransform(leftHand);
                 }
 
-                if (rightHand && rightPosRot != null && rightPosRot.NodeState.tracked)
+                if (rightHand && rightPose != null && rightPose.NodeState.tracked)
                 {
-                    rightHand.position = rightPosRot.Position;
-                    rightHand.rotation = rightPosRot.Rotation;
+                    rightHand.position = rightPose.Position;
+                    rightHand.rotation = rightPose.Rotation;
 
                     vrPlatformHelper.AdjustPlatformSpecificControllerTransform(rightHand);
                 }
 
-                TrackedDeviceState leftFoot = trackedDevices.LeftFoot;
-                TrackedDeviceState rightFoot = trackedDevices.RightFoot;
-                TrackedDeviceState waist = trackedDevices.Waist;
+                TrackedDeviceState leftLegTracker = trackedDevices.LeftFoot;
+                TrackedDeviceState rightLegTracker = trackedDevices.RightFoot;
+                TrackedDeviceState pelvisTracker = trackedDevices.Waist;
 
-                if (leftLeg && leftFoot != null && leftFoot.NodeState.tracked)
+                float playerEyeHeight = BeatSaberUtil.GetPlayerEyeHeight();
+                float positionScale = (playerEyeHeight - Position.y) / playerEyeHeight;
+
+                if (leftLeg && leftLegTracker != null && leftLegTracker.NodeState.tracked)
                 {
-                    var leftLegPosRot = trackedDevices.LeftFoot;
+                    var leftLegPose = trackedDevices.LeftFoot;
                     var correction = LeftLegCorrection ?? default;
 
-                    prevLeftLegPos = Vector3.Lerp(prevLeftLegPos, leftLegPosRot.Position + correction.position, 15 * Time.deltaTime);
-                    prevLeftLegRot = Quaternion.Slerp(prevLeftLegRot, leftLegPosRot.Rotation * correction.rotation, 10 * Time.deltaTime);
+                    prevLeftLegPos = Vector3.Lerp(prevLeftLegPos, (leftLegPose.Position + correction.position) * positionScale + Position, 15 * Time.deltaTime);
+                    prevLeftLegRot = Quaternion.Slerp(prevLeftLegRot, leftLegPose.Rotation * correction.rotation, 10 * Time.deltaTime);
                     leftLeg.position = prevLeftLegPos;
                     leftLeg.rotation = prevLeftLegRot;
                 }
 
-                if (rightLeg && rightFoot != null && rightFoot.NodeState.tracked)
+                if (rightLeg && rightLegTracker != null && rightLegTracker.NodeState.tracked)
                 {
-                    var rightLegPosRot = trackedDevices.RightFoot;
+                    var rightLegPose = trackedDevices.RightFoot;
                     var correction = RightLegCorrection ?? default;
 
-                    prevRightLegPos = Vector3.Lerp(prevRightLegPos, rightLegPosRot.Position + correction.position, 15 * Time.deltaTime);
-                    prevRightLegRot = Quaternion.Slerp(prevRightLegRot, rightLegPosRot.Rotation * correction.rotation, 10 * Time.deltaTime);
+                    prevRightLegPos = Vector3.Lerp(prevRightLegPos, (rightLegPose.Position + correction.position) * positionScale + Position, 15 * Time.deltaTime);
+                    prevRightLegRot = Quaternion.Slerp(prevRightLegRot, rightLegPose.Rotation * correction.rotation, 10 * Time.deltaTime);
                     rightLeg.position = prevRightLegPos;
                     rightLeg.rotation = prevRightLegRot;
                 }
 
-                if (pelvis && waist != null && waist.NodeState.tracked)
+                if (pelvis && pelvisTracker != null && pelvisTracker.NodeState.tracked)
                 {
-                    var pelvisPosRot = trackedDevices.Waist;
+                    var pelvisPose = trackedDevices.Waist;
                     var correction = PelvisCorrection ?? default;
 
-                    prevPelvisPos = Vector3.Lerp(prevPelvisPos, pelvisPosRot.Position + correction.position, 17 * Time.deltaTime);
-                    prevPelvisRot = Quaternion.Slerp(prevPelvisRot, pelvisPosRot.Rotation * correction.rotation, 13 * Time.deltaTime);
+                    prevPelvisPos = Vector3.Lerp(prevPelvisPos, (pelvisPose.Position + correction.position) * positionScale + Position, 17 * Time.deltaTime);
+                    prevPelvisRot = Quaternion.Slerp(prevPelvisRot, pelvisPose.Rotation * correction.rotation, 13 * Time.deltaTime);
                     pelvis.position = prevPelvisPos;
                     pelvis.rotation = prevPelvisRot;
                 }
@@ -140,7 +171,7 @@ namespace CustomAvatar
                     body.localPosition.z - prevBodyPos.z);
 
                 var rot = Quaternion.Euler(0.0f, head.localEulerAngles.y, 0.0f);
-                var tiltAxis = Vector3.Cross(gameObject.transform.up, vel);
+                var tiltAxis = Vector3.Cross(transform.up, vel);
                 body.localRotation = Quaternion.Lerp(body.localRotation,
                     Quaternion.AngleAxis(vel.magnitude * 1250.0f, tiltAxis) * rot,
                     Time.deltaTime * 10.0f);
