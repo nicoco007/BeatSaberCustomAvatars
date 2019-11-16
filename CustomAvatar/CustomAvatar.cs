@@ -11,6 +11,7 @@ namespace CustomAvatar
         private const float MinIkAvatarHeight = 1.4f;
         private const float MaxIkAvatarHeight = 2.5f;
         private const string GameObjectName = "_CustomAvatar";
+
         private float? eyeHeight;
 
         public string FullPath { get; }
@@ -45,8 +46,6 @@ namespace CustomAvatar
             GameObject = avatarGameObject ?? throw new ArgumentNullException(nameof(avatarGameObject));
             Descriptor = avatarGameObject.GetComponent<AvatarDescriptor>() ?? throw new AvatarLoadException($"Avatar at '{fullPath}' does not have an AvatarDescriptor");
             ViewPoint = avatarGameObject.transform.Find("Head") ?? throw new AvatarLoadException($"Avatar '{Descriptor.Name}' does not have a Head transform");
-
-            GameObject.transform.localScale = Vector3.one * 0.56666666666f;
         }
 
         public static IEnumerator<AsyncOperation> FromFileCoroutine(string filePath, Action<CustomAvatar> success, Action<Exception> error)
