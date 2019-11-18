@@ -10,15 +10,6 @@ namespace CustomAvatar
     {
         private Vector3? initialPlatformPosition = null;
 
-        private Animator FindAvatarAnimator(GameObject gameObject)
-        {
-            var vrik = gameObject.GetComponentInChildren<AvatarScriptPack.VRIK>();
-            if (vrik == null) return null;
-            var animator = vrik.gameObject.GetComponentInChildren<Animator>();
-            if (animator.avatar == null || !animator.isHuman) return null;
-            return animator;
-        }
-
         public void ResizeAvatar(SpawnedAvatar avatar)
         {
             // compute scale
