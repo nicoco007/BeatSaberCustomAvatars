@@ -63,15 +63,11 @@ namespace CustomAvatar.Tracking
                     case XRNode.HardwareTracker:
                         // try to figure out tracker role using OpenVR
                         string deviceName = InputTracking.GetNodeName(nodeStates[i].uniqueID);
-                        uint openVRDeviceId = (uint)serialNumbers.ToList().FindIndex(s => !string.IsNullOrEmpty(s) && deviceName.Contains(s));
+                        uint openVRDeviceId = (uint)Array.FindIndex(serialNumbers, s => !string.IsNullOrEmpty(s) && deviceName.Contains(s));
                         TrackedDeviceType role = OpenVRWrapper.GetTrackedDeviceType(openVRDeviceId);
 
                         switch (role)
                         {
-                            case TrackedDeviceType.ViveTracker:
-                                unassignedDevices.Enqueue(nodeStates[i]);
-                                break;
-
                             case TrackedDeviceType.LeftFoot:
                                 leftFoot = nodeStates[i];
                                 break;
@@ -83,6 +79,10 @@ namespace CustomAvatar.Tracking
                             case TrackedDeviceType.Waist:
                                 waist = nodeStates[i];
                                 break;
+
+                            default:
+	                            unassignedDevices.Enqueue(nodeStates[i]);
+	                            break;
                         }
 
                         trackerCount++;
