@@ -1,6 +1,7 @@
 # Beat Saber Custom Avatars Plugin
-[![Jenkins](https://img.shields.io/jenkins/build/https/ci.gnyra.com/job/CustomAvatarsPlugin/job/master?style=flat-square)](https://ci.gnyra.com/blue/organizations/jenkins/CustomAvatarsPlugin/)
-[![GitHub](https://img.shields.io/github/license/nicoco007/CustomAvatarsPlugin?style=flat-square)](https://github.com/nicoco007/CustomAvatarsPlugin/blob/master/LICENSE)
+[![Release](https://img.shields.io/github/v/release/nicoco007/BeatSaberCustomAvatars?include_prereleases&style=flat-square)](https://github.com/nicoco007/BeatSaberCustomAvatars/releases/)
+[![Jenkins](https://img.shields.io/jenkins/build/https/ci.gnyra.com/job/CustomAvatarsPlugin/job/master?style=flat-square)](https://ci.gnyra.com/blue/organizations/jenkins/BeatSaberCustomAvatars/)
+[![GitHub](https://img.shields.io/github/license/nicoco007/CustomAvatarsPlugin?style=flat-square)](https://github.com/nicoco007/BeatSaberCustomAvatars/blob/master/LICENSE)
 
 ## Contributing
 Guidelines coming soon.
