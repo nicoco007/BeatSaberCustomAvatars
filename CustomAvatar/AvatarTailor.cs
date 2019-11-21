@@ -14,19 +14,19 @@ namespace CustomAvatar
         {
             // compute scale
             float scale;
-            AvatarResizeMode resizeMode = SettingsManager.Settings.ResizeMode;
+            AvatarResizeMode resizeMode = SettingsManager.settings.resizeMode;
 
             switch (resizeMode)
             {
                 case AvatarResizeMode.ArmSpan:
-                    float playerArmLength = SettingsManager.Settings.PlayerArmSpan;
-                    var avatarArmLength = avatar.CustomAvatar.GetArmSpan();
+                    float playerArmLength = SettingsManager.settings.playerArmSpan;
+                    var avatarArmLength = avatar.customAvatar.GetArmSpan();
 
                     scale = playerArmLength / avatarArmLength;
                     break;
 
                 case AvatarResizeMode.Height:
-                    scale = BeatSaberUtil.GetPlayerEyeHeight() / avatar.CustomAvatar.EyeHeight;
+                    scale = BeatSaberUtil.GetPlayerEyeHeight() / avatar.customAvatar.eyeHeight;
                     break;
 
                 default:
@@ -35,7 +35,7 @@ namespace CustomAvatar
             }
 
             // apply scale
-            avatar.Behaviour.Scale = scale;
+            avatar.behaviour.scale = scale;
 
             SharedCoroutineStarter.instance.StartCoroutine(FloorMendingWithDelay(avatar));
         }
@@ -46,31 +46,31 @@ namespace CustomAvatar
 
             float floorOffset = 0f;
 
-            if (SettingsManager.Settings.EnableFloorAdjust)
+            if (SettingsManager.settings.enableFloorAdjust)
             {
                 float playerViewPointHeight = BeatSaberUtil.GetPlayerEyeHeight();
-                float avatarViewPointHeight = avatar.CustomAvatar.ViewPoint.position.y;
+                float avatarViewPointHeight = avatar.customAvatar.viewPoint.position.y;
 
-                floorOffset = playerViewPointHeight - avatarViewPointHeight * avatar.Behaviour.Scale;
+                floorOffset = playerViewPointHeight - avatarViewPointHeight * avatar.behaviour.scale;
             }
 
             // apply offset
-			avatar.Behaviour.Position = new Vector3(0, floorOffset, 0);
+			avatar.behaviour.position = new Vector3(0, floorOffset, 0);
             
             var originalFloor = GameObject.Find("MenuPlayersPlace") ?? GameObject.Find("Static/PlayersPlace");
             var customFloor = GameObject.Find("Platform Loader");
 
-            Plugin.Logger.Info("originalFloor " + originalFloor);
+            Plugin.logger.Info("originalFloor " + originalFloor);
 
             if (originalFloor != null)
             {
-                Plugin.Logger.Info($"Moving original floor {Math.Abs(floorOffset)} m {(floorOffset >= 0 ? "up" : "down")}");
+                Plugin.logger.Info($"Moving original floor {Math.Abs(floorOffset)} m {(floorOffset >= 0 ? "up" : "down")}");
                 originalFloor.transform.position = new Vector3(0, floorOffset, 0);
             }
 
             if (customFloor != null)
             {
-                Plugin.Logger.Info($"Moving Custom Platforms floor {Math.Abs(floorOffset)} m {(floorOffset >= 0 ? "up" : "down")}");
+                Plugin.logger.Info($"Moving Custom Platforms floor {Math.Abs(floorOffset)} m {(floorOffset >= 0 ? "up" : "down")}");
 
                 initialPlatformPosition = initialPlatformPosition ?? customFloor.transform.position;
                 customFloor.transform.position = (Vector3.up * floorOffset) + initialPlatformPosition ?? Vector3.zero;
@@ -79,7 +79,7 @@ namespace CustomAvatar
 
         public void CalibrateFullBodyTracking()
         {
-            Plugin.Logger.Info("Calibrating full body tracking");
+            Plugin.logger.Info("Calibrating full body tracking");
 
             TrackedDeviceManager input = PersistentSingleton<TrackedDeviceManager>.instance;
 
@@ -95,7 +95,7 @@ namespace CustomAvatar
                 Vector3 leftFootForward = leftFoot.Rotation * Vector3.up; // forward on feet trackers is y (up)
                 Vector3 leftFootStraightForward = Vector3.ProjectOnPlane(leftFootForward, normal); // get projection of forward vector on xz plane (floor)
                 Quaternion leftRotationCorrection = Quaternion.Inverse(leftFoot.Rotation) * Quaternion.LookRotation(Vector3.up, leftFootStraightForward); // get difference between world rotation and flat forward rotation
-                AvatarBehaviour.LeftLegCorrection = new Pose(leftFoot.Position.y * Vector3.down, leftRotationCorrection);
+                AvatarBehaviour.leftLegCorrection = new Pose(leftFoot.Position.y * Vector3.down, leftRotationCorrection);
             }
 
             if (rightFoot.Found)
@@ -103,7 +103,7 @@ namespace CustomAvatar
                 Vector3 rightFootForward = rightFoot.Rotation * Vector3.up;
                 Vector3 rightFootStraightForward = Vector3.ProjectOnPlane(rightFootForward, normal);
                 Quaternion rightRotationCorrection = Quaternion.Inverse(rightFoot.Rotation) * Quaternion.LookRotation(Vector3.up, rightFootStraightForward);
-                AvatarBehaviour.RightLegCorrection = new Pose(rightFoot.Position.y * Vector3.down, rightRotationCorrection);
+                AvatarBehaviour.rightLegCorrection = new Pose(rightFoot.Position.y * Vector3.down, rightRotationCorrection);
             }
 
             if (head.Found && pelvis.Found)
@@ -113,15 +113,15 @@ namespace CustomAvatar
                 var eyeHeight = head.Position.y;
                 Vector3 wantedPelvisPosition = new Vector3(0, eyeHeight / 15f * 10f, 0);
                 Vector3 pelvisPositionCorrection = wantedPelvisPosition - Vector3.up * pelvis.Position.y;
-                AvatarBehaviour.PelvisCorrection = new Pose(pelvisPositionCorrection, Quaternion.identity);
+                AvatarBehaviour.pelvisCorrection = new Pose(pelvisPositionCorrection, Quaternion.identity);
             }
         }
 
         public void ClearFullBodyTrackingData()
         {
-            AvatarBehaviour.LeftLegCorrection = default;
-            AvatarBehaviour.RightLegCorrection = default;
-            AvatarBehaviour.PelvisCorrection = default;
+            AvatarBehaviour.leftLegCorrection = default;
+            AvatarBehaviour.rightLegCorrection = default;
+            AvatarBehaviour.pelvisCorrection = default;
         }
     }
 }

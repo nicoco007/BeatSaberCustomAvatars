@@ -28,7 +28,7 @@ namespace CustomAvatar.StereoRendering
                 if (instance == null)
                 {
                     instance = new GameObject("StereoRenderManager").AddComponent<StereoRenderManager>();
-                    Plugin.Logger.Info("Initialized StereoRenderManager");
+                    Plugin.logger.Info("Initialized StereoRenderManager");
                 }
 
                 return instance;

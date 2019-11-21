@@ -39,14 +39,14 @@ namespace CustomAvatar.UI
 
         protected override void DidActivate(bool firstActivation, ActivationType type)
         {
-            visibleInFirstPerson = SettingsManager.Settings.IsAvatarVisibleInFirstPerson;
-            resizeMode = SettingsManager.Settings.ResizeMode;
-            floorHeightAdjust = SettingsManager.Settings.EnableFloorAdjust;
-            calibrateFullBodyTrackingOnStart = SettingsManager.Settings.CalibrateFullBodyTrackingOnStart;
+            visibleInFirstPerson = SettingsManager.settings.isAvatarVisibleInFirstPerson;
+            resizeMode = SettingsManager.settings.resizeMode;
+            floorHeightAdjust = SettingsManager.settings.enableFloorAdjust;
+            calibrateFullBodyTrackingOnStart = SettingsManager.settings.calibrateFullBodyTrackingOnStart;
 
             base.DidActivate(firstActivation, type);
 
-            armSpanLabel.SetText($"{SettingsManager.Settings.PlayerArmSpan:0.00} m");
+            armSpanLabel.SetText($"{SettingsManager.settings.playerArmSpan:0.00} m");
         }
 
         #region Actions
@@ -54,22 +54,22 @@ namespace CustomAvatar.UI
         [UIAction("visible-first-person-change")]
         private void OnVisibleInFirstPersonChanged(bool value)
         {
-            SettingsManager.Settings.IsAvatarVisibleInFirstPerson = value;
-            AvatarManager.Instance.CurrentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
+            SettingsManager.settings.isAvatarVisibleInFirstPerson = value;
+            AvatarManager.instance.currentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
         }
 
         [UIAction("resize-change")]
         private void OnResizeModeChanged(AvatarResizeMode value)
         {
-            SettingsManager.Settings.ResizeMode = value;
-            AvatarManager.Instance.ResizeCurrentAvatar();
+            SettingsManager.settings.resizeMode = value;
+            AvatarManager.instance.ResizeCurrentAvatar();
         }
 
         [UIAction("floor-adjust-change")]
         private void OnFloorHeightAdjustChanged(bool value)
         {
-            SettingsManager.Settings.EnableFloorAdjust = value;
-            AvatarManager.Instance.ResizeCurrentAvatar();
+            SettingsManager.settings.enableFloorAdjust = value;
+            AvatarManager.instance.ResizeCurrentAvatar();
         }
 
         [UIAction("resize-mode-formatter")]
@@ -99,19 +99,19 @@ namespace CustomAvatar.UI
         [UIAction("calibrate-fbt-click")]
         private void OnCalibrateFullBodyTrackingClicked()
         {
-            AvatarManager.Instance.AvatarTailor.CalibrateFullBodyTracking();
+            AvatarManager.instance.avatarTailor.CalibrateFullBodyTracking();
         }
 
         [UIAction("calibrate-fbt-on-start-change")]
         private void OnCalibrateFullBodyTrackingOnStartChanged(bool value)
         {
-            SettingsManager.Settings.CalibrateFullBodyTrackingOnStart = value;
+            SettingsManager.settings.calibrateFullBodyTrackingOnStart = value;
         }
 
         [UIAction("clear-fbt-calibration-data-click")]
         private void OnClearFullBodyTrackingCalibrationDataClicked()
         {
-            AvatarManager.Instance.AvatarTailor.ClearFullBodyTrackingData();
+            AvatarManager.instance.avatarTailor.ClearFullBodyTrackingData();
         }
 
         #endregion
@@ -154,7 +154,7 @@ namespace CustomAvatar.UI
             {
                 CancelInvoke(nameof(ScanArmSpan));
                 armSpanLabel.SetText($"{maxMeasuredArmSpan:0.00} m");
-                SettingsManager.Settings.PlayerArmSpan = maxMeasuredArmSpan;
+                SettingsManager.settings.playerArmSpan = maxMeasuredArmSpan;
                 isMeasuring = false;
             }
         }

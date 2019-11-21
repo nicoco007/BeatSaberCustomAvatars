@@ -4,25 +4,25 @@ namespace CustomAvatar.Utilities
 {
     internal class Settings
     {
-        public bool IsAvatarVisibleInFirstPerson { get; set; } = true;
-        public AvatarResizeMode ResizeMode { get; set; } = AvatarResizeMode.Height;
-        public bool EnableFloorAdjust { get; set; } = false;
-        public string PreviousAvatarPath { get; set; }
-        public float PlayerArmSpan { get; set; } = 1.7f;
-        public bool CalibrateFullBodyTrackingOnStart { get; set; } = false;
-        public float CameraNearClipPlane { get; set; } = 0.03f;
-        public FullBodyMotionSmoothing FullBodyMotionSmoothing { get; set; } = new FullBodyMotionSmoothing();
+        public bool isAvatarVisibleInFirstPerson { get; set; } = true;
+        public AvatarResizeMode resizeMode { get; set; } = AvatarResizeMode.Height;
+        public bool enableFloorAdjust { get; set; } = false;
+        public string previousAvatarPath { get; set; }
+        public float playerArmSpan { get; set; } = 1.7f;
+        public bool calibrateFullBodyTrackingOnStart { get; set; } = false;
+        public float cameraNearClipPlane { get; set; } = 0.03f;
+        public FullBodyMotionSmoothing fullBodyMotionSmoothing { get; set; } = new FullBodyMotionSmoothing();
     }
 
     public class FullBodyMotionSmoothing
     {
-	    public TrackedPoint Waist { get; set; } = new TrackedPoint { Position = 15, Rotation = 10 };
-	    public TrackedPoint Feet { get; set; } = new TrackedPoint { Position = 13, Rotation = 17 };
+	    public TrackedPoint waist { get; set; } = new TrackedPoint { position = 15, rotation = 10 };
+	    public TrackedPoint feet { get; set; } = new TrackedPoint { position = 13, rotation = 17 };
     }
 
     public class TrackedPoint
     {
-	    public float Position { get; set; }
-	    public float Rotation { get; set; }
+	    public float position { get; set; }
+	    public float rotation { get; set; }
     }
 }

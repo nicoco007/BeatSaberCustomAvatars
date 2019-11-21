@@ -9,49 +9,49 @@ namespace CustomAvatar
 {
     public class AvatarManager
     {
-        public static readonly string CustomAvatarsPath = Path.GetFullPath("CustomAvatars");
+        public static readonly string kCustomAvatarsPath = Path.GetFullPath("CustomAvatars");
 
-        public static AvatarManager Instance
+        public static AvatarManager instance
         {
             get
             {
-                if (instance == null)
+                if (_instance == null)
                 {
-                    instance = new AvatarManager();
+                    _instance = new AvatarManager();
                 }
 
-                return instance;
+                return _instance;
             }
         }
 
-        private static AvatarManager instance;
+        private static AvatarManager _instance;
         
-        public AvatarTailor AvatarTailor { get; }
-        public SpawnedAvatar CurrentlySpawnedAvatar { get; private set; }
+        public AvatarTailor avatarTailor { get; }
+        public SpawnedAvatar currentlySpawnedAvatar { get; private set; }
 
-        public event Action<SpawnedAvatar> AvatarChanged;
+        public event Action<SpawnedAvatar> avatarChanged;
 
         private AvatarManager()
         {
-            AvatarTailor = new AvatarTailor();
+            avatarTailor = new AvatarTailor();
 
-            Plugin.Instance.SceneTransitioned += OnSceneTransitioned;
+            Plugin.instance.sceneTransitioned += OnSceneTransitioned;
 
             SceneManager.sceneLoaded += OnSceneLoaded;
         }
 
         ~AvatarManager()
         {
-            Plugin.Instance.SceneTransitioned -= OnSceneTransitioned;
+            Plugin.instance.sceneTransitioned -= OnSceneTransitioned;
 
             SceneManager.sceneLoaded -= OnSceneLoaded;
         }
 
         public void GetAvatarsAsync(Action<CustomAvatar> success, Action<Exception> error)
         {
-            Plugin.Logger.Info("Loading all avatars from " + CustomAvatarsPath);
+            Plugin.logger.Info("Loading all avatars from " + kCustomAvatarsPath);
 
-            foreach (string filePath in Directory.GetFiles(CustomAvatarsPath, "*.avatar"))
+            foreach (string filePath in Directory.GetFiles(kCustomAvatarsPath, "*.avatar"))
             {
                 SharedCoroutineStarter.instance.StartCoroutine(CustomAvatar.FromFileCoroutine(filePath, success, error));
             }
@@ -59,16 +59,16 @@ namespace CustomAvatar
 
         public void LoadAvatarFromSettingsAsync()
         {
-            var previousAvatarPath = SettingsManager.Settings.PreviousAvatarPath;
+            var previousAvatarPath = SettingsManager.settings.previousAvatarPath;
 
             if (!File.Exists(previousAvatarPath))
             {
-                previousAvatarPath = Directory.GetFiles(CustomAvatarsPath, "*.avatar").FirstOrDefault();
+                previousAvatarPath = Directory.GetFiles(kCustomAvatarsPath, "*.avatar").FirstOrDefault();
             }
 
             if (string.IsNullOrEmpty(previousAvatarPath))
             {
-                Plugin.Logger.Info("No avatars found");
+                Plugin.logger.Info("No avatars found");
                 return;
             }
 
@@ -82,31 +82,31 @@ namespace CustomAvatar
                 SwitchToAvatar(avatar);
             }, ex =>
             {
-                Plugin.Logger.Error("Failed to load avatar: " + ex.Message);
+                Plugin.logger.Error("Failed to load avatar: " + ex.Message);
             }));
         }
 
         public void SwitchToAvatar(CustomAvatar avatar)
         {
             if (avatar == null) return;
-            if (CurrentlySpawnedAvatar?.CustomAvatar == avatar) return;
+            if (currentlySpawnedAvatar?.customAvatar == avatar) return;
 
-            CurrentlySpawnedAvatar?.Destroy();
+            currentlySpawnedAvatar?.Destroy();
 
-            CurrentlySpawnedAvatar = SpawnAvatar(avatar);
+            currentlySpawnedAvatar = SpawnAvatar(avatar);
 
-            AvatarChanged?.Invoke(CurrentlySpawnedAvatar);
+            avatarChanged?.Invoke(currentlySpawnedAvatar);
 
             ResizeCurrentAvatar();
-            CurrentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
+            currentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
 
-            SettingsManager.Settings.PreviousAvatarPath = avatar.FullPath;
+            SettingsManager.settings.previousAvatarPath = avatar.fullPath;
         }
 
         public void SwitchToNextAvatar()
         {
-            string[] files = Directory.GetFiles(CustomAvatarsPath, "*.avatar");
-            int index = Array.IndexOf(files, CurrentlySpawnedAvatar.CustomAvatar.FullPath);
+            string[] files = Directory.GetFiles(kCustomAvatarsPath, "*.avatar");
+            int index = Array.IndexOf(files, currentlySpawnedAvatar.customAvatar.fullPath);
 
             index = (index + 1) % files.Length;
 
@@ -115,8 +115,8 @@ namespace CustomAvatar
 
         public void SwitchToPreviousAvatar()
         {
-            string[] files = Directory.GetFiles(CustomAvatarsPath, "*.avatar");
-            int index = Array.IndexOf(files, CurrentlySpawnedAvatar.CustomAvatar.FullPath);
+            string[] files = Directory.GetFiles(kCustomAvatarsPath, "*.avatar");
+            int index = Array.IndexOf(files, currentlySpawnedAvatar.customAvatar.fullPath);
 
             index = (index + files.Length - 1) % files.Length;
 
@@ -125,24 +125,24 @@ namespace CustomAvatar
 
         public void ResizeCurrentAvatar()
         {
-            if (CurrentlySpawnedAvatar?.CustomAvatar.Descriptor.AllowHeightCalibration != true) return;
+            if (currentlySpawnedAvatar?.customAvatar.descriptor.AllowHeightCalibration != true) return;
 
-            AvatarTailor.ResizeAvatar(CurrentlySpawnedAvatar);
+            avatarTailor.ResizeAvatar(currentlySpawnedAvatar);
         }
 
         private void OnSceneLoaded(Scene newScene, LoadSceneMode mode)
         {
             ResizeCurrentAvatar();
-            CurrentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
-            CurrentlySpawnedAvatar?.EventsPlayer?.Restart();
+            currentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
+            currentlySpawnedAvatar?.eventsPlayer?.Restart();
         }
 
         private void OnSceneTransitioned(Scene newScene)
         {
             if (newScene.name.Equals("GameCore"))
-                CurrentlySpawnedAvatar?.EventsPlayer?.LevelStartedEvent();
+                currentlySpawnedAvatar?.eventsPlayer?.LevelStartedEvent();
             else if (newScene.name.Equals("MenuCore"))
-                CurrentlySpawnedAvatar?.EventsPlayer.MenuEnteredEvent();
+                currentlySpawnedAvatar?.eventsPlayer.MenuEnteredEvent();
         }
 
         private static SpawnedAvatar SpawnAvatar(CustomAvatar customAvatar)

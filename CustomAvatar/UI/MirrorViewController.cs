@@ -37,7 +37,7 @@ namespace CustomAvatar.UI
 
             if (!shadersBundleCreateRequest.isDone || shadersBundleCreateRequest.assetBundle == null)
             {
-                Plugin.Logger.Error("Failed to load stereo mirror shader");
+                Plugin.logger.Error("Failed to load stereo mirror shader");
                 yield break;
             }
 
@@ -47,7 +47,7 @@ namespace CustomAvatar.UI
 
             if (!assetBundleRequest.isDone || assetBundleRequest.asset == null)
             {
-                Plugin.Logger.Error("Failed to load stereo mirror shader");
+                Plugin.logger.Error("Failed to load stereo mirror shader");
                 yield break;
             }
 

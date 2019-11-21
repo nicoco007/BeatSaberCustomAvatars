@@ -7,36 +7,36 @@ namespace CustomAvatar
 {
 	public class SpawnedAvatar
 	{
-		public CustomAvatar CustomAvatar { get; }
-		public AvatarBehaviour Behaviour { get; }
-		public AvatarEventsPlayer EventsPlayer { get; }
+		public CustomAvatar customAvatar { get; }
+		public AvatarBehaviour behaviour { get; }
+		public AvatarEventsPlayer eventsPlayer { get; }
 
-        private readonly GameObject gameObject;
+        private readonly GameObject _gameObject;
 
         public SpawnedAvatar(CustomAvatar customAvatar)
         {
-            CustomAvatar = customAvatar ?? throw new ArgumentNullException(nameof(customAvatar));
-            gameObject = Object.Instantiate(customAvatar.GameObject);
+            this.customAvatar = customAvatar ?? throw new ArgumentNullException(nameof(customAvatar));
+            _gameObject = Object.Instantiate(customAvatar.gameObject);
 
-            EventsPlayer = gameObject.AddComponent<AvatarEventsPlayer>();
-            Behaviour = gameObject.AddComponent<AvatarBehaviour>();
+            eventsPlayer = _gameObject.AddComponent<AvatarEventsPlayer>();
+            behaviour = _gameObject.AddComponent<AvatarBehaviour>();
 
-            Object.DontDestroyOnLoad(gameObject);
+            Object.DontDestroyOnLoad(_gameObject);
         }
 
         public void Destroy()
         {
-	        Object.Destroy(gameObject);
+	        Object.Destroy(_gameObject);
         }
 
         public void OnFirstPersonEnabledChanged()
         {
-	        SetChildrenToLayer(SettingsManager.Settings.IsAvatarVisibleInFirstPerson ? AvatarLayers.AlwaysVisible : AvatarLayers.OnlyInThirdPerson);
+	        SetChildrenToLayer(SettingsManager.settings.isAvatarVisibleInFirstPerson ? AvatarLayers.AlwaysVisible : AvatarLayers.OnlyInThirdPerson);
         }
 
         private void SetChildrenToLayer(int layer)
         {
-	        foreach (var child in gameObject.GetComponentsInChildren<Transform>())
+	        foreach (var child in _gameObject.GetComponentsInChildren<Transform>())
 	        {
 		        child.gameObject.layer = layer;
 	        }

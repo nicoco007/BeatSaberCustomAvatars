@@ -6,38 +6,38 @@ namespace CustomAvatar.Utilities
 {
     internal static class SettingsManager
     {
-        public static readonly string SettingsPath = Path.Combine(Environment.CurrentDirectory, "UserData", "CustomAvatars.json");
-        public static Settings Settings { get; private set; }
+        public static readonly string kSettingsPath = Path.Combine(Environment.CurrentDirectory, "UserData", "CustomAvatars.json");
+        public static Settings settings { get; private set; }
 
         public static void LoadSettings()
         {
-            Plugin.Logger.Info("Loading settings from " + SettingsPath);
+            Plugin.logger.Info("Loading settings from " + kSettingsPath);
 
-            if (!File.Exists(SettingsPath))
+            if (!File.Exists(kSettingsPath))
             {
-                Plugin.Logger.Info("File does not exist, using default settings");
+                Plugin.logger.Info("File does not exist, using default settings");
 
-                Settings = new Settings();
+                settings = new Settings();
                 return;
             }
 
-            using (var reader = new StreamReader(SettingsPath))
+            using (var reader = new StreamReader(kSettingsPath))
             using (var jsonReader = new JsonTextReader(reader))
             {
                 var serializer = new JsonSerializer();
-                Settings = serializer.Deserialize<Settings>(jsonReader);
+                settings = serializer.Deserialize<Settings>(jsonReader);
             }
         }
 
         public static void SaveSettings()
         {
-            Plugin.Logger.Info("Saving settings to " + SettingsPath);
+            Plugin.logger.Info("Saving settings to " + kSettingsPath);
 
-            using (var writer = new StreamWriter(SettingsPath))
+            using (var writer = new StreamWriter(kSettingsPath))
             using (var jsonWriter = new JsonTextWriter(writer))
             {
                 var serializer = new JsonSerializer() { Formatting = Formatting.Indented };
-                serializer.Serialize(jsonWriter, Settings);
+                serializer.Serialize(jsonWriter, settings);
                 jsonWriter.Flush();
             }
         }

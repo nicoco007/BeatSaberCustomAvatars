@@ -44,7 +44,7 @@ namespace AvatarScriptPack
             }
             catch (System.Exception e)
             {
-                Plugin.Logger.Error(e.StackTrace);
+                Plugin.logger.Error(e.StackTrace);
             }
         }
 

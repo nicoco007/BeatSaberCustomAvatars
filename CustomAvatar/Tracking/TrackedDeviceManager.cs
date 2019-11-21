@@ -43,7 +43,7 @@ namespace CustomAvatar.Tracking
                 if (!foundDevices.Contains(nodeStates[i].uniqueID))
                 {
                     foundDevices.Add(nodeStates[i].uniqueID);
-                    Plugin.Logger.Debug($"Found new XR device of type \"{nodeStates[i].nodeType}\" named \"{InputTracking.GetNodeName(nodeStates[i].uniqueID)}\" with ID {nodeStates[i].uniqueID}");
+                    Plugin.logger.Debug($"Found new XR device of type \"{nodeStates[i].nodeType}\" named \"{InputTracking.GetNodeName(nodeStates[i].uniqueID)}\" with ID {nodeStates[i].uniqueID}");
                 }
 
                 switch (nodeStates[i].nodeType)
@@ -118,7 +118,7 @@ namespace CustomAvatar.Tracking
             {
                 if (!nodeStates.Exists(n => n.uniqueID == id))
                 {
-                    Plugin.Logger.Debug($"Lost XR device with ID " + id);
+                    Plugin.logger.Debug($"Lost XR device with ID " + id);
                     foundDevices.Remove(id);
                 }
             }
@@ -134,7 +134,7 @@ namespace CustomAvatar.Tracking
                     deviceState.Rotation = default;
                     deviceState.Found = false;
                     deviceState.NodeState = default;
-                    Plugin.Logger.Info($"Lost device with ID {deviceState.NodeState.uniqueID} that was used as {use}");
+                    Plugin.logger.Info($"Lost device with ID {deviceState.NodeState.uniqueID} that was used as {use}");
                     DeviceRemoved?.Invoke(deviceState);
                 }
 
@@ -158,7 +158,7 @@ namespace CustomAvatar.Tracking
 
             if (nodeState.uniqueID != previousId)
             {
-                Plugin.Logger.Info($"Using device \"{InputTracking.GetNodeName(nodeState.uniqueID)}\" ({nodeState.uniqueID}) as {use}");
+                Plugin.logger.Info($"Using device \"{InputTracking.GetNodeName(nodeState.uniqueID)}\" ({nodeState.uniqueID}) as {use}");
                 DeviceAdded?.Invoke(deviceState);
             }
         }
