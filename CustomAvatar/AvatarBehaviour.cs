@@ -245,25 +245,25 @@ namespace CustomAvatar
                 {
                     SkeletalSummaryData leftHandAnim = Plugin.leftHandAnimAction.GetSummaryData();
 
-                    ApplyBodyBonePose(HumanBodyBones.LeftThumbProximal,       _poseManager.openHand_LeftThumbProximal,       _poseManager.closedHand_LeftThumbProximal,       leftHandAnim.ThumbCurl * 2);
-                    ApplyBodyBonePose(HumanBodyBones.LeftThumbIntermediate,   _poseManager.openHand_LeftThumbIntermediate,   _poseManager.closedHand_LeftThumbIntermediate,   leftHandAnim.ThumbCurl * 2);
-                    ApplyBodyBonePose(HumanBodyBones.LeftThumbDistal,         _poseManager.openHand_LeftThumbDistal,         _poseManager.closedHand_LeftThumbDistal,         leftHandAnim.ThumbCurl * 2);
+                    ApplyBodyBonePose(HumanBodyBones.LeftThumbProximal,       _poseManager.openHand_LeftThumbProximal,       _poseManager.closedHand_LeftThumbProximal,       leftHandAnim.thumbCurl * 2);
+                    ApplyBodyBonePose(HumanBodyBones.LeftThumbIntermediate,   _poseManager.openHand_LeftThumbIntermediate,   _poseManager.closedHand_LeftThumbIntermediate,   leftHandAnim.thumbCurl * 2);
+                    ApplyBodyBonePose(HumanBodyBones.LeftThumbDistal,         _poseManager.openHand_LeftThumbDistal,         _poseManager.closedHand_LeftThumbDistal,         leftHandAnim.thumbCurl * 2);
 
-                    ApplyBodyBonePose(HumanBodyBones.LeftIndexProximal,       _poseManager.openHand_LeftIndexProximal,       _poseManager.closedHand_LeftIndexProximal,       leftHandAnim.IndexCurl);
-                    ApplyBodyBonePose(HumanBodyBones.LeftIndexIntermediate,   _poseManager.openHand_LeftIndexIntermediate,   _poseManager.closedHand_LeftIndexIntermediate,   leftHandAnim.IndexCurl);
-                    ApplyBodyBonePose(HumanBodyBones.LeftIndexDistal,         _poseManager.openHand_LeftIndexDistal,         _poseManager.closedHand_LeftIndexDistal,         leftHandAnim.IndexCurl);
+                    ApplyBodyBonePose(HumanBodyBones.LeftIndexProximal,       _poseManager.openHand_LeftIndexProximal,       _poseManager.closedHand_LeftIndexProximal,       leftHandAnim.indexCurl);
+                    ApplyBodyBonePose(HumanBodyBones.LeftIndexIntermediate,   _poseManager.openHand_LeftIndexIntermediate,   _poseManager.closedHand_LeftIndexIntermediate,   leftHandAnim.indexCurl);
+                    ApplyBodyBonePose(HumanBodyBones.LeftIndexDistal,         _poseManager.openHand_LeftIndexDistal,         _poseManager.closedHand_LeftIndexDistal,         leftHandAnim.indexCurl);
 
-                    ApplyBodyBonePose(HumanBodyBones.LeftMiddleProximal,      _poseManager.openHand_LeftMiddleProximal,      _poseManager.closedHand_LeftMiddleProximal,      leftHandAnim.MiddleCurl);
-                    ApplyBodyBonePose(HumanBodyBones.LeftMiddleIntermediate,  _poseManager.openHand_LeftMiddleIntermediate,  _poseManager.closedHand_LeftMiddleIntermediate,  leftHandAnim.MiddleCurl);
-                    ApplyBodyBonePose(HumanBodyBones.LeftMiddleDistal,        _poseManager.openHand_LeftMiddleDistal,        _poseManager.closedHand_LeftMiddleDistal,        leftHandAnim.MiddleCurl);
+                    ApplyBodyBonePose(HumanBodyBones.LeftMiddleProximal,      _poseManager.openHand_LeftMiddleProximal,      _poseManager.closedHand_LeftMiddleProximal,      leftHandAnim.middleCurl);
+                    ApplyBodyBonePose(HumanBodyBones.LeftMiddleIntermediate,  _poseManager.openHand_LeftMiddleIntermediate,  _poseManager.closedHand_LeftMiddleIntermediate,  leftHandAnim.middleCurl);
+                    ApplyBodyBonePose(HumanBodyBones.LeftMiddleDistal,        _poseManager.openHand_LeftMiddleDistal,        _poseManager.closedHand_LeftMiddleDistal,        leftHandAnim.middleCurl);
 
-                    ApplyBodyBonePose(HumanBodyBones.LeftRingProximal,        _poseManager.openHand_LeftRingProximal,        _poseManager.closedHand_LeftRingProximal,        leftHandAnim.RingCurl);
-                    ApplyBodyBonePose(HumanBodyBones.LeftRingIntermediate,    _poseManager.openHand_LeftRingIntermediate,    _poseManager.closedHand_LeftRingIntermediate,    leftHandAnim.RingCurl);
-                    ApplyBodyBonePose(HumanBodyBones.LeftRingDistal,          _poseManager.openHand_LeftRingDistal,          _poseManager.closedHand_LeftRingDistal,          leftHandAnim.RingCurl);
+                    ApplyBodyBonePose(HumanBodyBones.LeftRingProximal,        _poseManager.openHand_LeftRingProximal,        _poseManager.closedHand_LeftRingProximal,        leftHandAnim.ringCurl);
+                    ApplyBodyBonePose(HumanBodyBones.LeftRingIntermediate,    _poseManager.openHand_LeftRingIntermediate,    _poseManager.closedHand_LeftRingIntermediate,    leftHandAnim.ringCurl);
+                    ApplyBodyBonePose(HumanBodyBones.LeftRingDistal,          _poseManager.openHand_LeftRingDistal,          _poseManager.closedHand_LeftRingDistal,          leftHandAnim.ringCurl);
 
-                    ApplyBodyBonePose(HumanBodyBones.LeftLittleProximal,      _poseManager.openHand_LeftLittleProximal,      _poseManager.closedHand_LeftLittleProximal,      leftHandAnim.LittleCurl);
-                    ApplyBodyBonePose(HumanBodyBones.LeftLittleIntermediate,  _poseManager.openHand_LeftLittleIntermediate,  _poseManager.closedHand_LeftLittleIntermediate,  leftHandAnim.LittleCurl);
-                    ApplyBodyBonePose(HumanBodyBones.LeftLittleDistal,        _poseManager.openHand_LeftLittleDistal,        _poseManager.closedHand_LeftLittleDistal,        leftHandAnim.LittleCurl);
+                    ApplyBodyBonePose(HumanBodyBones.LeftLittleProximal,      _poseManager.openHand_LeftLittleProximal,      _poseManager.closedHand_LeftLittleProximal,      leftHandAnim.littleCurl);
+                    ApplyBodyBonePose(HumanBodyBones.LeftLittleIntermediate,  _poseManager.openHand_LeftLittleIntermediate,  _poseManager.closedHand_LeftLittleIntermediate,  leftHandAnim.littleCurl);
+                    ApplyBodyBonePose(HumanBodyBones.LeftLittleDistal,        _poseManager.openHand_LeftLittleDistal,        _poseManager.closedHand_LeftLittleDistal,        leftHandAnim.littleCurl);
                 }
                 catch (Exception) { }
             }
@@ -274,25 +274,25 @@ namespace CustomAvatar
                 {
                     SkeletalSummaryData rightHandAnim = Plugin.rightHandAnimAction.GetSummaryData();
 
-                    ApplyBodyBonePose(HumanBodyBones.RightThumbProximal,      _poseManager.openHand_RightThumbProximal,      _poseManager.closedHand_RightThumbProximal,      rightHandAnim.ThumbCurl * 2);
-                    ApplyBodyBonePose(HumanBodyBones.RightThumbIntermediate,  _poseManager.openHand_RightThumbIntermediate,  _poseManager.closedHand_RightThumbIntermediate,  rightHandAnim.ThumbCurl * 2);
-                    ApplyBodyBonePose(HumanBodyBones.RightThumbDistal,        _poseManager.openHand_RightThumbDistal,        _poseManager.closedHand_RightThumbDistal,        rightHandAnim.ThumbCurl * 2);
+                    ApplyBodyBonePose(HumanBodyBones.RightThumbProximal,      _poseManager.openHand_RightThumbProximal,      _poseManager.closedHand_RightThumbProximal,      rightHandAnim.thumbCurl * 2);
+                    ApplyBodyBonePose(HumanBodyBones.RightThumbIntermediate,  _poseManager.openHand_RightThumbIntermediate,  _poseManager.closedHand_RightThumbIntermediate,  rightHandAnim.thumbCurl * 2);
+                    ApplyBodyBonePose(HumanBodyBones.RightThumbDistal,        _poseManager.openHand_RightThumbDistal,        _poseManager.closedHand_RightThumbDistal,        rightHandAnim.thumbCurl * 2);
 
-                    ApplyBodyBonePose(HumanBodyBones.RightIndexProximal,      _poseManager.openHand_RightIndexProximal,      _poseManager.closedHand_RightIndexProximal,      rightHandAnim.IndexCurl);
-                    ApplyBodyBonePose(HumanBodyBones.RightIndexIntermediate,  _poseManager.openHand_RightIndexIntermediate,  _poseManager.closedHand_RightIndexIntermediate,  rightHandAnim.IndexCurl);
-                    ApplyBodyBonePose(HumanBodyBones.RightIndexDistal,        _poseManager.openHand_RightIndexDistal,        _poseManager.closedHand_RightIndexDistal,        rightHandAnim.IndexCurl);
+                    ApplyBodyBonePose(HumanBodyBones.RightIndexProximal,      _poseManager.openHand_RightIndexProximal,      _poseManager.closedHand_RightIndexProximal,      rightHandAnim.indexCurl);
+                    ApplyBodyBonePose(HumanBodyBones.RightIndexIntermediate,  _poseManager.openHand_RightIndexIntermediate,  _poseManager.closedHand_RightIndexIntermediate,  rightHandAnim.indexCurl);
+                    ApplyBodyBonePose(HumanBodyBones.RightIndexDistal,        _poseManager.openHand_RightIndexDistal,        _poseManager.closedHand_RightIndexDistal,        rightHandAnim.indexCurl);
 
-                    ApplyBodyBonePose(HumanBodyBones.RightMiddleProximal,     _poseManager.openHand_RightMiddleProximal,     _poseManager.closedHand_RightMiddleProximal,     rightHandAnim.MiddleCurl);
-                    ApplyBodyBonePose(HumanBodyBones.RightMiddleIntermediate, _poseManager.openHand_RightMiddleIntermediate, _poseManager.closedHand_RightMiddleIntermediate, rightHandAnim.MiddleCurl);
-                    ApplyBodyBonePose(HumanBodyBones.RightMiddleDistal,       _poseManager.openHand_RightMiddleDistal,       _poseManager.closedHand_RightMiddleDistal,       rightHandAnim.MiddleCurl);
+                    ApplyBodyBonePose(HumanBodyBones.RightMiddleProximal,     _poseManager.openHand_RightMiddleProximal,     _poseManager.closedHand_RightMiddleProximal,     rightHandAnim.middleCurl);
+                    ApplyBodyBonePose(HumanBodyBones.RightMiddleIntermediate, _poseManager.openHand_RightMiddleIntermediate, _poseManager.closedHand_RightMiddleIntermediate, rightHandAnim.middleCurl);
+                    ApplyBodyBonePose(HumanBodyBones.RightMiddleDistal,       _poseManager.openHand_RightMiddleDistal,       _poseManager.closedHand_RightMiddleDistal,       rightHandAnim.middleCurl);
 
-                    ApplyBodyBonePose(HumanBodyBones.RightRingProximal,       _poseManager.openHand_RightRingProximal,       _poseManager.closedHand_RightRingProximal,       rightHandAnim.RingCurl);
-                    ApplyBodyBonePose(HumanBodyBones.RightRingIntermediate,   _poseManager.openHand_RightRingIntermediate,   _poseManager.closedHand_RightRingIntermediate,   rightHandAnim.RingCurl);
-                    ApplyBodyBonePose(HumanBodyBones.RightRingDistal,         _poseManager.openHand_RightRingDistal,         _poseManager.closedHand_RightRingDistal,         rightHandAnim.RingCurl);
+                    ApplyBodyBonePose(HumanBodyBones.RightRingProximal,       _poseManager.openHand_RightRingProximal,       _poseManager.closedHand_RightRingProximal,       rightHandAnim.ringCurl);
+                    ApplyBodyBonePose(HumanBodyBones.RightRingIntermediate,   _poseManager.openHand_RightRingIntermediate,   _poseManager.closedHand_RightRingIntermediate,   rightHandAnim.ringCurl);
+                    ApplyBodyBonePose(HumanBodyBones.RightRingDistal,         _poseManager.openHand_RightRingDistal,         _poseManager.closedHand_RightRingDistal,         rightHandAnim.ringCurl);
 
-                    ApplyBodyBonePose(HumanBodyBones.RightLittleProximal,     _poseManager.openHand_RightLittleProximal,     _poseManager.closedHand_RightLittleProximal,     rightHandAnim.LittleCurl);
-                    ApplyBodyBonePose(HumanBodyBones.RightLittleIntermediate, _poseManager.openHand_RightLittleIntermediate, _poseManager.closedHand_RightLittleIntermediate, rightHandAnim.LittleCurl);
-                    ApplyBodyBonePose(HumanBodyBones.RightLittleDistal,       _poseManager.openHand_RightLittleDistal,       _poseManager.closedHand_RightLittleDistal,       rightHandAnim.LittleCurl);
+                    ApplyBodyBonePose(HumanBodyBones.RightLittleProximal,     _poseManager.openHand_RightLittleProximal,     _poseManager.closedHand_RightLittleProximal,     rightHandAnim.littleCurl);
+                    ApplyBodyBonePose(HumanBodyBones.RightLittleIntermediate, _poseManager.openHand_RightLittleIntermediate, _poseManager.closedHand_RightLittleIntermediate, rightHandAnim.littleCurl);
+                    ApplyBodyBonePose(HumanBodyBones.RightLittleDistal,       _poseManager.openHand_RightLittleDistal,       _poseManager.closedHand_RightLittleDistal,       rightHandAnim.littleCurl);
                 }
                 catch (Exception) { }
             }
