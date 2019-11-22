@@ -11,18 +11,26 @@ namespace CustomAvatar.Utilities
         public float playerArmSpan { get; set; } = 1.7f;
         public bool calibrateFullBodyTrackingOnStart { get; set; } = false;
         public float cameraNearClipPlane { get; set; } = 0.03f;
-        public FullBodyMotionSmoothing fullBodyMotionSmoothing { get; set; } = new FullBodyMotionSmoothing();
-    }
+        public FullBodyMotionSmoothing fullBodyMotionSmoothing { get; } = new FullBodyMotionSmoothing();
+        public FullBodyCalibration fullBodyCalibration { get; } = new FullBodyCalibration();
 
-    public class FullBodyMotionSmoothing
-    {
-	    public TrackedPoint waist { get; set; } = new TrackedPoint { position = 15, rotation = 10 };
-	    public TrackedPoint feet { get; set; } = new TrackedPoint { position = 13, rotation = 17 };
-    }
+        public class FullBodyMotionSmoothing
+        {
+            public TrackedPoint waist { get; } = new TrackedPoint { position = 15, rotation = 10 };
+            public TrackedPoint feet { get; } = new TrackedPoint { position = 13, rotation = 17 };
+        }
 
-    public class TrackedPoint
-    {
-	    public float position { get; set; }
-	    public float rotation { get; set; }
+        public class TrackedPoint
+        {
+            public float position { get; set; }
+            public float rotation { get; set; }
+        }
+
+        public class FullBodyCalibration
+        {
+            public Pose leftLeg { get; set; }
+            public Pose rightLeg { get; set; }
+            public Pose pelvis { get; set; }
+        }
     }
 }

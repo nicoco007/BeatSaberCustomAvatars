@@ -9,9 +9,6 @@ namespace CustomAvatar
 {
     public class AvatarBehaviour : MonoBehaviour
     {
-        public static Pose? leftLegCorrection { get; set; }
-        public static Pose? rightLegCorrection { get; set; }
-        public static Pose? pelvisCorrection { get; set; }
         public Vector3 position
         {
 	        get => transform.position - _initialPosition;
@@ -134,7 +131,7 @@ namespace CustomAvatar
                 if (_leftLeg && leftLegTracker != null && leftLegTracker.NodeState.tracked)
                 {
                     var leftLegPose = _trackedDevices.LeftFoot;
-                    var correction = leftLegCorrection ?? default;
+                    var correction = SettingsManager.settings.fullBodyCalibration.leftLeg;
 
                     _prevLeftLegPos = Vector3.Lerp(_prevLeftLegPos, (leftLegPose.Position + correction.position) * positionScale + position, SettingsManager.settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
                     _prevLeftLegRot = Quaternion.Slerp(_prevLeftLegRot, leftLegPose.Rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.feet.rotation * Time.deltaTime);
@@ -145,7 +142,7 @@ namespace CustomAvatar
                 if (_rightLeg && rightLegTracker != null && rightLegTracker.NodeState.tracked)
                 {
                     var rightLegPose = _trackedDevices.RightFoot;
-                    var correction = rightLegCorrection ?? default;
+                    var correction = SettingsManager.settings.fullBodyCalibration.rightLeg;
 
                     _prevRightLegPos = Vector3.Lerp(_prevRightLegPos, (rightLegPose.Position + correction.position) * positionScale + position, SettingsManager.settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
                     _prevRightLegRot = Quaternion.Slerp(_prevRightLegRot, rightLegPose.Rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.feet.rotation * Time.deltaTime);
@@ -156,7 +153,7 @@ namespace CustomAvatar
                 if (_pelvis && pelvisTracker != null && pelvisTracker.NodeState.tracked)
                 {
                     var pelvisPose = _trackedDevices.Waist;
-                    var correction = pelvisCorrection ?? default;
+                    var correction = SettingsManager.settings.fullBodyCalibration.rightLeg;
 
                     _prevPelvisPos = Vector3.Lerp(_prevPelvisPos, (pelvisPose.Position + correction.position) * positionScale + position, SettingsManager.settings.fullBodyMotionSmoothing.waist.position * Time.deltaTime);
                     _prevPelvisRot = Quaternion.Slerp(_prevPelvisRot, pelvisPose.Rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.waist.rotation * Time.deltaTime);
