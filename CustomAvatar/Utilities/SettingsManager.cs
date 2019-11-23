@@ -36,7 +36,7 @@ namespace CustomAvatar.Utilities
             using (var writer = new StreamWriter(kSettingsPath))
             using (var jsonWriter = new JsonTextWriter(writer))
             {
-                var serializer = new JsonSerializer() { Formatting = Formatting.Indented };
+                var serializer = new JsonSerializer { Formatting = Formatting.Indented, ReferenceLoopHandling = ReferenceLoopHandling.Ignore };
                 serializer.Serialize(jsonWriter, settings);
                 jsonWriter.Flush();
             }
