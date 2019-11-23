@@ -37,7 +37,7 @@ namespace CustomAvatar.UI
             tableCellTemplate = Resources.FindObjectsOfTypeAll<LevelListTableCell>().First(x => x.name == "LevelListTableCell");
             AvatarManager.instance.GetAvatarsAsync(avatar =>
             {
-                Plugin.logger.Info("Loaded avatar " + avatar.descriptor.Name);
+                Plugin.logger.Info("Loaded avatar " + avatar.descriptor.name);
 
                 avatars.Add(avatar);
 
@@ -89,7 +89,7 @@ namespace CustomAvatar.UI
 
         private void ReloadData()
         {
-            avatars.Sort((a, b) => string.Compare(a.descriptor.Name, b.descriptor.Name, StringComparison.CurrentCulture));
+            avatars.Sort((a, b) => string.Compare(a.descriptor.name, b.descriptor.name, StringComparison.CurrentCulture));
 
             int currentRow = avatars.FindIndex(a => a.fullPath == AvatarManager.instance.currentlySpawnedAvatar?.customAvatar.fullPath);
             
@@ -129,9 +129,9 @@ namespace CustomAvatar.UI
 
             CustomAvatar avatar = avatars[idx];
 
-            tableCell.GetPrivateField<TextMeshProUGUI>("_songNameText").text = avatar.descriptor.Name;
-            tableCell.GetPrivateField<TextMeshProUGUI>("_authorText").text = avatar.descriptor.Author;
-            tableCell.GetPrivateField<RawImage>("_coverRawImage").texture = avatar.descriptor.Cover?.texture ?? Texture2D.blackTexture;
+            tableCell.GetPrivateField<TextMeshProUGUI>("_songNameText").text = avatar.descriptor.name;
+            tableCell.GetPrivateField<TextMeshProUGUI>("_authorText").text = avatar.descriptor.author;
+            tableCell.GetPrivateField<RawImage>("_coverRawImage").texture = avatar.descriptor.cover?.texture ?? Texture2D.blackTexture;
 
             return tableCell;
         }

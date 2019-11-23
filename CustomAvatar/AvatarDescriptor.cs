@@ -2,34 +2,46 @@ using UnityEngine;
 
 namespace CustomAvatar
 {
+    // ReSharper disable ConvertToAutoProperty
+    // ReSharper disable once ClassNeverInstantiated.Global
     public class AvatarDescriptor : MonoBehaviour
     {
-        //For some reason, FormerlySerializedAs attribute doesn't work here, so I have to keep the names the same even though they're now private fields.
-
-        // ReSharper disable once InconsistentNaming
+        // Legacy stuff
+        // ReSharper disable InconsistentNaming
+        #pragma warning disable 649
         [SerializeField] private string AvatarName;
-
-        // ReSharper disable once InconsistentNaming
         [SerializeField] private string AuthorName;
-
-        //[SerializeField] private Transform _viewPoint;
-
-        [SerializeField] private bool _allowHeightCalibration = true;
-
         [SerializeField] private Sprite CoverImage;
-        
-        public string Name
+        #pragma warning restore 649
+        // ReSharper enable InconsistentNaming
+
+        [SerializeField] private string _name;
+        [SerializeField] private string _author;
+        [SerializeField] private bool _allowHeightCalibration = true;
+        [SerializeField] private Sprite _cover;
+
+        public new string name
         {
-            get => AvatarName;
-            set => AvatarName = value;
+            get => _name ?? AvatarName;
+            set => _name = value;
         }
-        public string Author
+
+        public string author
         {
-            get => AuthorName;
-            set => AuthorName = value;
+            get => _author ?? AuthorName;
+            set => _author = value;
         }
-        //public Transform ViewPoint => _viewPoint;
-        public bool AllowHeightCalibration => _allowHeightCalibration;
-        public Sprite Cover => CoverImage;
+
+        public bool allowHeightCalibration
+        {
+            get => _allowHeightCalibration;
+            set => _allowHeightCalibration = value;
+        }
+
+        public Sprite cover
+        {
+            get => _cover ?? CoverImage;
+            set => _cover = value;
+        }
     }
 }
