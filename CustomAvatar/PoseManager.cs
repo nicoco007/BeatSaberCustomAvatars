@@ -122,7 +122,7 @@ namespace CustomAvatar
                 }
                 else
                 {
-                    Plugin.logger.Error($"Could not find HumanBodyBones.{boneName}");
+                    Debug.LogError($"Could not find HumanBodyBones.{boneName}");
                 }
             }
         }
@@ -147,7 +147,7 @@ namespace CustomAvatar
                 }
                 else
                 {
-                    Plugin.logger.Error($"Could not find HumanBodyBones.{boneName}");
+                    Debug.LogError($"Could not find HumanBodyBones.{boneName}");
                 }
             }
         }
