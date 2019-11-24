@@ -66,9 +66,14 @@ namespace CustomAvatar
         private void Start()
         {
             _vrikManager = GetComponentInChildren<VRIKManager>();
-            _vrik = GetComponentInChildren<VRIK>() ?? _vrikManager?.gameObject.AddComponent<RootMotion.FinalIK.VRIK>();
+            _vrik = GetComponentInChildren<VRIK>() ?? _vrikManager?.gameObject.AddComponent<VRIK>();
             _animator = GetComponentInChildren<Animator>();
             _poseManager = GetComponentInChildren<PoseManager>();
+
+            foreach (TwistRelaxer twistRelaxer in GetComponentsInChildren<TwistRelaxer>())
+            {
+                twistRelaxer.ik = _vrik;
+            }
 
             _trackedDevices = PersistentSingleton<TrackedDeviceManager>.instance;
             _vrPlatformHelper = PersistentSingleton<VRPlatformHelper>.instance;
@@ -184,7 +189,7 @@ namespace CustomAvatar
 
         private void SetVrikReferences()
         {
-            if (!_vrikManager) return;
+            if (!_vrik || !_vrikManager) return;
 
             foreach (FieldInfo field in _vrikManager.GetType().GetFields())
             {
@@ -237,7 +242,7 @@ namespace CustomAvatar
 
         private void UpdateVrikReferences()
         {
-            if (!_vrikManager) return;
+            if (!_vrik || !_vrikManager) return;
 
             Plugin.logger.Info("Tracking device change detected, updating VRIK references");
 
