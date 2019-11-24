@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using CustomAvatar.Utilities;
 using UnityEngine.SceneManagement;
-using Object = UnityEngine.Object;
 
 namespace CustomAvatar
 {
@@ -51,9 +50,9 @@ namespace CustomAvatar
         {
             Plugin.logger.Info("Loading all avatars from " + kCustomAvatarsPath);
 
-            foreach (string filePath in Directory.GetFiles(kCustomAvatarsPath, "*.avatar"))
+            foreach (string fileName in GetAvatarFileNames())
             {
-                SharedCoroutineStarter.instance.StartCoroutine(CustomAvatar.FromFileCoroutine(filePath, success, error));
+                SharedCoroutineStarter.instance.StartCoroutine(CustomAvatar.FromFileCoroutine(fileName, success, error));
             }
         }
 
@@ -63,7 +62,7 @@ namespace CustomAvatar
 
             if (!File.Exists(previousAvatarPath))
             {
-                previousAvatarPath = Directory.GetFiles(kCustomAvatarsPath, "*.avatar").FirstOrDefault();
+                previousAvatarPath = GetAvatarFileNames().FirstOrDefault();
             }
 
             if (string.IsNullOrEmpty(previousAvatarPath))
@@ -105,7 +104,7 @@ namespace CustomAvatar
 
         public void SwitchToNextAvatar()
         {
-            string[] files = Directory.GetFiles(kCustomAvatarsPath, "*.avatar");
+            string[] files = GetAvatarFileNames();
             int index = Array.IndexOf(files, currentlySpawnedAvatar.customAvatar.fullPath);
 
             index = (index + 1) % files.Length;
@@ -115,7 +114,7 @@ namespace CustomAvatar
 
         public void SwitchToPreviousAvatar()
         {
-            string[] files = Directory.GetFiles(kCustomAvatarsPath, "*.avatar");
+            string[] files = GetAvatarFileNames();
             int index = Array.IndexOf(files, currentlySpawnedAvatar.customAvatar.fullPath);
 
             index = (index + files.Length - 1) % files.Length;
@@ -148,6 +147,24 @@ namespace CustomAvatar
         private static SpawnedAvatar SpawnAvatar(CustomAvatar customAvatar)
         {
             return new SpawnedAvatar(customAvatar);
+        }
+
+        private string[] GetAvatarFileNames()
+        {
+            return Directory.GetFiles(kCustomAvatarsPath, "*.avatar").Select(f => GetRelativePath(kCustomAvatarsPath, f)).ToArray();
+        }
+
+        private string GetRelativePath(string rootDirectoryPath, string path)
+        {
+            string fullRootDirectoryPath = Path.GetFullPath(rootDirectoryPath);
+            string fullPath = Path.GetFullPath(path);
+
+            if (!fullPath.StartsWith(fullRootDirectoryPath))
+            {
+                return fullPath;
+            }
+
+            return fullPath.Substring(fullRootDirectoryPath.Length + 1);
         }
     }
 }

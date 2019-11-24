@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using CustomAvatar.Exceptions;
 using CustomAvatar.Utilities;
 using UnityEngine;
@@ -48,11 +49,11 @@ namespace CustomAvatar
             viewPoint = avatarGameObject.transform.Find("Head") ?? throw new AvatarLoadException($"Avatar '{descriptor.name}' does not have a Head transform");
         }
 
-        public static IEnumerator<AsyncOperation> FromFileCoroutine(string filePath, Action<CustomAvatar> success, Action<Exception> error)
+        public static IEnumerator<AsyncOperation> FromFileCoroutine(string fileName, Action<CustomAvatar> success, Action<Exception> error)
         {
-            Plugin.logger.Info("Loading avatar from " + filePath);
+            Plugin.logger.Info("Loading avatar " + fileName);
 
-            AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(filePath);
+            AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(Path.Combine(AvatarManager.kCustomAvatarsPath, fileName));
             yield return assetBundleCreateRequest;
 
             if (!assetBundleCreateRequest.isDone || assetBundleCreateRequest.assetBundle == null)
@@ -73,7 +74,7 @@ namespace CustomAvatar
                 
             try
             {
-                success(new CustomAvatar(filePath, assetBundleRequest.asset as GameObject));
+                success(new CustomAvatar(fileName, assetBundleRequest.asset as GameObject));
             }
             catch (Exception ex)
             {
