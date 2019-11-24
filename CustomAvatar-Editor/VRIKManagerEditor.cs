@@ -24,6 +24,8 @@ namespace CustomAvatar
 
                 GUILayout.EndHorizontal();
             }
+
+            serializedObject.ApplyModifiedProperties();
         }
     }
 }
