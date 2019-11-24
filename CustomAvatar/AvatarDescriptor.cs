@@ -6,6 +6,7 @@ namespace CustomAvatar
     // ReSharper disable once ClassNeverInstantiated.Global
     public class AvatarDescriptor : MonoBehaviour, ISerializationCallbackReceiver
     {
+        public new string name;
         public string author;
         public bool allowHeightCalibration = true;
         public Sprite cover;
