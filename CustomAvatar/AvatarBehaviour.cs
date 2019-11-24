@@ -2,6 +2,9 @@ using AvatarScriptPack;
 using CustomAvatar.Tracking;
 using DynamicOpenVR.IO;
 using System;
+using System.Linq;
+using System.Reflection;
+using BS_Utils.Utilities;
 using CustomAvatar.Utilities;
 using UnityEngine;
 
@@ -47,7 +50,7 @@ namespace CustomAvatar
         private Quaternion _prevPelvisRot = default(Quaternion);
 
         private VRIK _vrik;
-        private IKManagerAdvanced _ikManagerAdvanced;
+        private VRIKManager _vrikManager;
         private TrackedDeviceManager _trackedDevices;
         private VRPlatformHelper _vrPlatformHelper;
         private Animator _animator;
@@ -64,11 +67,8 @@ namespace CustomAvatar
 
         private void Start()
         {
-			Console.WriteLine(_initialPosition);
-			Console.WriteLine(_initialScale);
-
-            _vrik = GetComponentInChildren<VRIK>();
-            _ikManagerAdvanced = GetComponentInChildren<IKManagerAdvanced>();
+            _vrikManager = GetComponentInChildren<VRIKManager>();
+            _vrik = GetComponentInChildren<VRIK>() ?? _vrikManager?.gameObject.AddComponent<VRIK>();
             _animator = GetComponentInChildren<Animator>();
             _poseManager = GetComponentInChildren<PoseManager>();
 
@@ -86,7 +86,7 @@ namespace CustomAvatar
             _rightLeg = transform.Find("RightLeg");
             _pelvis = transform.Find("Pelvis");
 
-            UpdateVrikReferences();
+            SetVrikReferences();
         }
 
         private void LateUpdate()
@@ -184,17 +184,70 @@ namespace CustomAvatar
         #pragma warning restore IDE0051
         #endregion
 
+        private void SetVrikReferences()
+        {
+            if (!_vrikManager) return;
+
+            foreach (FieldInfo field in _vrikManager.GetType().GetFields())
+            {
+                string[] parts = field.Name.Split('_');
+                object target = _vrik;
+
+                try
+                {
+                    for (int i = 0; i < parts.Length - 1; i++)
+                    {
+                        target = target.GetType().GetField(parts[i])?.GetValue(target);
+
+                        if (target == null)
+                        {
+                            Plugin.logger.Warn($"Target {parts[i]} is null");
+                            break;
+                        }
+                    }
+
+                    if (target == null) break;
+
+                    FieldInfo targetField = target.GetType().GetField(parts[parts.Length - 1]);
+                    object value = field.GetValue(_vrikManager);
+
+                    Plugin.logger.Debug($"Set {targetField.Name} ({string.Join(".", parts)}) = {value}");
+
+                    if (targetField.FieldType.IsEnum)
+                    {
+                        Type sourceType = Enum.GetUnderlyingType(field.FieldType);
+                        Type targetType = Enum.GetUnderlyingType(targetField.FieldType);
+
+                        Plugin.logger.Debug($"Converting enum value {field.FieldType} ({sourceType}) -> {targetField.FieldType} ({targetType})");
+                        targetField.SetValue(target, Convert.ChangeType(value, targetType));
+                    }
+                    else
+                    {
+                        targetField.SetValue(target, value);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Plugin.logger.Error(ex.ToString());
+                }
+            }
+
+            if (!_vrik.references.isFilled) _vrik.AutoDetectReferences();
+
+            UpdateVrikReferences();
+        }
+
         private void UpdateVrikReferences()
         {
-            if (!_ikManagerAdvanced) return;
+            if (!_vrikManager) return;
 
             Plugin.logger.Info("Tracking device change detected, updating VRIK references");
 
             if (_trackedDevices.LeftFoot.Found)
             {
-                _vrik.solver.leftLeg.target = _ikManagerAdvanced.LeftLeg_target;
-                _vrik.solver.leftLeg.positionWeight = _ikManagerAdvanced.LeftLeg_positionWeight;
-                _vrik.solver.leftLeg.rotationWeight = _ikManagerAdvanced.LeftLeg_rotationWeight;
+                _vrik.solver.leftLeg.target = _vrikManager.solver_leftLeg_target;
+                _vrik.solver.leftLeg.positionWeight = _vrikManager.solver_leftLeg_positionWeight;
+                _vrik.solver.leftLeg.rotationWeight = _vrikManager.solver_leftLeg_rotationWeight;
             }
             else
             {
@@ -205,9 +258,9 @@ namespace CustomAvatar
 
             if (_trackedDevices.RightFoot.Found)
             {
-                _vrik.solver.rightLeg.target = _ikManagerAdvanced.RightLeg_target;
-                _vrik.solver.rightLeg.positionWeight = _ikManagerAdvanced.RightLeg_positionWeight;
-                _vrik.solver.rightLeg.rotationWeight = _ikManagerAdvanced.RightLeg_rotationWeight;
+                _vrik.solver.rightLeg.target = _vrikManager.solver_rightLeg_target;
+                _vrik.solver.rightLeg.positionWeight = _vrikManager.solver_rightLeg_positionWeight;
+                _vrik.solver.rightLeg.rotationWeight = _vrikManager.solver_rightLeg_rotationWeight;
             }
             else
             {
@@ -218,9 +271,9 @@ namespace CustomAvatar
 
             if (_trackedDevices.Waist.Found)
             {
-                _vrik.solver.spine.pelvisTarget = _ikManagerAdvanced.Spine_pelvisTarget;
-                _vrik.solver.spine.pelvisPositionWeight = _ikManagerAdvanced.Spine_pelvisPositionWeight;
-                _vrik.solver.spine.pelvisRotationWeight = _ikManagerAdvanced.Spine_pelvisRotationWeight;
+                _vrik.solver.spine.pelvisTarget = _vrikManager.solver_spine_pelvisTarget;
+                _vrik.solver.spine.pelvisPositionWeight = _vrikManager.solver_spine_pelvisPositionWeight;
+                _vrik.solver.spine.pelvisRotationWeight = _vrikManager.solver_spine_pelvisRotationWeight;
                 _vrik.solver.plantFeet = false;
             }
             else

@@ -1,12 +1,15 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using CustomAvatar;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
 
 namespace AvatarScriptPack
 {
+    [Obsolete("Use VRIKManager")]
+    [RequireComponent(typeof(VRIKManager))]
     class IKManagerAdvanced : MonoBehaviour
     {
         [Space(5)]
@@ -167,9 +170,6 @@ namespace AvatarScriptPack
         [Range(-180f, 180f), Tooltip("Angular offset of the knee bending direction.")]
         public float LeftLeg_swivelOffset;
 
-        [Range(-180f, 180f), Tooltip("Rotation of the knee bend normal value.")]
-        public float LeftLeg_bendRotation;
-
 
         [Space(20)]
 
@@ -185,9 +185,6 @@ namespace AvatarScriptPack
 
         [Range(-180f, 180f), Tooltip("Angular offset of the knee bending direction.")]
         public float RightLeg_swivelOffset;
-
-        [Range(-180f, 180f), Tooltip("Rotation of the knee bend normal value.")]
-        public float RightLeg_bendRotation;
 
 
         [Space(20)]
@@ -252,12 +249,12 @@ namespace AvatarScriptPack
 
         public void Start()
         {
-            VRIK _VRIK = base.gameObject.GetComponent<VRIK>();
-            if (_VRIK != null)
+            VRIKManager vrikManager = base.gameObject.AddComponent<VRIKManager>();
+            if (vrikManager != null)
             {
-                _VRIK.solver.spine.headTarget = this.HeadTarget;
-                _VRIK.solver.leftArm.target = this.LeftHandTarget;
-                _VRIK.solver.rightArm.target = this.RightHandTarget;
+                vrikManager.solver_spine_headTarget = this.HeadTarget;
+                vrikManager.solver_leftArm_target = this.LeftHandTarget;
+                vrikManager.solver_rightArm_target = this.RightHandTarget;
 
                 Type type = this.GetType();
                 FieldInfo[] fieldInfos = type.GetFields(BindingFlags.Instance | BindingFlags.Public);
@@ -265,55 +262,32 @@ namespace AvatarScriptPack
                 {
                     string[] propertyName = fieldInfo.Name.Split('_');
                     var value = fieldInfo.GetValue(this);
+
                     if (propertyName.Count() > 1)
                     {
                         if ("Spine" == propertyName[0])
                         {
-                            try
-                            {
-                                SetProperty(_VRIK.solver.spine, propertyName[1], value);
-                            }
-                            catch { }
+                            SetProperty(vrikManager, "solver_spine_" + propertyName[1], value);
                         }
                         else if ("LeftArm" == propertyName[0])
                         {
-                            try
-                            {
-                                SetProperty(_VRIK.solver.leftArm, propertyName[1], value);
-                            }
-                            catch { }
+                            SetProperty(vrikManager, "solver_leftArm_" + propertyName[1], value);
                         }
                         else if ("RightArm" == propertyName[0])
                         {
-                            try
-                            {
-                                SetProperty(_VRIK.solver.rightArm, propertyName[1], value);
-                            }
-                            catch { }
+                            SetProperty(vrikManager, "solver_rightArm_" + propertyName[1], value);
                         }
                         else if ("LeftLeg" == propertyName[0])
                         {
-                            try
-                            {
-                                SetProperty(_VRIK.solver.leftLeg, propertyName[1], value);
-                            }
-                            catch { }
+                            SetProperty(vrikManager, "solver_leftLeg_" + propertyName[1], value);
                         }
                         else if ("RightLeg" == propertyName[0])
                         {
-                            try
-                            {
-                                SetProperty(_VRIK.solver.rightLeg, propertyName[1], value);
-                            }
-                            catch { }
+                            SetProperty(vrikManager, "solver_rightLeg_" + propertyName[1], value);
                         }
                         else if ("Locomotion" == propertyName[0])
                         {
-                            try
-                            {
-                                SetProperty(_VRIK.solver.locomotion, propertyName[1], value);
-                            }
-                            catch { }
+                            SetProperty(vrikManager, "solver_locomotion_" + propertyName[1], value);
                         }
                     }
                 }
@@ -322,21 +296,42 @@ namespace AvatarScriptPack
 
         public static void SetProperty(object obj, string fieldName, object value)
         {
-            obj.GetType().GetField(fieldName).SetValue(obj, value);
-        }
+            if (obj == null) return;
 
-
-        public void ToggleLeftHandTarget(Transform leftHandTarget)
-        {
-            Console.WriteLine("ToggleLeftHandTarget");
-            VRIK _VRIK = base.gameObject.GetComponent<VRIK>();
-            if ("RightHand".Equals(_VRIK.solver.leftArm.target.parent.name))
+            try
             {
-                _VRIK.solver.leftArm.target = this.LeftHandTarget;
+                FieldInfo field = obj.GetType().GetField(fieldName);
+
+                if (field == null)
+                {
+                    Plugin.logger.Warn($"{fieldName} does not exist on {obj.GetType()}");
+                    return;
+                }
+
+                Plugin.logger.Debug($"Set {field.Name} = {value}");
+
+                if (field.FieldType.IsEnum)
+                {
+                    if (value == null)
+                    {
+                        Plugin.logger.Warn("Tried to set Enum type to null");
+                        return;
+                    }
+
+                    Type sourceType = Enum.GetUnderlyingType(value.GetType());
+                    Type targetType = Enum.GetUnderlyingType(field.FieldType);
+
+                    Plugin.logger.Debug($"Converting enum value {value.GetType()} ({sourceType}) -> {field.FieldType} ({targetType})");
+                    field.SetValue(obj, Convert.ChangeType(value, targetType));
+                }
+                else
+                {
+                    field.SetValue(obj, Convert.ChangeType(value, field.FieldType));
+                }
             }
-            else
+            catch (Exception ex)
             {
-                _VRIK.solver.leftArm.target = leftHandTarget;
+                Plugin.logger.Error(ex.ToString());
             }
         }
     }

@@ -4,44 +4,31 @@ namespace CustomAvatar
 {
     // ReSharper disable ConvertToAutoProperty
     // ReSharper disable once ClassNeverInstantiated.Global
-    public class AvatarDescriptor : MonoBehaviour
+    public class AvatarDescriptor : MonoBehaviour, ISerializationCallbackReceiver
     {
+        public string author;
+        public bool allowHeightCalibration = true;
+        public Sprite cover;
+
         // Legacy stuff
         // ReSharper disable InconsistentNaming
         #pragma warning disable 649
-        [SerializeField] private string AvatarName;
-        [SerializeField] private string AuthorName;
-        [SerializeField] private Sprite CoverImage;
+        [SerializeField] [HideInInspector] private string AvatarName;
+        [SerializeField] [HideInInspector] private string AuthorName;
+        [SerializeField] [HideInInspector] private Sprite CoverImage;
+        [SerializeField] [HideInInspector] private string Name;
+        [SerializeField] [HideInInspector] private string Author;
+        [SerializeField] [HideInInspector] private Sprite Cover;
         #pragma warning restore 649
         // ReSharper enable InconsistentNaming
 
-        [SerializeField] private string _name;
-        [SerializeField] private string _author;
-        [SerializeField] private bool _allowHeightCalibration = true;
-        [SerializeField] private Sprite _cover;
+        public void OnBeforeSerialize() { }
 
-        public new string name
+        public void OnAfterDeserialize()
         {
-            get => _name ?? AvatarName;
-            set => _name = value;
-        }
-
-        public string author
-        {
-            get => _author ?? AuthorName;
-            set => _author = value;
-        }
-
-        public bool allowHeightCalibration
-        {
-            get => _allowHeightCalibration;
-            set => _allowHeightCalibration = value;
-        }
-
-        public Sprite cover
-        {
-            get => _cover ?? CoverImage;
-            set => _cover = value;
+            name = name ?? Name ?? AvatarName;
+            author = author ?? Author ?? AuthorName;
+            cover = cover ?? Cover ?? CoverImage;
         }
     }
 }

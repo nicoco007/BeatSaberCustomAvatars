@@ -133,6 +133,7 @@
     <Compile Include="PoseManager.cs" />
     <Compile Include="EventManager.cs" />
     <Compile Include="Utilities\SettingsManager.cs" />
+    <Compile Include="VRIKManager.cs" />
     <Compile Include="VRIK\FirstPersonExclusion.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -151,8 +152,8 @@
     <Compile Include="VRIK\AxisTools.cs" />
     <Compile Include="VRIK\Hierarchy.cs" />
     <Compile Include="VRIK\IK.cs" />
-    <Compile Include="VRIK\IKManager.cs" />
-    <Compile Include="VRIK\IKManagerAdvanced.cs" />
+    <Compile Include="Legacy\IKManager.cs" />
+    <Compile Include="Legacy\IKManagerAdvanced.cs" />
     <Compile Include="VRIK\IKSolver.cs" />
     <Compile Include="VRIK\IKSolverVR.cs" />
     <Compile Include="VRIK\IKSolverVRArm.cs" />
