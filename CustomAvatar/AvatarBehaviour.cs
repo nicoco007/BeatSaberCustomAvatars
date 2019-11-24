@@ -1,10 +1,8 @@
-using AvatarScriptPack;
 using CustomAvatar.Tracking;
 using DynamicOpenVR.IO;
 using System;
-using System.Linq;
 using System.Reflection;
-using BS_Utils.Utilities;
+using RootMotion.FinalIK;
 using CustomAvatar.Utilities;
 using UnityEngine;
 
@@ -49,7 +47,7 @@ namespace CustomAvatar
         private Vector3 _prevPelvisPos = default(Vector3);
         private Quaternion _prevPelvisRot = default(Quaternion);
 
-        private VRIK _vrik;
+        private RootMotion.FinalIK.VRIK _vrik;
         private VRIKManager _vrikManager;
         private TrackedDeviceManager _trackedDevices;
         private VRPlatformHelper _vrPlatformHelper;
@@ -68,7 +66,7 @@ namespace CustomAvatar
         private void Start()
         {
             _vrikManager = GetComponentInChildren<VRIKManager>();
-            _vrik = GetComponentInChildren<VRIK>() ?? _vrikManager?.gameObject.AddComponent<VRIK>();
+            _vrik = GetComponentInChildren<VRIK>() ?? _vrikManager?.gameObject.AddComponent<RootMotion.FinalIK.VRIK>();
             _animator = GetComponentInChildren<Animator>();
             _poseManager = GetComponentInChildren<PoseManager>();
 
