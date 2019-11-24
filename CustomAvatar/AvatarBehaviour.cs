@@ -191,9 +191,9 @@ namespace CustomAvatar
         {
             if (!_vrik || !_vrikManager) return;
 
-            foreach (FieldInfo field in _vrikManager.GetType().GetFields())
+            foreach (FieldInfo sourceField in _vrikManager.GetType().GetFields())
             {
-                string[] parts = field.Name.Split('_');
+                string[] parts = sourceField.Name.Split('_');
                 object target = _vrik;
 
                 try
@@ -212,20 +212,30 @@ namespace CustomAvatar
                     if (target == null) break;
 
                     FieldInfo targetField = target.GetType().GetField(parts[parts.Length - 1]);
-                    object value = field.GetValue(_vrikManager);
+                    object value = sourceField.GetValue(_vrikManager);
 
-                    Plugin.logger.Debug($"Set {targetField.Name} ({string.Join(".", parts)}) = {value}");
+                    Plugin.logger.Debug($"Set {string.Join(".", parts)} = {value}");
 
                     if (targetField.FieldType.IsEnum)
                     {
-                        Type sourceType = Enum.GetUnderlyingType(field.FieldType);
+                        Type sourceType = Enum.GetUnderlyingType(sourceField.FieldType);
                         Type targetType = Enum.GetUnderlyingType(targetField.FieldType);
 
-                        Plugin.logger.Debug($"Converting enum value {field.FieldType} ({sourceType}) -> {targetField.FieldType} ({targetType})");
+                        if (sourceType != targetType)
+                        {
+                            Plugin.logger.Warn($"Underlying types for {sourceField.Name} ({sourceType}) and {targetField.Name} ({targetType}) are not the same");
+                        }
+
+                        Plugin.logger.Debug($"Converting enum value {sourceField.FieldType} ({sourceType}) -> {targetField.FieldType} ({targetType})");
                         targetField.SetValue(target, Convert.ChangeType(value, targetType));
                     }
                     else
                     {
+                        if (sourceField.FieldType != targetField.FieldType)
+                        {
+                            Plugin.logger.Warn($"Types for {sourceField.Name} ({sourceField.FieldType}) and {targetField.Name} ({targetField.FieldType}) are not the same");
+                        }
+
                         targetField.SetValue(target, value);
                     }
                 }
