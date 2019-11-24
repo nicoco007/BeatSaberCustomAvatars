@@ -24,7 +24,7 @@ namespace CustomAvatar.Utilities
             using (var reader = new StreamReader(kSettingsPath))
             using (var jsonReader = new JsonTextReader(reader))
             {
-                var serializer = new JsonSerializer();
+                var serializer = GetSerializer();
                 settings = serializer.Deserialize<Settings>(jsonReader);
             }
         }
@@ -36,10 +36,20 @@ namespace CustomAvatar.Utilities
             using (var writer = new StreamWriter(kSettingsPath))
             using (var jsonWriter = new JsonTextWriter(writer))
             {
-                var serializer = new JsonSerializer { Formatting = Formatting.Indented, ReferenceLoopHandling = ReferenceLoopHandling.Ignore };
+                var serializer = GetSerializer();
                 serializer.Serialize(jsonWriter, settings);
                 jsonWriter.Flush();
             }
+        }
+
+        private static JsonSerializer GetSerializer()
+        {
+            return new JsonSerializer
+            {
+                Formatting = Formatting.Indented,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                Converters = { new Vector3JsonConverter(), new QuaternionJsonConverter(), new PoseJsonConverter() }
+            };
         }
     }
 }
