@@ -21,11 +21,21 @@ namespace CustomAvatar.Utilities
                 return;
             }
 
-            using (var reader = new StreamReader(kSettingsPath))
-            using (var jsonReader = new JsonTextReader(reader))
+            try
             {
-                var serializer = GetSerializer();
-                settings = serializer.Deserialize<Settings>(jsonReader);
+                using (var reader = new StreamReader(kSettingsPath))
+                using (var jsonReader = new JsonTextReader(reader))
+                {
+                    var serializer = GetSerializer();
+                    settings = serializer.Deserialize<Settings>(jsonReader);
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.logger.Error("Failed to load settings from file, using default settings");
+                Plugin.logger.Error(ex);
+
+                settings = new Settings();
             }
         }
 
