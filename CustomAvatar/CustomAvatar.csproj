@@ -186,7 +186,6 @@
   <ItemGroup>
     <EmbeddedResource Include="Views\SettingsViewController.bsml" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <EmbeddedResource Include="Resources\icon.png" />
   </ItemGroup>
