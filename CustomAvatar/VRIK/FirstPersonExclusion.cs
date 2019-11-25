@@ -1,9 +1,9 @@
+using System;
 using UnityEngine;
 
 #if PLUGIN
 using System.Linq;
 using CustomAvatar;
-using CustomAvatar.Utilities;
 #endif
 
 namespace AvatarScriptPack
@@ -42,9 +42,9 @@ namespace AvatarScriptPack
                     excludeObject.layer = AvatarLayers.OnlyInThirdPerson;
                 }
             }
-            catch (System.Exception e)
+            catch (Exception ex)
             {
-                Plugin.logger.Error(e.StackTrace);
+                Plugin.logger.Error(ex);
             }
         }
 

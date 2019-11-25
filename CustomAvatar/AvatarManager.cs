@@ -124,9 +124,10 @@ namespace CustomAvatar
 
         public void ResizeCurrentAvatar()
         {
-            if (currentlySpawnedAvatar?.customAvatar.descriptor.allowHeightCalibration != true) return;
-
-            avatarTailor.ResizeAvatar(currentlySpawnedAvatar);
+            if (currentlySpawnedAvatar != null)
+            {
+                avatarTailor.ResizeAvatar(currentlySpawnedAvatar);
+            }
         }
 
         private void OnSceneLoaded(Scene newScene, LoadSceneMode mode)

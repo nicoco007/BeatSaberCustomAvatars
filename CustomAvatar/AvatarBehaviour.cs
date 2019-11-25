@@ -255,7 +255,7 @@ namespace CustomAvatar
                 }
                 catch (Exception ex)
                 {
-                    Plugin.logger.Error(ex.ToString());
+                    Plugin.logger.Error(ex);
                 }
             }
 

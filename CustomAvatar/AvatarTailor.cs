@@ -8,10 +8,12 @@ namespace CustomAvatar
 {
     public class AvatarTailor
     {
-        private Vector3? initialPlatformPosition = null;
+        private Vector3? _initialPlatformPosition;
 
         public void ResizeAvatar(SpawnedAvatar avatar)
         {
+            if (!avatar.customAvatar.descriptor.allowHeightCalibration) return;
+
             // compute scale
             float scale;
             AvatarResizeMode resizeMode = SettingsManager.settings.resizeMode;
@@ -57,23 +59,23 @@ namespace CustomAvatar
             // apply offset
 			avatar.behaviour.position = new Vector3(0, floorOffset, 0);
             
+            // ReSharper disable Unity.PerformanceCriticalCodeInvocation
             var originalFloor = GameObject.Find("MenuPlayersPlace") ?? GameObject.Find("Static/PlayersPlace");
             var customFloor = GameObject.Find("Platform Loader");
+            // ReSharper disable restore Unity.PerformanceCriticalCodeInvocation
 
-            Plugin.logger.Info("originalFloor " + originalFloor);
-
-            if (originalFloor != null)
+            if (originalFloor)
             {
                 Plugin.logger.Info($"Moving original floor {Math.Abs(floorOffset)} m {(floorOffset >= 0 ? "up" : "down")}");
                 originalFloor.transform.position = new Vector3(0, floorOffset, 0);
             }
 
-            if (customFloor != null)
+            if (customFloor)
             {
                 Plugin.logger.Info($"Moving Custom Platforms floor {Math.Abs(floorOffset)} m {(floorOffset >= 0 ? "up" : "down")}");
 
-                initialPlatformPosition = initialPlatformPosition ?? customFloor.transform.position;
-                customFloor.transform.position = (Vector3.up * floorOffset) + initialPlatformPosition ?? Vector3.zero;
+                _initialPlatformPosition = _initialPlatformPosition ?? customFloor.transform.position;
+                customFloor.transform.position = (Vector3.up * floorOffset) + _initialPlatformPosition ?? Vector3.zero;
             }
         }
 
