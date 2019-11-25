@@ -30,34 +30,35 @@
   <ItemGroup>
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libraries\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\Libraries\Assembly-CSharp.dll</HintPath>
     </Reference>
-    <Reference Include="BeatSaberCustomUI, Version=1.5.11.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="BeatSaberCustomUI, Version=1.7.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libraries\BeatSaberCustomUI.dll</HintPath>
+      <HintPath>..\..\Libraries\BeatSaberCustomUI.dll</HintPath>
     </Reference>
-    <Reference Include="BSML, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="BSML, Version=1.0.6.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libraries\BSML.dll</HintPath>
+      <HintPath>..\..\Libraries\BSML.dll</HintPath>
     </Reference>
-    <Reference Include="BS_Utils, Version=1.3.6.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="BS_Utils, Version=1.3.7.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libraries\BS_Utils.dll</HintPath>
+      <HintPath>..\..\Libraries\BS_Utils.dll</HintPath>
     </Reference>
-    <Reference Include="DynamicOpenVR, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="DynamicOpenVR, Version=0.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libraries\DynamicOpenVR.dll</HintPath>
+      <HintPath>..\..\Libraries\DynamicOpenVR.dll</HintPath>
     </Reference>
-    <Reference Include="IPA.Injector, Version=3.12.23.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="IPA.Injector, Version=3.13.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libraries\IPA.Injector.dll</HintPath>
+      <HintPath>..\..\Libraries\IPA.Injector.dll</HintPath>
     </Reference>
     <Reference Include="IPA.Loader, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libraries\IPA.Loader.dll</HintPath>
+      <HintPath>..\..\Libraries\IPA.Loader.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json.12.0.0.0">
-      <HintPath>..\Libraries\Newtonsoft.Json.12.0.0.0.dll</HintPath>
+    <Reference Include="Newtonsoft.Json.12.0.0.0, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Libraries\Newtonsoft.Json.12.0.0.0.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -65,51 +66,54 @@
     <Reference Include="System.Xml" />
     <Reference Include="Unity.TextMeshPro, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libraries\Unity.TextMeshPro.dll</HintPath>
+      <HintPath>..\..\Libraries\Unity.TextMeshPro.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor">
+      <HintPath>..\..\Libraries\UnityEditor.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libraries\UnityEngine.dll</HintPath>
+      <HintPath>..\..\Libraries\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AnimationModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libraries\UnityEngine.AnimationModule.dll</HintPath>
+      <HintPath>..\..\Libraries\UnityEngine.AnimationModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AssetBundleModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libraries\UnityEngine.AssetBundleModule.dll</HintPath>
+      <HintPath>..\..\Libraries\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AudioModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libraries\UnityEngine.AudioModule.dll</HintPath>
+      <HintPath>..\..\Libraries\UnityEngine.AudioModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libraries\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>..\..\Libraries\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libraries\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>..\..\Libraries\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ParticleSystemModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libraries\UnityEngine.ParticleSystemModule.dll</HintPath>
+      <HintPath>..\..\Libraries\UnityEngine.ParticleSystemModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libraries\UnityEngine.PhysicsModule.dll</HintPath>
+      <HintPath>..\..\Libraries\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libraries\UnityEngine.UI.dll</HintPath>
+      <HintPath>..\..\Libraries\UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.VRModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libraries\UnityEngine.VRModule.dll</HintPath>
+      <HintPath>..\..\Libraries\UnityEngine.VRModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.XRModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libraries\UnityEngine.XRModule.dll</HintPath>
+      <HintPath>..\..\Libraries\UnityEngine.XRModule.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
