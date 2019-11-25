@@ -8,10 +8,12 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
 
+// ReSharper disable InconsistentNaming
+// ReSharper disable NotAccessedField.Global
+// ReSharper disable once CheckNamespace
 namespace AvatarScriptPack
 {
     [Obsolete("Use VRIKManager")]
-    [RequireComponent(typeof(VRIKManager))]
     class IKManagerAdvanced : MonoBehaviour
     {
         [Space(5)]
@@ -251,46 +253,44 @@ namespace AvatarScriptPack
 
         public void Start()
         {
-            VRIKManager vrikManager = base.gameObject.AddComponent<VRIKManager>();
-            if (vrikManager != null)
+            VRIKManager vrikManager = gameObject.AddComponent<VRIKManager>();
+
+            vrikManager.solver_spine_headTarget = this.HeadTarget;
+            vrikManager.solver_leftArm_target = this.LeftHandTarget;
+            vrikManager.solver_rightArm_target = this.RightHandTarget;
+
+            Type type = this.GetType();
+            FieldInfo[] fieldInfos = type.GetFields(BindingFlags.Instance | BindingFlags.Public);
+            foreach (FieldInfo fieldInfo in fieldInfos)
             {
-                vrikManager.solver_spine_headTarget = this.HeadTarget;
-                vrikManager.solver_leftArm_target = this.LeftHandTarget;
-                vrikManager.solver_rightArm_target = this.RightHandTarget;
+                string[] propertyName = fieldInfo.Name.Split('_');
+                var value = fieldInfo.GetValue(this);
 
-                Type type = this.GetType();
-                FieldInfo[] fieldInfos = type.GetFields(BindingFlags.Instance | BindingFlags.Public);
-                foreach (FieldInfo fieldInfo in fieldInfos)
+                if (propertyName.Count() > 1)
                 {
-                    string[] propertyName = fieldInfo.Name.Split('_');
-                    var value = fieldInfo.GetValue(this);
-
-                    if (propertyName.Count() > 1)
+                    if ("Spine" == propertyName[0])
                     {
-                        if ("Spine" == propertyName[0])
-                        {
-                            SetProperty(vrikManager, "solver_spine_" + propertyName[1], value);
-                        }
-                        else if ("LeftArm" == propertyName[0])
-                        {
-                            SetProperty(vrikManager, "solver_leftArm_" + propertyName[1], value);
-                        }
-                        else if ("RightArm" == propertyName[0])
-                        {
-                            SetProperty(vrikManager, "solver_rightArm_" + propertyName[1], value);
-                        }
-                        else if ("LeftLeg" == propertyName[0])
-                        {
-                            SetProperty(vrikManager, "solver_leftLeg_" + propertyName[1], value);
-                        }
-                        else if ("RightLeg" == propertyName[0])
-                        {
-                            SetProperty(vrikManager, "solver_rightLeg_" + propertyName[1], value);
-                        }
-                        else if ("Locomotion" == propertyName[0])
-                        {
-                            SetProperty(vrikManager, "solver_locomotion_" + propertyName[1], value);
-                        }
+                        SetProperty(vrikManager, "solver_spine_" + propertyName[1], value);
+                    }
+                    else if ("LeftArm" == propertyName[0])
+                    {
+                        SetProperty(vrikManager, "solver_leftArm_" + propertyName[1], value);
+                    }
+                    else if ("RightArm" == propertyName[0])
+                    {
+                        SetProperty(vrikManager, "solver_rightArm_" + propertyName[1], value);
+                    }
+                    else if ("LeftLeg" == propertyName[0])
+                    {
+                        SetProperty(vrikManager, "solver_leftLeg_" + propertyName[1], value);
+                    }
+                    else if ("RightLeg" == propertyName[0])
+                    {
+                        SetProperty(vrikManager, "solver_rightLeg_" + propertyName[1], value);
+                    }
+                    else if ("Locomotion" == propertyName[0])
+                    {
+                        SetProperty(vrikManager, "solver_locomotion_" + propertyName[1], value);
                     }
                 }
             }

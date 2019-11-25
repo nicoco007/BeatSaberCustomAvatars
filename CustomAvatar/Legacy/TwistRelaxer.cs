@@ -2,6 +2,7 @@
 using UnityEngine;
 using RootMotion.FinalIK;
 
+// ReSharper disable once CheckNamespace
 namespace AvatarScriptPack {
 
 	/// <summary>

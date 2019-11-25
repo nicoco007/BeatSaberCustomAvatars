@@ -75,7 +75,7 @@ namespace CustomAvatar
 
             if (!_vrik && _vrikManager)
             {
-                _vrikManager.gameObject.AddComponent<VRIK>();
+                _vrik = _vrikManager.gameObject.AddComponent<VRIK>();
             }
 
             _isFingerTrackingSupported = _animator && _poseManager;
