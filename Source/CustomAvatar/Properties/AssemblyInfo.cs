@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("CustomAvatar")]
-[assembly: AssemblyCopyright("Copyright © xyonico 2018")]
+[assembly: AssemblyCopyright("Copyright © Custom Avatars Contributors 2018-2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
