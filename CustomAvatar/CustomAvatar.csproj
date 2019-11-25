@@ -118,6 +118,7 @@
     <Compile Include="AvatarManager.cs" />
     <Compile Include="AvatarTailor.cs" />
     <Compile Include="AvatarResizeMode.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Legacy\TwistRelaxer.cs" />
     <Compile Include="Utilities\BeatSaberUtil.cs" />
     <Compile Include="CustomAvatar.cs" />

@@ -26,19 +26,19 @@ namespace CustomAvatar
             get
             {
                 if (gameObject == null) return BeatSaberUtil.GetPlayerEyeHeight();
-                if (this._eyeHeight == null)
+                if (_eyeHeight == null)
                 {
                     var localPosition = gameObject.transform.InverseTransformPoint(viewPoint.position);
-                    this._eyeHeight = localPosition.y;
+                    _eyeHeight = localPosition.y;
             
                     //This is to handle cases where the head might be at 0,0,0, like in a non-IK avatar.
-                    if (this._eyeHeight < kMinIkAvatarHeight || this._eyeHeight > kMaxIkAvatarHeight)
+                    if (_eyeHeight < kMinIkAvatarHeight || _eyeHeight > kMaxIkAvatarHeight)
                     {
-                        this._eyeHeight = MainSettingsModel.kDefaultPlayerHeight;
+                        _eyeHeight = MainSettingsModel.kDefaultPlayerHeight;
                     }
                 }
 
-                return this._eyeHeight.Value;
+                return _eyeHeight.Value;
             }
         }
 
@@ -49,7 +49,7 @@ namespace CustomAvatar
         public CustomAvatar(string fullPath, GameObject avatarGameObject)
         {
             this.fullPath = fullPath ?? throw new ArgumentNullException(nameof(avatarGameObject));
-            gameObject = avatarGameObject ?? throw new ArgumentNullException(nameof(avatarGameObject));
+            gameObject = avatarGameObject ? avatarGameObject : throw new ArgumentNullException(nameof(avatarGameObject));
             descriptor = avatarGameObject.GetComponent<AvatarDescriptor>() ?? throw new AvatarLoadException($"Avatar at '{fullPath}' does not have an AvatarDescriptor");
             viewPoint = avatarGameObject.transform.Find("Head") ?? throw new AvatarLoadException($"Avatar '{descriptor.name}' does not have a Head transform");
         }

@@ -21,7 +21,7 @@ namespace CustomAvatar
         [SerializeField] [HideInInspector] private string Author;
         [SerializeField] [HideInInspector] private Sprite Cover;
         #pragma warning restore 649
-        // ReSharper enable InconsistentNaming
+        // ReSharper restore InconsistentNaming
 
         public void OnBeforeSerialize() { }
 

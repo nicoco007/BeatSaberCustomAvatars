@@ -54,11 +54,14 @@ namespace CustomAvatar
         private Animator _animator;
         private PoseManager _poseManager;
 
+        private bool _isFingerTrackingSupported;
+
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
+        // ReSharper disable UnusedMember.Local
 
-		private void Awake()
-		{
+        private void Awake()
+        {
 			_initialPosition = transform.position;
 			_initialScale = transform.localScale;
 		}
@@ -66,9 +69,16 @@ namespace CustomAvatar
         private void Start()
         {
             _vrikManager = GetComponentInChildren<VRIKManager>();
-            _vrik = GetComponentInChildren<VRIK>() ?? _vrikManager?.gameObject.AddComponent<VRIK>();
+            _vrik = GetComponentInChildren<VRIK>();
             _animator = GetComponentInChildren<Animator>();
             _poseManager = GetComponentInChildren<PoseManager>();
+
+            if (!_vrik && _vrikManager)
+            {
+                _vrikManager.gameObject.AddComponent<VRIK>();
+            }
+
+            _isFingerTrackingSupported = _animator && _poseManager;
 
             foreach (TwistRelaxer twistRelaxer in GetComponentsInChildren<TwistRelaxer>())
             {
@@ -94,7 +104,10 @@ namespace CustomAvatar
 
         private void LateUpdate()
         {
-            ApplyFingerTracking();
+            if (_isFingerTrackingSupported)
+            {
+                ApplyFingerTracking();
+            }
 
             try
             {
@@ -164,7 +177,7 @@ namespace CustomAvatar
                     _pelvis.rotation = _prevPelvisRot;
                 }
 
-                if (_body == null) return;
+                if (!_body) return;
                 _body.position = _head.position - (_head.transform.up * 0.1f);
 
                 var vel = new Vector3(_body.transform.localPosition.x - _prevBodyPos.x, 0.0f,
@@ -183,7 +196,8 @@ namespace CustomAvatar
                 Plugin.logger.Error($"{e.Message}\n{e.StackTrace}");
             }
         }
-
+        
+        // ReSharper restore UnusedMember.Local
         #pragma warning restore IDE0051
         #endregion
 
@@ -300,8 +314,6 @@ namespace CustomAvatar
 
         public void ApplyFingerTracking()
         {
-            if (_poseManager == null) return;
-
             if (Plugin.leftHandAnimAction != null)
             {
                 try
@@ -363,8 +375,6 @@ namespace CustomAvatar
 
         private void ApplyBodyBonePose(HumanBodyBones bodyBone, Pose open, Pose closed, float position)
         {
-            if (_animator == null) return;
-
             Transform boneTransform = _animator.GetBoneTransform(bodyBone);
 
             if (!boneTransform) return;
