@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using AvatarScriptPack;
 using CustomAvatar.Exceptions;
 using CustomAvatar.Utilities;
 using UnityEngine;
@@ -40,6 +41,10 @@ namespace CustomAvatar
                 return this._eyeHeight.Value;
             }
         }
+
+        public bool isIKAvatar => (gameObject.GetComponentInChildren<VRIKManager>()?.gameObject ??
+                                   gameObject.GetComponentInChildren<IKManager>()?.gameObject ??
+                                   gameObject.GetComponentInChildren<IKManagerAdvanced>()?.gameObject) != null;
 
         public CustomAvatar(string fullPath, GameObject avatarGameObject)
         {
