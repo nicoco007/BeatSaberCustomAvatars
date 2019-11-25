@@ -187,6 +187,9 @@
     <EmbeddedResource Include="Views\SettingsViewController.bsml" />
   </ItemGroup>
   <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\icon.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <AutomatedBuild>false</AutomatedBuild>
