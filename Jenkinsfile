@@ -16,8 +16,8 @@ pipeline {
         bat 'msbuild Source\\CustomAvatar.sln /p:Configuration=Debug /p:Platform="Any CPU" /p:AutomatedBuild=true'
         bat 'copy Source\\CustomAvatar\\bin\\Debug\\CustomAvatar.dll Packaging-Debug\\Plugins'
         bat 'copy Source\\CustomAvatar\\bin\\Debug\\CustomAvatar.pdb Packaging-Debug\\Plugins'
-        bat '7z a BeatSaber.CustomAvatars.DEBUG.zip -r "./Packaging-Debug/*"'
-        archiveArtifacts 'BeatSaber.CustomAvatars.DEBUG.zip'
+        bat '7z a BeatSaberCustomAvatars.DEBUG.zip -r "./Packaging-Debug/*"'
+        archiveArtifacts 'BeatSaberCustomAvatars.DEBUG.zip'
       }
     }
     stage('Prepare Release') {
@@ -30,8 +30,8 @@ pipeline {
       steps {
         bat 'msbuild Source\\CustomAvatar.sln /p:Configuration=Release /p:Platform="Any CPU" /p:AutomatedBuild=true'
         bat 'copy Source\\CustomAvatar\\bin\\Release\\CustomAvatar.dll Packaging-Release\\Plugins'
-        bat '7z a BeatSaber.CustomAvatars.RELEASE.zip -r "./Packaging-Release/*"'
-        archiveArtifacts 'BeatSaber.CustomAvatars.RELEASE.zip'
+        bat '7z a BeatSaberCustomAvatars.RELEASE.zip -r "./Packaging-Release/*"'
+        archiveArtifacts 'BeatSaberCustomAvatars.RELEASE.zip'
       }
     }
     stage('Clean up') {
