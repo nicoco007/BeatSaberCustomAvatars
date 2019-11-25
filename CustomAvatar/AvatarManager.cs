@@ -60,7 +60,7 @@ namespace CustomAvatar
         {
             var previousAvatarPath = SettingsManager.settings.previousAvatarPath;
 
-            if (!File.Exists(previousAvatarPath))
+            if (!File.Exists(Path.Combine(kCustomAvatarsPath, previousAvatarPath)))
             {
                 previousAvatarPath = GetAvatarFileNames().FirstOrDefault();
             }
