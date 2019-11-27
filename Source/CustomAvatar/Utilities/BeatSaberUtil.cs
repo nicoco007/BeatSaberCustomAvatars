@@ -5,12 +5,11 @@ namespace CustomAvatar.Utilities
 {
     public static class BeatSaberUtil
     {
-        private static Transform _originTransform;
         private static MainSettingsModel _mainSettingsModel;
         private static float _lastPlayerHeight = MainSettingsModel.kDefaultPlayerHeight;
         private static PlayerDataModelSO _playerDataModel;
 
-        private static MainSettingsModel MainSettingsModel
+        private static MainSettingsModel mainSettingsModel
         {
             get
             {
@@ -28,7 +27,7 @@ namespace CustomAvatar.Utilities
             if (!_playerDataModel)
                 _playerDataModel = Resources.FindObjectsOfTypeAll<PlayerDataModelSO>().FirstOrDefault();
 
-            var playerHeight = _playerDataModel == null ? _lastPlayerHeight : _playerDataModel.playerData.playerSpecificSettings.playerHeight;
+            var playerHeight = !_playerDataModel ? _lastPlayerHeight : _playerDataModel.playerData.playerSpecificSettings.playerHeight;
             
             _lastPlayerHeight = playerHeight;
             return playerHeight;
@@ -41,22 +40,12 @@ namespace CustomAvatar.Utilities
 
         public static Vector3 GetRoomCenter()
         {
-            if (_originTransform == null)
-            {
-                return MainSettingsModel == null ? Vector3.zero : MainSettingsModel.roomCenter;
-            }
-            
-            return _originTransform.position;
+            return !mainSettingsModel ? Vector3.zero : mainSettingsModel.roomCenter;
         }
 
         public static Quaternion GetRoomRotation()
         {
-            if (_originTransform == null)
-            {
-                return MainSettingsModel == null ? Quaternion.identity : Quaternion.Euler(0, MainSettingsModel.roomRotation, 0);
-            }
-
-            return _originTransform.rotation;
+            return !mainSettingsModel ? Quaternion.identity : Quaternion.Euler(0, mainSettingsModel.roomRotation, 0);
         }
     }
 }

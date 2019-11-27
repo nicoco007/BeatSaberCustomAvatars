@@ -64,17 +64,16 @@ namespace CustomAvatar
         {
 			_initialPosition = transform.position;
 			_initialScale = transform.localScale;
-		}
 
-        private void Start()
-        {
             _vrikManager = GetComponentInChildren<VRIKManager>();
             _vrik = GetComponentInChildren<VRIK>();
             _animator = GetComponentInChildren<Animator>();
             _poseManager = GetComponentInChildren<PoseManager>();
 
-            if (!_vrik && _vrikManager)
+            if (_vrikManager && (!_vrik || _vrikManager.gameObject != _vrik.gameObject))
             {
+                Destroy(_vrik);
+
                 _vrik = _vrikManager.gameObject.AddComponent<VRIK>();
             }
 
@@ -88,8 +87,8 @@ namespace CustomAvatar
             _trackedDevices = PersistentSingleton<TrackedDeviceManager>.instance;
             _vrPlatformHelper = PersistentSingleton<VRPlatformHelper>.instance;
 
-            _trackedDevices.DeviceAdded += (device) => UpdateVrikReferences();
-            _trackedDevices.DeviceRemoved += (device) => UpdateVrikReferences();
+            _trackedDevices.DeviceAdded += OnTrackedDeviceAdded;
+            _trackedDevices.DeviceRemoved += OnTrackedDeviceRemoved;
 
             _head = transform.Find("Head");
             _body = transform.Find("Body");
@@ -100,7 +99,7 @@ namespace CustomAvatar
             _pelvis = transform.Find("Pelvis");
 
             SetVrikReferences();
-        }
+		}
 
         private void LateUpdate()
         {
@@ -196,10 +195,26 @@ namespace CustomAvatar
                 Plugin.logger.Error($"{e.Message}\n{e.StackTrace}");
             }
         }
-        
+
+        private void OnDestroy()
+        {
+            _trackedDevices.DeviceAdded -= OnTrackedDeviceAdded;
+            _trackedDevices.DeviceRemoved -= OnTrackedDeviceRemoved;
+        }
+
         // ReSharper restore UnusedMember.Local
         #pragma warning restore IDE0051
         #endregion
+
+        private void OnTrackedDeviceAdded(TrackedDeviceState device)
+        {
+            UpdateVrikReferences();
+        }
+
+        private void OnTrackedDeviceRemoved(TrackedDeviceState device)
+        {
+            UpdateVrikReferences();
+        }
 
         private void SetVrikReferences()
         {
