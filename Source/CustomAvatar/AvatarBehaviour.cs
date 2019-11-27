@@ -47,7 +47,7 @@ namespace CustomAvatar
         private Vector3 _prevPelvisPos = default(Vector3);
         private Quaternion _prevPelvisRot = default(Quaternion);
 
-        private RootMotion.FinalIK.VRIK _vrik;
+        private VRIK _vrik;
         private VRIKManager _vrikManager;
         private TrackedDeviceManager _trackedDevices;
         private VRPlatformHelper _vrPlatformHelper;
@@ -65,6 +65,14 @@ namespace CustomAvatar
 			_initialPosition = transform.position;
 			_initialScale = transform.localScale;
 
+            foreach (var twistRelaxer in GetComponentsInChildren<TwistRelaxer>())
+            {
+                twistRelaxer.enabled = false;
+            }
+		}
+
+        private void Start()
+        {
             _vrikManager = GetComponentInChildren<VRIKManager>();
             _vrik = GetComponentInChildren<VRIK>();
             _animator = GetComponentInChildren<Animator>();
@@ -78,10 +86,11 @@ namespace CustomAvatar
             }
 
             _isFingerTrackingSupported = _animator && _poseManager;
-
+            
             foreach (TwistRelaxer twistRelaxer in GetComponentsInChildren<TwistRelaxer>())
             {
                 twistRelaxer.ik = _vrik;
+                twistRelaxer.enabled = true;
             }
 
             _trackedDevices = PersistentSingleton<TrackedDeviceManager>.instance;
@@ -99,7 +108,7 @@ namespace CustomAvatar
             _pelvis = transform.Find("Pelvis");
 
             SetVrikReferences();
-		}
+        }
 
         private void LateUpdate()
         {
