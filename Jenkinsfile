@@ -13,7 +13,7 @@ pipeline {
     }
     stage('Build Debug') {
       steps {
-        bat 'msbuild Source\\CustomAvatar.sln /p:Configuration=Debug /p:Platform="Any CPU" /p:AutomatedBuild=true'
+        bat 'msbuild Source\\CustomAvatar\\CustomAvatar.csproj /p:Configuration=Debug /p:Platform="Any CPU" /p:AutomatedBuild=true'
         bat 'copy Source\\CustomAvatar\\bin\\Debug\\CustomAvatar.dll Packaging-Debug\\Plugins'
         bat 'copy Source\\CustomAvatar\\bin\\Debug\\CustomAvatar.pdb Packaging-Debug\\Plugins'
         bat '7z a BeatSaberCustomAvatars.DEBUG.zip -r "./Packaging-Debug/*"'
@@ -28,10 +28,23 @@ pipeline {
     }
     stage('Build Release') {
       steps {
-        bat 'msbuild Source\\CustomAvatar.sln /p:Configuration=Release /p:Platform="Any CPU" /p:AutomatedBuild=true'
+        bat 'msbuild Source\\CustomAvatar\\CustomAvatar.csproj /p:Configuration=Release /p:Platform="Any CPU" /p:AutomatedBuild=true'
         bat 'copy Source\\CustomAvatar\\bin\\Release\\CustomAvatar.dll Packaging-Release\\Plugins'
         bat '7z a BeatSaberCustomAvatars.RELEASE.zip -r "./Packaging-Release/*"'
         archiveArtifacts 'BeatSaberCustomAvatars.RELEASE.zip'
+      }
+    }
+    stage('Prepare Editor') {
+      steps {
+        bat 'mkdir Packaging-Editor'
+      }
+    }
+    stage('Build Editor') {
+      steps {
+        bat 'msbuild Source\\CustomAvatar-Editor\\CustomAvatar-Editor.csproj /p:Configuration=Release /p:Platform="Any CPU" /p:AutomatedBuild=true'
+        bat 'copy Source\\CustomAvatar-Editor\\bin\\Release\\CustomAvatar.dll Packaging-Editor'
+        bat '7z a BeatSaberCustomAvatars-Editor.zip -r "./Packaging-Editor/*"'
+        archiveArtifacts 'BeatSaberCustomAvatars-Editor.zip'
       }
     }
     stage('Clean up') {
