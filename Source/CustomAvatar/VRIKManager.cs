@@ -1,6 +1,8 @@
 ﻿using System;
+using RootMotion;
 using UnityEngine;
 using UnityEngine.Events;
+using static RootMotion.FinalIK.IKSolverVR.Arm;
 
 // ReSharper disable UnusedMember.Global
 // ReSharper disable NotAccessedField.Global
@@ -386,42 +388,6 @@ namespace CustomAvatar
         public void Reset()
         {
             AutoDetectReferences();
-        }
-
-        public enum ShoulderRotationMode {
-            YawPitch,
-            FromTo
-        }
-
-        public enum InterpolationMode
-        {
-            None,
-            InOutCubic,
-            InOutQuintic,
-            InOutSine,
-            InQuintic,
-            InQuartic,
-            InCubic,
-            InQuadratic,
-            InElastic,
-            InElasticSmall,
-            InElasticBig,
-            InSine,
-            InBack,
-            OutQuintic,
-            OutQuartic,
-            OutCubic,
-            OutInCubic,
-            OutInQuartic,
-            OutElastic,
-            OutElasticSmall,
-            OutElasticBig,
-            OutSine,
-            OutBack,
-            OutBackCubic,
-            OutBackQuartic,
-            BackInCubic,
-            BackInQuartic,
         }
     }
 }
