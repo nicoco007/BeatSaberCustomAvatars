@@ -199,7 +199,9 @@
     <PostBuildEvent>if $(AutomatedBuild) equ false (
   if "$(BeatSaberDir)" neq "" (
     copy "$(TargetPath)" "$(BeatSaberDir)\Plugins"
-    copy "$(TargetDir)$(TargetName).pdb" "$(BeatSaberDir)\Plugins"
+    if "$(Configuration)" equ "Debug" (
+      copy "$(TargetDir)$(TargetName).pdb" "$(BeatSaberDir)\Plugins"
+    )
   )
 )</PostBuildEvent>
   </PropertyGroup>
