@@ -60,12 +60,12 @@ namespace CustomAvatar
         {
             var previousAvatarPath = SettingsManager.settings.previousAvatarPath;
 
-            if (!File.Exists(Path.Combine(kCustomAvatarsPath, previousAvatarPath)))
+            if (string.IsNullOrEmpty(previousAvatarPath))
             {
                 previousAvatarPath = GetAvatarFileNames().FirstOrDefault();
             }
 
-            if (string.IsNullOrEmpty(previousAvatarPath))
+            if (string.IsNullOrEmpty(previousAvatarPath) || !File.Exists(Path.Combine(kCustomAvatarsPath, previousAvatarPath)))
             {
                 Plugin.logger.Info("No avatars found");
                 return;
