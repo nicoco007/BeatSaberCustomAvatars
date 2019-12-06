@@ -32,6 +32,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="DynamicBone">
+      <HintPath>..\..\Libraries\DynamicBone.dll</HintPath>
+    </Reference>
+    <Reference Include="FinalIK">
+      <HintPath>..\..\Libraries\FinalIK.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
@@ -65,18 +71,6 @@
     <Compile Include="..\CustomAvatar\AvatarDescriptor.cs">
       <Link>AvatarDescriptor.cs</Link>
     </Compile>
-    <Compile Include="..\CustomAvatar\DynamicBone\DynamicBone.cs">
-      <Link>DynamicBone\DynamicBone.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\DynamicBone\DynamicBoneCollider.cs">
-      <Link>DynamicBone\DynamicBoneCollider.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\DynamicBone\DynamicBoneColliderBase.cs">
-      <Link>DynamicBone\DynamicBoneColliderBase.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\DynamicBone\DynamicBonePlaneCollider.cs">
-      <Link>DynamicBone\DynamicBonePlaneCollider.cs</Link>
-    </Compile>
     <Compile Include="..\CustomAvatar\EventFilterBehaviour.cs">
       <Link>EventFilterBehaviour.cs</Link>
     </Compile>
@@ -94,69 +88,6 @@
     </Compile>
     <Compile Include="..\CustomAvatar\VRIKManager.cs">
       <Link>VRIKManager.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\VRIK\AxisTools.cs">
-      <Link>VRIK\AxisTools.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\VRIK\FirstPersonExclusion.cs">
-      <Link>VRIK\FirstPersonExclusion.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\VRIK\Hierarchy.cs">
-      <Link>VRIK\Hierarchy.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\VRIK\IK.cs">
-      <Link>VRIK\IK.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\VRIK\IKSolver.cs">
-      <Link>VRIK\IKSolver.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\VRIK\IKSolverVR.cs">
-      <Link>VRIK\IKSolverVR.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\VRIK\IKSolverVRArm.cs">
-      <Link>VRIK\IKSolverVRArm.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\VRIK\IKSolverVRBodyPart.cs">
-      <Link>VRIK\IKSolverVRBodyPart.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\VRIK\IKSolverVRFootstep.cs">
-      <Link>VRIK\IKSolverVRFootstep.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\VRIK\IKSolverVRLeg.cs">
-      <Link>VRIK\IKSolverVRLeg.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\VRIK\IKSolverVRLocomotion.cs">
-      <Link>VRIK\IKSolverVRLocomotion.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\VRIK\IKSolverVRSpine.cs">
-      <Link>VRIK\IKSolverVRSpine.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\VRIK\IKSolverVRUtilities.cs">
-      <Link>VRIK\IKSolverVRUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\VRIK\Interp.cs">
-      <Link>VRIK\Interp.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\VRIK\QuaTools.cs">
-      <Link>VRIK\QuaTools.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\VRIK\RotationLimit.cs">
-      <Link>VRIK\RotationLimit.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\VRIK\SolverManager.cs">
-      <Link>VRIK\SolverManager.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\VRIK\TwistRelaxer.cs">
-      <Link>VRIK\TwistRelaxer.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\VRIK\V3Tools.cs">
-      <Link>VRIK\V3Tools.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\VRIK\VRIK.cs">
-      <Link>VRIK\VRIK.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\VRIK\Warning.cs">
-      <Link>VRIK\Warning.cs</Link>
     </Compile>
     <Compile Include="VRIKManagerEditor.cs" />
     <Compile Include="PoseManagerEditor.cs" />
