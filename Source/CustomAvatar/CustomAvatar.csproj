@@ -28,7 +28,8 @@
     <DefineConstants>PLUGIN</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BSML">
+    <Reference Include="BSML, Version=1.0.6.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\BSML.dll</HintPath>
     </Reference>
     <Reference Include="BS_Utils, Version=1.3.7.0, Culture=neutral, processorArchitecture=MSIL">
