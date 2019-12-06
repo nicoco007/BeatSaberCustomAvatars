@@ -2,13 +2,11 @@ using CustomAvatar.StereoRendering;
 using IPA;
 using System;
 using System.Linq;
-using System.Reflection;
 using BeatSaberMarkupLanguage.MenuButtons;
 using CustomAvatar.UI;
 using CustomAvatar.Utilities;
 using DynamicOpenVR;
 using DynamicOpenVR.IO;
-using HMUI;
 using IPA.Utilities;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -83,10 +81,7 @@ namespace CustomAvatar
                 {
                     var mainFlowCoordinator = Resources.FindObjectsOfTypeAll<MainFlowCoordinator>().First();
                     var flowCoordinator = new GameObject("AvatarListFlowCoordinator").AddComponent<AvatarListFlowCoordinator>();
-                    mainFlowCoordinator.InvokePrivateMethod("PresentFlowCoordinator", flowCoordinator, new Action(() =>
-                    {
-                        Console.WriteLine("bam");
-                    }), true, false);
+                    mainFlowCoordinator.InvokePrivateMethod("PresentFlowCoordinator", flowCoordinator, null, true, false);
                 }));
             }
         }
