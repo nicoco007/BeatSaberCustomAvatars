@@ -14,8 +14,10 @@ namespace CustomAvatar.UI
 {
     public class AvatarListViewController : BSMLResourceViewController, TableView.IDataSource
     {
+        private const string kTableCellReuseIdentifier = "CustomAvatarsTableCell";
+
         public override string ResourceName => "CustomAvatar.Views.AvatarListViewController.bsml";
-        
+
         [UIComponent("avatar-list")] public CustomListTableData AvatarList;
         [UIComponent("up-button")] public Button UpButton;
         [UIComponent("down-button")] public Button DownButton;
@@ -110,7 +112,7 @@ namespace CustomAvatar.UI
 
         public TableCell CellForIdx(TableView tableView, int idx)
         {
-            LevelListTableCell tableCell = AvatarList.tableView.DequeueReusableCellForIdentifier("AvatarListCell") as LevelListTableCell;
+            LevelListTableCell tableCell = AvatarList.tableView.DequeueReusableCellForIdentifier(kTableCellReuseIdentifier) as LevelListTableCell;
 
             if (!tableCell)
             {
@@ -123,8 +125,9 @@ namespace CustomAvatar.UI
 
                 tableCell.SetPrivateField("_beatmapCharacteristicAlphas", new float[0]);
                 tableCell.SetPrivateField("_beatmapCharacteristicImages", new UnityEngine.UI.Image[0]);
+                tableCell.GetPrivateField<RawImage>("_favoritesBadgeImage").enabled = false;
 
-                tableCell.reuseIdentifier = "CustomAvatarsTableCell";
+                tableCell.reuseIdentifier = kTableCellReuseIdentifier;
             }
 
             CustomAvatar avatar = avatars[idx];
