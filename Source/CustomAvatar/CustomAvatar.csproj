@@ -28,6 +28,9 @@
     <DefineConstants>PLUGIN</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="BSML">
+      <HintPath>..\..\Libraries\BSML.dll</HintPath>
+    </Reference>
     <Reference Include="BS_Utils, Version=1.3.7.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\BS_Utils.dll</HintPath>
@@ -44,6 +47,10 @@
     </Reference>
     <Reference Include="HMLib">
       <HintPath>..\..\Libraries\HMLib.dll</HintPath>
+    </Reference>
+    <Reference Include="HMUI, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Libraries\HMUI.dll</HintPath>
     </Reference>
     <Reference Include="IPA.Injector, Version=3.13.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

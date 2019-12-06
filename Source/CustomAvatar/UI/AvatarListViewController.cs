@@ -1,4 +1,4 @@
-/*using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using BeatSaberMarkupLanguage.Attributes;
@@ -56,13 +56,13 @@ namespace CustomAvatar.UI
             UpButton.onClick.AddListener(() =>
             {
                 scroller.PageScrollUp();
-                AvatarList.tableView.RefreshScrollButtons();
+                AvatarList.tableView.InvokePrivateMethod("RefreshScrollButtons", false);
             });
 
             DownButton.onClick.AddListener(() =>
             {
                 scroller.PageScrollDown();
-                AvatarList.tableView.RefreshScrollButtons();
+                AvatarList.tableView.InvokePrivateMethod("RefreshScrollButtons", false);
             });
         }
 
@@ -136,4 +136,4 @@ namespace CustomAvatar.UI
             return tableCell;
         }
     }
-}*/
+}

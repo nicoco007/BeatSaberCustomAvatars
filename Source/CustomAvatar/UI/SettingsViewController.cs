@@ -1,4 +1,4 @@
-/*using System.Collections.Generic;
+using System.Collections.Generic;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
 using CustomAvatar.Tracking;
@@ -162,4 +162,3 @@ namespace CustomAvatar.UI
         #endregion
     }
 }
-*/

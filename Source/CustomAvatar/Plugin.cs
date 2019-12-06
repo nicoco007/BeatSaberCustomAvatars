@@ -2,11 +2,14 @@ using CustomAvatar.StereoRendering;
 using IPA;
 using System;
 using System.Linq;
-//using CustomAvatar.UI;
+using System.Reflection;
+using BeatSaberMarkupLanguage.MenuButtons;
+using CustomAvatar.UI;
 using CustomAvatar.Utilities;
-//using CustomUI.MenuButton;
 using DynamicOpenVR;
 using DynamicOpenVR.IO;
+using HMUI;
+using IPA.Utilities;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
@@ -76,12 +79,15 @@ namespace CustomAvatar
 
             if (newScene.name == "MenuCore")
             {
-                /*MenuButtonUI.AddButton("Avatars", () =>
+                MenuButtons.instance.RegisterButton(new MenuButton("Avatars", () =>
                 {
                     var mainFlowCoordinator = Resources.FindObjectsOfTypeAll<MainFlowCoordinator>().First();
                     var flowCoordinator = new GameObject("AvatarListFlowCoordinator").AddComponent<AvatarListFlowCoordinator>();
-                    mainFlowCoordinator.InvokePrivateMethod("PresentFlowCoordinator", flowCoordinator, null, false, false);
-                });*/
+                    mainFlowCoordinator.InvokePrivateMethod("PresentFlowCoordinator", flowCoordinator, new Action(() =>
+                    {
+                        Console.WriteLine("bam");
+                    }), true, false);
+                }));
             }
         }
 
