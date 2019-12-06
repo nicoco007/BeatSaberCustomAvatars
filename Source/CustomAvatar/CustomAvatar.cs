@@ -34,7 +34,7 @@ namespace CustomAvatar
                     //This is to handle cases where the head might be at 0,0,0, like in a non-IK avatar.
                     if (_eyeHeight < kMinIkAvatarHeight || _eyeHeight > kMaxIkAvatarHeight)
                     {
-                        _eyeHeight = MainSettingsModel.kDefaultPlayerHeight;
+                        _eyeHeight = MainSettingsModelSO.kDefaultPlayerHeight;
                     }
                 }
 

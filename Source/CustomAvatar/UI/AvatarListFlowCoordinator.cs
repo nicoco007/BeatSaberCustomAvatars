@@ -1,7 +1,7 @@
-using System.Linq;
+/*using System.Linq;
 using BeatSaberMarkupLanguage;
 using CustomUI.Utilities;
-using VRUI;
+using HMUI;
 using UnityEngine;
 
 namespace CustomAvatar.UI
@@ -21,9 +21,9 @@ namespace CustomAvatar.UI
             {
                 title = "Custom Avatars";
 
-                VRUIViewController contentViewController = BeatSaberUI.CreateViewController<MirrorViewController>();
-                VRUIViewController leftViewController = BeatSaberUI.CreateViewController<SettingsViewController>();
-                VRUIViewController rightViewController = BeatSaberUI.CreateViewController<AvatarListViewController>();
+                ViewController contentViewController = BeatSaberUI.CreateViewController<MirrorViewController>();
+                ViewController leftViewController = BeatSaberUI.CreateViewController<SettingsViewController>();
+                ViewController rightViewController = BeatSaberUI.CreateViewController<AvatarListViewController>();
 
                 rightNavigationController = BeatSaberUI.CreateDismissableNavigationController();
 
@@ -48,4 +48,4 @@ namespace CustomAvatar.UI
             mainFlowCoordinator.InvokePrivateMethod("DismissFlowCoordinator", new object[] { this, null, false });
         }
     }
-}
+}*/

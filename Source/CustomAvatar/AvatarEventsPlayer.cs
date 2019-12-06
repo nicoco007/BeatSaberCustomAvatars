@@ -13,7 +13,7 @@ namespace CustomAvatar
         private ObstacleSaberSparkleEffectManager _saberCollisionManager;
         private GameEnergyCounter _gameEnergyCounter;
         private BeatmapObjectCallbackController _beatmapObjectCallbackController;
-        private BeatmapDataModel _beatmapDataModel;
+        private BeatmapDataSO _beatmapDataModel;
         private int _lastNoteId = -1;
 
         public void Restart()
@@ -66,8 +66,8 @@ namespace CustomAvatar
             if (_beatmapObjectCallbackController)
                 _beatmapObjectCallbackController.beatmapEventDidTriggerEvent -= OnBeatmapEventDidTriggerEvent;
 
-            if (_beatmapDataModel)
-                _beatmapDataModel.beatmapDataDidChangeEvent -= BeatmapDataChangedCallback;
+            /*if (_beatmapDataModel)
+                _beatmapDataModel.beatmapDataDidChangeEvent -= BeatmapDataChangedCallback;*/
         }
 
         private void SceneManagerOnSceneLoaded(Scene newScene, LoadSceneMode mode)
@@ -85,7 +85,7 @@ namespace CustomAvatar
                 Resources.FindObjectsOfTypeAll<ObstacleSaberSparkleEffectManager>().FirstOrDefault();
             _gameEnergyCounter = Resources.FindObjectsOfTypeAll<GameEnergyCounter>().FirstOrDefault();
             _beatmapObjectCallbackController = Resources.FindObjectsOfTypeAll<BeatmapObjectCallbackController>().FirstOrDefault();
-            _beatmapDataModel = Resources.FindObjectsOfTypeAll<BeatmapDataModel>().FirstOrDefault();
+            _beatmapDataModel = Resources.FindObjectsOfTypeAll<BeatmapDataSO>().FirstOrDefault();
 
             _scoreController.noteWasCutEvent += SliceCallBack;
             _scoreController.noteWasMissedEvent += NoteMissCallBack;
@@ -104,11 +104,11 @@ namespace CustomAvatar
                 _beatmapObjectCallbackController.beatmapEventDidTriggerEvent += OnBeatmapEventDidTriggerEvent;
 
             _lastNoteId = -1;
-            if (_beatmapDataModel)
+            /*if (_beatmapDataModel)
             {
                 _beatmapDataModel.beatmapDataDidChangeEvent += BeatmapDataChangedCallback;
                 BeatmapDataChangedCallback();
-            }
+            }*/
         }
 
 

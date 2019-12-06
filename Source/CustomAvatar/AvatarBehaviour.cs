@@ -5,6 +5,7 @@ using System.Reflection;
 using RootMotion.FinalIK;
 using CustomAvatar.Utilities;
 using UnityEngine;
+using UnityEngine.XR;
 
 namespace CustomAvatar
 {
@@ -134,7 +135,7 @@ namespace CustomAvatar
                     _leftHand.position = leftPose.Position;
                     _leftHand.rotation = leftPose.Rotation;
 
-                    _vrPlatformHelper.AdjustPlatformSpecificControllerTransform(_leftHand);
+                    _vrPlatformHelper.AdjustPlatformSpecificControllerTransform(XRNode.LeftHand, _leftHand);
                 }
 
                 if (_rightHand && rightPose != null && rightPose.NodeState.tracked)
@@ -142,7 +143,7 @@ namespace CustomAvatar
                     _rightHand.position = rightPose.Position;
                     _rightHand.rotation = rightPose.Rotation;
 
-                    _vrPlatformHelper.AdjustPlatformSpecificControllerTransform(_rightHand);
+                    _vrPlatformHelper.AdjustPlatformSpecificControllerTransform(XRNode.RightHand, _rightHand);
                 }
 
                 TrackedDeviceState leftLegTracker = _trackedDevices.LeftFoot;

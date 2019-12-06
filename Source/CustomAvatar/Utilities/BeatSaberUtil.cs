@@ -5,17 +5,17 @@ namespace CustomAvatar.Utilities
 {
     public static class BeatSaberUtil
     {
-        private static MainSettingsModel _mainSettingsModel;
-        private static float _lastPlayerHeight = MainSettingsModel.kDefaultPlayerHeight;
+        private static MainSettingsModelSO _mainSettingsModel;
+        private static float _lastPlayerHeight = MainSettingsModelSO.kDefaultPlayerHeight;
         private static PlayerDataModelSO _playerDataModel;
 
-        private static MainSettingsModel mainSettingsModel
+        private static MainSettingsModelSO mainSettingsModel
         {
             get
             {
                 if (_mainSettingsModel == null)
                 {
-                    _mainSettingsModel = Resources.FindObjectsOfTypeAll<MainSettingsModel>().FirstOrDefault();
+                    _mainSettingsModel = Resources.FindObjectsOfTypeAll<MainSettingsModelSO>().FirstOrDefault();
                 }
 
                 return _mainSettingsModel;
@@ -35,7 +35,7 @@ namespace CustomAvatar.Utilities
 
         public static float GetPlayerEyeHeight()
         {
-            return GetPlayerHeight() - MainSettingsModel.kHeadPosToPlayerHeightOffset;
+            return GetPlayerHeight() - MainSettingsModelSO.kHeadPosToPlayerHeightOffset;
         }
 
         public static Vector3 GetRoomCenter()

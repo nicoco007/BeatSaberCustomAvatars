@@ -1,11 +1,11 @@
-using CustomAvatar.StereoRendering;
+/*using CustomAvatar.StereoRendering;
 using System.Collections;
 using UnityEngine;
-using VRUI;
+using HMUI;
 
 namespace CustomAvatar.UI
 {
-    internal class MirrorViewController : VRUINavigationController
+    /*internal class MirrorViewController : VRUINavigationController
     {
         private static readonly Vector3 MirrorPosition = new Vector3(0, 0, 1.5f); // origin is bottom center
         private static readonly Quaternion MirrorRotation = Quaternion.Euler(-90f, 0, 0);
@@ -87,4 +87,4 @@ namespace CustomAvatar.UI
             stereoRenderer.canvasOriginRot = mirrorPlane.transform.rotation;
         }
     }
-}
+}*/

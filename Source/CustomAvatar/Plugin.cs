@@ -2,14 +2,14 @@ using CustomAvatar.StereoRendering;
 using IPA;
 using System;
 using System.Linq;
-using CustomAvatar.UI;
+//using CustomAvatar.UI;
 using CustomAvatar.Utilities;
-using CustomUI.MenuButton;
+//using CustomUI.MenuButton;
 using DynamicOpenVR;
 using DynamicOpenVR.IO;
-using IPA.Utilities;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Zenject;
 using Input = UnityEngine.Input;
 using Logger = IPA.Logging.Logger;
 
@@ -65,7 +65,7 @@ namespace CustomAvatar
                 if (_scenesManager != null)
                 {
                     _scenesManager.transitionDidFinishEvent += SceneTransitionDidFinish;
-                    _scenesManager.transitionDidFinishEvent += () => sceneTransitioned?.Invoke(SceneManager.GetActiveScene());
+                    _scenesManager.transitionDidFinishEvent += (setupData, container) => sceneTransitioned?.Invoke(SceneManager.GetActiveScene());
                 }
             }
 
@@ -76,16 +76,16 @@ namespace CustomAvatar
 
             if (newScene.name == "MenuCore")
             {
-                MenuButtonUI.AddButton("Avatars", () =>
+                /*MenuButtonUI.AddButton("Avatars", () =>
                 {
                     var mainFlowCoordinator = Resources.FindObjectsOfTypeAll<MainFlowCoordinator>().First();
                     var flowCoordinator = new GameObject("AvatarListFlowCoordinator").AddComponent<AvatarListFlowCoordinator>();
                     mainFlowCoordinator.InvokePrivateMethod("PresentFlowCoordinator", flowCoordinator, null, false, false);
-                });
+                });*/
             }
         }
 
-        private void SceneTransitionDidFinish()
+        private void SceneTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
         {
             foreach (Camera camera in Camera.allCameras)
             {
