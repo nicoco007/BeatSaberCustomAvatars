@@ -1,5 +1,5 @@
-<bg size-delta-y='0'>
-    <page-button id='up-button' direction='Up' anchor-min-y='0.97'></page-button>
-    <list id='avatar-list' select-cell='avatar-click' expand-cell='true'></list>
-    <page-button id='down-button' direction='Down' anchor-min-y='0.03'></page-button>
-</bg>
+<vertical>
+    <page-button id="up-button" direction="Up"></page-button>
+    <list id="avatar-list" select-cell="avatar-click" expand-cell="true"></list>
+    <page-button id="down-button" direction="Down"></page-button>
+</vertical>
