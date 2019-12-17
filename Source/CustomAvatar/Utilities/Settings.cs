@@ -10,7 +10,7 @@ namespace CustomAvatar.Utilities
         public string previousAvatarPath { get; set; }
         public float playerArmSpan { get; set; } = 1.7f;
         public bool calibrateFullBodyTrackingOnStart { get; set; } = false;
-        public float cameraNearClipPlane { get; set; } = 0.03f;
+        public float cameraNearClipPlane { get; set; } = 0.3f;
         public FullBodyMotionSmoothing fullBodyMotionSmoothing { get; } = new FullBodyMotionSmoothing();
         public FullBodyCalibration fullBodyCalibration { get; } = new FullBodyCalibration();
 
