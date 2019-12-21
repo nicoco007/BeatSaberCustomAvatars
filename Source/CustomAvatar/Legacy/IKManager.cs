@@ -4,6 +4,7 @@ using UnityEngine;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable once CheckNamespace
+#pragma warning disable CS0649
 namespace AvatarScriptPack
 {
     [Obsolete("Use VRIKManager")]

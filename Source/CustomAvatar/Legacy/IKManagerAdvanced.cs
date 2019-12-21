@@ -13,6 +13,7 @@ using UnityEngine.Serialization;
 // ReSharper disable InconsistentNaming
 // ReSharper disable NotAccessedField.Global
 // ReSharper disable once CheckNamespace
+#pragma warning disable CS0649
 namespace AvatarScriptPack
 {
     [Obsolete("Use VRIKManager")]

@@ -42,9 +42,11 @@ namespace CustomAvatar
             }
         }
 
+        #pragma warning disable 618
         public bool isIKAvatar => (gameObject.GetComponentInChildren<VRIKManager>()?.gameObject ??
                                    gameObject.GetComponentInChildren<IKManager>()?.gameObject ??
                                    gameObject.GetComponentInChildren<IKManagerAdvanced>()?.gameObject) != null;
+        #pragma warning restore 618
 
         public CustomAvatar(string fullPath, GameObject avatarGameObject)
         {
