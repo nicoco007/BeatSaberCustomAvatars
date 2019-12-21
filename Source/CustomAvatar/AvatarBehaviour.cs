@@ -161,7 +161,7 @@ namespace CustomAvatar
                     var leftLegPose = _trackedDevices.leftFoot;
                     var correction = SettingsManager.settings.fullBodyCalibration.leftLeg;
 
-                    _prevLeftLegPos = Vector3.Lerp(_prevLeftLegPos, (leftLegPose.Position + correction.position) * positionScale + position, SettingsManager.settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
+                    _prevLeftLegPos = Vector3.Lerp(_prevLeftLegPos, AdjustTransformPosition(leftLegPose.Position, correction.position, positionScale), SettingsManager.settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
                     _prevLeftLegRot = Quaternion.Slerp(_prevLeftLegRot, leftLegPose.Rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.feet.rotation * Time.deltaTime);
                     _leftLeg.position = _prevLeftLegPos;
                     _leftLeg.rotation = _prevLeftLegRot;
@@ -172,7 +172,7 @@ namespace CustomAvatar
                     var rightLegPose = _trackedDevices.rightFoot;
                     var correction = SettingsManager.settings.fullBodyCalibration.rightLeg;
 
-                    _prevRightLegPos = Vector3.Lerp(_prevRightLegPos, (rightLegPose.Position + correction.position) * positionScale + position, SettingsManager.settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
+                    _prevRightLegPos = Vector3.Lerp(_prevRightLegPos, AdjustTransformPosition(rightLegPose.Position, correction.position, positionScale), SettingsManager.settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
                     _prevRightLegRot = Quaternion.Slerp(_prevRightLegRot, rightLegPose.Rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.feet.rotation * Time.deltaTime);
                     _rightLeg.position = _prevRightLegPos;
                     _rightLeg.rotation = _prevRightLegRot;
@@ -183,7 +183,7 @@ namespace CustomAvatar
                     var pelvisPose = _trackedDevices.waist;
                     var correction = SettingsManager.settings.fullBodyCalibration.rightLeg;
 
-                    _prevPelvisPos = Vector3.Lerp(_prevPelvisPos, (pelvisPose.Position + correction.position) * positionScale + position, SettingsManager.settings.fullBodyMotionSmoothing.waist.position * Time.deltaTime);
+                    _prevPelvisPos = Vector3.Lerp(_prevPelvisPos, AdjustTransformPosition(pelvisPose.Position, correction.position, positionScale), SettingsManager.settings.fullBodyMotionSmoothing.waist.position * Time.deltaTime);
                     _prevPelvisRot = Quaternion.Slerp(_prevPelvisRot, pelvisPose.Rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.waist.rotation * Time.deltaTime);
                     _pelvis.position = _prevPelvisPos;
                     _pelvis.rotation = _prevPelvisRot;
@@ -290,6 +290,12 @@ namespace CustomAvatar
             if (!_vrik.references.isFilled) _vrik.AutoDetectReferences();
 
             UpdateVrikReferences();
+        }
+
+        private Vector3 AdjustTransformPosition(Vector3 original, Vector3 correction, float scale)
+        {
+            Vector3 corrected = original + correction;
+            return new Vector3(corrected.x, corrected.y * scale, corrected.z) + position;
         }
 
         private void UpdateVrikReferences()
