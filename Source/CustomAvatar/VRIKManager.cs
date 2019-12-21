@@ -362,10 +362,10 @@ namespace CustomAvatar
         public float solver_locomotion_stepSpeed = 3f;
 
         [Tooltip("The height of the foot by normalized step progress (0 - 1).")]
-        public AnimationCurve solver_locomotion_stepHeight;
+        public AnimationCurve solver_locomotion_stepHeight = new AnimationCurve();
 
         [Tooltip("The height offset of the heel by normalized step progress (0 - 1).")]
-        public AnimationCurve solver_locomotion_heelHeight;
+        public AnimationCurve solver_locomotion_heelHeight = new AnimationCurve();
 
         [Tooltip("Rotates the foot while the leg is not stepping to relax the twist rotation of the leg if ideal rotation is past this angle.")]
         [Range(0f, 180f)] public float solver_locomotion_relaxLegTwistMinAngle = 20f;

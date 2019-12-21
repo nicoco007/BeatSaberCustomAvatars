@@ -287,7 +287,11 @@ namespace CustomAvatar
                 }
             }
 
-            if (!_vrik.references.isFilled) _vrik.AutoDetectReferences();
+            if (!_vrik.references.isFilled)
+            {
+                Plugin.logger.Warn("Some required references are missing; auto detecting references");
+                _vrik.AutoDetectReferences();
+            }
 
             UpdateVrikReferences();
         }
