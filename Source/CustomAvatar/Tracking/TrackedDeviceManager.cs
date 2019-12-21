@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using CustomAvatar.Utilities;
+using DynamicOpenVR;
 using UnityEngine;
 using UnityEngine.XR;
 
@@ -26,8 +27,13 @@ namespace CustomAvatar.Tracking
         {
             var nodeStates = new List<XRNodeState>();
             var unassignedDevices = new Queue<XRNodeState>();
-            string[] serialNumbers = OpenVRWrapper.GetTrackedDeviceSerialNumbers();
+            string[] serialNumbers = new string[0];
             InputTracking.GetNodeStates(nodeStates);
+
+            if (OpenVRActionManager.isRunning)
+            {
+                OpenVRWrapper.GetTrackedDeviceSerialNumbers();
+            }
 
             XRNodeState? head      = null;
             XRNodeState? leftHand  = null;
@@ -61,28 +67,35 @@ namespace CustomAvatar.Tracking
                         break;
 
                     case XRNode.HardwareTracker:
-                        // try to figure out tracker role using OpenVR
-                        string deviceName = InputTracking.GetNodeName(nodeStates[i].uniqueID);
-                        uint openVRDeviceId = (uint)Array.FindIndex(serialNumbers, s => !string.IsNullOrEmpty(s) && deviceName.Contains(s));
-                        TrackedDeviceType role = OpenVRWrapper.GetTrackedDeviceType(openVRDeviceId);
-
-                        switch (role)
+                        if (OpenVRActionManager.isRunning)
                         {
-                            case TrackedDeviceType.LeftFoot:
-                                leftFoot = nodeStates[i];
-                                break;
+                            // try to figure out tracker role using OpenVR
+                            string deviceName = InputTracking.GetNodeName(nodeStates[i].uniqueID);
+                            uint openVRDeviceId = (uint)Array.FindIndex(serialNumbers, s => !string.IsNullOrEmpty(s) && deviceName.Contains(s));
+                            TrackedDeviceType role = OpenVRWrapper.GetTrackedDeviceType(openVRDeviceId);
 
-                            case TrackedDeviceType.RightFoot:
-                                rightFoot = nodeStates[i];
-                                break;
+                            switch (role)
+                            {
+                                case TrackedDeviceType.LeftFoot:
+                                    leftFoot = nodeStates[i];
+                                    break;
 
-                            case TrackedDeviceType.Waist:
-                                waist = nodeStates[i];
-                                break;
+                                case TrackedDeviceType.RightFoot:
+                                    rightFoot = nodeStates[i];
+                                    break;
 
-                            default:
-	                            unassignedDevices.Enqueue(nodeStates[i]);
-	                            break;
+                                case TrackedDeviceType.Waist:
+                                    waist = nodeStates[i];
+                                    break;
+
+                                default:
+                                    unassignedDevices.Enqueue(nodeStates[i]);
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            unassignedDevices.Enqueue(nodeStates[i]);
                         }
 
                         trackerCount++;
