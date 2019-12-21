@@ -161,13 +161,17 @@ namespace CustomAvatar.Tracking
 
             var nodeState = (XRNodeState)possibleNodeState;
             ulong previousId = deviceState.NodeState.uniqueID;
+            
+            Vector3 origin = BeatSaberUtil.GetRoomCenter();
+            Quaternion originRotation = BeatSaberUtil.GetRoomRotation();
 
-            if (nodeState.TryGetPosition(out var position) && nodeState.TryGetRotation(out var rotation))
+            if (nodeState.TryGetPosition(out Vector3 position))
             {
-                Vector3 origin = BeatSaberUtil.GetRoomCenter();
-                Quaternion originRotation = BeatSaberUtil.GetRoomRotation();
-
                 deviceState.Position = originRotation * position + originRotation * origin;
+            }
+
+            if (nodeState.TryGetRotation(out Quaternion rotation))
+            {
                 deviceState.Rotation = originRotation * rotation;
             }
 

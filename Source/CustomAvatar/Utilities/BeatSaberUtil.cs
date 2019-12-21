@@ -13,7 +13,7 @@ namespace CustomAvatar.Utilities
         {
             get
             {
-                if (_mainSettingsModel == null)
+                if (!_mainSettingsModel)
                 {
                     _mainSettingsModel = Resources.FindObjectsOfTypeAll<MainSettingsModelSO>().FirstOrDefault();
                 }
@@ -27,10 +27,9 @@ namespace CustomAvatar.Utilities
             if (!_playerDataModel)
                 _playerDataModel = Resources.FindObjectsOfTypeAll<PlayerDataModelSO>().FirstOrDefault();
 
-            var playerHeight = !_playerDataModel ? _lastPlayerHeight : _playerDataModel.playerData.playerSpecificSettings.playerHeight;
+            _lastPlayerHeight = !_playerDataModel ? _lastPlayerHeight : _playerDataModel.playerData.playerSpecificSettings.playerHeight;
             
-            _lastPlayerHeight = playerHeight;
-            return playerHeight;
+            return _lastPlayerHeight;
         }
 
         public static float GetPlayerEyeHeight()
