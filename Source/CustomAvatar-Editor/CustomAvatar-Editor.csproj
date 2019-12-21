@@ -34,9 +34,11 @@
   <ItemGroup>
     <Reference Include="DynamicBone">
       <HintPath>..\..\Libraries\DynamicBone.dll</HintPath>
+      <Aliases>BeatSaberDynamicBone</Aliases>
     </Reference>
     <Reference Include="FinalIK">
       <HintPath>..\..\Libraries\FinalIK.dll</HintPath>
+      <Aliases>BeatSaberFinalIK</Aliases>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

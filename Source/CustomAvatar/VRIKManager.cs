@@ -1,8 +1,10 @@
-﻿using System;
-using RootMotion;
+﻿extern alias BeatSaberFinalIK;
+
+using System;
+using BeatSaberFinalIK::RootMotion;
 using UnityEngine;
 using UnityEngine.Events;
-using static RootMotion.FinalIK.IKSolverVR.Arm;
+using static BeatSaberFinalIK::RootMotion.FinalIK.IKSolverVR.Arm;
 
 // ReSharper disable UnusedMember.Global
 // ReSharper disable NotAccessedField.Global

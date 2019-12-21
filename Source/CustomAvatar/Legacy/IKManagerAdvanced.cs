@@ -1,9 +1,11 @@
+extern alias BeatSaberFinalIK;
+
 using System;
 using System.Linq;
 using System.Reflection;
 using CustomAvatar;
-using RootMotion;
-using RootMotion.FinalIK;
+using BeatSaberFinalIK::RootMotion;
+using BeatSaberFinalIK::RootMotion.FinalIK;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;

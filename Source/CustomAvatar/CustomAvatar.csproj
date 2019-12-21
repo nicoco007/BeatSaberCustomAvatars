@@ -38,6 +38,7 @@
     </Reference>
     <Reference Include="DynamicBone">
       <HintPath>..\..\Libraries\DynamicBone.dll</HintPath>
+      <Aliases>BeatSaberDynamicBone</Aliases>
     </Reference>
     <Reference Include="DynamicOpenVR, Version=0.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -45,6 +46,7 @@
     </Reference>
     <Reference Include="FinalIK">
       <HintPath>..\..\Libraries\FinalIK.dll</HintPath>
+      <Aliases>BeatSaberFinalIK</Aliases>
     </Reference>
     <Reference Include="HMLib">
       <HintPath>..\..\Libraries\HMLib.dll</HintPath>
@@ -134,7 +136,7 @@
     <Compile Include="AvatarTailor.cs" />
     <Compile Include="AvatarResizeMode.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="Legacy\TwistRelaxer.cs" />
+    <Compile Include="Legacy\Aliases.cs" />
     <Compile Include="Utilities\BeatSaberUtil.cs" />
     <Compile Include="CustomAvatar.cs" />
     <Compile Include="AvatarDescriptor.cs" />

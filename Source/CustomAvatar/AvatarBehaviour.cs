@@ -1,11 +1,14 @@
+extern alias BeatSaberFinalIK;
+
 using CustomAvatar.Tracking;
 using DynamicOpenVR.IO;
 using System;
 using System.Reflection;
-using RootMotion.FinalIK;
 using CustomAvatar.Utilities;
 using UnityEngine;
 using UnityEngine.XR;
+using VRIK = BeatSaberFinalIK::RootMotion.FinalIK.VRIK;
+using TwistRelaxer = BeatSaberFinalIK::RootMotion.FinalIK.TwistRelaxer;
 
 namespace CustomAvatar
 {
@@ -83,7 +86,7 @@ namespace CustomAvatar
             {
                 Destroy(_vrik);
 
-                _vrik = _vrikManager.gameObject.AddComponent<VRIK>();
+                _vrik = _vrikManager.gameObject.AddComponent<RootMotion.FinalIK.VRIK>();
             }
 
             _isFingerTrackingSupported = _animator && _poseManager;
