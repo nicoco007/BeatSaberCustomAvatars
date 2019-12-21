@@ -167,7 +167,7 @@ namespace CustomAvatar.Tracking
 
             if (nodeState.TryGetPosition(out Vector3 position))
             {
-                deviceState.Position = originRotation * position + originRotation * origin;
+                deviceState.Position = origin + originRotation * position;
             }
 
             if (nodeState.TryGetRotation(out Quaternion rotation))
