@@ -1,5 +1,5 @@
 <vertical>
-    <page-button id="up-button" direction="Up"></page-button>
-    <list id="avatar-list" select-cell="avatar-click" expand-cell="true"></list>
-    <page-button id="down-button" direction="Down"></page-button>
+    <page-button id="up-button" direction="Up"/>
+    <list id="avatar-list" select-cell="avatar-click" expand-cell="true"/>
+    <page-button id="down-button" direction="Down"/>
 </vertical>

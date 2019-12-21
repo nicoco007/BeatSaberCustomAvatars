@@ -18,12 +18,12 @@ namespace CustomAvatar.UI
 
         public override string ResourceName => "CustomAvatar.Views.AvatarListViewController.bsml";
 
-        [UIComponent("avatar-list")] public CustomListTableData AvatarList;
-        [UIComponent("up-button")] public Button UpButton;
-        [UIComponent("down-button")] public Button DownButton;
+        [UIComponent("avatar-list")] public CustomListTableData avatarList;
+        [UIComponent("up-button")] public Button upButton;
+        [UIComponent("down-button")] public Button downButton;
 
-        private List<CustomAvatar> avatars = new List<CustomAvatar>();
-        private LevelListTableCell tableCellTemplate;
+        private List<CustomAvatar> _avatars = new List<CustomAvatar>();
+        private LevelListTableCell _tableCellTemplate;
         
         protected override void DidActivate(bool firstActivation, ActivationType type)
         {
@@ -36,35 +36,38 @@ namespace CustomAvatar.UI
 
         private void FirstActivation()
         {
-            tableCellTemplate = Resources.FindObjectsOfTypeAll<LevelListTableCell>().First(x => x.name == "LevelListTableCell");
+            _tableCellTemplate = Resources.FindObjectsOfTypeAll<LevelListTableCell>().First(x => x.name == "LevelListTableCell");
+
+            avatarList.tableView.SetPrivateField("_pageUpButton", upButton);
+            avatarList.tableView.SetPrivateField("_pageDownButton", downButton);
+            avatarList.tableView.SetPrivateField("_hideScrollButtonsIfNotNeeded", false);
+
+            TableViewScroller scroller = avatarList.tableView.GetPrivateField<TableViewScroller>("_scroller");
+
+            upButton.onClick.AddListener(() =>
+            {
+                scroller.PageScrollUp();
+                avatarList.tableView.InvokePrivateMethod("RefreshScrollButtons", false);
+            });
+
+            downButton.onClick.AddListener(() =>
+            {
+                scroller.PageScrollDown();
+                avatarList.tableView.InvokePrivateMethod("RefreshScrollButtons", false);
+            });
+            
+            avatarList.tableView.dataSource = this;
+            
             AvatarManager.instance.GetAvatarsAsync(avatar =>
             {
                 Plugin.logger.Info("Loaded avatar " + avatar.descriptor.name);
 
-                avatars.Add(avatar);
+                _avatars.Add(avatar);
 
                 ReloadData();
             }, ex =>
             {
                 Plugin.logger.Error("Failed to load avatar: " + ex.Message);
-            });
-
-            AvatarList.tableView.dataSource = this;
-            AvatarList.tableView.SetPrivateField("_pageUpButton", UpButton);
-            AvatarList.tableView.SetPrivateField("_pageDownButton", DownButton);
-
-            TableViewScroller scroller = AvatarList.tableView.GetPrivateField<TableViewScroller>("_scroller");
-
-            UpButton.onClick.AddListener(() =>
-            {
-                scroller.PageScrollUp();
-                AvatarList.tableView.InvokePrivateMethod("RefreshScrollButtons", false);
-            });
-
-            DownButton.onClick.AddListener(() =>
-            {
-                scroller.PageScrollDown();
-                AvatarList.tableView.InvokePrivateMethod("RefreshScrollButtons", false);
             });
         }
 
@@ -81,7 +84,7 @@ namespace CustomAvatar.UI
         [UIAction("avatar-click")]
         private void OnAvatarClicked(TableView table, int row)
         {
-            AvatarManager.instance.SwitchToAvatar(avatars[row]);
+            AvatarManager.instance.SwitchToAvatar(_avatars[row]);
         }
 
         private void OnAvatarChanged(SpawnedAvatar avatar)
@@ -91,13 +94,13 @@ namespace CustomAvatar.UI
 
         private void ReloadData()
         {
-            avatars.Sort((a, b) => string.Compare(a.descriptor.name, b.descriptor.name, StringComparison.CurrentCulture));
+            _avatars.Sort((a, b) => string.Compare(a.descriptor.name, b.descriptor.name, StringComparison.CurrentCulture));
 
-            int currentRow = avatars.FindIndex(a => a.fullPath == AvatarManager.instance.currentlySpawnedAvatar?.customAvatar.fullPath);
+            int currentRow = _avatars.FindIndex(a => a.fullPath == AvatarManager.instance.currentlySpawnedAvatar?.customAvatar.fullPath);
             
-            AvatarList.tableView.ReloadData();
-            AvatarList.tableView.ScrollToCellWithIdx(currentRow, TableViewScroller.ScrollPositionType.Center, true);
-            AvatarList.tableView.SelectCellWithIdx(currentRow);
+            avatarList.tableView.ReloadData();
+            avatarList.tableView.ScrollToCellWithIdx(currentRow, TableViewScroller.ScrollPositionType.Center, true);
+            avatarList.tableView.SelectCellWithIdx(currentRow);
         }
 
         public float CellSize()
@@ -107,16 +110,16 @@ namespace CustomAvatar.UI
 
         public int NumberOfCells()
         {
-            return avatars.Count;
+            return _avatars.Count;
         }
 
         public TableCell CellForIdx(TableView tableView, int idx)
         {
-            LevelListTableCell tableCell = AvatarList.tableView.DequeueReusableCellForIdentifier(kTableCellReuseIdentifier) as LevelListTableCell;
+            LevelListTableCell tableCell = avatarList.tableView.DequeueReusableCellForIdentifier(kTableCellReuseIdentifier) as LevelListTableCell;
 
             if (!tableCell)
             {
-                tableCell = Instantiate(tableCellTemplate);
+                tableCell = Instantiate(_tableCellTemplate);
 
                 foreach (var image in tableCell.GetPrivateField<UnityEngine.UI.Image[]>("_beatmapCharacteristicImages"))
                 {
@@ -130,7 +133,7 @@ namespace CustomAvatar.UI
                 tableCell.reuseIdentifier = kTableCellReuseIdentifier;
             }
 
-            CustomAvatar avatar = avatars[idx];
+            CustomAvatar avatar = _avatars[idx];
 
             tableCell.GetPrivateField<TextMeshProUGUI>("_songNameText").text = avatar.descriptor.name;
             tableCell.GetPrivateField<TextMeshProUGUI>("_authorText").text = avatar.descriptor.author;
