@@ -14,7 +14,7 @@ namespace CustomAvatar.Tracking
 
     internal enum TrackedDeviceType
     {
-        [TrackedDeviceType("")] Unknown,
+        Unknown,
         [TrackedDeviceType("vive")] ViveHeadset,
         [TrackedDeviceType("knuckles")] ValveIndexController,
         [TrackedDeviceType("vive_tracker")] ViveTracker,

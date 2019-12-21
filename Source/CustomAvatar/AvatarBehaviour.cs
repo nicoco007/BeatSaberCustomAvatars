@@ -100,8 +100,8 @@ namespace CustomAvatar
             _trackedDevices = PersistentSingleton<TrackedDeviceManager>.instance;
             _vrPlatformHelper = PersistentSingleton<VRPlatformHelper>.instance;
 
-            _trackedDevices.DeviceAdded += OnTrackedDeviceAdded;
-            _trackedDevices.DeviceRemoved += OnTrackedDeviceRemoved;
+            _trackedDevices.deviceAdded += OnTrackedDeviceAdded;
+            _trackedDevices.deviceRemoved += OnTrackedDeviceRemoved;
 
             _head = transform.Find("Head");
             _body = transform.Find("Body");
@@ -123,9 +123,9 @@ namespace CustomAvatar
 
             try
             {
-                TrackedDeviceState headPose = _trackedDevices.Head;
-                TrackedDeviceState leftPose = _trackedDevices.LeftHand;
-                TrackedDeviceState rightPose = _trackedDevices.RightHand;
+                TrackedDeviceState headPose = _trackedDevices.head;
+                TrackedDeviceState leftPose = _trackedDevices.leftHand;
+                TrackedDeviceState rightPose = _trackedDevices.rightHand;
 
                 if (_head && headPose != null && headPose.NodeState.tracked)
                 {
@@ -149,16 +149,16 @@ namespace CustomAvatar
                     _vrPlatformHelper.AdjustPlatformSpecificControllerTransform(XRNode.RightHand, _rightHand);
                 }
 
-                TrackedDeviceState leftLegTracker = _trackedDevices.LeftFoot;
-                TrackedDeviceState rightLegTracker = _trackedDevices.RightFoot;
-                TrackedDeviceState pelvisTracker = _trackedDevices.Waist;
+                TrackedDeviceState leftLegTracker = _trackedDevices.leftFoot;
+                TrackedDeviceState rightLegTracker = _trackedDevices.rightFoot;
+                TrackedDeviceState pelvisTracker = _trackedDevices.waist;
 
                 float playerEyeHeight = BeatSaberUtil.GetPlayerEyeHeight();
                 float positionScale = (playerEyeHeight - position.y) / playerEyeHeight;
 
                 if (_leftLeg && leftLegTracker != null && leftLegTracker.NodeState.tracked)
                 {
-                    var leftLegPose = _trackedDevices.LeftFoot;
+                    var leftLegPose = _trackedDevices.leftFoot;
                     var correction = SettingsManager.settings.fullBodyCalibration.leftLeg;
 
                     _prevLeftLegPos = Vector3.Lerp(_prevLeftLegPos, (leftLegPose.Position + correction.position) * positionScale + position, SettingsManager.settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
@@ -169,7 +169,7 @@ namespace CustomAvatar
 
                 if (_rightLeg && rightLegTracker != null && rightLegTracker.NodeState.tracked)
                 {
-                    var rightLegPose = _trackedDevices.RightFoot;
+                    var rightLegPose = _trackedDevices.rightFoot;
                     var correction = SettingsManager.settings.fullBodyCalibration.rightLeg;
 
                     _prevRightLegPos = Vector3.Lerp(_prevRightLegPos, (rightLegPose.Position + correction.position) * positionScale + position, SettingsManager.settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
@@ -180,7 +180,7 @@ namespace CustomAvatar
 
                 if (_pelvis && pelvisTracker != null && pelvisTracker.NodeState.tracked)
                 {
-                    var pelvisPose = _trackedDevices.Waist;
+                    var pelvisPose = _trackedDevices.waist;
                     var correction = SettingsManager.settings.fullBodyCalibration.rightLeg;
 
                     _prevPelvisPos = Vector3.Lerp(_prevPelvisPos, (pelvisPose.Position + correction.position) * positionScale + position, SettingsManager.settings.fullBodyMotionSmoothing.waist.position * Time.deltaTime);
@@ -211,8 +211,8 @@ namespace CustomAvatar
 
         private void OnDestroy()
         {
-            _trackedDevices.DeviceAdded -= OnTrackedDeviceAdded;
-            _trackedDevices.DeviceRemoved -= OnTrackedDeviceRemoved;
+            _trackedDevices.deviceAdded -= OnTrackedDeviceAdded;
+            _trackedDevices.deviceRemoved -= OnTrackedDeviceRemoved;
         }
 
         // ReSharper restore UnusedMember.Local
@@ -265,7 +265,7 @@ namespace CustomAvatar
 
                         if (sourceType != targetType)
                         {
-                            Plugin.logger.Warn($"Underlying types for {sourceField.Name} ({sourceType}) and {targetField.Name} ({targetType}) are not the same");
+                            Plugin.logger.Warn($"Underlying types for {sourceField.Name} ({sourceType})Â and {targetField.Name} ({targetType})Â are not the same");
                         }
 
                         Plugin.logger.Debug($"Converting enum value {sourceField.FieldType} ({sourceType}) -> {targetField.FieldType} ({targetType})");
@@ -275,7 +275,7 @@ namespace CustomAvatar
                     {
                         if (sourceField.FieldType != targetField.FieldType)
                         {
-                            Plugin.logger.Warn($"Types for {sourceField.Name} ({sourceField.FieldType}) and {targetField.Name} ({targetField.FieldType}) are not the same");
+                            Plugin.logger.Warn($"Types for {sourceField.Name} ({sourceField.FieldType})Â and {targetField.Name} ({targetField.FieldType})Â are not the same");
                         }
 
                         targetField.SetValue(target, value);
@@ -298,7 +298,7 @@ namespace CustomAvatar
 
             Plugin.logger.Info("Tracking device change detected, updating VRIK references");
 
-            if (_trackedDevices.LeftFoot.Found)
+            if (_trackedDevices.leftFoot.Found)
             {
                 _vrik.solver.leftLeg.target = _vrikManager.solver_leftLeg_target;
                 _vrik.solver.leftLeg.positionWeight = _vrikManager.solver_leftLeg_positionWeight;
@@ -311,7 +311,7 @@ namespace CustomAvatar
                 _vrik.solver.leftLeg.rotationWeight = 0;
             }
 
-            if (_trackedDevices.RightFoot.Found)
+            if (_trackedDevices.rightFoot.Found)
             {
                 _vrik.solver.rightLeg.target = _vrikManager.solver_rightLeg_target;
                 _vrik.solver.rightLeg.positionWeight = _vrikManager.solver_rightLeg_positionWeight;
@@ -324,7 +324,7 @@ namespace CustomAvatar
                 _vrik.solver.rightLeg.rotationWeight = 0;
             }
 
-            if (_trackedDevices.Waist.Found)
+            if (_trackedDevices.waist.Found)
             {
                 _vrik.solver.spine.pelvisTarget = _vrikManager.solver_spine_pelvisTarget;
                 _vrik.solver.spine.pelvisPositionWeight = _vrikManager.solver_spine_pelvisPositionWeight;

@@ -85,10 +85,10 @@ namespace CustomAvatar
 
             TrackedDeviceManager input = PersistentSingleton<TrackedDeviceManager>.instance;
 
-            TrackedDeviceState head = input.Head;
-            TrackedDeviceState leftFoot = input.LeftFoot;
-            TrackedDeviceState rightFoot = input.RightFoot;
-            TrackedDeviceState pelvis = input.Waist;
+            TrackedDeviceState head = input.head;
+            TrackedDeviceState leftFoot = input.leftFoot;
+            TrackedDeviceState rightFoot = input.rightFoot;
+            TrackedDeviceState pelvis = input.waist;
 
             var normal = Vector3.up;
 

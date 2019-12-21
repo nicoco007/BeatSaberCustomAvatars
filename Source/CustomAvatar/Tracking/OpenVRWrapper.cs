@@ -23,6 +23,11 @@ namespace CustomAvatar.Tracking
         {
             string name = GetStringTrackedDeviceProperty(deviceIndex, ETrackedDeviceProperty.Prop_ControllerType_String);
 
+            if (name == null)
+            {
+                return TrackedDeviceType.Unknown;
+            }
+
             FieldInfo field = typeof(TrackedDeviceType).GetFields().FirstOrDefault(f => f.GetCustomAttribute<TrackedDeviceTypeAttribute>()?.Name == name);
 
             if (field == null)

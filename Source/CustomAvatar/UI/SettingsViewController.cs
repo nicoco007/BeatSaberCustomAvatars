@@ -138,7 +138,7 @@ namespace CustomAvatar.UI
 
         private void ScanArmSpan()
         {
-            var armSpan = Vector3.Distance(playerInput.LeftHand.Position, playerInput.RightHand.Position);
+            var armSpan = Vector3.Distance(playerInput.leftHand.Position, playerInput.rightHand.Position);
 
             if (armSpan > maxMeasuredArmSpan)
             {
