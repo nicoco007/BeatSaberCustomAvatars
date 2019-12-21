@@ -1,18 +1,20 @@
 ﻿extern alias BeatSaberFinalIK;
 extern alias BeatSaberDynamicBone;
+using System;
 
 namespace AvatarScriptPack
 {
-    public class VRIK : BeatSaberFinalIK::RootMotion.FinalIK.VRIK { }
-    public class TwistRelaxer : BeatSaberFinalIK::RootMotion.FinalIK.TwistRelaxer { }
+    [Obsolete("Use BeatSaberFinalIK::RootMotion.FinalIK.VRIK")] public class VRIK : BeatSaberFinalIK::RootMotion.FinalIK.VRIK { }
+    [Obsolete("Use BeatSaberFinalIK::RootMotion.FinalIK.TwistRelaxer")] public class TwistRelaxer : BeatSaberFinalIK::RootMotion.FinalIK.TwistRelaxer { }
 }
 
 namespace RootMotion.FinalIK
 {
-    public class VRIK : BeatSaberFinalIK::RootMotion.FinalIK.VRIK {  }
-    public class TwistRelaxer : BeatSaberFinalIK::RootMotion.FinalIK.TwistRelaxer { }
+    [Obsolete("Use BeatSaberFinalIK::RootMotion.FinalIK.VRIK")] public class VRIK : BeatSaberFinalIK::RootMotion.FinalIK.VRIK {  }
+    [Obsolete("Use BeatSaberFinalIK::RootMotion.FinalIK.TwistRelaxer")] public class TwistRelaxer : BeatSaberFinalIK::RootMotion.FinalIK.TwistRelaxer { }
 }
 
-public class DynamicBone : BeatSaberDynamicBone::DynamicBone { }
-public class DynamicBoneCollider : BeatSaberDynamicBone::DynamicBoneCollider { }
-public class DynamicBonePlaneCollider : BeatSaberDynamicBone::DynamicBonePlaneCollider { }
+[Obsolete("Use BeatSaberDynamicBone::DynamicBone")] public class DynamicBone : BeatSaberDynamicBone::DynamicBone { }
+[Obsolete("Use BeatSaberDynamicBone::DynamicBoneColliderBase")] public class DynamicBoneColliderBase : BeatSaberDynamicBone::DynamicBoneColliderBase { }
+[Obsolete("Use BeatSaberDynamicBone::DynamicBoneCollider")] public class DynamicBoneCollider : BeatSaberDynamicBone::DynamicBoneCollider { }
+[Obsolete("Use BeatSaberDynamicBone::DynamicBonePlaneCollider")] public class DynamicBonePlaneCollider : BeatSaberDynamicBone::DynamicBonePlaneCollider { }

@@ -86,7 +86,7 @@ namespace CustomAvatar
             {
                 Destroy(_vrik);
 
-                _vrik = _vrikManager.gameObject.AddComponent<RootMotion.FinalIK.VRIK>();
+                _vrik = _vrikManager.gameObject.AddComponent<VRIK>();
             }
 
             _isFingerTrackingSupported = _animator && _poseManager;
