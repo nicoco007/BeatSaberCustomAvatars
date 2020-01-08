@@ -132,21 +132,27 @@ namespace CustomAvatar
                     _head.position = headPose.Position;
                     _head.rotation = headPose.Rotation;
                 }
+                
+                Vector3 controllerPositionOffset = BeatSaberUtil.GetControllerPositionOffset();
+                Vector3 controllerRotationOffset = BeatSaberUtil.GetControllerRotationOffset();
+
+                if (_rightHand && rightPose != null && rightPose.NodeState.tracked)
+                {
+                    _rightHand.position = rightPose.Position;
+                    _rightHand.rotation = rightPose.Rotation;
+                    
+                    _vrPlatformHelper.AdjustPlatformSpecificControllerTransform(XRNode.RightHand, _rightHand, controllerPositionOffset, controllerRotationOffset);
+                }
+                
+                controllerPositionOffset = new Vector3(-controllerPositionOffset.x, controllerPositionOffset.y, controllerPositionOffset.z);
+                controllerRotationOffset = new Vector3(controllerRotationOffset.x, -controllerRotationOffset.y, controllerRotationOffset.z);
 
                 if (_leftHand && leftPose != null && leftPose.NodeState.tracked)
                 {
                     _leftHand.position = leftPose.Position;
                     _leftHand.rotation = leftPose.Rotation;
 
-                    _vrPlatformHelper.AdjustPlatformSpecificControllerTransform(XRNode.LeftHand, _leftHand);
-                }
-
-                if (_rightHand && rightPose != null && rightPose.NodeState.tracked)
-                {
-                    _rightHand.position = rightPose.Position;
-                    _rightHand.rotation = rightPose.Rotation;
-
-                    _vrPlatformHelper.AdjustPlatformSpecificControllerTransform(XRNode.RightHand, _rightHand);
+                    _vrPlatformHelper.AdjustPlatformSpecificControllerTransform(XRNode.LeftHand, _leftHand, controllerPositionOffset, controllerRotationOffset);
                 }
 
                 TrackedDeviceState leftLegTracker = _trackedDevices.leftFoot;

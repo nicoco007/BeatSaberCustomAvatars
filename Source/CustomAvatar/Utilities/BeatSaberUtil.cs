@@ -46,5 +46,15 @@ namespace CustomAvatar.Utilities
         {
             return !mainSettingsModel ? Quaternion.identity : Quaternion.Euler(0, mainSettingsModel.roomRotation, 0);
         }
+
+        public static Vector3 GetControllerPositionOffset()
+        {
+            return !mainSettingsModel ? Vector3.zero : mainSettingsModel.controllerPosition;
+        }
+
+        public static Vector3 GetControllerRotationOffset()
+        {
+            return !mainSettingsModel ? Vector3.zero : mainSettingsModel.controllerRotation;
+        }
     }
 }
