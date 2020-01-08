@@ -43,6 +43,8 @@ pipeline {
       steps {
         bat 'msbuild Source\\CustomAvatar-Editor\\CustomAvatar-Editor.csproj /p:Configuration=Release /p:Platform=AnyCPU /p:AutomatedBuild=true'
         bat 'copy Source\\CustomAvatar-Editor\\bin\\Release\\CustomAvatar.dll Packaging-Editor'
+        bat 'copy Libraries\\FinalIK.dll Packaging-Editor'
+        bat 'copy Libraries\\DynamicBone.dll Packaging-Editor'
         bat '7z a BeatSaberCustomAvatars-Editor.zip -r "./Packaging-Editor/*"'
         archiveArtifacts 'BeatSaberCustomAvatars-Editor.zip'
       }
