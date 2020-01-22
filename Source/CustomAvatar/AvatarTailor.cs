@@ -124,9 +124,9 @@ namespace CustomAvatar
 
         public void ClearFullBodyTrackingData()
         {
-            SettingsManager.settings.fullBodyCalibration.leftLeg = default;
-            SettingsManager.settings.fullBodyCalibration.rightLeg = default;
-            SettingsManager.settings.fullBodyCalibration.pelvis = default;
+            SettingsManager.settings.fullBodyCalibration.leftLeg = Pose.identity;
+            SettingsManager.settings.fullBodyCalibration.rightLeg = Pose.identity;
+            SettingsManager.settings.fullBodyCalibration.pelvis = Pose.identity;
         }
     }
 }

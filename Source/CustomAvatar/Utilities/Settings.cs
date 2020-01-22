@@ -28,9 +28,9 @@ namespace CustomAvatar.Utilities
 
         public class FullBodyCalibration
         {
-            public Pose leftLeg { get; set; }
-            public Pose rightLeg { get; set; }
-            public Pose pelvis { get; set; }
+            public Pose leftLeg { get; set; } = Pose.identity;
+            public Pose rightLeg { get; set; } = Pose.identity;
+            public Pose pelvis { get; set; } = Pose.identity;
         }
     }
 }
