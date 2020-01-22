@@ -77,18 +77,16 @@ namespace CustomAvatar
 
         private void Start()
         {
+            foreach (VRIK vrik in GetComponentsInChildren<VRIK>())
+            {
+                Destroy(vrik);
+            }
+
             _vrikManager = GetComponentInChildren<VRIKManager>();
-            _vrik = GetComponentInChildren<VRIK>();
             _animator = GetComponentInChildren<Animator>();
             _poseManager = GetComponentInChildren<PoseManager>();
 
-            if (_vrikManager && (!_vrik || _vrikManager.gameObject != _vrik.gameObject))
-            {
-                Destroy(_vrik);
-
-                _vrik = _vrikManager.gameObject.AddComponent<VRIK>();
-            }
-
+            _vrik = _vrikManager?.gameObject.AddComponent<VRIK>();
             _isFingerTrackingSupported = _animator && _poseManager;
             
             foreach (TwistRelaxer twistRelaxer in GetComponentsInChildren<TwistRelaxer>())
