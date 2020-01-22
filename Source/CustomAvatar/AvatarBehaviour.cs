@@ -60,6 +60,7 @@ namespace CustomAvatar
         private PoseManager _poseManager;
 
         private bool _isFingerTrackingSupported;
+        private bool _fixTransforms;
 
         private Action<BeatSaberDynamicBone::DynamicBone> _preUpdateDelegate;
         private Action<BeatSaberDynamicBone::DynamicBone, float> _updateDynamicBonesDelegate;
@@ -70,6 +71,13 @@ namespace CustomAvatar
 
         private void Awake()
         {
+            Type dynamicBoneType = typeof(BeatSaberDynamicBone::DynamicBone);
+            MethodInfo preUpdate = dynamicBoneType.GetMethod("PreUpdate", BindingFlags.Instance | BindingFlags.NonPublic);
+            MethodInfo updateDynamicBones = dynamicBoneType.GetMethod("UpdateDynamicBones", BindingFlags.Instance | BindingFlags.NonPublic);
+
+            _preUpdateDelegate = (Action<BeatSaberDynamicBone::DynamicBone>) Delegate.CreateDelegate(typeof(Action<BeatSaberDynamicBone::DynamicBone>), preUpdate);
+            _updateDynamicBonesDelegate = (Action<BeatSaberDynamicBone::DynamicBone, float>) Delegate.CreateDelegate(typeof(Action<BeatSaberDynamicBone::DynamicBone, float>), updateDynamicBones);
+
 			_initialPosition = transform.position;
 			_initialScale = transform.localScale;
 
@@ -89,15 +97,14 @@ namespace CustomAvatar
             _vrikManager = GetComponentInChildren<VRIKManager>();
             _animator = GetComponentInChildren<Animator>();
             _poseManager = GetComponentInChildren<PoseManager>();
-
-            _vrik = _vrikManager?.gameObject.AddComponent<VRIK>();
-            _vrik.fixTransforms = false;
-            _isFingerTrackingSupported = _animator && _poseManager;
             
-            foreach (TwistRelaxer twistRelaxer in GetComponentsInChildren<TwistRelaxer>())
+            _isFingerTrackingSupported = _animator && _poseManager;
+
+            if (_vrikManager)
             {
-                twistRelaxer.ik = _vrik;
-                twistRelaxer.enabled = true;
+                _vrik = _vrikManager.gameObject.AddComponent<VRIK>();
+                _fixTransforms = _vrik.fixTransforms;
+                _vrik.fixTransforms = false;
             }
 
             _trackedDevices = PersistentSingleton<TrackedDeviceManager>.instance;
@@ -113,13 +120,6 @@ namespace CustomAvatar
             _leftLeg = transform.Find("LeftLeg");
             _rightLeg = transform.Find("RightLeg");
             _pelvis = transform.Find("Pelvis");
-
-            Type dynamicBoneType = typeof(BeatSaberDynamicBone::DynamicBone);
-            MethodInfo preUpdate = dynamicBoneType.GetMethod("PreUpdate", BindingFlags.Instance | BindingFlags.NonPublic);
-            MethodInfo updateDynamicBones = dynamicBoneType.GetMethod("UpdateDynamicBones", BindingFlags.Instance | BindingFlags.NonPublic);
-
-            _preUpdateDelegate = (Action<BeatSaberDynamicBone::DynamicBone>) Delegate.CreateDelegate(typeof(Action<BeatSaberDynamicBone::DynamicBone>), preUpdate);
-            _updateDynamicBonesDelegate = (Action<BeatSaberDynamicBone::DynamicBone, float>) Delegate.CreateDelegate(typeof(Action<BeatSaberDynamicBone::DynamicBone, float>), updateDynamicBones);
 
             SetVrikReferences();
         }
@@ -224,9 +224,11 @@ namespace CustomAvatar
                 Plugin.logger.Error($"{e.Message}\n{e.StackTrace}");
             }
 
-            _vrik.solver.FixTransforms();
+            // VRIK must run before dynamic bones
+            if (_fixTransforms) _vrik.solver.FixTransforms();
             _vrik.UpdateSolverExternal();
 
+            // apply dynamic bones
             foreach (var dynamicBone in GetComponentsInChildren<BeatSaberDynamicBone::DynamicBone>())
             {
                 _preUpdateDelegate(dynamicBone);
