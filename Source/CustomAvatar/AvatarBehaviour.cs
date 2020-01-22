@@ -1,4 +1,5 @@
 extern alias BeatSaberFinalIK;
+extern alias BeatSaberDynamicBone;
 
 using CustomAvatar.Tracking;
 using DynamicOpenVR.IO;
@@ -60,6 +61,9 @@ namespace CustomAvatar
 
         private bool _isFingerTrackingSupported;
 
+        private Action<BeatSaberDynamicBone::DynamicBone> _preUpdateDelegate;
+        private Action<BeatSaberDynamicBone::DynamicBone, float> _updateDynamicBonesDelegate;
+
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
         // ReSharper disable UnusedMember.Local
@@ -110,13 +114,14 @@ namespace CustomAvatar
             _rightLeg = transform.Find("RightLeg");
             _pelvis = transform.Find("Pelvis");
 
-            SetVrikReferences();
-        }
+            Type dynamicBoneType = typeof(BeatSaberDynamicBone::DynamicBone);
+            MethodInfo preUpdate = dynamicBoneType.GetMethod("PreUpdate", BindingFlags.Instance | BindingFlags.NonPublic);
+            MethodInfo updateDynamicBones = dynamicBoneType.GetMethod("UpdateDynamicBones", BindingFlags.Instance | BindingFlags.NonPublic);
 
-        private void Update()
-        {
-            _vrik.solver.FixTransforms();
-            _vrik.UpdateSolverExternal();
+            _preUpdateDelegate = (Action<BeatSaberDynamicBone::DynamicBone>) Delegate.CreateDelegate(typeof(Action<BeatSaberDynamicBone::DynamicBone>), preUpdate);
+            _updateDynamicBonesDelegate = (Action<BeatSaberDynamicBone::DynamicBone, float>) Delegate.CreateDelegate(typeof(Action<BeatSaberDynamicBone::DynamicBone, float>), updateDynamicBones);
+
+            SetVrikReferences();
         }
 
         private void LateUpdate()
@@ -217,6 +222,15 @@ namespace CustomAvatar
             catch (Exception e)
             {
                 Plugin.logger.Error($"{e.Message}\n{e.StackTrace}");
+            }
+
+            _vrik.solver.FixTransforms();
+            _vrik.UpdateSolverExternal();
+
+            foreach (var dynamicBone in GetComponentsInChildren<BeatSaberDynamicBone::DynamicBone>())
+            {
+                _preUpdateDelegate(dynamicBone);
+                _updateDynamicBonesDelegate(dynamicBone, Time.deltaTime);
             }
         }
 
