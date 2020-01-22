@@ -87,6 +87,7 @@ namespace CustomAvatar
             _poseManager = GetComponentInChildren<PoseManager>();
 
             _vrik = _vrikManager?.gameObject.AddComponent<VRIK>();
+            _vrik.fixTransforms = false;
             _isFingerTrackingSupported = _animator && _poseManager;
             
             foreach (TwistRelaxer twistRelaxer in GetComponentsInChildren<TwistRelaxer>())
@@ -110,6 +111,12 @@ namespace CustomAvatar
             _pelvis = transform.Find("Pelvis");
 
             SetVrikReferences();
+        }
+
+        private void Update()
+        {
+            _vrik.solver.FixTransforms();
+            _vrik.UpdateSolverExternal();
         }
 
         private void LateUpdate()
