@@ -27,7 +27,7 @@ namespace CustomAvatar.Utilities
                 using (var jsonReader = new JsonTextReader(reader))
                 {
                     var serializer = GetSerializer();
-                    settings = serializer.Deserialize<Settings>(jsonReader);
+                    settings = serializer.Deserialize<Settings>(jsonReader) ?? new Settings();
                 }
             }
             catch (Exception ex)
