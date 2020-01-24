@@ -149,6 +149,7 @@
     <Compile Include="EventManager.cs" />
     <Compile Include="Utilities\QuaternionJsonConverter.cs" />
     <Compile Include="Utilities\PoseJsonConverter.cs" />
+    <Compile Include="Utilities\ReflectionExtensions.cs" />
     <Compile Include="Utilities\Vector3JsonConverter.cs" />
     <Compile Include="Utilities\SettingsManager.cs" />
     <Compile Include="VRIKManager.cs" />

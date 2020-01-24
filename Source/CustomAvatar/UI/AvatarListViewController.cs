@@ -4,8 +4,8 @@ using System.Linq;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.ViewControllers;
+using CustomAvatar.Utilities;
 using HMUI;
-using IPA.Utilities;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -42,7 +42,7 @@ namespace CustomAvatar.UI
             avatarList.tableView.SetPrivateField("_pageDownButton", downButton);
             avatarList.tableView.SetPrivateField("_hideScrollButtonsIfNotNeeded", false);
 
-            TableViewScroller scroller = avatarList.tableView.GetPrivateField<TableViewScroller>("_scroller");
+            TableViewScroller scroller = avatarList.tableView.GetPrivateField<TableView, TableViewScroller>("_scroller");
 
             upButton.onClick.AddListener(() =>
             {
@@ -121,23 +121,22 @@ namespace CustomAvatar.UI
             {
                 tableCell = Instantiate(_tableCellTemplate);
 
-                foreach (var image in tableCell.GetPrivateField<UnityEngine.UI.Image[]>("_beatmapCharacteristicImages"))
+                foreach (var image in tableCell.GetPrivateField<LevelListTableCell, UnityEngine.UI.Image[]>("_beatmapCharacteristicImages"))
                 {
                     DestroyImmediate(image);
                 }
 
-                tableCell.SetPrivateField("_beatmapCharacteristicAlphas", new float[0]);
                 tableCell.SetPrivateField("_beatmapCharacteristicImages", new UnityEngine.UI.Image[0]);
-                tableCell.GetPrivateField<RawImage>("_favoritesBadgeImage").enabled = false;
+                tableCell.GetPrivateField<LevelListTableCell, RawImage>("_favoritesBadgeImage").enabled = false;
 
                 tableCell.reuseIdentifier = kTableCellReuseIdentifier;
             }
 
             CustomAvatar avatar = _avatars[idx];
 
-            tableCell.GetPrivateField<TextMeshProUGUI>("_songNameText").text = avatar.descriptor.name;
-            tableCell.GetPrivateField<TextMeshProUGUI>("_authorText").text = avatar.descriptor.author;
-            tableCell.GetPrivateField<RawImage>("_coverRawImage").texture = avatar.descriptor.cover?.texture ?? Texture2D.blackTexture;
+            tableCell.GetPrivateField<LevelListTableCell, TextMeshProUGUI>("_songNameText").text = avatar.descriptor.name;
+            tableCell.GetPrivateField<LevelListTableCell, TextMeshProUGUI>("_authorText").text = avatar.descriptor.author;
+            tableCell.GetPrivateField<LevelListTableCell, RawImage>("_coverRawImage").texture = avatar.descriptor.cover?.texture ?? Texture2D.blackTexture;
 
             return tableCell;
         }

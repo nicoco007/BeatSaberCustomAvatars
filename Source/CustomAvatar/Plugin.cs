@@ -7,7 +7,6 @@ using CustomAvatar.UI;
 using CustomAvatar.Utilities;
 using DynamicOpenVR;
 using DynamicOpenVR.IO;
-using IPA.Utilities;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
