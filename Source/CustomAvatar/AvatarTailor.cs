@@ -12,7 +12,7 @@ namespace CustomAvatar
 
         public void ResizeAvatar(SpawnedAvatar avatar)
         {
-            if (!avatar.customAvatar.descriptor.allowHeightCalibration) return;
+            if (!avatar.customAvatar.descriptor.allowHeightCalibration || !avatar.customAvatar.isIKAvatar) return;
 
             // compute scale
             float scale;
@@ -24,7 +24,15 @@ namespace CustomAvatar
                     float playerArmLength = SettingsManager.settings.playerArmSpan;
                     var avatarArmLength = avatar.customAvatar.GetArmSpan();
 
-                    scale = playerArmLength / avatarArmLength;
+                    if (avatarArmLength > 0)
+                    {
+                        scale = playerArmLength / avatarArmLength;
+                    }
+                    else
+                    {
+                        scale = 1;
+                    }
+
                     break;
 
                 case AvatarResizeMode.Height:

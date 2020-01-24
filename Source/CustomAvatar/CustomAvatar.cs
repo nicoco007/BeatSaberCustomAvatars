@@ -97,6 +97,8 @@ namespace CustomAvatar
         {
             Animator animator = gameObject.GetComponentInChildren<Animator>();
 
+            if (!animator) return 0;
+
             Vector3 leftShoulder = animator.GetBoneTransform(HumanBodyBones.LeftShoulder).position;
             Vector3 leftUpperArm = animator.GetBoneTransform(HumanBodyBones.LeftUpperArm).position;
             Vector3 leftLowerArm = animator.GetBoneTransform(HumanBodyBones.LeftLowerArm).position;
@@ -110,7 +112,7 @@ namespace CustomAvatar
             float leftArmLength = Vector3.Distance(leftShoulder, leftUpperArm) + Vector3.Distance(leftUpperArm, leftLowerArm) + Vector3.Distance(leftLowerArm, leftHand);
             float rightArmLength = Vector3.Distance(rightShoulder, rightUpperArm) + Vector3.Distance(rightUpperArm, rightLowerArm) + Vector3.Distance(rightLowerArm, rightHand);
             float shoulderToShoulderDistance = Vector3.Distance(leftShoulder, rightShoulder);
-            
+
             float totalLength = leftArmLength + shoulderToShoulderDistance + rightArmLength;
             
             Plugin.logger.Debug("Avatar arm span: " + totalLength);
