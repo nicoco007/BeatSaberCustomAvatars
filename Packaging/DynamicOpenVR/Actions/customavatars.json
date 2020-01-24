@@ -1,0 +1,30 @@
+{
+  "actions": [
+    {
+      "name": "/actions/customavatars/in/lefthandanim",
+      "requirement": "suggested",
+      "type": "skeleton",
+      "skeleton": "/skeleton/hand/left"
+    },
+    {
+      "name": "/actions/customavatars/in/righthandanim",
+      "requirement": "suggested",
+      "type": "skeleton",
+      "skeleton": "/skeleton/hand/right"
+    }
+  ],
+  "action_sets": [
+    {
+      "name": "/actions/customavatars",
+      "usage": "leftright"
+    }
+  ],
+  "localization": [
+    {
+      "language_tag": "en_us",
+      "/actions/customavatars": "Custom Avatars",
+      "/actions/customavatars/in/lefthandanim": "Left Hand Animation",
+      "/actions/customavatars/in/righthandanim": "Right Hand Animation"
+    }
+  ]
+}
