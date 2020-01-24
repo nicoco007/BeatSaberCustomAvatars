@@ -103,8 +103,9 @@ namespace CustomAvatar
             if (_vrikManager)
             {
                 _vrik = _vrikManager.gameObject.AddComponent<VRIK>();
-                _fixTransforms = _vrik.fixTransforms;
                 _vrik.fixTransforms = false;
+
+                _fixTransforms = _vrikManager.fixTransforms;
             }
 
             _trackedDevices = PersistentSingleton<TrackedDeviceManager>.instance;
@@ -225,8 +226,11 @@ namespace CustomAvatar
             }
 
             // VRIK must run before dynamic bones
-            if (_fixTransforms) _vrik.solver.FixTransforms();
-            _vrik.UpdateSolverExternal();
+            if (_vrik)
+            {
+                if (_fixTransforms) _vrik.solver.FixTransforms();
+                _vrik.UpdateSolverExternal();
+            }
 
             // apply dynamic bones
             foreach (var dynamicBone in GetComponentsInChildren<BeatSaberDynamicBone::DynamicBone>())

@@ -16,6 +16,9 @@ namespace CustomAvatar
     [Serializable]
     public class VRIKManager : MonoBehaviour
     {
+        [Tooltip("If true, will fix all the Transforms used by the solver to their initial state in each Update. This prevents potential problems with unanimated bones and animator culling with a small cost of performance. Not recommended for CCD and FABRIK solvers.")]
+        public bool fixTransforms = true;
+
         #region References
         
         [Header("References")]
@@ -43,25 +46,25 @@ namespace CustomAvatar
         public Transform references_rightForearm;
         public Transform references_rightHand;
 
-        [Tooltip("VRIK also supports legless characters.If you do not wish to use legs, leave all leg references empty.")]
+        [Tooltip("VRIK also supports legless characters. If you do not wish to use legs, leave all leg references empty.")]
         public Transform references_leftThigh;
 
-        [Tooltip("VRIK also supports legless characters.If you do not wish to use legs, leave all leg references empty.")]
+        [Tooltip("VRIK also supports legless characters. If you do not wish to use legs, leave all leg references empty.")]
         public Transform references_leftCalf;
 
-        [Tooltip("VRIK also supports legless characters.If you do not wish to use legs, leave all leg references empty.")]
+        [Tooltip("VRIK also supports legless characters. If you do not wish to use legs, leave all leg references empty.")]
         public Transform references_leftFoot;
 
         [Tooltip("Optional")]
         public Transform references_leftToes;
 
-        [Tooltip("VRIK also supports legless characters.If you do not wish to use legs, leave all leg references empty.")]
+        [Tooltip("VRIK also supports legless characters. If you do not wish to use legs, leave all leg references empty.")]
         public Transform references_rightThigh;
 
-        [Tooltip("VRIK also supports legless characters.If you do not wish to use legs, leave all leg references empty.")]
+        [Tooltip("VRIK also supports legless characters. If you do not wish to use legs, leave all leg references empty.")]
         public Transform references_rightCalf;
 
-        [Tooltip("VRIK also supports legless characters.If you do not wish to use legs, leave all leg references empty.")]
+        [Tooltip("VRIK also supports legless characters. If you do not wish to use legs, leave all leg references empty.")]
         public Transform references_rightFoot;
 
         [Tooltip("Optional")]
