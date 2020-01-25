@@ -56,10 +56,11 @@ namespace CustomAvatar
 
         private VRIK _vrik;
         private VRIKManager _vrikManager;
-        private TrackedDeviceManager _trackedDevices;
         private VRPlatformHelper _vrPlatformHelper;
         private Animator _animator;
         private PoseManager _poseManager;
+
+        private BeatSaberDynamicBone::DynamicBone[] _dynamicBones;
 
         private bool _isFingerTrackingSupported;
         private bool _fixTransforms;
@@ -79,6 +80,8 @@ namespace CustomAvatar
 
 			_initialPosition = transform.position;
 			_initialScale = transform.localScale;
+
+            _dynamicBones = GetComponentsInChildren<BeatSaberDynamicBone::DynamicBone>();
 
             if (input == null)
             {
@@ -112,11 +115,9 @@ namespace CustomAvatar
                 _fixTransforms = _vrikManager.fixTransforms;
             }
 
-            _trackedDevices = PersistentSingleton<TrackedDeviceManager>.instance;
             _vrPlatformHelper = PersistentSingleton<VRPlatformHelper>.instance;
 
-            _trackedDevices.deviceAdded += OnTrackedDeviceAdded;
-            _trackedDevices.deviceRemoved += OnTrackedDeviceRemoved;
+            input.inputChanged += OnInputChanged;
 
             _head = transform.Find("Head");
             _body = transform.Find("Body");
@@ -171,7 +172,7 @@ namespace CustomAvatar
 
                 if (_leftLeg && input.TryGetLeftFootPose(out Pose leftFootPose))
                 {
-                    var correction = SettingsManager.settings.fullBodyCalibration.leftLeg;
+                    Pose correction = SettingsManager.settings.fullBodyCalibration.leftLeg;
 
                     _prevLeftLegPos = Vector3.Lerp(_prevLeftLegPos, AdjustTransformPosition(leftFootPose.position, correction.position, positionScale), SettingsManager.settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
                     _prevLeftLegRot = Quaternion.Slerp(_prevLeftLegRot, leftFootPose.rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.feet.rotation * Time.deltaTime);
@@ -181,7 +182,7 @@ namespace CustomAvatar
 
                 if (_rightLeg && input.TryGetRightFootPose(out Pose rightFootPose))
                 {
-                    var correction = SettingsManager.settings.fullBodyCalibration.rightLeg;
+                    Pose correction = SettingsManager.settings.fullBodyCalibration.rightLeg;
 
                     _prevRightLegPos = Vector3.Lerp(_prevRightLegPos, AdjustTransformPosition(rightFootPose.position, correction.position, positionScale), SettingsManager.settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
                     _prevRightLegRot = Quaternion.Slerp(_prevRightLegRot, rightFootPose.rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.feet.rotation * Time.deltaTime);
@@ -189,9 +190,9 @@ namespace CustomAvatar
                     _rightLeg.rotation = _prevRightLegRot;
                 }
 
-                if (_pelvis && input.TryGetRightFootPose(out Pose pelvisPose))
+                if (_pelvis && input.TryGetWaistPose(out Pose pelvisPose))
                 {
-                    var correction = SettingsManager.settings.fullBodyCalibration.rightLeg;
+                    Pose correction = SettingsManager.settings.fullBodyCalibration.rightLeg;
 
                     _prevPelvisPos = Vector3.Lerp(_prevPelvisPos, AdjustTransformPosition(pelvisPose.position, correction.position, positionScale), SettingsManager.settings.fullBodyMotionSmoothing.waist.position * Time.deltaTime);
                     _prevPelvisRot = Quaternion.Slerp(_prevPelvisRot, pelvisPose.rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.waist.rotation * Time.deltaTime);
@@ -199,19 +200,21 @@ namespace CustomAvatar
                     _pelvis.rotation = _prevPelvisRot;
                 }
 
-                if (!_body) return;
-                _body.position = _head.position - (_head.transform.up * 0.1f);
+                if (_body)
+                {
+                    _body.position = _head.position - (_head.transform.up * 0.1f);
 
-                var vel = new Vector3(_body.transform.localPosition.x - _prevBodyPos.x, 0.0f,
-                    _body.localPosition.z - _prevBodyPos.z);
+                    var vel = new Vector3(_body.transform.localPosition.x - _prevBodyPos.x, 0.0f,
+                        _body.localPosition.z - _prevBodyPos.z);
 
-                var rot = Quaternion.Euler(0.0f, _head.localEulerAngles.y, 0.0f);
-                var tiltAxis = Vector3.Cross(transform.up, vel);
-                _body.localRotation = Quaternion.Lerp(_body.localRotation,
-                    Quaternion.AngleAxis(vel.magnitude * 1250.0f, tiltAxis) * rot,
-                    Time.deltaTime * 10.0f);
+                    var rot = Quaternion.Euler(0.0f, _head.localEulerAngles.y, 0.0f);
+                    var tiltAxis = Vector3.Cross(transform.up, vel);
+                    _body.localRotation = Quaternion.Lerp(_body.localRotation,
+                        Quaternion.AngleAxis(vel.magnitude * 1250.0f, tiltAxis) * rot,
+                        Time.deltaTime * 10.0f);
 
-                _prevBodyPos = _body.transform.localPosition;
+                    _prevBodyPos = _body.transform.localPosition;
+                }
             }
             catch (Exception e)
             {
@@ -226,29 +229,26 @@ namespace CustomAvatar
             }
 
             // apply dynamic bones
-            foreach (var dynamicBone in GetComponentsInChildren<BeatSaberDynamicBone::DynamicBone>())
+            foreach (BeatSaberDynamicBone::DynamicBone dynamicBone in _dynamicBones)
             {
+                // setting m_DistantDisabled prevents the integrated calls to PreUpdate and UpdateDynamicBones from taking effect
+                dynamicBone.SetPrivateField("m_Weight", 1);
                 _preUpdateDelegate(dynamicBone);
                 _updateDynamicBonesDelegate(dynamicBone, Time.deltaTime);
+                dynamicBone.SetPrivateField("m_Weight", 0);
             }
         }
 
         private void OnDestroy()
         {
-            _trackedDevices.deviceAdded -= OnTrackedDeviceAdded;
-            _trackedDevices.deviceRemoved -= OnTrackedDeviceRemoved;
+            input.inputChanged -= OnInputChanged;
         }
 
         // ReSharper restore UnusedMember.Local
         #pragma warning restore IDE0051
         #endregion
 
-        private void OnTrackedDeviceAdded(TrackedDeviceState device)
-        {
-            UpdateVrikReferences();
-        }
-
-        private void OnTrackedDeviceRemoved(TrackedDeviceState device)
+        private void OnInputChanged()
         {
             UpdateVrikReferences();
         }
@@ -332,7 +332,7 @@ namespace CustomAvatar
 
             Plugin.logger.Info("Tracking device change detected, updating VRIK references");
 
-            if (_trackedDevices.leftFoot.found)
+            if (input.TryGetLeftFootPose(out _))
             {
                 _vrik.solver.leftLeg.target = _vrikManager.solver_leftLeg_target;
                 _vrik.solver.leftLeg.positionWeight = _vrikManager.solver_leftLeg_positionWeight;
@@ -345,7 +345,7 @@ namespace CustomAvatar
                 _vrik.solver.leftLeg.rotationWeight = 0;
             }
 
-            if (_trackedDevices.rightFoot.found)
+            if (input.TryGetRightFootPose(out _))
             {
                 _vrik.solver.rightLeg.target = _vrikManager.solver_rightLeg_target;
                 _vrik.solver.rightLeg.positionWeight = _vrikManager.solver_rightLeg_positionWeight;
@@ -358,7 +358,7 @@ namespace CustomAvatar
                 _vrik.solver.rightLeg.rotationWeight = 0;
             }
 
-            if (_trackedDevices.waist.found)
+            if (input.TryGetWaistPose(out _))
             {
                 _vrik.solver.spine.pelvisTarget = _vrikManager.solver_spine_pelvisTarget;
                 _vrik.solver.spine.pelvisPositionWeight = _vrikManager.solver_spine_pelvisPositionWeight;
