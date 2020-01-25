@@ -137,6 +137,8 @@
     <Compile Include="AvatarResizeMode.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Legacy\Aliases.cs" />
+    <Compile Include="Tracking\AvatarInput.cs" />
+    <Compile Include="Tracking\VRAvatarInput.cs" />
     <Compile Include="Utilities\BeatSaberUtil.cs" />
     <Compile Include="CustomAvatar.cs" />
     <Compile Include="AvatarDescriptor.cs" />

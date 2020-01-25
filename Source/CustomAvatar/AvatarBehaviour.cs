@@ -30,6 +30,8 @@ namespace CustomAvatar
 		        Plugin.logger.Info("Avatar resized with scale: " + value);
 	        }
         }
+
+        public AvatarInput input;
 		
         private Vector3 _initialPosition;
         private Vector3 _initialScale;
@@ -71,17 +73,19 @@ namespace CustomAvatar
 
         private void Awake()
         {
-            Type dynamicBoneType = typeof(BeatSaberDynamicBone::DynamicBone);
-            MethodInfo preUpdate = dynamicBoneType.GetMethod("PreUpdate", BindingFlags.Instance | BindingFlags.NonPublic);
-            MethodInfo updateDynamicBones = dynamicBoneType.GetMethod("UpdateDynamicBones", BindingFlags.Instance | BindingFlags.NonPublic);
-
-            _preUpdateDelegate = (Action<BeatSaberDynamicBone::DynamicBone>) Delegate.CreateDelegate(typeof(Action<BeatSaberDynamicBone::DynamicBone>), preUpdate);
-            _updateDynamicBonesDelegate = (Action<BeatSaberDynamicBone::DynamicBone, float>) Delegate.CreateDelegate(typeof(Action<BeatSaberDynamicBone::DynamicBone, float>), updateDynamicBones);
+            // create delegates for dynamic bones private methods (more efficient than continuously calling Invoke())
+            _preUpdateDelegate = typeof(BeatSaberDynamicBone::DynamicBone).CreatePrivateMethodDelegate<Action<BeatSaberDynamicBone::DynamicBone>>("PreUpdate");
+            _updateDynamicBonesDelegate = typeof(BeatSaberDynamicBone::DynamicBone).CreatePrivateMethodDelegate<Action<BeatSaberDynamicBone::DynamicBone, float>>("UpdateDynamicBones");
 
 			_initialPosition = transform.position;
 			_initialScale = transform.localScale;
 
-            foreach (var twistRelaxer in GetComponentsInChildren<TwistRelaxer>())
+            if (input == null)
+            {
+                input = new VRAvatarInput();
+            }
+
+            foreach (TwistRelaxer twistRelaxer in GetComponentsInChildren<TwistRelaxer>())
             {
                 twistRelaxer.enabled = false;
             }
@@ -134,23 +138,19 @@ namespace CustomAvatar
 
             try
             {
-                TrackedDeviceState headPose = _trackedDevices.head;
-                TrackedDeviceState leftPose = _trackedDevices.leftHand;
-                TrackedDeviceState rightPose = _trackedDevices.rightHand;
-
-                if (_head && headPose != null && headPose.NodeState.tracked)
+                if (_head && input.TryGetHeadPose(out Pose headPose))
                 {
-                    _head.position = headPose.Position;
-                    _head.rotation = headPose.Rotation;
+                    _head.position = headPose.position;
+                    _head.rotation = headPose.rotation;
                 }
                 
                 Vector3 controllerPositionOffset = BeatSaberUtil.GetControllerPositionOffset();
                 Vector3 controllerRotationOffset = BeatSaberUtil.GetControllerRotationOffset();
 
-                if (_rightHand && rightPose != null && rightPose.NodeState.tracked)
+                if (_rightHand && input.TryGetRightHandPose(out Pose rightHandPose))
                 {
-                    _rightHand.position = rightPose.Position;
-                    _rightHand.rotation = rightPose.Rotation;
+                    _rightHand.position = rightHandPose.position;
+                    _rightHand.rotation = rightHandPose.rotation;
                     
                     _vrPlatformHelper.AdjustPlatformSpecificControllerTransform(XRNode.RightHand, _rightHand, controllerPositionOffset, controllerRotationOffset);
                 }
@@ -158,50 +158,43 @@ namespace CustomAvatar
                 controllerPositionOffset = new Vector3(-controllerPositionOffset.x, controllerPositionOffset.y, controllerPositionOffset.z);
                 controllerRotationOffset = new Vector3(controllerRotationOffset.x, -controllerRotationOffset.y, controllerRotationOffset.z);
 
-                if (_leftHand && leftPose != null && leftPose.NodeState.tracked)
+                if (_leftHand && input.TryGetLeftHandPose(out Pose leftHandPose))
                 {
-                    _leftHand.position = leftPose.Position;
-                    _leftHand.rotation = leftPose.Rotation;
+                    _leftHand.position = leftHandPose.position;
+                    _leftHand.rotation = leftHandPose.rotation;
 
                     _vrPlatformHelper.AdjustPlatformSpecificControllerTransform(XRNode.LeftHand, _leftHand, controllerPositionOffset, controllerRotationOffset);
                 }
 
-                TrackedDeviceState leftLegTracker = _trackedDevices.leftFoot;
-                TrackedDeviceState rightLegTracker = _trackedDevices.rightFoot;
-                TrackedDeviceState pelvisTracker = _trackedDevices.waist;
-
                 float playerEyeHeight = BeatSaberUtil.GetPlayerEyeHeight();
                 float positionScale = (playerEyeHeight - position.y) / playerEyeHeight;
 
-                if (_leftLeg && leftLegTracker != null && leftLegTracker.NodeState.tracked)
+                if (_leftLeg && input.TryGetLeftFootPose(out Pose leftFootPose))
                 {
-                    var leftLegPose = _trackedDevices.leftFoot;
                     var correction = SettingsManager.settings.fullBodyCalibration.leftLeg;
 
-                    _prevLeftLegPos = Vector3.Lerp(_prevLeftLegPos, AdjustTransformPosition(leftLegPose.Position, correction.position, positionScale), SettingsManager.settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
-                    _prevLeftLegRot = Quaternion.Slerp(_prevLeftLegRot, leftLegPose.Rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.feet.rotation * Time.deltaTime);
+                    _prevLeftLegPos = Vector3.Lerp(_prevLeftLegPos, AdjustTransformPosition(leftFootPose.position, correction.position, positionScale), SettingsManager.settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
+                    _prevLeftLegRot = Quaternion.Slerp(_prevLeftLegRot, leftFootPose.rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.feet.rotation * Time.deltaTime);
                     _leftLeg.position = _prevLeftLegPos;
                     _leftLeg.rotation = _prevLeftLegRot;
                 }
 
-                if (_rightLeg && rightLegTracker != null && rightLegTracker.NodeState.tracked)
+                if (_rightLeg && input.TryGetRightFootPose(out Pose rightFootPose))
                 {
-                    var rightLegPose = _trackedDevices.rightFoot;
                     var correction = SettingsManager.settings.fullBodyCalibration.rightLeg;
 
-                    _prevRightLegPos = Vector3.Lerp(_prevRightLegPos, AdjustTransformPosition(rightLegPose.Position, correction.position, positionScale), SettingsManager.settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
-                    _prevRightLegRot = Quaternion.Slerp(_prevRightLegRot, rightLegPose.Rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.feet.rotation * Time.deltaTime);
+                    _prevRightLegPos = Vector3.Lerp(_prevRightLegPos, AdjustTransformPosition(rightFootPose.position, correction.position, positionScale), SettingsManager.settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
+                    _prevRightLegRot = Quaternion.Slerp(_prevRightLegRot, rightFootPose.rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.feet.rotation * Time.deltaTime);
                     _rightLeg.position = _prevRightLegPos;
                     _rightLeg.rotation = _prevRightLegRot;
                 }
 
-                if (_pelvis && pelvisTracker != null && pelvisTracker.NodeState.tracked)
+                if (_pelvis && input.TryGetRightFootPose(out Pose pelvisPose))
                 {
-                    var pelvisPose = _trackedDevices.waist;
                     var correction = SettingsManager.settings.fullBodyCalibration.rightLeg;
 
-                    _prevPelvisPos = Vector3.Lerp(_prevPelvisPos, AdjustTransformPosition(pelvisPose.Position, correction.position, positionScale), SettingsManager.settings.fullBodyMotionSmoothing.waist.position * Time.deltaTime);
-                    _prevPelvisRot = Quaternion.Slerp(_prevPelvisRot, pelvisPose.Rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.waist.rotation * Time.deltaTime);
+                    _prevPelvisPos = Vector3.Lerp(_prevPelvisPos, AdjustTransformPosition(pelvisPose.position, correction.position, positionScale), SettingsManager.settings.fullBodyMotionSmoothing.waist.position * Time.deltaTime);
+                    _prevPelvisRot = Quaternion.Slerp(_prevPelvisRot, pelvisPose.rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.waist.rotation * Time.deltaTime);
                     _pelvis.position = _prevPelvisPos;
                     _pelvis.rotation = _prevPelvisRot;
                 }
@@ -339,7 +332,7 @@ namespace CustomAvatar
 
             Plugin.logger.Info("Tracking device change detected, updating VRIK references");
 
-            if (_trackedDevices.leftFoot.Found)
+            if (_trackedDevices.leftFoot.found)
             {
                 _vrik.solver.leftLeg.target = _vrikManager.solver_leftLeg_target;
                 _vrik.solver.leftLeg.positionWeight = _vrikManager.solver_leftLeg_positionWeight;
@@ -352,7 +345,7 @@ namespace CustomAvatar
                 _vrik.solver.leftLeg.rotationWeight = 0;
             }
 
-            if (_trackedDevices.rightFoot.Found)
+            if (_trackedDevices.rightFoot.found)
             {
                 _vrik.solver.rightLeg.target = _vrikManager.solver_rightLeg_target;
                 _vrik.solver.rightLeg.positionWeight = _vrikManager.solver_rightLeg_positionWeight;
@@ -365,7 +358,7 @@ namespace CustomAvatar
                 _vrik.solver.rightLeg.rotationWeight = 0;
             }
 
-            if (_trackedDevices.waist.Found)
+            if (_trackedDevices.waist.found)
             {
                 _vrik.solver.spine.pelvisTarget = _vrikManager.solver_spine_pelvisTarget;
                 _vrik.solver.spine.pelvisPositionWeight = _vrikManager.solver_spine_pelvisPositionWeight;

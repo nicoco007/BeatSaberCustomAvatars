@@ -100,31 +100,31 @@ namespace CustomAvatar
 
             var normal = Vector3.up;
 
-            if (leftFoot.Found)
+            if (leftFoot.found)
             {
-                Vector3 leftFootForward = leftFoot.Rotation * Vector3.up; // forward on feet trackers is y (up)
+                Vector3 leftFootForward = leftFoot.rotation * Vector3.up; // forward on feet trackers is y (up)
                 Vector3 leftFootStraightForward = Vector3.ProjectOnPlane(leftFootForward, normal); // get projection of forward vector on xz plane (floor)
-                Quaternion leftRotationCorrection = Quaternion.Inverse(leftFoot.Rotation) * Quaternion.LookRotation(Vector3.up, leftFootStraightForward); // get difference between world rotation and flat forward rotation
-                SettingsManager.settings.fullBodyCalibration.leftLeg = new Pose(leftFoot.Position.y * Vector3.down, leftRotationCorrection);
+                Quaternion leftRotationCorrection = Quaternion.Inverse(leftFoot.rotation) * Quaternion.LookRotation(Vector3.up, leftFootStraightForward); // get difference between world rotation and flat forward rotation
+                SettingsManager.settings.fullBodyCalibration.leftLeg = new Pose(leftFoot.position.y * Vector3.down, leftRotationCorrection);
                 Plugin.logger.Info("Saved left foot pose correction " + SettingsManager.settings.fullBodyCalibration.leftLeg);
             }
 
-            if (rightFoot.Found)
+            if (rightFoot.found)
             {
-                Vector3 rightFootForward = rightFoot.Rotation * Vector3.up;
+                Vector3 rightFootForward = rightFoot.rotation * Vector3.up;
                 Vector3 rightFootStraightForward = Vector3.ProjectOnPlane(rightFootForward, normal);
-                Quaternion rightRotationCorrection = Quaternion.Inverse(rightFoot.Rotation) * Quaternion.LookRotation(Vector3.up, rightFootStraightForward);
-                SettingsManager.settings.fullBodyCalibration.rightLeg = new Pose(rightFoot.Position.y * Vector3.down, rightRotationCorrection);
+                Quaternion rightRotationCorrection = Quaternion.Inverse(rightFoot.rotation) * Quaternion.LookRotation(Vector3.up, rightFootStraightForward);
+                SettingsManager.settings.fullBodyCalibration.rightLeg = new Pose(rightFoot.position.y * Vector3.down, rightRotationCorrection);
                 Plugin.logger.Info("Saved right foot pose correction " + SettingsManager.settings.fullBodyCalibration.rightLeg);
             }
 
-            if (head.Found && pelvis.Found)
+            if (head.found && pelvis.found)
             {
                 // using "standard" 8 head high body proportions w/ eyes at 1/2 head height
                 // reference: https://miro.medium.com/max/3200/1*cqTRyEGl26l4CImEmWz68Q.jpeg
-                var eyeHeight = head.Position.y;
+                var eyeHeight = head.position.y;
                 Vector3 wantedPelvisPosition = new Vector3(0, eyeHeight / 15f * 10f, 0);
-                Vector3 pelvisPositionCorrection = wantedPelvisPosition - Vector3.up * pelvis.Position.y;
+                Vector3 pelvisPositionCorrection = wantedPelvisPosition - Vector3.up * pelvis.position.y;
                 SettingsManager.settings.fullBodyCalibration.pelvis = new Pose(pelvisPositionCorrection, Quaternion.identity);
                 Plugin.logger.Info("Saved pelvis pose correction " + SettingsManager.settings.fullBodyCalibration.pelvis);
             }

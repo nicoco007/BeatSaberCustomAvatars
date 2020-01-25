@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
 using UnityEngine.SceneManagement;
 
@@ -92,7 +93,7 @@ namespace CustomAvatar
 
             currentlySpawnedAvatar?.Destroy();
 
-            currentlySpawnedAvatar = SpawnAvatar(avatar);
+            currentlySpawnedAvatar = SpawnAvatar(avatar, new VRAvatarInput());
 
             avatarChanged?.Invoke(currentlySpawnedAvatar);
 
@@ -145,9 +146,16 @@ namespace CustomAvatar
                 currentlySpawnedAvatar?.eventsPlayer.MenuEnteredEvent();
         }
 
-        private static SpawnedAvatar SpawnAvatar(CustomAvatar customAvatar)
+        private static SpawnedAvatar SpawnAvatar(CustomAvatar customAvatar, AvatarInput input)
         {
-            return new SpawnedAvatar(customAvatar);
+            if (customAvatar == null) throw new ArgumentNullException(nameof(customAvatar));
+            if (input == null) throw new ArgumentNullException(nameof(input));
+
+            var spawnedAvatar = new SpawnedAvatar(customAvatar);
+
+            spawnedAvatar.behaviour.input = input;
+
+            return spawnedAvatar;
         }
 
         private string[] GetAvatarFileNames()

@@ -146,13 +146,13 @@ namespace CustomAvatar.Tracking
         {
             if (possibleNodeState == null)
             {
-                if (deviceState.Found)
+                if (deviceState.found)
                 {
-                    deviceState.Position = default;
-                    deviceState.Rotation = default;
-                    deviceState.Found = false;
-                    deviceState.NodeState = default;
-                    Plugin.logger.Info($"Lost device with ID {deviceState.NodeState.uniqueID} that was used as {use}");
+                    deviceState.position = default;
+                    deviceState.rotation = default;
+                    deviceState.found = false;
+                    deviceState.nodeState = default;
+                    Plugin.logger.Info($"Lost device with ID {deviceState.nodeState.uniqueID} that was used as {use}");
                     deviceRemoved?.Invoke(deviceState);
                 }
 
@@ -160,23 +160,23 @@ namespace CustomAvatar.Tracking
             }
 
             var nodeState = (XRNodeState)possibleNodeState;
-            ulong previousId = deviceState.NodeState.uniqueID;
+            ulong previousId = deviceState.nodeState.uniqueID;
             
             Vector3 origin = BeatSaberUtil.GetRoomCenter();
             Quaternion originRotation = BeatSaberUtil.GetRoomRotation();
 
             if (nodeState.TryGetPosition(out Vector3 position))
             {
-                deviceState.Position = origin + originRotation * position;
+                deviceState.position = origin + originRotation * position;
             }
 
             if (nodeState.TryGetRotation(out Quaternion rotation))
             {
-                deviceState.Rotation = originRotation * rotation;
+                deviceState.rotation = originRotation * rotation;
             }
 
-            deviceState.Found = true;
-            deviceState.NodeState = nodeState;
+            deviceState.found = true;
+            deviceState.nodeState = nodeState;
 
             if (nodeState.uniqueID != previousId)
             {
