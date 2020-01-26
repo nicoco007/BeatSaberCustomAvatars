@@ -91,8 +91,8 @@
     <Compile Include="..\CustomAvatar\VRIKManager.cs">
       <Link>VRIKManager.cs</Link>
     </Compile>
-    <Compile Include="VRIKManagerEditor.cs" />
-    <Compile Include="PoseManagerEditor.cs" />
+    <Compile Include="Editor\VRIKManagerEditor.cs" />
+    <Compile Include="Editor\PoseManagerEditor.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

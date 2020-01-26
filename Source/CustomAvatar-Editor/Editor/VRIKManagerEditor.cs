@@ -3,10 +3,10 @@ using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 
-namespace CustomAvatar
+namespace CustomAvatar.Editor
 {
     [CustomEditor(typeof(VRIKManager))]
-    public class VRIKManagerEditor : Editor
+    public class VRIKManagerEditor : UnityEditor.Editor
     {
         private static readonly Regex kRegex = new Regex("(?<!^)(?=[A-Z])");
 

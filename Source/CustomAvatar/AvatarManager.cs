@@ -26,10 +26,10 @@ namespace CustomAvatar
 
         private static AvatarManager _instance;
         
-        public AvatarTailor avatarTailor { get; }
-        public SpawnedAvatar currentlySpawnedAvatar { get; private set; }
+        internal AvatarTailor avatarTailor { get; }
+        internal SpawnedAvatar currentlySpawnedAvatar { get; private set; }
 
-        public event Action<SpawnedAvatar> avatarChanged;
+        internal event Action<SpawnedAvatar> avatarChanged;
 
         private AvatarManager()
         {
