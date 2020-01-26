@@ -6,7 +6,7 @@ using UnityEngine;
 namespace CustomAvatar.StereoRendering
 {
     [DisallowMultipleComponent]
-    public class StereoRenderManager : MonoBehaviour
+    internal class StereoRenderManager : MonoBehaviour
     {
         // singleton
         private static StereoRenderManager instance = null;

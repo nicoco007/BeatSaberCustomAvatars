@@ -6,7 +6,7 @@ namespace CustomAvatar.StereoRendering
 {
     [RequireComponent(typeof(Camera))]
     [DisallowMultipleComponent]
-    public class VRRenderEventDetector : MonoBehaviour
+    internal class VRRenderEventDetector : MonoBehaviour
     {
         public Camera Camera { get; private set; }
 

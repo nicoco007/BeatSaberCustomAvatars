@@ -5,18 +5,18 @@ using System;
 // ReSharper disable UnusedMember.Global
 namespace AvatarScriptPack
 {
-    [Obsolete("Use BeatSaberFinalIK::RootMotion.FinalIK.VRIK")] public class VRIK : BeatSaberFinalIK::RootMotion.FinalIK.VRIK { }
-    [Obsolete("Use BeatSaberFinalIK::RootMotion.FinalIK.TwistRelaxer")] public class TwistRelaxer : BeatSaberFinalIK::RootMotion.FinalIK.TwistRelaxer { }
-    [Obsolete("Use CustomAvatar.FirstPersonExclusion")] public class FirstPersonExclusion : CustomAvatar.FirstPersonExclusion { }
+    [Obsolete("Use BeatSaberFinalIK::RootMotion.FinalIK.VRIK")] internal class VRIK : BeatSaberFinalIK::RootMotion.FinalIK.VRIK { }
+    [Obsolete("Use BeatSaberFinalIK::RootMotion.FinalIK.TwistRelaxer")] internal class TwistRelaxer : BeatSaberFinalIK::RootMotion.FinalIK.TwistRelaxer { }
+    [Obsolete("Use CustomAvatar.FirstPersonExclusion")] internal class FirstPersonExclusion : CustomAvatar.FirstPersonExclusion { }
 }
 
 namespace RootMotion.FinalIK
 {
-    [Obsolete("Use BeatSaberFinalIK::RootMotion.FinalIK.VRIK")] public class VRIK : BeatSaberFinalIK::RootMotion.FinalIK.VRIK {  }
-    [Obsolete("Use BeatSaberFinalIK::RootMotion.FinalIK.TwistRelaxer")] public class TwistRelaxer : BeatSaberFinalIK::RootMotion.FinalIK.TwistRelaxer { }
+    [Obsolete("Use BeatSaberFinalIK::RootMotion.FinalIK.VRIK")] internal class VRIK : BeatSaberFinalIK::RootMotion.FinalIK.VRIK {  }
+    [Obsolete("Use BeatSaberFinalIK::RootMotion.FinalIK.TwistRelaxer")] internal class TwistRelaxer : BeatSaberFinalIK::RootMotion.FinalIK.TwistRelaxer { }
 }
 
-[Obsolete("Use BeatSaberDynamicBone::DynamicBone")] public class DynamicBone : BeatSaberDynamicBone::DynamicBone { }
-[Obsolete("Use BeatSaberDynamicBone::DynamicBoneColliderBase")] public class DynamicBoneColliderBase : BeatSaberDynamicBone::DynamicBoneColliderBase { }
-[Obsolete("Use BeatSaberDynamicBone::DynamicBoneCollider")] public class DynamicBoneCollider : BeatSaberDynamicBone::DynamicBoneCollider { }
-[Obsolete("Use BeatSaberDynamicBone::DynamicBonePlaneCollider")] public class DynamicBonePlaneCollider : BeatSaberDynamicBone::DynamicBonePlaneCollider { }
+[Obsolete("Use BeatSaberDynamicBone::DynamicBone")] internal class DynamicBone : BeatSaberDynamicBone::DynamicBone { }
+[Obsolete("Use BeatSaberDynamicBone::DynamicBoneColliderBase")] internal class DynamicBoneColliderBase : BeatSaberDynamicBone::DynamicBoneColliderBase { }
+[Obsolete("Use BeatSaberDynamicBone::DynamicBoneCollider")] internal class DynamicBoneCollider : BeatSaberDynamicBone::DynamicBoneCollider { }
+[Obsolete("Use BeatSaberDynamicBone::DynamicBonePlaneCollider")] internal class DynamicBonePlaneCollider : BeatSaberDynamicBone::DynamicBonePlaneCollider { }

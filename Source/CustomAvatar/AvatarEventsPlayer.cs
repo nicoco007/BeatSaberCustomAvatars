@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 namespace CustomAvatar
 {
-    public class AvatarEventsPlayer : MonoBehaviour
+    internal class AvatarEventsPlayer : MonoBehaviour
     {
         private EventManager _eventManager;
 

@@ -17,7 +17,7 @@ using UnityEngine.Serialization;
 namespace AvatarScriptPack
 {
     [Obsolete("Use VRIKManager")]
-    class IKManagerAdvanced : MonoBehaviour
+    internal class IKManagerAdvanced : MonoBehaviour
     {
         [Space(5)]
         [Header("IK Targets")]

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace CustomAvatar.UI
 {
-    class AvatarListFlowCoordinator : FlowCoordinator
+    internal class AvatarListFlowCoordinator : FlowCoordinator
     {
         private GameObject _mainScreen;
         private Vector3 _mainScreenScale;

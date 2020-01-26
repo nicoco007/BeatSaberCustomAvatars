@@ -13,7 +13,7 @@ using TwistRelaxer = BeatSaberFinalIK::RootMotion.FinalIK.TwistRelaxer;
 
 namespace CustomAvatar
 {
-    public class AvatarBehaviour : MonoBehaviour
+    internal class AvatarBehaviour : MonoBehaviour
     {
         public Vector3 position
         {

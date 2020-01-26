@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace CustomAvatar.Utilities
 {
-    public static class BeatSaberUtil
+    internal static class BeatSaberUtil
     {
         private static MainSettingsModelSO _mainSettingsModel;
         private static PlayerDataModelSO _playerDataModel;

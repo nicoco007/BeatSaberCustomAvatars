@@ -8,7 +8,7 @@ using UnityEngine;
 namespace AvatarScriptPack
 {
     [Obsolete("Use VRIKManager")]
-    class IKManager : MonoBehaviour
+    internal class IKManager : MonoBehaviour
     {
         public Transform HeadTarget;
         public Transform LeftHandTarget;

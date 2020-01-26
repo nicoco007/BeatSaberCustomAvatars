@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace CustomAvatar
 {
-    public class AvatarTailor
+    internal class AvatarTailor
     {
         private Vector3? _initialPlatformPosition;
 

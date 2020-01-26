@@ -14,7 +14,7 @@ using UnityEngine.UI;
 
 namespace CustomAvatar.UI
 {
-    public class AvatarListViewController : BSMLResourceViewController, TableView.IDataSource
+    internal class AvatarListViewController : BSMLResourceViewController, TableView.IDataSource
     {
         private const string kTableCellReuseIdentifier = "CustomAvatarsTableCell";
 

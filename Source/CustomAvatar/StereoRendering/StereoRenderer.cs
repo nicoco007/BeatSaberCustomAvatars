@@ -9,7 +9,7 @@ namespace CustomAvatar.StereoRendering
     [ExecuteInEditMode]
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Renderer))]
-    public class StereoRenderer : MonoBehaviour
+    internal class StereoRenderer : MonoBehaviour
     {
         #region variables
 

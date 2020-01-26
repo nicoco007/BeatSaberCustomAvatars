@@ -12,7 +12,7 @@ using UnityEngine;
 // ReSharper disable NotAccessedField.Local
 namespace CustomAvatar.UI
 {
-    class SettingsViewController : BSMLResourceViewController
+    internal class SettingsViewController : BSMLResourceViewController
     {
         public override string ResourceName => "CustomAvatar.Views.SettingsViewController.bsml";
 

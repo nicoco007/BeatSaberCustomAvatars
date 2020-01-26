@@ -1,8 +1,6 @@
-using UnityEngine;
-
 namespace CustomAvatar
 {
-    public static class AvatarLayers
+    internal static class AvatarLayers
     {
         public const int OnlyInThirdPerson = 3;
         public const int OnlyInFirstPerson = 4;

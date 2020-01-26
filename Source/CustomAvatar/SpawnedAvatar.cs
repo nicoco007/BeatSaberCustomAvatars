@@ -5,7 +5,7 @@ using Object = UnityEngine.Object;
 
 namespace CustomAvatar
 {
-	public class SpawnedAvatar
+	internal class SpawnedAvatar
 	{
 		public CustomAvatar customAvatar { get; }
 		public AvatarBehaviour behaviour { get; }
