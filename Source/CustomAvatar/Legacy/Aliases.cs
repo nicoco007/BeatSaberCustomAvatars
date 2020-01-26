@@ -2,10 +2,12 @@
 extern alias BeatSaberDynamicBone;
 using System;
 
+// ReSharper disable UnusedMember.Global
 namespace AvatarScriptPack
 {
     [Obsolete("Use BeatSaberFinalIK::RootMotion.FinalIK.VRIK")] public class VRIK : BeatSaberFinalIK::RootMotion.FinalIK.VRIK { }
     [Obsolete("Use BeatSaberFinalIK::RootMotion.FinalIK.TwistRelaxer")] public class TwistRelaxer : BeatSaberFinalIK::RootMotion.FinalIK.TwistRelaxer { }
+    [Obsolete("Use CustomAvatar.FirstPersonExclusion")] public class FirstPersonExclusion : CustomAvatar.FirstPersonExclusion { }
 }
 
 namespace RootMotion.FinalIK

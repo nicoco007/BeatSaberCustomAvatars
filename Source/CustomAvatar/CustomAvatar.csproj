@@ -131,6 +131,7 @@
     <Compile Include="AvatarManager.cs" />
     <Compile Include="AvatarTailor.cs" />
     <Compile Include="AvatarResizeMode.cs" />
+    <Compile Include="FirstPersonExclusion.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Legacy\Aliases.cs" />
     <Compile Include="Tracking\AvatarInput.cs" />

@@ -128,6 +128,14 @@ namespace CustomAvatar
             _pelvis = transform.Find("Pelvis");
 
             SetVrikReferences();
+
+            foreach (FirstPersonExclusion firstPersonExclusion in GetComponentsInChildren<FirstPersonExclusion>())
+            {
+                foreach (GameObject go in firstPersonExclusion.exclude)
+                {
+                    go.layer = AvatarLayers.OnlyInThirdPerson;
+                }
+            }
         }
 
         private void LateUpdate()
