@@ -97,6 +97,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule">
+      <HintPath>..\..\Libraries\UnityEngine.ImageConversionModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.IMGUIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\UnityEngine.IMGUIModule.dll</HintPath>
@@ -180,6 +183,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\mystery-man.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
