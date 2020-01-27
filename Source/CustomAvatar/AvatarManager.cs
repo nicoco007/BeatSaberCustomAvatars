@@ -89,7 +89,7 @@ namespace CustomAvatar
 
         public void SwitchToAvatar(CustomAvatar avatar)
         {
-            if (currentlySpawnedAvatar?.customAvatar == avatar) return;
+            if (SettingsManager.settings.previousAvatarPath == avatar?.fullPath) return;
 
             currentlySpawnedAvatar?.Destroy();
 
