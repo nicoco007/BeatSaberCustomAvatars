@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace CustomAvatar
@@ -31,6 +32,8 @@ namespace CustomAvatar
 
         internal event Action<SpawnedAvatar> avatarChanged;
 
+        private PlayerHeightDetector _playerHeightDetector;
+
         private AvatarManager()
         {
             avatarTailor = new AvatarTailor();
@@ -38,6 +41,10 @@ namespace CustomAvatar
             Plugin.instance.sceneTransitioned += OnSceneTransitioned;
 
             SceneManager.sceneLoaded += OnSceneLoaded;
+
+            _playerHeightDetector = Resources.FindObjectsOfTypeAll<PlayerHeightDetector>().First();
+
+            _playerHeightDetector.playerHeightDidChangeEvent += ResizeCurrentAvatar;
         }
 
         ~AvatarManager()
@@ -128,9 +135,14 @@ namespace CustomAvatar
 
         public void ResizeCurrentAvatar()
         {
+            ResizeCurrentAvatar(BeatSaberUtil.GetPlayerHeight());
+        }
+
+        public void ResizeCurrentAvatar(float playerHeight)
+        {
             if (currentlySpawnedAvatar != null)
             {
-                avatarTailor.ResizeAvatar(currentlySpawnedAvatar);
+                avatarTailor.ResizeAvatar(currentlySpawnedAvatar, playerHeight);
             }
         }
 

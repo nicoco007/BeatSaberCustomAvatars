@@ -10,7 +10,7 @@ namespace CustomAvatar
     {
         private Vector3? _initialPlatformPosition;
 
-        public void ResizeAvatar(SpawnedAvatar avatar)
+        public void ResizeAvatar(SpawnedAvatar avatar, float playerHeight)
         {
             if (!avatar.customAvatar.descriptor.allowHeightCalibration || !avatar.customAvatar.isIKAvatar) return;
 
@@ -39,7 +39,7 @@ namespace CustomAvatar
 
                     if (avatarEyeHeight > 0)
                     {
-                        scale = BeatSaberUtil.GetPlayerEyeHeight() / avatarEyeHeight;
+                        scale = playerHeight / avatarEyeHeight;
                     }
                     else
                     {
