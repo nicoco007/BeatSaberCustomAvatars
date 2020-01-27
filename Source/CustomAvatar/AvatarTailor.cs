@@ -21,27 +21,42 @@ namespace CustomAvatar
             switch (resizeMode)
             {
                 case AvatarResizeMode.ArmSpan:
-                    float playerArmLength = SettingsManager.settings.playerArmSpan;
-                    var avatarArmLength = avatar.customAvatar.GetArmSpan();
+                    float avatarArmLength = avatar.customAvatar.GetArmSpan();
 
                     if (avatarArmLength > 0)
                     {
-                        scale = playerArmLength / avatarArmLength;
+                        scale = SettingsManager.settings.playerArmSpan / avatarArmLength;
                     }
                     else
                     {
-                        scale = 1;
+                        scale = 1.0f;
                     }
 
                     break;
 
                 case AvatarResizeMode.Height:
-                    scale = BeatSaberUtil.GetPlayerEyeHeight() / avatar.customAvatar.eyeHeight;
+                    float avatarEyeHeight = avatar.customAvatar.eyeHeight;
+
+                    if (avatarEyeHeight > 0)
+                    {
+                        scale = BeatSaberUtil.GetPlayerEyeHeight() / avatarEyeHeight;
+                    }
+                    else
+                    {
+                        scale = 1.0f;
+                    }
+
                     break;
 
                 default:
                     scale = 1.0f;
                     break;
+            }
+
+            if (scale <= 0)
+            {
+                Plugin.logger.Warn("Calculated scale is <= 0; reverting to 1");
+                scale = 1.0f;
             }
 
             // apply scale
