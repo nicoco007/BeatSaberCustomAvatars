@@ -131,6 +131,7 @@
   <ItemGroup>
     <Compile Include="AvatarBehaviour.cs" />
     <Compile Include="AvatarLayers.cs" />
+    <Compile Include="AvatarListItem.cs" />
     <Compile Include="AvatarManager.cs" />
     <Compile Include="AvatarTailor.cs" />
     <Compile Include="AvatarResizeMode.cs" />
@@ -186,6 +187,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\mystery-man.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\ban.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

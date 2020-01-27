@@ -24,10 +24,11 @@ namespace CustomAvatar.UI
         [UIComponent("up-button")] public Button upButton;
         [UIComponent("down-button")] public Button downButton;
 
-        private List<CustomAvatar> _avatars = new List<CustomAvatar>();
+        private readonly List<AvatarListItem> _avatars = new List<AvatarListItem>();
         private LevelListTableCell _tableCellTemplate;
 
-        private Texture _blankAvatarIcon;
+        private Texture2D _blankAvatarIcon;
+        private Texture2D _noAvatarIcon;
         
         protected override void DidActivate(bool firstActivation, ActivationType type)
         {
@@ -35,19 +36,24 @@ namespace CustomAvatar.UI
 
             AvatarManager.instance.avatarChanged += OnAvatarChanged;
             
-            Texture2D texture = new Texture2D(0, 0);
-
-            using (Stream spriteStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("CustomAvatar.Resources.mystery-man.png"))
-            {
-                byte[] rawSprite = new byte[spriteStream.Length];
-                spriteStream.Read(rawSprite, 0, (int) spriteStream.Length);
-                texture.LoadImage(rawSprite);
-            }
-
-            _blankAvatarIcon = texture;
-
+            _blankAvatarIcon = LoadTextureFromResource("CustomAvatar.Resources.mystery-man.png");
+            _noAvatarIcon = LoadTextureFromResource("CustomAvatar.Resources.ban.png");
 
             if (firstActivation) FirstActivation();
+        }
+
+        private Texture2D LoadTextureFromResource(string resourceName)
+        {
+            Texture2D texture = new Texture2D(0, 0);
+
+            using (Stream textureStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
+            {
+                byte[] textureBytes = new byte[textureStream.Length];
+                textureStream.Read(textureBytes, 0, (int) textureStream.Length);
+                texture.LoadImage(textureBytes);
+            }
+
+            return texture;
         }
 
         private void FirstActivation()
@@ -73,12 +79,14 @@ namespace CustomAvatar.UI
             });
             
             avatarList.tableView.dataSource = this;
+
+            _avatars.Add(new AvatarListItem("No Avatar", _noAvatarIcon));
             
             AvatarManager.instance.GetAvatarsAsync(avatar =>
             {
                 Plugin.logger.Info("Loaded avatar " + avatar.descriptor.name);
 
-                _avatars.Add(avatar);
+                _avatars.Add(new AvatarListItem(avatar));
 
                 ReloadData();
             }, ex =>
@@ -95,12 +103,12 @@ namespace CustomAvatar.UI
         }
 
         
-        // ReSharper disable UnusedMember.Local
+        // ReSharper disable once UnusedMember.Local
         // ReSharper disable once UnusedParameter.Local
         [UIAction("avatar-click")]
         private void OnAvatarClicked(TableView table, int row)
         {
-            AvatarManager.instance.SwitchToAvatar(_avatars[row]);
+            AvatarManager.instance.SwitchToAvatar(_avatars[row].avatar);
         }
 
         private void OnAvatarChanged(SpawnedAvatar avatar)
@@ -110,9 +118,15 @@ namespace CustomAvatar.UI
 
         private void ReloadData()
         {
-            _avatars.Sort((a, b) => string.Compare(a.descriptor.name, b.descriptor.name, StringComparison.CurrentCulture));
+            _avatars.Sort((a, b) =>
+            {
+                if (a.avatar == null) return -1;
+                if (b.avatar == null) return 1;
 
-            int currentRow = _avatars.FindIndex(a => a.fullPath == AvatarManager.instance.currentlySpawnedAvatar?.customAvatar.fullPath);
+                return string.Compare(a.name, b.name, StringComparison.CurrentCulture);
+            });
+
+            int currentRow = _avatars.FindIndex(a => a.avatar?.fullPath == AvatarManager.instance.currentlySpawnedAvatar?.customAvatar.fullPath);
             
             avatarList.tableView.ReloadData();
             avatarList.tableView.ScrollToCellWithIdx(currentRow, TableViewScroller.ScrollPositionType.Center, true);
@@ -148,11 +162,11 @@ namespace CustomAvatar.UI
                 tableCell.reuseIdentifier = kTableCellReuseIdentifier;
             }
 
-            CustomAvatar avatar = _avatars[idx];
+            AvatarListItem avatar = _avatars[idx];
 
-            tableCell.GetPrivateField<LevelListTableCell, TextMeshProUGUI>("_songNameText").text = avatar.descriptor.name;
-            tableCell.GetPrivateField<LevelListTableCell, TextMeshProUGUI>("_authorText").text = avatar.descriptor.author;
-            tableCell.GetPrivateField<LevelListTableCell, RawImage>("_coverRawImage").texture = avatar.descriptor.cover?.texture ?? _blankAvatarIcon;
+            tableCell.GetPrivateField<LevelListTableCell, TextMeshProUGUI>("_songNameText").text = avatar.name;
+            tableCell.GetPrivateField<LevelListTableCell, TextMeshProUGUI>("_authorText").text = avatar.author;
+            tableCell.GetPrivateField<LevelListTableCell, RawImage>("_coverRawImage").texture = avatar.icon ?? _blankAvatarIcon;
 
             return tableCell;
         }

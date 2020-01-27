@@ -59,14 +59,14 @@ namespace CustomAvatar
 
         public void LoadAvatarFromSettingsAsync()
         {
-            var previousAvatarPath = SettingsManager.settings.previousAvatarPath;
+            string previousAvatarPath = SettingsManager.settings.previousAvatarPath;
 
             if (string.IsNullOrEmpty(previousAvatarPath))
             {
-                previousAvatarPath = GetAvatarFileNames().FirstOrDefault();
+                return;
             }
 
-            if (string.IsNullOrEmpty(previousAvatarPath) || !File.Exists(Path.Combine(kCustomAvatarsPath, previousAvatarPath)))
+            if (!File.Exists(Path.Combine(kCustomAvatarsPath, previousAvatarPath)))
             {
                 Plugin.logger.Info("No avatars found");
                 return;
@@ -79,6 +79,7 @@ namespace CustomAvatar
         {
             SharedCoroutineStarter.instance.StartCoroutine(CustomAvatar.FromFileCoroutine(filePath, avatar =>
             {
+                Plugin.logger.Info("Successfully loaded avatar " + avatar.descriptor.name);
                 SwitchToAvatar(avatar);
             }, ex =>
             {
@@ -88,10 +89,13 @@ namespace CustomAvatar
 
         public void SwitchToAvatar(CustomAvatar avatar)
         {
-            if (avatar == null) return;
             if (currentlySpawnedAvatar?.customAvatar == avatar) return;
 
             currentlySpawnedAvatar?.Destroy();
+
+            SettingsManager.settings.previousAvatarPath = avatar?.fullPath;
+
+            if (avatar == null) return;
 
             currentlySpawnedAvatar = SpawnAvatar(avatar, new VRAvatarInput());
 
@@ -99,8 +103,6 @@ namespace CustomAvatar
 
             ResizeCurrentAvatar();
             currentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
-
-            SettingsManager.settings.previousAvatarPath = avatar.fullPath;
         }
 
         public void SwitchToNextAvatar()
