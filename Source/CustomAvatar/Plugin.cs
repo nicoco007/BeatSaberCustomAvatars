@@ -5,8 +5,6 @@ using System.Linq;
 using BeatSaberMarkupLanguage.MenuButtons;
 using CustomAvatar.UI;
 using CustomAvatar.Utilities;
-using DynamicOpenVR;
-using DynamicOpenVR.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
@@ -15,7 +13,7 @@ using Logger = IPA.Logging.Logger;
 
 namespace CustomAvatar
 {
-    public class Plugin : IBeatSaberPlugin
+    internal class Plugin : IBeatSaberPlugin
     {
         private GameScenesManager _scenesManager;
 
@@ -24,18 +22,6 @@ namespace CustomAvatar
         public static Plugin instance { get; private set; }
 
         public static Logger logger { get; private set; }
-
-        public static SkeletalInput leftHandAnimAction;
-        public static SkeletalInput rightHandAnimAction;
-
-        public Plugin()
-        {
-            if (OpenVRStatus.isRunning)
-            {
-                leftHandAnimAction  = new SkeletalInput("/actions/customavatars/in/lefthandanim");
-                rightHandAnimAction = new SkeletalInput("/actions/customavatars/in/righthandanim");
-            }
-        }
 
         public void Init(Logger logger)
         {

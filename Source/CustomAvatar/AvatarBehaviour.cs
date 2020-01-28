@@ -44,21 +44,23 @@ namespace CustomAvatar
         private Transform _rightLeg;
         private Transform _pelvis;
 
-        private Vector3 _prevBodyPos;
-
-        private Vector3 _prevLeftLegPos = default(Vector3);
-        private Vector3 _prevRightLegPos = default(Vector3);
-        private Quaternion _prevLeftLegRot = default(Quaternion);
-        private Quaternion _prevRightLegRot = default(Quaternion);
-
-        private Vector3 _prevPelvisPos = default(Vector3);
-        private Quaternion _prevPelvisRot = default(Quaternion);
+        private Vector3 _prevBodyPos     = Vector3.zero;
+        private Vector3 _prevPelvisPos   = Vector3.zero;
+        private Vector3 _prevLeftLegPos  = Vector3.zero;
+        private Vector3 _prevRightLegPos = Vector3.zero;
+        
+        private Quaternion _prevLeftLegRot  = Quaternion.identity;   
+        private Quaternion _prevRightLegRot = Quaternion.identity;
+        private Quaternion _prevPelvisRot   = Quaternion.identity;
 
         private VRIK _vrik;
         private VRIKManager _vrikManager;
         private VRPlatformHelper _vrPlatformHelper;
         private Animator _animator;
         private PoseManager _poseManager;
+
+        private SkeletalInput _leftHandAnimAction;
+        private SkeletalInput _rightHandAnimAction;
 
         private BeatSaberDynamicBone::DynamicBone[] _dynamicBones;
 
@@ -80,6 +82,9 @@ namespace CustomAvatar
 
 			_initialPosition = transform.position;
 			_initialScale = transform.localScale;
+
+            _leftHandAnimAction  = new SkeletalInput("/actions/customavatars/in/lefthandanim");
+            _rightHandAnimAction = new SkeletalInput("/actions/customavatars/in/righthandanim");
 
             _dynamicBones = GetComponentsInChildren<BeatSaberDynamicBone::DynamicBone>();
 
@@ -250,6 +255,9 @@ namespace CustomAvatar
         private void OnDestroy()
         {
             input.inputChanged -= OnInputChanged;
+
+            _leftHandAnimAction.Dispose();
+            _rightHandAnimAction.Dispose();
         }
 
         // ReSharper restore UnusedMember.Local
@@ -384,11 +392,11 @@ namespace CustomAvatar
 
         public void ApplyFingerTracking()
         {
-            if (Plugin.leftHandAnimAction != null)
+            if (_leftHandAnimAction != null)
             {
                 try
                 {
-                    SkeletalSummaryData leftHandAnim = Plugin.leftHandAnimAction.summaryData;
+                    SkeletalSummaryData leftHandAnim = _leftHandAnimAction.summaryData;
 
                     ApplyBodyBonePose(HumanBodyBones.LeftThumbProximal,       _poseManager.openHand_LeftThumbProximal,       _poseManager.closedHand_LeftThumbProximal,       leftHandAnim.thumbCurl * 2);
                     ApplyBodyBonePose(HumanBodyBones.LeftThumbIntermediate,   _poseManager.openHand_LeftThumbIntermediate,   _poseManager.closedHand_LeftThumbIntermediate,   leftHandAnim.thumbCurl * 2);
@@ -413,11 +421,11 @@ namespace CustomAvatar
                 catch (Exception) { }
             }
 
-            if (Plugin.rightHandAnimAction != null)
+            if (_rightHandAnimAction != null)
             {
                 try
                 {
-                    SkeletalSummaryData rightHandAnim = Plugin.rightHandAnimAction.summaryData;
+                    SkeletalSummaryData rightHandAnim = _rightHandAnimAction.summaryData;
 
                     ApplyBodyBonePose(HumanBodyBones.RightThumbProximal,      _poseManager.openHand_RightThumbProximal,      _poseManager.closedHand_RightThumbProximal,      rightHandAnim.thumbCurl * 2);
                     ApplyBodyBonePose(HumanBodyBones.RightThumbIntermediate,  _poseManager.openHand_RightThumbIntermediate,  _poseManager.closedHand_RightThumbIntermediate,  rightHandAnim.thumbCurl * 2);
