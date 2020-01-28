@@ -388,7 +388,7 @@ namespace CustomAvatar
             {
                 try
                 {
-                    SkeletalSummaryData leftHandAnim = Plugin.leftHandAnimAction.GetSummaryData();
+                    SkeletalSummaryData leftHandAnim = Plugin.leftHandAnimAction.summaryData;
 
                     ApplyBodyBonePose(HumanBodyBones.LeftThumbProximal,       _poseManager.openHand_LeftThumbProximal,       _poseManager.closedHand_LeftThumbProximal,       leftHandAnim.thumbCurl * 2);
                     ApplyBodyBonePose(HumanBodyBones.LeftThumbIntermediate,   _poseManager.openHand_LeftThumbIntermediate,   _poseManager.closedHand_LeftThumbIntermediate,   leftHandAnim.thumbCurl * 2);
@@ -417,7 +417,7 @@ namespace CustomAvatar
             {
                 try
                 {
-                    SkeletalSummaryData rightHandAnim = Plugin.rightHandAnimAction.GetSummaryData();
+                    SkeletalSummaryData rightHandAnim = Plugin.rightHandAnimAction.summaryData;
 
                     ApplyBodyBonePose(HumanBodyBones.RightThumbProximal,      _poseManager.openHand_RightThumbProximal,      _poseManager.closedHand_RightThumbProximal,      rightHandAnim.thumbCurl * 2);
                     ApplyBodyBonePose(HumanBodyBones.RightThumbIntermediate,  _poseManager.openHand_RightThumbIntermediate,  _poseManager.closedHand_RightThumbIntermediate,  rightHandAnim.thumbCurl * 2);

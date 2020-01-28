@@ -30,7 +30,7 @@ namespace CustomAvatar.Tracking
             var serialNumbers = new string[0];
             InputTracking.GetNodeStates(nodeStates);
 
-            if (OpenVRActionManager.isRunning)
+            if (OpenVRStatus.isRunning)
             {
                 serialNumbers = OpenVRWrapper.GetTrackedDeviceSerialNumbers();
             }
@@ -67,7 +67,7 @@ namespace CustomAvatar.Tracking
                         break;
 
                     case XRNode.HardwareTracker:
-                        if (OpenVRActionManager.isRunning)
+                        if (OpenVRStatus.isRunning)
                         {
                             // try to figure out tracker role using OpenVR
                             string deviceName = InputTracking.GetNodeName(nodeState.uniqueID);
