@@ -77,6 +77,11 @@ namespace CustomAvatar
                 float avatarViewPointHeight = avatar.customAvatar.viewPoint.position.y;
 
                 floorOffset = playerViewPointHeight - avatarViewPointHeight * avatar.behaviour.scale;
+
+                if (SettingsManager.settings.moveFloorWithRoomAdjust)
+                {
+                    floorOffset += BeatSaberUtil.GetRoomCenter().y;
+                }
             }
 
             // apply offset
