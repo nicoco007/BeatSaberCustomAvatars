@@ -27,7 +27,10 @@ namespace CustomAvatar
         {
             Plugin.logger = logger;
             instance = this;
-            
+        }
+
+        public void OnApplicationStart()
+        {
             SettingsManager.LoadSettings();
             AvatarManager.instance.LoadAvatarFromSettingsAsync();
         }
@@ -137,7 +140,5 @@ namespace CustomAvatar
         public void OnSceneUnloaded(Scene scene) { }
 
         public void OnActiveSceneChanged(Scene prevScene, Scene nextScene) { }
-
-        public void OnApplicationStart() { }
     }
 }
