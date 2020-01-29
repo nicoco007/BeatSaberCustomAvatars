@@ -84,6 +84,8 @@ namespace CustomAvatar
                 }
             }
 
+            floorOffset = (float) Math.Round(floorOffset, 3); // round to millimeter
+
             // apply offset
 			avatar.behaviour.position = new Vector3(0, floorOffset, 0);
             

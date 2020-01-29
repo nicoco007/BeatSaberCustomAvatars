@@ -244,7 +244,7 @@ namespace CustomAvatar
             // apply dynamic bones
             foreach (BeatSaberDynamicBone::DynamicBone dynamicBone in _dynamicBones)
             {
-                // setting m_DistantDisabled prevents the integrated calls to PreUpdate and UpdateDynamicBones from taking effect
+                // setting m_Weight prevents the integrated calls to PreUpdate and UpdateDynamicBones from taking effect
                 dynamicBone.SetPrivateField("m_Weight", 1);
                 _preUpdateDelegate(dynamicBone);
                 _updateDynamicBonesDelegate(dynamicBone, Time.deltaTime);
@@ -298,7 +298,7 @@ namespace CustomAvatar
 
                     Plugin.logger.Debug($"Set {string.Join(".", parts)} = {value}");
 
-                    if (targetField.FieldType.IsEnum)
+                    if (targetField.FieldType.IsEnum && sourceField.FieldType != targetField.FieldType)
                     {
                         Type sourceType = Enum.GetUnderlyingType(sourceField.FieldType);
                         Type targetType = Enum.GetUnderlyingType(targetField.FieldType);
