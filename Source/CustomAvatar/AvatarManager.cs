@@ -68,7 +68,7 @@ namespace CustomAvatar
 
             if (!File.Exists(Path.Combine(kCustomAvatarsPath, previousAvatarPath)))
             {
-                Plugin.logger.Info("No avatars found");
+                Plugin.logger.Warn("Previously loaded avatar no longer exists; reverting to default");
                 return;
             }
 
