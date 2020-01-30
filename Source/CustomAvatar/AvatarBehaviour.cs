@@ -181,7 +181,16 @@ namespace CustomAvatar
                 }
 
                 float playerEyeHeight = BeatSaberUtil.GetPlayerEyeHeight();
-                float positionScale = (playerEyeHeight - position.y) / playerEyeHeight;
+                float feetOffset = playerEyeHeight - position.y;
+
+                if (SettingsManager.settings.moveFloorWithRoomAdjust)
+                {
+                    feetOffset -= BeatSaberUtil.GetRoomCenter().y;
+                }
+
+                float positionScale = feetOffset / playerEyeHeight;
+
+                Plugin.logger.Info(positionScale.ToString());
 
                 if (_leftLeg && input.TryGetLeftFootPose(out Pose leftFootPose))
                 {
@@ -339,7 +348,7 @@ namespace CustomAvatar
         private Vector3 AdjustTransformPosition(Vector3 original, Vector3 correction, float scale)
         {
             Vector3 corrected = original + correction;
-            return new Vector3(corrected.x, corrected.y * scale, corrected.z) + position;
+            return new Vector3(corrected.x, corrected.y * scale, corrected.z);
         }
 
         private void UpdateVrikReferences()
