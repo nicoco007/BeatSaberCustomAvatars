@@ -190,8 +190,6 @@ namespace CustomAvatar
 
                 float positionScale = feetOffset / playerEyeHeight;
 
-                Plugin.logger.Info(positionScale.ToString());
-
                 if (_leftLeg && input.TryGetLeftFootPose(out Pose leftFootPose))
                 {
                     Pose correction = SettingsManager.settings.fullBodyCalibration.leftLeg;
