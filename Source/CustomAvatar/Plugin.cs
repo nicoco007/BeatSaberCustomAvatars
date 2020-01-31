@@ -94,6 +94,8 @@ namespace CustomAvatar
             {
                 logger.Error("Could not find main camera!");
             }
+
+            AvatarManager.instance.ResizeCurrentAvatar();
         }
 
         public void OnUpdate()

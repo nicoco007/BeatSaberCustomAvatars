@@ -90,13 +90,20 @@ namespace CustomAvatar
 			avatar.behaviour.position = new Vector3(0, floorOffset, 0);
             
             // ReSharper disable Unity.PerformanceCriticalCodeInvocation
-            var originalFloor = GameObject.Find("MenuPlayersPlace") ?? GameObject.Find("Static/PlayersPlace");
-            var customFloor = GameObject.Find("Platform Loader");
+            GameObject menuPlayersPlace = GameObject.Find("MenuPlayersPlace");
+            GameObject originalFloor = GameObject.Find("Environment/PlayersPlace");
+            GameObject customFloor = GameObject.Find("Platform Loader");
             // ReSharper disable restore Unity.PerformanceCriticalCodeInvocation
+
+            if (menuPlayersPlace)
+            {
+                Plugin.logger.Info($"Moving MenuPlayersPlace floor {Math.Abs(floorOffset)} m {(floorOffset >= 0 ? "up" : "down")}");
+                menuPlayersPlace.transform.position = new Vector3(0, floorOffset, 0);
+            }
 
             if (originalFloor)
             {
-                Plugin.logger.Info($"Moving original floor {Math.Abs(floorOffset)} m {(floorOffset >= 0 ? "up" : "down")}");
+                Plugin.logger.Info($"Moving PlayersPlace {Math.Abs(floorOffset)} m {(floorOffset >= 0 ? "up" : "down")}");
                 originalFloor.transform.position = new Vector3(0, floorOffset, 0);
             }
 
