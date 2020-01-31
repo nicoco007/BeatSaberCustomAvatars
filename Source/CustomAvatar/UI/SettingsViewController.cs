@@ -156,6 +156,11 @@ namespace CustomAvatar.UI
                 armSpanLabel.SetText($"{maxMeasuredArmSpan:0.00} m");
                 SettingsManager.settings.playerArmSpan = maxMeasuredArmSpan;
                 isMeasuring = false;
+
+                if (SettingsManager.settings.resizeMode == AvatarResizeMode.ArmSpan)
+                {
+                    AvatarManager.instance.ResizeCurrentAvatar();
+                }
             }
         }
 
