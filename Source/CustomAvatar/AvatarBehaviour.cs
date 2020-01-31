@@ -185,7 +185,7 @@ namespace CustomAvatar
 
                 if (SettingsManager.settings.moveFloorWithRoomAdjust)
                 {
-                    feetOffset -= BeatSaberUtil.GetRoomCenter().y;
+                    feetOffset += BeatSaberUtil.GetRoomCenter().y;
                 }
 
                 float positionScale = feetOffset / playerEyeHeight;

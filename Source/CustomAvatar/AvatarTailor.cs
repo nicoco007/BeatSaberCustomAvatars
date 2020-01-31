@@ -152,7 +152,7 @@ namespace CustomAvatar
             {
                 // using "standard" 8 head high body proportions w/ eyes at 1/2 head height
                 // reference: https://miro.medium.com/max/3200/1*cqTRyEGl26l4CImEmWz68Q.jpeg
-                var eyeHeight = head.position.y;
+                float eyeHeight = head.position.y - floorPosition;
                 Vector3 wantedPelvisPosition = new Vector3(0, eyeHeight / 15f * 10f, 0);
                 Vector3 pelvisPositionCorrection = wantedPelvisPosition - Vector3.up * (pelvis.position.y - floorPosition);
                 SettingsManager.settings.fullBodyCalibration.pelvis = new Pose(pelvisPositionCorrection, Quaternion.identity);
