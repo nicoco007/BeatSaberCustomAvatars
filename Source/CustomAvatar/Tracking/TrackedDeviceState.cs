@@ -8,5 +8,6 @@ namespace CustomAvatar.Tracking
         public Vector3 position { get; set; }
         public Quaternion rotation { get; set; }
         public bool found { get; set; }
+        public bool tracked { get; set; }
     }
 }

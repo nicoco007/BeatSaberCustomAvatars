@@ -10,6 +10,8 @@ namespace CustomAvatar.Tracking
         {
             _deviceManager.deviceAdded += (device) => InvokeInputChanged();
             _deviceManager.deviceRemoved += (device) => InvokeInputChanged();
+            _deviceManager.deviceTrackingAcquired += (device) => InvokeInputChanged();
+            _deviceManager.deviceTrackingLost += (device) => InvokeInputChanged();
         }
 
         public override bool TryGetHeadPose(out Pose pose) => TryGetPose(_deviceManager.head, out pose);
@@ -21,7 +23,7 @@ namespace CustomAvatar.Tracking
 
         private bool TryGetPose(TrackedDeviceState device, out Pose pose)
         {
-            if (!device.found)
+            if (!device.found || !device.tracked)
             {
                 pose = Pose.identity;
                 return false;

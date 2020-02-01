@@ -20,6 +20,8 @@ namespace CustomAvatar.Tracking
         // these should only trigger for nodes that are registered to a specific target, not all found XR nodes
         public event Action<TrackedDeviceState> deviceAdded;
         public event Action<TrackedDeviceState> deviceRemoved;
+        public event Action<TrackedDeviceState> deviceTrackingAcquired;
+        public event Action<TrackedDeviceState> deviceTrackingLost;
 
         private readonly HashSet<ulong> _foundNodes = new HashSet<ulong>();
 
@@ -91,6 +93,8 @@ namespace CustomAvatar.Tracking
                             {
                                 role = OpenVRWrapper.GetTrackedDeviceType((uint)openVRDeviceId);
                             }
+
+                            Plugin.logger.Info($"Tracker {nodeState.uniqueID} has role {role}");
                             
                             switch (role)
                             {
@@ -157,7 +161,7 @@ namespace CustomAvatar.Tracking
 
         private void AssignTrackedDevice(TrackedDeviceState deviceState, XRNodeState? possibleNodeState, string use)
         {
-            if (possibleNodeState.HasValue && possibleNodeState.Value.tracked && !deviceState.found)
+            if (possibleNodeState.HasValue && !deviceState.found)
             {
                 XRNodeState nodeState = possibleNodeState.Value;
 
@@ -169,7 +173,7 @@ namespace CustomAvatar.Tracking
                 deviceAdded?.Invoke(deviceState);
             }
             
-            if (!(possibleNodeState.HasValue && possibleNodeState.Value.tracked) && deviceState.found) {
+            if (!possibleNodeState.HasValue && deviceState.found) {
                 Plugin.logger.Info($"Lost device with ID {deviceState.uniqueID} that was used as {use}");
 
                 deviceState.uniqueID = default;
@@ -214,6 +218,25 @@ namespace CustomAvatar.Tracking
             if (!possibleNodeState.HasValue) return;
 
             var nodeState = possibleNodeState.Value;
+
+            if (!nodeState.tracked)
+            {
+                if (deviceState.tracked)
+                {
+                    Plugin.logger.Info($"Lost tracking of device with ID {deviceState.uniqueID}");
+                    deviceState.tracked = false;
+                    deviceTrackingLost?.Invoke(deviceState);
+                }
+
+                return;
+            }
+
+            if (!deviceState.tracked)
+            {
+                Plugin.logger.Info($"Acquired tracking of device with ID {deviceState.uniqueID}");
+                deviceState.tracked = true;
+                deviceTrackingAcquired?.Invoke(deviceState);
+            }
             
             Vector3 origin = BeatSaberUtil.GetRoomCenter();
             Quaternion originRotation = BeatSaberUtil.GetRoomRotation();
