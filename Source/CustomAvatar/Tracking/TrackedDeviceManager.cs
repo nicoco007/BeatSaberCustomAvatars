@@ -144,7 +144,7 @@ namespace CustomAvatar.Tracking
 
         private void UpdateTrackedDevice(TrackedDeviceState deviceState, XRNodeState? possibleNodeState, string use)
         {
-            if (possibleNodeState == null)
+            if (possibleNodeState == null || !possibleNodeState.Value.tracked)
             {
                 if (deviceState.found)
                 {

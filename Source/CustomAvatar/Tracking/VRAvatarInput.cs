@@ -21,7 +21,7 @@ namespace CustomAvatar.Tracking
 
         private bool TryGetPose(TrackedDeviceState device, out Pose pose)
         {
-            if (!device.found || !device.nodeState.tracked)
+            if (!device.found)
             {
                 pose = Pose.identity;
                 return false;
