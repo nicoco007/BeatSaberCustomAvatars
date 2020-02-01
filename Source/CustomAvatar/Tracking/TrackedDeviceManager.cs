@@ -150,8 +150,6 @@ namespace CustomAvatar.Tracking
                 {
                     Plugin.logger.Info($"Lost device with ID {deviceState.uniqueID} that was used as {use}");
                     deviceState.uniqueID = default;
-                    deviceState.position = default;
-                    deviceState.rotation = default;
                     deviceState.found = false;
                     deviceRemoved?.Invoke(deviceState);
                 }
