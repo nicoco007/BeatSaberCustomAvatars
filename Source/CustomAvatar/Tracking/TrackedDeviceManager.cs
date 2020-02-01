@@ -148,11 +148,11 @@ namespace CustomAvatar.Tracking
             {
                 if (deviceState.found)
                 {
+                    Plugin.logger.Info($"Lost device with ID {deviceState.uniqueID} that was used as {use}");
+                    deviceState.uniqueID = default;
                     deviceState.position = default;
                     deviceState.rotation = default;
                     deviceState.found = false;
-                    deviceState.nodeState = default;
-                    Plugin.logger.Info($"Lost device with ID {deviceState.nodeState.uniqueID} that was used as {use}");
                     deviceRemoved?.Invoke(deviceState);
                 }
 
@@ -160,7 +160,7 @@ namespace CustomAvatar.Tracking
             }
 
             var nodeState = (XRNodeState)possibleNodeState;
-            ulong previousId = deviceState.nodeState.uniqueID;
+            ulong previousId = deviceState.uniqueID;
             
             Vector3 origin = BeatSaberUtil.GetRoomCenter();
             Quaternion originRotation = BeatSaberUtil.GetRoomRotation();
@@ -175,8 +175,8 @@ namespace CustomAvatar.Tracking
                 deviceState.rotation = originRotation * rotation;
             }
 
+            deviceState.uniqueID = nodeState.uniqueID;
             deviceState.found = true;
-            deviceState.nodeState = nodeState;
 
             if (nodeState.uniqueID != previousId)
             {
