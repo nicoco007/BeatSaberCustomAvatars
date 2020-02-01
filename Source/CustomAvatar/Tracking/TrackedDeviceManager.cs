@@ -21,16 +21,29 @@ namespace CustomAvatar.Tracking
         public event Action<TrackedDeviceState> deviceAdded;
         public event Action<TrackedDeviceState> deviceRemoved;
 
-        private readonly HashSet<ulong> _foundDevices = new HashSet<ulong>();
+        private readonly HashSet<ulong> _foundNodes = new HashSet<ulong>();
 
-        public void Update()
+        private bool _isOpenVRRunning;
+
+        public void Start()
+        {
+            _isOpenVRRunning = OpenVRStatus.isRunning;
+
+            InputTracking.nodeAdded += node => UpdateNodes();
+            InputTracking.nodeRemoved += node => UpdateNodes();
+
+            UpdateNodes();
+        }
+
+        public void UpdateNodes()
         {
             var nodeStates = new List<XRNodeState>();
             var unassignedDevices = new Queue<XRNodeState>();
             var serialNumbers = new string[0];
+
             InputTracking.GetNodeStates(nodeStates);
 
-            if (OpenVRStatus.isRunning)
+            if (_isOpenVRRunning)
             {
                 serialNumbers = OpenVRWrapper.GetTrackedDeviceSerialNumbers();
             }
@@ -38,18 +51,18 @@ namespace CustomAvatar.Tracking
             XRNodeState? headNodeState      = null;
             XRNodeState? leftHandNodeState  = null;
             XRNodeState? rightHandNodeState = null;
+            XRNodeState? waistNodeState     = null;
             XRNodeState? leftFootNodeState  = null;
             XRNodeState? rightFootNodeState = null;
-            XRNodeState? waistNodeState     = null;
 
             int trackerCount = 0;
 
             foreach (XRNodeState nodeState in nodeStates)
             {
-                if (!_foundDevices.Contains(nodeState.uniqueID))
+                if (!_foundNodes.Contains(nodeState.uniqueID))
                 {
-                    _foundDevices.Add(nodeState.uniqueID);
-                    Plugin.logger.Debug($"Found new XR device of type \"{nodeState.nodeType}\" named \"{InputTracking.GetNodeName(nodeState.uniqueID)}\" with ID {nodeState.uniqueID}");
+                    Plugin.logger.Info($"Found new node {InputTracking.GetNodeName(nodeState.uniqueID)} with ID {nodeState.uniqueID}");
+                    _foundNodes.Add(nodeState.uniqueID);
                 }
 
                 switch (nodeState.nodeType)
@@ -67,7 +80,7 @@ namespace CustomAvatar.Tracking
                         break;
 
                     case XRNode.HardwareTracker:
-                        if (OpenVRStatus.isRunning)
+                        if (_isOpenVRRunning)
                         {
                             // try to figure out tracker role using OpenVR
                             string deviceName = InputTracking.GetNodeName(nodeState.uniqueID);
@@ -81,16 +94,16 @@ namespace CustomAvatar.Tracking
                             
                             switch (role)
                             {
+                                case TrackedDeviceType.Waist:
+                                    waistNodeState = nodeState;
+                                    break;
+
                                 case TrackedDeviceType.LeftFoot:
                                     leftFootNodeState = nodeState;
                                     break;
 
                                 case TrackedDeviceType.RightFoot:
                                     rightFootNodeState = nodeState;
-                                    break;
-
-                                case TrackedDeviceType.Waist:
-                                    waistNodeState = nodeState;
                                     break;
 
                                 default:
@@ -125,40 +138,82 @@ namespace CustomAvatar.Tracking
                 waistNodeState = unassignedDevices.Dequeue();
             }
 
-            UpdateTrackedDevice(head,      headNodeState,      nameof(head));
-            UpdateTrackedDevice(leftHand,  leftHandNodeState,  nameof(leftHand));
-            UpdateTrackedDevice(rightHand, rightHandNodeState, nameof(rightHand));
-            UpdateTrackedDevice(leftFoot,  leftFootNodeState,  nameof(leftFoot));
-            UpdateTrackedDevice(rightFoot, rightFootNodeState, nameof(rightFoot));
-            UpdateTrackedDevice(waist,     waistNodeState,     nameof(waist));
+            AssignTrackedDevice(head,      headNodeState,      nameof(head));
+            AssignTrackedDevice(leftHand,  leftHandNodeState,  nameof(leftHand));
+            AssignTrackedDevice(rightHand, rightHandNodeState, nameof(rightHand));
+            AssignTrackedDevice(waist,     waistNodeState,     nameof(waist));
+            AssignTrackedDevice(leftFoot,  leftFootNodeState,  nameof(leftFoot));
+            AssignTrackedDevice(rightFoot, rightFootNodeState, nameof(rightFoot));
 
-            foreach (ulong id in _foundDevices.ToList())
+            foreach (ulong uniqueID in _foundNodes.ToList())
             {
-                if (!nodeStates.Exists(n => n.uniqueID == id))
+                if (!nodeStates.Exists(ns => ns.uniqueID == uniqueID))
                 {
-                    Plugin.logger.Debug($"Lost XR device with ID " + id);
-                    _foundDevices.Remove(id);
+                    Plugin.logger.Info($"Lost node with ID {uniqueID}");
+                    _foundNodes.Remove(uniqueID);
                 }
             }
         }
 
-        private void UpdateTrackedDevice(TrackedDeviceState deviceState, XRNodeState? possibleNodeState, string use)
+        private void AssignTrackedDevice(TrackedDeviceState deviceState, XRNodeState? possibleNodeState, string use)
         {
-            if (possibleNodeState == null || !possibleNodeState.Value.tracked)
+            if (possibleNodeState.HasValue && possibleNodeState.Value.tracked && !deviceState.found)
             {
-                if (deviceState.found)
-                {
-                    Plugin.logger.Info($"Lost device with ID {deviceState.uniqueID} that was used as {use}");
-                    deviceState.uniqueID = default;
-                    deviceState.found = false;
-                    deviceRemoved?.Invoke(deviceState);
-                }
+                XRNodeState nodeState = possibleNodeState.Value;
 
-                return;
+                Plugin.logger.Info($"Using device \"{InputTracking.GetNodeName(nodeState.uniqueID)}\" ({nodeState.uniqueID}) as {use}");
+
+                deviceState.uniqueID = nodeState.uniqueID;
+                deviceState.found = true;
+                
+                deviceAdded?.Invoke(deviceState);
+            }
+            
+            if (!(possibleNodeState.HasValue && possibleNodeState.Value.tracked) && deviceState.found) {
+                Plugin.logger.Info($"Lost device with ID {deviceState.uniqueID} that was used as {use}");
+
+                deviceState.uniqueID = default;
+                deviceState.found = false;
+
+                deviceRemoved?.Invoke(deviceState);
+            }
+        }
+
+        private void Update()
+        {
+            var nodeStates = new List<XRNodeState>();
+            InputTracking.GetNodeStates(nodeStates);
+
+            XRNodeState? headNodeState      = null;
+            XRNodeState? leftHandNodeState  = null;
+            XRNodeState? rightHandNodeState = null;
+            XRNodeState? waistNodeState     = null;
+            XRNodeState? leftFootNodeState  = null;
+            XRNodeState? rightFootNodeState = null;
+
+            foreach (XRNodeState nodeState in nodeStates)
+            {
+                if (nodeState.uniqueID == head.uniqueID) headNodeState = nodeState;
+                if (nodeState.uniqueID == leftHand.uniqueID) leftHandNodeState = nodeState;
+                if (nodeState.uniqueID == rightHand.uniqueID) rightHandNodeState = nodeState;
+                if (nodeState.uniqueID == waist.uniqueID) waistNodeState = nodeState;
+                if (nodeState.uniqueID == leftFoot.uniqueID) leftFootNodeState = nodeState;
+                if (nodeState.uniqueID == rightFoot.uniqueID) rightFootNodeState = nodeState;
             }
 
-            var nodeState = (XRNodeState)possibleNodeState;
-            ulong previousId = deviceState.uniqueID;
+            UpdateTrackedDevice(head,      headNodeState,      nameof(head));
+            UpdateTrackedDevice(leftHand,  leftHandNodeState,  nameof(leftHand));
+            UpdateTrackedDevice(rightHand, rightHandNodeState, nameof(rightHand));
+            UpdateTrackedDevice(waist,     waistNodeState,     nameof(head));
+            UpdateTrackedDevice(leftFoot,  leftFootNodeState,  nameof(leftFoot));
+            UpdateTrackedDevice(rightFoot, rightFootNodeState, nameof(rightFoot));
+        }
+
+        private void UpdateTrackedDevice(TrackedDeviceState deviceState, XRNodeState? possibleNodeState, string use)
+        {
+            if (!possibleNodeState.HasValue) return;
+
+            var nodeState = possibleNodeState.Value;
             
             Vector3 origin = BeatSaberUtil.GetRoomCenter();
             Quaternion originRotation = BeatSaberUtil.GetRoomRotation();
@@ -171,15 +226,6 @@ namespace CustomAvatar.Tracking
             if (nodeState.TryGetRotation(out Quaternion rotation))
             {
                 deviceState.rotation = originRotation * rotation;
-            }
-
-            deviceState.uniqueID = nodeState.uniqueID;
-            deviceState.found = true;
-
-            if (nodeState.uniqueID != previousId)
-            {
-                Plugin.logger.Info($"Using device \"{InputTracking.GetNodeName(nodeState.uniqueID)}\" ({nodeState.uniqueID}) as {use}");
-                deviceAdded?.Invoke(deviceState);
             }
         }
     }
