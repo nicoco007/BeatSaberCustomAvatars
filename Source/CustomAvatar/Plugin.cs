@@ -16,8 +16,8 @@ namespace CustomAvatar
     internal class Plugin : IBeatSaberPlugin
     {
         private GameScenesManager _scenesManager;
-
-        public event Action<Scene> sceneTransitioned;
+        
+        public event Action<ScenesTransitionSetupDataSO, DiContainer> sceneTransitionDidFinish;
 
         public static Plugin instance { get; private set; }
 
@@ -38,7 +38,10 @@ namespace CustomAvatar
         public void OnApplicationQuit()
         {
             if (_scenesManager != null)
+            {
+                _scenesManager.transitionDidFinishEvent -= sceneTransitionDidFinish;
                 _scenesManager.transitionDidFinishEvent -= SceneTransitionDidFinish;
+            }
 
             SettingsManager.SaveSettings();
         }
@@ -51,14 +54,9 @@ namespace CustomAvatar
 
                 if (_scenesManager != null)
                 {
+                    _scenesManager.transitionDidFinishEvent += sceneTransitionDidFinish;
                     _scenesManager.transitionDidFinishEvent += SceneTransitionDidFinish;
-                    _scenesManager.transitionDidFinishEvent += (setupData, container) => sceneTransitioned?.Invoke(SceneManager.GetActiveScene());
                 }
-            }
-
-            if (newScene.name == "HealthWarning" && SettingsManager.settings.calibrateFullBodyTrackingOnStart)
-            {
-                AvatarManager.instance.avatarTailor.CalibrateFullBodyTracking();
             }
 
             if (newScene.name == "MenuCore")
@@ -94,8 +92,6 @@ namespace CustomAvatar
             {
                 logger.Error("Could not find main camera!");
             }
-
-            AvatarManager.instance.ResizeCurrentAvatar();
         }
 
         public void OnUpdate()

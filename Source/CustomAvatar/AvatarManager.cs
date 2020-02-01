@@ -4,6 +4,7 @@ using System.Linq;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
 using UnityEngine.SceneManagement;
+using Zenject;
 
 namespace CustomAvatar
 {
@@ -35,14 +36,14 @@ namespace CustomAvatar
         {
             avatarTailor = new AvatarTailor();
 
-            Plugin.instance.sceneTransitioned += OnSceneTransitioned;
+            Plugin.instance.sceneTransitionDidFinish += OnSceneTransitionDidFinish;
 
             SceneManager.sceneLoaded += OnSceneLoaded;
         }
 
         ~AvatarManager()
         {
-            Plugin.instance.sceneTransitioned -= OnSceneTransitioned;
+            Plugin.instance.sceneTransitionDidFinish -= OnSceneTransitionDidFinish;
 
             SceneManager.sceneLoaded -= OnSceneLoaded;
         }
@@ -136,17 +137,28 @@ namespace CustomAvatar
 
         private void OnSceneLoaded(Scene newScene, LoadSceneMode mode)
         {
-            ResizeCurrentAvatar();
             currentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
             currentlySpawnedAvatar?.eventsPlayer?.Restart();
+
+            if (newScene.name == "HealthWarning")
+            {
+                avatarTailor.CalibrateFullBodyTracking();
+            }
         }
 
-        private void OnSceneTransitioned(Scene newScene)
+        private void OnSceneTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
         {
-            if (newScene.name.Equals("GameCore"))
-                currentlySpawnedAvatar?.eventsPlayer?.LevelStartedEvent();
-            else if (newScene.name.Equals("MenuCore"))
-                currentlySpawnedAvatar?.eventsPlayer.MenuEnteredEvent();
+            string currentScene = SceneManager.GetActiveScene().name;
+
+            if (currentScene == "GameCore" && currentlySpawnedAvatar?.eventsPlayer)
+            {
+                currentlySpawnedAvatar.eventsPlayer.LevelStartedEvent();
+            }
+
+            if (currentScene == "MenuCore" && currentlySpawnedAvatar?.eventsPlayer)
+            {
+                currentlySpawnedAvatar.eventsPlayer.MenuEnteredEvent();
+            }
         }
 
         private static SpawnedAvatar SpawnAvatar(CustomAvatar customAvatar, AvatarInput input)
