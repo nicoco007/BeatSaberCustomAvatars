@@ -1,0 +1,70 @@
+{
+  "name": "Default Beat Saber Bindings",
+  "description": "Action bindings for Beat Saber.",
+  "controller_type": "knuckles",
+  "category": "steamvr_input",
+  "bindings": {
+    "/actions/main": {
+      "sources": [
+        {
+          "path": "/user/hand/left/input/trigger",
+          "mode": "trigger",
+          "inputs": {
+            "pull": {
+              "output": "/actions/main/in/lefttriggervalue"
+            }
+          }
+        },
+        {
+          "path": "/user/hand/right/input/trigger",
+          "mode": "trigger",
+          "inputs": {
+            "pull": {
+              "output": "/actions/main/in/righttriggervalue"
+            }
+          }
+        },
+        {
+          "path": "/user/hand/left/input/b",
+          "mode": "button",
+          "inputs": {
+            "click": {
+              "output": "/actions/main/in/menu"
+            }
+          }
+        },
+        {
+          "path": "/user/hand/right/input/b",
+          "mode": "button",
+          "inputs": {
+            "click": {
+              "output": "/actions/main/in/menu"
+            }
+          }
+        }
+      ],
+      "haptics": [
+        {
+          "output": "/actions/main/out/leftslice",
+          "path": "/user/hand/left/output/haptic"
+        },
+        {
+          "output": "/actions/main/out/rightslice",
+          "path": "/user/hand/right/output/haptic"
+        }
+      ],
+      "poses": [
+        {
+          "output": "/actions/main/in/lefthandpose",
+          "path": "/user/hand/left/pose/raw"
+        },
+        {
+          "output": "/actions/main/in/righthandpose",
+          "path": "/user/hand/right/pose/raw"
+        }
+      ],
+      "skeleton": [],
+      "chords": []
+    }
+  }
+}

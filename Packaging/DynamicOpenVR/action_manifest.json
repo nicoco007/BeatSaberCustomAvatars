@@ -1,0 +1,80 @@
+{
+  "actions": [
+    {
+      "name": "/actions/main/in/lefttriggervalue",
+      "requirement": "mandatory",
+      "type": "vector1"
+    },
+    {
+      "name": "/actions/main/in/righttriggervalue",
+      "requirement": "mandatory",
+      "type": "vector1"
+    },
+    {
+      "name": "/actions/main/in/menu",
+      "requirement": "mandatory",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/main/out/leftslice",
+      "requirement": "suggested",
+      "type": "vibration"
+    },
+    {
+      "name": "/actions/main/out/rightslice",
+      "requirement": "suggested",
+      "type": "vibration"
+    },
+    {
+      "name": "/actions/main/in/lefthandpose",
+      "requirement": "mandatory",
+      "type": "pose"
+    },
+    {
+      "name": "/actions/main/in/righthandpose",
+      "requirement": "mandatory",
+      "type": "pose"
+    }
+  ],
+  "action_sets": [
+    {
+      "name": "/actions/main",
+      "usage": "leftright"
+    }
+  ],
+  "default_bindings": [
+    {
+      "controller_type": "knuckles",
+      "binding_url": "default_bindings_knuckles.json"
+    },
+    {
+      "controller_type": "oculus_touch",
+      "binding_url": "default_bindings_oculus_touch.json"
+    },
+    {
+      "controller_type": "vive_controller",
+      "binding_url": "default_bindings_vive_controller.json"
+    }
+  ],
+  "localization": [
+    {
+      "language_tag": "en_us",
+      "/actions/main": "Beat Saber",
+      "/actions/main/in/lefttriggervalue": "Left Trigger Pull",
+      "/actions/main/in/righttriggervalue": "Right Trigger Pull",
+      "/actions/main/in/menu": "Menu Button",
+      "/actions/main/out/leftslice": "Left Slice Haptic Feedback",
+      "/actions/main/out/rightslice": "Left Slice Haptic Feedback",
+      "/actions/main/in/lefthandpose": "Left Hand Pose",
+      "/actions/main/in/righthandpose": "Right Hand Pose"
+    },
+    {
+      "language_tag": "fr_fr",
+      "/actions/main/in/lefttriggervalue": "Gâchette gauche (tirer)",
+      "/actions/main/in/righttriggervalue": "Gâchette droite (tirer)",
+      "/actions/main/in/menu": "Bouton Menu",
+      "/actions/main/out/leftslice": "Retour haptique pour coupe de gauche",
+      "/actions/main/out/rightslice": "Retour haptique pour coupe de droite"
+    }
+  ]
+}
