@@ -144,9 +144,9 @@ namespace CustomAvatar
             _rightLeg = transform.Find("RightLeg");
             _pelvis = transform.Find("Pelvis");
 
-            _initialPelvisPose = new Pose(_pelvis.position, _pelvis.rotation);
-            _initialLeftFootPose = new Pose(_leftLeg.position, _leftLeg.rotation);
-            _initialRightFootPose = new Pose(_rightLeg.position, _rightLeg.rotation);
+            if (_pelvis) _initialPelvisPose = new Pose(_pelvis.position, _pelvis.rotation);
+            if (_leftLeg) _initialLeftFootPose = new Pose(_leftLeg.position, _leftLeg.rotation);
+            if (_rightLeg) _initialRightFootPose = new Pose(_rightLeg.position, _rightLeg.rotation);
 
             SetVrikReferences();
 
