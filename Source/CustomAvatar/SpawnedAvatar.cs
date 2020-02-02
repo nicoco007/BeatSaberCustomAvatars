@@ -1,4 +1,5 @@
 using System;
+using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -13,13 +14,16 @@ namespace CustomAvatar
 
         private readonly GameObject _gameObject;
 
-        public SpawnedAvatar(CustomAvatar customAvatar)
+        public SpawnedAvatar(CustomAvatar customAvatar, AvatarInput input)
         {
             this.customAvatar = customAvatar ?? throw new ArgumentNullException(nameof(customAvatar));
             _gameObject = Object.Instantiate(customAvatar.gameObject);
 
             eventsPlayer = _gameObject.AddComponent<AvatarEventsPlayer>();
             behaviour = _gameObject.AddComponent<AvatarBehaviour>();
+
+            behaviour.customAvatar = customAvatar;
+            behaviour.input = input;
 
             Object.DontDestroyOnLoad(_gameObject);
         }

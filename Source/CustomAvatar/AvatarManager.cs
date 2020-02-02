@@ -144,6 +144,8 @@ namespace CustomAvatar
             {
                 avatarTailor.CalibrateFullBodyTracking();
             }
+
+            ResizeCurrentAvatar();
         }
 
         private void OnSceneTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
@@ -159,6 +161,8 @@ namespace CustomAvatar
             {
                 currentlySpawnedAvatar.eventsPlayer.MenuEnteredEvent();
             }
+
+            ResizeCurrentAvatar();
         }
 
         private static SpawnedAvatar SpawnAvatar(CustomAvatar customAvatar, AvatarInput input)
@@ -166,9 +170,7 @@ namespace CustomAvatar
             if (customAvatar == null) throw new ArgumentNullException(nameof(customAvatar));
             if (input == null) throw new ArgumentNullException(nameof(input));
 
-            var spawnedAvatar = new SpawnedAvatar(customAvatar);
-
-            spawnedAvatar.behaviour.input = input;
+            var spawnedAvatar = new SpawnedAvatar(customAvatar, input);
 
             return spawnedAvatar;
         }
