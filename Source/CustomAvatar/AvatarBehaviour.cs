@@ -163,6 +163,25 @@ namespace CustomAvatar
             }
         }
 
+        private void Update()
+        {
+            if (_vrik && _fixTransforms)
+            {
+                _vrik.solver.FixTransforms();
+            }
+
+            // DynamicBones PreUpdate
+            foreach (BeatSaberDynamicBone::DynamicBone dynamicBone in _dynamicBones)
+            {
+                if (!dynamicBone.enabled) continue;
+
+                // setting m_Weight prevents the integrated calls to PreUpdate and UpdateDynamicBones from taking effect
+                dynamicBone.SetPrivateField("m_Weight", 1);
+                _preUpdateDelegate(dynamicBone);
+                dynamicBone.SetPrivateField("m_Weight", 0);
+            }
+        }
+
         private void LateUpdate()
         {
             if (_isFingerTrackingSupported)
@@ -254,16 +273,16 @@ namespace CustomAvatar
             // VRIK must run before dynamic bones
             if (_vrik)
             {
-                if (_fixTransforms) _vrik.solver.FixTransforms();
                 _vrik.UpdateSolverExternal();
             }
 
             // apply dynamic bones
             foreach (BeatSaberDynamicBone::DynamicBone dynamicBone in _dynamicBones)
             {
+                if (!dynamicBone.enabled) continue;
+
                 // setting m_Weight prevents the integrated calls to PreUpdate and UpdateDynamicBones from taking effect
                 dynamicBone.SetPrivateField("m_Weight", 1);
-                _preUpdateDelegate(dynamicBone);
                 _updateDynamicBonesDelegate(dynamicBone, Time.deltaTime);
                 dynamicBone.SetPrivateField("m_Weight", 0);
             }
