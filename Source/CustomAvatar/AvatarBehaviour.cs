@@ -6,6 +6,7 @@ using DynamicOpenVR.IO;
 using System;
 using System.Reflection;
 using CustomAvatar.Utilities;
+using DynamicOpenVR;
 using UnityEngine;
 using UnityEngine.XR;
 using VRIK = BeatSaberFinalIK::RootMotion.FinalIK.VRIK;
@@ -88,8 +89,11 @@ namespace CustomAvatar
             _initialPosition = transform.position;
             _initialScale = transform.localScale;
 
-            _leftHandAnimAction  = new SkeletalInput("/actions/customavatars/in/lefthandanim");
-            _rightHandAnimAction = new SkeletalInput("/actions/customavatars/in/righthandanim");
+            if (OpenVRStatus.isRunning)
+            {
+                _leftHandAnimAction  = new SkeletalInput("/actions/customavatars/in/lefthandanim");
+                _rightHandAnimAction = new SkeletalInput("/actions/customavatars/in/righthandanim");
+            }
 
             _dynamicBones = GetComponentsInChildren<BeatSaberDynamicBone::DynamicBone>();
 
