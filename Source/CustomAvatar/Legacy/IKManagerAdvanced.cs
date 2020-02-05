@@ -1,7 +1,6 @@
 extern alias BeatSaberFinalIK;
 
 using System;
-using System.Linq;
 using System.Reflection;
 using CustomAvatar;
 using BeatSaberFinalIK::RootMotion;
@@ -11,7 +10,6 @@ using UnityEngine.Events;
 using UnityEngine.Serialization;
 
 // ReSharper disable InconsistentNaming
-// ReSharper disable NotAccessedField.Global
 // ReSharper disable once CheckNamespace
 #pragma warning disable CS0649
 namespace AvatarScriptPack
@@ -256,6 +254,8 @@ namespace AvatarScriptPack
 
         public void Start()
         {
+            Plugin.logger.Warn("Avatar is still using the legacy IKManagerAdvanced; please migrate to VRIKManager");
+
             VRIKManager vrikManager = gameObject.AddComponent<VRIKManager>();
 
             vrikManager.solver_spine_headTarget = this.HeadTarget;
@@ -269,7 +269,7 @@ namespace AvatarScriptPack
                 string[] propertyName = fieldInfo.Name.Split('_');
                 var value = fieldInfo.GetValue(this);
 
-                if (propertyName.Count() > 1)
+                if (propertyName.Length > 1)
                 {
                     if ("Spine" == propertyName[0])
                     {

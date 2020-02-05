@@ -4,7 +4,7 @@ extern alias BeatSaberDynamicBone;
 using CustomAvatar.Tracking;
 using DynamicOpenVR.IO;
 using System;
-using System.Reflection;
+using System.Collections.Generic;
 using CustomAvatar.Utilities;
 using DynamicOpenVR;
 using UnityEngine;
@@ -76,6 +76,8 @@ namespace CustomAvatar
         private Action<BeatSaberDynamicBone::DynamicBone> _preUpdateDelegate;
         private Action<BeatSaberDynamicBone::DynamicBone, float> _updateDynamicBonesDelegate;
 
+        private List<TwistRelaxer> _twistRelaxers = new List<TwistRelaxer>();
+
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
         // ReSharper disable UnusedMember.Local
@@ -99,7 +101,11 @@ namespace CustomAvatar
 
             foreach (TwistRelaxer twistRelaxer in GetComponentsInChildren<TwistRelaxer>())
             {
-                twistRelaxer.enabled = false;
+                if (twistRelaxer.enabled)
+                {
+                    twistRelaxer.enabled = false;
+                    _twistRelaxers.Add(twistRelaxer);
+                }
             }
 		}
 
@@ -117,27 +123,32 @@ namespace CustomAvatar
                 throw new ArgumentNullException(nameof(customAvatar));
             }
 
-            foreach (VRIK vrik in GetComponentsInChildren<VRIK>())
-            {
-                Destroy(vrik);
-            }
-
             _vrikManager = GetComponentInChildren<VRIKManager>();
             _animator = GetComponentInChildren<Animator>();
             _poseManager = GetComponentInChildren<PoseManager>();
-            
+
             _isFingerTrackingSupported = _animator && _poseManager;
 
             if (_vrikManager)
             {
-                _vrik = _vrikManager.gameObject.AddComponent<VRIK>();
+                _vrik = _vrikManager.vrik;
                 _vrik.fixTransforms = false;
 
                 _fixTransforms = _vrikManager.fixTransforms;
+
+                _vrikManager.referencesUpdated += UpdateConditionalReferences;
+                
+                UpdateConditionalReferences();
+                
+                foreach (TwistRelaxer twistRelaxer in _twistRelaxers)
+                {
+                    twistRelaxer.ik = _vrik;
+                    twistRelaxer.enabled = true;
+                }
             }
-
+            
             _vrPlatformHelper = PersistentSingleton<VRPlatformHelper>.instance;
-
+            
             input.inputChanged += OnInputChanged;
 
             _head = transform.Find("Head");
@@ -151,8 +162,6 @@ namespace CustomAvatar
             if (_pelvis) _initialPelvisPose = new Pose(_pelvis.position, _pelvis.rotation);
             if (_leftLeg) _initialLeftFootPose = new Pose(_leftLeg.position, _leftLeg.rotation);
             if (_rightLeg) _initialRightFootPose = new Pose(_rightLeg.position, _rightLeg.rotation);
-
-            SetVrikReferences();
 
             foreach (FirstPersonExclusion firstPersonExclusion in GetComponentsInChildren<FirstPersonExclusion>())
             {
@@ -302,74 +311,8 @@ namespace CustomAvatar
 
         private void OnInputChanged()
         {
-            UpdateVrikReferences();
-        }
-
-        private void SetVrikReferences()
-        {
-            if (!_vrik || !_vrikManager) return;
-
-            foreach (FieldInfo sourceField in _vrikManager.GetType().GetFields())
-            {
-                string[] parts = sourceField.Name.Split('_');
-                object target = _vrik;
-
-                try
-                {
-                    for (int i = 0; i < parts.Length - 1; i++)
-                    {
-                        target = target.GetType().GetField(parts[i])?.GetValue(target);
-
-                        if (target == null)
-                        {
-                            Plugin.logger.Warn($"Target {parts[i]} is null");
-                            break;
-                        }
-                    }
-
-                    if (target == null) break;
-
-                    FieldInfo targetField = target.GetType().GetField(parts[parts.Length - 1]);
-                    object value = sourceField.GetValue(_vrikManager);
-
-                    Plugin.logger.Debug($"Set {string.Join(".", parts)} = {value}");
-
-                    if (targetField.FieldType.IsEnum && sourceField.FieldType != targetField.FieldType)
-                    {
-                        Type sourceType = Enum.GetUnderlyingType(sourceField.FieldType);
-                        Type targetType = Enum.GetUnderlyingType(targetField.FieldType);
-
-                        if (sourceType != targetType)
-                        {
-                            Plugin.logger.Warn($"Underlying types for {sourceField.Name} ({sourceType}) and {targetField.Name} ({targetType}) are not the same");
-                        }
-
-                        Plugin.logger.Debug($"Converting enum value {sourceField.FieldType} ({sourceType}) -> {targetField.FieldType} ({targetType})");
-                        targetField.SetValue(target, Convert.ChangeType(value, targetType));
-                    }
-                    else
-                    {
-                        if (sourceField.FieldType != targetField.FieldType)
-                        {
-                            Plugin.logger.Warn($"Types for {sourceField.Name} ({sourceField.FieldType}) and {targetField.Name} ({targetField.FieldType}) are not the same");
-                        }
-
-                        targetField.SetValue(target, value);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Plugin.logger.Error(ex);
-                }
-            }
-
-            if (!_vrik.references.isFilled)
-            {
-                Plugin.logger.Warn("Some required references are missing; auto detecting references");
-                _vrik.AutoDetectReferences();
-            }
-
-            UpdateVrikReferences();
+            Plugin.logger.Info("Tracking device change detected, updating VRIK references");
+            UpdateConditionalReferences();
         }
 
         private Vector3 AdjustTransformPosition(Vector3 original, Vector3 correction, Vector3 originalPosition)
@@ -385,22 +328,22 @@ namespace CustomAvatar
             return new Vector3(corrected.x, corrected.y + (1 - originalPosition.y / customAvatar.eyeHeight) * y, corrected.z);
         }
 
-        private void UpdateVrikReferences()
+        private void UpdateConditionalReferences()
         {
             if (!_vrik || !_vrikManager) return;
-
-            Plugin.logger.Info("Tracking device change detected, updating VRIK references");
+            
+            Plugin.logger.Info("Updating conditional references");
 
             if (input.TryGetLeftFootPose(out _))
             {
-                Plugin.logger.Notice("Left foot enabled");
+                Plugin.logger.Debug("Left foot enabled");
                 _vrik.solver.leftLeg.target = _vrikManager.solver_leftLeg_target;
                 _vrik.solver.leftLeg.positionWeight = _vrikManager.solver_leftLeg_positionWeight;
                 _vrik.solver.leftLeg.rotationWeight = _vrikManager.solver_leftLeg_rotationWeight;
             }
             else
             {
-                Plugin.logger.Notice("Left foot disabled");
+                Plugin.logger.Debug("Left foot disabled");
                 _vrik.solver.leftLeg.target = null;
                 _vrik.solver.leftLeg.positionWeight = 0;
                 _vrik.solver.leftLeg.rotationWeight = 0;
@@ -408,14 +351,14 @@ namespace CustomAvatar
 
             if (input.TryGetRightFootPose(out _))
             {
-                Plugin.logger.Notice("Right foot enabled");
+                Plugin.logger.Debug("Right foot enabled");
                 _vrik.solver.rightLeg.target = _vrikManager.solver_rightLeg_target;
                 _vrik.solver.rightLeg.positionWeight = _vrikManager.solver_rightLeg_positionWeight;
                 _vrik.solver.rightLeg.rotationWeight = _vrikManager.solver_rightLeg_rotationWeight;
             }
             else
             {
-                Plugin.logger.Notice("Right foot disabled");
+                Plugin.logger.Debug("Right foot disabled");
                 _vrik.solver.rightLeg.target = null;
                 _vrik.solver.rightLeg.positionWeight = 0;
                 _vrik.solver.rightLeg.rotationWeight = 0;
@@ -423,7 +366,7 @@ namespace CustomAvatar
 
             if (input.TryGetWaistPose(out _))
             {
-                Plugin.logger.Notice("Pelvis enabled");
+                Plugin.logger.Debug("Pelvis enabled");
                 _vrik.solver.spine.pelvisTarget = _vrikManager.solver_spine_pelvisTarget;
                 _vrik.solver.spine.pelvisPositionWeight = _vrikManager.solver_spine_pelvisPositionWeight;
                 _vrik.solver.spine.pelvisRotationWeight = _vrikManager.solver_spine_pelvisRotationWeight;
@@ -431,11 +374,11 @@ namespace CustomAvatar
             }
             else
             {
-                Plugin.logger.Notice("Pelvis disabled");
+                Plugin.logger.Debug("Pelvis disabled");
                 _vrik.solver.spine.pelvisTarget = null;
                 _vrik.solver.spine.pelvisPositionWeight = 0;
                 _vrik.solver.spine.pelvisRotationWeight = 0;
-                _vrik.solver.plantFeet = true;
+                _vrik.solver.plantFeet = _vrikManager.solver_plantFeet;
             }
         }
 

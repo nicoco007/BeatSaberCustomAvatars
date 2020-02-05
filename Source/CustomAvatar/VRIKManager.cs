@@ -1,10 +1,12 @@
 ﻿extern alias BeatSaberFinalIK;
 
 using System;
+using System.Reflection;
 using BeatSaberFinalIK::RootMotion;
 using UnityEngine;
 using UnityEngine.Events;
 using static BeatSaberFinalIK::RootMotion.FinalIK.IKSolverVR.Arm;
+using VRIK = BeatSaberFinalIK::RootMotion.FinalIK.VRIK;
 
 // ReSharper disable UnusedMember.Global
 // ReSharper disable NotAccessedField.Global
@@ -75,7 +77,7 @@ namespace CustomAvatar
             var animator = transform.GetComponentInChildren<Animator>();
 
             if (animator == null || !animator.isHuman) {
-                Debug.LogWarning("VRIK needs a Humanoid Animator to auto-detect biped references. Please assign references manually.");
+                //Debug.LogWarning("VRIK needs a Humanoid Animator to auto-detect biped references. Please assign references manually.");
                 return;
             }
 
@@ -390,9 +392,96 @@ namespace CustomAvatar
 
         #endregion
 
-        public void Reset()
+        internal event Action referencesUpdated;
+        
+        internal VRIK vrik;
+
+        private void Reset()
         {
             AutoDetectReferences();
+        }
+
+        private void Awake()
+        {
+            foreach (VRIK vrik in GetComponentsInChildren<VRIK>())
+            {
+                //Debug.LogWarning($"Removing existing VRIK component from {name}");
+                Destroy(vrik);
+            }
+
+            vrik = gameObject.AddComponent<VRIK>();
+        }
+
+        private void Start()
+        {
+            SetVrikReferences();
+        }
+
+        internal void SetVrikReferences()
+        {
+            //Debug.Log($"Setting VRIK references on '{name}'");
+
+            foreach (FieldInfo sourceField in GetType().GetFields())
+            {
+                string[] parts = sourceField.Name.Split('_');
+                object target = vrik;
+
+                try
+                {
+                    for (int i = 0; i < parts.Length - 1; i++)
+                    {
+                        target = target.GetType().GetField(parts[i])?.GetValue(target);
+
+                        if (target == null)
+                        {
+                            //Plugin.logger.Warn($"Target {parts[i]} is null");
+                            break;
+                        }
+                    }
+
+                    if (target == null) break;
+
+                    FieldInfo targetField = target.GetType().GetField(parts[parts.Length - 1]);
+                    object value = sourceField.GetValue(this);
+
+                    //Plugin.logger.Debug($"Set {string.Join(".", parts)} = {value}");
+
+                    if (targetField.FieldType.IsEnum && sourceField.FieldType != targetField.FieldType)
+                    {
+                        Type sourceType = Enum.GetUnderlyingType(sourceField.FieldType);
+                        Type targetType = Enum.GetUnderlyingType(targetField.FieldType);
+
+                        if (sourceType != targetType)
+                        {
+                            //Plugin.logger.Warn($"Underlying types for {sourceField.Name} ({sourceType}) and {targetField.Name} ({targetType}) are not the same");
+                        }
+
+                        //Plugin.logger.Debug($"Converting enum value {sourceField.FieldType} ({sourceType}) -> {targetField.FieldType} ({targetType})");
+                        targetField.SetValue(target, Convert.ChangeType(value, targetType));
+                    }
+                    else
+                    {
+                        if (sourceField.FieldType != targetField.FieldType)
+                        {
+                            //Plugin.logger.Warn($"Types for {sourceField.Name} ({sourceField.FieldType}) and {targetField.Name} ({targetField.FieldType}) are not the same");
+                        }
+
+                        targetField.SetValue(target, value);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //Plugin.logger.Error(ex);
+                }
+            }
+
+            if (!vrik.references.isFilled)
+            {
+                //Plugin.logger.Warn("Some required references are missing; auto detecting references");
+                vrik.AutoDetectReferences();
+            }
+
+            referencesUpdated?.Invoke();
         }
     }
 }

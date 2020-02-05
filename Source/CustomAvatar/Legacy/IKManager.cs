@@ -16,6 +16,8 @@ namespace AvatarScriptPack
 
         public void Start()
         {
+            Plugin.logger.Warn("Avatar is still using the legacy IKManager; please migrate to VRIKManager");
+
             var vrikManager = gameObject.AddComponent<VRIKManager>();
 
             vrikManager.solver_spine_headTarget = HeadTarget;
