@@ -140,7 +140,7 @@ namespace CustomAvatar
             currentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
             currentlySpawnedAvatar?.eventsPlayer?.Restart();
 
-            if (newScene.name == "HealthWarning")
+            if (newScene.name == "HealthWarning" && SettingsManager.settings.calibrateFullBodyTrackingOnStart)
             {
                 avatarTailor.CalibrateFullBodyTracking();
             }

@@ -246,7 +246,7 @@ namespace CustomAvatar
 
                 if (_pelvis && input.TryGetWaistPose(out Pose pelvisPose))
                 {
-                    Pose correction = SettingsManager.settings.fullBodyCalibration.rightLeg;
+                    Pose correction = SettingsManager.settings.fullBodyCalibration.pelvis;
 
                     _prevPelvisPos = Vector3.Lerp(_prevPelvisPos, AdjustTransformPosition(pelvisPose.position, correction.position, _initialPelvisPose.position), SettingsManager.settings.fullBodyMotionSmoothing.waist.position * Time.deltaTime);
                     _prevPelvisRot = Quaternion.Slerp(_prevPelvisRot, pelvisPose.rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.waist.rotation * Time.deltaTime);
