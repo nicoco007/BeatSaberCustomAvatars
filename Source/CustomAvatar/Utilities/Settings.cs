@@ -17,11 +17,11 @@ namespace CustomAvatar.Utilities
 
         public class FullBodyMotionSmoothing
         {
-            public TrackedPoint waist = new TrackedPoint { position = 15, rotation = 10 };
-            public TrackedPoint feet = new TrackedPoint { position = 13, rotation = 17 };
+            public TrackedPointSmoothing waist = new TrackedPointSmoothing { position = 15, rotation = 10 };
+            public TrackedPointSmoothing feet = new TrackedPointSmoothing { position = 13, rotation = 17 };
         }
 
-        public class TrackedPoint
+        public class TrackedPointSmoothing
         {
             public float position;
             public float rotation;

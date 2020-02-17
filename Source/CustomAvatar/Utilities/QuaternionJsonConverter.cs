@@ -24,9 +24,20 @@ namespace CustomAvatar.Utilities
         {
             JObject obj = serializer.Deserialize<JObject>(reader);
 
-            if (obj == null) return default;
+            if (obj == null) return Quaternion.identity;
 
-            return new Quaternion(obj.Value<float>("x"), obj.Value<float>("y"), obj.Value<float>("z"), obj.Value<float>("w"));
+            float x = obj.Value<float>("x");
+            float y = obj.Value<float>("y");
+            float z = obj.Value<float>("z");
+            float w = obj.Value<float>("w");
+
+            // prevent null quaternion
+            if (x == 0 && y == 0 && z == 0 && w == 0)
+            {
+                w = 1.0f;
+            }
+
+            return new Quaternion(x, y, z, w);
         }
     }
 }
