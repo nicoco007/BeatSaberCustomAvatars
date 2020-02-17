@@ -91,12 +91,8 @@ namespace CustomAvatar
             _initialPosition = transform.position;
             _initialScale = transform.localScale;
 
-            if (OpenVRStatus.isRunning)
-            {
-                _leftHandAnimAction  = new SkeletalInput("/actions/customavatars/in/lefthandanim");
-                _rightHandAnimAction = new SkeletalInput("/actions/customavatars/in/righthandanim");
-            }
-
+            _leftHandAnimAction  = new SkeletalInput("/actions/customavatars/in/lefthandanim");
+            _rightHandAnimAction = new SkeletalInput("/actions/customavatars/in/righthandanim");
             _dynamicBones = GetComponentsInChildren<BeatSaberDynamicBone::DynamicBone>();
 
             foreach (TwistRelaxer twistRelaxer in GetComponentsInChildren<TwistRelaxer>())
@@ -193,7 +189,7 @@ namespace CustomAvatar
 
         private void LateUpdate()
         {
-            if (_isFingerTrackingSupported)
+            if (_isFingerTrackingSupported && OpenVRActionManager.instance.initialized)
             {
                 ApplyFingerTracking();
             }
