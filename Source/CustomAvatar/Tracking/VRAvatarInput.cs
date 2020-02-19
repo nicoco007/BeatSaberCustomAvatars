@@ -8,10 +8,10 @@ namespace CustomAvatar.Tracking
 
         public VRAvatarInput()
         {
-            _deviceManager.deviceAdded += (device) => InvokeInputChanged();
-            _deviceManager.deviceRemoved += (device) => InvokeInputChanged();
-            _deviceManager.deviceTrackingAcquired += (device) => InvokeInputChanged();
-            _deviceManager.deviceTrackingLost += (device) => InvokeInputChanged();
+            _deviceManager.deviceAdded += (device, use) => InvokeInputChanged();
+            _deviceManager.deviceRemoved += (device, use) => InvokeInputChanged();
+            _deviceManager.deviceTrackingAcquired += (device, use) => InvokeInputChanged();
+            _deviceManager.deviceTrackingLost += (device, use) => InvokeInputChanged();
         }
 
         public override bool TryGetHeadPose(out Pose pose) => TryGetPose(_deviceManager.head, out pose);

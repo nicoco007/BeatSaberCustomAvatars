@@ -18,10 +18,10 @@ namespace CustomAvatar.Tracking
         public TrackedDeviceState waist     { get; } = new TrackedDeviceState();
 
         // these should only trigger for nodes that are registered to a specific target, not all found XR nodes
-        public event Action<TrackedDeviceState> deviceAdded;
-        public event Action<TrackedDeviceState> deviceRemoved;
-        public event Action<TrackedDeviceState> deviceTrackingAcquired;
-        public event Action<TrackedDeviceState> deviceTrackingLost;
+        public event Action<TrackedDeviceState, NodeUse> deviceAdded;
+        public event Action<TrackedDeviceState, NodeUse> deviceRemoved;
+        public event Action<TrackedDeviceState, NodeUse> deviceTrackingAcquired;
+        public event Action<TrackedDeviceState, NodeUse> deviceTrackingLost;
 
         private readonly HashSet<ulong> _foundNodes = new HashSet<ulong>();
 
@@ -142,12 +142,12 @@ namespace CustomAvatar.Tracking
                 waistNodeState = unassignedDevices.Dequeue();
             }
 
-            AssignTrackedDevice(head,      headNodeState,      nameof(head));
-            AssignTrackedDevice(leftHand,  leftHandNodeState,  nameof(leftHand));
-            AssignTrackedDevice(rightHand, rightHandNodeState, nameof(rightHand));
-            AssignTrackedDevice(waist,     waistNodeState,     nameof(waist));
-            AssignTrackedDevice(leftFoot,  leftFootNodeState,  nameof(leftFoot));
-            AssignTrackedDevice(rightFoot, rightFootNodeState, nameof(rightFoot));
+            AssignTrackedDevice(head,      headNodeState,      NodeUse.Head);
+            AssignTrackedDevice(leftHand,  leftHandNodeState,  NodeUse.LeftHand);
+            AssignTrackedDevice(rightHand, rightHandNodeState, NodeUse.RightHand);
+            AssignTrackedDevice(waist,     waistNodeState,     NodeUse.Waist);
+            AssignTrackedDevice(leftFoot,  leftFootNodeState,  NodeUse.LeftFoot);
+            AssignTrackedDevice(rightFoot, rightFootNodeState, NodeUse.RightFoot);
 
             foreach (ulong uniqueID in _foundNodes.ToList())
             {
@@ -159,7 +159,7 @@ namespace CustomAvatar.Tracking
             }
         }
 
-        private void AssignTrackedDevice(TrackedDeviceState deviceState, XRNodeState? possibleNodeState, string use)
+        private void AssignTrackedDevice(TrackedDeviceState deviceState, XRNodeState? possibleNodeState, NodeUse use)
         {
             if (possibleNodeState.HasValue && !deviceState.found)
             {
@@ -168,18 +168,20 @@ namespace CustomAvatar.Tracking
                 Plugin.logger.Info($"Using device \"{InputTracking.GetNodeName(nodeState.uniqueID)}\" ({nodeState.uniqueID}) as {use}");
 
                 deviceState.uniqueID = nodeState.uniqueID;
+                deviceState.name = InputTracking.GetNodeName(nodeState.uniqueID);
                 deviceState.found = true;
                 
-                deviceAdded?.Invoke(deviceState);
+                deviceAdded?.Invoke(deviceState, use);
             }
             
             if (!possibleNodeState.HasValue && deviceState.found) {
                 Plugin.logger.Info($"Lost device with ID {deviceState.uniqueID} that was used as {use}");
 
                 deviceState.uniqueID = default;
+                deviceState.name = null;
                 deviceState.found = false;
 
-                deviceRemoved?.Invoke(deviceState);
+                deviceRemoved?.Invoke(deviceState, use);
             }
         }
 
@@ -205,15 +207,15 @@ namespace CustomAvatar.Tracking
                 if (nodeState.uniqueID == rightFoot.uniqueID) rightFootNodeState = nodeState;
             }
 
-            UpdateTrackedDevice(head,      headNodeState,      nameof(head));
-            UpdateTrackedDevice(leftHand,  leftHandNodeState,  nameof(leftHand));
-            UpdateTrackedDevice(rightHand, rightHandNodeState, nameof(rightHand));
-            UpdateTrackedDevice(waist,     waistNodeState,     nameof(head));
-            UpdateTrackedDevice(leftFoot,  leftFootNodeState,  nameof(leftFoot));
-            UpdateTrackedDevice(rightFoot, rightFootNodeState, nameof(rightFoot));
+            UpdateTrackedDevice(head,      headNodeState,      NodeUse.Head);
+            UpdateTrackedDevice(leftHand,  leftHandNodeState,  NodeUse.LeftHand);
+            UpdateTrackedDevice(rightHand, rightHandNodeState, NodeUse.RightHand);
+            UpdateTrackedDevice(waist,     waistNodeState,     NodeUse.Waist);
+            UpdateTrackedDevice(leftFoot,  leftFootNodeState,  NodeUse.LeftFoot);
+            UpdateTrackedDevice(rightFoot, rightFootNodeState, NodeUse.RightFoot);
         }
 
-        private void UpdateTrackedDevice(TrackedDeviceState deviceState, XRNodeState? possibleNodeState, string use)
+        private void UpdateTrackedDevice(TrackedDeviceState deviceState, XRNodeState? possibleNodeState, NodeUse use)
         {
             if (!possibleNodeState.HasValue) return;
 
@@ -225,7 +227,7 @@ namespace CustomAvatar.Tracking
                 {
                     Plugin.logger.Info($"Lost tracking of device with ID {deviceState.uniqueID}");
                     deviceState.tracked = false;
-                    deviceTrackingLost?.Invoke(deviceState);
+                    deviceTrackingLost?.Invoke(deviceState, use);
                 }
 
                 return;
@@ -235,7 +237,7 @@ namespace CustomAvatar.Tracking
             {
                 Plugin.logger.Info($"Acquired tracking of device with ID {deviceState.uniqueID}");
                 deviceState.tracked = true;
-                deviceTrackingAcquired?.Invoke(deviceState);
+                deviceTrackingAcquired?.Invoke(deviceState, use);
             }
             
             Vector3 origin = BeatSaberUtil.GetRoomCenter();
@@ -249,6 +251,12 @@ namespace CustomAvatar.Tracking
             if (nodeState.TryGetRotation(out Quaternion rotation))
             {
                 deviceState.rotation = originRotation * rotation;
+
+                // Driver4VR tracking correction
+                if (deviceState.name?.StartsWith("d4vr_tracker_") == true && (use == NodeUse.LeftFoot || use == NodeUse.RightFoot))
+                {
+                    deviceState.rotation *= Quaternion.Euler(-90, 180, 0);
+                }
             }
         }
     }
