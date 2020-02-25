@@ -6,7 +6,6 @@ using DynamicOpenVR.IO;
 using System;
 using System.Collections.Generic;
 using CustomAvatar.Utilities;
-using DynamicOpenVR;
 using UnityEngine;
 using UnityEngine.XR;
 using VRIK = BeatSaberFinalIK::RootMotion.FinalIK.VRIK;
@@ -50,14 +49,11 @@ namespace CustomAvatar
         private Pose _initialLeftFootPose;
         private Pose _initialRightFootPose;
 
-        private Vector3 _prevBodyPos     = Vector3.zero;
-        private Vector3 _prevPelvisPos   = Vector3.zero;
-        private Vector3 _prevLeftLegPos  = Vector3.zero;
-        private Vector3 _prevRightLegPos = Vector3.zero;
-        
-        private Quaternion _prevLeftLegRot  = Quaternion.identity;   
-        private Quaternion _prevRightLegRot = Quaternion.identity;
-        private Quaternion _prevPelvisRot   = Quaternion.identity;
+        private Vector3 _prevBodyLocalPosition = Vector3.zero;
+
+        private Pose _prevPelvisPose = Pose.identity;
+        private Pose _prevLeftLegPose = Pose.identity;
+        private Pose _prevRightLegPose = Pose.identity;
 
         private VRIK _vrik;
         private VRIKManager _vrikManager;
@@ -72,6 +68,7 @@ namespace CustomAvatar
 
         private bool _isFingerTrackingSupported;
         private bool _fixTransforms;
+        private bool _fingerTrackingExceptionOccurred;
 
         private Action<BeatSaberDynamicBone::DynamicBone> _preUpdateDelegate;
         private Action<BeatSaberDynamicBone::DynamicBone, float> _updateDynamicBonesDelegate;
@@ -93,6 +90,7 @@ namespace CustomAvatar
 
             _leftHandAnimAction  = new SkeletalInput("/actions/customavatars/in/lefthandanim");
             _rightHandAnimAction = new SkeletalInput("/actions/customavatars/in/righthandanim");
+
             _dynamicBones = GetComponentsInChildren<BeatSaberDynamicBone::DynamicBone>();
 
             foreach (TwistRelaxer twistRelaxer in GetComponentsInChildren<TwistRelaxer>())
@@ -161,9 +159,9 @@ namespace CustomAvatar
 
             foreach (FirstPersonExclusion firstPersonExclusion in GetComponentsInChildren<FirstPersonExclusion>())
             {
-                foreach (GameObject go in firstPersonExclusion.exclude)
+                foreach (GameObject gameObj in firstPersonExclusion.exclude)
                 {
-                    go.layer = AvatarLayers.OnlyInThirdPerson;
+                    gameObj.layer = AvatarLayers.OnlyInThirdPerson;
                 }
             }
         }
@@ -189,7 +187,7 @@ namespace CustomAvatar
 
         private void LateUpdate()
         {
-            if (_isFingerTrackingSupported && OpenVRActionManager.instance.initialized)
+            if (_isFingerTrackingSupported)
             {
                 ApplyFingerTracking();
             }
@@ -228,46 +226,50 @@ namespace CustomAvatar
                 {
                     Pose correction = SettingsManager.settings.fullBodyCalibration.leftLeg;
 
-                    _prevLeftLegPos = Vector3.Lerp(_prevLeftLegPos, AdjustTransformPosition(leftFootPose.position, correction.position, _initialLeftFootPose.position), SettingsManager.settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
-                    _prevLeftLegRot = Quaternion.Slerp(_prevLeftLegRot, leftFootPose.rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.feet.rotation * Time.deltaTime);
-                    _leftLeg.position = _prevLeftLegPos;
-                    _leftLeg.rotation = _prevLeftLegRot;
+                    _prevLeftLegPose.position = Vector3.Lerp(_prevLeftLegPose.position, AdjustTransformPosition(leftFootPose.position, correction.position, _initialLeftFootPose.position), SettingsManager.settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
+                    _prevLeftLegPose.rotation = Quaternion.Slerp(_prevLeftLegPose.rotation, leftFootPose.rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.feet.rotation * Time.deltaTime);
+                    
+                    _leftLeg.position = _prevLeftLegPose.position;
+                    _leftLeg.rotation = _prevLeftLegPose.rotation;
                 }
 
                 if (_rightLeg && input.TryGetRightFootPose(out Pose rightFootPose))
                 {
                     Pose correction = SettingsManager.settings.fullBodyCalibration.rightLeg;
 
-                    _prevRightLegPos = Vector3.Lerp(_prevRightLegPos, AdjustTransformPosition(rightFootPose.position, correction.position, _initialRightFootPose.position), SettingsManager.settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
-                    _prevRightLegRot = Quaternion.Slerp(_prevRightLegRot, rightFootPose.rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.feet.rotation * Time.deltaTime);
-                    _rightLeg.position = _prevRightLegPos;
-                    _rightLeg.rotation = _prevRightLegRot;
+                    _prevRightLegPose.position = Vector3.Lerp(_prevRightLegPose.position, AdjustTransformPosition(rightFootPose.position, correction.position, _initialRightFootPose.position), SettingsManager.settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
+                    _prevRightLegPose.rotation = Quaternion.Slerp(_prevRightLegPose.rotation, rightFootPose.rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.feet.rotation * Time.deltaTime);
+                    
+                    _rightLeg.position = _prevRightLegPose.position;
+                    _rightLeg.rotation = _prevRightLegPose.rotation;
                 }
 
                 if (_pelvis && input.TryGetWaistPose(out Pose pelvisPose))
                 {
                     Pose correction = SettingsManager.settings.fullBodyCalibration.pelvis;
 
-                    _prevPelvisPos = Vector3.Lerp(_prevPelvisPos, AdjustTransformPosition(pelvisPose.position, correction.position, _initialPelvisPose.position), SettingsManager.settings.fullBodyMotionSmoothing.waist.position * Time.deltaTime);
-                    _prevPelvisRot = Quaternion.Slerp(_prevPelvisRot, pelvisPose.rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.waist.rotation * Time.deltaTime);
-                    _pelvis.position = _prevPelvisPos;
-                    _pelvis.rotation = _prevPelvisRot;
+                    _prevPelvisPose.position = Vector3.Lerp(_prevPelvisPose.position, AdjustTransformPosition(pelvisPose.position, correction.position, _initialPelvisPose.position), SettingsManager.settings.fullBodyMotionSmoothing.waist.position * Time.deltaTime);
+                    _prevPelvisPose.rotation = Quaternion.Slerp(_prevPelvisPose.rotation, pelvisPose.rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.waist.rotation * Time.deltaTime);
+                    
+                    _pelvis.position = _prevPelvisPose.position;
+                    _pelvis.rotation = _prevPelvisPose.rotation;
                 }
 
                 if (_body)
                 {
                     _body.position = _head.position - (_head.transform.up * 0.1f);
 
-                    var vel = new Vector3(_body.transform.localPosition.x - _prevBodyPos.x, 0.0f,
-                        _body.localPosition.z - _prevBodyPos.z);
+                    var vel = new Vector3(_body.transform.localPosition.x - _prevBodyLocalPosition.x, 0.0f,
+                        _body.localPosition.z - _prevBodyLocalPosition.z);
 
                     var rot = Quaternion.Euler(0.0f, _head.localEulerAngles.y, 0.0f);
                     var tiltAxis = Vector3.Cross(transform.up, vel);
+
                     _body.localRotation = Quaternion.Lerp(_body.localRotation,
                         Quaternion.AngleAxis(vel.magnitude * 1250.0f, tiltAxis) * rot,
                         Time.deltaTime * 10.0f);
 
-                    _prevBodyPos = _body.transform.localPosition;
+                    _prevBodyLocalPosition = _body.transform.localPosition;
                 }
             }
             catch (Exception e)
@@ -380,73 +382,101 @@ namespace CustomAvatar
 
         public void ApplyFingerTracking()
         {
-            if (_leftHandAnimAction != null)
+            if (_leftHandAnimAction.isActive && !_fingerTrackingExceptionOccurred)
             {
                 try
                 {
                     SkeletalSummaryData leftHandAnim = _leftHandAnimAction.summaryData;
-
-                    ApplyBodyBonePose(HumanBodyBones.LeftThumbProximal,       _poseManager.openHand_LeftThumbProximal,       _poseManager.closedHand_LeftThumbProximal,       leftHandAnim.thumbCurl * 2);
-                    ApplyBodyBonePose(HumanBodyBones.LeftThumbIntermediate,   _poseManager.openHand_LeftThumbIntermediate,   _poseManager.closedHand_LeftThumbIntermediate,   leftHandAnim.thumbCurl * 2);
-                    ApplyBodyBonePose(HumanBodyBones.LeftThumbDistal,         _poseManager.openHand_LeftThumbDistal,         _poseManager.closedHand_LeftThumbDistal,         leftHandAnim.thumbCurl * 2);
-
-                    ApplyBodyBonePose(HumanBodyBones.LeftIndexProximal,       _poseManager.openHand_LeftIndexProximal,       _poseManager.closedHand_LeftIndexProximal,       leftHandAnim.indexCurl);
-                    ApplyBodyBonePose(HumanBodyBones.LeftIndexIntermediate,   _poseManager.openHand_LeftIndexIntermediate,   _poseManager.closedHand_LeftIndexIntermediate,   leftHandAnim.indexCurl);
-                    ApplyBodyBonePose(HumanBodyBones.LeftIndexDistal,         _poseManager.openHand_LeftIndexDistal,         _poseManager.closedHand_LeftIndexDistal,         leftHandAnim.indexCurl);
-
-                    ApplyBodyBonePose(HumanBodyBones.LeftMiddleProximal,      _poseManager.openHand_LeftMiddleProximal,      _poseManager.closedHand_LeftMiddleProximal,      leftHandAnim.middleCurl);
-                    ApplyBodyBonePose(HumanBodyBones.LeftMiddleIntermediate,  _poseManager.openHand_LeftMiddleIntermediate,  _poseManager.closedHand_LeftMiddleIntermediate,  leftHandAnim.middleCurl);
-                    ApplyBodyBonePose(HumanBodyBones.LeftMiddleDistal,        _poseManager.openHand_LeftMiddleDistal,        _poseManager.closedHand_LeftMiddleDistal,        leftHandAnim.middleCurl);
-
-                    ApplyBodyBonePose(HumanBodyBones.LeftRingProximal,        _poseManager.openHand_LeftRingProximal,        _poseManager.closedHand_LeftRingProximal,        leftHandAnim.ringCurl);
-                    ApplyBodyBonePose(HumanBodyBones.LeftRingIntermediate,    _poseManager.openHand_LeftRingIntermediate,    _poseManager.closedHand_LeftRingIntermediate,    leftHandAnim.ringCurl);
-                    ApplyBodyBonePose(HumanBodyBones.LeftRingDistal,          _poseManager.openHand_LeftRingDistal,          _poseManager.closedHand_LeftRingDistal,          leftHandAnim.ringCurl);
-
-                    ApplyBodyBonePose(HumanBodyBones.LeftLittleProximal,      _poseManager.openHand_LeftLittleProximal,      _poseManager.closedHand_LeftLittleProximal,      leftHandAnim.littleCurl);
-                    ApplyBodyBonePose(HumanBodyBones.LeftLittleIntermediate,  _poseManager.openHand_LeftLittleIntermediate,  _poseManager.closedHand_LeftLittleIntermediate,  leftHandAnim.littleCurl);
-                    ApplyBodyBonePose(HumanBodyBones.LeftLittleDistal,        _poseManager.openHand_LeftLittleDistal,        _poseManager.closedHand_LeftLittleDistal,        leftHandAnim.littleCurl);
+                    ApplyLeftHandFingerPoses(leftHandAnim.thumbCurl, leftHandAnim.indexCurl, leftHandAnim.middleCurl, leftHandAnim.ringCurl, leftHandAnim.littleCurl);
                 }
-                catch (Exception) { }
+                catch (Exception ex)
+                {
+                    Plugin.logger.Error("Left hand finger tracking failed");
+                    Plugin.logger.Error(ex.ToString());
+
+                    _fingerTrackingExceptionOccurred = true;
+                }
+            }
+            else
+            {
+                ApplyLeftHandFingerPoses(1, 1, 1, 1, 1);
             }
 
-            if (_rightHandAnimAction != null)
+            if (_rightHandAnimAction.isActive && !_fingerTrackingExceptionOccurred)
             {
                 try
                 {
                     SkeletalSummaryData rightHandAnim = _rightHandAnimAction.summaryData;
-
-                    ApplyBodyBonePose(HumanBodyBones.RightThumbProximal,      _poseManager.openHand_RightThumbProximal,      _poseManager.closedHand_RightThumbProximal,      rightHandAnim.thumbCurl * 2);
-                    ApplyBodyBonePose(HumanBodyBones.RightThumbIntermediate,  _poseManager.openHand_RightThumbIntermediate,  _poseManager.closedHand_RightThumbIntermediate,  rightHandAnim.thumbCurl * 2);
-                    ApplyBodyBonePose(HumanBodyBones.RightThumbDistal,        _poseManager.openHand_RightThumbDistal,        _poseManager.closedHand_RightThumbDistal,        rightHandAnim.thumbCurl * 2);
-
-                    ApplyBodyBonePose(HumanBodyBones.RightIndexProximal,      _poseManager.openHand_RightIndexProximal,      _poseManager.closedHand_RightIndexProximal,      rightHandAnim.indexCurl);
-                    ApplyBodyBonePose(HumanBodyBones.RightIndexIntermediate,  _poseManager.openHand_RightIndexIntermediate,  _poseManager.closedHand_RightIndexIntermediate,  rightHandAnim.indexCurl);
-                    ApplyBodyBonePose(HumanBodyBones.RightIndexDistal,        _poseManager.openHand_RightIndexDistal,        _poseManager.closedHand_RightIndexDistal,        rightHandAnim.indexCurl);
-
-                    ApplyBodyBonePose(HumanBodyBones.RightMiddleProximal,     _poseManager.openHand_RightMiddleProximal,     _poseManager.closedHand_RightMiddleProximal,     rightHandAnim.middleCurl);
-                    ApplyBodyBonePose(HumanBodyBones.RightMiddleIntermediate, _poseManager.openHand_RightMiddleIntermediate, _poseManager.closedHand_RightMiddleIntermediate, rightHandAnim.middleCurl);
-                    ApplyBodyBonePose(HumanBodyBones.RightMiddleDistal,       _poseManager.openHand_RightMiddleDistal,       _poseManager.closedHand_RightMiddleDistal,       rightHandAnim.middleCurl);
-
-                    ApplyBodyBonePose(HumanBodyBones.RightRingProximal,       _poseManager.openHand_RightRingProximal,       _poseManager.closedHand_RightRingProximal,       rightHandAnim.ringCurl);
-                    ApplyBodyBonePose(HumanBodyBones.RightRingIntermediate,   _poseManager.openHand_RightRingIntermediate,   _poseManager.closedHand_RightRingIntermediate,   rightHandAnim.ringCurl);
-                    ApplyBodyBonePose(HumanBodyBones.RightRingDistal,         _poseManager.openHand_RightRingDistal,         _poseManager.closedHand_RightRingDistal,         rightHandAnim.ringCurl);
-
-                    ApplyBodyBonePose(HumanBodyBones.RightLittleProximal,     _poseManager.openHand_RightLittleProximal,     _poseManager.closedHand_RightLittleProximal,     rightHandAnim.littleCurl);
-                    ApplyBodyBonePose(HumanBodyBones.RightLittleIntermediate, _poseManager.openHand_RightLittleIntermediate, _poseManager.closedHand_RightLittleIntermediate, rightHandAnim.littleCurl);
-                    ApplyBodyBonePose(HumanBodyBones.RightLittleDistal,       _poseManager.openHand_RightLittleDistal,       _poseManager.closedHand_RightLittleDistal,       rightHandAnim.littleCurl);
+                    ApplyRightHandFingerPoses(rightHandAnim.thumbCurl, rightHandAnim.indexCurl, rightHandAnim.middleCurl, rightHandAnim.ringCurl, rightHandAnim.littleCurl);
                 }
-                catch (Exception) { }
+                catch (Exception ex)
+                {
+                    Plugin.logger.Error("Right hand finger tracking failed");
+                    Plugin.logger.Error(ex.ToString());
+
+                    _fingerTrackingExceptionOccurred = true;
+                }
+            }
+            else
+            {
+                ApplyRightHandFingerPoses(1, 1, 1, 1, 1);
             }
         }
 
-        private void ApplyBodyBonePose(HumanBodyBones bodyBone, Pose open, Pose closed, float position)
+        private void ApplyLeftHandFingerPoses(float thumbCurl, float indexCurl, float middleCurl, float ringCurl, float littleCurl)
+        {
+            ApplyBodyBonePose(HumanBodyBones.LeftThumbProximal,       _poseManager.openHand_LeftThumbProximal,       _poseManager.closedHand_LeftThumbProximal,       thumbCurl);
+            ApplyBodyBonePose(HumanBodyBones.LeftThumbIntermediate,   _poseManager.openHand_LeftThumbIntermediate,   _poseManager.closedHand_LeftThumbIntermediate,   thumbCurl);
+            ApplyBodyBonePose(HumanBodyBones.LeftThumbDistal,         _poseManager.openHand_LeftThumbDistal,         _poseManager.closedHand_LeftThumbDistal,         thumbCurl);
+
+            ApplyBodyBonePose(HumanBodyBones.LeftIndexProximal,       _poseManager.openHand_LeftIndexProximal,       _poseManager.closedHand_LeftIndexProximal,       indexCurl);
+            ApplyBodyBonePose(HumanBodyBones.LeftIndexIntermediate,   _poseManager.openHand_LeftIndexIntermediate,   _poseManager.closedHand_LeftIndexIntermediate,   indexCurl);
+            ApplyBodyBonePose(HumanBodyBones.LeftIndexDistal,         _poseManager.openHand_LeftIndexDistal,         _poseManager.closedHand_LeftIndexDistal,         indexCurl);
+
+            ApplyBodyBonePose(HumanBodyBones.LeftMiddleProximal,      _poseManager.openHand_LeftMiddleProximal,      _poseManager.closedHand_LeftMiddleProximal,      middleCurl);
+            ApplyBodyBonePose(HumanBodyBones.LeftMiddleIntermediate,  _poseManager.openHand_LeftMiddleIntermediate,  _poseManager.closedHand_LeftMiddleIntermediate,  middleCurl);
+            ApplyBodyBonePose(HumanBodyBones.LeftMiddleDistal,        _poseManager.openHand_LeftMiddleDistal,        _poseManager.closedHand_LeftMiddleDistal,        middleCurl);
+
+            ApplyBodyBonePose(HumanBodyBones.LeftRingProximal,        _poseManager.openHand_LeftRingProximal,        _poseManager.closedHand_LeftRingProximal,        ringCurl);
+            ApplyBodyBonePose(HumanBodyBones.LeftRingIntermediate,    _poseManager.openHand_LeftRingIntermediate,    _poseManager.closedHand_LeftRingIntermediate,    ringCurl);
+            ApplyBodyBonePose(HumanBodyBones.LeftRingDistal,          _poseManager.openHand_LeftRingDistal,          _poseManager.closedHand_LeftRingDistal,          ringCurl);
+
+            ApplyBodyBonePose(HumanBodyBones.LeftLittleProximal,      _poseManager.openHand_LeftLittleProximal,      _poseManager.closedHand_LeftLittleProximal,      littleCurl);
+            ApplyBodyBonePose(HumanBodyBones.LeftLittleIntermediate,  _poseManager.openHand_LeftLittleIntermediate,  _poseManager.closedHand_LeftLittleIntermediate,  littleCurl);
+            ApplyBodyBonePose(HumanBodyBones.LeftLittleDistal,        _poseManager.openHand_LeftLittleDistal,        _poseManager.closedHand_LeftLittleDistal,        littleCurl);
+        }
+
+        private void ApplyRightHandFingerPoses(float thumbCurl, float indexCurl, float middleCurl, float ringCurl, float littleCurl)
+        {
+            ApplyBodyBonePose(HumanBodyBones.RightThumbProximal,       _poseManager.openHand_RightThumbProximal,       _poseManager.closedHand_RightThumbProximal,       thumbCurl);
+            ApplyBodyBonePose(HumanBodyBones.RightThumbIntermediate,   _poseManager.openHand_RightThumbIntermediate,   _poseManager.closedHand_RightThumbIntermediate,   thumbCurl);
+            ApplyBodyBonePose(HumanBodyBones.RightThumbDistal,         _poseManager.openHand_RightThumbDistal,         _poseManager.closedHand_RightThumbDistal,         thumbCurl);
+
+            ApplyBodyBonePose(HumanBodyBones.RightIndexProximal,       _poseManager.openHand_RightIndexProximal,       _poseManager.closedHand_RightIndexProximal,       indexCurl);
+            ApplyBodyBonePose(HumanBodyBones.RightIndexIntermediate,   _poseManager.openHand_RightIndexIntermediate,   _poseManager.closedHand_RightIndexIntermediate,   indexCurl);
+            ApplyBodyBonePose(HumanBodyBones.RightIndexDistal,         _poseManager.openHand_RightIndexDistal,         _poseManager.closedHand_RightIndexDistal,         indexCurl);
+
+            ApplyBodyBonePose(HumanBodyBones.RightMiddleProximal,      _poseManager.openHand_RightMiddleProximal,      _poseManager.closedHand_RightMiddleProximal,      middleCurl);
+            ApplyBodyBonePose(HumanBodyBones.RightMiddleIntermediate,  _poseManager.openHand_RightMiddleIntermediate,  _poseManager.closedHand_RightMiddleIntermediate,  middleCurl);
+            ApplyBodyBonePose(HumanBodyBones.RightMiddleDistal,        _poseManager.openHand_RightMiddleDistal,        _poseManager.closedHand_RightMiddleDistal,        middleCurl);
+
+            ApplyBodyBonePose(HumanBodyBones.RightRingProximal,        _poseManager.openHand_RightRingProximal,        _poseManager.closedHand_RightRingProximal,        ringCurl);
+            ApplyBodyBonePose(HumanBodyBones.RightRingIntermediate,    _poseManager.openHand_RightRingIntermediate,    _poseManager.closedHand_RightRingIntermediate,    ringCurl);
+            ApplyBodyBonePose(HumanBodyBones.RightRingDistal,          _poseManager.openHand_RightRingDistal,          _poseManager.closedHand_RightRingDistal,          ringCurl);
+
+            ApplyBodyBonePose(HumanBodyBones.RightLittleProximal,      _poseManager.openHand_RightLittleProximal,      _poseManager.closedHand_RightLittleProximal,      littleCurl);
+            ApplyBodyBonePose(HumanBodyBones.RightLittleIntermediate,  _poseManager.openHand_RightLittleIntermediate,  _poseManager.closedHand_RightLittleIntermediate,  littleCurl);
+            ApplyBodyBonePose(HumanBodyBones.RightLittleDistal,        _poseManager.openHand_RightLittleDistal,        _poseManager.closedHand_RightLittleDistal,        littleCurl);
+        }
+
+        private void ApplyBodyBonePose(HumanBodyBones bodyBone, Pose open, Pose closed, float fade)
         {
             Transform boneTransform = _animator.GetBoneTransform(bodyBone);
 
             if (!boneTransform) return;
 
-            boneTransform.localPosition = Vector3.Lerp(open.position, closed.position, position);
-            boneTransform.localRotation = Quaternion.Slerp(open.rotation, closed.rotation, position);
+            boneTransform.localPosition = Vector3.Lerp(open.position, closed.position, fade);
+            boneTransform.localRotation = Quaternion.Slerp(open.rotation, closed.rotation, fade);
         }
     }
 }
