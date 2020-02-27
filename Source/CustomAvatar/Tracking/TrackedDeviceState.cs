@@ -10,5 +10,6 @@ namespace CustomAvatar.Tracking
         public Quaternion rotation { get; set; }
         public bool found { get; set; }
         public bool tracked { get; set; }
+        public TrackedDeviceRole role { get; set; }
     }
 }

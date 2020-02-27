@@ -44,6 +44,8 @@ namespace CustomAvatar.Tracking
             var serialNumbers = new string[0];
 
             InputTracking.GetNodeStates(nodeStates);
+            
+            var deviceRoles = new Dictionary<ulong, TrackedDeviceRole>(nodeStates.Count);
 
             if (_isOpenVRRunning)
             {
@@ -61,6 +63,8 @@ namespace CustomAvatar.Tracking
 
             foreach (XRNodeState nodeState in nodeStates)
             {
+                deviceRoles.Add(nodeState.uniqueID, TrackedDeviceRole.Unknown);
+
                 if (!_foundNodes.Contains(nodeState.uniqueID))
                 {
                     Plugin.logger.Info($"Found new node {InputTracking.GetNodeName(nodeState.uniqueID)} with ID {nodeState.uniqueID}");
@@ -87,26 +91,27 @@ namespace CustomAvatar.Tracking
                             // try to figure out tracker role using OpenVR
                             string deviceName = InputTracking.GetNodeName(nodeState.uniqueID);
                             int openVRDeviceId = Array.FindIndex(serialNumbers, s => !string.IsNullOrEmpty(s) && deviceName.Contains(s));
-                            var role = TrackedDeviceType.Unknown;
+                            var role = TrackedDeviceRole.Unknown;
                             
                             if (openVRDeviceId != -1)
                             {
-                                role = OpenVRWrapper.GetTrackedDeviceType((uint)openVRDeviceId);
+                                role = OpenVRWrapper.GetTrackedDeviceRole((uint)openVRDeviceId);
+                                deviceRoles[nodeState.uniqueID] = role;
                             }
 
                             Plugin.logger.Info($"Tracker {nodeState.uniqueID} has role {role}");
-                            
+
                             switch (role)
                             {
-                                case TrackedDeviceType.Waist:
+                                case TrackedDeviceRole.Waist:
                                     waistNodeState = nodeState;
                                     break;
 
-                                case TrackedDeviceType.LeftFoot:
+                                case TrackedDeviceRole.LeftFoot:
                                     leftFootNodeState = nodeState;
                                     break;
 
-                                case TrackedDeviceType.RightFoot:
+                                case TrackedDeviceRole.RightFoot:
                                     rightFootNodeState = nodeState;
                                     break;
 
@@ -142,12 +147,12 @@ namespace CustomAvatar.Tracking
                 waistNodeState = unassignedDevices.Dequeue();
             }
 
-            AssignTrackedDevice(head,      headNodeState,      NodeUse.Head);
-            AssignTrackedDevice(leftHand,  leftHandNodeState,  NodeUse.LeftHand);
-            AssignTrackedDevice(rightHand, rightHandNodeState, NodeUse.RightHand);
-            AssignTrackedDevice(waist,     waistNodeState,     NodeUse.Waist);
-            AssignTrackedDevice(leftFoot,  leftFootNodeState,  NodeUse.LeftFoot);
-            AssignTrackedDevice(rightFoot, rightFootNodeState, NodeUse.RightFoot);
+            AssignTrackedDevice(head,      headNodeState,      NodeUse.Head,      headNodeState.HasValue      ? deviceRoles[headNodeState.Value.uniqueID]      : TrackedDeviceRole.Unknown);
+            AssignTrackedDevice(leftHand,  leftHandNodeState,  NodeUse.LeftHand,  leftHandNodeState.HasValue  ? deviceRoles[leftHandNodeState.Value.uniqueID]  : TrackedDeviceRole.Unknown);
+            AssignTrackedDevice(rightHand, rightHandNodeState, NodeUse.RightHand, rightHandNodeState.HasValue ? deviceRoles[rightHandNodeState.Value.uniqueID] : TrackedDeviceRole.Unknown);
+            AssignTrackedDevice(waist,     waistNodeState,     NodeUse.Waist,     waistNodeState.HasValue     ? deviceRoles[waistNodeState.Value.uniqueID]     : TrackedDeviceRole.Unknown);
+            AssignTrackedDevice(leftFoot,  leftFootNodeState,  NodeUse.LeftFoot,  leftFootNodeState.HasValue  ? deviceRoles[leftFootNodeState.Value.uniqueID]  : TrackedDeviceRole.Unknown);
+            AssignTrackedDevice(rightFoot, rightFootNodeState, NodeUse.RightFoot, rightFootNodeState.HasValue ? deviceRoles[rightFootNodeState.Value.uniqueID] : TrackedDeviceRole.Unknown);
 
             foreach (ulong uniqueID in _foundNodes.ToList())
             {
@@ -159,7 +164,7 @@ namespace CustomAvatar.Tracking
             }
         }
 
-        private void AssignTrackedDevice(TrackedDeviceState deviceState, XRNodeState? possibleNodeState, NodeUse use)
+        private void AssignTrackedDevice(TrackedDeviceState deviceState, XRNodeState? possibleNodeState, NodeUse use, TrackedDeviceRole deviceRole)
         {
             if (possibleNodeState.HasValue && !deviceState.found)
             {
@@ -170,6 +175,7 @@ namespace CustomAvatar.Tracking
                 deviceState.uniqueID = nodeState.uniqueID;
                 deviceState.name = InputTracking.GetNodeName(nodeState.uniqueID);
                 deviceState.found = true;
+                deviceState.role = deviceRole;
                 
                 deviceAdded?.Invoke(deviceState, use);
             }
@@ -180,6 +186,7 @@ namespace CustomAvatar.Tracking
                 deviceState.uniqueID = default;
                 deviceState.name = null;
                 deviceState.found = false;
+                deviceState.role = TrackedDeviceRole.Unknown;
 
                 deviceRemoved?.Invoke(deviceState, use);
             }
@@ -252,10 +259,24 @@ namespace CustomAvatar.Tracking
             {
                 deviceState.rotation = originRotation * rotation;
 
-                // Driver4VR tracking correction
+                // Driver4VR rotation correction
                 if (deviceState.name?.StartsWith("d4vr_tracker_") == true && (use == NodeUse.LeftFoot || use == NodeUse.RightFoot))
                 {
                     deviceState.rotation *= Quaternion.Euler(-90, 180, 0);
+                }
+
+                // KinectToVR rotation correction
+                if (deviceState.role == TrackedDeviceRole.KinectToVrTracker)
+                {
+                    if (use == NodeUse.Waist)
+                    {
+                        deviceState.rotation *= Quaternion.Euler(-90, 180, 0);
+                    }
+
+                    if (use == NodeUse.LeftFoot || use == NodeUse.RightFoot)
+                    {
+                        deviceState.rotation *= Quaternion.Euler(0, 180, 0);
+                    }
                 }
             }
         }

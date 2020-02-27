@@ -165,7 +165,7 @@
     <Compile Include="StereoRendering\VRRenderEventDetector.cs" />
     <Compile Include="Tracking\TrackedDeviceManager.cs" />
     <Compile Include="Tracking\TrackedDeviceState.cs" />
-    <Compile Include="Tracking\TrackedDeviceType.cs" />
+    <Compile Include="Tracking\TrackedDeviceRole.cs" />
     <Compile Include="UI\AvatarListFlowCoordinator.cs" />
     <Compile Include="UI\AvatarListViewController.cs" />
     <Compile Include="UI\MirrorViewController.cs" />
