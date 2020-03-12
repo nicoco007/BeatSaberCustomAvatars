@@ -6,7 +6,7 @@ namespace CustomAvatar.Utilities
     internal static class BeatSaberUtil
     {
         private static MainSettingsModelSO _mainSettingsModel;
-        private static PlayerDataModelSO _playerDataModel;
+        private static PlayerDataModel _playerDataModel;
 
         private static MainSettingsModelSO mainSettingsModel
         {
@@ -21,13 +21,13 @@ namespace CustomAvatar.Utilities
             }
         }
 
-        private static PlayerDataModelSO playerDataModel
+        private static PlayerDataModel playerDataModel
         {
             get
             {
                 if (!_playerDataModel)
                 {
-                    _playerDataModel = Resources.FindObjectsOfTypeAll<PlayerDataModelSO>().FirstOrDefault();
+                    _playerDataModel = Resources.FindObjectsOfTypeAll<PlayerDataModel>().FirstOrDefault(m => m.playerData != null);
                 }
 
                 return _playerDataModel;
