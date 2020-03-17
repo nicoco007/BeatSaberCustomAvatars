@@ -28,8 +28,6 @@ namespace CustomAvatar.Tracking
                 return TrackedDeviceRole.Unknown;
             }
 
-            Plugin.logger.Debug($"Device {deviceIndex}: {name}");
-
             FieldInfo field = typeof(TrackedDeviceRole).GetFields().FirstOrDefault(f => f.GetCustomAttribute<TrackedDeviceTypeAttribute>()?.Name == name);
 
             if (field == null)
