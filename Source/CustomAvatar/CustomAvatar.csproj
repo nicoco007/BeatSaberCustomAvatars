@@ -141,8 +141,10 @@
     <Compile Include="FirstPersonExclusion.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Legacy\Aliases.cs" />
+    <Compile Include="StereoRendering\MirrorHelper.cs" />
     <Compile Include="Tracking\AvatarInput.cs" />
-    <Compile Include="Tracking\NodeUse.cs" />
+    <Compile Include="Tracking\Extensions.cs" />
+    <Compile Include="Tracking\DeviceUse.cs" />
     <Compile Include="Tracking\VRAvatarInput.cs" />
     <Compile Include="Utilities\BeatSaberUtil.cs" />
     <Compile Include="CustomAvatar.cs" />

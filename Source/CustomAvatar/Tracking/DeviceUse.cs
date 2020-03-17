@@ -1,6 +1,6 @@
 ﻿namespace CustomAvatar.Tracking
 {
-    public enum NodeUse
+    public enum DeviceUse
     {
         Head,
         LeftHand,
