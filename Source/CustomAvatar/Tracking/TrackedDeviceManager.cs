@@ -135,7 +135,7 @@ namespace CustomAvatar.Tracking
                 {
                     rightHandInputDevice = device;
                 }
-                else if (device.HasCharacteristics(InputDeviceCharacteristics.TrackedDevice))
+                else if (device.HasCharacteristics(InputDeviceCharacteristics.TrackedDevice) && !device.HasCharacteristics(InputDeviceCharacteristics.TrackingReference))
                 {
                     if (_isOpenVRRunning &&
                         !string.IsNullOrEmpty(device.serialNumber) &&
