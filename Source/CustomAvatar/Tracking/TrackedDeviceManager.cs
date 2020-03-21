@@ -29,7 +29,7 @@ namespace CustomAvatar.Tracking
 
         public void Start()
         {
-            _isOpenVRRunning = OpenVRStatus.isRunning;
+            _isOpenVRRunning = OpenVRUtilities.isInitialized;
 
             InputTracking.nodeAdded += node => UpdateNodes();
             InputTracking.nodeRemoved += node => UpdateNodes();
