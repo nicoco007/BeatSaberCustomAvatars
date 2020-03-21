@@ -8,6 +8,8 @@ namespace CustomAvatar.Utilities
         private static MainSettingsModelSO _mainSettingsModel;
         private static PlayerDataModelSO _playerDataModel;
 
+        public const float kDefaultPlayerEyeHeight = MainSettingsModelSO.kDefaultPlayerHeight - MainSettingsModelSO.kHeadPosToPlayerHeightOffset;
+
         private static MainSettingsModelSO mainSettingsModel
         {
             get

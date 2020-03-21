@@ -73,10 +73,10 @@ namespace CustomAvatar
 
             if (SettingsManager.settings.enableFloorAdjust && avatar.customAvatar.isIKAvatar)
             {
-                float playerViewPointHeight = BeatSaberUtil.GetPlayerEyeHeight();
-                float avatarViewPointHeight = avatar.customAvatar.viewPoint.position.y;
+                float playerEyeHeight = BeatSaberUtil.GetPlayerEyeHeight();
+                float avatarEyeHeight = avatar.customAvatar.eyeHeight;
 
-                floorOffset = playerViewPointHeight - avatarViewPointHeight * avatar.behaviour.scale;
+                floorOffset = playerEyeHeight - avatarEyeHeight * avatar.behaviour.scale;
 
                 if (SettingsManager.settings.moveFloorWithRoomAdjust)
                 {

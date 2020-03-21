@@ -153,6 +153,11 @@ namespace CustomAvatar
             _rightLeg = transform.Find("RightLeg");
             _pelvis = transform.Find("Pelvis");
 
+            GameObject head = GameObject.CreatePrimitive(PrimitiveType.Cube);
+
+            head.transform.position = new Vector3(0f, customAvatar.eyeHeight, 0f);
+            head.transform.localScale = Vector3.one * 0.1f;
+
             if (_pelvis) _initialPelvisPose = new Pose(_pelvis.position, _pelvis.rotation);
             if (_leftLeg) _initialLeftFootPose = new Pose(_leftLeg.position, _leftLeg.rotation);
             if (_rightLeg) _initialRightFootPose = new Pose(_rightLeg.position, _rightLeg.rotation);

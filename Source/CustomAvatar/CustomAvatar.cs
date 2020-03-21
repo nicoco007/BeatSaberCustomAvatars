@@ -10,42 +10,17 @@ namespace CustomAvatar
 {
     public class CustomAvatar
     {
-        private const float kMinIkAvatarHeight = 1.4f;
-        private const float kMaxIkAvatarHeight = 2.5f;
         private const string kGameObjectName = "_CustomAvatar";
-
-        private float? _eyeHeight;
 
         public string fullPath { get; }
         public GameObject gameObject { get; }
         public AvatarDescriptor descriptor { get; }
-        public Transform viewPoint { get; }
-
-        public float eyeHeight
-        {
-            get
-            {
-                if (gameObject == null) return BeatSaberUtil.GetPlayerEyeHeight();
-                if (_eyeHeight == null)
-                {
-                    var localPosition = gameObject.transform.InverseTransformPoint(viewPoint.position);
-                    _eyeHeight = localPosition.y;
-            
-                    //This is to handle cases where the head might be at 0,0,0, like in a non-IK avatar.
-                    if (_eyeHeight < kMinIkAvatarHeight || _eyeHeight > kMaxIkAvatarHeight)
-                    {
-                        _eyeHeight = MainSettingsModelSO.kDefaultPlayerHeight;
-                    }
-                }
-
-                return _eyeHeight.Value;
-            }
-        }
+        public float eyeHeight { get; }
 
         #pragma warning disable 618
-        public bool isIKAvatar => (gameObject.GetComponentInChildren<VRIKManager>()?.gameObject ??
-                                   gameObject.GetComponentInChildren<IKManager>()?.gameObject ??
-                                   gameObject.GetComponentInChildren<IKManagerAdvanced>()?.gameObject) != null;
+        public bool isIKAvatar => (gameObject.GetComponentInChildren<VRIKManager>() ??
+                                   gameObject.GetComponentInChildren<IKManager>() ??
+                                   gameObject.GetComponentInChildren<IKManagerAdvanced>() as object) != null;
         #pragma warning restore 618
 
         public CustomAvatar(string fullPath, GameObject avatarGameObject)
@@ -53,7 +28,8 @@ namespace CustomAvatar
             this.fullPath = fullPath ?? throw new ArgumentNullException(nameof(avatarGameObject));
             gameObject = avatarGameObject ? avatarGameObject : throw new ArgumentNullException(nameof(avatarGameObject));
             descriptor = avatarGameObject.GetComponent<AvatarDescriptor>() ?? throw new AvatarLoadException($"Avatar at '{fullPath}' does not have an AvatarDescriptor");
-            viewPoint = avatarGameObject.transform.Find("Head") ?? throw new AvatarLoadException($"Avatar '{descriptor.name}' does not have a Head transform");
+
+            eyeHeight = GetEyeHeight();
         }
 
         public static IEnumerator<AsyncOperation> FromFileCoroutine(string fileName, Action<CustomAvatar> success, Action<Exception> error)
@@ -87,6 +63,88 @@ namespace CustomAvatar
             {
                 error(ex);
             }
+        }
+
+        private float GetEyeHeight()
+        {
+            if (!isIKAvatar)
+            {
+                return BeatSaberUtil.kDefaultPlayerEyeHeight;
+            }
+
+            return GetViewPoint().y;
+        }
+
+        /// <summary>
+        /// Get the avatar's view point (camera position) in global coordinates.
+        /// </summary>
+        private Vector3 GetViewPoint()
+        {
+            Transform head = gameObject.transform.Find("Head") ?? throw new AvatarLoadException($"Avatar '{descriptor.name}' does not have a Head transform");
+            Vector3 offset = GetHeadTargetOffset();
+
+            // only warn if offset is larger than 1 mm
+            if (offset.magnitude > 0.001f)
+            {
+                // manually putting each coordinate gives more resolution
+                Plugin.logger.Warn($"Head bone and head target are not at the same position; offset: ({offset.x}, {offset.y}, {offset.z})");
+            }
+
+            return gameObject.transform.InverseTransformPoint(head.position - offset);
+        }
+
+        /// <summary>
+        /// Gets the offset between the head target and the actual head bone. Avoids issues when using
+        /// the Head transform for calculations.
+        /// </summary>
+        private Vector3 GetHeadTargetOffset()
+        {
+            Transform headReference = null;
+            Transform headTarget = null;
+                
+            #pragma warning disable 618
+            VRIK vrik = gameObject.GetComponentInChildren<VRIK>();
+            IKManager ikManager = gameObject.GetComponentInChildren<IKManager>();
+            IKManagerAdvanced ikManagerAdvanced = gameObject.GetComponentInChildren<IKManagerAdvanced>();
+            #pragma warning restore 618
+
+            VRIKManager vrikManager = gameObject.GetComponentInChildren<VRIKManager>();
+                
+            if (vrikManager)
+            {
+                if (!vrikManager.references_head) vrikManager.AutoDetectReferences();
+
+                headReference = vrikManager.references_head;
+                headTarget = vrikManager.solver_spine_headTarget;
+            }
+            else if (vrik)
+            {
+                vrik.AutoDetectReferences();
+                headReference = vrik.references.head;
+
+                if (ikManagerAdvanced)
+                {
+                    headTarget = ikManagerAdvanced.HeadTarget;
+                }
+                else if (ikManager)
+                {
+                    headTarget = ikManager.HeadTarget;
+                }
+            }
+
+            if (!headReference)
+            {
+                Plugin.logger.Warn("Could not find head reference; height adjust may be broken");
+                return Vector3.zero;
+            }
+
+            if (!headTarget)
+            {
+                Plugin.logger.Warn("Could not find head target; height adjust may be broken");
+                return Vector3.zero;
+            }
+
+            return headTarget.position - headReference.position;
         }
 
         /// <summary>
