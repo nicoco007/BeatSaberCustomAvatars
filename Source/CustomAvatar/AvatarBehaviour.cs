@@ -161,14 +161,6 @@ namespace CustomAvatar
             if (_pelvis) _initialPelvisPose = new Pose(_pelvis.position, _pelvis.rotation);
             if (_leftLeg) _initialLeftFootPose = new Pose(_leftLeg.position, _leftLeg.rotation);
             if (_rightLeg) _initialRightFootPose = new Pose(_rightLeg.position, _rightLeg.rotation);
-
-            foreach (FirstPersonExclusion firstPersonExclusion in GetComponentsInChildren<FirstPersonExclusion>())
-            {
-                foreach (GameObject gameObj in firstPersonExclusion.exclude)
-                {
-                    gameObj.layer = AvatarLayers.OnlyInThirdPerson;
-                }
-            }
         }
 
         private void Update()
