@@ -146,7 +146,7 @@
     <Compile Include="Utilities\BeatSaberUtil.cs" />
     <Compile Include="Avatar\LoadedAvatar.cs" />
     <Compile Include="AvatarDescriptor.cs" />
-    <Compile Include="AvatarEventsPlayer.cs" />
+    <Compile Include="Avatar\AvatarEventsPlayer.cs" />
     <Compile Include="EventFilterBehaviour.cs" />
     <Compile Include="EventFilters.cs" />
     <Compile Include="Exceptions\AvatarLoadException.cs" />
