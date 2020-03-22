@@ -6,9 +6,9 @@ using CustomAvatar.Exceptions;
 using CustomAvatar.Utilities;
 using UnityEngine;
 
-namespace CustomAvatar
+namespace CustomAvatar.Avatar
 {
-    public class CustomAvatar
+    public class LoadedAvatar
     {
         private const string kGameObjectName = "_CustomAvatar";
 
@@ -16,6 +16,7 @@ namespace CustomAvatar
         public GameObject gameObject { get; }
         public AvatarDescriptor descriptor { get; }
         public float eyeHeight { get; }
+        public bool supportsFingerTracking { get; }
 
         #pragma warning disable 618
         public bool isIKAvatar => (gameObject.GetComponentInChildren<VRIKManager>() ??
@@ -23,23 +24,26 @@ namespace CustomAvatar
                                    gameObject.GetComponentInChildren<IKManagerAdvanced>() as object) != null;
         #pragma warning restore 618
 
-        public CustomAvatar(string fullPath, GameObject avatarGameObject)
+        public LoadedAvatar(string fullPath, GameObject avatarGameObject)
         {
             this.fullPath = fullPath ?? throw new ArgumentNullException(nameof(avatarGameObject));
             gameObject = avatarGameObject ? avatarGameObject : throw new ArgumentNullException(nameof(avatarGameObject));
             descriptor = avatarGameObject.GetComponent<AvatarDescriptor>() ?? throw new AvatarLoadException($"Avatar at '{fullPath}' does not have an AvatarDescriptor");
+           
+            supportsFingerTracking = avatarGameObject.GetComponentInChildren<Animator>() &&
+                                     avatarGameObject.GetComponentInChildren<PoseManager>();
 
             eyeHeight = GetEyeHeight();
         }
 
-        public static IEnumerator<AsyncOperation> FromFileCoroutine(string fileName, Action<CustomAvatar> success, Action<Exception> error)
+        public static IEnumerator<AsyncOperation> FromFileCoroutine(string fileName, Action<LoadedAvatar> success, Action<Exception> error)
         {
             Plugin.logger.Info("Loading avatar " + fileName);
 
             AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(Path.Combine(AvatarManager.kCustomAvatarsPath, fileName));
             yield return assetBundleCreateRequest;
 
-            if (!assetBundleCreateRequest.isDone || assetBundleCreateRequest.assetBundle == null)
+            if (!assetBundleCreateRequest.isDone || !assetBundleCreateRequest.assetBundle)
             {
                 error(new AvatarLoadException("Avatar game object not found"));
                 yield break;
@@ -57,7 +61,7 @@ namespace CustomAvatar
                 
             try
             {
-                success(new CustomAvatar(fileName, assetBundleRequest.asset as GameObject));
+                success(new LoadedAvatar(fileName, assetBundleRequest.asset as GameObject));
             }
             catch (Exception ex)
             {

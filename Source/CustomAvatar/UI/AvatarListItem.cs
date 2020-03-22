@@ -1,15 +1,16 @@
-﻿using UnityEngine;
+﻿using CustomAvatar.Avatar;
+using UnityEngine;
 
-namespace CustomAvatar
+namespace CustomAvatar.UI
 {
     internal class AvatarListItem
     {
         public string name;
         public string author;
         public Texture2D icon;
-        public CustomAvatar avatar;
+        public LoadedAvatar avatar;
 
-        internal AvatarListItem(CustomAvatar avatar)
+        internal AvatarListItem(LoadedAvatar avatar)
         {
             name = avatar.descriptor.name;
             author = avatar.descriptor.author;

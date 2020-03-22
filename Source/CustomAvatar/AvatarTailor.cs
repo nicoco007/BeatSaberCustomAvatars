@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using CustomAvatar.Avatar;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
 using UnityEngine;
@@ -60,7 +61,7 @@ namespace CustomAvatar
             }
 
             // apply scale
-            avatar.behaviour.scale = scale;
+            avatar.tracking.scale = scale;
 
             SharedCoroutineStarter.instance.StartCoroutine(FloorMendingWithDelay(avatar));
         }
@@ -76,7 +77,7 @@ namespace CustomAvatar
                 float playerEyeHeight = BeatSaberUtil.GetPlayerEyeHeight();
                 float avatarEyeHeight = avatar.customAvatar.eyeHeight;
 
-                floorOffset = playerEyeHeight - avatarEyeHeight * avatar.behaviour.scale;
+                floorOffset = playerEyeHeight - avatarEyeHeight * avatar.tracking.scale;
 
                 if (SettingsManager.settings.moveFloorWithRoomAdjust)
                 {
@@ -87,7 +88,7 @@ namespace CustomAvatar
             floorOffset = (float) Math.Round(floorOffset, 3); // round to millimeter
 
             // apply offset
-			avatar.behaviour.position = new Vector3(0, floorOffset, 0);
+			avatar.tracking.verticalPosition = floorOffset;
             
             // ReSharper disable Unity.PerformanceCriticalCodeInvocation
             GameObject menuPlayersPlace = GameObject.Find("MenuPlayersPlace");

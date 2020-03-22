@@ -4,29 +4,41 @@ using CustomAvatar.Utilities;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace CustomAvatar
+namespace CustomAvatar.Avatar
 {
 	internal class SpawnedAvatar
 	{
-		public CustomAvatar customAvatar { get; }
-		public AvatarBehaviour behaviour { get; }
+		public LoadedAvatar customAvatar { get; }
+		public AvatarTracking tracking { get; }
 		public AvatarEventsPlayer eventsPlayer { get; }
 
         private readonly GameObject _gameObject;
         private readonly FirstPersonExclusion[] _firstPersonExclusions;
 
-        public SpawnedAvatar(CustomAvatar customAvatar, AvatarInput input)
+        public SpawnedAvatar(LoadedAvatar avatar, AvatarInput input)
         {
-            this.customAvatar = customAvatar ?? throw new ArgumentNullException(nameof(customAvatar));
-            _gameObject = Object.Instantiate(customAvatar.gameObject);
+            customAvatar = avatar ?? throw new ArgumentNullException(nameof(avatar));
 
+            _gameObject            = Object.Instantiate(customAvatar.gameObject);
             _firstPersonExclusions = _gameObject.GetComponentsInChildren<FirstPersonExclusion>();
 
-            eventsPlayer = _gameObject.AddComponent<AvatarEventsPlayer>();
-            behaviour = _gameObject.AddComponent<AvatarBehaviour>();
+            eventsPlayer   = _gameObject.AddComponent<AvatarEventsPlayer>();
+            tracking       = _gameObject.AddComponent<AvatarTracking>();
 
-            behaviour.customAvatar = customAvatar;
-            behaviour.input = input;
+            tracking.customAvatar = customAvatar;
+            tracking.input        = input;
+            
+            if (customAvatar.isIKAvatar)
+            {
+                AvatarIK ik = _gameObject.AddComponent<AvatarIK>();
+
+                ik.input = input;
+            }
+
+            if (customAvatar.supportsFingerTracking)
+            {
+                _gameObject.AddComponent<AvatarFingerTracking>();
+            }
 
             Object.DontDestroyOnLoad(_gameObject);
         }
