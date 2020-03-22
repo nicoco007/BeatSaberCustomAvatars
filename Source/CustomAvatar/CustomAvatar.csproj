@@ -132,9 +132,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AvatarBehaviour.cs" />
+    <Compile Include="Avatar\AvatarIK.cs" />
+    <Compile Include="Avatar\AvatarTracking.cs" />
     <Compile Include="AvatarLayers.cs" />
-    <Compile Include="AvatarListItem.cs" />
+    <Compile Include="Avatar\AvatarFingerTracking.cs" />
+    <Compile Include="UI\AvatarListItem.cs" />
     <Compile Include="AvatarManager.cs" />
     <Compile Include="AvatarTailor.cs" />
     <Compile Include="AvatarResizeMode.cs" />
@@ -147,9 +149,9 @@
     <Compile Include="Tracking\DeviceUse.cs" />
     <Compile Include="Tracking\VRAvatarInput.cs" />
     <Compile Include="Utilities\BeatSaberUtil.cs" />
-    <Compile Include="CustomAvatar.cs" />
+    <Compile Include="Avatar\LoadedAvatar.cs" />
     <Compile Include="AvatarDescriptor.cs" />
-    <Compile Include="AvatarEventsPlayer.cs" />
+    <Compile Include="Avatar\AvatarEventsPlayer.cs" />
     <Compile Include="EventFilterBehaviour.cs" />
     <Compile Include="EventFilters.cs" />
     <Compile Include="Exceptions\AvatarLoadException.cs" />
@@ -164,7 +166,7 @@
     <Compile Include="VRIKManager.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SpawnedAvatar.cs" />
+    <Compile Include="Avatar\SpawnedAvatar.cs" />
     <Compile Include="StereoRendering\StereoRenderer.cs" />
     <Compile Include="StereoRendering\StereoRenderManager.cs" />
     <Compile Include="StereoRendering\VRRenderEventDetector.cs" />
@@ -197,6 +199,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\ban.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <AutomatedBuild>false</AutomatedBuild>

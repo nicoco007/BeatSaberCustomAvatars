@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using CustomAvatar.Avatar;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
 using UnityEngine.SceneManagement;
@@ -48,13 +49,13 @@ namespace CustomAvatar
             SceneManager.sceneLoaded -= OnSceneLoaded;
         }
 
-        public void GetAvatarsAsync(Action<CustomAvatar> success, Action<Exception> error)
+        public void GetAvatarsAsync(Action<LoadedAvatar> success, Action<Exception> error)
         {
             Plugin.logger.Info("Loading all avatars from " + kCustomAvatarsPath);
 
             foreach (string fileName in GetAvatarFileNames())
             {
-                SharedCoroutineStarter.instance.StartCoroutine(CustomAvatar.FromFileCoroutine(fileName, success, error));
+                SharedCoroutineStarter.instance.StartCoroutine(LoadedAvatar.FromFileCoroutine(fileName, success, error));
             }
         }
 
@@ -78,7 +79,7 @@ namespace CustomAvatar
 
         public void SwitchToAvatarAsync(string filePath)
         {
-            SharedCoroutineStarter.instance.StartCoroutine(CustomAvatar.FromFileCoroutine(filePath, avatar =>
+            SharedCoroutineStarter.instance.StartCoroutine(LoadedAvatar.FromFileCoroutine(filePath, avatar =>
             {
                 Plugin.logger.Info("Successfully loaded avatar " + avatar.descriptor.name);
                 SwitchToAvatar(avatar);
@@ -88,7 +89,7 @@ namespace CustomAvatar
             }));
         }
 
-        public void SwitchToAvatar(CustomAvatar avatar)
+        public void SwitchToAvatar(LoadedAvatar avatar)
         {
             if (currentlySpawnedAvatar?.customAvatar == avatar) return;
 
@@ -165,7 +166,7 @@ namespace CustomAvatar
             ResizeCurrentAvatar();
         }
 
-        private static SpawnedAvatar SpawnAvatar(CustomAvatar customAvatar, AvatarInput input)
+        private static SpawnedAvatar SpawnAvatar(LoadedAvatar customAvatar, AvatarInput input)
         {
             if (customAvatar == null) throw new ArgumentNullException(nameof(customAvatar));
             if (input == null) throw new ArgumentNullException(nameof(input));

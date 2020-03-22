@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace CustomAvatar
+namespace CustomAvatar.Avatar
 {
     internal class AvatarEventsPlayer : MonoBehaviour
     {

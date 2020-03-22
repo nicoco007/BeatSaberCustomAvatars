@@ -9,7 +9,7 @@ namespace CustomAvatar
 
         public void Awake()
         {
-            exclude = Exclude ?? exclude;
+            if (Exclude != null && Exclude.Length > 0) exclude = Exclude;
         }
     }
 }
