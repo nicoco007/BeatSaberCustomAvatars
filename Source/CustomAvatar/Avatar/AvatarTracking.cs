@@ -9,7 +9,7 @@ using UnityEngine.XR;
 
 namespace CustomAvatar.Avatar
 {
-    internal class AvatarTracking : MonoBehaviour
+    internal class AvatarTracking : BodyAwareBehaviour
     {
         public float verticalPosition
         {
@@ -32,14 +32,6 @@ namespace CustomAvatar.Avatar
 		
         private Vector3 _initialScale;
 
-        private Transform _head;
-        private Transform _body;
-        private Transform _leftHand;
-        private Transform _rightHand;
-        private Transform _leftLeg;
-        private Transform _rightLeg;
-        private Transform _pelvis;
-
         private Pose _initialPelvisPose;
         private Pose _initialLeftFootPose;
         private Pose _initialRightFootPose;
@@ -61,8 +53,10 @@ namespace CustomAvatar.Avatar
             _initialScale = transform.localScale;
 		}
 
-        private void Start()
+        protected override void Start()
         {
+            base.Start();
+
             if (input == null)
             {
                 Destroy(this);
@@ -76,14 +70,6 @@ namespace CustomAvatar.Avatar
             }
             
             _vrPlatformHelper = PersistentSingleton<VRPlatformHelper>.instance;
-
-            _head = transform.Find("Head");
-            _body = transform.Find("Body");
-            _leftHand = transform.Find("LeftHand");
-            _rightHand = transform.Find("RightHand");
-            _leftLeg = transform.Find("LeftLeg");
-            _rightLeg = transform.Find("RightLeg");
-            _pelvis = transform.Find("Pelvis");
 
             if (_pelvis) _initialPelvisPose = new Pose(_pelvis.position, _pelvis.rotation);
             if (_leftLeg) _initialLeftFootPose = new Pose(_leftLeg.position, _leftLeg.rotation);

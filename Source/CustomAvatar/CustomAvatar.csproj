@@ -133,6 +133,7 @@
     <Compile Include="Avatar\AvatarTracking.cs" />
     <Compile Include="AvatarLayers.cs" />
     <Compile Include="Avatar\AvatarFingerTracking.cs" />
+    <Compile Include="Avatar\BodyAwareBehaviour.cs" />
     <Compile Include="UI\AvatarListItem.cs" />
     <Compile Include="AvatarManager.cs" />
     <Compile Include="AvatarTailor.cs" />

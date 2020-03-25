@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace CustomAvatar.Avatar
 {
-    internal class AvatarIK : MonoBehaviour
+    internal class AvatarIK : BodyAwareBehaviour
     {
         public AvatarInput input;
 
@@ -46,8 +46,10 @@ namespace CustomAvatar.Avatar
             }
         }
 
-        private void Start()
+        protected override void Start()
         {
+            base.Start();
+
             _vrikManager = GetComponentInChildren<VRIKManager>();
             _dynamicBones = GetComponentsInChildren<BeatSaberDynamicBone::DynamicBone>();
 
@@ -56,9 +58,9 @@ namespace CustomAvatar.Avatar
 
             _fixTransforms = _vrikManager.fixTransforms;
 
-            _vrikManager.referencesUpdated += UpdateConditionalReferences;
+            _vrikManager.referencesUpdated += OnReferencesUpdated;
             
-            UpdateConditionalReferences();
+            OnReferencesUpdated();
             
             foreach (TwistRelaxer twistRelaxer in _twistRelaxers)
             {
@@ -120,14 +122,49 @@ namespace CustomAvatar.Avatar
         private void OnInputChanged()
         {
             Plugin.logger.Info("Tracking device change detected, updating VRIK references");
-            UpdateConditionalReferences();
+            UpdateSolverTargets();
         }
 
-        private void UpdateConditionalReferences()
+        private void OnReferencesUpdated()
         {
-            if (!_vrik || !_vrikManager) return;
-            
-            Plugin.logger.Info("Updating conditional references");
+            CreateTargetsIfMissing();
+            UpdateSolverTargets();
+        }
+
+        private void CreateTargetsIfMissing()
+        {
+            _vrikManager.solver_spine_headTarget   = CreateTargetIfMissing(_vrikManager.solver_spine_headTarget,   _vrik.references.head,      _head);
+            _vrikManager.solver_leftArm_target     = CreateTargetIfMissing(_vrikManager.solver_leftArm_target,     _vrik.references.leftHand,  _leftHand);
+            _vrikManager.solver_rightArm_target    = CreateTargetIfMissing(_vrikManager.solver_rightArm_target,    _vrik.references.rightHand, _rightHand);
+            _vrikManager.solver_spine_pelvisTarget = CreateTargetIfMissing(_vrikManager.solver_spine_pelvisTarget, _vrik.references.pelvis,    _pelvis);
+            _vrikManager.solver_leftLeg_target     = CreateTargetIfMissing(_vrikManager.solver_leftLeg_target,     _vrik.references.leftToes ?? _vrik.references.leftFoot,  _leftLeg);
+            _vrikManager.solver_rightLeg_target    = CreateTargetIfMissing(_vrikManager.solver_rightLeg_target,    _vrik.references.rightToes ?? _vrik.references.rightFoot, _rightLeg);
+        }
+
+        private Transform CreateTargetIfMissing(Transform target, Transform reference, Transform parent)
+        {
+            if (target || !parent) return target;
+
+            Transform newTarget = new GameObject().transform;
+
+            newTarget.SetParent(parent, false);
+            newTarget.position = reference.position;
+            newTarget.rotation = reference.rotation;
+
+            Plugin.logger.Info($"Created IK target for '{parent.name}'");
+
+            return newTarget;
+        }
+
+        private void UpdateSolverTargets()
+        {
+            Plugin.logger.Info("Updating solver targets");
+
+            _vrik.solver.spine.headTarget  = _vrikManager.solver_spine_headTarget;
+            _vrik.solver.leftArm.target    = _vrikManager.solver_leftArm_target;
+            _vrik.solver.rightArm.target   = _vrikManager.solver_rightArm_target;
+
+            Plugin.logger.Info("Updating conditional solver targets");
 
             if (input.TryGetLeftFootPose(out _))
             {
