@@ -1,7 +1,7 @@
 using System.Linq;
 using BeatSaberMarkupLanguage;
+using CustomAvatar.Utilities;
 using HMUI;
-using IPA.Utilities;
 using UnityEngine;
 
 namespace CustomAvatar.UI
@@ -36,7 +36,7 @@ namespace CustomAvatar.UI
         {
             _mainScreen.transform.localScale = _mainScreenScale;
             var mainFlowCoordinator = Resources.FindObjectsOfTypeAll<MainFlowCoordinator>().First();
-            mainFlowCoordinator.InvokePrivateMethod("DismissFlowCoordinator", new object[] { this, null, false });
+            mainFlowCoordinator.InvokePrivateMethod("DismissFlowCoordinator", this, null, false);
         }
 
         protected override void DidDeactivate(DeactivationType deactivationType) { }

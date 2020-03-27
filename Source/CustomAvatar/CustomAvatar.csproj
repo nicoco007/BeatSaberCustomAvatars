@@ -62,9 +62,9 @@
     <Reference Include="Main">
       <HintPath>..\..\Libraries\Main.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json.12.0.0.0, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libraries\Newtonsoft.Json.12.0.0.0.dll</HintPath>
+      <HintPath>..\..\Libraries\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -137,6 +137,7 @@
     <Compile Include="AvatarLayers.cs" />
     <Compile Include="Avatar\AvatarFingerTracking.cs" />
     <Compile Include="Avatar\BodyAwareBehaviour.cs" />
+    <Compile Include="KeyboardInputHandler.cs" />
     <Compile Include="UI\AvatarListItem.cs" />
     <Compile Include="AvatarManager.cs" />
     <Compile Include="AvatarTailor.cs" />

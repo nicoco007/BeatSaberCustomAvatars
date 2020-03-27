@@ -9,8 +9,12 @@
   "version": "5.0.0-beta.7",
   "features": [],
   "dependsOn": {
-    "BSIPA": "^3.13.0",
+    "BSIPA": "^4.0.0",
     "BeatSaberMarkupLanguage": "^1.0.0",
     "DynamicOpenVR": "^0.2.0"
-  }
+  },
+  "files": [
+    "DynamicOpenVR\\Actions\\customavatars.json",
+    "DynamicOpenVR\\Bindings\\customavatars_knuckles.json"
+  ]
 }
