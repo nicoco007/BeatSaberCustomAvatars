@@ -16,7 +16,9 @@ if (commit_hash is None or len(commit_hash) == 0):
 with open(file_path, "r") as json_file:
     obj = json.load(json_file)
 
-obj["version"] = obj["version"] + "-" + commit_hash
+version = obj["version"]
+
+obj["version"] = version[0:version.index("-", version.index("-") + 1)] + "-" + commit_hash
 
 with open(file_path, "w") as json_file:
     json.dump(obj, json_file, indent=2)
