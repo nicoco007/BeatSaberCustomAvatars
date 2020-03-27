@@ -16,6 +16,7 @@ namespace CustomAvatar
     internal class Plugin : IBeatSaberPlugin
     {
         private GameScenesManager _scenesManager;
+        private GameObject _mirrorContainer;
         
         public event Action<ScenesTransitionSetupDataSO, DiContainer> sceneTransitionDidFinish;
 
@@ -61,12 +62,25 @@ namespace CustomAvatar
 
             if (newScene.name == "MenuCore")
             {
-                MenuButtons.instance.RegisterButton(new MenuButton("Avatars", () =>
+                try
                 {
-                    var mainFlowCoordinator = Resources.FindObjectsOfTypeAll<MainFlowCoordinator>().First();
-                    var flowCoordinator = new GameObject("AvatarListFlowCoordinator").AddComponent<AvatarListFlowCoordinator>();
-                    mainFlowCoordinator.InvokePrivateMethod("PresentFlowCoordinator", flowCoordinator, null, true, false);
-                }));
+                    MenuButtons.instance.RegisterButton(new MenuButton("Avatars", () =>
+                    {
+                        var mainFlowCoordinator = Resources.FindObjectsOfTypeAll<MainFlowCoordinator>().First();
+                        var flowCoordinator = new GameObject("AvatarListFlowCoordinator")
+                            .AddComponent<AvatarListFlowCoordinator>();
+                        mainFlowCoordinator.InvokePrivateMethod("PresentFlowCoordinator", flowCoordinator, null, true,
+                            false);
+                    }));
+                }
+                catch (Exception)
+                {
+                    logger.Warn("Failed to add menu button, spawning mirror instead");
+
+                    _mirrorContainer = new GameObject();
+                    GameObject.DontDestroyOnLoad(_mirrorContainer);
+                    SharedCoroutineStarter.instance.StartCoroutine(MirrorHelper.SpawnMirror(new Vector3(0, 0, -1.5f), Quaternion.Euler(-90f, 180f, 0), new Vector3(0.50f, 1f, 0.25f), _mirrorContainer.transform));
+                }
             }
         }
 
