@@ -93,6 +93,7 @@ namespace CustomAvatar.UI
             }, ex =>
             {
                 Plugin.logger.Error("Failed to load avatar: " + ex.Message);
+                Plugin.logger.Error(ex);
             });
         }
 
