@@ -56,6 +56,8 @@ namespace CustomAvatar.Avatar
             {
                 foreach (GameObject gameObj in firstPersonExclusion.exclude)
                 {
+                    if (!gameObj) continue;
+
                     Plugin.logger.Debug($"Excluding '{gameObj.name}' from first person view");
                     gameObj.layer = AvatarLayers.OnlyInThirdPerson;
                 }
