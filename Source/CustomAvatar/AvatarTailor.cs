@@ -155,7 +155,7 @@ namespace CustomAvatar
                 // reference: https://miro.medium.com/max/3200/1*cqTRyEGl26l4CImEmWz68Q.jpeg
                 float eyeHeight = head.position.y - floorPosition;
 
-                Vector3 wantedPelvisPosition = new Vector3(0, eyeHeight / 15f * 10f, 0);
+                Vector3 wantedPelvisPosition = new Vector3(0, eyeHeight / 22.5f * 14f, 0);
                 Vector3 pelvisPositionCorrection = wantedPelvisPosition - Vector3.up * (pelvis.position.y - floorPosition);
 
                 Vector3 pelvisForward = pelvis.rotation * Vector3.forward;
