@@ -8,6 +8,11 @@ using UnityEngine;
 
 namespace CustomAvatar.Utilities
 {
+    // ReSharper disable ClassNeverInstantiated.Global
+    // ReSharper disable ClassWithVirtualMembersNeverInherited.Global
+    // ReSharper disable RedundantDefaultMemberInitializer
+    // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
+    // ReSharper disable UnusedMember.Global
     internal class Settings
     {
         public virtual bool isAvatarVisibleInFirstPerson { get; set; } = true;
@@ -53,7 +58,7 @@ namespace CustomAvatar.Utilities
 
             CheckAllValuesValid();
         }
-
+        
         private void CheckAllValuesValid()
         {
             if (fullBodyCalibration.pelvis.rotation.x == 0 && fullBodyCalibration.pelvis.rotation.y == 0 &&
