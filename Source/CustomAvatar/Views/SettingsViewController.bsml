@@ -12,8 +12,8 @@
             <text text="Full Body Calibration" font-size="5" align="Center"></text>
         </horizontal>
         <horizontal child-align="MiddleCenter" child-expand-width="true" child-control-width="true">
-            <button id="calibrate-button" text="Start Calibrating" hover-hint="Begin calibrating full body tracking." on-click="calibrate-fbt-click"></button>
-            <button text="Clear" hover-hint="Clear calibration data." on-click="clear-fbt-calibration-data-click"></button>
+            <button id="calibrate-button" text="Calibrate" hover-hint="Calibrate full body tracking." on-click="calibrate-fbt-click"></button>
+            <button id="clear-button" text="Clear" hover-hint="Clear calibration data." on-click="clear-fbt-calibration-data-click"></button>
         </horizontal>
     </settings-container>
 </horizontal>

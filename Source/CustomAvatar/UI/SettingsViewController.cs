@@ -15,43 +15,52 @@ namespace CustomAvatar.UI
     {
         public override string ResourceName => "CustomAvatar.Views.SettingsViewController.bsml";
 
-        private bool _calibrating = false;
-        private Material _sphereMaterial = null;
+        private readonly TrackedDeviceManager _playerInput = PersistentSingleton<TrackedDeviceManager>.instance;
+        private bool _calibrating;
+        private Material _sphereMaterial;
 
         #region Components
         
-        [UIComponent("arm-span")] private TextMeshProUGUI armSpanLabel;
-        [UIComponent("calibrate-button")] private TextMeshProUGUI calibrateButtonText;
+        [UIComponent("arm-span")] private TextMeshProUGUI _armSpanLabel;
+        [UIComponent("calibrate-button")] private TextMeshProUGUI _calibrateButtonText;
+        [UIComponent("clear-button")] private TextMeshProUGUI _clearButtonText;
 
         #endregion
 
         #region Properties
 
-        [UIValue("resize-options")] private readonly List<object> resizeModeOptions = new List<object> { AvatarResizeMode.None, AvatarResizeMode.Height, AvatarResizeMode.ArmSpan };
+        [UIValue("resize-options")] private readonly List<object> _resizeModeOptions = new List<object> { AvatarResizeMode.None, AvatarResizeMode.Height, AvatarResizeMode.ArmSpan };
 
         #endregion
 
         #region Values
 
-        [UIValue("visible-first-person-value")] private bool visibleInFirstPerson;
-        [UIValue("resize-value")] private AvatarResizeMode resizeMode;
-        [UIValue("floor-adjust-value")] private bool floorHeightAdjust;
-        [UIValue("calibrate-fbt-on-start")] private bool calibrateFullBodyTrackingOnStart;
+        [UIValue("visible-first-person-value")] private bool _visibleInFirstPerson;
+        [UIValue("resize-value")] private AvatarResizeMode _resizeMode;
+        [UIValue("floor-adjust-value")] private bool _floorHeightAdjust;
+        [UIValue("calibrate-fbt-on-start")] private bool _calibrateFullBodyTrackingOnStart;
 
         #endregion
 
         protected override void DidActivate(bool firstActivation, ActivationType type)
         {
-            visibleInFirstPerson = Plugin.settings.isAvatarVisibleInFirstPerson;
-            resizeMode = Plugin.settings.resizeMode;
-            floorHeightAdjust = Plugin.settings.enableFloorAdjust;
-            calibrateFullBodyTrackingOnStart = Plugin.settings.calibrateFullBodyTrackingOnStart;
+            _visibleInFirstPerson = Plugin.settings.isAvatarVisibleInFirstPerson;
+            _resizeMode = Plugin.settings.resizeMode;
+            _floorHeightAdjust = Plugin.settings.enableFloorAdjust;
+            _calibrateFullBodyTrackingOnStart = Plugin.settings.calibrateFullBodyTrackingOnStart;
 
             base.DidActivate(firstActivation, type);
 
-            armSpanLabel.SetText($"{Plugin.settings.playerArmSpan:0.00} m");
+            _armSpanLabel.SetText($"{Plugin.settings.playerArmSpan:0.00} m");
 
             _sphereMaterial = new Material(ShaderLoader.unlitShader);
+        }
+
+        protected override void DidDeactivate(DeactivationType deactivationType)
+        {
+            base.DidDeactivate(deactivationType);
+
+            DisableCalibrationMode(false);
         }
 
         #region Actions
@@ -110,24 +119,11 @@ namespace CustomAvatar.UI
             }
             else if (!_calibrating)
             {
-                AvatarManager.instance.currentlySpawnedAvatar.tracking.isCalibrationModeEnabled = true;
-                _calibrating = true;
-                calibrateButtonText.text = "Save";
-
-                _waistSphere = CreateCalibrationSphere();
-                _leftFootSphere = CreateCalibrationSphere();
-                _rightFootSphere = CreateCalibrationSphere();
+                EnableCalibrationMode();
             }
             else
             {
-                AvatarManager.instance.avatarTailor.CalibrateFullBodyTrackingManual(AvatarManager.instance.currentlySpawnedAvatar);
-                AvatarManager.instance.currentlySpawnedAvatar.tracking.isCalibrationModeEnabled = false;
-                _calibrating = false;
-                calibrateButtonText.text = "Start Calibrating";
-
-                Destroy(_waistSphere.gameObject);
-                Destroy(_leftFootSphere.gameObject);
-                Destroy(_rightFootSphere.gameObject);
+                DisableCalibrationMode(true);
             }
         }
 
@@ -140,16 +136,52 @@ namespace CustomAvatar.UI
         [UIAction("clear-fbt-calibration-data-click")]
         private void OnClearFullBodyTrackingCalibrationDataClicked()
         {
-            AvatarManager.instance.avatarTailor.ClearFullBodyTrackingData();
+            if (_calibrating)
+            {
+                DisableCalibrationMode(false);
+            }
+            else
+            {
+                AvatarManager.instance.avatarTailor.ClearFullBodyTrackingData();
+            }
         }
 
         #endregion
 
-        private Transform _waistSphere;
-        private Transform _leftFootSphere;
-        private Transform _rightFootSphere;
+        private GameObject _waistSphere;
+        private GameObject _leftFootSphere;
+        private GameObject _rightFootSphere;
 
-        private Transform CreateCalibrationSphere()
+        private void EnableCalibrationMode()
+        {
+            AvatarManager.instance.currentlySpawnedAvatar.tracking.isCalibrationModeEnabled = true;
+            _calibrating = true;
+            _calibrateButtonText.text = "Save";
+            _clearButtonText.text = "Cancel";
+
+            _waistSphere = CreateCalibrationSphere();
+            _leftFootSphere = CreateCalibrationSphere();
+            _rightFootSphere = CreateCalibrationSphere();
+        }
+
+        private void DisableCalibrationMode(bool save)
+        {
+            if (save)
+            {
+                AvatarManager.instance.avatarTailor.CalibrateFullBodyTrackingManual(AvatarManager.instance.currentlySpawnedAvatar);
+            }
+
+            Destroy(_waistSphere);
+            Destroy(_leftFootSphere);
+            Destroy(_rightFootSphere);
+
+            AvatarManager.instance.currentlySpawnedAvatar.tracking.isCalibrationModeEnabled = false;
+            _calibrating = false;
+            _calibrateButtonText.text = "Calibrate";
+            _clearButtonText.text = "Clear";
+        }
+
+        private GameObject CreateCalibrationSphere()
         { 
             GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 
@@ -157,90 +189,87 @@ namespace CustomAvatar.UI
             sphere.transform.localScale = Vector3.one * 0.1f;
             sphere.GetComponent<Renderer>().material = _sphereMaterial;
 
-            return sphere.transform;
+            return sphere;
         }
 
         private void Update()
         {
             if (_calibrating)
             {
-                TrackedDeviceManager input = PersistentSingleton<TrackedDeviceManager>.instance;
-
-                if (input.waist.tracked)
+                if (_playerInput.waist.tracked)
                 {
-                    _waistSphere.gameObject.SetActive(true);
-                    _waistSphere.position = input.waist.position;
-                    _waistSphere.rotation = input.waist.rotation;
+                    _waistSphere.SetActive(true);
+                    _waistSphere.transform.position = _playerInput.waist.position;
+                    _waistSphere.transform.rotation = _playerInput.waist.rotation;
                 }
                 else
                 {
-                    _waistSphere.gameObject.SetActive(false);
+                    _waistSphere.SetActive(false);
                 }
 
-                if (input.leftFoot.tracked)
+                if (_playerInput.leftFoot.tracked)
                 {
-                    _leftFootSphere.gameObject.SetActive(true);
-                    _leftFootSphere.position = input.leftFoot.position;
-                    _leftFootSphere.rotation = input.leftFoot.rotation;
+                    _leftFootSphere.SetActive(true);
+                    _leftFootSphere.transform.position = _playerInput.leftFoot.position;
+                    _leftFootSphere.transform.rotation = _playerInput.leftFoot.rotation;
                 }
                 else
                 {
-                    _leftFootSphere.gameObject.SetActive(false);
+                    _leftFootSphere.SetActive(false);
                 }
 
-                if (input.rightFoot.tracked)
+                if (_playerInput.rightFoot.tracked)
                 {
-                    _rightFootSphere.gameObject.SetActive(true);
-                    _rightFootSphere.position = input.rightFoot.position;
-                    _rightFootSphere.rotation = input.rightFoot.rotation;
+                    _rightFootSphere.SetActive(true);
+                    _rightFootSphere.transform.position = _playerInput.rightFoot.position;
+                    _rightFootSphere.transform.rotation = _playerInput.rightFoot.rotation;
                 }
                 else
                 {
-                    _rightFootSphere.gameObject.SetActive(false);
+                    _rightFootSphere.SetActive(false);
                 }
             }
         }
 
         #region Arm Span Measurement
         
-        private const float KMinArmSpan = 0.5f;
+        private const float kMinArmSpan = 0.5f;
 
-        private TrackedDeviceManager playerInput = PersistentSingleton<TrackedDeviceManager>.instance;
-        private bool isMeasuring;
-        private float maxMeasuredArmSpan;
-        private float lastUpdateTime;
+        private bool _isMeasuring;
+        private float _maxMeasuredArmSpan;
+        private float _lastUpdateTime;
 
         private void MeasureArmSpan()
         {
-            if (isMeasuring) return;
+            if (_isMeasuring) return;
 
-            isMeasuring = true;
-            maxMeasuredArmSpan = KMinArmSpan;
-            lastUpdateTime = Time.timeSinceLevelLoad;
+            _isMeasuring = true;
+            _maxMeasuredArmSpan = kMinArmSpan;
+            _lastUpdateTime = Time.timeSinceLevelLoad;
 
             InvokeRepeating(nameof(ScanArmSpan), 0.0f, 0.1f);
         }
 
         private void ScanArmSpan()
         {
-            var armSpan = Vector3.Distance(playerInput.leftHand.position, playerInput.rightHand.position);
+            var armSpan = Vector3.Distance(_playerInput.leftHand.position, _playerInput.rightHand.position);
 
-            if (armSpan > maxMeasuredArmSpan)
+            if (armSpan > _maxMeasuredArmSpan)
             {
-                maxMeasuredArmSpan = armSpan;
-                lastUpdateTime = Time.timeSinceLevelLoad;
+                _maxMeasuredArmSpan = armSpan;
+                _lastUpdateTime = Time.timeSinceLevelLoad;
             }
 
-            if (Time.timeSinceLevelLoad - lastUpdateTime < 2.0f)
+            if (Time.timeSinceLevelLoad - _lastUpdateTime < 2.0f)
             {
-                armSpanLabel.SetText($"Measuring... {maxMeasuredArmSpan:0.00} m");
+                _armSpanLabel.SetText($"Measuring... {_maxMeasuredArmSpan:0.00} m");
             }
             else
             {
                 CancelInvoke(nameof(ScanArmSpan));
-                armSpanLabel.SetText($"{maxMeasuredArmSpan:0.00} m");
-                Plugin.settings.playerArmSpan = maxMeasuredArmSpan;
-                isMeasuring = false;
+                _armSpanLabel.SetText($"{_maxMeasuredArmSpan:0.00} m");
+                Plugin.settings.playerArmSpan = _maxMeasuredArmSpan;
+                _isMeasuring = false;
 
                 if (Plugin.settings.resizeMode == AvatarResizeMode.ArmSpan)
                 {

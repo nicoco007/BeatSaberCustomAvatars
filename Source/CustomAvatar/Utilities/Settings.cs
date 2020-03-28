@@ -81,6 +81,16 @@ namespace CustomAvatar.Utilities
             {
                 fullBodyCalibration.rightLeg = Pose.identity;
             }
+
+            if (mirrorRenderScale <= 0)
+            {
+                mirrorRenderScale = 1.0f;
+            }
+
+            if (mirrorSize.x <= 0 || mirrorSize.y <= 0)
+            {
+                mirrorSize = new Vector2(5f, 2.5f);
+            }
         }
     }
 }
