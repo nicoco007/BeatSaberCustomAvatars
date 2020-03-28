@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using CustomAvatar.Utilities;
-using DynamicOpenVR;
 using UnityEngine;
 using UnityEngine.XR;
+using Valve.VR;
 
 namespace CustomAvatar.Tracking
 {
@@ -33,7 +33,15 @@ namespace CustomAvatar.Tracking
 
         public void Start()
         {
-            _isOpenVRRunning = OpenVRUtilities.isInitialized;
+            try
+            {
+                _isOpenVRRunning = OpenVR.IsRuntimeInstalled();
+            }
+            catch (Exception ex)
+            {
+                Plugin.logger.Error("Failed to check if SteamVR is running; assuming it is not");
+                Plugin.logger.Error(ex);
+            }
 
             InputDevices.deviceConnected += device => UpdateInputDevices();
             InputDevices.deviceDisconnected += device => UpdateInputDevices();
@@ -57,11 +65,11 @@ namespace CustomAvatar.Tracking
 
             foreach (InputDevice inputDevice in inputDevices)
             {
-                if (inputDevice.name == head.name) headInputDevice = inputDevice;
-                if (inputDevice.name == leftHand.name) leftHandInputDevice = inputDevice;
+                if (inputDevice.name == head.name)      headInputDevice      = inputDevice;
+                if (inputDevice.name == leftHand.name)  leftHandInputDevice  = inputDevice;
                 if (inputDevice.name == rightHand.name) rightHandInputDevice = inputDevice;
-                if (inputDevice.name == waist.name) waistInputDevice = inputDevice;
-                if (inputDevice.name == leftFoot.name) leftFootInputDevice = inputDevice;
+                if (inputDevice.name == waist.name)     waistInputDevice     = inputDevice;
+                if (inputDevice.name == leftFoot.name)  leftFootInputDevice  = inputDevice;
                 if (inputDevice.name == rightFoot.name) rightFootInputDevice = inputDevice;
             }
 
