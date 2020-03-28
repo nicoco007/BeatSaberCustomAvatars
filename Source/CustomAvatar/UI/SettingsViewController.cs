@@ -16,6 +16,7 @@ namespace CustomAvatar.UI
         public override string ResourceName => "CustomAvatar.Views.SettingsViewController.bsml";
 
         private bool _calibrating = false;
+        private Material _sphereMaterial = null;
 
         #region Components
         
@@ -49,6 +50,8 @@ namespace CustomAvatar.UI
             base.DidActivate(firstActivation, type);
 
             armSpanLabel.SetText($"{Plugin.settings.playerArmSpan:0.00} m");
+
+            _sphereMaterial = new Material(ShaderLoader.unlitShader);
         }
 
         #region Actions
@@ -140,6 +143,8 @@ namespace CustomAvatar.UI
             AvatarManager.instance.avatarTailor.ClearFullBodyTrackingData();
         }
 
+        #endregion
+
         private Transform _waistSphere;
         private Transform _leftFootSphere;
         private Transform _rightFootSphere;
@@ -150,6 +155,7 @@ namespace CustomAvatar.UI
 
             sphere.layer = AvatarLayers.AlwaysVisible;
             sphere.transform.localScale = Vector3.one * 0.1f;
+            sphere.GetComponent<Renderer>().material = _sphereMaterial;
 
             return sphere.transform;
         }
@@ -194,8 +200,6 @@ namespace CustomAvatar.UI
                 }
             }
         }
-
-        #endregion
 
         #region Arm Span Measurement
         

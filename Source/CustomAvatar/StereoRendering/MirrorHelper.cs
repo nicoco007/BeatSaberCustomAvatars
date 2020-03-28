@@ -7,27 +7,6 @@ namespace CustomAvatar.StereoRendering
     {
         public static IEnumerator<AsyncOperation> SpawnMirror(Vector3 position, Quaternion rotation, Vector3 scale, Transform container)
         {
-            AssetBundleCreateRequest shadersBundleCreateRequest = AssetBundle.LoadFromFileAsync("CustomAvatars/Shaders/customavatars.assetbundle");
-            yield return shadersBundleCreateRequest;
-
-            if (!shadersBundleCreateRequest.isDone || shadersBundleCreateRequest.assetBundle == null)
-            {
-                Plugin.logger.Error("Failed to load stereo mirror shader");
-                yield break;
-            }
-
-            AssetBundleRequest assetBundleRequest = shadersBundleCreateRequest.assetBundle.LoadAssetAsync<Shader>("Assets/Shaders/StereoRenderShader-Unlit.shader");
-            yield return assetBundleRequest;
-            shadersBundleCreateRequest.assetBundle.Unload(false);
-
-            if (!assetBundleRequest.isDone || assetBundleRequest.asset == null)
-            {
-                Plugin.logger.Error("Failed to load stereo mirror shader");
-                yield break;
-            }
-
-            Shader stereoRenderShader = assetBundleRequest.asset as Shader;
-
             GameObject mirrorPlane = GameObject.CreatePrimitive(PrimitiveType.Plane);
             mirrorPlane.transform.SetParent(container);
             mirrorPlane.name = "Stereo Mirror";
@@ -35,7 +14,7 @@ namespace CustomAvatar.StereoRendering
             mirrorPlane.transform.localPosition = position + new Vector3(0, scale.z * 5, 0); // plane is 10 units in size at scale 1
             mirrorPlane.transform.localRotation = rotation;
 
-            Material material = new Material(stereoRenderShader);
+            Material material = new Material(ShaderLoader.stereoMirrorShader);
             material.SetFloat("_Cutout", 0.01f);
             
             Renderer renderer = mirrorPlane.GetComponent<Renderer>();
@@ -61,6 +40,8 @@ namespace CustomAvatar.StereoRendering
             stereoRenderer.useScissor = false;
             stereoRenderer.canvasOriginPos = mirrorPlane.transform.position + new Vector3(-10f, 0, 0);
             stereoRenderer.canvasOriginRot = mirrorPlane.transform.rotation;
+
+            yield break;
         }
     }
 }

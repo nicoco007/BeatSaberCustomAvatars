@@ -138,6 +138,7 @@
     <Compile Include="Avatar\AvatarFingerTracking.cs" />
     <Compile Include="Avatar\BodyAwareBehaviour.cs" />
     <Compile Include="KeyboardInputHandler.cs" />
+    <Compile Include="ShaderLoader.cs" />
     <Compile Include="UI\AvatarListItem.cs" />
     <Compile Include="AvatarManager.cs" />
     <Compile Include="AvatarTailor.cs" />

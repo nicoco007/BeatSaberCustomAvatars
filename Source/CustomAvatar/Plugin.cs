@@ -45,6 +45,9 @@ namespace CustomAvatar
 
             KeyboardInputHandler keyboardInputHandler = new GameObject(nameof(KeyboardInputHandler)).AddComponent<KeyboardInputHandler>();
             Object.DontDestroyOnLoad(keyboardInputHandler.gameObject);
+
+            ShaderLoader shaderLoader = new GameObject(nameof(ShaderLoader)).AddComponent<ShaderLoader>();
+            Object.DontDestroyOnLoad(shaderLoader.gameObject);
         }
 
         [OnExit]
