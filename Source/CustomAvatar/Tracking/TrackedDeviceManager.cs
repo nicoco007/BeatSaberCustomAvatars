@@ -17,215 +17,238 @@ namespace CustomAvatar.Tracking
         public TrackedDeviceState rightFoot { get; } = new TrackedDeviceState();
         public TrackedDeviceState waist     { get; } = new TrackedDeviceState();
 
-        // these should only trigger for nodes that are registered to a specific target, not all found XR nodes
-        public event Action<TrackedDeviceState> deviceAdded;
-        public event Action<TrackedDeviceState> deviceRemoved;
-        public event Action<TrackedDeviceState> deviceTrackingAcquired;
-        public event Action<TrackedDeviceState> deviceTrackingLost;
+        // these only trigger for devices that are registered to a specific target, not all found input devices
+        public event Action<TrackedDeviceState, DeviceUse> deviceAdded;
+        public event Action<TrackedDeviceState, DeviceUse> deviceRemoved;
+        public event Action<TrackedDeviceState, DeviceUse> deviceTrackingAcquired;
+        public event Action<TrackedDeviceState, DeviceUse> deviceTrackingLost;
 
-        private readonly HashSet<ulong> _foundNodes = new HashSet<ulong>();
+        private readonly HashSet<string> _foundDevices = new HashSet<string>();
 
         private bool _isOpenVRRunning;
 
+        #region Behaviour Lifecycle
+        #pragma warning disable IDE0051
+        // ReSharper disable UnusedMember.Local
+
         public void Start()
         {
-            _isOpenVRRunning = OpenVRStatus.isRunning;
+            _isOpenVRRunning = OpenVRUtilities.isInitialized;
 
-            InputTracking.nodeAdded += node => UpdateNodes();
-            InputTracking.nodeRemoved += node => UpdateNodes();
+            InputDevices.deviceConnected += device => UpdateInputDevices();
+            InputDevices.deviceDisconnected += device => UpdateInputDevices();
+            InputDevices.deviceConfigChanged += device => UpdateInputDevices();
 
-            UpdateNodes();
-        }
-
-        public void UpdateNodes()
-        {
-            var nodeStates = new List<XRNodeState>();
-            var unassignedDevices = new Queue<XRNodeState>();
-            var serialNumbers = new string[0];
-
-            InputTracking.GetNodeStates(nodeStates);
-
-            if (_isOpenVRRunning)
-            {
-                serialNumbers = OpenVRWrapper.GetTrackedDeviceSerialNumbers();
-            }
-
-            XRNodeState? headNodeState      = null;
-            XRNodeState? leftHandNodeState  = null;
-            XRNodeState? rightHandNodeState = null;
-            XRNodeState? waistNodeState     = null;
-            XRNodeState? leftFootNodeState  = null;
-            XRNodeState? rightFootNodeState = null;
-
-            int trackerCount = 0;
-
-            foreach (XRNodeState nodeState in nodeStates)
-            {
-                if (!_foundNodes.Contains(nodeState.uniqueID))
-                {
-                    Plugin.logger.Info($"Found new node {InputTracking.GetNodeName(nodeState.uniqueID)} with ID {nodeState.uniqueID}");
-                    _foundNodes.Add(nodeState.uniqueID);
-                }
-
-                switch (nodeState.nodeType)
-                {
-                    case XRNode.CenterEye:
-                        headNodeState = nodeState;
-                        break;
-
-                    case XRNode.LeftHand:
-                        leftHandNodeState = nodeState;
-                        break;
-
-                    case XRNode.RightHand:
-                        rightHandNodeState = nodeState;
-                        break;
-
-                    case XRNode.HardwareTracker:
-                        if (_isOpenVRRunning)
-                        {
-                            // try to figure out tracker role using OpenVR
-                            string deviceName = InputTracking.GetNodeName(nodeState.uniqueID);
-                            int openVRDeviceId = Array.FindIndex(serialNumbers, s => !string.IsNullOrEmpty(s) && deviceName.Contains(s));
-                            var role = TrackedDeviceType.Unknown;
-                            
-                            if (openVRDeviceId != -1)
-                            {
-                                role = OpenVRWrapper.GetTrackedDeviceType((uint)openVRDeviceId);
-                            }
-
-                            Plugin.logger.Info($"Tracker {nodeState.uniqueID} has role {role}");
-                            
-                            switch (role)
-                            {
-                                case TrackedDeviceType.Waist:
-                                    waistNodeState = nodeState;
-                                    break;
-
-                                case TrackedDeviceType.LeftFoot:
-                                    leftFootNodeState = nodeState;
-                                    break;
-
-                                case TrackedDeviceType.RightFoot:
-                                    rightFootNodeState = nodeState;
-                                    break;
-
-                                default:
-                                    unassignedDevices.Enqueue(nodeState);
-                                    break;
-                            }
-                        }
-                        else
-                        {
-                            unassignedDevices.Enqueue(nodeState);
-                        }
-
-                        trackerCount++;
-
-                        break;
-                }
-            }
-
-            // fallback if OpenVR tracker roles aren't set/supported
-            if (leftFootNodeState == null && trackerCount >= 2 && unassignedDevices.Count > 0)
-            {
-                leftFootNodeState = unassignedDevices.Dequeue();
-            }
-
-            if (rightFootNodeState == null && trackerCount >= 2 && unassignedDevices.Count > 0)
-            {
-                rightFootNodeState = unassignedDevices.Dequeue();
-            }
-
-            if (waistNodeState == null && unassignedDevices.Count > 0)
-            {
-                waistNodeState = unassignedDevices.Dequeue();
-            }
-
-            AssignTrackedDevice(head,      headNodeState,      nameof(head));
-            AssignTrackedDevice(leftHand,  leftHandNodeState,  nameof(leftHand));
-            AssignTrackedDevice(rightHand, rightHandNodeState, nameof(rightHand));
-            AssignTrackedDevice(waist,     waistNodeState,     nameof(waist));
-            AssignTrackedDevice(leftFoot,  leftFootNodeState,  nameof(leftFoot));
-            AssignTrackedDevice(rightFoot, rightFootNodeState, nameof(rightFoot));
-
-            foreach (ulong uniqueID in _foundNodes.ToList())
-            {
-                if (!nodeStates.Exists(ns => ns.uniqueID == uniqueID))
-                {
-                    Plugin.logger.Info($"Lost node with ID {uniqueID}");
-                    _foundNodes.Remove(uniqueID);
-                }
-            }
-        }
-
-        private void AssignTrackedDevice(TrackedDeviceState deviceState, XRNodeState? possibleNodeState, string use)
-        {
-            if (possibleNodeState.HasValue && !deviceState.found)
-            {
-                XRNodeState nodeState = possibleNodeState.Value;
-
-                Plugin.logger.Info($"Using device \"{InputTracking.GetNodeName(nodeState.uniqueID)}\" ({nodeState.uniqueID}) as {use}");
-
-                deviceState.uniqueID = nodeState.uniqueID;
-                deviceState.found = true;
-                
-                deviceAdded?.Invoke(deviceState);
-            }
-            
-            if (!possibleNodeState.HasValue && deviceState.found) {
-                Plugin.logger.Info($"Lost device with ID {deviceState.uniqueID} that was used as {use}");
-
-                deviceState.uniqueID = default;
-                deviceState.found = false;
-
-                deviceRemoved?.Invoke(deviceState);
-            }
+            UpdateInputDevices();
         }
 
         private void Update()
         {
-            var nodeStates = new List<XRNodeState>();
-            InputTracking.GetNodeStates(nodeStates);
+            var inputDevices = new List<InputDevice>();
 
-            XRNodeState? headNodeState      = null;
-            XRNodeState? leftHandNodeState  = null;
-            XRNodeState? rightHandNodeState = null;
-            XRNodeState? waistNodeState     = null;
-            XRNodeState? leftFootNodeState  = null;
-            XRNodeState? rightFootNodeState = null;
+            InputDevices.GetDevices(inputDevices);
 
-            foreach (XRNodeState nodeState in nodeStates)
+            InputDevice? headInputDevice      = null;
+            InputDevice? leftHandInputDevice  = null;
+            InputDevice? rightHandInputDevice = null;
+            InputDevice? waistInputDevice     = null;
+            InputDevice? leftFootInputDevice  = null;
+            InputDevice? rightFootInputDevice = null;
+
+            foreach (InputDevice inputDevice in inputDevices)
             {
-                if (nodeState.uniqueID == head.uniqueID) headNodeState = nodeState;
-                if (nodeState.uniqueID == leftHand.uniqueID) leftHandNodeState = nodeState;
-                if (nodeState.uniqueID == rightHand.uniqueID) rightHandNodeState = nodeState;
-                if (nodeState.uniqueID == waist.uniqueID) waistNodeState = nodeState;
-                if (nodeState.uniqueID == leftFoot.uniqueID) leftFootNodeState = nodeState;
-                if (nodeState.uniqueID == rightFoot.uniqueID) rightFootNodeState = nodeState;
+                if (inputDevice.name == head.name) headInputDevice = inputDevice;
+                if (inputDevice.name == leftHand.name) leftHandInputDevice = inputDevice;
+                if (inputDevice.name == rightHand.name) rightHandInputDevice = inputDevice;
+                if (inputDevice.name == waist.name) waistInputDevice = inputDevice;
+                if (inputDevice.name == leftFoot.name) leftFootInputDevice = inputDevice;
+                if (inputDevice.name == rightFoot.name) rightFootInputDevice = inputDevice;
             }
 
-            UpdateTrackedDevice(head,      headNodeState,      nameof(head));
-            UpdateTrackedDevice(leftHand,  leftHandNodeState,  nameof(leftHand));
-            UpdateTrackedDevice(rightHand, rightHandNodeState, nameof(rightHand));
-            UpdateTrackedDevice(waist,     waistNodeState,     nameof(head));
-            UpdateTrackedDevice(leftFoot,  leftFootNodeState,  nameof(leftFoot));
-            UpdateTrackedDevice(rightFoot, rightFootNodeState, nameof(rightFoot));
+            UpdateTrackedDevice(head,      headInputDevice,      DeviceUse.Head);
+            UpdateTrackedDevice(leftHand,  leftHandInputDevice,  DeviceUse.LeftHand);
+            UpdateTrackedDevice(rightHand, rightHandInputDevice, DeviceUse.RightHand);
+            UpdateTrackedDevice(waist,     waistInputDevice,     DeviceUse.Waist);
+            UpdateTrackedDevice(leftFoot,  leftFootInputDevice,  DeviceUse.LeftFoot);
+            UpdateTrackedDevice(rightFoot, rightFootInputDevice, DeviceUse.RightFoot);
+        }
+        
+        // ReSharper restore UnusedMember.Local
+        #pragma warning restore IDE0051
+        #endregion
+
+        private void UpdateInputDevices()
+        {
+            var inputDevices = new List<InputDevice>();
+            var unassignedDevices = new Queue<InputDevice>();
+            var openVRDevicesBySerialNumber = new Dictionary<string, uint>();
+
+            InputDevices.GetDevices(inputDevices);
+            
+            var deviceRoles = new Dictionary<string, TrackedDeviceRole>(inputDevices.Count);
+
+            if (_isOpenVRRunning)
+            {
+                string[] serialNumbers = OpenVRWrapper.GetTrackedDeviceSerialNumbers();
+
+                for (uint i = 0; i < serialNumbers.Length; i++)
+                {
+                    if (string.IsNullOrEmpty(serialNumbers[i])) continue;
+
+                    Plugin.logger.Debug($"Got serial number \"{serialNumbers[i]}\" for device at index {i}");
+                    openVRDevicesBySerialNumber.Add(serialNumbers[i], i);
+                }
+            }
+
+            InputDevice? headInputDevice      = null;
+            InputDevice? leftHandInputDevice  = null;
+            InputDevice? rightHandInputDevice = null;
+            InputDevice? waistInputDevice     = null;
+            InputDevice? leftFootInputDevice  = null;
+            InputDevice? rightFootInputDevice = null;
+
+            int trackerCount = 0;
+
+            foreach (InputDevice device in inputDevices)
+            {
+                if (!device.isValid) continue;
+
+                deviceRoles.Add(device.name, TrackedDeviceRole.Unknown);
+
+                if (!_foundDevices.Contains(device.name))
+                {
+                    Plugin.logger.Info($"Found new input device \"{device.name}\" with serial number \"{device.serialNumber}\"");
+                    _foundDevices.Add(device.name);
+                }
+
+                if (device.HasCharacteristics(InputDeviceCharacteristics.HeadMounted))
+                {
+                    headInputDevice = device;
+                }
+                else if (device.HasCharacteristics(InputDeviceCharacteristics.HeldInHand |
+                                                   InputDeviceCharacteristics.Left))
+                {
+                    leftHandInputDevice = device;
+                }
+                else if (device.HasCharacteristics(InputDeviceCharacteristics.HeldInHand |
+                                                   InputDeviceCharacteristics.Right))
+                {
+                    rightHandInputDevice = device;
+                }
+                else if (device.HasCharacteristics(InputDeviceCharacteristics.TrackedDevice) && !device.HasCharacteristics(InputDeviceCharacteristics.TrackingReference))
+                {
+                    if (_isOpenVRRunning &&
+                        !string.IsNullOrEmpty(device.serialNumber) &&
+                        openVRDevicesBySerialNumber.TryGetValue(device.serialNumber, out uint openVRDeviceId))
+                    {
+                        // try to figure out tracker role using OpenVR
+                        var role = OpenVRWrapper.GetTrackedDeviceRole(openVRDeviceId);
+                        deviceRoles[device.name] = role;
+
+                        Plugin.logger.Info($"Tracker \"{device.name}\" has role {role}");
+
+                        switch (role)
+                        {
+                            case TrackedDeviceRole.Waist:
+                                waistInputDevice = device;
+                                break;
+
+                            case TrackedDeviceRole.LeftFoot:
+                                leftFootInputDevice = device;
+                                break;
+
+                            case TrackedDeviceRole.RightFoot:
+                                rightFootInputDevice = device;
+                                break;
+
+                            default:
+                                unassignedDevices.Enqueue(device);
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        unassignedDevices.Enqueue(device);
+                    }
+
+                    trackerCount++;
+                }
+            }
+
+            // fallback if OpenVR tracker roles aren't set/supported
+            if (leftFootInputDevice == null && trackerCount >= 2 && unassignedDevices.Count > 0)
+            {
+                leftFootInputDevice = unassignedDevices.Dequeue();
+            }
+
+            if (rightFootInputDevice == null && trackerCount >= 2 && unassignedDevices.Count > 0)
+            {
+                rightFootInputDevice = unassignedDevices.Dequeue();
+            }
+
+            if (waistInputDevice == null && unassignedDevices.Count > 0)
+            {
+                waistInputDevice = unassignedDevices.Dequeue();
+            }
+
+            AssignTrackedDevice(head,      headInputDevice,      DeviceUse.Head,      headInputDevice.HasValue      ? deviceRoles[headInputDevice.Value.name]      : TrackedDeviceRole.Unknown);
+            AssignTrackedDevice(leftHand,  leftHandInputDevice,  DeviceUse.LeftHand,  leftHandInputDevice.HasValue  ? deviceRoles[leftHandInputDevice.Value.name]  : TrackedDeviceRole.Unknown);
+            AssignTrackedDevice(rightHand, rightHandInputDevice, DeviceUse.RightHand, rightHandInputDevice.HasValue ? deviceRoles[rightHandInputDevice.Value.name] : TrackedDeviceRole.Unknown);
+            AssignTrackedDevice(waist,     waistInputDevice,     DeviceUse.Waist,     waistInputDevice.HasValue     ? deviceRoles[waistInputDevice.Value.name]     : TrackedDeviceRole.Unknown);
+            AssignTrackedDevice(leftFoot,  leftFootInputDevice,  DeviceUse.LeftFoot,  leftFootInputDevice.HasValue  ? deviceRoles[leftFootInputDevice.Value.name]  : TrackedDeviceRole.Unknown);
+            AssignTrackedDevice(rightFoot, rightFootInputDevice, DeviceUse.RightFoot, rightFootInputDevice.HasValue ? deviceRoles[rightFootInputDevice.Value.name] : TrackedDeviceRole.Unknown);
+
+            foreach (string deviceName in _foundDevices.ToList())
+            {
+                if (!inputDevices.Exists(d => d.name == deviceName))
+                {
+                    Plugin.logger.Info($"Lost device \"{deviceName}\"");
+                    _foundDevices.Remove(deviceName);
+                }
+            }
         }
 
-        private void UpdateTrackedDevice(TrackedDeviceState deviceState, XRNodeState? possibleNodeState, string use)
+        private void AssignTrackedDevice(TrackedDeviceState deviceState, InputDevice? possibleInputDevice, DeviceUse use, TrackedDeviceRole deviceRole)
         {
-            if (!possibleNodeState.HasValue) return;
+            if (possibleInputDevice.HasValue && !deviceState.found)
+            {
+                InputDevice inputDevice = possibleInputDevice.Value;
 
-            var nodeState = possibleNodeState.Value;
+                Plugin.logger.Info($"Using device \"{inputDevice.name}\" as {use}");
 
-            if (!nodeState.tracked)
+                deviceState.name = inputDevice.name;
+                deviceState.serialNumber = inputDevice.serialNumber;
+                deviceState.found = true;
+                deviceState.role = deviceRole;
+                
+                deviceAdded?.Invoke(deviceState, use);
+            }
+            
+            if (!possibleInputDevice.HasValue && deviceState.found) {
+                Plugin.logger.Info($"Lost device \"{deviceState.name}\" that was used as {use}");
+
+                deviceState.name = null;
+                deviceState.serialNumber = null;
+                deviceState.found = false;
+                deviceState.role = TrackedDeviceRole.Unknown;
+
+                deviceRemoved?.Invoke(deviceState, use);
+            }
+        }
+
+        private void UpdateTrackedDevice(TrackedDeviceState deviceState, InputDevice? possibleInputDevice, DeviceUse use)
+        {
+            if (!possibleInputDevice.HasValue) return;
+
+            var inputDevice = possibleInputDevice.Value;
+
+            if (!inputDevice.TryGetFeatureValue(CommonUsages.isTracked, out bool isTracked) || !isTracked)
             {
                 if (deviceState.tracked)
                 {
-                    Plugin.logger.Info($"Lost tracking of device with ID {deviceState.uniqueID}");
+                    Plugin.logger.Info($"Lost tracking of device \"{deviceState.name}\"");
                     deviceState.tracked = false;
-                    deviceTrackingLost?.Invoke(deviceState);
+                    deviceTrackingLost?.Invoke(deviceState, use);
                 }
 
                 return;
@@ -233,22 +256,42 @@ namespace CustomAvatar.Tracking
 
             if (!deviceState.tracked)
             {
-                Plugin.logger.Info($"Acquired tracking of device with ID {deviceState.uniqueID}");
+                Plugin.logger.Info($"Acquired tracking of device \"{deviceState.name}\"");
                 deviceState.tracked = true;
-                deviceTrackingAcquired?.Invoke(deviceState);
+                deviceTrackingAcquired?.Invoke(deviceState, use);
             }
             
             Vector3 origin = BeatSaberUtil.GetRoomCenter();
             Quaternion originRotation = BeatSaberUtil.GetRoomRotation();
 
-            if (nodeState.TryGetPosition(out Vector3 position))
+            if (inputDevice.TryGetFeatureValue(CommonUsages.devicePosition, out Vector3 position))
             {
                 deviceState.position = origin + originRotation * position;
             }
 
-            if (nodeState.TryGetRotation(out Quaternion rotation))
+            if (inputDevice.TryGetFeatureValue(CommonUsages.deviceRotation, out Quaternion rotation))
             {
                 deviceState.rotation = originRotation * rotation;
+
+                // Driver4VR rotation correction
+                if (deviceState.name?.StartsWith("d4vr_tracker_") == true && (use == DeviceUse.LeftFoot || use == DeviceUse.RightFoot))
+                {
+                    deviceState.rotation *= Quaternion.Euler(-90, 180, 0);
+                }
+
+                // KinectToVR rotation correction
+                if (deviceState.role == TrackedDeviceRole.KinectToVrTracker)
+                {
+                    if (use == DeviceUse.Waist)
+                    {
+                        deviceState.rotation *= Quaternion.Euler(-90, 180, 0);
+                    }
+
+                    if (use == DeviceUse.LeftFoot || use == DeviceUse.RightFoot)
+                    {
+                        deviceState.rotation *= Quaternion.Euler(0, 180, 0);
+                    }
+                }
             }
         }
     }

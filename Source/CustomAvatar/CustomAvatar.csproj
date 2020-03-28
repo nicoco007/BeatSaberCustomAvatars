@@ -59,12 +59,12 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\IPA.Loader.dll</HintPath>
     </Reference>
-    <Reference Include="MainAssembly">
-      <HintPath>..\..\Libraries\MainAssembly.dll</HintPath>
+    <Reference Include="Main">
+      <HintPath>..\..\Libraries\Main.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json.12.0.0.0, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libraries\Newtonsoft.Json.12.0.0.0.dll</HintPath>
+      <HintPath>..\..\Libraries\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -104,6 +104,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>..\..\Libraries\UnityEngine.InputLegacyModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.ParticleSystemModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\UnityEngine.ParticleSystemModule.dll</HintPath>
@@ -129,21 +132,28 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AvatarBehaviour.cs" />
+    <Compile Include="Avatar\AvatarIK.cs" />
+    <Compile Include="Avatar\AvatarTracking.cs" />
     <Compile Include="AvatarLayers.cs" />
-    <Compile Include="AvatarListItem.cs" />
+    <Compile Include="Avatar\AvatarFingerTracking.cs" />
+    <Compile Include="Avatar\BodyAwareBehaviour.cs" />
+    <Compile Include="KeyboardInputHandler.cs" />
+    <Compile Include="UI\AvatarListItem.cs" />
     <Compile Include="AvatarManager.cs" />
     <Compile Include="AvatarTailor.cs" />
     <Compile Include="AvatarResizeMode.cs" />
     <Compile Include="FirstPersonExclusion.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Legacy\Aliases.cs" />
+    <Compile Include="StereoRendering\MirrorHelper.cs" />
     <Compile Include="Tracking\AvatarInput.cs" />
+    <Compile Include="Tracking\Extensions.cs" />
+    <Compile Include="Tracking\DeviceUse.cs" />
     <Compile Include="Tracking\VRAvatarInput.cs" />
     <Compile Include="Utilities\BeatSaberUtil.cs" />
-    <Compile Include="CustomAvatar.cs" />
+    <Compile Include="Avatar\LoadedAvatar.cs" />
     <Compile Include="AvatarDescriptor.cs" />
-    <Compile Include="AvatarEventsPlayer.cs" />
+    <Compile Include="Avatar\AvatarEventsPlayer.cs" />
     <Compile Include="EventFilterBehaviour.cs" />
     <Compile Include="EventFilters.cs" />
     <Compile Include="Exceptions\AvatarLoadException.cs" />
@@ -158,13 +168,13 @@
     <Compile Include="VRIKManager.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SpawnedAvatar.cs" />
+    <Compile Include="Avatar\SpawnedAvatar.cs" />
     <Compile Include="StereoRendering\StereoRenderer.cs" />
     <Compile Include="StereoRendering\StereoRenderManager.cs" />
     <Compile Include="StereoRendering\VRRenderEventDetector.cs" />
     <Compile Include="Tracking\TrackedDeviceManager.cs" />
     <Compile Include="Tracking\TrackedDeviceState.cs" />
-    <Compile Include="Tracking\TrackedDeviceType.cs" />
+    <Compile Include="Tracking\TrackedDeviceRole.cs" />
     <Compile Include="UI\AvatarListFlowCoordinator.cs" />
     <Compile Include="UI\AvatarListViewController.cs" />
     <Compile Include="UI\MirrorViewController.cs" />
@@ -191,6 +201,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\ban.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <AutomatedBuild>false</AutomatedBuild>

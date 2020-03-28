@@ -23,7 +23,7 @@ namespace CustomAvatar.Utilities
         {
             JObject obj = serializer.Deserialize<JObject>(reader);
 
-            if (obj == null) return default;
+            if (obj == null) return Vector3.zero;
 
             return new Vector3(obj.Value<float>("x"), obj.Value<float>("y"), obj.Value<float>("z"));
         }

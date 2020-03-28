@@ -12,7 +12,7 @@ namespace CustomAvatar.Tracking
         }
     }
 
-    internal enum TrackedDeviceType
+    internal enum TrackedDeviceRole
     {
         Unknown,
         [TrackedDeviceType("vive")] ViveHeadset,
@@ -26,6 +26,7 @@ namespace CustomAvatar.Tracking
         [TrackedDeviceType("vive_tracker_waist")] Waist,
         [TrackedDeviceType("vive_tracker_chest")] Chest,
         [TrackedDeviceType("vive_tracker_camera")] Camera,
-        [TrackedDeviceType("vive_tracker_keyboard")] Keyboard
+        [TrackedDeviceType("vive_tracker_keyboard")] Keyboard,
+        [TrackedDeviceType("kinect_device")] KinectToVrTracker
     }
 }

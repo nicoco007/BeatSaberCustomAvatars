@@ -2,15 +2,19 @@
   "$schema": "https://raw.githubusercontent.com/nike4613/ModSaber-MetadataFileSchema/master/Schema.json",
   "author": "Custom Avatars Contributors",
   "description": "A plugin to let you use custom avatars in Beat Saber.",
-  "gameVersion": "1.7.0",
+  "gameVersion": "1.8.0",
   "id": "CustomAvatars",
   "icon": "CustomAvatar.Resources.icon.png",
   "name": "Custom Avatars",
-  "version": "5.0.0-beta.6",
+  "version": "5.0.0-beta.7",
   "features": [],
   "dependsOn": {
-    "BSIPA": "^3.13.0",
+    "BSIPA": "^4.0.0",
     "BeatSaberMarkupLanguage": "^1.0.0",
-    "BS Utils": "^1.3.0"
-  }
+    "DynamicOpenVR": "^0.2.0"
+  },
+  "files": [
+    "DynamicOpenVR\\Actions\\customavatars.json",
+    "DynamicOpenVR\\Bindings\\customavatars_knuckles.json"
+  ]
 }

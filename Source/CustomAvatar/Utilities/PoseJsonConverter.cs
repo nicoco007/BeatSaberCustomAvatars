@@ -23,7 +23,7 @@ namespace CustomAvatar.Utilities
         {
             JObject obj = serializer.Deserialize<JObject>(reader);
 
-            if (obj == null) return default;
+            if (obj == null) return Pose.identity;
 
             return new Pose(
                 obj.Value<JObject>("position")?.ToObject<Vector3>(serializer) ?? default,

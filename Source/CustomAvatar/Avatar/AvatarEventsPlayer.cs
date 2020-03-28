@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace CustomAvatar
+namespace CustomAvatar.Avatar
 {
     internal class AvatarEventsPlayer : MonoBehaviour
     {
@@ -156,12 +156,12 @@ namespace CustomAvatar
             }
         }
 
-        private void SaberStartCollide(Saber.SaberType saber)
+        private void SaberStartCollide(SaberType saber)
         {
             _eventManager?.SaberStartColliding?.Invoke();
         }
 
-        private void SaberEndCollide(Saber.SaberType saber)
+        private void SaberEndCollide(SaberType saber)
         {
             _eventManager?.SaberStopColliding?.Invoke();
         }

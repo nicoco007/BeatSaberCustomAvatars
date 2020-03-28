@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using CustomAvatar.Avatar;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
 using UnityEngine;
@@ -60,7 +61,7 @@ namespace CustomAvatar
             }
 
             // apply scale
-            avatar.behaviour.scale = scale;
+            avatar.tracking.scale = scale;
 
             SharedCoroutineStarter.instance.StartCoroutine(FloorMendingWithDelay(avatar));
         }
@@ -73,10 +74,10 @@ namespace CustomAvatar
 
             if (SettingsManager.settings.enableFloorAdjust && avatar.customAvatar.isIKAvatar)
             {
-                float playerViewPointHeight = BeatSaberUtil.GetPlayerEyeHeight();
-                float avatarViewPointHeight = avatar.customAvatar.viewPoint.position.y;
+                float playerEyeHeight = BeatSaberUtil.GetPlayerEyeHeight();
+                float avatarEyeHeight = avatar.customAvatar.eyeHeight;
 
-                floorOffset = playerViewPointHeight - avatarViewPointHeight * avatar.behaviour.scale;
+                floorOffset = playerEyeHeight - avatarEyeHeight * avatar.tracking.scale;
 
                 if (SettingsManager.settings.moveFloorWithRoomAdjust)
                 {
@@ -87,7 +88,7 @@ namespace CustomAvatar
             floorOffset = (float) Math.Round(floorOffset, 3); // round to millimeter
 
             // apply offset
-			avatar.behaviour.position = new Vector3(0, floorOffset, 0);
+			avatar.tracking.verticalPosition = floorOffset;
             
             // ReSharper disable Unity.PerformanceCriticalCodeInvocation
             GameObject menuPlayersPlace = GameObject.Find("MenuPlayersPlace");
@@ -127,13 +128,13 @@ namespace CustomAvatar
             TrackedDeviceState rightFoot = input.rightFoot;
             TrackedDeviceState pelvis = input.waist;
 
-            Vector3 normal = Vector3.up;
+            Vector3 floorNormal = Vector3.up;
             float floorPosition = SettingsManager.settings.moveFloorWithRoomAdjust ? BeatSaberUtil.GetRoomCenter().y : 0;
 
             if (leftFoot.found)
             {
                 Vector3 leftFootForward = leftFoot.rotation * Vector3.up; // forward on feet trackers is y (up)
-                Vector3 leftFootStraightForward = Vector3.ProjectOnPlane(leftFootForward, normal); // get projection of forward vector on xz plane (floor)
+                Vector3 leftFootStraightForward = Vector3.ProjectOnPlane(leftFootForward, floorNormal); // get projection of forward vector on xz plane (floor)
                 Quaternion leftRotationCorrection = Quaternion.Inverse(leftFoot.rotation) * Quaternion.LookRotation(Vector3.up, leftFootStraightForward); // get difference between world rotation and flat forward rotation
                 SettingsManager.settings.fullBodyCalibration.leftLeg = new Pose((leftFoot.position.y - floorPosition) * Vector3.down, leftRotationCorrection);
                 Plugin.logger.Info("Saved left foot pose correction " + SettingsManager.settings.fullBodyCalibration.leftLeg);
@@ -142,7 +143,7 @@ namespace CustomAvatar
             if (rightFoot.found)
             {
                 Vector3 rightFootForward = rightFoot.rotation * Vector3.up;
-                Vector3 rightFootStraightForward = Vector3.ProjectOnPlane(rightFootForward, normal);
+                Vector3 rightFootStraightForward = Vector3.ProjectOnPlane(rightFootForward, floorNormal);
                 Quaternion rightRotationCorrection = Quaternion.Inverse(rightFoot.rotation) * Quaternion.LookRotation(Vector3.up, rightFootStraightForward);
                 SettingsManager.settings.fullBodyCalibration.rightLeg = new Pose((rightFoot.position.y - floorPosition) * Vector3.down, rightRotationCorrection);
                 Plugin.logger.Info("Saved right foot pose correction " + SettingsManager.settings.fullBodyCalibration.rightLeg);
@@ -153,9 +154,15 @@ namespace CustomAvatar
                 // using "standard" 8 head high body proportions w/ eyes at 1/2 head height
                 // reference: https://miro.medium.com/max/3200/1*cqTRyEGl26l4CImEmWz68Q.jpeg
                 float eyeHeight = head.position.y - floorPosition;
+
                 Vector3 wantedPelvisPosition = new Vector3(0, eyeHeight / 15f * 10f, 0);
                 Vector3 pelvisPositionCorrection = wantedPelvisPosition - Vector3.up * (pelvis.position.y - floorPosition);
-                SettingsManager.settings.fullBodyCalibration.pelvis = new Pose(pelvisPositionCorrection, Quaternion.identity);
+
+                Vector3 pelvisForward = pelvis.rotation * Vector3.forward;
+                Vector3 pelvisStraightForward = Vector3.ProjectOnPlane(pelvisForward, floorNormal);
+                Quaternion pelvisRotationCorrection = Quaternion.Inverse(pelvis.rotation) * Quaternion.LookRotation(pelvisStraightForward, Vector3.up);
+
+                SettingsManager.settings.fullBodyCalibration.pelvis = new Pose(pelvisPositionCorrection, pelvisRotationCorrection);
                 Plugin.logger.Info("Saved pelvis pose correction " + SettingsManager.settings.fullBodyCalibration.pelvis);
             }
         }

@@ -19,23 +19,23 @@ namespace CustomAvatar.Tracking
             return serialNumbers;
         }
 
-        internal static TrackedDeviceType GetTrackedDeviceType(uint deviceIndex)
+        internal static TrackedDeviceRole GetTrackedDeviceRole(uint deviceIndex)
         {
             string name = GetStringTrackedDeviceProperty(deviceIndex, ETrackedDeviceProperty.Prop_ControllerType_String);
 
             if (name == null)
             {
-                return TrackedDeviceType.Unknown;
+                return TrackedDeviceRole.Unknown;
             }
 
-            FieldInfo field = typeof(TrackedDeviceType).GetFields().FirstOrDefault(f => f.GetCustomAttribute<TrackedDeviceTypeAttribute>()?.Name == name);
+            FieldInfo field = typeof(TrackedDeviceRole).GetFields().FirstOrDefault(f => f.GetCustomAttribute<TrackedDeviceTypeAttribute>()?.Name == name);
 
             if (field == null)
             {
-                return TrackedDeviceType.Unknown;
+                return TrackedDeviceRole.Unknown;
             }
 
-            return (TrackedDeviceType)field.GetValue(null);
+            return (TrackedDeviceRole)field.GetValue(null);
         }
 
         internal static string GetStringTrackedDeviceProperty(uint deviceIndex, ETrackedDeviceProperty property)

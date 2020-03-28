@@ -8,14 +8,16 @@ using CustomAvatar.Utilities;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
-using Input = UnityEngine.Input;
 using Logger = IPA.Logging.Logger;
+using Object = UnityEngine.Object;
 
 namespace CustomAvatar
 {
-    internal class Plugin : IBeatSaberPlugin
+    [Plugin(RuntimeOptions.SingleStartInit)]
+    internal class Plugin
     {
         private GameScenesManager _scenesManager;
+        private GameObject _mirrorContainer;
         
         public event Action<ScenesTransitionSetupDataSO, DiContainer> sceneTransitionDidFinish;
 
@@ -23,25 +25,34 @@ namespace CustomAvatar
 
         public static Logger logger { get; private set; }
 
-        public void Init(Logger logger)
+        [Init]
+        public Plugin(Logger logger)
         {
             Plugin.logger = logger;
             instance = this;
         }
 
-        public void OnApplicationStart()
+        [OnStart]
+        public void OnStart()
         {
             SettingsManager.LoadSettings();
             AvatarManager.instance.LoadAvatarFromSettingsAsync();
+            SceneManager.sceneLoaded += OnSceneLoaded;
+
+            KeyboardInputHandler keyboardInputHandler = new GameObject(nameof(KeyboardInputHandler)).AddComponent<KeyboardInputHandler>();
+            Object.DontDestroyOnLoad(keyboardInputHandler.gameObject);
         }
 
-        public void OnApplicationQuit()
+        [OnExit]
+        public void OnExit()
         {
             if (_scenesManager != null)
             {
                 _scenesManager.transitionDidFinishEvent -= sceneTransitionDidFinish;
                 _scenesManager.transitionDidFinishEvent -= SceneTransitionDidFinish;
             }
+
+            SceneManager.sceneLoaded -= OnSceneLoaded;
 
             SettingsManager.SaveSettings();
         }
@@ -61,12 +72,25 @@ namespace CustomAvatar
 
             if (newScene.name == "MenuCore")
             {
-                MenuButtons.instance.RegisterButton(new MenuButton("Avatars", () =>
+                try
                 {
-                    var mainFlowCoordinator = Resources.FindObjectsOfTypeAll<MainFlowCoordinator>().First();
-                    var flowCoordinator = new GameObject("AvatarListFlowCoordinator").AddComponent<AvatarListFlowCoordinator>();
-                    mainFlowCoordinator.InvokePrivateMethod("PresentFlowCoordinator", flowCoordinator, null, true, false);
-                }));
+                    MenuButtons.instance.RegisterButton(new MenuButton("Avatars", () =>
+                    {
+                        var mainFlowCoordinator = Resources.FindObjectsOfTypeAll<MainFlowCoordinator>().First();
+                        var flowCoordinator = new GameObject("AvatarListFlowCoordinator")
+                            .AddComponent<AvatarListFlowCoordinator>();
+                        mainFlowCoordinator.InvokePrivateMethod("PresentFlowCoordinator", flowCoordinator, null, true,
+                            false);
+                    }));
+                }
+                catch (Exception)
+                {
+                    logger.Warn("Failed to add menu button, spawning mirror instead");
+
+                    _mirrorContainer = new GameObject();
+                    GameObject.DontDestroyOnLoad(_mirrorContainer);
+                    SharedCoroutineStarter.instance.StartCoroutine(MirrorHelper.SpawnMirror(new Vector3(0, 0, -1.5f), Quaternion.Euler(-90f, 180f, 0), new Vector3(0.50f, 1f, 0.25f), _mirrorContainer.transform));
+                }
             }
         }
 
@@ -94,49 +118,11 @@ namespace CustomAvatar
             }
         }
 
-        public void OnUpdate()
-        {
-            AvatarManager avatarManager = AvatarManager.instance;
-
-            if (Input.GetKeyDown(KeyCode.PageDown))
-            {
-                avatarManager.SwitchToNextAvatar();
-            }
-            else if (Input.GetKeyDown(KeyCode.PageUp))
-            {
-                avatarManager.SwitchToPreviousAvatar();
-            }
-            else if (Input.GetKeyDown(KeyCode.Home))
-            {
-                SettingsManager.settings.isAvatarVisibleInFirstPerson = !SettingsManager.settings.isAvatarVisibleInFirstPerson;
-                logger.Info($"{(SettingsManager.settings.isAvatarVisibleInFirstPerson ? "Enabled" : "Disabled")} first person visibility");
-                avatarManager.currentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
-            }
-            else if (Input.GetKeyDown(KeyCode.End))
-            {
-                SettingsManager.settings.resizeMode = (AvatarResizeMode) (((int)SettingsManager.settings.resizeMode + 1) % 3);
-                logger.Info($"Set resize mode to {SettingsManager.settings.resizeMode}");
-                avatarManager.ResizeCurrentAvatar();
-            }
-            else if (Input.GetKeyDown(KeyCode.Insert))
-            {
-                SettingsManager.settings.enableFloorAdjust = !SettingsManager.settings.enableFloorAdjust;
-                logger.Info($"{(SettingsManager.settings.enableFloorAdjust ? "Enabled" : "Disabled")} floor adjust");
-                avatarManager.ResizeCurrentAvatar();
-            }
-        }
-
         private void SetCameraCullingMask(Camera camera)
         {
             logger.Debug("Adding third person culling mask to " + camera.name);
 
             camera.cullingMask &= ~(1 << AvatarLayers.OnlyInThirdPerson);
         }
-
-        public void OnFixedUpdate() { }
-
-        public void OnSceneUnloaded(Scene scene) { }
-
-        public void OnActiveSceneChanged(Scene prevScene, Scene nextScene) { }
     }
 }
