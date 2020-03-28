@@ -18,7 +18,7 @@ with open(file_path, "r") as json_file:
 
 version = obj["version"]
 
-obj["version"] = version[0:version.index("-", version.index("-") + 1)] + "-" + commit_hash
+obj["version"] = version[0:version.rindex("-")] + "-" + commit_hash
 
 with open(file_path, "w") as json_file:
     json.dump(obj, json_file, indent=2)
