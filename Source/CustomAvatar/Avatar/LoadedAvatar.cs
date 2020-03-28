@@ -144,7 +144,7 @@ namespace CustomAvatar.Avatar
 
             if (!headTarget)
             {
-                Plugin.logger.Warn("Could not find head target; height adjust may be broken");
+                // target will be added automatically, no need to adjust
                 return Vector3.zero;
             }
 
