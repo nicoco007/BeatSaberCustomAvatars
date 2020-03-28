@@ -48,7 +48,7 @@ namespace CustomAvatar
             SceneManager.sceneLoaded -= OnSceneLoaded;
         }
 
-        public void GetAvatarsAsync(Action<LoadedAvatar> success, Action<Exception> error)
+        public void GetAvatarsAsync(Action<LoadedAvatar> success = null, Action<Exception> error = null)
         {
             Plugin.logger.Info("Loading all avatars from " + kCustomAvatarsPath);
 
@@ -80,12 +80,7 @@ namespace CustomAvatar
         {
             SharedCoroutineStarter.instance.StartCoroutine(LoadedAvatar.FromFileCoroutine(filePath, avatar =>
             {
-                Plugin.logger.Info("Successfully loaded avatar " + avatar.descriptor.name);
                 SwitchToAvatar(avatar);
-            }, ex =>
-            {
-                Plugin.logger.Error("Failed to load avatar: " + ex.Message);
-                Plugin.logger.Error(ex);
             }));
         }
 

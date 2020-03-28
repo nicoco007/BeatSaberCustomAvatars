@@ -85,15 +85,9 @@ namespace CustomAvatar.UI
             
             AvatarManager.instance.GetAvatarsAsync(avatar =>
             {
-                Plugin.logger.Info("Loaded avatar " + avatar.descriptor.name);
-
                 _avatars.Add(new AvatarListItem(avatar));
 
                 ReloadData();
-            }, ex =>
-            {
-                Plugin.logger.Error("Failed to load avatar: " + ex.Message);
-                Plugin.logger.Error(ex);
             });
         }
 

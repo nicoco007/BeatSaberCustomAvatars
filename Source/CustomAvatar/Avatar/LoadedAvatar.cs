@@ -16,7 +16,7 @@ namespace CustomAvatar.Avatar
         public GameObject gameObject { get; }
         public AvatarDescriptor descriptor { get; }
         public float eyeHeight { get; }
-        public float armSpan { get; set; }
+        public float armSpan { get; }
         public bool supportsFingerTracking { get; }
 
         #pragma warning disable 618
@@ -25,7 +25,7 @@ namespace CustomAvatar.Avatar
                                    gameObject.GetComponentInChildren<IKManagerAdvanced>() as object) != null;
         #pragma warning restore 618
 
-        public LoadedAvatar(string fullPath, GameObject avatarGameObject)
+        private LoadedAvatar(string fullPath, GameObject avatarGameObject)
         {
             this.fullPath = fullPath ?? throw new ArgumentNullException(nameof(avatarGameObject));
             gameObject = avatarGameObject ? avatarGameObject : throw new ArgumentNullException(nameof(avatarGameObject));
@@ -38,16 +38,21 @@ namespace CustomAvatar.Avatar
             armSpan = GetArmSpan();
         }
 
-        public static IEnumerator<AsyncOperation> FromFileCoroutine(string fileName, Action<LoadedAvatar> success, Action<Exception> error)
+        public static IEnumerator<AsyncOperation> FromFileCoroutine(string fileName, Action<LoadedAvatar> success = null, Action<Exception> error = null)
         {
-            Plugin.logger.Info("Loading avatar " + fileName);
+            Plugin.logger.Info($"Loading avatar from '{fileName}'");
 
             AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(Path.Combine(AvatarManager.kCustomAvatarsPath, fileName));
             yield return assetBundleCreateRequest;
 
             if (!assetBundleCreateRequest.isDone || !assetBundleCreateRequest.assetBundle)
             {
-                error(new AvatarLoadException("Avatar game object not found"));
+                var exception = new AvatarLoadException("Avatar game object not found");
+
+                Plugin.logger.Error($"Failed to load avatar from '{fileName}'");
+                Plugin.logger.Error(exception);
+
+                error?.Invoke(exception);
                 yield break;
             }
 
@@ -57,16 +62,28 @@ namespace CustomAvatar.Avatar
 
             if (!assetBundleRequest.isDone || assetBundleRequest.asset == null)
             {
-                error(new AvatarLoadException("Could not load asset bundle"));
+                var exception = new AvatarLoadException("Could not load asset bundle");
+
+                Plugin.logger.Error($"Failed to load avatar from '{fileName}'");
+                Plugin.logger.Error(exception);
+
+                error?.Invoke(exception);
                 yield break;
             }
                 
             try
             {
-                success(new LoadedAvatar(fileName, assetBundleRequest.asset as GameObject));
+                var loadedAvatar = new LoadedAvatar(fileName, assetBundleRequest.asset as GameObject);
+
+                Plugin.logger.Info($"Successfully loaded avatar '{loadedAvatar.descriptor.name}' from '{fileName}'");
+
+                success?.Invoke(loadedAvatar);
             }
             catch (Exception ex)
             {
+                Plugin.logger.Error($"Failed to load avatar from '{fileName}'");
+                Plugin.logger.Error(ex);
+
                 error(ex);
             }
         }
