@@ -5,13 +5,15 @@ namespace CustomAvatar.StereoRendering
 {
     internal static class MirrorHelper
     {
-        public static IEnumerator<AsyncOperation> SpawnMirror(Vector3 position, Quaternion rotation, Vector3 scale, Transform container)
+        public static void CreateMirror(Vector3 position, Quaternion rotation, Vector2 size, Transform container)
         {
+            Vector3 scale = new Vector3(size.x / 10, 1, size.y / 10); // plane is 10 units in size at scale 1, width is x and height is z
+
             GameObject mirrorPlane = GameObject.CreatePrimitive(PrimitiveType.Plane);
             mirrorPlane.transform.SetParent(container);
             mirrorPlane.name = "Stereo Mirror";
             mirrorPlane.transform.localScale = scale;
-            mirrorPlane.transform.localPosition = position + new Vector3(0, scale.z * 5, 0); // plane is 10 units in size at scale 1
+            mirrorPlane.transform.localPosition = position;
             mirrorPlane.transform.localRotation = rotation;
 
             Material material = new Material(ShaderLoader.stereoMirrorShader);
@@ -40,8 +42,6 @@ namespace CustomAvatar.StereoRendering
             stereoRenderer.useScissor = false;
             stereoRenderer.canvasOriginPos = mirrorPlane.transform.position + new Vector3(-10f, 0, 0);
             stereoRenderer.canvasOriginRot = mirrorPlane.transform.rotation;
-
-            yield break;
         }
     }
 }

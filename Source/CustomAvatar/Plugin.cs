@@ -92,7 +92,7 @@ namespace CustomAvatar
 
                     _mirrorContainer = new GameObject();
                     Object.DontDestroyOnLoad(_mirrorContainer);
-                    SharedCoroutineStarter.instance.StartCoroutine(MirrorHelper.SpawnMirror(new Vector3(0, 0, -1.5f), Quaternion.Euler(-90f, 180f, 0), new Vector3(0.50f, 1f, 0.25f), _mirrorContainer.transform));
+                    MirrorHelper.CreateMirror(new Vector3(0, 1.5f, -1.5f), Quaternion.Euler(-90f, 180f, 0), new Vector2(5f, 2f), _mirrorContainer.transform);
                 }
             }
         }
