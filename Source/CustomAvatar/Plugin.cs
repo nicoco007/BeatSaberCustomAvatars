@@ -92,7 +92,8 @@ namespace CustomAvatar
 
                     _mirrorContainer = new GameObject();
                     Object.DontDestroyOnLoad(_mirrorContainer);
-                    MirrorHelper.CreateMirror(new Vector3(0, 1.5f, -1.5f), Quaternion.Euler(-90f, 180f, 0), new Vector2(5f, 2f), _mirrorContainer.transform);
+                    Vector2 mirrorSize = settings.mirrorSize;
+                    MirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, -1.5f), Quaternion.Euler(-90f, 180f, 0), mirrorSize, _mirrorContainer.transform);
                 }
             }
         }

@@ -24,6 +24,8 @@ namespace CustomAvatar.Utilities
         public virtual bool useAutomaticFullBodyCalibration { get; set; } = false;
         public virtual bool calibrateFullBodyTrackingOnStart { get; set; } = false;
         public virtual float cameraNearClipPlane { get; set; } = 0.1f;
+        [UseConverter(typeof(Vector2ValueConverter))] public virtual Vector2 mirrorSize { get; set; } = new Vector2(5f, 2.5f);
+        public virtual float mirrorRenderScale { get; set; } = 1.0f;
         public virtual FullBodyMotionSmoothing fullBodyMotionSmoothing { get; set; } = new FullBodyMotionSmoothing();
         public virtual FullBodyCalibration fullBodyCalibration { get; set; } = new FullBodyCalibration();
 

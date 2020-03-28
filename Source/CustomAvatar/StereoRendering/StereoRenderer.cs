@@ -155,8 +155,6 @@ namespace CustomAvatar.StereoRendering
         private Dictionary<int, RenderTexture> leftEyeTextures = new Dictionary<int, RenderTexture>();
         private Dictionary<int, RenderTexture> rightEyeTextures = new Dictionary<int, RenderTexture>();
 
-        public float textureResolutionScale = 1.0f;
-
         // the materials for displaying render result
         private Material stereoMaterial;
 
@@ -324,8 +322,8 @@ namespace CustomAvatar.StereoRendering
             var rightEyeOffset = new Vector3(ipd / 2, 0, 0);
 
             int hash = detector.GetHashCode();
-            int renderWidth = (int)(textureResolutionScale * detector.Camera.pixelWidth);
-            int renderHeight = (int)(textureResolutionScale * detector.Camera.pixelHeight);
+            int renderWidth = (int)(Plugin.settings.mirrorRenderScale * detector.Camera.pixelWidth);
+            int renderHeight = (int)(Plugin.settings.mirrorRenderScale * detector.Camera.pixelHeight);
 
             if (!leftEyeTextures.ContainsKey(hash))
             {

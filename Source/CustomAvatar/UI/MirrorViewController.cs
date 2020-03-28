@@ -6,10 +6,6 @@ namespace CustomAvatar.UI
 {
     internal class MirrorViewController : ViewController
     {
-        private static readonly Vector3 kMirrorPosition = new Vector3(0, 1f, 1.5f);
-        private static readonly Quaternion kMirrorRotation = Quaternion.Euler(-90f, 0, 0);
-        private static readonly Vector2 kMirrorScale = new Vector2(5f, 2f);
-
         private GameObject _mirrorContainer;
 
         protected override void DidActivate(bool firstActivation, ActivationType activationType)
@@ -20,7 +16,8 @@ namespace CustomAvatar.UI
 
             if (firstActivation)
             {
-                MirrorHelper.CreateMirror(kMirrorPosition, kMirrorRotation, kMirrorScale, _mirrorContainer.transform);
+                Vector2 mirrorSize = Plugin.settings.mirrorSize;
+                MirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, 1.5f), Quaternion.Euler(-90f, 0, 0), mirrorSize, _mirrorContainer.transform);
             }
         }
 

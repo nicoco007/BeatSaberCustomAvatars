@@ -161,6 +161,7 @@
     <Compile Include="Tracking\OpenVRWrapper.cs" />
     <Compile Include="PoseManager.cs" />
     <Compile Include="EventManager.cs" />
+    <Compile Include="Utilities\Vector2ValueConverter.cs" />
     <Compile Include="Utilities\PoseValueConverter.cs" />
     <Compile Include="Utilities\ReflectionExtensions.cs" />
     <Compile Include="VRIKManager.cs" />
