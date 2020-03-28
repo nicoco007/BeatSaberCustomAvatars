@@ -9,6 +9,8 @@ namespace CustomAvatar
 {
     internal class AvatarTailor
     {
+        public const float kDefaultPlayerArmSpan = 1.7f;
+
         private Vector3? _initialPlatformPosition;
 
         public void ResizeAvatar(SpawnedAvatar avatar)

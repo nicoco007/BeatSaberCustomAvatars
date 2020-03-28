@@ -20,7 +20,7 @@ namespace CustomAvatar.Utilities
         public virtual bool enableFloorAdjust { get; set; } = false;
         public virtual bool moveFloorWithRoomAdjust { get; set; } = false;
         public virtual string previousAvatarPath { get; set; } = null;
-        public virtual float playerArmSpan { get; set; } = 1.7f;
+        public virtual float playerArmSpan { get; set; } = AvatarTailor.kDefaultPlayerArmSpan;
         public virtual bool useAutomaticFullBodyCalibration { get; set; } = false;
         public virtual bool calibrateFullBodyTrackingOnStart { get; set; } = false;
         public virtual float cameraNearClipPlane { get; set; } = 0.1f;

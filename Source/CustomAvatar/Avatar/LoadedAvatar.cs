@@ -84,7 +84,7 @@ namespace CustomAvatar.Avatar
                 Plugin.logger.Error($"Failed to load avatar from '{fileName}'");
                 Plugin.logger.Error(ex);
 
-                error(ex);
+                error?.Invoke(ex);
             }
         }
 
@@ -178,25 +178,29 @@ namespace CustomAvatar.Avatar
         {
             Animator animator = gameObject.GetComponentInChildren<Animator>();
 
-            if (!animator) return 0;
+            if (!animator) return AvatarTailor.kDefaultPlayerArmSpan;
 
-            Vector3 leftShoulder = animator.GetBoneTransform(HumanBodyBones.LeftShoulder).position;
-            Vector3 leftUpperArm = animator.GetBoneTransform(HumanBodyBones.LeftUpperArm).position;
-            Vector3 leftLowerArm = animator.GetBoneTransform(HumanBodyBones.LeftLowerArm).position;
-            Vector3 leftHand = gameObject.transform.Find("LeftHand").position;
+            Transform leftShoulder = animator.GetBoneTransform(HumanBodyBones.LeftShoulder);
+            Transform leftUpperArm = animator.GetBoneTransform(HumanBodyBones.LeftUpperArm);
+            Transform leftLowerArm = animator.GetBoneTransform(HumanBodyBones.LeftLowerArm);
+            Transform leftHand = gameObject.transform.Find("LeftHand");
 
-            Vector3 rightShoulder = animator.GetBoneTransform(HumanBodyBones.RightShoulder).position;
-            Vector3 rightUpperArm = animator.GetBoneTransform(HumanBodyBones.RightUpperArm).position;
-            Vector3 rightLowerArm = animator.GetBoneTransform(HumanBodyBones.RightLowerArm).position;
-            Vector3 rightHand = gameObject.transform.Find("RightHand").position;
+            Transform rightShoulder = animator.GetBoneTransform(HumanBodyBones.RightShoulder);
+            Transform rightUpperArm = animator.GetBoneTransform(HumanBodyBones.RightUpperArm);
+            Transform rightLowerArm = animator.GetBoneTransform(HumanBodyBones.RightLowerArm);
+            Transform rightHand = gameObject.transform.Find("RightHand");
 
-            float leftArmLength = Vector3.Distance(leftShoulder, leftUpperArm) + Vector3.Distance(leftUpperArm, leftLowerArm) + Vector3.Distance(leftLowerArm, leftHand);
-            float rightArmLength = Vector3.Distance(rightShoulder, rightUpperArm) + Vector3.Distance(rightUpperArm, rightLowerArm) + Vector3.Distance(rightLowerArm, rightHand);
-            float shoulderToShoulderDistance = Vector3.Distance(leftShoulder, rightShoulder);
+            if (!leftShoulder || !leftUpperArm || !leftLowerArm || !leftHand || !rightShoulder || !rightUpperArm || !rightLowerArm || !rightHand)
+            {
+                Plugin.logger.Warn("Could not calculate avatar arm span due to missing bones");
+                return AvatarTailor.kDefaultPlayerArmSpan;
+            }
+
+            float leftArmLength = Vector3.Distance(leftShoulder.position, leftUpperArm.position) + Vector3.Distance(leftUpperArm.position, leftLowerArm.position) + Vector3.Distance(leftLowerArm.position, leftHand.position);
+            float rightArmLength = Vector3.Distance(rightShoulder.position, rightUpperArm.position) + Vector3.Distance(rightUpperArm.position, rightLowerArm.position) + Vector3.Distance(rightLowerArm.position, rightHand.position);
+            float shoulderToShoulderDistance = Vector3.Distance(leftShoulder.position, rightShoulder.position);
 
             float totalLength = leftArmLength + shoulderToShoulderDistance + rightArmLength;
-            
-            Plugin.logger.Debug("Avatar arm span: " + totalLength);
 
             return totalLength;
         }

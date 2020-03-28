@@ -4,6 +4,8 @@ namespace CustomAvatar.StereoRendering
 {
     internal static class MirrorHelper
     {
+        private static readonly int kCutout = Shader.PropertyToID("_Cutout");
+
         public static void CreateMirror(Vector3 position, Quaternion rotation, Vector2 size, Transform container)
         {
             Vector3 scale = new Vector3(size.x / 10, 1, size.y / 10); // plane is 10 units in size at scale 1, width is x and height is z
@@ -16,7 +18,7 @@ namespace CustomAvatar.StereoRendering
             mirrorPlane.transform.localRotation = rotation;
 
             Material material = new Material(ShaderLoader.stereoMirrorShader);
-            material.SetFloat("_Cutout", 0.01f);
+            material.SetFloat(kCutout, 0.01f);
             
             Renderer renderer = mirrorPlane.GetComponent<Renderer>();
             renderer.sharedMaterial = material;
