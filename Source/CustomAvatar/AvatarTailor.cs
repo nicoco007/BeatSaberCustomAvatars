@@ -116,8 +116,44 @@ namespace CustomAvatar
                 customFloor.transform.position = (Vector3.up * floorOffset) + _initialPlatformPosition ?? Vector3.zero;
             }
         }
+        
+        public void CalibrateFullBodyTrackingManual(SpawnedAvatar spawnedAvatar)
+        {
+            TrackedDeviceManager input = PersistentSingleton<TrackedDeviceManager>.instance;
 
-        public void CalibrateFullBodyTracking()
+            TrackedDeviceState leftFoot = input.leftFoot;
+            TrackedDeviceState rightFoot = input.rightFoot;
+            TrackedDeviceState pelvis = input.waist;
+
+            if (pelvis.tracked)
+            {
+                Vector3 positionOffset = spawnedAvatar.tracking.pelvis.position - pelvis.position;
+                Quaternion rotationOffset = Quaternion.Inverse(pelvis.rotation) * spawnedAvatar.tracking.pelvis.rotation;
+
+                Plugin.settings.fullBodyCalibration.pelvis = new Pose(positionOffset, rotationOffset);
+                Plugin.logger.Info("Saved pelvis pose correction " + Plugin.settings.fullBodyCalibration.pelvis);
+            }
+
+            if (leftFoot.tracked)
+            {
+                Vector3 positionOffset = spawnedAvatar.tracking.leftLeg.position - leftFoot.position;
+                Quaternion rotationOffset = Quaternion.Inverse(leftFoot.rotation) * spawnedAvatar.tracking.leftLeg.rotation;
+
+                Plugin.settings.fullBodyCalibration.leftLeg = new Pose(positionOffset, rotationOffset);
+                Plugin.logger.Info("Saved left foot pose correction " + Plugin.settings.fullBodyCalibration.leftLeg);
+            }
+
+            if (rightFoot.tracked)
+            {
+                Vector3 positionOffset = spawnedAvatar.tracking.rightLeg.position - rightFoot.position;
+                Quaternion rotationOffset = Quaternion.Inverse(rightFoot.rotation) * spawnedAvatar.tracking.rightLeg.rotation;
+
+                Plugin.settings.fullBodyCalibration.rightLeg = new Pose(positionOffset, rotationOffset);
+                Plugin.logger.Info("Saved right foot pose correction " + Plugin.settings.fullBodyCalibration.rightLeg);
+            }
+        }
+
+        public void CalibrateFullBodyTrackingAuto()
         {
             Plugin.logger.Info("Calibrating full body tracking");
 

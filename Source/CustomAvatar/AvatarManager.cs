@@ -136,9 +136,9 @@ namespace CustomAvatar
             currentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
             currentlySpawnedAvatar?.eventsPlayer?.Restart();
 
-            if (newScene.name == "HealthWarning" && Plugin.settings.calibrateFullBodyTrackingOnStart)
+            if (newScene.name == "HealthWarning" && Plugin.settings.calibrateFullBodyTrackingOnStart && Plugin.settings.useAutomaticFullBodyCalibration)
             {
-                avatarTailor.CalibrateFullBodyTracking();
+                avatarTailor.CalibrateFullBodyTrackingAuto();
             }
 
             ResizeCurrentAvatar();

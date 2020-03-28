@@ -15,9 +15,12 @@ namespace CustomAvatar.UI
     {
         public override string ResourceName => "CustomAvatar.Views.SettingsViewController.bsml";
 
+        private bool _calibrating = false;
+
         #region Components
         
         [UIComponent("arm-span")] private TextMeshProUGUI armSpanLabel;
+        [UIComponent("calibrate-button")] private TextMeshProUGUI calibrateButtonText;
 
         #endregion
 
@@ -98,7 +101,31 @@ namespace CustomAvatar.UI
         [UIAction("calibrate-fbt-click")]
         private void OnCalibrateFullBodyTrackingClicked()
         {
-            AvatarManager.instance.avatarTailor.CalibrateFullBodyTracking();
+            if (Plugin.settings.useAutomaticFullBodyCalibration)
+            {
+                AvatarManager.instance.avatarTailor.CalibrateFullBodyTrackingAuto();
+            }
+            else if (!_calibrating)
+            {
+                AvatarManager.instance.currentlySpawnedAvatar.tracking.isCalibrationModeEnabled = true;
+                _calibrating = true;
+                calibrateButtonText.text = "Save";
+
+                _waistSphere = CreateCalibrationSphere();
+                _leftFootSphere = CreateCalibrationSphere();
+                _rightFootSphere = CreateCalibrationSphere();
+            }
+            else
+            {
+                AvatarManager.instance.avatarTailor.CalibrateFullBodyTrackingManual(AvatarManager.instance.currentlySpawnedAvatar);
+                AvatarManager.instance.currentlySpawnedAvatar.tracking.isCalibrationModeEnabled = false;
+                _calibrating = false;
+                calibrateButtonText.text = "Start Calibrating";
+
+                Destroy(_waistSphere.gameObject);
+                Destroy(_leftFootSphere.gameObject);
+                Destroy(_rightFootSphere.gameObject);
+            }
         }
 
         [UIAction("calibrate-fbt-on-start-change")]
@@ -111,6 +138,61 @@ namespace CustomAvatar.UI
         private void OnClearFullBodyTrackingCalibrationDataClicked()
         {
             AvatarManager.instance.avatarTailor.ClearFullBodyTrackingData();
+        }
+
+        private Transform _waistSphere;
+        private Transform _leftFootSphere;
+        private Transform _rightFootSphere;
+
+        private Transform CreateCalibrationSphere()
+        { 
+            GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+
+            sphere.layer = AvatarLayers.AlwaysVisible;
+            sphere.transform.localScale = Vector3.one * 0.1f;
+
+            return sphere.transform;
+        }
+
+        private void Update()
+        {
+            if (_calibrating)
+            {
+                TrackedDeviceManager input = PersistentSingleton<TrackedDeviceManager>.instance;
+
+                if (input.waist.tracked)
+                {
+                    _waistSphere.gameObject.SetActive(true);
+                    _waistSphere.position = input.waist.position;
+                    _waistSphere.rotation = input.waist.rotation;
+                }
+                else
+                {
+                    _waistSphere.gameObject.SetActive(false);
+                }
+
+                if (input.leftFoot.tracked)
+                {
+                    _leftFootSphere.gameObject.SetActive(true);
+                    _leftFootSphere.position = input.leftFoot.position;
+                    _leftFootSphere.rotation = input.leftFoot.rotation;
+                }
+                else
+                {
+                    _leftFootSphere.gameObject.SetActive(false);
+                }
+
+                if (input.rightFoot.tracked)
+                {
+                    _rightFootSphere.gameObject.SetActive(true);
+                    _rightFootSphere.position = input.rightFoot.position;
+                    _rightFootSphere.rotation = input.rightFoot.rotation;
+                }
+                else
+                {
+                    _rightFootSphere.gameObject.SetActive(false);
+                }
+            }
         }
 
         #endregion

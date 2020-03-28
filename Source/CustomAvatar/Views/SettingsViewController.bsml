@@ -12,9 +12,8 @@
             <text text="Full Body Calibration" font-size="5" align="Center"></text>
         </horizontal>
         <horizontal child-align="MiddleCenter" child-expand-width="true" child-control-width="true">
-            <button text="Calibrate Now" hover-hint="Calibrate full body tracking. Make sure you are standing up as straight as possible before pressing." on-click="calibrate-fbt-click"></button>
+            <button id="calibrate-button" text="Start Calibrating" hover-hint="Begin calibrating full body tracking." on-click="calibrate-fbt-click"></button>
             <button text="Clear" hover-hint="Clear calibration data." on-click="clear-fbt-calibration-data-click"></button>
         </horizontal>
-        <bool-setting text="Calibrate On Start" value="calibrate-fbt-on-start" on-change="calibrate-fbt-on-start-change" hover-hint="Calibrate full body tracking when the game starts. You'll need to be standing as straight as possible while the game loads for this to work."></bool-setting>
     </settings-container>
 </horizontal>
