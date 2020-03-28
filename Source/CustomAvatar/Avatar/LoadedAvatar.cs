@@ -16,6 +16,7 @@ namespace CustomAvatar.Avatar
         public GameObject gameObject { get; }
         public AvatarDescriptor descriptor { get; }
         public float eyeHeight { get; }
+        public float armSpan { get; set; }
         public bool supportsFingerTracking { get; }
 
         #pragma warning disable 618
@@ -34,6 +35,7 @@ namespace CustomAvatar.Avatar
                                      avatarGameObject.GetComponentInChildren<PoseManager>();
 
             eyeHeight = GetEyeHeight();
+            armSpan = GetArmSpan();
         }
 
         public static IEnumerator<AsyncOperation> FromFileCoroutine(string fileName, Action<LoadedAvatar> success, Action<Exception> error)
@@ -155,7 +157,7 @@ namespace CustomAvatar.Avatar
         /// Measure avatar arm span. Since the player's measured arm span is actually from palm to palm
         /// (approximately) due to the way the controllers are held, this isn't "true" arm span.
         /// </summary>
-        public float GetArmSpan()
+        private float GetArmSpan()
         {
             Animator animator = gameObject.GetComponentInChildren<Animator>();
 

@@ -22,7 +22,7 @@ namespace CustomAvatar
             switch (resizeMode)
             {
                 case AvatarResizeMode.ArmSpan:
-                    float avatarArmLength = avatar.customAvatar.GetArmSpan();
+                    float avatarArmLength = avatar.customAvatar.armSpan;
 
                     if (avatarArmLength > 0)
                     {
