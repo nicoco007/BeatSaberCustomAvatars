@@ -35,9 +35,9 @@ namespace CustomAvatar.Utilities
 
         public class FullBodyCalibration
         {
-            [UseConverter(typeof(PoseJsonConverter))] public virtual Pose leftLeg { get; set; } = Pose.identity;
-            [UseConverter(typeof(PoseJsonConverter))] public virtual Pose rightLeg { get; set; } = Pose.identity;
-            [UseConverter(typeof(PoseJsonConverter))] public virtual Pose pelvis { get; set; } = Pose.identity;
+            [UseConverter(typeof(PoseValueConverter))] public virtual Pose leftLeg { get; set; } = Pose.identity;
+            [UseConverter(typeof(PoseValueConverter))] public virtual Pose rightLeg { get; set; } = Pose.identity;
+            [UseConverter(typeof(PoseValueConverter))] public virtual Pose pelvis { get; set; } = Pose.identity;
         }
 
         public virtual void Changed()

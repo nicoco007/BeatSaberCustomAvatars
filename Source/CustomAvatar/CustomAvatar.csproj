@@ -160,10 +160,8 @@
     <Compile Include="Tracking\OpenVRWrapper.cs" />
     <Compile Include="PoseManager.cs" />
     <Compile Include="EventManager.cs" />
-    <Compile Include="Utilities\QuaternionJsonConverter.cs" />
-    <Compile Include="Utilities\PoseJsonConverter.cs" />
+    <Compile Include="Utilities\PoseValueConverter.cs" />
     <Compile Include="Utilities\ReflectionExtensions.cs" />
-    <Compile Include="Utilities\Vector3JsonConverter.cs" />
     <Compile Include="VRIKManager.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace CustomAvatar.Utilities
 {
-    internal class PoseJsonConverter : ValueConverter<Pose>
+    internal class PoseValueConverter : ValueConverter<Pose>
     {
         public override Value ToValue(Pose obj, object parent)
         {
