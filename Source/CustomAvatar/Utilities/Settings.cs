@@ -1,37 +1,78 @@
+using System.Runtime.CompilerServices;
+using IPA.Config.Stores;
+using IPA.Config.Stores.Attributes;
+using IPA.Config.Stores.Converters;
 using UnityEngine;
+
+[assembly: InternalsVisibleTo(GeneratedStore.AssemblyVisibilityTarget)]
 
 namespace CustomAvatar.Utilities
 {
     internal class Settings
     {
-        public bool isAvatarVisibleInFirstPerson = true;
-        public AvatarResizeMode resizeMode = AvatarResizeMode.Height;
-        public bool enableFloorAdjust = false;
-        public bool moveFloorWithRoomAdjust = false;
-        public string previousAvatarPath = null;
-        public float playerArmSpan = 1.7f;
-        public bool calibrateFullBodyTrackingOnStart = false;
-        public float cameraNearClipPlane = 0.1f;
-        public FullBodyMotionSmoothing fullBodyMotionSmoothing = new FullBodyMotionSmoothing();
-        public FullBodyCalibration fullBodyCalibration = new FullBodyCalibration();
+        public virtual bool isAvatarVisibleInFirstPerson { get; set; } = true;
+        [UseConverter(typeof(EnumConverter<AvatarResizeMode>))] public virtual AvatarResizeMode resizeMode { get; set; } = AvatarResizeMode.Height;
+        public virtual bool enableFloorAdjust { get; set; } = false;
+        public virtual bool moveFloorWithRoomAdjust { get; set; } = false;
+        public virtual string previousAvatarPath { get; set; } = null;
+        public virtual float playerArmSpan { get; set; } = 1.7f;
+        public virtual bool calibrateFullBodyTrackingOnStart { get; set; } = false;
+        public virtual float cameraNearClipPlane { get; set; } = 0.1f;
+        public virtual FullBodyMotionSmoothing fullBodyMotionSmoothing { get; set; } = new FullBodyMotionSmoothing();
+        public virtual FullBodyCalibration fullBodyCalibration { get; set; } = new FullBodyCalibration();
 
         public class FullBodyMotionSmoothing
         {
-            public TrackedPointSmoothing waist = new TrackedPointSmoothing { position = 15, rotation = 10 };
-            public TrackedPointSmoothing feet = new TrackedPointSmoothing { position = 13, rotation = 17 };
+            public virtual TrackedPointSmoothing waist { get; set; } = new TrackedPointSmoothing { position = 15, rotation = 10 };
+            public virtual TrackedPointSmoothing feet { get; set; } = new TrackedPointSmoothing { position = 13, rotation = 17 };
         }
 
         public class TrackedPointSmoothing
         {
-            public float position;
-            public float rotation;
+            public virtual float position { get; set; }
+            public virtual float rotation { get; set; }
         }
 
         public class FullBodyCalibration
         {
-            public Pose leftLeg = Pose.identity;
-            public Pose rightLeg = Pose.identity;
-            public Pose pelvis = Pose.identity;
+            [UseConverter(typeof(PoseJsonConverter))] public virtual Pose leftLeg { get; set; } = Pose.identity;
+            [UseConverter(typeof(PoseJsonConverter))] public virtual Pose rightLeg { get; set; } = Pose.identity;
+            [UseConverter(typeof(PoseJsonConverter))] public virtual Pose pelvis { get; set; } = Pose.identity;
+        }
+
+        public virtual void Changed()
+        {
+            Plugin.logger.Debug("Settings changed");
+
+            CheckAllValuesValid();
+        }
+
+        public virtual void OnReload()
+        {
+            Plugin.logger.Debug("Settings reloaded");
+
+            CheckAllValuesValid();
+        }
+
+        private void CheckAllValuesValid()
+        {
+            if (fullBodyCalibration.pelvis.rotation.x == 0 && fullBodyCalibration.pelvis.rotation.y == 0 &&
+                fullBodyCalibration.pelvis.rotation.z == 0 && fullBodyCalibration.pelvis.rotation.w == 0)
+            {
+                fullBodyCalibration.pelvis = Pose.identity;
+            }
+
+            if (fullBodyCalibration.leftLeg.rotation.x == 0 && fullBodyCalibration.leftLeg.rotation.y == 0 &&
+                fullBodyCalibration.leftLeg.rotation.z == 0 && fullBodyCalibration.leftLeg.rotation.w == 0)
+            {
+                fullBodyCalibration.leftLeg = Pose.identity;
+            }
+
+            if (fullBodyCalibration.rightLeg.rotation.x == 0 && fullBodyCalibration.rightLeg.rotation.y == 0 &&
+                fullBodyCalibration.rightLeg.rotation.z == 0 && fullBodyCalibration.rightLeg.rotation.w == 0)
+            {
+                fullBodyCalibration.rightLeg = Pose.identity;
+            }
         }
     }
 }

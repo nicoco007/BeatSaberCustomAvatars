@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
 using CustomAvatar.Tracking;
-using CustomAvatar.Utilities;
 using TMPro;
 using UnityEngine;
 
@@ -39,14 +38,14 @@ namespace CustomAvatar.UI
 
         protected override void DidActivate(bool firstActivation, ActivationType type)
         {
-            visibleInFirstPerson = SettingsManager.settings.isAvatarVisibleInFirstPerson;
-            resizeMode = SettingsManager.settings.resizeMode;
-            floorHeightAdjust = SettingsManager.settings.enableFloorAdjust;
-            calibrateFullBodyTrackingOnStart = SettingsManager.settings.calibrateFullBodyTrackingOnStart;
+            visibleInFirstPerson = Plugin.settings.isAvatarVisibleInFirstPerson;
+            resizeMode = Plugin.settings.resizeMode;
+            floorHeightAdjust = Plugin.settings.enableFloorAdjust;
+            calibrateFullBodyTrackingOnStart = Plugin.settings.calibrateFullBodyTrackingOnStart;
 
             base.DidActivate(firstActivation, type);
 
-            armSpanLabel.SetText($"{SettingsManager.settings.playerArmSpan:0.00} m");
+            armSpanLabel.SetText($"{Plugin.settings.playerArmSpan:0.00} m");
         }
 
         #region Actions
@@ -54,21 +53,21 @@ namespace CustomAvatar.UI
         [UIAction("visible-first-person-change")]
         private void OnVisibleInFirstPersonChanged(bool value)
         {
-            SettingsManager.settings.isAvatarVisibleInFirstPerson = value;
+            Plugin.settings.isAvatarVisibleInFirstPerson = value;
             AvatarManager.instance.currentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
         }
 
         [UIAction("resize-change")]
         private void OnResizeModeChanged(AvatarResizeMode value)
         {
-            SettingsManager.settings.resizeMode = value;
+            Plugin.settings.resizeMode = value;
             AvatarManager.instance.ResizeCurrentAvatar();
         }
 
         [UIAction("floor-adjust-change")]
         private void OnFloorHeightAdjustChanged(bool value)
         {
-            SettingsManager.settings.enableFloorAdjust = value;
+            Plugin.settings.enableFloorAdjust = value;
             AvatarManager.instance.ResizeCurrentAvatar();
         }
 
@@ -105,7 +104,7 @@ namespace CustomAvatar.UI
         [UIAction("calibrate-fbt-on-start-change")]
         private void OnCalibrateFullBodyTrackingOnStartChanged(bool value)
         {
-            SettingsManager.settings.calibrateFullBodyTrackingOnStart = value;
+            Plugin.settings.calibrateFullBodyTrackingOnStart = value;
         }
 
         [UIAction("clear-fbt-calibration-data-click")]
@@ -154,10 +153,10 @@ namespace CustomAvatar.UI
             {
                 CancelInvoke(nameof(ScanArmSpan));
                 armSpanLabel.SetText($"{maxMeasuredArmSpan:0.00} m");
-                SettingsManager.settings.playerArmSpan = maxMeasuredArmSpan;
+                Plugin.settings.playerArmSpan = maxMeasuredArmSpan;
                 isMeasuring = false;
 
-                if (SettingsManager.settings.resizeMode == AvatarResizeMode.ArmSpan)
+                if (Plugin.settings.resizeMode == AvatarResizeMode.ArmSpan)
                 {
                     AvatarManager.instance.ResizeCurrentAvatar();
                 }

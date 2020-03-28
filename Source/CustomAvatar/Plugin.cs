@@ -5,6 +5,8 @@ using System.Linq;
 using BeatSaberMarkupLanguage.MenuButtons;
 using CustomAvatar.UI;
 using CustomAvatar.Utilities;
+using IPA.Config;
+using IPA.Config.Stores;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
@@ -24,18 +26,20 @@ namespace CustomAvatar
         public static Plugin instance { get; private set; }
 
         public static Logger logger { get; private set; }
+        public static Settings settings { get; set; }
 
         [Init]
-        public Plugin(Logger logger)
+        public Plugin(Logger logger, [Config.Name("CustomAvatars")] Config config)
         {
             Plugin.logger = logger;
+            Plugin.settings = config.Generated<Settings>();
+
             instance = this;
         }
 
         [OnStart]
         public void OnStart()
         {
-            SettingsManager.LoadSettings();
             AvatarManager.instance.LoadAvatarFromSettingsAsync();
             SceneManager.sceneLoaded += OnSceneLoaded;
 
@@ -53,8 +57,6 @@ namespace CustomAvatar
             }
 
             SceneManager.sceneLoaded -= OnSceneLoaded;
-
-            SettingsManager.SaveSettings();
         }
 
         public void OnSceneLoaded(Scene newScene, LoadSceneMode mode)
@@ -110,7 +112,7 @@ namespace CustomAvatar
             if (mainCamera)
             {
                 SetCameraCullingMask(mainCamera);
-                mainCamera.nearClipPlane = SettingsManager.settings.cameraNearClipPlane;
+                mainCamera.nearClipPlane = Plugin.settings.cameraNearClipPlane;
             }
             else
             {

@@ -164,7 +164,6 @@
     <Compile Include="Utilities\PoseJsonConverter.cs" />
     <Compile Include="Utilities\ReflectionExtensions.cs" />
     <Compile Include="Utilities\Vector3JsonConverter.cs" />
-    <Compile Include="Utilities\SettingsManager.cs" />
     <Compile Include="VRIKManager.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

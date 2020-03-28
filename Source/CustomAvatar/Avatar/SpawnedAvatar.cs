@@ -50,7 +50,7 @@ namespace CustomAvatar.Avatar
 
         public void OnFirstPersonEnabledChanged()
         {
-	        SetChildrenToLayer(SettingsManager.settings.isAvatarVisibleInFirstPerson ? AvatarLayers.AlwaysVisible : AvatarLayers.OnlyInThirdPerson);
+	        SetChildrenToLayer(Plugin.settings.isAvatarVisibleInFirstPerson ? AvatarLayers.AlwaysVisible : AvatarLayers.OnlyInThirdPerson);
 
             foreach (FirstPersonExclusion firstPersonExclusion in _firstPersonExclusions)
             {

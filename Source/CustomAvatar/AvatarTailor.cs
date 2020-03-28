@@ -17,7 +17,7 @@ namespace CustomAvatar
 
             // compute scale
             float scale;
-            AvatarResizeMode resizeMode = SettingsManager.settings.resizeMode;
+            AvatarResizeMode resizeMode = Plugin.settings.resizeMode;
 
             switch (resizeMode)
             {
@@ -26,7 +26,7 @@ namespace CustomAvatar
 
                     if (avatarArmLength > 0)
                     {
-                        scale = SettingsManager.settings.playerArmSpan / avatarArmLength;
+                        scale = Plugin.settings.playerArmSpan / avatarArmLength;
                     }
                     else
                     {
@@ -72,14 +72,14 @@ namespace CustomAvatar
 
             float floorOffset = 0f;
 
-            if (SettingsManager.settings.enableFloorAdjust && avatar.customAvatar.isIKAvatar)
+            if (Plugin.settings.enableFloorAdjust && avatar.customAvatar.isIKAvatar)
             {
                 float playerEyeHeight = BeatSaberUtil.GetPlayerEyeHeight();
                 float avatarEyeHeight = avatar.customAvatar.eyeHeight;
 
                 floorOffset = playerEyeHeight - avatarEyeHeight * avatar.tracking.scale;
 
-                if (SettingsManager.settings.moveFloorWithRoomAdjust)
+                if (Plugin.settings.moveFloorWithRoomAdjust)
                 {
                     floorOffset += BeatSaberUtil.GetRoomCenter().y;
                 }
@@ -129,15 +129,15 @@ namespace CustomAvatar
             TrackedDeviceState pelvis = input.waist;
 
             Vector3 floorNormal = Vector3.up;
-            float floorPosition = SettingsManager.settings.moveFloorWithRoomAdjust ? BeatSaberUtil.GetRoomCenter().y : 0;
+            float floorPosition = Plugin.settings.moveFloorWithRoomAdjust ? BeatSaberUtil.GetRoomCenter().y : 0;
 
             if (leftFoot.found)
             {
                 Vector3 leftFootForward = leftFoot.rotation * Vector3.up; // forward on feet trackers is y (up)
                 Vector3 leftFootStraightForward = Vector3.ProjectOnPlane(leftFootForward, floorNormal); // get projection of forward vector on xz plane (floor)
                 Quaternion leftRotationCorrection = Quaternion.Inverse(leftFoot.rotation) * Quaternion.LookRotation(Vector3.up, leftFootStraightForward); // get difference between world rotation and flat forward rotation
-                SettingsManager.settings.fullBodyCalibration.leftLeg = new Pose((leftFoot.position.y - floorPosition) * Vector3.down, leftRotationCorrection);
-                Plugin.logger.Info("Saved left foot pose correction " + SettingsManager.settings.fullBodyCalibration.leftLeg);
+                Plugin.settings.fullBodyCalibration.leftLeg = new Pose((leftFoot.position.y - floorPosition) * Vector3.down, leftRotationCorrection);
+                Plugin.logger.Info("Saved left foot pose correction " + Plugin.settings.fullBodyCalibration.leftLeg);
             }
 
             if (rightFoot.found)
@@ -145,8 +145,8 @@ namespace CustomAvatar
                 Vector3 rightFootForward = rightFoot.rotation * Vector3.up;
                 Vector3 rightFootStraightForward = Vector3.ProjectOnPlane(rightFootForward, floorNormal);
                 Quaternion rightRotationCorrection = Quaternion.Inverse(rightFoot.rotation) * Quaternion.LookRotation(Vector3.up, rightFootStraightForward);
-                SettingsManager.settings.fullBodyCalibration.rightLeg = new Pose((rightFoot.position.y - floorPosition) * Vector3.down, rightRotationCorrection);
-                Plugin.logger.Info("Saved right foot pose correction " + SettingsManager.settings.fullBodyCalibration.rightLeg);
+                Plugin.settings.fullBodyCalibration.rightLeg = new Pose((rightFoot.position.y - floorPosition) * Vector3.down, rightRotationCorrection);
+                Plugin.logger.Info("Saved right foot pose correction " + Plugin.settings.fullBodyCalibration.rightLeg);
             }
 
             if (head.found && pelvis.found)
@@ -162,16 +162,16 @@ namespace CustomAvatar
                 Vector3 pelvisStraightForward = Vector3.ProjectOnPlane(pelvisForward, floorNormal);
                 Quaternion pelvisRotationCorrection = Quaternion.Inverse(pelvis.rotation) * Quaternion.LookRotation(pelvisStraightForward, Vector3.up);
 
-                SettingsManager.settings.fullBodyCalibration.pelvis = new Pose(pelvisPositionCorrection, pelvisRotationCorrection);
-                Plugin.logger.Info("Saved pelvis pose correction " + SettingsManager.settings.fullBodyCalibration.pelvis);
+                Plugin.settings.fullBodyCalibration.pelvis = new Pose(pelvisPositionCorrection, pelvisRotationCorrection);
+                Plugin.logger.Info("Saved pelvis pose correction " + Plugin.settings.fullBodyCalibration.pelvis);
             }
         }
 
         public void ClearFullBodyTrackingData()
         {
-            SettingsManager.settings.fullBodyCalibration.leftLeg = Pose.identity;
-            SettingsManager.settings.fullBodyCalibration.rightLeg = Pose.identity;
-            SettingsManager.settings.fullBodyCalibration.pelvis = Pose.identity;
+            Plugin.settings.fullBodyCalibration.leftLeg = Pose.identity;
+            Plugin.settings.fullBodyCalibration.rightLeg = Pose.identity;
+            Plugin.settings.fullBodyCalibration.pelvis = Pose.identity;
         }
     }
 }

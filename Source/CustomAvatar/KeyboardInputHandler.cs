@@ -1,5 +1,4 @@
-﻿using CustomAvatar.Utilities;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace CustomAvatar
 {
@@ -19,20 +18,20 @@ namespace CustomAvatar
             }
             else if (Input.GetKeyDown(KeyCode.Home))
             {
-                SettingsManager.settings.isAvatarVisibleInFirstPerson = !SettingsManager.settings.isAvatarVisibleInFirstPerson;
-                Plugin.logger.Info($"{(SettingsManager.settings.isAvatarVisibleInFirstPerson ? "Enabled" : "Disabled")} first person visibility");
+                Plugin.settings.isAvatarVisibleInFirstPerson = !Plugin.settings.isAvatarVisibleInFirstPerson;
+                Plugin.logger.Info($"{(Plugin.settings.isAvatarVisibleInFirstPerson ? "Enabled" : "Disabled")} first person visibility");
                 avatarManager.currentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
             }
             else if (Input.GetKeyDown(KeyCode.End))
             {
-                SettingsManager.settings.resizeMode = (AvatarResizeMode) (((int)SettingsManager.settings.resizeMode + 1) % 3);
-                Plugin.logger.Info($"Set resize mode to {SettingsManager.settings.resizeMode}");
+                Plugin.settings.resizeMode = (AvatarResizeMode) (((int)Plugin.settings.resizeMode + 1) % 3);
+                Plugin.logger.Info($"Set resize mode to {Plugin.settings.resizeMode}");
                 avatarManager.ResizeCurrentAvatar();
             }
             else if (Input.GetKeyDown(KeyCode.Insert))
             {
-                SettingsManager.settings.enableFloorAdjust = !SettingsManager.settings.enableFloorAdjust;
-                Plugin.logger.Info($"{(SettingsManager.settings.enableFloorAdjust ? "Enabled" : "Disabled")} floor adjust");
+                Plugin.settings.enableFloorAdjust = !Plugin.settings.enableFloorAdjust;
+                Plugin.logger.Info($"{(Plugin.settings.enableFloorAdjust ? "Enabled" : "Disabled")} floor adjust");
                 avatarManager.ResizeCurrentAvatar();
             }
         }
