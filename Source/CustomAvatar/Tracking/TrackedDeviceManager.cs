@@ -238,6 +238,7 @@ namespace CustomAvatar.Tracking
                 deviceState.name = null;
                 deviceState.serialNumber = null;
                 deviceState.found = false;
+                deviceState.tracked = false;
                 deviceState.role = TrackedDeviceRole.Unknown;
 
                 deviceRemoved?.Invoke(deviceState, use);

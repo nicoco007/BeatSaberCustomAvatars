@@ -10,54 +10,58 @@ namespace CustomAvatar.Utilities
     // ReSharper disable RedundantDefaultMemberInitializer
     // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
     // ReSharper disable UnusedMember.Global
+    // ReSharper disable FieldCanBeMadeReadOnly.Global
+    // ReSharper disable InconsistentNaming
     internal class Settings
     {
-        public bool isAvatarVisibleInFirstPerson { get; set; } = true;
-        [JsonConverter(typeof(StringEnumConverter))] public AvatarResizeMode resizeMode { get; set; } = AvatarResizeMode.Height;
-        public bool enableFloorAdjust { get; set; } = false;
-        public bool moveFloorWithRoomAdjust { get; set; } = false;
-        public string previousAvatarPath { get; set; } = null;
-        public float playerArmSpan { get; set; } = AvatarTailor.kDefaultPlayerArmSpan;
-        public bool useAutomaticFullBodyCalibration { get; set; } = false;
-        public bool calibrateFullBodyTrackingOnStart { get; set; } = false;
-        public float cameraNearClipPlane { get; set; } = 0.1f;
-        public Vector2 mirrorSize { get; set; } = new Vector2(5f, 2.5f);
-        public float mirrorRenderScale { get; set; } = 1.0f;
-        public FullBodyMotionSmoothing fullBodyMotionSmoothing { get; set; } = new FullBodyMotionSmoothing();
-        public Dictionary<string, AvatarSpecificSettings> avatarSpecificSettings { get; set; } = new Dictionary<string, AvatarSpecificSettings>();
+        public bool isAvatarVisibleInFirstPerson = true;
+        [JsonConverter(typeof(StringEnumConverter))] public AvatarResizeMode resizeMode = AvatarResizeMode.Height;
+        public bool enableFloorAdjust = false;
+        public bool moveFloorWithRoomAdjust= false;
+        public string previousAvatarPath = null;
+        public float playerArmSpan = AvatarTailor.kDefaultPlayerArmSpan;
+        public bool calibrateFullBodyTrackingOnStart = false;
+        public float cameraNearClipPlane = 0.1f;
+        public Vector2 mirrorSize = new Vector2(5f, 2.5f);
+        public float mirrorRenderScale = 1.0f;
+        public FullBodyMotionSmoothing fullBodyMotionSmoothing = new FullBodyMotionSmoothing();
+        [JsonProperty] private Dictionary<string, AvatarSpecificSettings> avatarSpecificSettings = new Dictionary<string, AvatarSpecificSettings>();
         
         public class FullBodyMotionSmoothing
         {
-            public TrackedPointSmoothing waist { get; set; } = new TrackedPointSmoothing { position = 15, rotation = 10 };
-            public TrackedPointSmoothing feet { get; set; } = new TrackedPointSmoothing { position = 13, rotation = 17 };
+            public TrackedPointSmoothing waist = new TrackedPointSmoothing { position = 15, rotation = 10 };
+            public TrackedPointSmoothing feet = new TrackedPointSmoothing { position = 13, rotation = 17 };
         }
 
         public class TrackedPointSmoothing
         {
-            public float position { get; set; }
-            public float rotation { get; set; }
+            public float position;
+            public float rotation;
         }
 
         public class FullBodyCalibration
         {
-            public Pose leftLeg { get; set; } = Pose.identity;
-            public Pose rightLeg { get; set; } = Pose.identity;
-            public Pose pelvis { get; set; } = Pose.identity;
+            public Pose leftLeg = Pose.identity;
+            public Pose rightLeg = Pose.identity;
+            public Pose pelvis = Pose.identity;
+
+            [JsonIgnore] public bool isDefault => leftLeg.Equals(Pose.identity) && rightLeg.Equals(Pose.identity) && pelvis.Equals(Pose.identity);
         }
 
         public class AvatarSpecificSettings
         {
-            public FullBodyCalibration fullBodyCalibration { get; set; } = new FullBodyCalibration();
+            public FullBodyCalibration fullBodyCalibration = new FullBodyCalibration();
+            public bool useAutomaticCalibration = false;
         }
 
-        public FullBodyCalibration GetAvatarSettings(string fullPath)
+        public AvatarSpecificSettings GetAvatarSettings(string fullPath)
         {
             if (!avatarSpecificSettings.ContainsKey(fullPath))
             {
                 avatarSpecificSettings.Add(fullPath, new AvatarSpecificSettings());
             }
 
-            return avatarSpecificSettings[fullPath].fullBodyCalibration;
+            return avatarSpecificSettings[fullPath];
         }
     }
 }

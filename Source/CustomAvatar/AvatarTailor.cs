@@ -127,7 +127,7 @@ namespace CustomAvatar
             TrackedDeviceState rightFoot = input.rightFoot;
             TrackedDeviceState pelvis = input.waist;
 
-            Settings.FullBodyCalibration fullBodyCalibration = SettingsManager.settings.GetAvatarSettings(spawnedAvatar.customAvatar.fullPath);
+            Settings.FullBodyCalibration fullBodyCalibration = SettingsManager.settings.GetAvatarSettings(spawnedAvatar.customAvatar.fullPath).fullBodyCalibration;
 
             if (pelvis.tracked)
             {
@@ -168,12 +168,12 @@ namespace CustomAvatar
             TrackedDeviceState rightFoot = input.rightFoot;
             TrackedDeviceState pelvis = input.waist;
 
-            Settings.FullBodyCalibration fullBodyCalibration = SettingsManager.settings.GetAvatarSettings(spawnedAvatar.customAvatar.fullPath);
+            Settings.FullBodyCalibration fullBodyCalibration = SettingsManager.settings.GetAvatarSettings(spawnedAvatar.customAvatar.fullPath).fullBodyCalibration;
 
             Vector3 floorNormal = Vector3.up;
             float floorPosition = SettingsManager.settings.moveFloorWithRoomAdjust ? BeatSaberUtil.GetRoomCenter().y : 0;
 
-            if (leftFoot.found)
+            if (leftFoot.tracked)
             {
                 Vector3 leftFootForward = leftFoot.rotation * Vector3.up; // forward on feet trackers is y (up)
                 Vector3 leftFootStraightForward = Vector3.ProjectOnPlane(leftFootForward, floorNormal); // get projection of forward vector on xz plane (floor)
@@ -182,7 +182,7 @@ namespace CustomAvatar
                 Plugin.logger.Info("Saved left foot pose correction " + fullBodyCalibration.leftLeg);
             }
 
-            if (rightFoot.found)
+            if (rightFoot.tracked)
             {
                 Vector3 rightFootForward = rightFoot.rotation * Vector3.up;
                 Vector3 rightFootStraightForward = Vector3.ProjectOnPlane(rightFootForward, floorNormal);
@@ -191,7 +191,7 @@ namespace CustomAvatar
                 Plugin.logger.Info("Saved right foot pose correction " + fullBodyCalibration.rightLeg);
             }
 
-            if (head.found && pelvis.found)
+            if (head.tracked && pelvis.tracked)
             {
                 // using "standard" 8 head high body proportions w/ eyes at 1/2 head height
                 // reference: https://miro.medium.com/max/3200/1*cqTRyEGl26l4CImEmWz68Q.jpeg
@@ -211,7 +211,7 @@ namespace CustomAvatar
 
         public void ClearFullBodyTrackingData(SpawnedAvatar spawnedAvatar)
         {
-            Settings.FullBodyCalibration fullBodyCalibration = SettingsManager.settings.GetAvatarSettings(spawnedAvatar.customAvatar.fullPath);
+            Settings.FullBodyCalibration fullBodyCalibration = SettingsManager.settings.GetAvatarSettings(spawnedAvatar.customAvatar.fullPath).fullBodyCalibration;
 
             fullBodyCalibration.leftLeg = Pose.identity;
             fullBodyCalibration.rightLeg = Pose.identity;

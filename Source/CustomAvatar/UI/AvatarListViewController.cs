@@ -19,7 +19,7 @@ namespace CustomAvatar.UI
     {
         private const string kTableCellReuseIdentifier = "CustomAvatarsTableCell";
 
-        public override string ResourceName => "CustomAvatar.Views.AvatarListViewController.bsml";
+        public override string ResourceName => "CustomAvatar.Views.AvatarList.bsml";
 
         [UIComponent("avatar-list")] public CustomListTableData avatarList;
         [UIComponent("up-button")] public Button upButton;

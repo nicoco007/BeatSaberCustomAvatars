@@ -61,7 +61,7 @@ namespace CustomAvatar.Avatar
         {
             base.Start();
 
-            _fullBodyCalibration = SettingsManager.settings.GetAvatarSettings(customAvatar.fullPath);
+            _fullBodyCalibration = SettingsManager.settings.GetAvatarSettings(customAvatar.fullPath).fullBodyCalibration;
 
             if (input == null)
             {

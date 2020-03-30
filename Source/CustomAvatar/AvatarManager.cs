@@ -134,10 +134,12 @@ namespace CustomAvatar
 
         private void OnSceneLoaded(Scene newScene, LoadSceneMode mode)
         {
-            currentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
-            currentlySpawnedAvatar?.eventsPlayer?.Restart();
+            if (currentlySpawnedAvatar == null) return;
 
-            if (newScene.name == "HealthWarning" && SettingsManager.settings.calibrateFullBodyTrackingOnStart && SettingsManager.settings.useAutomaticFullBodyCalibration)
+            currentlySpawnedAvatar.OnFirstPersonEnabledChanged();
+            currentlySpawnedAvatar.eventsPlayer?.Restart();
+
+            if (newScene.name == "HealthWarning" && SettingsManager.settings.calibrateFullBodyTrackingOnStart && SettingsManager.settings.GetAvatarSettings(currentlySpawnedAvatar.customAvatar.fullPath).useAutomaticCalibration)
             {
                 avatarTailor.CalibrateFullBodyTrackingAuto(currentlySpawnedAvatar);
             }

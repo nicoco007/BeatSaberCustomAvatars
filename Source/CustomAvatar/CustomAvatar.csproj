@@ -153,6 +153,7 @@
     <Compile Include="Tracking\Extensions.cs" />
     <Compile Include="Tracking\DeviceUse.cs" />
     <Compile Include="Tracking\VRAvatarInput.cs" />
+    <Compile Include="UI\BSMLExtensions.cs" />
     <Compile Include="Utilities\BeatSaberUtil.cs" />
     <Compile Include="Avatar\LoadedAvatar.cs" />
     <Compile Include="AvatarDescriptor.cs" />
@@ -191,10 +192,10 @@
     <EmbeddedResource Include="manifest.json" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Views\AvatarListViewController.bsml" />
+    <EmbeddedResource Include="Views\AvatarList.bsml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Views\SettingsViewController.bsml" />
+    <EmbeddedResource Include="Views\Settings.bsml" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\icon.png" />

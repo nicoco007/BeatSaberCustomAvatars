@@ -1,10 +1,14 @@
 using System.Collections.Generic;
 using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberMarkupLanguage.Components.Settings;
 using BeatSaberMarkupLanguage.ViewControllers;
+using CustomAvatar.Avatar;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
+using HMUI;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 #pragma warning disable 649 // disable "field is never assigned"
 #pragma warning disable IDE0044 // disable "make field readonly"
@@ -14,47 +18,63 @@ namespace CustomAvatar.UI
 {
     internal class SettingsViewController : BSMLResourceViewController
     {
-        public override string ResourceName => "CustomAvatar.Views.SettingsViewController.bsml";
+        public override string ResourceName => "CustomAvatar.Views.Settings.bsml";
 
         private readonly TrackedDeviceManager _playerInput = PersistentSingleton<TrackedDeviceManager>.instance;
         private bool _calibrating;
         private Material _sphereMaterial;
+        private Settings.AvatarSpecificSettings _currentAvatarSettings;
 
         #region Components
         
+        // text
         [UIComponent("arm-span")] private TextMeshProUGUI _armSpanLabel;
         [UIComponent("calibrate-button")] private TextMeshProUGUI _calibrateButtonText;
         [UIComponent("clear-button")] private TextMeshProUGUI _clearButtonText;
 
-        #endregion
+        // buttons
+        [UIComponent("calibrate-button")] private Button _calibrateButton;
+        [UIComponent("clear-button")] private Button _clearButton;
 
-        #region Properties
+        // settings
+        [UIComponent("visible-in-first-person")] private BoolSetting _visibleInFirstPerson;
+        [UIComponent("resize-mode")] private ListSetting _resizeMode;
+        [UIComponent("floor-adjust")] private BoolSetting _floorHeightAdjust;
+        [UIComponent("calibrate-fbt-on-start")] private BoolSetting _calibrateFullBodyTrackingOnStart;
+        [UIComponent("automatic-calibration")] private BoolSetting _automaticCalibrationSetting;
 
-        [UIValue("resize-options")] private readonly List<object> _resizeModeOptions = new List<object> { AvatarResizeMode.None, AvatarResizeMode.Height, AvatarResizeMode.ArmSpan };
+        [UIComponent("automatic-calibration")] private HoverHint _automaticCalibrationHoverHint;
 
         #endregion
 
         #region Values
 
-        [UIValue("visible-first-person-value")] private bool _visibleInFirstPerson;
-        [UIValue("resize-value")] private AvatarResizeMode _resizeMode;
-        [UIValue("floor-adjust-value")] private bool _floorHeightAdjust;
-        [UIValue("calibrate-fbt-on-start")] private bool _calibrateFullBodyTrackingOnStart;
+        [UIValue("resize-mode-options")] private readonly List<object> _resizeModeOptions = new List<object> { AvatarResizeMode.None, AvatarResizeMode.Height, AvatarResizeMode.ArmSpan };
 
         #endregion
 
         protected override void DidActivate(bool firstActivation, ActivationType type)
         {
-            _visibleInFirstPerson = SettingsManager.settings.isAvatarVisibleInFirstPerson;
-            _resizeMode = SettingsManager.settings.resizeMode;
-            _floorHeightAdjust = SettingsManager.settings.enableFloorAdjust;
-            _calibrateFullBodyTrackingOnStart = SettingsManager.settings.calibrateFullBodyTrackingOnStart;
-
             base.DidActivate(firstActivation, type);
+
+            _visibleInFirstPerson.Value = SettingsManager.settings.isAvatarVisibleInFirstPerson;
+            _resizeMode.Value = SettingsManager.settings.resizeMode;
+            _floorHeightAdjust.Value = SettingsManager.settings.enableFloorAdjust;
+            _calibrateFullBodyTrackingOnStart.Value = SettingsManager.settings.calibrateFullBodyTrackingOnStart;
+
+            OnAvatarChanged(AvatarManager.instance.currentlySpawnedAvatar);
+            OnInputDevicesChanged();
 
             _armSpanLabel.SetText($"{SettingsManager.settings.playerArmSpan:0.00} m");
 
             _sphereMaterial = new Material(ShaderLoader.unlitShader);
+
+            AvatarManager.instance.avatarChanged += OnAvatarChanged;
+
+            _playerInput.deviceAdded += (state, use) => OnInputDevicesChanged();
+            _playerInput.deviceRemoved += (state, use) => OnInputDevicesChanged();
+            _playerInput.deviceTrackingAcquired += (state, use) => OnInputDevicesChanged();
+            _playerInput.deviceTrackingLost += (state, use) => OnInputDevicesChanged();
         }
 
         protected override void DidDeactivate(DeactivationType deactivationType)
@@ -62,6 +82,24 @@ namespace CustomAvatar.UI
             base.DidDeactivate(deactivationType);
 
             DisableCalibrationMode(false);
+        }
+
+        private void OnAvatarChanged(SpawnedAvatar avatar)
+        {
+            _currentAvatarSettings = SettingsManager.settings.GetAvatarSettings(avatar.customAvatar.fullPath);
+
+            _clearButton.interactable = !_currentAvatarSettings.fullBodyCalibration.isDefault;
+
+            _automaticCalibrationSetting.Value = _currentAvatarSettings.useAutomaticCalibration;
+            _automaticCalibrationSetting.SetInteractable(avatar.customAvatar.descriptor.supportsAutomaticCalibration);
+            _automaticCalibrationHoverHint.text = avatar.customAvatar.descriptor.supportsAutomaticCalibration ? "Use automatic calibration instead of manual calibration" : "Not supported by current avatar";
+
+            DisableCalibrationMode(false);
+        }
+
+        private void OnInputDevicesChanged()
+        {
+            _calibrateButton.interactable = _playerInput.waist.tracked || _playerInput.leftFoot.tracked || _playerInput.rightFoot.tracked;
         }
 
         #region Actions
@@ -73,7 +111,7 @@ namespace CustomAvatar.UI
             AvatarManager.instance.currentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
         }
 
-        [UIAction("resize-change")]
+        [UIAction("resize-mode-change")]
         private void OnResizeModeChanged(AvatarResizeMode value)
         {
             SettingsManager.settings.resizeMode = value;
@@ -114,9 +152,10 @@ namespace CustomAvatar.UI
         [UIAction("calibrate-fbt-click")]
         private void OnCalibrateFullBodyTrackingClicked()
         {
-            if (SettingsManager.settings.useAutomaticFullBodyCalibration)
+            if (_currentAvatarSettings.useAutomaticCalibration)
             {
                 AvatarManager.instance.avatarTailor.CalibrateFullBodyTrackingAuto(AvatarManager.instance.currentlySpawnedAvatar);
+                _clearButton.interactable = !_currentAvatarSettings.fullBodyCalibration.isDefault;
             }
             else if (!_calibrating)
             {
@@ -144,7 +183,14 @@ namespace CustomAvatar.UI
             else
             {
                 AvatarManager.instance.avatarTailor.ClearFullBodyTrackingData(AvatarManager.instance.currentlySpawnedAvatar);
+                _clearButton.interactable = false;
             }
+        }
+
+        [UIAction("automatic-calibration-change")]
+        private void OnAutomaticCalibrationChanged(bool value)
+        {
+            _currentAvatarSettings.useAutomaticCalibration = value;
         }
 
         #endregion
@@ -159,6 +205,7 @@ namespace CustomAvatar.UI
             _calibrating = true;
             _calibrateButtonText.text = "Save";
             _clearButtonText.text = "Cancel";
+            _clearButton.interactable = true;
 
             _waistSphere = CreateCalibrationSphere();
             _leftFootSphere = CreateCalibrationSphere();
@@ -180,6 +227,7 @@ namespace CustomAvatar.UI
             _calibrating = false;
             _calibrateButtonText.text = "Calibrate";
             _clearButtonText.text = "Clear";
+            _clearButton.interactable = !_currentAvatarSettings.fullBodyCalibration.isDefault;
         }
 
         private GameObject CreateCalibrationSphere()
