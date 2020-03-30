@@ -17,7 +17,7 @@ namespace CustomAvatar.Utilities
         public bool isAvatarVisibleInFirstPerson = true;
         [JsonConverter(typeof(StringEnumConverter))] public AvatarResizeMode resizeMode = AvatarResizeMode.Height;
         public bool enableFloorAdjust = false;
-        public bool moveFloorWithRoomAdjust= false;
+        public bool moveFloorWithRoomAdjust = false;
         public string previousAvatarPath = null;
         public float playerArmSpan = AvatarTailor.kDefaultPlayerArmSpan;
         public bool calibrateFullBodyTrackingOnStart = false;
