@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using CustomAvatar.Avatar;
 using CustomAvatar.Tracking;
+using CustomAvatar.Utilities;
 using UnityEngine.SceneManagement;
 using Zenject;
 
@@ -60,7 +61,7 @@ namespace CustomAvatar
 
         public void LoadAvatarFromSettingsAsync()
         {
-            string previousAvatarPath = Plugin.settings.previousAvatarPath;
+            string previousAvatarPath = SettingsManager.settings.previousAvatarPath;
 
             if (string.IsNullOrEmpty(previousAvatarPath))
             {
@@ -91,7 +92,7 @@ namespace CustomAvatar
             currentlySpawnedAvatar?.Destroy();
             currentlySpawnedAvatar = null;
 
-            Plugin.settings.previousAvatarPath = avatar?.fullPath;
+            SettingsManager.settings.previousAvatarPath = avatar?.fullPath;
 
             if (avatar == null) return;
 
@@ -136,9 +137,9 @@ namespace CustomAvatar
             currentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
             currentlySpawnedAvatar?.eventsPlayer?.Restart();
 
-            if (newScene.name == "HealthWarning" && Plugin.settings.calibrateFullBodyTrackingOnStart && Plugin.settings.useAutomaticFullBodyCalibration)
+            if (newScene.name == "HealthWarning" && SettingsManager.settings.calibrateFullBodyTrackingOnStart && SettingsManager.settings.useAutomaticFullBodyCalibration)
             {
-                avatarTailor.CalibrateFullBodyTrackingAuto();
+                avatarTailor.CalibrateFullBodyTrackingAuto(currentlySpawnedAvatar);
             }
 
             ResizeCurrentAvatar();

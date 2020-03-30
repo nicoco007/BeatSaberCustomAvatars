@@ -19,7 +19,7 @@ namespace CustomAvatar
 
             // compute scale
             float scale;
-            AvatarResizeMode resizeMode = Plugin.settings.resizeMode;
+            AvatarResizeMode resizeMode = SettingsManager.settings.resizeMode;
 
             switch (resizeMode)
             {
@@ -28,7 +28,7 @@ namespace CustomAvatar
 
                     if (avatarArmLength > 0)
                     {
-                        scale = Plugin.settings.playerArmSpan / avatarArmLength;
+                        scale = SettingsManager.settings.playerArmSpan / avatarArmLength;
                     }
                     else
                     {
@@ -74,14 +74,14 @@ namespace CustomAvatar
 
             float floorOffset = 0f;
 
-            if (Plugin.settings.enableFloorAdjust && avatar.customAvatar.isIKAvatar)
+            if (SettingsManager.settings.enableFloorAdjust && avatar.customAvatar.isIKAvatar)
             {
                 float playerEyeHeight = BeatSaberUtil.GetPlayerEyeHeight();
                 float avatarEyeHeight = avatar.customAvatar.eyeHeight;
 
                 floorOffset = playerEyeHeight - avatarEyeHeight * avatar.tracking.scale;
 
-                if (Plugin.settings.moveFloorWithRoomAdjust)
+                if (SettingsManager.settings.moveFloorWithRoomAdjust)
                 {
                     floorOffset += BeatSaberUtil.GetRoomCenter().y;
                 }
@@ -127,13 +127,15 @@ namespace CustomAvatar
             TrackedDeviceState rightFoot = input.rightFoot;
             TrackedDeviceState pelvis = input.waist;
 
+            Settings.FullBodyCalibration fullBodyCalibration = SettingsManager.settings.GetAvatarSettings(spawnedAvatar.customAvatar.fullPath);
+
             if (pelvis.tracked)
             {
                 Vector3 positionOffset = spawnedAvatar.tracking.pelvis.position - pelvis.position;
                 Quaternion rotationOffset = Quaternion.Inverse(pelvis.rotation) * spawnedAvatar.tracking.pelvis.rotation;
 
-                Plugin.settings.fullBodyCalibration.pelvis = new Pose(positionOffset, rotationOffset);
-                Plugin.logger.Info("Saved pelvis pose correction " + Plugin.settings.fullBodyCalibration.pelvis);
+                fullBodyCalibration.pelvis = new Pose(positionOffset, rotationOffset);
+                Plugin.logger.Info("Saved pelvis pose correction " + fullBodyCalibration.pelvis);
             }
 
             if (leftFoot.tracked)
@@ -141,8 +143,8 @@ namespace CustomAvatar
                 Vector3 positionOffset = spawnedAvatar.tracking.leftLeg.position - leftFoot.position;
                 Quaternion rotationOffset = Quaternion.Inverse(leftFoot.rotation) * spawnedAvatar.tracking.leftLeg.rotation;
 
-                Plugin.settings.fullBodyCalibration.leftLeg = new Pose(positionOffset, rotationOffset);
-                Plugin.logger.Info("Saved left foot pose correction " + Plugin.settings.fullBodyCalibration.leftLeg);
+                fullBodyCalibration.leftLeg = new Pose(positionOffset, rotationOffset);
+                Plugin.logger.Info("Saved left foot pose correction " + fullBodyCalibration.leftLeg);
             }
 
             if (rightFoot.tracked)
@@ -150,12 +152,12 @@ namespace CustomAvatar
                 Vector3 positionOffset = spawnedAvatar.tracking.rightLeg.position - rightFoot.position;
                 Quaternion rotationOffset = Quaternion.Inverse(rightFoot.rotation) * spawnedAvatar.tracking.rightLeg.rotation;
 
-                Plugin.settings.fullBodyCalibration.rightLeg = new Pose(positionOffset, rotationOffset);
-                Plugin.logger.Info("Saved right foot pose correction " + Plugin.settings.fullBodyCalibration.rightLeg);
+                fullBodyCalibration.rightLeg = new Pose(positionOffset, rotationOffset);
+                Plugin.logger.Info("Saved right foot pose correction " + fullBodyCalibration.rightLeg);
             }
         }
 
-        public void CalibrateFullBodyTrackingAuto()
+        public void CalibrateFullBodyTrackingAuto(SpawnedAvatar spawnedAvatar)
         {
             Plugin.logger.Info("Calibrating full body tracking");
 
@@ -166,16 +168,18 @@ namespace CustomAvatar
             TrackedDeviceState rightFoot = input.rightFoot;
             TrackedDeviceState pelvis = input.waist;
 
+            Settings.FullBodyCalibration fullBodyCalibration = SettingsManager.settings.GetAvatarSettings(spawnedAvatar.customAvatar.fullPath);
+
             Vector3 floorNormal = Vector3.up;
-            float floorPosition = Plugin.settings.moveFloorWithRoomAdjust ? BeatSaberUtil.GetRoomCenter().y : 0;
+            float floorPosition = SettingsManager.settings.moveFloorWithRoomAdjust ? BeatSaberUtil.GetRoomCenter().y : 0;
 
             if (leftFoot.found)
             {
                 Vector3 leftFootForward = leftFoot.rotation * Vector3.up; // forward on feet trackers is y (up)
                 Vector3 leftFootStraightForward = Vector3.ProjectOnPlane(leftFootForward, floorNormal); // get projection of forward vector on xz plane (floor)
                 Quaternion leftRotationCorrection = Quaternion.Inverse(leftFoot.rotation) * Quaternion.LookRotation(Vector3.up, leftFootStraightForward); // get difference between world rotation and flat forward rotation
-                Plugin.settings.fullBodyCalibration.leftLeg = new Pose((leftFoot.position.y - floorPosition) * Vector3.down, leftRotationCorrection);
-                Plugin.logger.Info("Saved left foot pose correction " + Plugin.settings.fullBodyCalibration.leftLeg);
+                fullBodyCalibration.leftLeg = new Pose((leftFoot.position.y - floorPosition) * Vector3.down, leftRotationCorrection);
+                Plugin.logger.Info("Saved left foot pose correction " + fullBodyCalibration.leftLeg);
             }
 
             if (rightFoot.found)
@@ -183,8 +187,8 @@ namespace CustomAvatar
                 Vector3 rightFootForward = rightFoot.rotation * Vector3.up;
                 Vector3 rightFootStraightForward = Vector3.ProjectOnPlane(rightFootForward, floorNormal);
                 Quaternion rightRotationCorrection = Quaternion.Inverse(rightFoot.rotation) * Quaternion.LookRotation(Vector3.up, rightFootStraightForward);
-                Plugin.settings.fullBodyCalibration.rightLeg = new Pose((rightFoot.position.y - floorPosition) * Vector3.down, rightRotationCorrection);
-                Plugin.logger.Info("Saved right foot pose correction " + Plugin.settings.fullBodyCalibration.rightLeg);
+                fullBodyCalibration.rightLeg = new Pose((rightFoot.position.y - floorPosition) * Vector3.down, rightRotationCorrection);
+                Plugin.logger.Info("Saved right foot pose correction " + fullBodyCalibration.rightLeg);
             }
 
             if (head.found && pelvis.found)
@@ -200,16 +204,18 @@ namespace CustomAvatar
                 Vector3 pelvisStraightForward = Vector3.ProjectOnPlane(pelvisForward, floorNormal);
                 Quaternion pelvisRotationCorrection = Quaternion.Inverse(pelvis.rotation) * Quaternion.LookRotation(pelvisStraightForward, Vector3.up);
 
-                Plugin.settings.fullBodyCalibration.pelvis = new Pose(pelvisPositionCorrection, pelvisRotationCorrection);
-                Plugin.logger.Info("Saved pelvis pose correction " + Plugin.settings.fullBodyCalibration.pelvis);
+                fullBodyCalibration.pelvis = new Pose(pelvisPositionCorrection, pelvisRotationCorrection);
+                Plugin.logger.Info("Saved pelvis pose correction " + fullBodyCalibration.pelvis);
             }
         }
 
-        public void ClearFullBodyTrackingData()
+        public void ClearFullBodyTrackingData(SpawnedAvatar spawnedAvatar)
         {
-            Plugin.settings.fullBodyCalibration.leftLeg = Pose.identity;
-            Plugin.settings.fullBodyCalibration.rightLeg = Pose.identity;
-            Plugin.settings.fullBodyCalibration.pelvis = Pose.identity;
+            Settings.FullBodyCalibration fullBodyCalibration = SettingsManager.settings.GetAvatarSettings(spawnedAvatar.customAvatar.fullPath);
+
+            fullBodyCalibration.leftLeg = Pose.identity;
+            fullBodyCalibration.rightLeg = Pose.identity;
+            fullBodyCalibration.pelvis = Pose.identity;
         }
     }
 }

@@ -12,6 +12,8 @@
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -161,9 +163,12 @@
     <Compile Include="Tracking\OpenVRWrapper.cs" />
     <Compile Include="PoseManager.cs" />
     <Compile Include="EventManager.cs" />
-    <Compile Include="Utilities\Vector2ValueConverter.cs" />
-    <Compile Include="Utilities\PoseValueConverter.cs" />
+    <Compile Include="Utilities\PoseJsonConverter.cs" />
+    <Compile Include="Utilities\QuaternionJsonConverter.cs" />
     <Compile Include="Utilities\ReflectionExtensions.cs" />
+    <Compile Include="Utilities\SettingsManager.cs" />
+    <Compile Include="Utilities\Vector2JsonConverter.cs" />
+    <Compile Include="Utilities\Vector3JsonConverter.cs" />
     <Compile Include="VRIKManager.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -200,7 +205,6 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\ban.png" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <AutomatedBuild>false</AutomatedBuild>

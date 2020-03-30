@@ -29,6 +29,8 @@ namespace CustomAvatar.Avatar
 
         public AvatarInput input;
         public LoadedAvatar customAvatar;
+
+        private Settings.FullBodyCalibration _fullBodyCalibration;
 		
         private Vector3 _initialScale;
 
@@ -58,6 +60,8 @@ namespace CustomAvatar.Avatar
         protected override void Start()
         {
             base.Start();
+
+            _fullBodyCalibration = SettingsManager.settings.GetAvatarSettings(customAvatar.fullPath);
 
             if (input == null)
             {
@@ -134,10 +138,10 @@ namespace CustomAvatar.Avatar
                 {
                     if (leftLeg && input.TryGetLeftFootPose(out Pose leftFootPose))
                     {
-                        Pose correction = Plugin.settings.fullBodyCalibration.leftLeg;
+                        Pose correction = _fullBodyCalibration.leftLeg;
 
-                        _prevLeftLegPose.position = Vector3.Lerp(_prevLeftLegPose.position, AdjustTransformPosition(leftFootPose.position, correction.position, _initialLeftFootPose.position), Plugin.settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
-                        _prevLeftLegPose.rotation = Quaternion.Slerp(_prevLeftLegPose.rotation, leftFootPose.rotation * correction.rotation, Plugin.settings.fullBodyMotionSmoothing.feet.rotation * Time.deltaTime);
+                        _prevLeftLegPose.position = Vector3.Lerp(_prevLeftLegPose.position, AdjustTransformPosition(leftFootPose.position, correction.position, _initialLeftFootPose.position), SettingsManager.settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
+                        _prevLeftLegPose.rotation = Quaternion.Slerp(_prevLeftLegPose.rotation, leftFootPose.rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.feet.rotation * Time.deltaTime);
                         
                         leftLeg.position = _prevLeftLegPose.position;
                         leftLeg.rotation = _prevLeftLegPose.rotation;
@@ -145,10 +149,10 @@ namespace CustomAvatar.Avatar
 
                     if (rightLeg && input.TryGetRightFootPose(out Pose rightFootPose))
                     {
-                        Pose correction = Plugin.settings.fullBodyCalibration.rightLeg;
+                        Pose correction = _fullBodyCalibration.rightLeg;
 
-                        _prevRightLegPose.position = Vector3.Lerp(_prevRightLegPose.position, AdjustTransformPosition(rightFootPose.position, correction.position, _initialRightFootPose.position), Plugin.settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
-                        _prevRightLegPose.rotation = Quaternion.Slerp(_prevRightLegPose.rotation, rightFootPose.rotation * correction.rotation, Plugin.settings.fullBodyMotionSmoothing.feet.rotation * Time.deltaTime);
+                        _prevRightLegPose.position = Vector3.Lerp(_prevRightLegPose.position, AdjustTransformPosition(rightFootPose.position, correction.position, _initialRightFootPose.position), SettingsManager.settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
+                        _prevRightLegPose.rotation = Quaternion.Slerp(_prevRightLegPose.rotation, rightFootPose.rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.feet.rotation * Time.deltaTime);
                         
                         rightLeg.position = _prevRightLegPose.position;
                         rightLeg.rotation = _prevRightLegPose.rotation;
@@ -156,10 +160,10 @@ namespace CustomAvatar.Avatar
 
                     if (pelvis && input.TryGetWaistPose(out Pose pelvisPose))
                     {
-                        Pose correction = Plugin.settings.fullBodyCalibration.pelvis;
+                        Pose correction = _fullBodyCalibration.pelvis;
 
-                        _prevPelvisPose.position = Vector3.Lerp(_prevPelvisPose.position, AdjustTransformPosition(pelvisPose.position, correction.position, _initialPelvisPose.position), Plugin.settings.fullBodyMotionSmoothing.waist.position * Time.deltaTime);
-                        _prevPelvisPose.rotation = Quaternion.Slerp(_prevPelvisPose.rotation, pelvisPose.rotation * correction.rotation, Plugin.settings.fullBodyMotionSmoothing.waist.rotation * Time.deltaTime);
+                        _prevPelvisPose.position = Vector3.Lerp(_prevPelvisPose.position, AdjustTransformPosition(pelvisPose.position, correction.position, _initialPelvisPose.position), SettingsManager.settings.fullBodyMotionSmoothing.waist.position * Time.deltaTime);
+                        _prevPelvisPose.rotation = Quaternion.Slerp(_prevPelvisPose.rotation, pelvisPose.rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.waist.rotation * Time.deltaTime);
                         
                         pelvis.position = _prevPelvisPose.position;
                         pelvis.rotation = _prevPelvisPose.rotation;
@@ -198,7 +202,7 @@ namespace CustomAvatar.Avatar
             Vector3 corrected = original + correction;
             float y = verticalPosition;
 
-            if (Plugin.settings.moveFloorWithRoomAdjust)
+            if (SettingsManager.settings.moveFloorWithRoomAdjust)
             {
                 y -= BeatSaberUtil.GetRoomCenter().y;
             }

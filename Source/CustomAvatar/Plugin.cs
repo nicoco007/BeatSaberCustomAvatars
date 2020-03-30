@@ -26,13 +26,13 @@ namespace CustomAvatar
         public static Plugin instance { get; private set; }
 
         public static Logger logger { get; private set; }
-        public static Settings settings { get; set; }
 
         [Init]
-        public Plugin(Logger logger, [Config.Name("CustomAvatars")] Config config)
+        public Plugin(Logger logger)
         {
             Plugin.logger = logger;
-            Plugin.settings = config.Generated<Settings>();
+            
+            SettingsManager.Load();
 
             instance = this;
         }
@@ -60,6 +60,8 @@ namespace CustomAvatar
             }
 
             SceneManager.sceneLoaded -= OnSceneLoaded;
+
+            SettingsManager.Save();
         }
 
         public void OnSceneLoaded(Scene newScene, LoadSceneMode mode)
@@ -92,7 +94,7 @@ namespace CustomAvatar
 
                     _mirrorContainer = new GameObject();
                     Object.DontDestroyOnLoad(_mirrorContainer);
-                    Vector2 mirrorSize = settings.mirrorSize;
+                    Vector2 mirrorSize = SettingsManager.settings.mirrorSize;
                     MirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, -1.5f), Quaternion.Euler(-90f, 180f, 0), mirrorSize, _mirrorContainer.transform);
                 }
             }
@@ -114,7 +116,7 @@ namespace CustomAvatar
             if (mainCamera)
             {
                 SetCameraCullingMask(mainCamera);
-                mainCamera.nearClipPlane = Plugin.settings.cameraNearClipPlane;
+                mainCamera.nearClipPlane = SettingsManager.settings.cameraNearClipPlane;
             }
             else
             {

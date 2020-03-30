@@ -1,4 +1,5 @@
 using CustomAvatar.StereoRendering;
+using CustomAvatar.Utilities;
 using UnityEngine;
 using HMUI;
 
@@ -16,7 +17,7 @@ namespace CustomAvatar.UI
 
             if (firstActivation)
             {
-                Vector2 mirrorSize = Plugin.settings.mirrorSize;
+                Vector2 mirrorSize = SettingsManager.settings.mirrorSize;
                 MirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, 1.5f), Quaternion.Euler(-90f, 0, 0), mirrorSize, _mirrorContainer.transform);
             }
         }

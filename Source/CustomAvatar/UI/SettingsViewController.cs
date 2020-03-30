@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
 using CustomAvatar.Tracking;
+using CustomAvatar.Utilities;
 using TMPro;
 using UnityEngine;
 
@@ -44,14 +45,14 @@ namespace CustomAvatar.UI
 
         protected override void DidActivate(bool firstActivation, ActivationType type)
         {
-            _visibleInFirstPerson = Plugin.settings.isAvatarVisibleInFirstPerson;
-            _resizeMode = Plugin.settings.resizeMode;
-            _floorHeightAdjust = Plugin.settings.enableFloorAdjust;
-            _calibrateFullBodyTrackingOnStart = Plugin.settings.calibrateFullBodyTrackingOnStart;
+            _visibleInFirstPerson = SettingsManager.settings.isAvatarVisibleInFirstPerson;
+            _resizeMode = SettingsManager.settings.resizeMode;
+            _floorHeightAdjust = SettingsManager.settings.enableFloorAdjust;
+            _calibrateFullBodyTrackingOnStart = SettingsManager.settings.calibrateFullBodyTrackingOnStart;
 
             base.DidActivate(firstActivation, type);
 
-            _armSpanLabel.SetText($"{Plugin.settings.playerArmSpan:0.00} m");
+            _armSpanLabel.SetText($"{SettingsManager.settings.playerArmSpan:0.00} m");
 
             _sphereMaterial = new Material(ShaderLoader.unlitShader);
         }
@@ -68,21 +69,21 @@ namespace CustomAvatar.UI
         [UIAction("visible-first-person-change")]
         private void OnVisibleInFirstPersonChanged(bool value)
         {
-            Plugin.settings.isAvatarVisibleInFirstPerson = value;
+            SettingsManager.settings.isAvatarVisibleInFirstPerson = value;
             AvatarManager.instance.currentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
         }
 
         [UIAction("resize-change")]
         private void OnResizeModeChanged(AvatarResizeMode value)
         {
-            Plugin.settings.resizeMode = value;
+            SettingsManager.settings.resizeMode = value;
             AvatarManager.instance.ResizeCurrentAvatar();
         }
 
         [UIAction("floor-adjust-change")]
         private void OnFloorHeightAdjustChanged(bool value)
         {
-            Plugin.settings.enableFloorAdjust = value;
+            SettingsManager.settings.enableFloorAdjust = value;
             AvatarManager.instance.ResizeCurrentAvatar();
         }
 
@@ -113,9 +114,9 @@ namespace CustomAvatar.UI
         [UIAction("calibrate-fbt-click")]
         private void OnCalibrateFullBodyTrackingClicked()
         {
-            if (Plugin.settings.useAutomaticFullBodyCalibration)
+            if (SettingsManager.settings.useAutomaticFullBodyCalibration)
             {
-                AvatarManager.instance.avatarTailor.CalibrateFullBodyTrackingAuto();
+                AvatarManager.instance.avatarTailor.CalibrateFullBodyTrackingAuto(AvatarManager.instance.currentlySpawnedAvatar);
             }
             else if (!_calibrating)
             {
@@ -130,7 +131,7 @@ namespace CustomAvatar.UI
         [UIAction("calibrate-fbt-on-start-change")]
         private void OnCalibrateFullBodyTrackingOnStartChanged(bool value)
         {
-            Plugin.settings.calibrateFullBodyTrackingOnStart = value;
+            SettingsManager.settings.calibrateFullBodyTrackingOnStart = value;
         }
 
         [UIAction("clear-fbt-calibration-data-click")]
@@ -142,7 +143,7 @@ namespace CustomAvatar.UI
             }
             else
             {
-                AvatarManager.instance.avatarTailor.ClearFullBodyTrackingData();
+                AvatarManager.instance.avatarTailor.ClearFullBodyTrackingData(AvatarManager.instance.currentlySpawnedAvatar);
             }
         }
 
@@ -268,10 +269,10 @@ namespace CustomAvatar.UI
             {
                 CancelInvoke(nameof(ScanArmSpan));
                 _armSpanLabel.SetText($"{_maxMeasuredArmSpan:0.00} m");
-                Plugin.settings.playerArmSpan = _maxMeasuredArmSpan;
+                SettingsManager.settings.playerArmSpan = _maxMeasuredArmSpan;
                 _isMeasuring = false;
 
-                if (Plugin.settings.resizeMode == AvatarResizeMode.ArmSpan)
+                if (SettingsManager.settings.resizeMode == AvatarResizeMode.ArmSpan)
                 {
                     AvatarManager.instance.ResizeCurrentAvatar();
                 }
