@@ -10,6 +10,8 @@ namespace CustomAvatar.Utilities
 
         public static Settings settings { get; private set; }
 
+        private static bool _hasReset;
+
         public static void Load()
         {
             Plugin.logger.Info("Loading settings from " + kSettingsPath);
@@ -36,12 +38,15 @@ namespace CustomAvatar.Utilities
                 Plugin.logger.Error("Failed to load settings from file; using default settings");
                 Plugin.logger.Error(ex);
 
+                _hasReset = true;
                 settings = new Settings();
             }
         }
 
         public static void Save()
         {
+            if (_hasReset) return;
+
             Plugin.logger.Info("Saving settings to " + kSettingsPath);
 
             using (var writer = new StreamWriter(kSettingsPath))
@@ -59,7 +64,7 @@ namespace CustomAvatar.Utilities
             {
                 Formatting = Formatting.Indented,
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                Converters = { new Vector2JsonConverter(), new Vector3JsonConverter(), new QuaternionJsonConverter(), new PoseJsonConverter() }
+                Converters = { new Vector2JsonConverter(), new Vector3JsonConverter(), new QuaternionJsonConverter(), new PoseJsonConverter(), new FloatJsonConverter() }
             };
         }
     }

@@ -216,6 +216,7 @@ namespace CustomAvatar.UI
         {
             SettingsManager.settings.cameraNearClipPlane = value;
 
+            // TODO logic in view controller is not ideal
             Camera mainCamera = Camera.main;
 
             if (mainCamera)
