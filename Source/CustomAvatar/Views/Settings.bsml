@@ -1,7 +1,7 @@
 <bg id="root">
   <tab-selector tab-tag="avatar-tabs" anchor-pos-y="-2"></tab-selector>
 
-  <tab tags="avatar-tabs" tab-name="General" anchor-max-y="0.9">
+  <tab tags="avatar-tabs" tab-name="General" anchor-max-y="0.8">
     <settings-container>
       <bool-setting text="Visible in First Person" id="visible-in-first-person" on-change="visible-first-person-change"></bool-setting>
       <list-setting text="Resize Mode" id="resize-mode" on-change="resize-mode-change" options="resize-mode-options" formatter="resize-mode-formatter"></list-setting>
@@ -18,7 +18,7 @@
     </settings-container>
   </tab>
 
-  <tab tags="avatar-tabs" tab-name="Avatar Specific" anchor-max-y="0.9">
+  <tab tags="avatar-tabs" tab-name="Avatar Specific" anchor-max-y="0.8">
     <settings-container>
       <bool-setting id="automatic-calibration" text="Use automatic calibration" hover-hint="Must be supported by avatar" on-change="automatic-calibration-change"></bool-setting>
 
