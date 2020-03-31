@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using CustomAvatar.Avatar;
@@ -79,10 +81,13 @@ namespace CustomAvatar
 
         public void SwitchToAvatarAsync(string filePath)
         {
-            SharedCoroutineStarter.instance.StartCoroutine(LoadedAvatar.FromFileCoroutine(filePath, avatar =>
+            if (string.IsNullOrEmpty(filePath))
             {
-                SwitchToAvatar(avatar);
-            }));
+                SwitchToAvatar(null);
+                return;
+            }
+
+            SharedCoroutineStarter.instance.StartCoroutine(LoadedAvatar.FromFileCoroutine(filePath, SwitchToAvatar));
         }
 
         public void SwitchToAvatar(LoadedAvatar avatar)
@@ -94,7 +99,11 @@ namespace CustomAvatar
 
             SettingsManager.settings.previousAvatarPath = avatar?.fullPath;
 
-            if (avatar == null) return;
+            if (avatar == null)
+            {
+                Plugin.logger.Info("No avatar selected");
+                return;
+            }
 
             currentlySpawnedAvatar = SpawnAvatar(avatar, new VRAvatarInput());
 
@@ -106,21 +115,25 @@ namespace CustomAvatar
 
         public void SwitchToNextAvatar()
         {
-            string[] files = GetAvatarFileNames();
-            int index = Array.IndexOf(files, currentlySpawnedAvatar.customAvatar.fullPath);
+            List<string> files = GetAvatarFileNames();
+            files.Insert(0, null);
 
-            index = (index + 1) % files.Length;
+            int index = files.IndexOf(currentlySpawnedAvatar?.customAvatar.fullPath);
+
+            index = (index + 1) % files.Count;
 
             SwitchToAvatarAsync(files[index]);
         }
 
         public void SwitchToPreviousAvatar()
         {
-            string[] files = GetAvatarFileNames();
-            int index = Array.IndexOf(files, currentlySpawnedAvatar.customAvatar.fullPath);
+            List<string> files = GetAvatarFileNames();
+            files.Insert(0, null);
+            
+            int index = files.IndexOf(currentlySpawnedAvatar?.customAvatar.fullPath);
 
-            index = (index + files.Length - 1) % files.Length;
-
+            index = (index + files.Count - 1) % files.Count;
+            
             SwitchToAvatarAsync(files[index]);
         }
 
@@ -174,9 +187,9 @@ namespace CustomAvatar
             return spawnedAvatar;
         }
 
-        private string[] GetAvatarFileNames()
+        private List<string> GetAvatarFileNames()
         {
-            return Directory.GetFiles(kCustomAvatarsPath, "*.avatar").Select(f => GetRelativePath(kCustomAvatarsPath, f)).ToArray();
+            return Directory.GetFiles(kCustomAvatarsPath, "*.avatar").Select(f => GetRelativePath(kCustomAvatarsPath, f)).ToList();
         }
 
         private string GetRelativePath(string rootDirectoryPath, string path)
