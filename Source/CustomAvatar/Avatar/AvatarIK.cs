@@ -119,6 +119,16 @@ namespace CustomAvatar.Avatar
         #pragma warning restore IDE0051
         #endregion
 
+        public void EnableCalibrationMode()
+        {
+            UpdateSolverTargets(true);
+        }
+
+        public void DisableCalibrationMode()
+        {
+            UpdateSolverTargets();
+        }
+
         private void OnInputChanged()
         {
             Plugin.logger.Info("Tracking device change detected, updating VRIK references");
@@ -156,7 +166,7 @@ namespace CustomAvatar.Avatar
             return newTarget;
         }
 
-        private void UpdateSolverTargets()
+        private void UpdateSolverTargets(bool forceEnableAll = false)
         {
             Plugin.logger.Info("Updating solver targets");
 
@@ -166,7 +176,7 @@ namespace CustomAvatar.Avatar
 
             Plugin.logger.Info("Updating conditional solver targets");
 
-            if (input.TryGetLeftFootPose(out _))
+            if (input.TryGetLeftFootPose(out _) || forceEnableAll)
             {
                 Plugin.logger.Debug("Left foot enabled");
                 _vrik.solver.leftLeg.target = _vrikManager.solver_leftLeg_target;
@@ -181,7 +191,7 @@ namespace CustomAvatar.Avatar
                 _vrik.solver.leftLeg.rotationWeight = 0;
             }
 
-            if (input.TryGetRightFootPose(out _))
+            if (input.TryGetRightFootPose(out _) || forceEnableAll)
             {
                 Plugin.logger.Debug("Right foot enabled");
                 _vrik.solver.rightLeg.target = _vrikManager.solver_rightLeg_target;
@@ -196,7 +206,7 @@ namespace CustomAvatar.Avatar
                 _vrik.solver.rightLeg.rotationWeight = 0;
             }
 
-            if (input.TryGetWaistPose(out _))
+            if (input.TryGetWaistPose(out _) || forceEnableAll)
             {
                 Plugin.logger.Debug("Pelvis enabled");
                 _vrik.solver.spine.pelvisTarget = _vrikManager.solver_spine_pelvisTarget;

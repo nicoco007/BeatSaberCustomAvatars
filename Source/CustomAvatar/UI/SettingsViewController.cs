@@ -20,9 +20,14 @@ namespace CustomAvatar.UI
     {
         public override string ResourceName => "CustomAvatar.Views.Settings.bsml";
 
+        private static readonly int kColor = Shader.PropertyToID("_Color");
+
         private readonly TrackedDeviceManager _playerInput = PersistentSingleton<TrackedDeviceManager>.instance;
         private bool _calibrating;
         private Material _sphereMaterial;
+        private Material _redMaterial;
+        private Material _greenMaterial;
+        private Material _blueMaterial;
         private Settings.AvatarSpecificSettings _currentAvatarSettings;
 
         #region Components
@@ -70,6 +75,13 @@ namespace CustomAvatar.UI
             _armSpanLabel.SetText($"{SettingsManager.settings.playerArmSpan:0.00} m");
 
             _sphereMaterial = new Material(ShaderLoader.unlitShader);
+            _redMaterial = new Material(ShaderLoader.unlitShader);
+            _greenMaterial = new Material(ShaderLoader.unlitShader);
+            _blueMaterial = new Material(ShaderLoader.unlitShader);
+
+            _redMaterial.SetColor(kColor, new Color(0.8f, 0, 0, 1));
+            _greenMaterial.SetColor(kColor, new Color(0, 0.8f, 0, 1));
+            _blueMaterial.SetColor(kColor, new Color(0, 0.5f, 1, 1));
 
             AvatarManager.instance.avatarChanged += OnAvatarChanged;
 
@@ -208,6 +220,7 @@ namespace CustomAvatar.UI
         [UIAction("automatic-calibration-change")]
         private void OnAutomaticCalibrationChanged(bool value)
         {
+            DisableCalibrationMode(false);
             _currentAvatarSettings.useAutomaticCalibration = value;
         }
 
@@ -237,7 +250,7 @@ namespace CustomAvatar.UI
 
         private void EnableCalibrationMode()
         {
-            AvatarManager.instance.currentlySpawnedAvatar.tracking.isCalibrationModeEnabled = true;
+            AvatarManager.instance.currentlySpawnedAvatar.EnableCalibrationMode();;
             _calibrating = true;
             _calibrateButtonText.text = "Save";
             _clearButtonText.text = "Cancel";
@@ -257,7 +270,7 @@ namespace CustomAvatar.UI
                     AvatarManager.instance.avatarTailor.CalibrateFullBodyTrackingManual(AvatarManager.instance.currentlySpawnedAvatar);
                 }
                 
-                AvatarManager.instance.currentlySpawnedAvatar.tracking.isCalibrationModeEnabled = false;
+                AvatarManager.instance.currentlySpawnedAvatar.DisableCalibrationMode();
             }
 
             Destroy(_waistSphere);
@@ -278,7 +291,22 @@ namespace CustomAvatar.UI
             sphere.transform.localScale = Vector3.one * 0.1f;
             sphere.GetComponent<Renderer>().material = _sphereMaterial;
 
+            CreateAxis(new Vector3(0.5f, 0, 0), new Vector3(1f, 0.1f, 0.1f), _redMaterial, sphere.transform);
+            CreateAxis(new Vector3(0, 0.5f, 0), new Vector3(0.1f, 1f, 0.1f), _greenMaterial, sphere.transform);
+            CreateAxis(new Vector3(0, 0, 0.5f), new Vector3(0.1f, 0.1f, 1f), _blueMaterial, sphere.transform);
+
             return sphere;
+        }
+
+        private void CreateAxis(Vector3 position, Vector3 scale, Material material, Transform parent)
+        {
+            GameObject axis = GameObject.CreatePrimitive(PrimitiveType.Cube);
+
+            axis.layer = AvatarLayers.AlwaysVisible;
+            axis.transform.localPosition = position;
+            axis.transform.localScale = scale;
+            axis.GetComponent<Renderer>().material = material;
+            axis.transform.SetParent(parent, false);
         }
 
         private void Update()

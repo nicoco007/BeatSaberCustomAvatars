@@ -10,10 +10,13 @@ namespace CustomAvatar.Avatar
 	{
 		public LoadedAvatar customAvatar { get; }
 		public AvatarTracking tracking { get; }
+        public AvatarIK ik { get; }
 		public AvatarEventsPlayer eventsPlayer { get; }
 
         private readonly GameObject _gameObject;
         private readonly FirstPersonExclusion[] _firstPersonExclusions;
+
+        private bool _isCalibrationModeEnabled;
 
         public SpawnedAvatar(LoadedAvatar avatar, AvatarInput input)
         {
@@ -30,8 +33,7 @@ namespace CustomAvatar.Avatar
             
             if (customAvatar.isIKAvatar)
             {
-                AvatarIK ik = _gameObject.AddComponent<AvatarIK>();
-
+                ik = _gameObject.AddComponent<AvatarIK>();
                 ik.input = input;
             }
 
@@ -48,6 +50,27 @@ namespace CustomAvatar.Avatar
 	        Object.Destroy(_gameObject);
         }
 
+        public void EnableCalibrationMode()
+        {
+            if (_isCalibrationModeEnabled || !ik) return;
+
+            _isCalibrationModeEnabled = true;
+
+            tracking.isCalibrationModeEnabled = true;
+            ik.EnableCalibrationMode();
+        }
+
+        public void DisableCalibrationMode()
+        {
+            if (!_isCalibrationModeEnabled || !ik) return;
+
+            tracking.isCalibrationModeEnabled = false;
+            ik.DisableCalibrationMode();
+
+            _isCalibrationModeEnabled = false;
+        }
+
+        // TODO make this class subscribe to an event rather than calling externally
         public void OnFirstPersonEnabledChanged()
         {
 	        SetChildrenToLayer(SettingsManager.settings.isAvatarVisibleInFirstPerson ? AvatarLayers.AlwaysVisible : AvatarLayers.OnlyInThirdPerson);
