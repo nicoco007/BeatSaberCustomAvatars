@@ -17,8 +17,8 @@ namespace CustomAvatar.UI
 
             if (firstActivation)
             {
-                Vector2 mirrorSize = SettingsManager.settings.mirrorSize;
-                MirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, 1.5f), Quaternion.Euler(-90f, 0, 0), mirrorSize, _mirrorContainer.transform);
+                Vector2 mirrorSize = SettingsManager.settings.mirror.size;
+                MirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, 3f) + SettingsManager.settings.mirror.positionOffset, Quaternion.Euler(-90f, 0, 0), mirrorSize, _mirrorContainer.transform, new Vector3(0, mirrorSize.y / 2, 1.5f));
             }
         }
 

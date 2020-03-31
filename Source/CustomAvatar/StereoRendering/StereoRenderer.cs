@@ -323,8 +323,8 @@ namespace CustomAvatar.StereoRendering
             var rightEyeOffset = new Vector3(ipd / 2, 0, 0);
 
             int hash = detector.GetHashCode();
-            int renderWidth = (int)(SettingsManager.settings.mirrorRenderScale * detector.Camera.pixelWidth);
-            int renderHeight = (int)(SettingsManager.settings.mirrorRenderScale * detector.Camera.pixelHeight);
+            int renderWidth = (int)(SettingsManager.settings.mirror.renderScale * detector.Camera.pixelWidth);
+            int renderHeight = (int)(SettingsManager.settings.mirror.renderScale * detector.Camera.pixelHeight);
 
             if (!leftEyeTextures.ContainsKey(hash))
             {
