@@ -40,6 +40,7 @@ namespace CustomAvatar.UI
         [UIComponent("visible-in-first-person")] private BoolSetting _visibleInFirstPerson;
         [UIComponent("resize-mode")] private ListSetting _resizeMode;
         [UIComponent("floor-adjust")] private BoolSetting _floorHeightAdjust;
+        [UIComponent("camera-clip-plane")] private IncrementSetting _cameraNearClipPlane;
         [UIComponent("calibrate-fbt-on-start")] private BoolSetting _calibrateFullBodyTrackingOnStart;
         [UIComponent("automatic-calibration")] private BoolSetting _automaticCalibrationSetting;
 
@@ -61,6 +62,7 @@ namespace CustomAvatar.UI
             _resizeMode.Value = SettingsManager.settings.resizeMode;
             _floorHeightAdjust.Value = SettingsManager.settings.enableFloorAdjust;
             _calibrateFullBodyTrackingOnStart.Value = SettingsManager.settings.calibrateFullBodyTrackingOnStart;
+            _cameraNearClipPlane.Value = SettingsManager.settings.cameraNearClipPlane;
 
             OnAvatarChanged(AvatarManager.instance.currentlySpawnedAvatar);
             OnInputDevicesChanged();
@@ -207,6 +209,23 @@ namespace CustomAvatar.UI
         private void OnAutomaticCalibrationChanged(bool value)
         {
             _currentAvatarSettings.useAutomaticCalibration = value;
+        }
+
+        [UIAction("camera-clip-plane-change")]
+        private void OnCameraClipPlaneChanged(float value)
+        {
+            SettingsManager.settings.cameraNearClipPlane = value;
+
+            Camera mainCamera = Camera.main;
+
+            if (mainCamera)
+            {
+                mainCamera.nearClipPlane = value;
+            }
+            else
+            {
+                Plugin.logger.Error("Could not find main camera!");
+            }
         }
 
         #endregion

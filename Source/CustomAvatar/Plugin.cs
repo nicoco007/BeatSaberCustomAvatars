@@ -5,8 +5,6 @@ using System.Linq;
 using BeatSaberMarkupLanguage.MenuButtons;
 using CustomAvatar.UI;
 using CustomAvatar.Utilities;
-using IPA.Config;
-using IPA.Config.Stores;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
