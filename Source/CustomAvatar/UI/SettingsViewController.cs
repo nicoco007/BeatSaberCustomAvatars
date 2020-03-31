@@ -71,6 +71,7 @@ namespace CustomAvatar.UI
 
             AvatarManager.instance.avatarChanged += OnAvatarChanged;
 
+            // TODO unsub from all these
             _playerInput.deviceAdded += (state, use) => OnInputDevicesChanged();
             _playerInput.deviceRemoved += (state, use) => OnInputDevicesChanged();
             _playerInput.deviceTrackingAcquired += (state, use) => OnInputDevicesChanged();
@@ -81,25 +82,40 @@ namespace CustomAvatar.UI
         {
             base.DidDeactivate(deactivationType);
 
+            AvatarManager.instance.avatarChanged -= OnAvatarChanged;
+
             DisableCalibrationMode(false);
         }
 
         private void OnAvatarChanged(SpawnedAvatar avatar)
         {
+            DisableCalibrationMode(false);
+
+            if (avatar == null)
+            {
+                _clearButton.interactable = false;
+                _calibrateButton.interactable = false;
+                _automaticCalibrationSetting.SetInteractable(false);
+                _automaticCalibrationHoverHint.text = "No avatar selected";
+
+                return;
+            }
+
             _currentAvatarSettings = SettingsManager.settings.GetAvatarSettings(avatar.customAvatar.fullPath);
 
             _clearButton.interactable = !_currentAvatarSettings.fullBodyCalibration.isDefault;
+            // TODO same here
+            _calibrateButton.interactable = AvatarManager.instance.currentlySpawnedAvatar.customAvatar.isIKAvatar && (_playerInput.waist.tracked || _playerInput.leftFoot.tracked || _playerInput.rightFoot.tracked);
 
             _automaticCalibrationSetting.Value = _currentAvatarSettings.useAutomaticCalibration;
             _automaticCalibrationSetting.SetInteractable(avatar.customAvatar.descriptor.supportsAutomaticCalibration);
             _automaticCalibrationHoverHint.text = avatar.customAvatar.descriptor.supportsAutomaticCalibration ? "Use automatic calibration instead of manual calibration" : "Not supported by current avatar";
-
-            DisableCalibrationMode(false);
         }
 
         private void OnInputDevicesChanged()
         {
-            _calibrateButton.interactable = _playerInput.waist.tracked || _playerInput.leftFoot.tracked || _playerInput.rightFoot.tracked;
+            // TODO check targets exist on avatar, e.g. isFbtCapable
+            _calibrateButton.interactable = (AvatarManager.instance.currentlySpawnedAvatar?.customAvatar.isIKAvatar ?? false) && (_playerInput.waist.tracked || _playerInput.leftFoot.tracked || _playerInput.rightFoot.tracked);
         }
 
         #region Actions
@@ -214,20 +230,24 @@ namespace CustomAvatar.UI
 
         private void DisableCalibrationMode(bool save)
         {
-            if (save)
+            if (AvatarManager.instance.currentlySpawnedAvatar != null)
             {
-                AvatarManager.instance.avatarTailor.CalibrateFullBodyTrackingManual(AvatarManager.instance.currentlySpawnedAvatar);
+                if (save)
+                {
+                    AvatarManager.instance.avatarTailor.CalibrateFullBodyTrackingManual(AvatarManager.instance.currentlySpawnedAvatar);
+                }
+                
+                AvatarManager.instance.currentlySpawnedAvatar.tracking.isCalibrationModeEnabled = false;
             }
 
             Destroy(_waistSphere);
             Destroy(_leftFootSphere);
             Destroy(_rightFootSphere);
 
-            AvatarManager.instance.currentlySpawnedAvatar.tracking.isCalibrationModeEnabled = false;
             _calibrating = false;
             _calibrateButtonText.text = "Calibrate";
             _clearButtonText.text = "Clear";
-            _clearButton.interactable = !_currentAvatarSettings.fullBodyCalibration.isDefault;
+            _clearButton.interactable = !_currentAvatarSettings?.fullBodyCalibration.isDefault ?? false;
         }
 
         private GameObject CreateCalibrationSphere()

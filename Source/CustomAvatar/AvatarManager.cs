@@ -102,15 +102,16 @@ namespace CustomAvatar
             if (avatar == null)
             {
                 Plugin.logger.Info("No avatar selected");
+                avatarChanged?.Invoke(null);
                 return;
             }
 
             currentlySpawnedAvatar = SpawnAvatar(avatar, new VRAvatarInput());
 
-            avatarChanged?.Invoke(currentlySpawnedAvatar);
-
             ResizeCurrentAvatar();
             currentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
+
+            avatarChanged?.Invoke(currentlySpawnedAvatar);
         }
 
         public void SwitchToNextAvatar()
