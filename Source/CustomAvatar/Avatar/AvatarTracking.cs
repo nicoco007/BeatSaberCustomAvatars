@@ -102,9 +102,10 @@ namespace CustomAvatar.Avatar
                     
                     _vrPlatformHelper.AdjustPlatformSpecificControllerTransform(XRNode.RightHand, rightHand, controllerPositionOffset, controllerRotationOffset);
                 }
-                
-                controllerPositionOffset = new Vector3(-controllerPositionOffset.x, controllerPositionOffset.y, controllerPositionOffset.z);
-                controllerRotationOffset = new Vector3(controllerRotationOffset.x, -controllerRotationOffset.y, controllerRotationOffset.z);
+
+                // mirror offset for left hand
+                controllerPositionOffset.x *= -1;
+                controllerRotationOffset.y *= -1;
 
                 if (leftHand && input.TryGetLeftHandPose(out Pose leftHandPose))
                 {

@@ -195,6 +195,12 @@ namespace CustomAvatar.Avatar
             _vrik.solver.leftArm.target    = _vrikManager.solver_leftArm_target;
             _vrik.solver.rightArm.target   = _vrikManager.solver_rightArm_target;
 
+            if (_vrikManager.solver_spine_maintainPelvisPosition > 0 && !_avatarSettings.allowMaintainPelvisPosition)
+            {
+                Plugin.logger.Warn("maintainPelvisPosition > 0 is not recommended because it can cause strange pelvis rotation issues. To allow maintainPelvisPosition > 0, please set allowMaintainPelvisPosition to true for your avatar in the configuration file.");
+                _vrik.solver.spine.maintainPelvisPosition = 0;
+            }
+
             Plugin.logger.Info("Updating conditional solver targets");
 
             if (input.TryGetLeftFootPose(out _) || forceEnableAll)
@@ -234,12 +240,6 @@ namespace CustomAvatar.Avatar
                 _vrik.solver.spine.pelvisPositionWeight = _vrikManager.solver_spine_pelvisPositionWeight;
                 _vrik.solver.spine.pelvisRotationWeight = _vrikManager.solver_spine_pelvisRotationWeight;
                 _vrik.solver.plantFeet = false;
-
-                if (_vrikManager.solver_spine_maintainPelvisPosition > 0 && !_avatarSettings.allowMaintainPelvisPosition)
-                {
-                    Plugin.logger.Info("maintainPelvisPosition > 0 is not recommended for waist tracking and has been set to 0. To disable this behaviour, please set allowMaintainPelvisPosition to true for your avatar in the configuration file.");
-                    _vrik.solver.spine.maintainPelvisPosition = 0;
-                }
             }
             else
             {
@@ -248,7 +248,6 @@ namespace CustomAvatar.Avatar
                 _vrik.solver.spine.pelvisPositionWeight = 0;
                 _vrik.solver.spine.pelvisRotationWeight = 0;
                 _vrik.solver.plantFeet = _vrikManager.solver_plantFeet;
-                _vrik.solver.spine.maintainPelvisPosition = _vrikManager.solver_spine_maintainPelvisPosition;
             }
         }
     }
