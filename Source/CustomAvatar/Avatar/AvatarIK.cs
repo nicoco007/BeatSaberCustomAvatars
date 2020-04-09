@@ -13,9 +13,11 @@ namespace CustomAvatar.Avatar
     internal class AvatarIK : BodyAwareBehaviour
     {
         public AvatarInput input;
+        public LoadedAvatar avatar;
 
         private VRIK _vrik;
         private VRIKManager _vrikManager;
+        private Settings.AvatarSpecificSettings _avatarSettings;
 
         private bool _fixTransforms;
 
@@ -48,7 +50,26 @@ namespace CustomAvatar.Avatar
 
         protected override void Start()
         {
+            if (input == null)
+            {
+                Destroy(this);
+                throw new ArgumentNullException(nameof(input));
+            }
+
+            if (avatar == null)
+            {
+                Destroy(this);
+                throw new ArgumentNullException(nameof(avatar));
+            }
+
             base.Start();
+
+            _avatarSettings = SettingsManager.settings.GetAvatarSettings(avatar.fullPath);
+
+            if (_avatarSettings == null)
+            {
+
+            }
 
             _vrikManager = GetComponentInChildren<VRIKManager>();
             _dynamicBones = GetComponentsInChildren<BeatSaberDynamicBone::DynamicBone>();
@@ -213,6 +234,12 @@ namespace CustomAvatar.Avatar
                 _vrik.solver.spine.pelvisPositionWeight = _vrikManager.solver_spine_pelvisPositionWeight;
                 _vrik.solver.spine.pelvisRotationWeight = _vrikManager.solver_spine_pelvisRotationWeight;
                 _vrik.solver.plantFeet = false;
+
+                if (_vrikManager.solver_spine_maintainPelvisPosition > 0 && !_avatarSettings.allowMaintainPelvisPosition)
+                {
+                    Plugin.logger.Info("maintainPelvisPosition > 0 is not recommended for waist tracking and has been set to 0. To disable this behaviour, please set allowMaintainPelvisPosition to true for your avatar in the configuration file.");
+                    _vrik.solver.spine.maintainPelvisPosition = 0;
+                }
             }
             else
             {
@@ -221,6 +248,7 @@ namespace CustomAvatar.Avatar
                 _vrik.solver.spine.pelvisPositionWeight = 0;
                 _vrik.solver.spine.pelvisRotationWeight = 0;
                 _vrik.solver.plantFeet = _vrikManager.solver_plantFeet;
+                _vrik.solver.spine.maintainPelvisPosition = _vrikManager.solver_spine_maintainPelvisPosition;
             }
         }
     }

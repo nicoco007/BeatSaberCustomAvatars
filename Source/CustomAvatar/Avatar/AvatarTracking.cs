@@ -28,9 +28,9 @@ namespace CustomAvatar.Avatar
         }
 
         public AvatarInput input;
-        public LoadedAvatar customAvatar;
+        public LoadedAvatar avatar;
 
-        private Settings.FullBodyCalibration _fullBodyCalibration;
+        private Settings.AvatarSpecificSettings _avatarSpecificSettings;
 		
         private Vector3 _initialScale;
 
@@ -59,22 +59,22 @@ namespace CustomAvatar.Avatar
 
         protected override void Start()
         {
-            base.Start();
-
-            _fullBodyCalibration = SettingsManager.settings.GetAvatarSettings(customAvatar.fullPath).fullBodyCalibration;
-
             if (input == null)
             {
                 Destroy(this);
                 throw new ArgumentNullException(nameof(input));
             }
 
-            if (customAvatar == null)
+            if (avatar == null)
             {
                 Destroy(this);
-                throw new ArgumentNullException(nameof(customAvatar));
+                throw new ArgumentNullException(nameof(avatar));
             }
-            
+
+            base.Start();
+
+            _avatarSpecificSettings = SettingsManager.settings.GetAvatarSettings(avatar.fullPath);
+
             _vrPlatformHelper = PersistentSingleton<VRPlatformHelper>.instance;
 
             if (pelvis) _initialPelvisPose = new Pose(pelvis.position, pelvis.rotation);
@@ -138,7 +138,7 @@ namespace CustomAvatar.Avatar
                 {
                     if (leftLeg && input.TryGetLeftFootPose(out Pose leftFootPose))
                     {
-                        Pose correction = _fullBodyCalibration.leftLeg;
+                        Pose correction = _avatarSpecificSettings.fullBodyCalibration.leftLeg;
 
                         _prevLeftLegPose.position = Vector3.Lerp(_prevLeftLegPose.position, AdjustTransformPosition(leftFootPose.position, correction.position, _initialLeftFootPose.position), SettingsManager.settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
                         _prevLeftLegPose.rotation = Quaternion.Slerp(_prevLeftLegPose.rotation, leftFootPose.rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.feet.rotation * Time.deltaTime);
@@ -149,7 +149,7 @@ namespace CustomAvatar.Avatar
 
                     if (rightLeg && input.TryGetRightFootPose(out Pose rightFootPose))
                     {
-                        Pose correction = _fullBodyCalibration.rightLeg;
+                        Pose correction = _avatarSpecificSettings.fullBodyCalibration.rightLeg;
 
                         _prevRightLegPose.position = Vector3.Lerp(_prevRightLegPose.position, AdjustTransformPosition(rightFootPose.position, correction.position, _initialRightFootPose.position), SettingsManager.settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
                         _prevRightLegPose.rotation = Quaternion.Slerp(_prevRightLegPose.rotation, rightFootPose.rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.feet.rotation * Time.deltaTime);
@@ -160,7 +160,7 @@ namespace CustomAvatar.Avatar
 
                     if (pelvis && input.TryGetWaistPose(out Pose pelvisPose))
                     {
-                        Pose correction = _fullBodyCalibration.pelvis;
+                        Pose correction = _avatarSpecificSettings.fullBodyCalibration.pelvis;
 
                         _prevPelvisPose.position = Vector3.Lerp(_prevPelvisPose.position, AdjustTransformPosition(pelvisPose.position, correction.position, _initialPelvisPose.position), SettingsManager.settings.fullBodyMotionSmoothing.waist.position * Time.deltaTime);
                         _prevPelvisPose.rotation = Quaternion.Slerp(_prevPelvisPose.rotation, pelvisPose.rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.waist.rotation * Time.deltaTime);
@@ -207,7 +207,7 @@ namespace CustomAvatar.Avatar
                 y -= BeatSaberUtil.GetRoomCenter().y;
             }
 
-            return new Vector3(corrected.x, corrected.y + (1 - originalPosition.y / customAvatar.eyeHeight) * y, corrected.z);
+            return new Vector3(corrected.x, corrected.y + (1 - originalPosition.y / avatar.eyeHeight) * y, corrected.z);
         }
     }
 }

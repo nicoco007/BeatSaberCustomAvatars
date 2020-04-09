@@ -8,7 +8,7 @@ namespace CustomAvatar.Avatar
 {
 	internal class SpawnedAvatar
 	{
-		public LoadedAvatar customAvatar { get; }
+		public LoadedAvatar avatar { get; }
 		public AvatarTracking tracking { get; }
         public AvatarIK ik { get; }
 		public AvatarEventsPlayer eventsPlayer { get; }
@@ -20,24 +20,27 @@ namespace CustomAvatar.Avatar
 
         public SpawnedAvatar(LoadedAvatar avatar, AvatarInput input)
         {
-            customAvatar = avatar ?? throw new ArgumentNullException(nameof(avatar));
+            this.avatar = avatar ?? throw new ArgumentNullException(nameof(avatar));
+            
+            if (input == null) throw new ArgumentNullException(nameof(input));
 
-            _gameObject            = Object.Instantiate(customAvatar.gameObject);
+            _gameObject            = Object.Instantiate(avatar.gameObject);
             _firstPersonExclusions = _gameObject.GetComponentsInChildren<FirstPersonExclusion>();
 
             eventsPlayer   = _gameObject.AddComponent<AvatarEventsPlayer>();
             tracking       = _gameObject.AddComponent<AvatarTracking>();
 
-            tracking.customAvatar = customAvatar;
-            tracking.input        = input;
+            tracking.avatar = avatar;
+            tracking.input  = input;
             
-            if (customAvatar.isIKAvatar)
+            if (avatar.isIKAvatar)
             {
                 ik = _gameObject.AddComponent<AvatarIK>();
                 ik.input = input;
+                ik.avatar = avatar;
             }
 
-            if (customAvatar.supportsFingerTracking)
+            if (avatar.supportsFingerTracking)
             {
                 _gameObject.AddComponent<AvatarFingerTracking>();
             }

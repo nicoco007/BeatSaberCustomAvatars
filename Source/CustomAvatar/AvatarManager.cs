@@ -92,7 +92,7 @@ namespace CustomAvatar
 
         public void SwitchToAvatar(LoadedAvatar avatar)
         {
-            if (currentlySpawnedAvatar?.customAvatar == avatar) return;
+            if (currentlySpawnedAvatar?.avatar == avatar) return;
 
             currentlySpawnedAvatar?.Destroy();
             currentlySpawnedAvatar = null;
@@ -119,7 +119,7 @@ namespace CustomAvatar
             List<string> files = GetAvatarFileNames();
             files.Insert(0, null);
 
-            int index = files.IndexOf(currentlySpawnedAvatar?.customAvatar.fullPath);
+            int index = files.IndexOf(currentlySpawnedAvatar?.avatar.fullPath);
 
             index = (index + 1) % files.Count;
 
@@ -131,7 +131,7 @@ namespace CustomAvatar
             List<string> files = GetAvatarFileNames();
             files.Insert(0, null);
             
-            int index = files.IndexOf(currentlySpawnedAvatar?.customAvatar.fullPath);
+            int index = files.IndexOf(currentlySpawnedAvatar?.avatar.fullPath);
 
             index = (index + files.Count - 1) % files.Count;
             
@@ -153,7 +153,7 @@ namespace CustomAvatar
             currentlySpawnedAvatar.OnFirstPersonEnabledChanged();
             currentlySpawnedAvatar.eventsPlayer?.Restart();
 
-            if (newScene.name == "HealthWarning" && SettingsManager.settings.calibrateFullBodyTrackingOnStart && SettingsManager.settings.GetAvatarSettings(currentlySpawnedAvatar.customAvatar.fullPath).useAutomaticCalibration)
+            if (newScene.name == "HealthWarning" && SettingsManager.settings.calibrateFullBodyTrackingOnStart && SettingsManager.settings.GetAvatarSettings(currentlySpawnedAvatar.avatar.fullPath).useAutomaticCalibration)
             {
                 avatarTailor.CalibrateFullBodyTrackingAuto(currentlySpawnedAvatar);
             }

@@ -59,6 +59,7 @@ namespace CustomAvatar.Utilities
         {
             public FullBodyCalibration fullBodyCalibration { get; private set; } = new FullBodyCalibration();
             public bool useAutomaticCalibration = false;
+            public bool allowMaintainPelvisPosition = false;
         }
 
         public AvatarSpecificSettings GetAvatarSettings(string fullPath)

@@ -115,21 +115,21 @@ namespace CustomAvatar.UI
                 return;
             }
 
-            _currentAvatarSettings = SettingsManager.settings.GetAvatarSettings(avatar.customAvatar.fullPath);
+            _currentAvatarSettings = SettingsManager.settings.GetAvatarSettings(avatar.avatar.fullPath);
 
             _clearButton.interactable = !_currentAvatarSettings.fullBodyCalibration.isDefault;
             // TODO same here
-            _calibrateButton.interactable = AvatarManager.instance.currentlySpawnedAvatar.customAvatar.isIKAvatar && (_playerInput.waist.tracked || _playerInput.leftFoot.tracked || _playerInput.rightFoot.tracked);
+            _calibrateButton.interactable = AvatarManager.instance.currentlySpawnedAvatar.avatar.isIKAvatar && (_playerInput.waist.tracked || _playerInput.leftFoot.tracked || _playerInput.rightFoot.tracked);
 
             _automaticCalibrationSetting.Value = _currentAvatarSettings.useAutomaticCalibration;
-            _automaticCalibrationSetting.SetInteractable(avatar.customAvatar.descriptor.supportsAutomaticCalibration);
-            _automaticCalibrationHoverHint.text = avatar.customAvatar.descriptor.supportsAutomaticCalibration ? "Use automatic calibration instead of manual calibration" : "Not supported by current avatar";
+            _automaticCalibrationSetting.SetInteractable(avatar.avatar.descriptor.supportsAutomaticCalibration);
+            _automaticCalibrationHoverHint.text = avatar.avatar.descriptor.supportsAutomaticCalibration ? "Use automatic calibration instead of manual calibration" : "Not supported by current avatar";
         }
 
         private void OnInputDevicesChanged()
         {
             // TODO check targets exist on avatar, e.g. isFbtCapable
-            _calibrateButton.interactable = (AvatarManager.instance.currentlySpawnedAvatar?.customAvatar.isIKAvatar ?? false) && (_playerInput.waist.tracked || _playerInput.leftFoot.tracked || _playerInput.rightFoot.tracked);
+            _calibrateButton.interactable = (AvatarManager.instance.currentlySpawnedAvatar?.avatar.isIKAvatar ?? false) && (_playerInput.waist.tracked || _playerInput.leftFoot.tracked || _playerInput.rightFoot.tracked);
         }
 
         #region Actions

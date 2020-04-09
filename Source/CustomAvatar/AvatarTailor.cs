@@ -15,7 +15,7 @@ namespace CustomAvatar
 
         public void ResizeAvatar(SpawnedAvatar avatar)
         {
-            if (!avatar.customAvatar.descriptor.allowHeightCalibration || !avatar.customAvatar.isIKAvatar) return;
+            if (!avatar.avatar.descriptor.allowHeightCalibration || !avatar.avatar.isIKAvatar) return;
 
             // compute scale
             float scale;
@@ -24,7 +24,7 @@ namespace CustomAvatar
             switch (resizeMode)
             {
                 case AvatarResizeMode.ArmSpan:
-                    float avatarArmLength = avatar.customAvatar.armSpan;
+                    float avatarArmLength = avatar.avatar.armSpan;
 
                     if (avatarArmLength > 0)
                     {
@@ -38,7 +38,7 @@ namespace CustomAvatar
                     break;
 
                 case AvatarResizeMode.Height:
-                    float avatarEyeHeight = avatar.customAvatar.eyeHeight;
+                    float avatarEyeHeight = avatar.avatar.eyeHeight;
 
                     if (avatarEyeHeight > 0)
                     {
@@ -74,10 +74,10 @@ namespace CustomAvatar
 
             float floorOffset = 0f;
 
-            if (SettingsManager.settings.enableFloorAdjust && avatar.customAvatar.isIKAvatar)
+            if (SettingsManager.settings.enableFloorAdjust && avatar.avatar.isIKAvatar)
             {
                 float playerEyeHeight = BeatSaberUtil.GetPlayerEyeHeight();
-                float avatarEyeHeight = avatar.customAvatar.eyeHeight;
+                float avatarEyeHeight = avatar.avatar.eyeHeight;
 
                 floorOffset = playerEyeHeight - avatarEyeHeight * avatar.tracking.scale;
 
@@ -127,7 +127,7 @@ namespace CustomAvatar
             TrackedDeviceState rightFoot = input.rightFoot;
             TrackedDeviceState pelvis = input.waist;
 
-            Settings.FullBodyCalibration fullBodyCalibration = SettingsManager.settings.GetAvatarSettings(spawnedAvatar.customAvatar.fullPath).fullBodyCalibration;
+            Settings.FullBodyCalibration fullBodyCalibration = SettingsManager.settings.GetAvatarSettings(spawnedAvatar.avatar.fullPath).fullBodyCalibration;
 
             if (pelvis.tracked)
             {
@@ -168,7 +168,7 @@ namespace CustomAvatar
             TrackedDeviceState rightFoot = input.rightFoot;
             TrackedDeviceState pelvis = input.waist;
 
-            Settings.FullBodyCalibration fullBodyCalibration = SettingsManager.settings.GetAvatarSettings(spawnedAvatar.customAvatar.fullPath).fullBodyCalibration;
+            Settings.FullBodyCalibration fullBodyCalibration = SettingsManager.settings.GetAvatarSettings(spawnedAvatar.avatar.fullPath).fullBodyCalibration;
 
             Vector3 floorNormal = Vector3.up;
             float floorPosition = SettingsManager.settings.moveFloorWithRoomAdjust ? BeatSaberUtil.GetRoomCenter().y : 0;
@@ -211,7 +211,7 @@ namespace CustomAvatar
 
         public void ClearFullBodyTrackingData(SpawnedAvatar spawnedAvatar)
         {
-            Settings.FullBodyCalibration fullBodyCalibration = SettingsManager.settings.GetAvatarSettings(spawnedAvatar.customAvatar.fullPath).fullBodyCalibration;
+            Settings.FullBodyCalibration fullBodyCalibration = SettingsManager.settings.GetAvatarSettings(spawnedAvatar.avatar.fullPath).fullBodyCalibration;
 
             fullBodyCalibration.leftLeg = Pose.identity;
             fullBodyCalibration.rightLeg = Pose.identity;
