@@ -6,7 +6,7 @@ namespace CustomAvatar.Utilities
     internal static class BeatSaberUtil
     {
         private static MainSettingsModelSO _mainSettingsModel;
-        private static PlayerDataModel _playerDataModel;
+        private static PlayerData _playerData;
 
         public const float kDefaultPlayerEyeHeight = MainSettingsModelSO.kDefaultPlayerHeight - MainSettingsModelSO.kHeadPosToPlayerHeightOffset;
 
@@ -23,22 +23,22 @@ namespace CustomAvatar.Utilities
             }
         }
 
-        private static PlayerDataModel playerDataModel
+        private static PlayerData playerData
         {
             get
             {
-                if (!_playerDataModel)
+                if (_playerData == null)
                 {
-                    _playerDataModel = Resources.FindObjectsOfTypeAll<PlayerDataModel>().FirstOrDefault(m => m.playerData != null);
+                    _playerData = Object.FindObjectOfType<PlayerDataModel>()?.playerData;
                 }
 
-                return _playerDataModel;
+                return _playerData;
             }
         }
 
         public static float GetPlayerHeight()
         {
-            return !playerDataModel ? MainSettingsModelSO.kDefaultPlayerHeight : playerDataModel.playerData.playerSpecificSettings.playerHeight;
+            return playerData?.playerSpecificSettings.playerHeight ?? MainSettingsModelSO.kDefaultPlayerHeight;
         }
 
         public static float GetPlayerEyeHeight()

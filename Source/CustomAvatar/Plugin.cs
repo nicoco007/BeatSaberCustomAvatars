@@ -28,17 +28,16 @@ namespace CustomAvatar
         [Init]
         public Plugin(Logger logger)
         {
+            instance = this;
             Plugin.logger = logger;
             
             SettingsManager.Load();
-
-            instance = this;
+            BeatSaberEvents.ApplyPatches();
         }
 
         [OnStart]
         public void OnStart()
         {
-            AvatarManager.instance.LoadAvatarFromSettingsAsync();
             SceneManager.sceneLoaded += OnSceneLoaded;
 
             KeyboardInputHandler keyboardInputHandler = new GameObject(nameof(KeyboardInputHandler)).AddComponent<KeyboardInputHandler>();
@@ -73,6 +72,11 @@ namespace CustomAvatar
                     _scenesManager.transitionDidFinishEvent += sceneTransitionDidFinish;
                     _scenesManager.transitionDidFinishEvent += SceneTransitionDidFinish;
                 }
+            }
+
+            if (newScene.name == "PCInit")
+            {
+                AvatarManager.instance.LoadAvatarFromSettingsAsync();
             }
 
             if (newScene.name == "MenuCore")

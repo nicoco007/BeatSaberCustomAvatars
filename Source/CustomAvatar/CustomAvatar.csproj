@@ -30,6 +30,9 @@
     <DefineConstants>PLUGIN</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\Libraries\0Harmony.dll</HintPath>
+    </Reference>
     <Reference Include="BSML, Version=1.0.6.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\BSML.dll</HintPath>
@@ -139,6 +142,7 @@
     <Compile Include="AvatarLayers.cs" />
     <Compile Include="Avatar\AvatarFingerTracking.cs" />
     <Compile Include="Avatar\BodyAwareBehaviour.cs" />
+    <Compile Include="BeatSaberEvents.cs" />
     <Compile Include="KeyboardInputHandler.cs" />
     <Compile Include="ShaderLoader.cs" />
     <Compile Include="UI\AvatarListItem.cs" />

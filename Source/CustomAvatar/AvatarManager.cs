@@ -42,6 +42,7 @@ namespace CustomAvatar
             Plugin.instance.sceneTransitionDidFinish += OnSceneTransitionDidFinish;
 
             SceneManager.sceneLoaded += OnSceneLoaded;
+            BeatSaberEvents.onPlayerHeightChanged += (height) => ResizeCurrentAvatar();
         }
 
         ~AvatarManager()
@@ -153,7 +154,7 @@ namespace CustomAvatar
             currentlySpawnedAvatar.OnFirstPersonEnabledChanged();
             currentlySpawnedAvatar.eventsPlayer?.Restart();
 
-            if (newScene.name == "HealthWarning" && SettingsManager.settings.calibrateFullBodyTrackingOnStart && SettingsManager.settings.GetAvatarSettings(currentlySpawnedAvatar.avatar.fullPath).useAutomaticCalibration)
+            if (newScene.name == "PCInit" && SettingsManager.settings.calibrateFullBodyTrackingOnStart && SettingsManager.settings.GetAvatarSettings(currentlySpawnedAvatar.avatar.fullPath).useAutomaticCalibration)
             {
                 avatarTailor.CalibrateFullBodyTrackingAuto(currentlySpawnedAvatar);
             }
