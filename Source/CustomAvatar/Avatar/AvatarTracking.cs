@@ -13,8 +13,8 @@ namespace CustomAvatar.Avatar
     {
         public float verticalPosition
         {
-	        get => transform.position.y;
-	        set => transform.position = new Vector3(0, value, 0);
+	        get => transform.position.y - _initialPosition.y;
+	        set => transform.position = _initialPosition + value * Vector3.up;
         }
 
         public float scale
@@ -31,7 +31,8 @@ namespace CustomAvatar.Avatar
         public LoadedAvatar avatar;
 
         private Settings.AvatarSpecificSettings _avatarSpecificSettings;
-		
+
+        private Vector3 _initialPosition;
         private Vector3 _initialScale;
 
         private Pose _initialPelvisPose;
@@ -54,7 +55,13 @@ namespace CustomAvatar.Avatar
 
         private void Awake()
         {
+            _initialPosition = transform.localPosition;
             _initialScale = transform.localScale;
+
+            if (_initialPosition.magnitude > 0.0f)
+            {
+                Plugin.logger.Warn("Avatar root position is not at origin; resizing by height and floor adjust may not work properly.");
+            }
 		}
 
         protected override void Start()
