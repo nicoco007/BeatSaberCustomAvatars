@@ -118,19 +118,19 @@ namespace CustomAvatar.Avatar
                 {
                     if (pelvis)
                     {
-                        pelvis.position = _initialPelvisPose.position;
+                        pelvis.position = _initialPelvisPose.position * scale;
                         pelvis.rotation = _initialPelvisPose.rotation;
                     }
 
                     if (leftLeg)
                     {
-                        leftLeg.position = _initialLeftFootPose.position;
+                        leftLeg.position = _initialLeftFootPose.position * scale;
                         leftLeg.rotation = _initialLeftFootPose.rotation;
                     }
 
                     if (rightLeg)
                     {
-                        rightLeg.position = _initialRightFootPose.position;
+                        rightLeg.position = _initialRightFootPose.position * scale;
                         rightLeg.rotation = _initialRightFootPose.rotation;
                     }
                 }
