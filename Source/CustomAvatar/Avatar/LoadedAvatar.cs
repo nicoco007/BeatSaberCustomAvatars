@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using AvatarScriptPack;
 using CustomAvatar.Exceptions;
-using CustomAvatar.Utilities;
 using UnityEngine;
 
 namespace CustomAvatar.Avatar
@@ -18,12 +18,7 @@ namespace CustomAvatar.Avatar
         public float eyeHeight { get; }
         public float armSpan { get; }
         public bool supportsFingerTracking { get; }
-
-        #pragma warning disable 618
-        public bool isIKAvatar => (gameObject.GetComponentInChildren<VRIKManager>() ??
-                                   gameObject.GetComponentInChildren<IKManager>() ??
-                                   gameObject.GetComponentInChildren<IKManagerAdvanced>() as object) != null;
-        #pragma warning restore 618
+        public bool isIKAvatar { get; }
 
         private LoadedAvatar(string fullPath, GameObject avatarGameObject)
         {
@@ -33,6 +28,17 @@ namespace CustomAvatar.Avatar
            
             supportsFingerTracking = avatarGameObject.GetComponentInChildren<Animator>() &&
                                      avatarGameObject.GetComponentInChildren<PoseManager>();
+
+            VRIKManager vrikManager = avatarGameObject.GetComponentInChildren<VRIKManager>();
+            IKManager ikManager = avatarGameObject.GetComponentInChildren<IKManager>();
+            VRIK vrik = avatarGameObject.GetComponentInChildren<VRIK>();
+
+            isIKAvatar = ikManager || vrikManager;
+
+            if (vrik && !vrik.references.isFilled) vrik.AutoDetectReferences();
+            if (vrikManager && !vrikManager.areReferencesFilled) vrikManager.AutoDetectReferences();
+
+            if (isIKAvatar) FixTrackingReferences();
 
             eyeHeight = GetEyeHeight();
             armSpan = GetArmSpan();
@@ -92,45 +98,52 @@ namespace CustomAvatar.Avatar
 
         private float GetEyeHeight()
         {
-            if (!isIKAvatar)
-            {
-                return BeatSaberUtil.kDefaultPlayerEyeHeight;
-            }
+            Transform head = gameObject.transform.Find("Head");
 
-            return GetViewPoint().y;
+            if (!head) throw new AvatarLoadException("Avatar does not have a head tracking reference");
+
+            // many avatars rely on this being global because their root position isn't at (0, 0, 0)
+            return head.position.y;
         }
 
-        /// <summary>
-        /// Get the avatar's view point (camera position) in global coordinates.
-        /// </summary>
-        private Vector3 GetViewPoint()
+        private void FixTrackingReferences()
         {
-            Transform head = gameObject.transform.Find("Head") ?? throw new AvatarLoadException($"Avatar '{descriptor.name}' does not have a Head transform");
-            Vector3 offset = GetHeadTargetOffset();
-
+            Vector3 headOffset = GetTargetOffset(nameof(VRIK.References.head), nameof(VRIKManager.solver_spine_headTarget), nameof(IKManager.HeadTarget));
+            Vector3 leftHandOffset = GetTargetOffset(nameof(VRIK.References.leftHand), nameof(VRIKManager.solver_leftArm_target), nameof(IKManager.LeftHandTarget));
+            Vector3 rightHandOffset = GetTargetOffset(nameof(VRIK.References.rightHand), nameof(VRIKManager.solver_rightArm_target), nameof(IKManager.RightHandTarget));
+            
             // only warn if offset is larger than 1 mm
-            if (offset.magnitude > 0.001f)
+            if (headOffset.magnitude > 0.001f)
             {
                 // manually putting each coordinate gives more resolution
-                Plugin.logger.Warn($"Head bone and head target are not at the same position; offset: ({offset.x}, {offset.y}, {offset.z})");
+                Plugin.logger.Warn($"Head bone and target are not at the same position; offset: ({headOffset.x}, {headOffset.y}, {headOffset.z})");
+                gameObject.transform.Find("Head").position -= headOffset;
             }
 
-            return gameObject.transform.InverseTransformPoint(head.position - offset);
+            if (leftHandOffset.magnitude > 0.001f)
+            {
+                Plugin.logger.Warn($"Left hand bone and target are not at the same position; offset: ({leftHandOffset.x}, {leftHandOffset.y}, {leftHandOffset.z})");
+                gameObject.transform.Find("LeftHand").position -= headOffset;
+            }
+
+            if (rightHandOffset.magnitude > 0.001f)
+            {
+                Plugin.logger.Warn($"Right hand bone and target are not at the same position; offset: ({rightHandOffset.x}, {rightHandOffset.y}, {rightHandOffset.z})");
+                gameObject.transform.Find("RightHand").position -= headOffset;
+            }
         }
 
         /// <summary>
-        /// Gets the offset between the head target and the actual head bone. Avoids issues when using
-        /// the Head transform for calculations.
+        /// Gets the offset between the target and the actual bone. Avoids issues when using just the tracking reference transform for calculations.
         /// </summary>
-        private Vector3 GetHeadTargetOffset()
+        private Vector3 GetTargetOffset(string referenceName, string vrikManagerTargetName, string ikManagerTargetName)
         {
-            Transform headReference = null;
-            Transform headTarget = null;
+            Transform reference = null;
+            Transform target = null;
                 
             #pragma warning disable 618
             VRIK vrik = gameObject.GetComponentInChildren<VRIK>();
             IKManager ikManager = gameObject.GetComponentInChildren<IKManager>();
-            IKManagerAdvanced ikManagerAdvanced = gameObject.GetComponentInChildren<IKManagerAdvanced>();
             #pragma warning restore 618
 
             VRIKManager vrikManager = gameObject.GetComponentInChildren<VRIKManager>();
@@ -139,37 +152,48 @@ namespace CustomAvatar.Avatar
             {
                 if (!vrikManager.references_head) vrikManager.AutoDetectReferences();
 
-                headReference = vrikManager.references_head;
-                headTarget = vrikManager.solver_spine_headTarget;
+                reference = GetFieldValue<Transform>(vrikManager, "references_" + referenceName);
+                target = GetFieldValue<Transform>(vrikManager, vrikManagerTargetName);
             }
             else if (vrik)
             {
                 vrik.AutoDetectReferences();
-                headReference = vrik.references.head;
+                reference = GetFieldValue<Transform>(vrik.references, referenceName);
 
-                if (ikManagerAdvanced)
+                if (ikManager)
                 {
-                    headTarget = ikManagerAdvanced.HeadTarget;
-                }
-                else if (ikManager)
-                {
-                    headTarget = ikManager.HeadTarget;
+                    target = GetFieldValue<Transform>(ikManager, ikManagerTargetName);
                 }
             }
 
-            if (!headReference)
+            if (!reference)
             {
-                Plugin.logger.Warn("Could not find head reference; height adjust may be broken");
+                Plugin.logger.Warn($"Could not find '{referenceName}' reference");
                 return Vector3.zero;
             }
 
-            if (!headTarget)
+            if (!target)
             {
                 // target will be added automatically, no need to adjust
                 return Vector3.zero;
             }
 
-            return headTarget.position - headReference.position;
+            return target.position - reference.position;
+        }
+
+        private T GetFieldValue<T>(object obj, string fieldName)
+        {
+            if (obj == null) throw new ArgumentNullException(nameof(obj));
+            if (string.IsNullOrEmpty(fieldName)) throw new ArgumentNullException(nameof(fieldName));
+
+            FieldInfo field = obj.GetType().GetField(fieldName, BindingFlags.Public | BindingFlags.Instance);
+
+            if (field == null)
+            {
+                throw new InvalidOperationException($"Public instance field '{fieldName}' does not exist");
+            }
+
+            return (T) field.GetValue(obj);
         }
 
         /// <summary>
@@ -178,6 +202,7 @@ namespace CustomAvatar.Avatar
         /// </summary>
         private float GetArmSpan()
         {
+            // TODO using animator here probably isn't a good idea, use VRIKManager references instead
             Animator animator = gameObject.GetComponentInChildren<Animator>();
 
             if (!animator) return AvatarTailor.kDefaultPlayerArmSpan;
@@ -192,9 +217,15 @@ namespace CustomAvatar.Avatar
             Transform rightLowerArm = animator.GetBoneTransform(HumanBodyBones.RightLowerArm);
             Transform rightHand = gameObject.transform.Find("RightHand");
 
-            if (!leftShoulder || !leftUpperArm || !leftLowerArm || !leftHand || !rightShoulder || !rightUpperArm || !rightLowerArm || !rightHand)
+            if (!leftShoulder || !leftUpperArm || !leftLowerArm || !rightShoulder || !rightUpperArm || !rightLowerArm)
             {
                 Plugin.logger.Warn("Could not calculate avatar arm span due to missing bones");
+                return AvatarTailor.kDefaultPlayerArmSpan;
+            }
+
+            if (!leftHand || !rightHand)
+            {
+                Plugin.logger.Warn("Could not calculate avatar arm span due to missing tracking references");
                 return AvatarTailor.kDefaultPlayerArmSpan;
             }
 

@@ -14,7 +14,7 @@ namespace AvatarScriptPack
         public Transform LeftHandTarget;
         public Transform RightHandTarget;
 
-        public void Start()
+        public virtual void Start()
         {
             Plugin.logger.Warn("Avatar is still using the legacy IKManager; please migrate to VRIKManager");
 

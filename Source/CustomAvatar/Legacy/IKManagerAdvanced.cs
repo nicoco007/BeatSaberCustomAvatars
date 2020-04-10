@@ -15,17 +15,8 @@ using UnityEngine.Serialization;
 namespace AvatarScriptPack
 {
     [Obsolete("Use VRIKManager")]
-    internal class IKManagerAdvanced : MonoBehaviour
+    internal class IKManagerAdvanced : IKManager
     {
-        [Space(5)]
-        [Header("IK Targets")]
-        [Tooltip("The head target.")]
-        public Transform HeadTarget;
-        [Tooltip("The hand target.")]
-        public Transform LeftHandTarget;
-        [Tooltip("The hand target.")]
-        public Transform RightHandTarget;
-
         [Space(5)]
         [Header("Full Body Tracking")]
         [Tooltip("The pelvis target, useful with seated rigs.")]
@@ -252,9 +243,9 @@ namespace AvatarScriptPack
         [Tooltip("Called when the right foot has finished a step")]
         public UnityEvent Locomotion_onRightFootstep = new UnityEvent();
 
-        public void Start()
+        public override void Start()
         {
-            Plugin.logger.Warn("Avatar is still using the legacy IKManagerAdvanced; please migrate to VRIKManager");
+            Plugin.logger.Warn("Avatar is using the legacy IKManagerAdvanced; please migrate to VRIKManager");
 
             VRIKManager vrikManager = gameObject.AddComponent<VRIKManager>();
 
