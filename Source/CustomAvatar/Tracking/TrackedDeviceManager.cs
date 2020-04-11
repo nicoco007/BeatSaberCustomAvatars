@@ -5,6 +5,7 @@ using CustomAvatar.Utilities;
 using UnityEngine;
 using UnityEngine.XR;
 using Valve.VR;
+using Zenject;
 
 namespace CustomAvatar.Tracking
 {
@@ -24,6 +25,8 @@ namespace CustomAvatar.Tracking
         public event Action<TrackedDeviceState, DeviceUse> deviceTrackingLost;
 
         private readonly HashSet<string> _foundDevices = new HashSet<string>();
+
+        [Inject] private readonly MainSettingsModelSO _mainSettingsModel;
 
         private bool _isOpenVRRunning;
 
@@ -270,8 +273,8 @@ namespace CustomAvatar.Tracking
                 deviceTrackingAcquired?.Invoke(deviceState, use);
             }
             
-            Vector3 origin = BeatSaberUtil.GetRoomCenter();
-            Quaternion originRotation = BeatSaberUtil.GetRoomRotation();
+            Vector3 origin = _mainSettingsModel.roomCenter.value;
+            Quaternion originRotation = Quaternion.Euler(0, _mainSettingsModel.roomRotation.value, 0);
 
             if (inputDevice.TryGetFeatureValue(CommonUsages.devicePosition, out Vector3 position))
             {

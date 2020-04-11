@@ -163,7 +163,6 @@
     <Compile Include="Tracking\DeviceUse.cs" />
     <Compile Include="Tracking\VRAvatarInput.cs" />
     <Compile Include="UI\BSMLExtensions.cs" />
-    <Compile Include="Utilities\BeatSaberUtil.cs" />
     <Compile Include="Avatar\LoadedAvatar.cs" />
     <Compile Include="AvatarDescriptor.cs" />
     <Compile Include="Avatar\AvatarEventsPlayer.cs" />

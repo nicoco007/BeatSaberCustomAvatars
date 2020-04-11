@@ -2,6 +2,7 @@ using System;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
 using UnityEngine;
+using Zenject;
 using Object = UnityEngine.Object;
 
 namespace CustomAvatar.Avatar
@@ -18,7 +19,7 @@ namespace CustomAvatar.Avatar
 
         private bool _isCalibrationModeEnabled;
 
-        public SpawnedAvatar(LoadedAvatar avatar, AvatarInput input)
+        public SpawnedAvatar(DiContainer container, LoadedAvatar avatar, AvatarInput input)
         {
             this.avatar = avatar ?? throw new ArgumentNullException(nameof(avatar));
             
@@ -27,22 +28,22 @@ namespace CustomAvatar.Avatar
             _gameObject            = Object.Instantiate(avatar.gameObject);
             _firstPersonExclusions = _gameObject.GetComponentsInChildren<FirstPersonExclusion>();
 
-            eventsPlayer   = _gameObject.AddComponent<AvatarEventsPlayer>();
-            tracking       = _gameObject.AddComponent<AvatarTracking>();
+            eventsPlayer   = container.InstantiateComponent<AvatarEventsPlayer>(_gameObject);
+            tracking       = container.InstantiateComponent<AvatarTracking>(_gameObject);
 
             tracking.avatar = avatar;
             tracking.input  = input;
             
             if (avatar.isIKAvatar)
             {
-                ik = _gameObject.AddComponent<AvatarIK>();
+                ik = container.InstantiateComponent<AvatarIK>(_gameObject);
                 ik.input = input;
                 ik.avatar = avatar;
             }
 
             if (avatar.supportsFingerTracking)
             {
-                _gameObject.AddComponent<AvatarFingerTracking>();
+                container.InstantiateComponent<AvatarFingerTracking>(_gameObject);
             }
 
             Object.DontDestroyOnLoad(_gameObject);

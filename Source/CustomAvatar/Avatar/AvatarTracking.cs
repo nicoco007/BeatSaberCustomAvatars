@@ -6,6 +6,7 @@ using System;
 using CustomAvatar.Utilities;
 using UnityEngine;
 using UnityEngine.XR;
+using Zenject;
 
 namespace CustomAvatar.Avatar
 {
@@ -48,6 +49,8 @@ namespace CustomAvatar.Avatar
         public bool isCalibrationModeEnabled = false;
 
         private VRPlatformHelper _vrPlatformHelper;
+
+        [Inject] private MainSettingsModelSO _mainSettingsModel;
 
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
@@ -99,8 +102,8 @@ namespace CustomAvatar.Avatar
                     head.rotation = headPose.rotation;
                 }
                 
-                Vector3 controllerPositionOffset = BeatSaberUtil.GetControllerPositionOffset();
-                Vector3 controllerRotationOffset = BeatSaberUtil.GetControllerRotationOffset();
+                Vector3 controllerPositionOffset = _mainSettingsModel.controllerPosition;
+                Vector3 controllerRotationOffset = _mainSettingsModel.controllerRotation;
 
                 if (rightHand && input.TryGetRightHandPose(out Pose rightHandPose))
                 {
@@ -212,7 +215,7 @@ namespace CustomAvatar.Avatar
 
             if (SettingsManager.settings.moveFloorWithRoomAdjust)
             {
-                y -= BeatSaberUtil.GetRoomCenter().y;
+                y -= _mainSettingsModel.roomCenter.value.y;
             }
 
             return new Vector3(corrected.x, corrected.y + (1 - originalPosition.y / avatar.eyeHeight) * y, corrected.z);

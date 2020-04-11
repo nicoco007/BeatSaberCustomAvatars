@@ -10,7 +10,7 @@ using Zenject;
 
 namespace CustomAvatar
 {
-    public class AvatarManager
+    public class AvatarManager : IDisposable
     {
         public static readonly string kCustomAvatarsPath = Path.GetFullPath("CustomAvatars");
         
@@ -19,23 +19,25 @@ namespace CustomAvatar
 
         internal event Action<SpawnedAvatar> avatarChanged;
 
-        private AvatarManager(PlayerDataModel playerDataModel)
+        private TrackedDeviceManager _trackedDeviceManager;
+        private DiContainer _container;
+
+        private AvatarManager(AvatarTailor avatarTailor, TrackedDeviceManager trackedDeviceManager, DiContainer container)
         {
-            avatarTailor = new AvatarTailor();
+            this.avatarTailor = avatarTailor;
+            _trackedDeviceManager = trackedDeviceManager;
+            _container = container;
 
             Plugin.instance.sceneTransitionDidFinish += OnSceneTransitionDidFinish;
-
             SceneManager.sceneLoaded += OnSceneLoaded;
-            BeatSaberEvents.onPlayerHeightChanged += (height) => ResizeCurrentAvatar();
-
-            Plugin.logger.Info("playerDataModel: " + playerDataModel);
+            BeatSaberEvents.onPlayerHeightChanged += OnPlayerHeightChanged;
         }
 
-        ~AvatarManager()
+        public void Dispose()
         {
             Plugin.instance.sceneTransitionDidFinish -= OnSceneTransitionDidFinish;
-
             SceneManager.sceneLoaded -= OnSceneLoaded;
+            BeatSaberEvents.onPlayerHeightChanged -= OnPlayerHeightChanged;
         }
 
         public void GetAvatarsAsync(Action<LoadedAvatar> success = null, Action<Exception> error = null)
@@ -93,7 +95,7 @@ namespace CustomAvatar
                 return;
             }
 
-            currentlySpawnedAvatar = SpawnAvatar(avatar, new VRAvatarInput());
+            currentlySpawnedAvatar = SpawnAvatar(avatar, new VRAvatarInput(_trackedDeviceManager));
 
             ResizeCurrentAvatar();
             currentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
@@ -165,14 +167,17 @@ namespace CustomAvatar
             ResizeCurrentAvatar();
         }
 
-        private static SpawnedAvatar SpawnAvatar(LoadedAvatar customAvatar, AvatarInput input)
+        private void OnPlayerHeightChanged(float height)
+        {
+            ResizeCurrentAvatar();
+        }
+
+        private SpawnedAvatar SpawnAvatar(LoadedAvatar customAvatar, AvatarInput input)
         {
             if (customAvatar == null) throw new ArgumentNullException(nameof(customAvatar));
             if (input == null) throw new ArgumentNullException(nameof(input));
-
-            var spawnedAvatar = new SpawnedAvatar(customAvatar, input);
-
-            return spawnedAvatar;
+            
+            return _container.Instantiate<SpawnedAvatar>(new object[] { customAvatar, input });
         }
 
         private List<string> GetAvatarFileNames()

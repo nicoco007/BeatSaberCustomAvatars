@@ -23,14 +23,14 @@ namespace CustomAvatar.UI
 
         private static readonly int kColor = Shader.PropertyToID("_Color");
 
-        private readonly TrackedDeviceManager _playerInput = PersistentSingleton<TrackedDeviceManager>.instance;
         private bool _calibrating;
         private Material _sphereMaterial;
         private Material _redMaterial;
         private Material _greenMaterial;
         private Material _blueMaterial;
         private Settings.AvatarSpecificSettings _currentAvatarSettings;
-
+        
+        [Inject] private TrackedDeviceManager _trackedDeviceManager;
         [Inject] private AvatarManager _avatarManager;
 
         #region Components
@@ -89,10 +89,10 @@ namespace CustomAvatar.UI
             _avatarManager.avatarChanged += OnAvatarChanged;
 
             // TODO unsub from all these
-            _playerInput.deviceAdded += (state, use) => OnInputDevicesChanged();
-            _playerInput.deviceRemoved += (state, use) => OnInputDevicesChanged();
-            _playerInput.deviceTrackingAcquired += (state, use) => OnInputDevicesChanged();
-            _playerInput.deviceTrackingLost += (state, use) => OnInputDevicesChanged();
+            _trackedDeviceManager.deviceAdded += (state, use) => OnInputDevicesChanged();
+            _trackedDeviceManager.deviceRemoved += (state, use) => OnInputDevicesChanged();
+            _trackedDeviceManager.deviceTrackingAcquired += (state, use) => OnInputDevicesChanged();
+            _trackedDeviceManager.deviceTrackingLost += (state, use) => OnInputDevicesChanged();
         }
 
         protected override void DidDeactivate(DeactivationType deactivationType)
@@ -122,7 +122,7 @@ namespace CustomAvatar.UI
 
             _clearButton.interactable = !_currentAvatarSettings.fullBodyCalibration.isDefault;
             // TODO same here
-            _calibrateButton.interactable = _avatarManager.currentlySpawnedAvatar.avatar.isIKAvatar && (_playerInput.waist.tracked || _playerInput.leftFoot.tracked || _playerInput.rightFoot.tracked);
+            _calibrateButton.interactable = _avatarManager.currentlySpawnedAvatar.avatar.isIKAvatar && (_trackedDeviceManager.waist.tracked || _trackedDeviceManager.leftFoot.tracked || _trackedDeviceManager.rightFoot.tracked);
 
             _automaticCalibrationSetting.Value = _currentAvatarSettings.useAutomaticCalibration;
             _automaticCalibrationSetting.SetInteractable(avatar.avatar.descriptor.supportsAutomaticCalibration);
@@ -132,7 +132,7 @@ namespace CustomAvatar.UI
         private void OnInputDevicesChanged()
         {
             // TODO check targets exist on avatar, e.g. isFbtCapable
-            _calibrateButton.interactable = (_avatarManager.currentlySpawnedAvatar?.avatar.isIKAvatar ?? false) && (_playerInput.waist.tracked || _playerInput.leftFoot.tracked || _playerInput.rightFoot.tracked);
+            _calibrateButton.interactable = (_avatarManager.currentlySpawnedAvatar?.avatar.isIKAvatar ?? false) && (_trackedDeviceManager.waist.tracked || _trackedDeviceManager.leftFoot.tracked || _trackedDeviceManager.rightFoot.tracked);
         }
 
         #region Actions
@@ -316,33 +316,33 @@ namespace CustomAvatar.UI
         {
             if (_calibrating)
             {
-                if (_playerInput.waist.tracked)
+                if (_trackedDeviceManager.waist.tracked)
                 {
                     _waistSphere.SetActive(true);
-                    _waistSphere.transform.position = _playerInput.waist.position;
-                    _waistSphere.transform.rotation = _playerInput.waist.rotation;
+                    _waistSphere.transform.position = _trackedDeviceManager.waist.position;
+                    _waistSphere.transform.rotation = _trackedDeviceManager.waist.rotation;
                 }
                 else
                 {
                     _waistSphere.SetActive(false);
                 }
 
-                if (_playerInput.leftFoot.tracked)
+                if (_trackedDeviceManager.leftFoot.tracked)
                 {
                     _leftFootSphere.SetActive(true);
-                    _leftFootSphere.transform.position = _playerInput.leftFoot.position;
-                    _leftFootSphere.transform.rotation = _playerInput.leftFoot.rotation;
+                    _leftFootSphere.transform.position = _trackedDeviceManager.leftFoot.position;
+                    _leftFootSphere.transform.rotation = _trackedDeviceManager.leftFoot.rotation;
                 }
                 else
                 {
                     _leftFootSphere.SetActive(false);
                 }
 
-                if (_playerInput.rightFoot.tracked)
+                if (_trackedDeviceManager.rightFoot.tracked)
                 {
                     _rightFootSphere.SetActive(true);
-                    _rightFootSphere.transform.position = _playerInput.rightFoot.position;
-                    _rightFootSphere.transform.rotation = _playerInput.rightFoot.rotation;
+                    _rightFootSphere.transform.position = _trackedDeviceManager.rightFoot.position;
+                    _rightFootSphere.transform.rotation = _trackedDeviceManager.rightFoot.rotation;
                 }
                 else
                 {
@@ -372,7 +372,7 @@ namespace CustomAvatar.UI
 
         private void ScanArmSpan()
         {
-            var armSpan = Vector3.Distance(_playerInput.leftHand.position, _playerInput.rightHand.position);
+            var armSpan = Vector3.Distance(_trackedDeviceManager.leftHand.position, _trackedDeviceManager.rightHand.position);
 
             if (armSpan > _maxMeasuredArmSpan)
             {

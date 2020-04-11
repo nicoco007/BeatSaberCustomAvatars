@@ -4,10 +4,11 @@ namespace CustomAvatar.Tracking
 {
     internal class VRAvatarInput : AvatarInput
     {
-        private readonly TrackedDeviceManager _deviceManager = PersistentSingleton<TrackedDeviceManager>.instance;
+        private readonly TrackedDeviceManager _deviceManager;
 
-        public VRAvatarInput()
+        public VRAvatarInput(TrackedDeviceManager trackedDeviceManager)
         {
+            _deviceManager = trackedDeviceManager;
             _deviceManager.deviceAdded += (device, use) => InvokeInputChanged();
             _deviceManager.deviceRemoved += (device, use) => InvokeInputChanged();
             _deviceManager.deviceTrackingAcquired += (device, use) => InvokeInputChanged();

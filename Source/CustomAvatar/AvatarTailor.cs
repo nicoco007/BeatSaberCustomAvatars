@@ -11,7 +11,21 @@ namespace CustomAvatar
     {
         public const float kDefaultPlayerArmSpan = 1.7f;
 
+        private readonly MainSettingsModelSO _mainSettingsModel;
+        private readonly PlayerDataModel _playerDataModel;
+        private readonly TrackedDeviceManager _trackedDeviceManager;
+
         private Vector3? _initialPlatformPosition;
+        
+        private Vector3 _roomCenter => _mainSettingsModel.roomCenter.value;
+        private float _playerEyeHeight => _playerDataModel.playerData.playerSpecificSettings.playerHeight - MainSettingsModelSO.kHeadPosToPlayerHeightOffset;
+
+        private AvatarTailor(MainSettingsModelSO mainSettingsModel, PlayerDataModel playerDataModel, TrackedDeviceManager trackedDeviceManager)
+        {
+            _mainSettingsModel = mainSettingsModel;
+            _playerDataModel = playerDataModel;
+            _trackedDeviceManager = trackedDeviceManager;
+        }
 
         public void ResizeAvatar(SpawnedAvatar avatar)
         {
@@ -42,7 +56,7 @@ namespace CustomAvatar
 
                     if (avatarEyeHeight > 0)
                     {
-                        scale = BeatSaberUtil.GetPlayerEyeHeight() / avatarEyeHeight;
+                        scale = _playerEyeHeight / avatarEyeHeight;
                     }
                     else
                     {
@@ -76,14 +90,14 @@ namespace CustomAvatar
 
             if (SettingsManager.settings.enableFloorAdjust && avatar.avatar.isIKAvatar)
             {
-                float playerEyeHeight = BeatSaberUtil.GetPlayerEyeHeight();
+                float playerEyeHeight = _playerEyeHeight;
                 float avatarEyeHeight = avatar.avatar.eyeHeight;
 
                 floorOffset = playerEyeHeight - avatarEyeHeight * avatar.tracking.scale;
 
                 if (SettingsManager.settings.moveFloorWithRoomAdjust)
                 {
-                    floorOffset += BeatSaberUtil.GetRoomCenter().y;
+                    floorOffset += _roomCenter.y;
                 }
             }
 
@@ -121,11 +135,9 @@ namespace CustomAvatar
         
         public void CalibrateFullBodyTrackingManual(SpawnedAvatar spawnedAvatar)
         {
-            TrackedDeviceManager input = PersistentSingleton<TrackedDeviceManager>.instance;
-
-            TrackedDeviceState leftFoot = input.leftFoot;
-            TrackedDeviceState rightFoot = input.rightFoot;
-            TrackedDeviceState pelvis = input.waist;
+            TrackedDeviceState leftFoot  = _trackedDeviceManager.leftFoot;
+            TrackedDeviceState rightFoot = _trackedDeviceManager.rightFoot;
+            TrackedDeviceState pelvis    = _trackedDeviceManager.waist;
 
             Settings.FullBodyCalibration fullBodyCalibration = SettingsManager.settings.GetAvatarSettings(spawnedAvatar.avatar.fullPath).fullBodyCalibration;
 
@@ -171,7 +183,7 @@ namespace CustomAvatar
             Settings.FullBodyCalibration fullBodyCalibration = SettingsManager.settings.GetAvatarSettings(spawnedAvatar.avatar.fullPath).fullBodyCalibration;
 
             Vector3 floorNormal = Vector3.up;
-            float floorPosition = SettingsManager.settings.moveFloorWithRoomAdjust ? BeatSaberUtil.GetRoomCenter().y : 0;
+            float floorPosition = SettingsManager.settings.moveFloorWithRoomAdjust ? _roomCenter.y : 0;
 
             if (leftFoot.tracked)
             {
