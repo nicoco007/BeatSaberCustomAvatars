@@ -16,9 +16,9 @@ namespace CustomAvatar
     [Plugin(RuntimeOptions.SingleStartInit)]
     internal class Plugin
     {
-        private AvatarManager _avatarManager;
-        private GameScenesManager _scenesManager;
-        private AvatarListFlowCoordinator _flowCoordinator;
+        [Inject] private AvatarManager _avatarManager;
+        [Inject] private GameScenesManager _scenesManager;
+        [Inject] private AvatarListFlowCoordinator _flowCoordinator;
 
         private SceneContext _sceneContext;
         private GameObject _mirrorContainer;
@@ -68,10 +68,9 @@ namespace CustomAvatar
 
         private void OnActiveSceneChanged(Scene previousScene, Scene newScene)
         {
-            logger.Info("OnActiveSceneChanged: " + newScene.name);
-
             if (newScene.name == "PCInit")
             {
+                // Beat Saber has one instance of SceneContext in the PCInit scene
                 _sceneContext = Object.FindObjectOfType<SceneContext>();
 
                 _sceneContext.Container.Install<CustomAvatarsInstaller>();
@@ -83,8 +82,7 @@ namespace CustomAvatar
         {
             if (newScene.name == "PCInit")
             {
-                _scenesManager = _sceneContext.Container.Resolve<GameScenesManager>();
-                _avatarManager = _sceneContext.Container.Resolve<AvatarManager>();
+                _sceneContext.Container.Inject(this);
 
                 _scenesManager.transitionDidFinishEvent += sceneTransitionDidFinish;
                 _scenesManager.transitionDidFinishEvent += SceneTransitionDidFinish;
@@ -94,8 +92,6 @@ namespace CustomAvatar
 
             if (newScene.name == "MenuCore")
             {
-                _flowCoordinator = _sceneContext.Container.Resolve<AvatarListFlowCoordinator>();
-
                 try
                 {
                     MenuButtons.instance.RegisterButton(new MenuButton("Avatars", () =>
