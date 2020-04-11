@@ -96,7 +96,6 @@ namespace CustomAvatar
                 {
                     MenuButtons.instance.RegisterButton(new MenuButton("Avatars", () =>
                     {
-                        Plugin.logger.Info("flowCoordinator: " + _flowCoordinator);
                         BeatSaberUI.MainFlowCoordinator.PresentFlowCoordinator(_flowCoordinator, null, true);
                     }));
                 }

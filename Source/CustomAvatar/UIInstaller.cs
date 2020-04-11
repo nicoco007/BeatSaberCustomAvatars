@@ -15,12 +15,15 @@ namespace CustomAvatar
             var settingsViewController = BeatSaberUI.CreateViewController<SettingsViewController>();
 
             // required since BaseInputModule isn't actually registered for some reason...?
-            Container.Bind<BaseInputModule>().FromInstance(null);
+            if (!Container.HasBinding<BaseInputModule>())
+            {
+                Container.Bind<BaseInputModule>().FromInstance(null);
+            }
 
             Container.Bind<AvatarListViewController>().FromInstance(avatarListViewController);
             Container.Bind<MirrorViewController>().FromInstance(mirrorViewController);
             Container.Bind<SettingsViewController>().FromInstance(settingsViewController);
-            Container.Bind<AvatarListFlowCoordinator>().FromNewComponentOnNewPrefab(new GameObject()).AsSingle();
+            Container.Bind<AvatarListFlowCoordinator>().FromNewComponentOnNewPrefab(new GameObject(nameof(AvatarListFlowCoordinator))).AsSingle();
 
             Container.QueueForInject(avatarListViewController);
             Container.QueueForInject(mirrorViewController);
