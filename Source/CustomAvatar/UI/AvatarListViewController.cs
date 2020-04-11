@@ -12,14 +12,18 @@ using HMUI;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Zenject;
 
 namespace CustomAvatar.UI
 {
     internal class AvatarListViewController : BSMLResourceViewController, TableView.IDataSource
     {
+        [Inject] private AvatarManager _avatarManager;
+
         private const string kTableCellReuseIdentifier = "CustomAvatarsTableCell";
 
         public override string ResourceName => "CustomAvatar.Views.AvatarList.bsml";
+
 
         [UIComponent("avatar-list")] public CustomListTableData avatarList;
         [UIComponent("up-button")] public Button upButton;
@@ -30,12 +34,12 @@ namespace CustomAvatar.UI
 
         private Texture2D _blankAvatarIcon;
         private Texture2D _noAvatarIcon;
-        
+
         protected override void DidActivate(bool firstActivation, ActivationType type)
         {
             base.DidActivate(firstActivation, type);
 
-            AvatarManager.instance.avatarChanged += OnAvatarChanged;
+            _avatarManager.avatarChanged += OnAvatarChanged;
             
             _blankAvatarIcon = LoadTextureFromResource("CustomAvatar.Resources.mystery-man.png");
             _noAvatarIcon = LoadTextureFromResource("CustomAvatar.Resources.ban.png");
@@ -83,7 +87,7 @@ namespace CustomAvatar.UI
 
             _avatars.Add(new AvatarListItem("No Avatar", _noAvatarIcon));
             
-            AvatarManager.instance.GetAvatarsAsync(avatar =>
+            _avatarManager.GetAvatarsAsync(avatar =>
             {
                 _avatars.Add(new AvatarListItem(avatar));
 
@@ -95,7 +99,7 @@ namespace CustomAvatar.UI
         {
             base.DidDeactivate(deactivationType);
 
-            AvatarManager.instance.avatarChanged -= OnAvatarChanged;
+            _avatarManager.avatarChanged -= OnAvatarChanged;
         }
 
         
@@ -104,7 +108,7 @@ namespace CustomAvatar.UI
         [UIAction("avatar-click")]
         private void OnAvatarClicked(TableView table, int row)
         {
-            AvatarManager.instance.SwitchToAvatar(_avatars[row].avatar);
+            _avatarManager.SwitchToAvatar(_avatars[row].avatar);
         }
 
         private void OnAvatarChanged(SpawnedAvatar avatar)
@@ -122,7 +126,7 @@ namespace CustomAvatar.UI
                 return string.Compare(a.name, b.name, StringComparison.CurrentCulture);
             });
 
-            int currentRow = _avatars.FindIndex(a => a.avatar?.fullPath == AvatarManager.instance.currentlySpawnedAvatar?.avatar.fullPath);
+            int currentRow = _avatars.FindIndex(a => a.avatar?.fullPath == _avatarManager.currentlySpawnedAvatar?.avatar.fullPath);
             
             avatarList.tableView.ReloadData();
             avatarList.tableView.ScrollToCellWithIdx(currentRow, TableViewScroller.ScrollPositionType.Center, true);

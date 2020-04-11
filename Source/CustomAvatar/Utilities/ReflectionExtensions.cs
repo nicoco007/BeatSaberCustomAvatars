@@ -12,7 +12,7 @@ namespace CustomAvatar.Utilities
                 throw new ArgumentNullException(nameof(obj));
             }
 
-            FieldInfo field = typeof(TSubject).GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
+            FieldInfo field = typeof(TSubject).GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Static);
 
             if (field == null)
             {

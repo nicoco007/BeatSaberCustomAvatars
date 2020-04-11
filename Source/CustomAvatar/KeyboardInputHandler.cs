@@ -1,39 +1,45 @@
 ﻿using CustomAvatar.Utilities;
 using UnityEngine;
+using Zenject;
 
 namespace CustomAvatar
 {
     internal class KeyboardInputHandler : MonoBehaviour
     {
+        private readonly AvatarManager _avatarManager;
+
+        private KeyboardInputHandler(AvatarManager avatarManager)
+        {
+            _avatarManager = avatarManager;
+        }
+
         private void Update()
         {
-            AvatarManager avatarManager = AvatarManager.instance;
-
             if (Input.GetKeyDown(KeyCode.PageDown))
             {
-                avatarManager.SwitchToNextAvatar();
+                _avatarManager.SwitchToNextAvatar();
             }
             else if (Input.GetKeyDown(KeyCode.PageUp))
             {
-                avatarManager.SwitchToPreviousAvatar();
+                _avatarManager.SwitchToPreviousAvatar();
             }
             else if (Input.GetKeyDown(KeyCode.Home))
             {
                 SettingsManager.settings.isAvatarVisibleInFirstPerson = !SettingsManager.settings.isAvatarVisibleInFirstPerson;
                 Plugin.logger.Info($"{(SettingsManager.settings.isAvatarVisibleInFirstPerson ? "Enabled" : "Disabled")} first person visibility");
-                avatarManager.currentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
+                _avatarManager.currentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
             }
             else if (Input.GetKeyDown(KeyCode.End))
             {
                 SettingsManager.settings.resizeMode = (AvatarResizeMode) (((int)SettingsManager.settings.resizeMode + 1) % 3);
                 Plugin.logger.Info($"Set resize mode to {SettingsManager.settings.resizeMode}");
-                avatarManager.ResizeCurrentAvatar();
+                _avatarManager.ResizeCurrentAvatar();
             }
             else if (Input.GetKeyDown(KeyCode.Insert))
             {
                 SettingsManager.settings.enableFloorAdjust = !SettingsManager.settings.enableFloorAdjust;
                 Plugin.logger.Info($"{(SettingsManager.settings.enableFloorAdjust ? "Enabled" : "Disabled")} floor adjust");
-                avatarManager.ResizeCurrentAvatar();
+                _avatarManager.ResizeCurrentAvatar();
             }
         }
     }

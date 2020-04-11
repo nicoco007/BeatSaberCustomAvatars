@@ -9,6 +9,7 @@ using HMUI;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Zenject;
 
 #pragma warning disable 649 // disable "field is never assigned"
 #pragma warning disable IDE0044 // disable "make field readonly"
@@ -29,6 +30,8 @@ namespace CustomAvatar.UI
         private Material _greenMaterial;
         private Material _blueMaterial;
         private Settings.AvatarSpecificSettings _currentAvatarSettings;
+
+        [Inject] private AvatarManager _avatarManager;
 
         #region Components
         
@@ -69,7 +72,7 @@ namespace CustomAvatar.UI
             _calibrateFullBodyTrackingOnStart.Value = SettingsManager.settings.calibrateFullBodyTrackingOnStart;
             _cameraNearClipPlane.Value = SettingsManager.settings.cameraNearClipPlane;
 
-            OnAvatarChanged(AvatarManager.instance.currentlySpawnedAvatar);
+            OnAvatarChanged(_avatarManager.currentlySpawnedAvatar);
             OnInputDevicesChanged();
 
             _armSpanLabel.SetText($"{SettingsManager.settings.playerArmSpan:0.00} m");
@@ -83,7 +86,7 @@ namespace CustomAvatar.UI
             _greenMaterial.SetColor(kColor, new Color(0, 0.8f, 0, 1));
             _blueMaterial.SetColor(kColor, new Color(0, 0.5f, 1, 1));
 
-            AvatarManager.instance.avatarChanged += OnAvatarChanged;
+            _avatarManager.avatarChanged += OnAvatarChanged;
 
             // TODO unsub from all these
             _playerInput.deviceAdded += (state, use) => OnInputDevicesChanged();
@@ -96,7 +99,7 @@ namespace CustomAvatar.UI
         {
             base.DidDeactivate(deactivationType);
 
-            AvatarManager.instance.avatarChanged -= OnAvatarChanged;
+            _avatarManager.avatarChanged -= OnAvatarChanged;
 
             DisableCalibrationMode(false);
         }
@@ -119,7 +122,7 @@ namespace CustomAvatar.UI
 
             _clearButton.interactable = !_currentAvatarSettings.fullBodyCalibration.isDefault;
             // TODO same here
-            _calibrateButton.interactable = AvatarManager.instance.currentlySpawnedAvatar.avatar.isIKAvatar && (_playerInput.waist.tracked || _playerInput.leftFoot.tracked || _playerInput.rightFoot.tracked);
+            _calibrateButton.interactable = _avatarManager.currentlySpawnedAvatar.avatar.isIKAvatar && (_playerInput.waist.tracked || _playerInput.leftFoot.tracked || _playerInput.rightFoot.tracked);
 
             _automaticCalibrationSetting.Value = _currentAvatarSettings.useAutomaticCalibration;
             _automaticCalibrationSetting.SetInteractable(avatar.avatar.descriptor.supportsAutomaticCalibration);
@@ -129,7 +132,7 @@ namespace CustomAvatar.UI
         private void OnInputDevicesChanged()
         {
             // TODO check targets exist on avatar, e.g. isFbtCapable
-            _calibrateButton.interactable = (AvatarManager.instance.currentlySpawnedAvatar?.avatar.isIKAvatar ?? false) && (_playerInput.waist.tracked || _playerInput.leftFoot.tracked || _playerInput.rightFoot.tracked);
+            _calibrateButton.interactable = (_avatarManager.currentlySpawnedAvatar?.avatar.isIKAvatar ?? false) && (_playerInput.waist.tracked || _playerInput.leftFoot.tracked || _playerInput.rightFoot.tracked);
         }
 
         #region Actions
@@ -138,21 +141,21 @@ namespace CustomAvatar.UI
         private void OnVisibleInFirstPersonChanged(bool value)
         {
             SettingsManager.settings.isAvatarVisibleInFirstPerson = value;
-            AvatarManager.instance.currentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
+            _avatarManager.currentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
         }
 
         [UIAction("resize-mode-change")]
         private void OnResizeModeChanged(AvatarResizeMode value)
         {
             SettingsManager.settings.resizeMode = value;
-            AvatarManager.instance.ResizeCurrentAvatar();
+            _avatarManager.ResizeCurrentAvatar();
         }
 
         [UIAction("floor-adjust-change")]
         private void OnFloorHeightAdjustChanged(bool value)
         {
             SettingsManager.settings.enableFloorAdjust = value;
-            AvatarManager.instance.ResizeCurrentAvatar();
+            _avatarManager.ResizeCurrentAvatar();
         }
 
         [UIAction("resize-mode-formatter")]
@@ -184,7 +187,7 @@ namespace CustomAvatar.UI
         {
             if (_currentAvatarSettings.useAutomaticCalibration)
             {
-                AvatarManager.instance.avatarTailor.CalibrateFullBodyTrackingAuto(AvatarManager.instance.currentlySpawnedAvatar);
+                _avatarManager.avatarTailor.CalibrateFullBodyTrackingAuto(_avatarManager.currentlySpawnedAvatar);
                 _clearButton.interactable = !_currentAvatarSettings.fullBodyCalibration.isDefault;
             }
             else if (!_calibrating)
@@ -212,7 +215,7 @@ namespace CustomAvatar.UI
             }
             else
             {
-                AvatarManager.instance.avatarTailor.ClearFullBodyTrackingData(AvatarManager.instance.currentlySpawnedAvatar);
+                _avatarManager.avatarTailor.ClearFullBodyTrackingData(_avatarManager.currentlySpawnedAvatar);
                 _clearButton.interactable = false;
             }
         }
@@ -250,7 +253,7 @@ namespace CustomAvatar.UI
 
         private void EnableCalibrationMode()
         {
-            AvatarManager.instance.currentlySpawnedAvatar.EnableCalibrationMode();;
+            _avatarManager.currentlySpawnedAvatar.EnableCalibrationMode();;
             _calibrating = true;
             _calibrateButtonText.text = "Save";
             _clearButtonText.text = "Cancel";
@@ -263,14 +266,14 @@ namespace CustomAvatar.UI
 
         private void DisableCalibrationMode(bool save)
         {
-            if (AvatarManager.instance.currentlySpawnedAvatar != null)
+            if (_avatarManager.currentlySpawnedAvatar != null)
             {
                 if (save)
                 {
-                    AvatarManager.instance.avatarTailor.CalibrateFullBodyTrackingManual(AvatarManager.instance.currentlySpawnedAvatar);
+                    _avatarManager.avatarTailor.CalibrateFullBodyTrackingManual(_avatarManager.currentlySpawnedAvatar);
                 }
                 
-                AvatarManager.instance.currentlySpawnedAvatar.DisableCalibrationMode();
+                _avatarManager.currentlySpawnedAvatar.DisableCalibrationMode();
             }
 
             Destroy(_waistSphere);
@@ -390,7 +393,7 @@ namespace CustomAvatar.UI
 
                 if (SettingsManager.settings.resizeMode == AvatarResizeMode.ArmSpan)
                 {
-                    AvatarManager.instance.ResizeCurrentAvatar();
+                    _avatarManager.ResizeCurrentAvatar();
                 }
             }
         }

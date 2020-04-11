@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using CustomAvatar.Avatar;
@@ -14,28 +13,13 @@ namespace CustomAvatar
     public class AvatarManager
     {
         public static readonly string kCustomAvatarsPath = Path.GetFullPath("CustomAvatars");
-
-        public static AvatarManager instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new AvatarManager();
-                }
-
-                return _instance;
-            }
-        }
-
-        private static AvatarManager _instance;
         
         internal AvatarTailor avatarTailor { get; }
         internal SpawnedAvatar currentlySpawnedAvatar { get; private set; }
 
         internal event Action<SpawnedAvatar> avatarChanged;
 
-        private AvatarManager()
+        private AvatarManager(PlayerDataModel playerDataModel)
         {
             avatarTailor = new AvatarTailor();
 
@@ -43,6 +27,8 @@ namespace CustomAvatar
 
             SceneManager.sceneLoaded += OnSceneLoaded;
             BeatSaberEvents.onPlayerHeightChanged += (height) => ResizeCurrentAvatar();
+
+            Plugin.logger.Info("playerDataModel: " + playerDataModel);
         }
 
         ~AvatarManager()

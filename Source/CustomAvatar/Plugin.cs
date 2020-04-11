@@ -1,7 +1,6 @@
 using CustomAvatar.StereoRendering;
 using IPA;
 using System;
-using System.Linq;
 using BeatSaberMarkupLanguage.MenuButtons;
 using CustomAvatar.UI;
 using CustomAvatar.Utilities;
@@ -10,13 +9,18 @@ using UnityEngine.SceneManagement;
 using Zenject;
 using Logger = IPA.Logging.Logger;
 using Object = UnityEngine.Object;
+using BeatSaberMarkupLanguage;
 
 namespace CustomAvatar
 {
     [Plugin(RuntimeOptions.SingleStartInit)]
     internal class Plugin
     {
+        private AvatarManager _avatarManager;
         private GameScenesManager _scenesManager;
+        private AvatarListFlowCoordinator _flowCoordinator;
+
+        private SceneContext _sceneContext;
         private GameObject _mirrorContainer;
         
         public event Action<ScenesTransitionSetupDataSO, DiContainer> sceneTransitionDidFinish;
@@ -38,6 +42,7 @@ namespace CustomAvatar
         [OnStart]
         public void OnStart()
         {
+            SceneManager.activeSceneChanged += OnActiveSceneChanged;
             SceneManager.sceneLoaded += OnSceneLoaded;
 
             KeyboardInputHandler keyboardInputHandler = new GameObject(nameof(KeyboardInputHandler)).AddComponent<KeyboardInputHandler>();
@@ -61,33 +66,42 @@ namespace CustomAvatar
             SettingsManager.Save();
         }
 
-        public void OnSceneLoaded(Scene newScene, LoadSceneMode mode)
+        private void OnActiveSceneChanged(Scene previousScene, Scene newScene)
         {
-            if (_scenesManager == null)
-            {
-                _scenesManager = Resources.FindObjectsOfTypeAll<GameScenesManager>().FirstOrDefault();
-
-                if (_scenesManager != null)
-                {
-                    _scenesManager.transitionDidFinishEvent += sceneTransitionDidFinish;
-                    _scenesManager.transitionDidFinishEvent += SceneTransitionDidFinish;
-                }
-            }
+            logger.Info("OnActiveSceneChanged: " + newScene.name);
 
             if (newScene.name == "PCInit")
             {
-                AvatarManager.instance.LoadAvatarFromSettingsAsync();
+                _sceneContext = Object.FindObjectOfType<SceneContext>();
+
+                _sceneContext.Container.Install<CustomAvatarsInstaller>();
+                _sceneContext.Container.Install<UIInstaller>();
+            }
+        }
+
+        public void OnSceneLoaded(Scene newScene, LoadSceneMode mode)
+        {
+            if (newScene.name == "PCInit")
+            {
+                _scenesManager = _sceneContext.Container.Resolve<GameScenesManager>();
+                _avatarManager = _sceneContext.Container.Resolve<AvatarManager>();
+
+                _scenesManager.transitionDidFinishEvent += sceneTransitionDidFinish;
+                _scenesManager.transitionDidFinishEvent += SceneTransitionDidFinish;
+
+                _avatarManager.LoadAvatarFromSettingsAsync();
             }
 
             if (newScene.name == "MenuCore")
             {
+                _flowCoordinator = _sceneContext.Container.Resolve<AvatarListFlowCoordinator>();
+
                 try
                 {
                     MenuButtons.instance.RegisterButton(new MenuButton("Avatars", () =>
                     {
-                        var mainFlowCoordinator = Resources.FindObjectsOfTypeAll<MainFlowCoordinator>().First();
-                        var flowCoordinator = new GameObject(nameof(AvatarListFlowCoordinator)).AddComponent<AvatarListFlowCoordinator>();
-                        mainFlowCoordinator.InvokePrivateMethod("PresentFlowCoordinator", flowCoordinator, null, true, false);
+                        Plugin.logger.Info("flowCoordinator: " + _flowCoordinator);
+                        BeatSaberUI.MainFlowCoordinator.PresentFlowCoordinator(_flowCoordinator, null, true);
                     }));
                 }
                 catch (Exception)
