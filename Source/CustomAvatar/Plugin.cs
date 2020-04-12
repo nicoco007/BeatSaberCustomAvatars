@@ -75,6 +75,7 @@ namespace CustomAvatar
                 // Beat Saber has one instance of SceneContext in the PCInit scene
                 _sceneContext = Object.FindObjectOfType<SceneContext>();
 
+                // OnActiveSceneChanged runs before OnSceneLoaded for PCInit so bind new stuff here
                 _sceneContext.Container.Install<CustomAvatarsInstaller>(new object[] { _ipaLogger });
                 _sceneContext.Container.Install<UIInstaller>();
             }
@@ -84,6 +85,7 @@ namespace CustomAvatar
         {
             if (newScene.name == "PCInit")
             {
+                // OnSceneLoaded runs after OnActiveSceneChanged for PCInit so inject here
                 _sceneContext.Container.Inject(this);
 
                 _scenesManager.transitionDidFinishEvent += sceneTransitionDidFinish;
