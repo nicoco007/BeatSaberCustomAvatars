@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using CustomAvatar.Avatar;
+using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
 using UnityEngine.SceneManagement;
@@ -19,13 +20,17 @@ namespace CustomAvatar
 
         internal event Action<SpawnedAvatar> avatarChanged;
 
-        private TrackedDeviceManager _trackedDeviceManager;
-        private DiContainer _container;
+        private readonly ILogger _logger;
+        private readonly TrackedDeviceManager _trackedDeviceManager;
+        private readonly Settings _settings;
+        private readonly DiContainer _container;
 
-        private AvatarManager(AvatarTailor avatarTailor, TrackedDeviceManager trackedDeviceManager, DiContainer container)
+        private AvatarManager(AvatarTailor avatarTailor, ILoggerFactory loggerFactory, TrackedDeviceManager trackedDeviceManager, Settings settings, DiContainer container)
         {
             this.avatarTailor = avatarTailor;
+            _logger = loggerFactory.CreateLogger<AvatarManager>();
             _trackedDeviceManager = trackedDeviceManager;
+            _settings = settings;
             _container = container;
 
             Plugin.instance.sceneTransitionDidFinish += OnSceneTransitionDidFinish;
@@ -42,7 +47,7 @@ namespace CustomAvatar
 
         public void GetAvatarsAsync(Action<LoadedAvatar> success = null, Action<Exception> error = null)
         {
-            Plugin.logger.Info("Loading all avatars from " + kCustomAvatarsPath);
+            _logger.Info("Loading all avatars from " + kCustomAvatarsPath);
 
             foreach (string fileName in GetAvatarFileNames())
             {
@@ -52,7 +57,7 @@ namespace CustomAvatar
 
         public void LoadAvatarFromSettingsAsync()
         {
-            string previousAvatarPath = SettingsManager.settings.previousAvatarPath;
+            string previousAvatarPath = _settings.previousAvatarPath;
 
             if (string.IsNullOrEmpty(previousAvatarPath))
             {
@@ -61,7 +66,7 @@ namespace CustomAvatar
 
             if (!File.Exists(Path.Combine(kCustomAvatarsPath, previousAvatarPath)))
             {
-                Plugin.logger.Warn("Previously loaded avatar no longer exists; reverting to default");
+                _logger.Warning("Previously loaded avatar no longer exists; reverting to default");
                 return;
             }
 
@@ -86,11 +91,11 @@ namespace CustomAvatar
             currentlySpawnedAvatar?.Destroy();
             currentlySpawnedAvatar = null;
 
-            SettingsManager.settings.previousAvatarPath = avatar?.fullPath;
+            _settings.previousAvatarPath = avatar?.fullPath;
 
             if (avatar == null)
             {
-                Plugin.logger.Info("No avatar selected");
+                _logger.Info("No avatar selected");
                 avatarChanged?.Invoke(null);
                 return;
             }
@@ -142,7 +147,7 @@ namespace CustomAvatar
             currentlySpawnedAvatar.OnFirstPersonEnabledChanged();
             currentlySpawnedAvatar.eventsPlayer?.Restart();
 
-            if (newScene.name == "PCInit" && SettingsManager.settings.calibrateFullBodyTrackingOnStart && SettingsManager.settings.GetAvatarSettings(currentlySpawnedAvatar.avatar.fullPath).useAutomaticCalibration)
+            if (newScene.name == "PCInit" && _settings.calibrateFullBodyTrackingOnStart && _settings.GetAvatarSettings(currentlySpawnedAvatar.avatar.fullPath).useAutomaticCalibration)
             {
                 avatarTailor.CalibrateFullBodyTrackingAuto(currentlySpawnedAvatar);
             }

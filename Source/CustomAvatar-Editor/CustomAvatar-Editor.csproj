@@ -68,6 +68,12 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
+    <Reference Include="Zenject">
+      <HintPath>..\..\Libraries\Zenject.dll</HintPath>
+    </Reference>
+    <Reference Include="Zenject-usage">
+      <HintPath>..\..\Libraries\Zenject-usage.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\CustomAvatar\AvatarDescriptor.cs">
@@ -84,6 +90,15 @@
     </Compile>
     <Compile Include="..\CustomAvatar\FirstPersonExclusion.cs">
       <Link>FirstPersonExclusion.cs</Link>
+    </Compile>
+    <Compile Include="..\CustomAvatar\Logging\ILogger.cs">
+      <Link>Logging\ILogger.cs</Link>
+    </Compile>
+    <Compile Include="..\CustomAvatar\Logging\ILoggerFactory.cs">
+      <Link>Logging\ILoggerFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\CustomAvatar\Logging\UnityDebugLogger.cs">
+      <Link>Logging\UnityDebugLogger.cs</Link>
     </Compile>
     <Compile Include="..\CustomAvatar\PoseManager.cs">
       <Link>PoseManager.cs</Link>

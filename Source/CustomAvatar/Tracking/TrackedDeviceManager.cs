@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using CustomAvatar.Logging;
 using CustomAvatar.Utilities;
 using UnityEngine;
 using UnityEngine.XR;
 using Valve.VR;
 using Zenject;
+using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar.Tracking
 {
@@ -26,13 +28,21 @@ namespace CustomAvatar.Tracking
 
         private readonly HashSet<string> _foundDevices = new HashSet<string>();
 
-        [Inject] private readonly MainSettingsModelSO _mainSettingsModel;
+        private MainSettingsModelSO _mainSettingsModel;
+        private ILogger _logger;
 
         private bool _isOpenVRRunning;
 
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
         // ReSharper disable UnusedMember.Local
+
+        [Inject]
+        private void Inject(MainSettingsModelSO mainSettingsModel, ILoggerFactory loggerFactory)
+        {
+            _mainSettingsModel = mainSettingsModel;
+            _logger = loggerFactory.CreateLogger<TrackedDeviceManager>();
+        }
 
         public void Start()
         {
@@ -42,8 +52,8 @@ namespace CustomAvatar.Tracking
             }
             catch (Exception ex)
             {
-                Plugin.logger.Error("Failed to check if SteamVR is running; assuming it is not");
-                Plugin.logger.Error(ex);
+                _logger.Error("Failed to check if SteamVR is running; assuming it is not");
+                _logger.Error(ex);
             }
 
             InputDevices.deviceConnected += device => UpdateInputDevices();
@@ -106,7 +116,7 @@ namespace CustomAvatar.Tracking
                 {
                     if (string.IsNullOrEmpty(serialNumbers[i])) continue;
 
-                    Plugin.logger.Debug($"Got serial number '{serialNumbers[i]}' for device at index {i}");
+                    _logger.Debug($"Got serial number '{serialNumbers[i]}' for device at index {i}");
                     openVRDevicesBySerialNumber.Add(serialNumbers[i], i);
                 }
             }
@@ -128,7 +138,7 @@ namespace CustomAvatar.Tracking
 
                 if (!_foundDevices.Contains(device.name))
                 {
-                    Plugin.logger.Info($"Found new input device '{device.name}' with serial number '{device.serialNumber}'");
+                    _logger.Info($"Found new input device '{device.name}' with serial number '{device.serialNumber}'");
                     _foundDevices.Add(device.name);
                 }
 
@@ -156,7 +166,7 @@ namespace CustomAvatar.Tracking
                         var role = OpenVRWrapper.GetTrackedDeviceRole(openVRDeviceId);
                         deviceRoles[device.name] = role;
 
-                        Plugin.logger.Info($"Tracker '{device.name}' has role {role}");
+                        _logger.Info($"Tracker '{device.name}' has role {role}");
 
                         switch (role)
                         {
@@ -213,7 +223,7 @@ namespace CustomAvatar.Tracking
             {
                 if (!inputDevices.Exists(d => d.name == deviceName))
                 {
-                    Plugin.logger.Info($"Lost device '{deviceName}'");
+                    _logger.Info($"Lost device '{deviceName}'");
                     _foundDevices.Remove(deviceName);
                 }
             }
@@ -225,7 +235,7 @@ namespace CustomAvatar.Tracking
             {
                 InputDevice inputDevice = possibleInputDevice.Value;
 
-                Plugin.logger.Info($"Using device '{inputDevice.name}' as {use}");
+                _logger.Info($"Using device '{inputDevice.name}' as {use}");
 
                 deviceState.name = inputDevice.name;
                 deviceState.serialNumber = inputDevice.serialNumber;
@@ -236,7 +246,7 @@ namespace CustomAvatar.Tracking
             }
             
             if (!possibleInputDevice.HasValue && deviceState.found) {
-                Plugin.logger.Info($"Lost device '{deviceState.name}' that was used as {use}");
+                _logger.Info($"Lost device '{deviceState.name}' that was used as {use}");
 
                 deviceState.name = null;
                 deviceState.serialNumber = null;
@@ -258,7 +268,7 @@ namespace CustomAvatar.Tracking
             {
                 if (deviceState.tracked)
                 {
-                    Plugin.logger.Info($"Lost tracking of device '{deviceState.name}'");
+                    _logger.Info($"Lost tracking of device '{deviceState.name}'");
                     deviceState.tracked = false;
                     deviceTrackingLost?.Invoke(deviceState, use);
                 }
@@ -268,7 +278,7 @@ namespace CustomAvatar.Tracking
 
             if (!deviceState.tracked)
             {
-                Plugin.logger.Info($"Acquired tracking of device '{deviceState.name}'");
+                _logger.Info($"Acquired tracking of device '{deviceState.name}'");
                 deviceState.tracked = true;
                 deviceTrackingAcquired?.Invoke(deviceState, use);
             }

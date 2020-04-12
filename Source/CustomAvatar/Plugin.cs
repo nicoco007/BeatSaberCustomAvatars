@@ -10,6 +10,8 @@ using Zenject;
 using Logger = IPA.Logging.Logger;
 using Object = UnityEngine.Object;
 using BeatSaberMarkupLanguage;
+using CustomAvatar.Logging;
+using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar
 {
@@ -19,6 +21,9 @@ namespace CustomAvatar
         [Inject] private AvatarManager _avatarManager;
         [Inject] private GameScenesManager _scenesManager;
         [Inject] private AvatarListFlowCoordinator _flowCoordinator;
+        [Inject] private Settings _settings;
+        [Inject] private SettingsManager _settingsManager;
+        [Inject] private MirrorHelper _mirrorHelper;
 
         private SceneContext _sceneContext;
         private GameObject _mirrorContainer;
@@ -27,15 +32,18 @@ namespace CustomAvatar
 
         public static Plugin instance { get; private set; }
 
-        public static Logger logger { get; private set; }
+        private ILogger _logger;
+        private Logger _ipaLogger;
 
         [Init]
         public Plugin(Logger logger)
         {
             instance = this;
-            Plugin.logger = logger;
+            _ipaLogger = logger;
+
+            // can't inject at this point so just create it
+            _logger = new IPALogger<Plugin>(logger);
             
-            SettingsManager.Load();
             BeatSaberEvents.ApplyPatches();
         }
 
@@ -44,12 +52,6 @@ namespace CustomAvatar
         {
             SceneManager.activeSceneChanged += OnActiveSceneChanged;
             SceneManager.sceneLoaded += OnSceneLoaded;
-
-            KeyboardInputHandler keyboardInputHandler = new GameObject(nameof(KeyboardInputHandler)).AddComponent<KeyboardInputHandler>();
-            Object.DontDestroyOnLoad(keyboardInputHandler.gameObject);
-
-            ShaderLoader shaderLoader = new GameObject(nameof(ShaderLoader)).AddComponent<ShaderLoader>();
-            Object.DontDestroyOnLoad(shaderLoader.gameObject);
         }
 
         [OnExit]
@@ -63,7 +65,7 @@ namespace CustomAvatar
 
             SceneManager.sceneLoaded -= OnSceneLoaded;
 
-            SettingsManager.Save();
+            _settingsManager.Save(_settings);
         }
 
         private void OnActiveSceneChanged(Scene previousScene, Scene newScene)
@@ -73,7 +75,7 @@ namespace CustomAvatar
                 // Beat Saber has one instance of SceneContext in the PCInit scene
                 _sceneContext = Object.FindObjectOfType<SceneContext>();
 
-                _sceneContext.Container.Install<CustomAvatarsInstaller>();
+                _sceneContext.Container.Install<CustomAvatarsInstaller>(new object[] { _ipaLogger });
                 _sceneContext.Container.Install<UIInstaller>();
             }
         }
@@ -88,6 +90,9 @@ namespace CustomAvatar
                 _scenesManager.transitionDidFinishEvent += SceneTransitionDidFinish;
 
                 _avatarManager.LoadAvatarFromSettingsAsync();
+
+                KeyboardInputHandler keyboardInputHandler = _sceneContext.Container.InstantiateComponentOnNewGameObject<KeyboardInputHandler>();
+                Object.DontDestroyOnLoad(keyboardInputHandler.gameObject);
             }
 
             if (newScene.name == "MenuCore")
@@ -101,12 +106,12 @@ namespace CustomAvatar
                 }
                 catch (Exception)
                 {
-                    logger.Warn("Failed to add menu button, spawning mirror instead");
+                    _logger.Warning("Failed to add menu button, spawning mirror instead");
 
                     _mirrorContainer = new GameObject();
                     Object.DontDestroyOnLoad(_mirrorContainer);
-                    Vector2 mirrorSize = SettingsManager.settings.mirror.size;
-                    MirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, -1.5f), Quaternion.Euler(-90f, 180f, 0), mirrorSize, _mirrorContainer.transform);
+                    Vector2 mirrorSize = _settings.mirror.size;
+                    _mirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, -1.5f), Quaternion.Euler(-90f, 180f, 0), mirrorSize, _mirrorContainer.transform);
                 }
             }
         }
@@ -115,10 +120,12 @@ namespace CustomAvatar
         {
             foreach (Camera camera in Camera.allCameras)
             {
-                if (camera.gameObject.GetComponent<VRRenderEventDetector>() == null)
+                var detector = camera.gameObject.GetComponent<VRRenderEventDetector>();
+
+                if (detector == null)
                 {
-                    camera.gameObject.AddComponent<VRRenderEventDetector>();
-                    logger.Info($"Added {nameof(VRRenderEventDetector)} to {camera}");
+                    _sceneContext.Container.InstantiateComponent<VRRenderEventDetector>(camera.gameObject);
+                    _logger.Info($"Added {nameof(VRRenderEventDetector)} to {camera}");
                 }
             }
             
@@ -127,17 +134,17 @@ namespace CustomAvatar
             if (mainCamera)
             {
                 SetCameraCullingMask(mainCamera);
-                mainCamera.nearClipPlane = SettingsManager.settings.cameraNearClipPlane;
+                mainCamera.nearClipPlane = _settings.cameraNearClipPlane;
             }
             else
             {
-                logger.Error("Could not find main camera!");
+                _logger.Error("Could not find main camera!");
             }
         }
 
         private void SetCameraCullingMask(Camera camera)
         {
-            logger.Debug("Adding third person culling mask to " + camera.name);
+            _logger.Debug("Adding third person culling mask to " + camera.name);
 
             camera.cullingMask &= ~(1 << AvatarLayers.OnlyInThirdPerson);
         }

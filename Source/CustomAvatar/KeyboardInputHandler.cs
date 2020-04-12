@@ -1,16 +1,23 @@
-﻿using CustomAvatar.Utilities;
+﻿using CustomAvatar.Logging;
+using CustomAvatar.Utilities;
 using UnityEngine;
 using Zenject;
+using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar
 {
     internal class KeyboardInputHandler : MonoBehaviour
     {
-        private readonly AvatarManager _avatarManager;
+        private Settings _settings;
+        private AvatarManager _avatarManager;
+        private ILogger _logger;
 
-        private KeyboardInputHandler(AvatarManager avatarManager)
+        [Inject]
+        private void Inject(Settings settings, AvatarManager avatarManager, ILoggerFactory loggerFactory)
         {
+            _settings = settings;
             _avatarManager = avatarManager;
+            _logger = loggerFactory.CreateLogger<KeyboardInputHandler>();
         }
 
         private void Update()
@@ -25,20 +32,20 @@ namespace CustomAvatar
             }
             else if (Input.GetKeyDown(KeyCode.Home))
             {
-                SettingsManager.settings.isAvatarVisibleInFirstPerson = !SettingsManager.settings.isAvatarVisibleInFirstPerson;
-                Plugin.logger.Info($"{(SettingsManager.settings.isAvatarVisibleInFirstPerson ? "Enabled" : "Disabled")} first person visibility");
+                _settings.isAvatarVisibleInFirstPerson = !_settings.isAvatarVisibleInFirstPerson;
+                _logger.Info($"{(_settings.isAvatarVisibleInFirstPerson ? "Enabled" : "Disabled")} first person visibility");
                 _avatarManager.currentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
             }
             else if (Input.GetKeyDown(KeyCode.End))
             {
-                SettingsManager.settings.resizeMode = (AvatarResizeMode) (((int)SettingsManager.settings.resizeMode + 1) % 3);
-                Plugin.logger.Info($"Set resize mode to {SettingsManager.settings.resizeMode}");
+                _settings.resizeMode = (AvatarResizeMode) (((int)_settings.resizeMode + 1) % 3);
+                _logger.Info($"Set resize mode to {_settings.resizeMode}");
                 _avatarManager.ResizeCurrentAvatar();
             }
             else if (Input.GetKeyDown(KeyCode.Insert))
             {
-                SettingsManager.settings.enableFloorAdjust = !SettingsManager.settings.enableFloorAdjust;
-                Plugin.logger.Info($"{(SettingsManager.settings.enableFloorAdjust ? "Enabled" : "Disabled")} floor adjust");
+                _settings.enableFloorAdjust = !_settings.enableFloorAdjust;
+                _logger.Info($"{(_settings.enableFloorAdjust ? "Enabled" : "Disabled")} floor adjust");
                 _avatarManager.ResizeCurrentAvatar();
             }
         }

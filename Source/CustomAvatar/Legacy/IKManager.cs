@@ -1,6 +1,9 @@
 using System;
 using CustomAvatar;
+using CustomAvatar.Logging;
 using UnityEngine;
+using Zenject;
+using ILogger = CustomAvatar.Logging.ILogger;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable once CheckNamespace
@@ -14,9 +17,17 @@ namespace AvatarScriptPack
         public Transform LeftHandTarget;
         public Transform RightHandTarget;
 
+        private ILogger _logger;
+
+        [Inject]
+        private void Inject(ILoggerFactory loggerFactory)
+        {
+            _logger = loggerFactory.CreateLogger<IKManager>();
+        }
+
         public virtual void Start()
         {
-            Plugin.logger.Warn("Avatar is still using the legacy IKManager; please migrate to VRIKManager");
+            _logger.Warning("Avatar is still using the legacy IKManager; please migrate to VRIKManager");
 
             var vrikManager = gameObject.AddComponent<VRIKManager>();
 

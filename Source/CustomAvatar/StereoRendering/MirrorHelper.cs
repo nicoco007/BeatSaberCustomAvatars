@@ -1,12 +1,22 @@
 ﻿using UnityEngine;
+using Zenject;
 
 namespace CustomAvatar.StereoRendering
 {
-    internal static class MirrorHelper
+    internal class MirrorHelper
     {
         private static readonly int kCutout = Shader.PropertyToID("_Cutout");
 
-        public static void CreateMirror(Vector3 position, Quaternion rotation, Vector2 size, Transform container, Vector3? origin = null)
+        private DiContainer _container;
+        private ShaderLoader _shaderLoader;
+
+        public MirrorHelper(DiContainer container, ShaderLoader shaderLoader)
+        {
+            _container = container;
+            _shaderLoader = shaderLoader;
+        }
+
+        public void CreateMirror(Vector3 position, Quaternion rotation, Vector2 size, Transform container, Vector3? origin = null)
         {
             Vector3 scale = new Vector3(size.x / 10, 1, size.y / 10); // plane is 10 units in size at scale 1, width is x and height is z
 
@@ -17,7 +27,7 @@ namespace CustomAvatar.StereoRendering
             mirrorPlane.transform.localPosition = position;
             mirrorPlane.transform.localRotation = rotation;
 
-            Material material = new Material(ShaderLoader.stereoMirrorShader);
+            Material material = new Material(_shaderLoader.stereoMirrorShader);
             material.SetFloat(kCutout, 0.01f);
             
             Renderer renderer = mirrorPlane.GetComponent<Renderer>();
@@ -36,7 +46,7 @@ namespace CustomAvatar.StereoRendering
             stereoCameraEye.clearFlags = CameraClearFlags.SolidColor;
             stereoCameraEye.backgroundColor = new Color(0, 0, 0, 1f);
 
-            StereoRenderer stereoRenderer = mirrorPlane.AddComponent<StereoRenderer>();
+            StereoRenderer stereoRenderer = _container.InstantiateComponent<StereoRenderer>(mirrorPlane);
             stereoRenderer.stereoCameraHead = stereoCameraHead;
             stereoRenderer.stereoCameraEye = stereoCameraEye;
             stereoRenderer.isMirror = true;

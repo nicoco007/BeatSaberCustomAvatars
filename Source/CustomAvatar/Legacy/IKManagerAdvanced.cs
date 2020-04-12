@@ -5,9 +5,12 @@ using System.Reflection;
 using CustomAvatar;
 using BeatSaberFinalIK::RootMotion;
 using BeatSaberFinalIK::RootMotion.FinalIK;
+using CustomAvatar.Logging;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
+using Zenject;
+using ILogger = CustomAvatar.Logging.ILogger;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable once CheckNamespace
@@ -243,9 +246,17 @@ namespace AvatarScriptPack
         [Tooltip("Called when the right foot has finished a step")]
         public UnityEvent Locomotion_onRightFootstep = new UnityEvent();
 
+        private ILogger _logger;
+
+        [Inject]
+        private void Inject(ILoggerFactory loggerFactory)
+        {
+            _logger = loggerFactory.CreateLogger<IKManagerAdvanced>();
+        }
+
         public override void Start()
         {
-            Plugin.logger.Warn("Avatar is using the legacy IKManagerAdvanced; please migrate to VRIKManager");
+            _logger.Warning("Avatar is using the legacy IKManagerAdvanced; please migrate to VRIKManager");
 
             VRIKManager vrikManager = gameObject.AddComponent<VRIKManager>();
 
@@ -290,7 +301,7 @@ namespace AvatarScriptPack
             }
         }
 
-        public static void SetProperty(object obj, string fieldName, object value)
+        private void SetProperty(object obj, string fieldName, object value)
         {
             if (obj == null) return;
 
@@ -300,24 +311,24 @@ namespace AvatarScriptPack
 
                 if (field == null)
                 {
-                    Plugin.logger.Warn($"{fieldName} does not exist on {obj.GetType()}");
+                    _logger.Warning($"{fieldName} does not exist on {obj.GetType()}");
                     return;
                 }
 
-                Plugin.logger.Debug($"Set {field.Name} = {value}");
+                _logger.Debug($"Set {field.Name} = {value}");
 
                 if (field.FieldType.IsEnum)
                 {
                     if (value == null)
                     {
-                        Plugin.logger.Warn("Tried to set Enum type to null");
+                        _logger.Warning("Tried to set Enum type to null");
                         return;
                     }
 
                     Type sourceType = Enum.GetUnderlyingType(value.GetType());
                     Type targetType = Enum.GetUnderlyingType(field.FieldType);
 
-                    Plugin.logger.Debug($"Converting enum value {value.GetType()} ({sourceType}) -> {field.FieldType} ({targetType})");
+                    _logger.Debug($"Converting enum value {value.GetType()} ({sourceType}) -> {field.FieldType} ({targetType})");
                     field.SetValue(obj, Convert.ChangeType(value, targetType));
                 }
                 else
@@ -327,7 +338,7 @@ namespace AvatarScriptPack
             }
             catch (Exception ex)
             {
-                Plugin.logger.Error(ex);
+                _logger.Error(ex);
             }
         }
     }

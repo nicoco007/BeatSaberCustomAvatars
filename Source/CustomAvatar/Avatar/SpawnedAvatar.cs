@@ -1,9 +1,11 @@
 using System;
+using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
 using UnityEngine;
 using Zenject;
 using Object = UnityEngine.Object;
+using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar.Avatar
 {
@@ -14,31 +16,31 @@ namespace CustomAvatar.Avatar
         public AvatarIK ik { get; }
 		public AvatarEventsPlayer eventsPlayer { get; }
 
+        private Settings _settings;
+        private ILogger _logger;
         private readonly GameObject _gameObject;
         private readonly FirstPersonExclusion[] _firstPersonExclusions;
 
         private bool _isCalibrationModeEnabled;
 
-        public SpawnedAvatar(DiContainer container, LoadedAvatar avatar, AvatarInput input)
+        public SpawnedAvatar(DiContainer container, ILoggerFactory loggerFactory, LoadedAvatar avatar, AvatarInput input, Settings settings)
         {
             this.avatar = avatar ?? throw new ArgumentNullException(nameof(avatar));
             
             if (input == null) throw new ArgumentNullException(nameof(input));
 
-            _gameObject            = Object.Instantiate(avatar.gameObject);
+            _logger = loggerFactory.CreateLogger<SpawnedAvatar>();
+            _settings = settings;
+
+            _gameObject            = container.InstantiatePrefab(avatar.gameObject);
             _firstPersonExclusions = _gameObject.GetComponentsInChildren<FirstPersonExclusion>();
 
             eventsPlayer   = container.InstantiateComponent<AvatarEventsPlayer>(_gameObject);
-            tracking       = container.InstantiateComponent<AvatarTracking>(_gameObject);
+            tracking       = container.InstantiateComponent<AvatarTracking>(_gameObject, new object[] { avatar, input });
 
-            tracking.avatar = avatar;
-            tracking.input  = input;
-            
             if (avatar.isIKAvatar)
             {
-                ik = container.InstantiateComponent<AvatarIK>(_gameObject);
-                ik.input = input;
-                ik.avatar = avatar;
+                ik = container.InstantiateComponent<AvatarIK>(_gameObject, new object[] { avatar, input });
             }
 
             if (avatar.supportsFingerTracking)
@@ -77,7 +79,7 @@ namespace CustomAvatar.Avatar
         // TODO make this class subscribe to an event rather than calling externally
         public void OnFirstPersonEnabledChanged()
         {
-	        SetChildrenToLayer(SettingsManager.settings.isAvatarVisibleInFirstPerson ? AvatarLayers.AlwaysVisible : AvatarLayers.OnlyInThirdPerson);
+	        SetChildrenToLayer(_settings.isAvatarVisibleInFirstPerson ? AvatarLayers.AlwaysVisible : AvatarLayers.OnlyInThirdPerson);
 
             foreach (FirstPersonExclusion firstPersonExclusion in _firstPersonExclusions)
             {
@@ -85,7 +87,7 @@ namespace CustomAvatar.Avatar
                 {
                     if (!gameObj) continue;
 
-                    Plugin.logger.Debug($"Excluding '{gameObj.name}' from first person view");
+                    _logger.Debug($"Excluding '{gameObj.name}' from first person view");
                     gameObj.layer = AvatarLayers.OnlyInThirdPerson;
                 }
             }

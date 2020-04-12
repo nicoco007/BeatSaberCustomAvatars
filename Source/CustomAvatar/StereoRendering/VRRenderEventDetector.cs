@@ -1,6 +1,7 @@
 //========= Copyright 2016-2017, HTC Corporation. All rights reserved. ===========
 
 using UnityEngine;
+using Zenject;
 
 namespace CustomAvatar.StereoRendering
 {
@@ -10,14 +11,28 @@ namespace CustomAvatar.StereoRendering
     {
         public Camera Camera { get; private set; }
 
+        private StereoRenderManager _manager { get; set; }
+
+        [Inject]
+        private void Inject(StereoRenderManager manager)
+        {
+            _manager = manager;
+        }
+
         public void Start()
         {
+            // check instantiated properly
+            if (_manager == null)
+            {
+                Destroy(this);
+            }
+
             Camera = GetComponent<Camera>();
         }
 
         private void OnPreRender()
         {
-            StereoRenderManager.Instance.InvokeStereoRenderers(this);
+            _manager.InvokeStereoRenderers(this);
         }
     }
 }

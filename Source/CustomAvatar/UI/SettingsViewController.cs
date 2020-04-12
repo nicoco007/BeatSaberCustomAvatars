@@ -3,6 +3,7 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components.Settings;
 using BeatSaberMarkupLanguage.ViewControllers;
 using CustomAvatar.Avatar;
+using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
 using HMUI;
@@ -10,6 +11,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
+using ILogger = CustomAvatar.Logging.ILogger;
 
 #pragma warning disable 649 // disable "field is never assigned"
 #pragma warning disable IDE0044 // disable "make field readonly"
@@ -62,25 +64,37 @@ namespace CustomAvatar.UI
 
         #endregion
 
+        private Settings _settings;
+        private ShaderLoader _shaderLoader;
+        private ILogger _logger;
+
+        [Inject]
+        private void Inject(Settings settings, ShaderLoader shaderLoader, ILoggerFactory loggerFactory)
+        {
+            _settings = settings;
+            _shaderLoader = shaderLoader;
+            _logger = loggerFactory.CreateLogger<SettingsViewController>();
+        }
+
         protected override void DidActivate(bool firstActivation, ActivationType type)
         {
             base.DidActivate(firstActivation, type);
 
-            _visibleInFirstPerson.Value = SettingsManager.settings.isAvatarVisibleInFirstPerson;
-            _resizeMode.Value = SettingsManager.settings.resizeMode;
-            _floorHeightAdjust.Value = SettingsManager.settings.enableFloorAdjust;
-            _calibrateFullBodyTrackingOnStart.Value = SettingsManager.settings.calibrateFullBodyTrackingOnStart;
-            _cameraNearClipPlane.Value = SettingsManager.settings.cameraNearClipPlane;
+            _visibleInFirstPerson.Value = _settings.isAvatarVisibleInFirstPerson;
+            _resizeMode.Value = _settings.resizeMode;
+            _floorHeightAdjust.Value = _settings.enableFloorAdjust;
+            _calibrateFullBodyTrackingOnStart.Value = _settings.calibrateFullBodyTrackingOnStart;
+            _cameraNearClipPlane.Value = _settings.cameraNearClipPlane;
 
             OnAvatarChanged(_avatarManager.currentlySpawnedAvatar);
             OnInputDevicesChanged();
 
-            _armSpanLabel.SetText($"{SettingsManager.settings.playerArmSpan:0.00} m");
+            _armSpanLabel.SetText($"{_settings.playerArmSpan:0.00} m");
 
-            _sphereMaterial = new Material(ShaderLoader.unlitShader);
-            _redMaterial = new Material(ShaderLoader.unlitShader);
-            _greenMaterial = new Material(ShaderLoader.unlitShader);
-            _blueMaterial = new Material(ShaderLoader.unlitShader);
+            _sphereMaterial = new Material(_shaderLoader.unlitShader);
+            _redMaterial = new Material(_shaderLoader.unlitShader);
+            _greenMaterial = new Material(_shaderLoader.unlitShader);
+            _blueMaterial = new Material(_shaderLoader.unlitShader);
 
             _redMaterial.SetColor(kColor, new Color(0.8f, 0, 0, 1));
             _greenMaterial.SetColor(kColor, new Color(0, 0.8f, 0, 1));
@@ -118,7 +132,7 @@ namespace CustomAvatar.UI
                 return;
             }
 
-            _currentAvatarSettings = SettingsManager.settings.GetAvatarSettings(avatar.avatar.fullPath);
+            _currentAvatarSettings = _settings.GetAvatarSettings(avatar.avatar.fullPath);
 
             _clearButton.interactable = !_currentAvatarSettings.fullBodyCalibration.isDefault;
             // TODO same here
@@ -140,21 +154,21 @@ namespace CustomAvatar.UI
         [UIAction("visible-first-person-change")]
         private void OnVisibleInFirstPersonChanged(bool value)
         {
-            SettingsManager.settings.isAvatarVisibleInFirstPerson = value;
+            _settings.isAvatarVisibleInFirstPerson = value;
             _avatarManager.currentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
         }
 
         [UIAction("resize-mode-change")]
         private void OnResizeModeChanged(AvatarResizeMode value)
         {
-            SettingsManager.settings.resizeMode = value;
+            _settings.resizeMode = value;
             _avatarManager.ResizeCurrentAvatar();
         }
 
         [UIAction("floor-adjust-change")]
         private void OnFloorHeightAdjustChanged(bool value)
         {
-            SettingsManager.settings.enableFloorAdjust = value;
+            _settings.enableFloorAdjust = value;
             _avatarManager.ResizeCurrentAvatar();
         }
 
@@ -203,7 +217,7 @@ namespace CustomAvatar.UI
         [UIAction("calibrate-fbt-on-start-change")]
         private void OnCalibrateFullBodyTrackingOnStartChanged(bool value)
         {
-            SettingsManager.settings.calibrateFullBodyTrackingOnStart = value;
+            _settings.calibrateFullBodyTrackingOnStart = value;
         }
 
         [UIAction("clear-fbt-calibration-data-click")]
@@ -230,7 +244,7 @@ namespace CustomAvatar.UI
         [UIAction("camera-clip-plane-change")]
         private void OnCameraClipPlaneChanged(float value)
         {
-            SettingsManager.settings.cameraNearClipPlane = value;
+            _settings.cameraNearClipPlane = value;
 
             // TODO logic in view controller is not ideal
             Camera mainCamera = Camera.main;
@@ -241,7 +255,7 @@ namespace CustomAvatar.UI
             }
             else
             {
-                Plugin.logger.Error("Could not find main camera!");
+                _logger.Error("Could not find main camera!");
             }
         }
 
@@ -388,10 +402,10 @@ namespace CustomAvatar.UI
             {
                 CancelInvoke(nameof(ScanArmSpan));
                 _armSpanLabel.SetText($"{_maxMeasuredArmSpan:0.00} m");
-                SettingsManager.settings.playerArmSpan = _maxMeasuredArmSpan;
+                _settings.playerArmSpan = _maxMeasuredArmSpan;
                 _isMeasuring = false;
 
-                if (SettingsManager.settings.resizeMode == AvatarResizeMode.ArmSpan)
+                if (_settings.resizeMode == AvatarResizeMode.ArmSpan)
                 {
                     _avatarManager.ResizeCurrentAvatar();
                 }

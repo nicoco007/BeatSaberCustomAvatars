@@ -4,6 +4,7 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using CustomAvatar.Utilities;
+using Zenject;
 
 namespace CustomAvatar.StereoRendering
 {
@@ -178,6 +179,9 @@ namespace CustomAvatar.StereoRendering
 
         #endregion
 
+        [Inject] private StereoRenderManager _manager;
+        [Inject] private Settings _settings;
+
         /////////////////////////////////////////////////////////////////////////////////
         // initialization
 
@@ -192,12 +196,12 @@ namespace CustomAvatar.StereoRendering
             stereoMaterial = renderer.materials[0];
 
             // get main camera and registor to StereoRenderManager
-            StereoRenderManager.Instance.AddToManager(this);
+            _manager.AddToManager(this);
         }
 
         private void OnDestroy()
         {
-            StereoRenderManager.Instance.RemoveFromManager(this);
+            _manager.RemoveFromManager(this);
         }
 
         private void CreateStereoCameraRig()
@@ -323,8 +327,8 @@ namespace CustomAvatar.StereoRendering
             var rightEyeOffset = new Vector3(ipd / 2, 0, 0);
 
             int hash = detector.GetHashCode();
-            int renderWidth = (int)(SettingsManager.settings.mirror.renderScale * detector.Camera.pixelWidth);
-            int renderHeight = (int)(SettingsManager.settings.mirror.renderScale * detector.Camera.pixelHeight);
+            int renderWidth = (int)(_settings.mirror.renderScale * detector.Camera.pixelWidth);
+            int renderHeight = (int)(_settings.mirror.renderScale * detector.Camera.pixelHeight);
 
             if (!leftEyeTextures.ContainsKey(hash))
             {

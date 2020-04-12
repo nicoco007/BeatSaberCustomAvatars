@@ -1,13 +1,24 @@
 ﻿using System.Collections;
+using CustomAvatar.Logging;
 using UnityEngine;
+using Zenject;
+using ILogger = CustomAvatar.Logging.ILogger;
 using Object = UnityEngine.Object;
 
 namespace CustomAvatar
 {
     internal class ShaderLoader : MonoBehaviour
     {
-        public static Shader stereoMirrorShader;
-        public static Shader unlitShader;
+        public Shader stereoMirrorShader;
+        public Shader unlitShader;
+
+        private ILogger _logger;
+
+        [Inject]
+        private void Inject(ILoggerFactory loggerFactory)
+        {
+            _logger = loggerFactory.CreateLogger<ShaderLoader>();
+        }
 
         private void Start()
         {
@@ -21,7 +32,7 @@ namespace CustomAvatar
 
             if (!shadersBundleCreateRequest.isDone || !shadersBundleCreateRequest.assetBundle)
             {
-                Plugin.logger.Error("Failed to load shaders");
+                _logger.Error("Failed to load shaders");
                 yield break;
             }
 
@@ -30,7 +41,7 @@ namespace CustomAvatar
 
             if (!assetBundleRequest.isDone || assetBundleRequest.allAssets.Length == 0)
             {
-                Plugin.logger.Error("Failed to load shaders");
+                _logger.Error("Failed to load shaders");
                 yield break;
             }
 
@@ -40,12 +51,12 @@ namespace CustomAvatar
                 {
                     case "BeatSaber/Unlit Glow":
                         unlitShader = asset as Shader;
-                        Plugin.logger.Info("Loaded unlit shader");
+                        _logger.Info("Loaded unlit shader");
                         break;
                     
                     case "Custom/StereoRenderShader-Unlit":
                         stereoMirrorShader = asset as Shader;
-                        Plugin.logger.Info("Loaded stereo render shader");
+                        _logger.Info("Loaded stereo render shader");
                         break;
                 }
             }

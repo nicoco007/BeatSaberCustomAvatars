@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace CustomAvatar.Tracking
 {
@@ -8,7 +9,7 @@ namespace CustomAvatar.Tracking
 
         public VRAvatarInput(TrackedDeviceManager trackedDeviceManager)
         {
-            _deviceManager = trackedDeviceManager;
+            _deviceManager = trackedDeviceManager ? trackedDeviceManager : throw new ArgumentNullException(nameof(trackedDeviceManager));
             _deviceManager.deviceAdded += (device, use) => InvokeInputChanged();
             _deviceManager.deviceRemoved += (device, use) => InvokeInputChanged();
             _deviceManager.deviceTrackingAcquired += (device, use) => InvokeInputChanged();

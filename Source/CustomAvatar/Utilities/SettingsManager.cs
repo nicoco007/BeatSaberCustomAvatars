@@ -1,27 +1,32 @@
 ﻿using System;
 using System.IO;
+using CustomAvatar.Logging;
 using Newtonsoft.Json;
 
 namespace CustomAvatar.Utilities
 {
     internal class SettingsManager
     {
-        public static readonly string kSettingsPath = Path.Combine(Environment.CurrentDirectory, "UserData", "CustomAvatars.json");
+        public readonly string kSettingsPath = Path.Combine(Environment.CurrentDirectory, "UserData", "CustomAvatars.json");
 
-        public static Settings settings { get; private set; }
+        private bool _hasReset;
 
-        private static bool _hasReset;
+        private ILogger _logger;
 
-        public static void Load()
+        private SettingsManager(ILoggerFactory loggerFactory)
         {
-            Plugin.logger.Info("Loading settings from " + kSettingsPath);
+            _logger = loggerFactory.CreateLogger<SettingsManager>();
+        }
+
+        public Settings Load()
+        {
+            _logger.Info("Loading settings from " + kSettingsPath);
 
             if (!File.Exists(kSettingsPath))
             {
-                Plugin.logger.Info("File does not exist, using default settings");
+                _logger.Info("File does not exist, using default settings");
 
-                settings = new Settings();
-                return;
+                return new Settings();
             }
 
             try
@@ -30,24 +35,24 @@ namespace CustomAvatar.Utilities
                 using (var jsonReader = new JsonTextReader(reader))
                 {
                     var serializer = GetSerializer();
-                    settings = serializer.Deserialize<Settings>(jsonReader) ?? new Settings();
+                    return serializer.Deserialize<Settings>(jsonReader) ?? new Settings();
                 }
             }
             catch (Exception ex)
             {
-                Plugin.logger.Error("Failed to load settings from file; using default settings");
-                Plugin.logger.Error(ex);
+                _logger.Error("Failed to load settings from file; using default settings");
+                _logger.Error(ex);
 
                 _hasReset = true;
-                settings = new Settings();
+                return new Settings();
             }
         }
 
-        public static void Save()
+        public void Save(Settings settings)
         {
             if (_hasReset) return;
 
-            Plugin.logger.Info("Saving settings to " + kSettingsPath);
+            _logger.Info("Saving settings to " + kSettingsPath);
 
             using (var writer = new StreamWriter(kSettingsPath))
             using (var jsonWriter = new JsonTextWriter(writer))
@@ -58,7 +63,7 @@ namespace CustomAvatar.Utilities
             }
         }
 
-        private static JsonSerializer GetSerializer()
+        private JsonSerializer GetSerializer()
         {
             return new JsonSerializer
             {

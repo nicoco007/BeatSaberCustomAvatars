@@ -4,17 +4,17 @@ extern alias BeatSaberDynamicBone;
 using System;
 using System.Collections.Generic;
 using BeatSaberFinalIK::RootMotion.FinalIK;
+using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
 using UnityEngine;
+using Zenject;
+using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar.Avatar
 {
     internal class AvatarIK : BodyAwareBehaviour
     {
-        public AvatarInput input;
-        public LoadedAvatar avatar;
-
         private VRIK _vrik;
         private VRIKManager _vrikManager;
         private Settings.AvatarSpecificSettings _avatarSettings;
@@ -27,6 +27,11 @@ namespace CustomAvatar.Avatar
 
         private Action<BeatSaberDynamicBone::DynamicBone> _preUpdateDelegate;
         private Action<BeatSaberDynamicBone::DynamicBone, float> _updateDynamicBonesDelegate;
+        
+        private AvatarInput _input;
+        private LoadedAvatar _avatar;
+        private Settings _settings;
+        private ILogger _logger;
         
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
@@ -48,23 +53,32 @@ namespace CustomAvatar.Avatar
             }
         }
 
+        [Inject]
+        private void Inject(AvatarInput input, LoadedAvatar avatar, Settings settings, ILoggerFactory loggerFactory)
+        {
+            _input = input;
+            _avatar = avatar;
+            _settings = settings;
+            _logger = loggerFactory.CreateLogger<AvatarIK>(_avatar.descriptor.name);
+        }
+
         protected override void Start()
         {
-            if (input == null)
+            if (_input == null)
             {
                 Destroy(this);
-                throw new ArgumentNullException(nameof(input));
+                throw new ArgumentNullException(nameof(_input));
             }
 
-            if (avatar == null)
+            if (_avatar == null)
             {
                 Destroy(this);
-                throw new ArgumentNullException(nameof(avatar));
+                throw new ArgumentNullException(nameof(_avatar));
             }
 
             base.Start();
 
-            _avatarSettings = SettingsManager.settings.GetAvatarSettings(avatar.fullPath);
+            _avatarSettings = _settings.GetAvatarSettings(_avatar.fullPath);
 
             if (_avatarSettings == null)
             {
@@ -89,7 +103,7 @@ namespace CustomAvatar.Avatar
                 twistRelaxer.enabled = true;
             }
             
-            input.inputChanged += OnInputChanged;
+            _input.inputChanged += OnInputChanged;
         }
 
         private void Update()
@@ -133,7 +147,7 @@ namespace CustomAvatar.Avatar
 
         private void OnDestroy()
         {
-            input.inputChanged -= OnInputChanged;
+            _input.inputChanged -= OnInputChanged;
         }
 
         // ReSharper restore UnusedMember.Local
@@ -152,7 +166,7 @@ namespace CustomAvatar.Avatar
 
         private void OnInputChanged()
         {
-            Plugin.logger.Info("Tracking device change detected, updating VRIK references");
+            _logger.Info("Tracking device change detected, updating VRIK references");
             UpdateSolverTargets();
         }
 
@@ -182,14 +196,14 @@ namespace CustomAvatar.Avatar
             newTarget.position = reference.position;
             newTarget.rotation = reference.rotation;
 
-            Plugin.logger.Info($"Created IK target for '{parent.name}'");
+            _logger.Info($"Created IK target for '{parent.name}'");
 
             return newTarget;
         }
 
         private void UpdateSolverTargets(bool forceEnableAll = false)
         {
-            Plugin.logger.Info("Updating solver targets");
+            _logger.Info("Updating solver targets");
 
             _vrik.solver.spine.headTarget  = _vrikManager.solver_spine_headTarget;
             _vrik.solver.leftArm.target    = _vrikManager.solver_leftArm_target;
@@ -197,45 +211,45 @@ namespace CustomAvatar.Avatar
 
             if (_vrikManager.solver_spine_maintainPelvisPosition > 0 && !_avatarSettings.allowMaintainPelvisPosition)
             {
-                Plugin.logger.Warn("maintainPelvisPosition > 0 is not recommended because it can cause strange pelvis rotation issues. To allow maintainPelvisPosition > 0, please set allowMaintainPelvisPosition to true for your avatar in the configuration file.");
+                _logger.Warning("maintainPelvisPosition > 0 is not recommended because it can cause strange pelvis rotation issues. To allow maintainPelvisPosition > 0, please set allowMaintainPelvisPosition to true for your avatar in the configuration file.");
                 _vrik.solver.spine.maintainPelvisPosition = 0;
             }
 
-            Plugin.logger.Info("Updating conditional solver targets");
+            _logger.Info("Updating conditional solver targets");
 
-            if (input.TryGetLeftFootPose(out _) || forceEnableAll)
+            if (_input.TryGetLeftFootPose(out _) || forceEnableAll)
             {
-                Plugin.logger.Debug("Left foot enabled");
+                _logger.Debug("Left foot enabled");
                 _vrik.solver.leftLeg.target = _vrikManager.solver_leftLeg_target;
                 _vrik.solver.leftLeg.positionWeight = _vrikManager.solver_leftLeg_positionWeight;
                 _vrik.solver.leftLeg.rotationWeight = _vrikManager.solver_leftLeg_rotationWeight;
             }
             else
             {
-                Plugin.logger.Debug("Left foot disabled");
+                _logger.Debug("Left foot disabled");
                 _vrik.solver.leftLeg.target = null;
                 _vrik.solver.leftLeg.positionWeight = 0;
                 _vrik.solver.leftLeg.rotationWeight = 0;
             }
 
-            if (input.TryGetRightFootPose(out _) || forceEnableAll)
+            if (_input.TryGetRightFootPose(out _) || forceEnableAll)
             {
-                Plugin.logger.Debug("Right foot enabled");
+                _logger.Debug("Right foot enabled");
                 _vrik.solver.rightLeg.target = _vrikManager.solver_rightLeg_target;
                 _vrik.solver.rightLeg.positionWeight = _vrikManager.solver_rightLeg_positionWeight;
                 _vrik.solver.rightLeg.rotationWeight = _vrikManager.solver_rightLeg_rotationWeight;
             }
             else
             {
-                Plugin.logger.Debug("Right foot disabled");
+                _logger.Debug("Right foot disabled");
                 _vrik.solver.rightLeg.target = null;
                 _vrik.solver.rightLeg.positionWeight = 0;
                 _vrik.solver.rightLeg.rotationWeight = 0;
             }
 
-            if (input.TryGetWaistPose(out _) || forceEnableAll)
+            if (_input.TryGetWaistPose(out _) || forceEnableAll)
             {
-                Plugin.logger.Debug("Pelvis enabled");
+                _logger.Debug("Pelvis enabled");
                 _vrik.solver.spine.pelvisTarget = _vrikManager.solver_spine_pelvisTarget;
                 _vrik.solver.spine.pelvisPositionWeight = _vrikManager.solver_spine_pelvisPositionWeight;
                 _vrik.solver.spine.pelvisRotationWeight = _vrikManager.solver_spine_pelvisRotationWeight;
@@ -243,7 +257,7 @@ namespace CustomAvatar.Avatar
             }
             else
             {
-                Plugin.logger.Debug("Pelvis disabled");
+                _logger.Debug("Pelvis disabled");
                 _vrik.solver.spine.pelvisTarget = null;
                 _vrik.solver.spine.pelvisPositionWeight = 0;
                 _vrik.solver.spine.pelvisRotationWeight = 0;

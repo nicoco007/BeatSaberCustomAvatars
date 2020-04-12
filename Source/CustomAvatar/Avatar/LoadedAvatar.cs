@@ -4,7 +4,9 @@ using System.IO;
 using System.Reflection;
 using AvatarScriptPack;
 using CustomAvatar.Exceptions;
+using CustomAvatar.Logging;
 using UnityEngine;
+using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar.Avatar
 {
@@ -19,6 +21,8 @@ namespace CustomAvatar.Avatar
         public float armSpan { get; }
         public bool supportsFingerTracking { get; }
         public bool isIKAvatar { get; }
+
+        //private ILogger _logger;
 
         private LoadedAvatar(string fullPath, GameObject avatarGameObject)
         {
@@ -35,6 +39,8 @@ namespace CustomAvatar.Avatar
 
             isIKAvatar = ikManager || vrikManager;
 
+            //_logger = loggerFactory.CreateLogger<LoadedAvatar>(descriptor.name);
+
             if (vrik && !vrik.references.isFilled) vrik.AutoDetectReferences();
             if (vrikManager && !vrikManager.areReferencesFilled) vrikManager.AutoDetectReferences();
 
@@ -48,7 +54,7 @@ namespace CustomAvatar.Avatar
         {
             if (string.IsNullOrEmpty(fileName)) throw new ArgumentNullException(nameof(fileName));
 
-            Plugin.logger.Info($"Loading avatar from '{fileName}'");
+            //_logger.Info($"Loading avatar from '{fileName}'");
 
             AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(Path.Combine(AvatarManager.kCustomAvatarsPath, fileName));
             yield return assetBundleCreateRequest;
@@ -57,8 +63,8 @@ namespace CustomAvatar.Avatar
             {
                 var exception = new AvatarLoadException("Avatar game object not found");
 
-                Plugin.logger.Error($"Failed to load avatar from '{fileName}'");
-                Plugin.logger.Error(exception);
+                //_logger.Error($"Failed to load avatar from '{fileName}'");
+                //_logger.Error(exception);
 
                 error?.Invoke(exception);
                 yield break;
@@ -72,8 +78,8 @@ namespace CustomAvatar.Avatar
             {
                 var exception = new AvatarLoadException("Could not load asset bundle");
 
-                Plugin.logger.Error($"Failed to load avatar from '{fileName}'");
-                Plugin.logger.Error(exception);
+                //_logger.Error($"Failed to load avatar from '{fileName}'");
+                //_logger.Error(exception);
 
                 error?.Invoke(exception);
                 yield break;
@@ -83,14 +89,14 @@ namespace CustomAvatar.Avatar
             {
                 var loadedAvatar = new LoadedAvatar(fileName, assetBundleRequest.asset as GameObject);
 
-                Plugin.logger.Info($"Successfully loaded avatar '{loadedAvatar.descriptor.name}' from '{fileName}'");
+                //_logger.Info($"Successfully loaded avatar '{loadedAvatar.descriptor.name}' from '{fileName}'");
 
                 success?.Invoke(loadedAvatar);
             }
             catch (Exception ex)
             {
-                Plugin.logger.Error($"Failed to load avatar from '{fileName}'");
-                Plugin.logger.Error(ex);
+                //_logger.Error($"Failed to load avatar from '{fileName}'");
+                //_logger.Error(ex);
 
                 error?.Invoke(ex);
             }
@@ -116,19 +122,19 @@ namespace CustomAvatar.Avatar
             if (headOffset.magnitude > 0.001f)
             {
                 // manually putting each coordinate gives more resolution
-                Plugin.logger.Warn($"Head bone and target are not at the same position; offset: ({headOffset.x}, {headOffset.y}, {headOffset.z})");
+                //_logger.Warn($"Head bone and target are not at the same position; offset: ({headOffset.x}, {headOffset.y}, {headOffset.z})");
                 gameObject.transform.Find("Head").position -= headOffset;
             }
 
             if (leftHandOffset.magnitude > 0.001f)
             {
-                Plugin.logger.Warn($"Left hand bone and target are not at the same position; offset: ({leftHandOffset.x}, {leftHandOffset.y}, {leftHandOffset.z})");
+                //_logger.Warn($"Left hand bone and target are not at the same position; offset: ({leftHandOffset.x}, {leftHandOffset.y}, {leftHandOffset.z})");
                 gameObject.transform.Find("LeftHand").position -= headOffset;
             }
 
             if (rightHandOffset.magnitude > 0.001f)
             {
-                Plugin.logger.Warn($"Right hand bone and target are not at the same position; offset: ({rightHandOffset.x}, {rightHandOffset.y}, {rightHandOffset.z})");
+                //_logger.Warn($"Right hand bone and target are not at the same position; offset: ({rightHandOffset.x}, {rightHandOffset.y}, {rightHandOffset.z})");
                 gameObject.transform.Find("RightHand").position -= headOffset;
             }
         }
@@ -168,7 +174,7 @@ namespace CustomAvatar.Avatar
 
             if (!reference)
             {
-                Plugin.logger.Warn($"Could not find '{referenceName}' reference");
+                //_logger.Warn($"Could not find '{referenceName}' reference");
                 return Vector3.zero;
             }
 
@@ -219,13 +225,13 @@ namespace CustomAvatar.Avatar
 
             if (!leftShoulder || !leftUpperArm || !leftLowerArm || !rightShoulder || !rightUpperArm || !rightLowerArm)
             {
-                Plugin.logger.Warn("Could not calculate avatar arm span due to missing bones");
+                //_logger.Warn("Could not calculate avatar arm span due to missing bones");
                 return AvatarTailor.kDefaultPlayerArmSpan;
             }
 
             if (!leftHand || !rightHand)
             {
-                Plugin.logger.Warn("Could not calculate avatar arm span due to missing tracking references");
+                //_logger.Warn("Could not calculate avatar arm span due to missing tracking references");
                 return AvatarTailor.kDefaultPlayerArmSpan;
             }
 

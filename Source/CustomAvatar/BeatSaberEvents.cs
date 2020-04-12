@@ -23,14 +23,14 @@ namespace CustomAvatar
             }
             catch (Exception ex)
             {
-                Plugin.logger.Error("Failed to patch " + nameof(PlayerSpecificSettings.playerHeight));
-                Plugin.logger.Error(ex);
+                //Plugin.logger.Error("Failed to patch " + nameof(PlayerSpecificSettings.playerHeight));
+                //Plugin.logger.Error(ex);
             }
         }
 
         private static void OnPlayerHeightChanged(float value)
         {
-            Plugin.logger.Info($"Player height set to {value} m");
+            //Plugin.logger.Info($"Player height set to {value} m");
             onPlayerHeightChanged?.Invoke(value);
         }
     }
