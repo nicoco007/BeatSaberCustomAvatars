@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using Newtonsoft.Json;
@@ -27,7 +28,7 @@ namespace CustomAvatar.Utilities
         public Lighting lighting { get; private set; } = new Lighting();
         public Mirror mirror { get; private set; } = new Mirror();
         public FullBodyMotionSmoothing fullBodyMotionSmoothing { get; private set; } = new FullBodyMotionSmoothing();
-        [JsonProperty] private Dictionary<string, AvatarSpecificSettings> avatarSpecificSettings = new Dictionary<string, AvatarSpecificSettings>();
+        [JsonProperty(Order = int.MaxValue)] private Dictionary<string, AvatarSpecificSettings> avatarSpecificSettings = new Dictionary<string, AvatarSpecificSettings>();
 
         public class Lighting
         {
