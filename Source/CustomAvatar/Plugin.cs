@@ -3,6 +3,7 @@ using IPA;
 using System;
 using System.Linq;
 using BeatSaberMarkupLanguage.MenuButtons;
+using CustomAvatar.Lighting;
 using CustomAvatar.UI;
 using CustomAvatar.Utilities;
 using UnityEngine;
@@ -76,6 +77,7 @@ namespace CustomAvatar
 
             if (newScene.name == "PCInit")
             {
+                SetUpLighting();
                 AvatarManager.instance.LoadAvatarFromSettingsAsync();
             }
 
@@ -131,6 +133,24 @@ namespace CustomAvatar
             logger.Debug("Adding third person culling mask to " + camera.name);
 
             camera.cullingMask &= ~(1 << AvatarLayers.OnlyInThirdPerson);
+        }
+
+        private void SetUpLighting()
+        {
+            if (SettingsManager.settings.lighting.enabled)
+            {
+                var lighting = new LightingRig();
+
+                lighting.AddLight(Quaternion.Euler(135, 0, 0));
+                lighting.AddLight(Quaternion.Euler(45, 0, 0));
+
+                if (SettingsManager.settings.lighting.castShadows)
+                {
+                    QualitySettings.shadows = ShadowQuality.All;
+                    QualitySettings.shadowResolution = SettingsManager.settings.lighting.shadowResolution;
+                    QualitySettings.shadowDistance = 10;
+                }
+            }
         }
     }
 }

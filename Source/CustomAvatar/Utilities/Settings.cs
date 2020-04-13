@@ -23,10 +23,18 @@ namespace CustomAvatar.Utilities
         public float playerArmSpan = AvatarTailor.kDefaultPlayerArmSpan;
         public bool calibrateFullBodyTrackingOnStart = false;
         public float cameraNearClipPlane = 0.1f;
+        public Lighting lighting { get; private set; } = new Lighting();
         public Mirror mirror { get; private set; } = new Mirror();
         public FullBodyMotionSmoothing fullBodyMotionSmoothing { get; private set; } = new FullBodyMotionSmoothing();
         [JsonProperty] private Dictionary<string, AvatarSpecificSettings> avatarSpecificSettings = new Dictionary<string, AvatarSpecificSettings>();
-        
+
+        public class Lighting
+        {
+            public bool enabled = true;
+            public bool castShadows = false;
+            [JsonConverter(typeof(StringEnumConverter))] public ShadowResolution shadowResolution = ShadowResolution.Medium;
+        }
+
         public class Mirror
         {
             public Vector3 positionOffset = new Vector3(0, -1f, 0);
