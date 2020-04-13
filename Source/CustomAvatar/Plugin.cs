@@ -141,8 +141,10 @@ namespace CustomAvatar
             {
                 var lighting = new LightingRig();
 
-                lighting.AddLight(Quaternion.Euler(135, 0, 0));
-                lighting.AddLight(Quaternion.Euler(45, 0, 0));
+                foreach (Settings.LightDefinition lightDefinition in SettingsManager.settings.lighting.lights)
+                {
+                    lighting.AddLight(lightDefinition);
+                }
 
                 if (SettingsManager.settings.lighting.castShadows)
                 {

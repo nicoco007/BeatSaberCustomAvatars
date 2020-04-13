@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 
-namespace CustomAvatar.Utilities
+namespace CustomAvatar.Utilities.Converters
 {
     internal class PoseJsonConverter : JsonConverter<Pose>
     {
@@ -23,7 +23,7 @@ namespace CustomAvatar.Utilities
         {
             JObject obj = serializer.Deserialize<JObject>(reader);
 
-            if (obj == null) return Pose.identity;
+            if (obj == null) return existingValue;
 
             return new Pose(
                 obj.GetValue("position")?.ToObject<Vector3>(serializer) ?? default,

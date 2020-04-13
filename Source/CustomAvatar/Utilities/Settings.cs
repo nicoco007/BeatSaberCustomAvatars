@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.ComponentModel;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using UnityEngine;
@@ -33,6 +34,22 @@ namespace CustomAvatar.Utilities
             public bool enabled = true;
             public bool castShadows = false;
             [JsonConverter(typeof(StringEnumConverter))] public ShadowResolution shadowResolution = ShadowResolution.Medium;
+
+            [JsonProperty(ObjectCreationHandling = ObjectCreationHandling.Reuse)]
+            public readonly LightDefinition[] lights =
+            {
+                new LightDefinition { type = LightType.Directional, rotation = new Vector3(135, 0, 0) },
+                new LightDefinition { type = LightType.Directional, rotation = new Vector3(45, 0, 0) }
+            };
+        }
+
+        public class LightDefinition
+        {
+            [JsonConverter(typeof(StringEnumConverter))] public LightType type = LightType.Directional;
+            public Vector3 position = Vector3.zero;
+            public Vector3 rotation = Vector3.zero;
+            public Color color = Color.white;
+            public float intensity = 1;
         }
 
         public class Mirror

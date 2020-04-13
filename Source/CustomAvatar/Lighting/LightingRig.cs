@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using CustomAvatar.Utilities;
 using UnityEngine;
 
 namespace CustomAvatar.Lighting
 {
-    public class LightingRig
+    internal class LightingRig
     {
         private readonly GameObject _root = new GameObject(nameof(LightingRig));
 
@@ -12,17 +12,19 @@ namespace CustomAvatar.Lighting
             if (parent) _root.transform.SetParent(parent);
         }
 
-        public void AddLight(Quaternion rotation)
+        internal void AddLight(Settings.LightDefinition definition)
         {
             var container = new GameObject();
             var light = container.AddComponent<Light>();
 
-            light.type = LightType.Directional;
-            light.color = Color.white;
+            light.type = definition.type;
+            light.color = definition.color;
             light.shadows = LightShadows.Soft;
+            light.renderMode = LightRenderMode.ForcePixel;
+            light.intensity = definition.intensity;
 
-            container.transform.position = Vector3.zero;
-            container.transform.rotation = rotation;
+            container.transform.position = definition.position;
+            container.transform.rotation = Quaternion.Euler(definition.rotation);
             container.transform.SetParent(_root.transform, false);
         }
     }
