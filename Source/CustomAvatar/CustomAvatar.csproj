@@ -150,6 +150,7 @@
     <Compile Include="KeyboardInputHandler.cs" />
     <Compile Include="Logging\ILoggerFactory.cs" />
     <Compile Include="Logging\IPALoggerFactory.cs" />
+    <Compile Include="Lighting\LightingRig.cs" />
     <Compile Include="ShaderLoader.cs" />
     <Compile Include="UIInstaller.cs" />
     <Compile Include="UI\AvatarListItem.cs" />
@@ -174,16 +175,17 @@
     <Compile Include="Tracking\OpenVRWrapper.cs" />
     <Compile Include="PoseManager.cs" />
     <Compile Include="EventManager.cs" />
-    <Compile Include="Utilities\FloatJsonConverter.cs" />
+    <Compile Include="Utilities\Converters\FloatJsonConverter.cs" />
+    <Compile Include="Utilities\Converters\PoseJsonConverter.cs" />
+    <Compile Include="Utilities\Converters\QuaternionJsonConverter.cs" />
     <Compile Include="Logging\ILogger.cs" />
     <Compile Include="Logging\IPALogger.cs" />
-    <Compile Include="Utilities\PoseJsonConverter.cs" />
-    <Compile Include="Utilities\QuaternionJsonConverter.cs" />
     <Compile Include="Utilities\ReflectionExtensions.cs" />
     <Compile Include="Utilities\SettingsManager.cs" />
+    <Compile Include="Utilities\Converters\Vector2JsonConverter.cs" />
+    <Compile Include="Utilities\Converters\ColorJsonConverter.cs" />
+    <Compile Include="Utilities\Converters\Vector3JsonConverter.cs" />
     <Compile Include="Logging\UnityDebugLogger.cs" />
-    <Compile Include="Utilities\Vector2JsonConverter.cs" />
-    <Compile Include="Utilities\Vector3JsonConverter.cs" />
     <Compile Include="VRIKManager.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -220,7 +222,6 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\ban.png" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <AutomatedBuild>false</AutomatedBuild>

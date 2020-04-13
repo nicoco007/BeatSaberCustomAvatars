@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using UnityEngine;
@@ -23,10 +25,36 @@ namespace CustomAvatar.Utilities
         public float playerArmSpan = AvatarTailor.kDefaultPlayerArmSpan;
         public bool calibrateFullBodyTrackingOnStart = false;
         public float cameraNearClipPlane = 0.1f;
+        public Lighting lighting { get; private set; } = new Lighting();
         public Mirror mirror { get; private set; } = new Mirror();
         public FullBodyMotionSmoothing fullBodyMotionSmoothing { get; private set; } = new FullBodyMotionSmoothing();
-        [JsonProperty] private Dictionary<string, AvatarSpecificSettings> avatarSpecificSettings = new Dictionary<string, AvatarSpecificSettings>();
-        
+        [JsonProperty(Order = int.MaxValue)] private Dictionary<string, AvatarSpecificSettings> avatarSpecificSettings = new Dictionary<string, AvatarSpecificSettings>();
+
+        public class Lighting
+        {
+            public bool enabled = true;
+            public bool castShadows = false;
+            [JsonConverter(typeof(StringEnumConverter))] public ShadowResolution shadowResolution = ShadowResolution.Medium;
+
+            [JsonProperty(ObjectCreationHandling = ObjectCreationHandling.Reuse)]
+            public readonly LightDefinition[] lights =
+            {
+                new LightDefinition { type = LightType.Directional, rotation = new Vector3(135, 0, 0) },
+                new LightDefinition { type = LightType.Directional, rotation = new Vector3(45, 0, 0) }
+            };
+        }
+
+        public class LightDefinition
+        {
+            [JsonConverter(typeof(StringEnumConverter))] public LightType type = LightType.Directional;
+            public Vector3 position = Vector3.zero;
+            public Vector3 rotation = Vector3.zero;
+            public Color color = Color.white;
+            public float intensity = 1;
+            public float spotAngle = 30;
+            public float range = 10;
+        }
+
         public class Mirror
         {
             public Vector3 positionOffset = new Vector3(0, -1f, 0);

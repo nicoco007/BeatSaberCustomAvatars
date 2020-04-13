@@ -2,6 +2,7 @@
 using System.IO;
 using CustomAvatar.Logging;
 using Newtonsoft.Json;
+using CustomAvatar.Utilities.Converters;
 
 namespace CustomAvatar.Utilities
 {
@@ -69,7 +70,7 @@ namespace CustomAvatar.Utilities
             {
                 Formatting = Formatting.Indented,
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                Converters = { new Vector2JsonConverter(), new Vector3JsonConverter(), new QuaternionJsonConverter(), new PoseJsonConverter(), new FloatJsonConverter() }
+                Converters = { new Vector2JsonConverter(), new Vector3JsonConverter(), new QuaternionJsonConverter(), new PoseJsonConverter(), new FloatJsonConverter(), new ColorJsonConverter() }
             };
         }
     }

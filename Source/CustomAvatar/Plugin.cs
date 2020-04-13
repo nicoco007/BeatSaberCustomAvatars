@@ -2,6 +2,7 @@ using CustomAvatar.StereoRendering;
 using IPA;
 using System;
 using BeatSaberMarkupLanguage.MenuButtons;
+using CustomAvatar.Lighting;
 using CustomAvatar.UI;
 using CustomAvatar.Utilities;
 using UnityEngine;
@@ -95,6 +96,8 @@ namespace CustomAvatar
 
                 KeyboardInputHandler keyboardInputHandler = _sceneContext.Container.InstantiateComponentOnNewGameObject<KeyboardInputHandler>();
                 Object.DontDestroyOnLoad(keyboardInputHandler.gameObject);
+
+                SetUpLighting();
             }
 
             if (newScene.name == "MenuCore")
@@ -149,6 +152,26 @@ namespace CustomAvatar
             _logger.Debug("Adding third person culling mask to " + camera.name);
 
             camera.cullingMask &= ~(1 << AvatarLayers.OnlyInThirdPerson);
+        }
+
+        private void SetUpLighting()
+        {
+            if (SettingsManager.settings.lighting.enabled)
+            {
+                var lighting = new LightingRig();
+
+                foreach (Settings.LightDefinition lightDefinition in SettingsManager.settings.lighting.lights)
+                {
+                    lighting.AddLight(lightDefinition);
+                }
+
+                if (SettingsManager.settings.lighting.castShadows)
+                {
+                    QualitySettings.shadows = ShadowQuality.All;
+                    QualitySettings.shadowResolution = SettingsManager.settings.lighting.shadowResolution;
+                    QualitySettings.shadowDistance = 10;
+                }
+            }
         }
     }
 }
