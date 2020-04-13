@@ -22,6 +22,8 @@ namespace CustomAvatar.Lighting
             light.shadows = LightShadows.Soft;
             light.renderMode = LightRenderMode.ForcePixel;
             light.intensity = definition.intensity;
+            light.spotAngle = definition.spotAngle;
+            light.range = definition.range;
 
             container.transform.position = definition.position;
             container.transform.rotation = Quaternion.Euler(definition.rotation);

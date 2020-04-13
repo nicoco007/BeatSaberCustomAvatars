@@ -50,6 +50,8 @@ namespace CustomAvatar.Utilities
             public Vector3 rotation = Vector3.zero;
             public Color color = Color.white;
             public float intensity = 1;
+            public float spotAngle = 30;
+            public float range = 10;
         }
 
         public class Mirror
