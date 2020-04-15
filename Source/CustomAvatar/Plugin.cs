@@ -156,19 +156,19 @@ namespace CustomAvatar
 
         private void SetUpLighting()
         {
-            if (SettingsManager.settings.lighting.enabled)
+            if (_settings.lighting.enabled)
             {
                 var lighting = new LightingRig();
 
-                foreach (Settings.LightDefinition lightDefinition in SettingsManager.settings.lighting.lights)
+                foreach (Settings.LightDefinition lightDefinition in _settings.lighting.lights)
                 {
                     lighting.AddLight(lightDefinition);
                 }
 
-                if (SettingsManager.settings.lighting.castShadows)
+                if (_settings.lighting.castShadows)
                 {
                     QualitySettings.shadows = ShadowQuality.All;
-                    QualitySettings.shadowResolution = SettingsManager.settings.lighting.shadowResolution;
+                    QualitySettings.shadowResolution = _settings.lighting.shadowResolution;
                     QualitySettings.shadowDistance = 10;
                 }
             }

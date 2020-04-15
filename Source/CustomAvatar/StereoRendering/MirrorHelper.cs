@@ -28,7 +28,7 @@ namespace CustomAvatar.StereoRendering
             mirrorPlane.transform.localRotation = rotation;
 
             Material material = new Material(_shaderLoader.stereoMirrorShader);
-            material.SetFloat(kCutout, 0.01f);
+            material.SetFloat(kCutout, 0.999f);
             
             Renderer renderer = mirrorPlane.GetComponent<Renderer>();
             renderer.sharedMaterial = material;
