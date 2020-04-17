@@ -1,6 +1,7 @@
 using CustomAvatar.StereoRendering;
 using IPA;
 using System;
+using System.Reflection;
 using BeatSaberMarkupLanguage.MenuButtons;
 using CustomAvatar.Lighting;
 using CustomAvatar.UI;
@@ -12,6 +13,7 @@ using Logger = IPA.Logging.Logger;
 using Object = UnityEngine.Object;
 using BeatSaberMarkupLanguage;
 using CustomAvatar.Logging;
+using HarmonyLib;
 using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar
@@ -28,13 +30,15 @@ namespace CustomAvatar
 
         private SceneContext _sceneContext;
         private GameObject _mirrorContainer;
+        private LightingRig _lightingRig;
+        private KeyboardInputHandler _keyboardInputHandler;
         
         public event Action<ScenesTransitionSetupDataSO, DiContainer> sceneTransitionDidFinish;
 
         public static Plugin instance { get; private set; }
 
         private ILogger _logger;
-        private Logger _ipaLogger;
+        private static Logger _ipaLogger;
 
         [Init]
         public Plugin(Logger logger)
@@ -46,13 +50,33 @@ namespace CustomAvatar
             _logger = new IPALogger<Plugin>(logger);
             
             BeatSaberEvents.ApplyPatches();
+
+            PatchAppCoreInstallerInstallBindings();
+        }
+
+        private void PatchAppCoreInstallerInstallBindings()
+        {
+            Harmony harmony = new Harmony("com.nicoco007.beatsabercustomavatars");
+
+            var methodToPatch = typeof(AppCoreInstaller).GetMethod("InstallBindings", BindingFlags.Public | BindingFlags.Instance);
+            var patch = new HarmonyMethod(GetType().GetMethod(nameof(InstallBindings), BindingFlags.Static | BindingFlags.NonPublic));
+
+            harmony.Patch(methodToPatch, null, patch);
+        }
+
+        private static void InstallBindings(AppCoreInstaller __instance)
+        {
+            DiContainer container = new Traverse(__instance).Property<DiContainer>("Container").Value;
+
+            container.Install<CustomAvatarsInstaller>(new object[] { _ipaLogger });
+            container.Install<UIInstaller>();
         }
 
         [OnStart]
         public void OnStart()
         {
-            SceneManager.activeSceneChanged += OnActiveSceneChanged;
             SceneManager.sceneLoaded += OnSceneLoaded;
+            SceneManager.sceneUnloaded += OnSceneUnloaded;
         }
 
         [OnExit]
@@ -65,39 +89,25 @@ namespace CustomAvatar
             }
 
             SceneManager.sceneLoaded -= OnSceneLoaded;
-
-            _settingsManager.Save(_settings);
+            SceneManager.sceneUnloaded -= OnSceneUnloaded;
         }
 
-        private void OnActiveSceneChanged(Scene previousScene, Scene newScene)
+        private void OnSceneLoaded(Scene newScene, LoadSceneMode mode)
         {
             if (newScene.name == "PCInit")
             {
                 // Beat Saber has one instance of SceneContext in the PCInit scene
                 _sceneContext = Object.FindObjectOfType<SceneContext>();
 
-                // OnActiveSceneChanged runs before OnSceneLoaded for PCInit so bind new stuff here
-                _sceneContext.Container.Install<CustomAvatarsInstaller>(new object[] { _ipaLogger });
-                _sceneContext.Container.Install<UIInstaller>();
-            }
-        }
-
-        public void OnSceneLoaded(Scene newScene, LoadSceneMode mode)
-        {
-            if (newScene.name == "PCInit")
-            {
-                // OnSceneLoaded runs after OnActiveSceneChanged for PCInit so inject here
-                _sceneContext.Container.Inject(this);
-
-                _scenesManager.transitionDidFinishEvent += sceneTransitionDidFinish;
-                _scenesManager.transitionDidFinishEvent += SceneTransitionDidFinish;
-
-                _avatarManager.LoadAvatarFromSettingsAsync();
-
-                KeyboardInputHandler keyboardInputHandler = _sceneContext.Container.InstantiateComponentOnNewGameObject<KeyboardInputHandler>();
-                Object.DontDestroyOnLoad(keyboardInputHandler.gameObject);
-
-                SetUpLighting();
+                // handle scene context already being installed when the game is first loaded
+                if (_sceneContext.HasInstalled)
+                {
+                    OnSceneContextPostInstall();
+                }
+                else
+                {
+                    _sceneContext.OnPostInstall.AddListener(OnSceneContextPostInstall);
+                }
             }
 
             if (newScene.name == "MenuCore")
@@ -119,6 +129,34 @@ namespace CustomAvatar
                     _mirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, -1.5f), Quaternion.Euler(-90f, 180f, 0), mirrorSize, _mirrorContainer.transform);
                 }
             }
+        }
+
+        private void OnSceneUnloaded(Scene scene)
+        {
+            if (scene.name == "PCInit")
+            {
+                Object.Destroy(_keyboardInputHandler);
+                Object.Destroy(_lightingRig);
+                Object.Destroy(_mirrorContainer);
+
+                _avatarManager.currentlySpawnedAvatar.Destroy();
+
+                _settingsManager.Save(_settings);
+            }
+        }
+
+        private void OnSceneContextPostInstall()
+        {
+            _sceneContext.Container.Inject(this);
+
+            _scenesManager.transitionDidFinishEvent += sceneTransitionDidFinish;
+            _scenesManager.transitionDidFinishEvent += SceneTransitionDidFinish;
+
+            _avatarManager.LoadAvatarFromSettingsAsync();
+
+            _keyboardInputHandler = _sceneContext.Container.InstantiateComponentOnNewGameObject<KeyboardInputHandler>(nameof(KeyboardInputHandler));
+
+            SetUpLighting();
         }
 
         private void SceneTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
@@ -158,11 +196,13 @@ namespace CustomAvatar
         {
             if (_settings.lighting.enabled)
             {
-                var lighting = new LightingRig();
-
+                _lightingRig = _sceneContext.Container.InstantiateComponentOnNewGameObject<LightingRig>(nameof(LightingRig));
+                
+                Object.DontDestroyOnLoad(_lightingRig.gameObject);
+                
                 foreach (Settings.LightDefinition lightDefinition in _settings.lighting.lights)
                 {
-                    lighting.AddLight(lightDefinition);
+                    _lightingRig.AddLight(lightDefinition);
                 }
 
                 if (_settings.lighting.castShadows)

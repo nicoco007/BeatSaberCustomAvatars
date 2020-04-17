@@ -29,7 +29,7 @@ namespace CustomAvatar.Avatar
             
             if (input == null) throw new ArgumentNullException(nameof(input));
 
-            _logger = loggerFactory.CreateLogger<SpawnedAvatar>();
+            _logger = loggerFactory.CreateLogger<SpawnedAvatar>(avatar.descriptor.name);
             _settings = settings;
 
             _gameObject            = container.InstantiatePrefab(avatar.gameObject);
@@ -96,8 +96,8 @@ namespace CustomAvatar.Avatar
         private void SetChildrenToLayer(int layer)
         {
 	        foreach (Transform child in _gameObject.GetComponentsInChildren<Transform>())
-	        {
-		        child.gameObject.layer = layer;
+            {
+                child.gameObject.layer = layer;
 	        }
         }
     }

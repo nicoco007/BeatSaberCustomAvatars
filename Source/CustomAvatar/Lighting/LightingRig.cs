@@ -3,15 +3,8 @@ using UnityEngine;
 
 namespace CustomAvatar.Lighting
 {
-    internal class LightingRig
+    internal class LightingRig : MonoBehaviour
     {
-        private readonly GameObject _root = new GameObject(nameof(LightingRig));
-
-        public LightingRig(Transform parent = null)
-        {
-            if (parent) _root.transform.SetParent(parent);
-        }
-
         internal void AddLight(Settings.LightDefinition definition)
         {
             var container = new GameObject();
@@ -27,7 +20,7 @@ namespace CustomAvatar.Lighting
 
             container.transform.position = definition.position;
             container.transform.rotation = Quaternion.Euler(definition.rotation);
-            container.transform.SetParent(_root.transform, false);
+            container.transform.SetParent(transform, false);
         }
     }
 }

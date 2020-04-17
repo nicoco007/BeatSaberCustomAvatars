@@ -8,6 +8,7 @@ using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
 using UnityEngine.SceneManagement;
 using Zenject;
+using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar
 {
@@ -40,6 +41,9 @@ namespace CustomAvatar
 
         public void Dispose()
         {
+            currentlySpawnedAvatar.Destroy();
+            currentlySpawnedAvatar = null;
+
             Plugin.instance.sceneTransitionDidFinish -= OnSceneTransitionDidFinish;
             SceneManager.sceneLoaded -= OnSceneLoaded;
             BeatSaberEvents.onPlayerHeightChanged -= OnPlayerHeightChanged;
