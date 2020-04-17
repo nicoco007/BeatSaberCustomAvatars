@@ -4,26 +4,27 @@ using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
 using UnityEngine;
 using Zenject;
-using Object = UnityEngine.Object;
 using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar.Avatar
 {
-	internal class SpawnedAvatar
+	internal class SpawnedAvatar : MonoBehaviour
 	{
-		public LoadedAvatar avatar { get; }
-		public AvatarTracking tracking { get; }
-        public AvatarIK ik { get; }
-		public AvatarEventsPlayer eventsPlayer { get; }
+		public LoadedAvatar avatar { get; private set; }
+		public AvatarTracking tracking { get; private set; }
+        public AvatarIK ik { get; private set; }
+        public AvatarFingerTracking fingerTracking { get; private set; }
+		public AvatarEventsPlayer eventsPlayer { get; private set; }
 
         private Settings _settings;
         private ILogger _logger;
-        private readonly GameObject _gameObject;
-        private readonly FirstPersonExclusion[] _firstPersonExclusions;
+        private FirstPersonExclusion[] _firstPersonExclusions;
+        private Renderer[] _renderers;
 
         private bool _isCalibrationModeEnabled;
 
-        public SpawnedAvatar(DiContainer container, ILoggerFactory loggerFactory, LoadedAvatar avatar, AvatarInput input, Settings settings)
+        [Inject]
+        public void Inject(DiContainer container, ILoggerFactory loggerFactory, LoadedAvatar avatar, AvatarInput input, Settings settings)
         {
             this.avatar = avatar ?? throw new ArgumentNullException(nameof(avatar));
             
@@ -32,28 +33,28 @@ namespace CustomAvatar.Avatar
             _logger = loggerFactory.CreateLogger<SpawnedAvatar>(avatar.descriptor.name);
             _settings = settings;
 
-            _gameObject            = container.InstantiatePrefab(avatar.gameObject);
-            _firstPersonExclusions = _gameObject.GetComponentsInChildren<FirstPersonExclusion>();
+            _firstPersonExclusions = GetComponentsInChildren<FirstPersonExclusion>();
+            _renderers = GetComponentsInChildren<Renderer>();
 
-            eventsPlayer   = container.InstantiateComponent<AvatarEventsPlayer>(_gameObject);
-            tracking       = container.InstantiateComponent<AvatarTracking>(_gameObject, new object[] { avatar, input });
+            eventsPlayer   = container.InstantiateComponent<AvatarEventsPlayer>(gameObject);
+            tracking       = container.InstantiateComponent<AvatarTracking>(gameObject, new object[] { avatar, input });
 
             if (avatar.isIKAvatar)
             {
-                ik = container.InstantiateComponent<AvatarIK>(_gameObject, new object[] { avatar, input });
+                ik = container.InstantiateComponent<AvatarIK>(gameObject, new object[] { avatar, input });
             }
 
             if (avatar.supportsFingerTracking)
             {
-                container.InstantiateComponent<AvatarFingerTracking>(_gameObject);
+                fingerTracking = container.InstantiateComponent<AvatarFingerTracking>(gameObject);
             }
 
-            Object.DontDestroyOnLoad(_gameObject);
+            DontDestroyOnLoad(this);
         }
 
-        public void Destroy()
+        private void OnDestroy()
         {
-	        Object.Destroy(_gameObject);
+            Destroy(gameObject);
         }
 
         public void EnableCalibrationMode()
@@ -95,9 +96,9 @@ namespace CustomAvatar.Avatar
 
         private void SetChildrenToLayer(int layer)
         {
-	        foreach (Transform child in _gameObject.GetComponentsInChildren<Transform>())
+	        foreach (Renderer renderer in _renderers)
             {
-                child.gameObject.layer = layer;
+                renderer.gameObject.layer = layer;
 	        }
         }
     }

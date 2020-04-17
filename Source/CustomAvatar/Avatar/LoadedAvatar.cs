@@ -4,9 +4,7 @@ using System.IO;
 using System.Reflection;
 using AvatarScriptPack;
 using CustomAvatar.Exceptions;
-using CustomAvatar.Logging;
 using UnityEngine;
-using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar.Avatar
 {
@@ -15,19 +13,17 @@ namespace CustomAvatar.Avatar
         private const string kGameObjectName = "_CustomAvatar";
 
         public string fullPath { get; }
-        public GameObject gameObject { get; }
+        public GameObject prefab { get; }
         public AvatarDescriptor descriptor { get; }
         public float eyeHeight { get; }
         public float armSpan { get; }
         public bool supportsFingerTracking { get; }
         public bool isIKAvatar { get; }
 
-        //private ILogger _logger;
-
         private LoadedAvatar(string fullPath, GameObject avatarGameObject)
         {
             this.fullPath = fullPath ?? throw new ArgumentNullException(nameof(avatarGameObject));
-            gameObject = avatarGameObject ? avatarGameObject : throw new ArgumentNullException(nameof(avatarGameObject));
+            prefab = avatarGameObject ? avatarGameObject : throw new ArgumentNullException(nameof(avatarGameObject));
             descriptor = avatarGameObject.GetComponent<AvatarDescriptor>() ?? throw new AvatarLoadException($"Avatar at '{fullPath}' does not have an AvatarDescriptor");
            
             supportsFingerTracking = avatarGameObject.GetComponentInChildren<Animator>() &&
@@ -104,7 +100,7 @@ namespace CustomAvatar.Avatar
 
         private float GetEyeHeight()
         {
-            Transform head = gameObject.transform.Find("Head");
+            Transform head = prefab.transform.Find("Head");
 
             if (!head) throw new AvatarLoadException("Avatar does not have a head tracking reference");
 
@@ -123,19 +119,19 @@ namespace CustomAvatar.Avatar
             {
                 // manually putting each coordinate gives more resolution
                 //_logger.Warn($"Head bone and target are not at the same position; offset: ({headOffset.x}, {headOffset.y}, {headOffset.z})");
-                gameObject.transform.Find("Head").position -= headOffset;
+                prefab.transform.Find("Head").position -= headOffset;
             }
 
             if (leftHandOffset.magnitude > 0.001f)
             {
                 //_logger.Warn($"Left hand bone and target are not at the same position; offset: ({leftHandOffset.x}, {leftHandOffset.y}, {leftHandOffset.z})");
-                gameObject.transform.Find("LeftHand").position -= headOffset;
+                prefab.transform.Find("LeftHand").position -= headOffset;
             }
 
             if (rightHandOffset.magnitude > 0.001f)
             {
                 //_logger.Warn($"Right hand bone and target are not at the same position; offset: ({rightHandOffset.x}, {rightHandOffset.y}, {rightHandOffset.z})");
-                gameObject.transform.Find("RightHand").position -= headOffset;
+                prefab.transform.Find("RightHand").position -= headOffset;
             }
         }
 
@@ -148,11 +144,11 @@ namespace CustomAvatar.Avatar
             Transform target = null;
                 
             #pragma warning disable 618
-            VRIK vrik = gameObject.GetComponentInChildren<VRIK>();
-            IKManager ikManager = gameObject.GetComponentInChildren<IKManager>();
+            VRIK vrik = prefab.GetComponentInChildren<VRIK>();
+            IKManager ikManager = prefab.GetComponentInChildren<IKManager>();
             #pragma warning restore 618
 
-            VRIKManager vrikManager = gameObject.GetComponentInChildren<VRIKManager>();
+            VRIKManager vrikManager = prefab.GetComponentInChildren<VRIKManager>();
                 
             if (vrikManager)
             {
@@ -209,19 +205,19 @@ namespace CustomAvatar.Avatar
         private float GetArmSpan()
         {
             // TODO using animator here probably isn't a good idea, use VRIKManager references instead
-            Animator animator = gameObject.GetComponentInChildren<Animator>();
+            Animator animator = prefab.GetComponentInChildren<Animator>();
 
             if (!animator) return AvatarTailor.kDefaultPlayerArmSpan;
 
             Transform leftShoulder = animator.GetBoneTransform(HumanBodyBones.LeftShoulder);
             Transform leftUpperArm = animator.GetBoneTransform(HumanBodyBones.LeftUpperArm);
             Transform leftLowerArm = animator.GetBoneTransform(HumanBodyBones.LeftLowerArm);
-            Transform leftHand = gameObject.transform.Find("LeftHand");
+            Transform leftHand = prefab.transform.Find("LeftHand");
 
             Transform rightShoulder = animator.GetBoneTransform(HumanBodyBones.RightShoulder);
             Transform rightUpperArm = animator.GetBoneTransform(HumanBodyBones.RightUpperArm);
             Transform rightLowerArm = animator.GetBoneTransform(HumanBodyBones.RightLowerArm);
-            Transform rightHand = gameObject.transform.Find("RightHand");
+            Transform rightHand = prefab.transform.Find("RightHand");
 
             if (!leftShoulder || !leftUpperArm || !leftLowerArm || !rightShoulder || !rightUpperArm || !rightLowerArm)
             {

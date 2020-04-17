@@ -6,9 +6,11 @@ using CustomAvatar.Avatar;
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
 using ILogger = CustomAvatar.Logging.ILogger;
+using Object = UnityEngine.Object;
 
 namespace CustomAvatar
 {
@@ -41,8 +43,7 @@ namespace CustomAvatar
 
         public void Dispose()
         {
-            currentlySpawnedAvatar.Destroy();
-            currentlySpawnedAvatar = null;
+            Object.Destroy(currentlySpawnedAvatar);
 
             Plugin.instance.sceneTransitionDidFinish -= OnSceneTransitionDidFinish;
             SceneManager.sceneLoaded -= OnSceneLoaded;
@@ -90,10 +91,9 @@ namespace CustomAvatar
 
         public void SwitchToAvatar(LoadedAvatar avatar)
         {
-            if (currentlySpawnedAvatar?.avatar == avatar) return;
+            if (currentlySpawnedAvatar && currentlySpawnedAvatar.avatar == avatar) return;
 
-            currentlySpawnedAvatar?.Destroy();
-            currentlySpawnedAvatar = null;
+            Object.Destroy(currentlySpawnedAvatar);
 
             _settings.previousAvatarPath = avatar?.fullPath;
 
@@ -107,7 +107,7 @@ namespace CustomAvatar
             currentlySpawnedAvatar = SpawnAvatar(avatar, new VRAvatarInput(_trackedDeviceManager));
 
             ResizeCurrentAvatar();
-            currentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
+            currentlySpawnedAvatar.OnFirstPersonEnabledChanged();
 
             avatarChanged?.Invoke(currentlySpawnedAvatar);
         }
@@ -116,8 +116,8 @@ namespace CustomAvatar
         {
             List<string> files = GetAvatarFileNames();
             files.Insert(0, null);
-
-            int index = files.IndexOf(currentlySpawnedAvatar?.avatar.fullPath);
+            
+            int index = currentlySpawnedAvatar ? files.IndexOf(currentlySpawnedAvatar.avatar.fullPath) : 0;
 
             index = (index + 1) % files.Count;
 
@@ -129,7 +129,7 @@ namespace CustomAvatar
             List<string> files = GetAvatarFileNames();
             files.Insert(0, null);
             
-            int index = files.IndexOf(currentlySpawnedAvatar?.avatar.fullPath);
+            int index = currentlySpawnedAvatar ? files.IndexOf(currentlySpawnedAvatar.avatar.fullPath) : 0;
 
             index = (index + files.Count - 1) % files.Count;
             
@@ -146,10 +146,10 @@ namespace CustomAvatar
 
         private void OnSceneLoaded(Scene newScene, LoadSceneMode mode)
         {
-            if (currentlySpawnedAvatar == null) return;
+            if (!currentlySpawnedAvatar) return;
 
             currentlySpawnedAvatar.OnFirstPersonEnabledChanged();
-            currentlySpawnedAvatar.eventsPlayer?.Restart();
+            currentlySpawnedAvatar.eventsPlayer.Restart();
 
             if (newScene.name == "PCInit" && _settings.calibrateFullBodyTrackingOnStart && _settings.GetAvatarSettings(currentlySpawnedAvatar.avatar.fullPath).useAutomaticCalibration)
             {
@@ -161,14 +161,16 @@ namespace CustomAvatar
 
         private void OnSceneTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
         {
+            if (!currentlySpawnedAvatar) return;
+
             string currentScene = SceneManager.GetActiveScene().name;
 
-            if (currentScene == "GameCore" && currentlySpawnedAvatar?.eventsPlayer)
+            if (currentScene == "GameCore" && currentlySpawnedAvatar.eventsPlayer)
             {
                 currentlySpawnedAvatar.eventsPlayer.LevelStartedEvent();
             }
 
-            if (currentScene == "MenuCore" && currentlySpawnedAvatar?.eventsPlayer)
+            if (currentScene == "MenuCore" && currentlySpawnedAvatar.eventsPlayer)
             {
                 currentlySpawnedAvatar.eventsPlayer.MenuEnteredEvent();
             }
@@ -186,7 +188,8 @@ namespace CustomAvatar
             if (customAvatar == null) throw new ArgumentNullException(nameof(customAvatar));
             if (input == null) throw new ArgumentNullException(nameof(input));
             
-            return _container.Instantiate<SpawnedAvatar>(new object[] { customAvatar, input });
+            GameObject avatarInstance = _container.InstantiatePrefab(customAvatar.prefab);
+            return _container.InstantiateComponent<SpawnedAvatar>(avatarInstance, new object[] { customAvatar, input });
         }
 
         private List<string> GetAvatarFileNames()

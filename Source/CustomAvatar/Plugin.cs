@@ -138,8 +138,7 @@ namespace CustomAvatar
                 Object.Destroy(_keyboardInputHandler);
                 Object.Destroy(_lightingRig);
                 Object.Destroy(_mirrorContainer);
-
-                _avatarManager.currentlySpawnedAvatar.Destroy();
+                Object.Destroy(_avatarManager.currentlySpawnedAvatar);
 
                 _settingsManager.Save(_settings);
             }
