@@ -24,14 +24,16 @@ namespace CustomAvatar
         internal event Action<SpawnedAvatar> avatarChanged;
 
         private readonly ILogger _logger;
+        private readonly AvatarLoader _avatarLoader;
         private readonly TrackedDeviceManager _trackedDeviceManager;
         private readonly Settings _settings;
         private readonly DiContainer _container;
 
-        private AvatarManager(AvatarTailor avatarTailor, ILoggerFactory loggerFactory, TrackedDeviceManager trackedDeviceManager, Settings settings, DiContainer container)
+        private AvatarManager(AvatarTailor avatarTailor, ILoggerFactory loggerFactory, AvatarLoader avatarLoader, TrackedDeviceManager trackedDeviceManager, Settings settings, DiContainer container)
         {
             this.avatarTailor = avatarTailor;
             _logger = loggerFactory.CreateLogger<AvatarManager>();
+            _avatarLoader = avatarLoader;
             _trackedDeviceManager = trackedDeviceManager;
             _settings = settings;
             _container = container;
@@ -56,7 +58,7 @@ namespace CustomAvatar
 
             foreach (string fileName in GetAvatarFileNames())
             {
-                SharedCoroutineStarter.instance.StartCoroutine(LoadedAvatar.FromFileCoroutine(fileName, success, error));
+                SharedCoroutineStarter.instance.StartCoroutine(_avatarLoader.FromFileCoroutine(fileName, success, error));
             }
         }
 
@@ -86,7 +88,7 @@ namespace CustomAvatar
                 return;
             }
 
-            SharedCoroutineStarter.instance.StartCoroutine(LoadedAvatar.FromFileCoroutine(filePath, SwitchToAvatar));
+            SharedCoroutineStarter.instance.StartCoroutine(_avatarLoader.FromFileCoroutine(filePath, SwitchToAvatar));
         }
 
         public void SwitchToAvatar(LoadedAvatar avatar)

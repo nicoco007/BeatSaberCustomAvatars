@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using CustomAvatar.Avatar;
 using CustomAvatar.Logging;
 using CustomAvatar.StereoRendering;
 using CustomAvatar.Tracking;
@@ -32,6 +33,7 @@ namespace CustomAvatar
             Container.Bind<StereoRenderManager>().AsSingle();
             Container.Bind<AvatarTailor>().AsTransient();
             Container.Bind<MirrorHelper>().AsTransient();
+            Container.Bind<AvatarLoader>().AsTransient();
 
             // behaviours
             Container.Bind<TrackedDeviceManager>().FromNewComponentOnNewPrefab(new GameObject(nameof(TrackedDeviceManager))).AsSingle();

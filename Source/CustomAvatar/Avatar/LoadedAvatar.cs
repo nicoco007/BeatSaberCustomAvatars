@@ -1,17 +1,15 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
 using AvatarScriptPack;
 using CustomAvatar.Exceptions;
+using CustomAvatar.Logging;
 using UnityEngine;
+using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar.Avatar
 {
     public class LoadedAvatar
     {
-        private const string kGameObjectName = "_CustomAvatar";
-
         public string fullPath { get; }
         public GameObject prefab { get; }
         public AvatarDescriptor descriptor { get; }
@@ -20,12 +18,16 @@ namespace CustomAvatar.Avatar
         public bool supportsFingerTracking { get; }
         public bool isIKAvatar { get; }
 
-        private LoadedAvatar(string fullPath, GameObject avatarGameObject)
+        private readonly ILogger _logger;
+
+        internal LoadedAvatar(string fullPath, GameObject avatarGameObject, ILoggerFactory loggerFactory)
         {
             this.fullPath = fullPath ?? throw new ArgumentNullException(nameof(avatarGameObject));
             prefab = avatarGameObject ? avatarGameObject : throw new ArgumentNullException(nameof(avatarGameObject));
             descriptor = avatarGameObject.GetComponent<AvatarDescriptor>() ?? throw new AvatarLoadException($"Avatar at '{fullPath}' does not have an AvatarDescriptor");
-           
+
+            _logger = loggerFactory.CreateLogger<LoadedAvatar>();
+
             supportsFingerTracking = avatarGameObject.GetComponentInChildren<Animator>() &&
                                      avatarGameObject.GetComponentInChildren<PoseManager>();
 
@@ -35,7 +37,7 @@ namespace CustomAvatar.Avatar
 
             isIKAvatar = ikManager || vrikManager;
 
-            //_logger = loggerFactory.CreateLogger<LoadedAvatar>(descriptor.name);
+            _logger = loggerFactory.CreateLogger<LoadedAvatar>(descriptor.name);
 
             if (vrik && !vrik.references.isFilled) vrik.AutoDetectReferences();
             if (vrikManager && !vrikManager.areReferencesFilled) vrikManager.AutoDetectReferences();
@@ -44,58 +46,6 @@ namespace CustomAvatar.Avatar
 
             eyeHeight = GetEyeHeight();
             armSpan = GetArmSpan();
-        }
-
-        public static IEnumerator<AsyncOperation> FromFileCoroutine(string fileName, Action<LoadedAvatar> success = null, Action<Exception> error = null)
-        {
-            if (string.IsNullOrEmpty(fileName)) throw new ArgumentNullException(nameof(fileName));
-
-            //_logger.Info($"Loading avatar from '{fileName}'");
-
-            AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(Path.Combine(AvatarManager.kCustomAvatarsPath, fileName));
-            yield return assetBundleCreateRequest;
-
-            if (!assetBundleCreateRequest.isDone || !assetBundleCreateRequest.assetBundle)
-            {
-                var exception = new AvatarLoadException("Avatar game object not found");
-
-                //_logger.Error($"Failed to load avatar from '{fileName}'");
-                //_logger.Error(exception);
-
-                error?.Invoke(exception);
-                yield break;
-            }
-
-            AssetBundleRequest assetBundleRequest = assetBundleCreateRequest.assetBundle.LoadAssetWithSubAssetsAsync<GameObject>(kGameObjectName);
-            yield return assetBundleRequest;
-            assetBundleCreateRequest.assetBundle.Unload(false);
-
-            if (!assetBundleRequest.isDone || assetBundleRequest.asset == null)
-            {
-                var exception = new AvatarLoadException("Could not load asset bundle");
-
-                //_logger.Error($"Failed to load avatar from '{fileName}'");
-                //_logger.Error(exception);
-
-                error?.Invoke(exception);
-                yield break;
-            }
-                
-            try
-            {
-                var loadedAvatar = new LoadedAvatar(fileName, assetBundleRequest.asset as GameObject);
-
-                //_logger.Info($"Successfully loaded avatar '{loadedAvatar.descriptor.name}' from '{fileName}'");
-
-                success?.Invoke(loadedAvatar);
-            }
-            catch (Exception ex)
-            {
-                //_logger.Error($"Failed to load avatar from '{fileName}'");
-                //_logger.Error(ex);
-
-                error?.Invoke(ex);
-            }
         }
 
         private float GetEyeHeight()
@@ -118,19 +68,19 @@ namespace CustomAvatar.Avatar
             if (headOffset.magnitude > 0.001f)
             {
                 // manually putting each coordinate gives more resolution
-                //_logger.Warn($"Head bone and target are not at the same position; offset: ({headOffset.x}, {headOffset.y}, {headOffset.z})");
+                _logger.Warning($"Head bone and target are not at the same position; offset: ({headOffset.x}, {headOffset.y}, {headOffset.z})");
                 prefab.transform.Find("Head").position -= headOffset;
             }
 
             if (leftHandOffset.magnitude > 0.001f)
             {
-                //_logger.Warn($"Left hand bone and target are not at the same position; offset: ({leftHandOffset.x}, {leftHandOffset.y}, {leftHandOffset.z})");
+                _logger.Warning($"Left hand bone and target are not at the same position; offset: ({leftHandOffset.x}, {leftHandOffset.y}, {leftHandOffset.z})");
                 prefab.transform.Find("LeftHand").position -= headOffset;
             }
 
             if (rightHandOffset.magnitude > 0.001f)
             {
-                //_logger.Warn($"Right hand bone and target are not at the same position; offset: ({rightHandOffset.x}, {rightHandOffset.y}, {rightHandOffset.z})");
+                _logger.Warning($"Right hand bone and target are not at the same position; offset: ({rightHandOffset.x}, {rightHandOffset.y}, {rightHandOffset.z})");
                 prefab.transform.Find("RightHand").position -= headOffset;
             }
         }
@@ -170,7 +120,7 @@ namespace CustomAvatar.Avatar
 
             if (!reference)
             {
-                //_logger.Warn($"Could not find '{referenceName}' reference");
+                _logger.Warning($"Could not find '{referenceName}' reference");
                 return Vector3.zero;
             }
 
@@ -221,13 +171,13 @@ namespace CustomAvatar.Avatar
 
             if (!leftShoulder || !leftUpperArm || !leftLowerArm || !rightShoulder || !rightUpperArm || !rightLowerArm)
             {
-                //_logger.Warn("Could not calculate avatar arm span due to missing bones");
+                _logger.Warning("Could not calculate avatar arm span due to missing bones");
                 return AvatarTailor.kDefaultPlayerArmSpan;
             }
 
             if (!leftHand || !rightHand)
             {
-                //_logger.Warn("Could not calculate avatar arm span due to missing tracking references");
+                _logger.Warning("Could not calculate avatar arm span due to missing tracking references");
                 return AvatarTailor.kDefaultPlayerArmSpan;
             }
 
