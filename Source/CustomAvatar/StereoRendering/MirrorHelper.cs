@@ -7,8 +7,8 @@ namespace CustomAvatar.StereoRendering
     {
         private static readonly int kCutout = Shader.PropertyToID("_Cutout");
 
-        private DiContainer _container;
-        private ShaderLoader _shaderLoader;
+        private readonly DiContainer _container;
+        private readonly ShaderLoader _shaderLoader;
 
         public MirrorHelper(DiContainer container, ShaderLoader shaderLoader)
         {
@@ -28,7 +28,7 @@ namespace CustomAvatar.StereoRendering
             mirrorPlane.transform.localRotation = rotation;
 
             Material material = new Material(_shaderLoader.stereoMirrorShader);
-            material.SetFloat(kCutout, 0.999f);
+            material.SetFloat(kCutout, 0f);
             
             Renderer renderer = mirrorPlane.GetComponent<Renderer>();
             renderer.sharedMaterial = material;
