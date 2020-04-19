@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using CustomAvatar.Exceptions;
 using CustomAvatar.Logging;
 using UnityEngine;
@@ -9,27 +8,27 @@ using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar.Avatar
 {
-    internal class AvatarLoader
+    public class AvatarLoader
     {
         private const string kGameObjectName = "_CustomAvatar";
 
         private readonly ILogger _logger;
         private readonly DiContainer _container;
 
-        public AvatarLoader(ILoggerFactory loggerFactory, DiContainer container)
+        internal AvatarLoader(ILoggerFactory loggerFactory, DiContainer container)
         {
             _logger = loggerFactory.CreateLogger<AvatarLoader>();
             _container = container;
         }
 
         // TODO from stream/memory
-        public IEnumerator<AsyncOperation> FromFileCoroutine(string fileName, Action<LoadedAvatar> success = null, Action<Exception> error = null)
+        public IEnumerator<AsyncOperation> FromFileCoroutine(string filePath, Action<LoadedAvatar> success = null, Action<Exception> error = null)
         {
-            if (string.IsNullOrEmpty(fileName)) throw new ArgumentNullException(nameof(fileName));
+            if (string.IsNullOrEmpty(filePath)) throw new ArgumentNullException(nameof(filePath));
 
-            _logger.Info($"Loading avatar from '{fileName}'");
+            _logger.Info($"Loading avatar from '{filePath}'");
 
-            AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(Path.Combine(AvatarManager.kCustomAvatarsPath, fileName));
+            AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(filePath);
 
             AssetBundleRequest assetBundleRequest = assetBundleCreateRequest.assetBundle.LoadAssetWithSubAssetsAsync<GameObject>(kGameObjectName);
             yield return assetBundleRequest;
@@ -39,7 +38,7 @@ namespace CustomAvatar.Avatar
             {
                 var exception = new AvatarLoadException("Could not load asset bundle");
 
-                _logger.Error($"Failed to load avatar {fileName}");
+                _logger.Error($"Failed to load avatar at '{filePath}'");
                 _logger.Error(exception);
 
                 error?.Invoke(exception);
@@ -48,15 +47,15 @@ namespace CustomAvatar.Avatar
                 
             try
             {
-                var loadedAvatar = _container.Instantiate<LoadedAvatar>(new object[] { fileName, (GameObject)assetBundleRequest.asset });
+                var loadedAvatar = _container.Instantiate<LoadedAvatar>(new object[] { filePath, (GameObject)assetBundleRequest.asset });
 
-                _logger.Info($"Successfully loaded avatar '{loadedAvatar.descriptor.name}' ({fileName})");
+                _logger.Info($"Successfully loaded avatar '{loadedAvatar.descriptor.name}' from '{filePath}'");
 
                 success?.Invoke(loadedAvatar);
             }
             catch (Exception ex)
             {
-                _logger.Error($"Failed to load avatar {fileName}");
+                _logger.Error($"Failed to load avatar at '{filePath}'");
                 _logger.Error(ex);
 
                 error?.Invoke(ex);

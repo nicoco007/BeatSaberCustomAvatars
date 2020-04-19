@@ -33,7 +33,8 @@ namespace CustomAvatar.UI
         private Settings.AvatarSpecificSettings _currentAvatarSettings;
         
         [Inject] private TrackedDeviceManager _trackedDeviceManager;
-        [Inject] private AvatarManager _avatarManager;
+        [Inject] private PlayerAvatarManager _avatarManager;
+        [Inject] private AvatarTailor _avatarTailor;
 
         #region Components
         
@@ -201,7 +202,7 @@ namespace CustomAvatar.UI
         {
             if (_currentAvatarSettings.useAutomaticCalibration)
             {
-                _avatarManager.avatarTailor.CalibrateFullBodyTrackingAuto(_avatarManager.currentlySpawnedAvatar);
+                _avatarTailor.CalibrateFullBodyTrackingAuto(_avatarManager.currentlySpawnedAvatar);
                 _clearButton.interactable = !_currentAvatarSettings.fullBodyCalibration.isDefault;
             }
             else if (!_calibrating)
@@ -229,7 +230,7 @@ namespace CustomAvatar.UI
             }
             else
             {
-                _avatarManager.avatarTailor.ClearFullBodyTrackingData(_avatarManager.currentlySpawnedAvatar);
+                _avatarTailor.ClearFullBodyTrackingData(_avatarManager.currentlySpawnedAvatar);
                 _clearButton.interactable = false;
             }
         }
@@ -284,7 +285,7 @@ namespace CustomAvatar.UI
             {
                 if (save)
                 {
-                    _avatarManager.avatarTailor.CalibrateFullBodyTrackingManual(_avatarManager.currentlySpawnedAvatar);
+                    _avatarTailor.CalibrateFullBodyTrackingManual(_avatarManager.currentlySpawnedAvatar);
                 }
                 
                 _avatarManager.currentlySpawnedAvatar.DisableCalibrationMode();

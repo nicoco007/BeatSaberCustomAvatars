@@ -21,7 +21,7 @@ namespace CustomAvatar
     [Plugin(RuntimeOptions.SingleStartInit)]
     internal class Plugin
     {
-        [Inject] private AvatarManager _avatarManager;
+        [Inject] private PlayerAvatarManager _avatarManager;
         [Inject] private GameScenesManager _scenesManager;
         [Inject] private AvatarListFlowCoordinator _flowCoordinator;
         [Inject] private Settings _settings;

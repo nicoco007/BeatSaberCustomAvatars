@@ -9,11 +9,11 @@ namespace CustomAvatar
     internal class KeyboardInputHandler : MonoBehaviour
     {
         private Settings _settings;
-        private AvatarManager _avatarManager;
+        private PlayerAvatarManager _avatarManager;
         private ILogger _logger;
 
         [Inject]
-        private void Inject(Settings settings, AvatarManager avatarManager, ILoggerFactory loggerFactory)
+        private void Inject(Settings settings, PlayerAvatarManager avatarManager, ILoggerFactory loggerFactory)
         {
             _settings = settings;
             _avatarManager = avatarManager;

@@ -142,6 +142,7 @@
   <ItemGroup>
     <Compile Include="Avatar\AvatarIK.cs" />
     <Compile Include="Avatar\AvatarLoader.cs" />
+    <Compile Include="Avatar\AvatarSpawner.cs" />
     <Compile Include="Avatar\AvatarTracking.cs" />
     <Compile Include="AvatarLayers.cs" />
     <Compile Include="Avatar\AvatarFingerTracking.cs" />
@@ -155,7 +156,7 @@
     <Compile Include="ShaderLoader.cs" />
     <Compile Include="UIInstaller.cs" />
     <Compile Include="UI\AvatarListItem.cs" />
-    <Compile Include="AvatarManager.cs" />
+    <Compile Include="PlayerAvatarManager.cs" />
     <Compile Include="AvatarTailor.cs" />
     <Compile Include="AvatarResizeMode.cs" />
     <Compile Include="FirstPersonExclusion.cs" />

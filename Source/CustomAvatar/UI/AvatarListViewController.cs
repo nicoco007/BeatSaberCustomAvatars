@@ -18,7 +18,7 @@ namespace CustomAvatar.UI
 {
     internal class AvatarListViewController : BSMLResourceViewController, TableView.IDataSource
     {
-        [Inject] private AvatarManager _avatarManager;
+        [Inject] private PlayerAvatarManager _avatarManager;
 
         private const string kTableCellReuseIdentifier = "CustomAvatarsTableCell";
 

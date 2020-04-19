@@ -7,7 +7,7 @@ namespace CustomAvatar.Tracking
     {
         private readonly TrackedDeviceManager _deviceManager;
 
-        public VRAvatarInput(TrackedDeviceManager trackedDeviceManager)
+        internal VRAvatarInput(TrackedDeviceManager trackedDeviceManager)
         {
             _deviceManager = trackedDeviceManager ? trackedDeviceManager : throw new ArgumentNullException(nameof(trackedDeviceManager));
             _deviceManager.deviceAdded += (device, use) => InvokeInputChanged();

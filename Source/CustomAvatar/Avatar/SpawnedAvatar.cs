@@ -8,13 +8,14 @@ using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar.Avatar
 {
-	internal class SpawnedAvatar : MonoBehaviour
+	public class SpawnedAvatar : MonoBehaviour
 	{
 		public LoadedAvatar avatar { get; private set; }
-		public AvatarTracking tracking { get; private set; }
-        public AvatarIK ik { get; private set; }
-        public AvatarFingerTracking fingerTracking { get; private set; }
-		public AvatarEventsPlayer eventsPlayer { get; private set; }
+
+		internal AvatarTracking tracking { get; private set; }
+        internal AvatarIK ik { get; private set; }
+        internal AvatarFingerTracking fingerTracking { get; private set; }
+        internal AvatarEventsPlayer eventsPlayer { get; private set; }
 
         private Settings _settings;
         private ILogger _logger;
@@ -24,27 +25,27 @@ namespace CustomAvatar.Avatar
         private bool _isCalibrationModeEnabled;
 
         [Inject]
-        public void Inject(DiContainer container, ILoggerFactory loggerFactory, LoadedAvatar avatar, AvatarInput input, Settings settings)
+        internal void Inject(DiContainer container, ILoggerFactory loggerFactory, LoadedAvatar loadedAvatar, AvatarInput input, Settings settings)
         {
-            this.avatar = avatar ?? throw new ArgumentNullException(nameof(avatar));
+            avatar = loadedAvatar ?? throw new ArgumentNullException(nameof(loadedAvatar));
             
             if (input == null) throw new ArgumentNullException(nameof(input));
 
-            _logger = loggerFactory.CreateLogger<SpawnedAvatar>(avatar.descriptor.name);
+            _logger = loggerFactory.CreateLogger<SpawnedAvatar>(loadedAvatar.descriptor.name);
             _settings = settings;
 
             _firstPersonExclusions = GetComponentsInChildren<FirstPersonExclusion>();
             _renderers = GetComponentsInChildren<Renderer>();
 
             eventsPlayer   = container.InstantiateComponent<AvatarEventsPlayer>(gameObject);
-            tracking       = container.InstantiateComponent<AvatarTracking>(gameObject, new object[] { avatar, input });
+            tracking       = container.InstantiateComponent<AvatarTracking>(gameObject, new object[] { loadedAvatar, input });
 
-            if (avatar.isIKAvatar)
+            if (loadedAvatar.isIKAvatar)
             {
-                ik = container.InstantiateComponent<AvatarIK>(gameObject, new object[] { avatar, input });
+                ik = container.InstantiateComponent<AvatarIK>(gameObject, new object[] { loadedAvatar, input });
             }
 
-            if (avatar.supportsFingerTracking)
+            if (loadedAvatar.supportsFingerTracking)
             {
                 fingerTracking = container.InstantiateComponent<AvatarFingerTracking>(gameObject);
             }

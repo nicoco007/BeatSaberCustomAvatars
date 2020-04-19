@@ -29,11 +29,12 @@ namespace CustomAvatar
             Container.Bind<Settings>().FromMethod((context) => context.Container.Resolve<SettingsManager>().Load()).AsSingle();
             
             // managers & helper classes
-            Container.BindInterfacesAndSelfTo<AvatarManager>().AsSingle();
+            Container.BindInterfacesAndSelfTo<PlayerAvatarManager>().AsSingle();
             Container.Bind<StereoRenderManager>().AsSingle();
             Container.Bind<AvatarTailor>().AsTransient();
             Container.Bind<MirrorHelper>().AsTransient();
             Container.Bind<AvatarLoader>().AsTransient();
+            Container.Bind<AvatarSpawner>().AsTransient();
 
             // behaviours
             Container.Bind<TrackedDeviceManager>().FromNewComponentOnNewPrefab(new GameObject(nameof(TrackedDeviceManager))).AsSingle();

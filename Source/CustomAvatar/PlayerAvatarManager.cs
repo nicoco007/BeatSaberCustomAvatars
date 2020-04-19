@@ -14,29 +14,29 @@ using Object = UnityEngine.Object;
 
 namespace CustomAvatar
 {
-    public class AvatarManager : IDisposable
+    public class PlayerAvatarManager : IDisposable
     {
         public static readonly string kCustomAvatarsPath = Path.GetFullPath("CustomAvatars");
         
-        internal AvatarTailor avatarTailor { get; }
         internal SpawnedAvatar currentlySpawnedAvatar { get; private set; }
 
         internal event Action<SpawnedAvatar> avatarChanged;
 
         private readonly ILogger _logger;
         private readonly AvatarLoader _avatarLoader;
+        private readonly AvatarTailor _avatarTailor;
         private readonly TrackedDeviceManager _trackedDeviceManager;
         private readonly Settings _settings;
-        private readonly DiContainer _container;
+        private readonly AvatarSpawner _spawner;
 
-        private AvatarManager(AvatarTailor avatarTailor, ILoggerFactory loggerFactory, AvatarLoader avatarLoader, TrackedDeviceManager trackedDeviceManager, Settings settings, DiContainer container)
+        private PlayerAvatarManager(AvatarTailor avatarTailor, ILoggerFactory loggerFactory, AvatarLoader avatarLoader, TrackedDeviceManager trackedDeviceManager, Settings settings, AvatarSpawner spawner)
         {
-            this.avatarTailor = avatarTailor;
-            _logger = loggerFactory.CreateLogger<AvatarManager>();
+            _logger = loggerFactory.CreateLogger<PlayerAvatarManager>();
             _avatarLoader = avatarLoader;
+            _avatarTailor = avatarTailor;
             _trackedDeviceManager = trackedDeviceManager;
             _settings = settings;
-            _container = container;
+            _spawner = spawner;
 
             Plugin.instance.sceneTransitionDidFinish += OnSceneTransitionDidFinish;
             SceneManager.sceneLoaded += OnSceneLoaded;
@@ -80,15 +80,17 @@ namespace CustomAvatar
             SwitchToAvatarAsync(previousAvatarPath);
         }
 
-        public void SwitchToAvatarAsync(string filePath)
+        public void SwitchToAvatarAsync(string fileName)
         {
-            if (string.IsNullOrEmpty(filePath))
+            if (string.IsNullOrEmpty(fileName))
             {
                 SwitchToAvatar(null);
                 return;
             }
 
-            SharedCoroutineStarter.instance.StartCoroutine(_avatarLoader.FromFileCoroutine(filePath, SwitchToAvatar));
+            string fullPath = Path.Combine(kCustomAvatarsPath, fileName);
+
+            SharedCoroutineStarter.instance.StartCoroutine(_avatarLoader.FromFileCoroutine(fullPath, SwitchToAvatar));
         }
 
         public void SwitchToAvatar(LoadedAvatar avatar)
@@ -106,10 +108,10 @@ namespace CustomAvatar
                 return;
             }
 
-            currentlySpawnedAvatar = SpawnAvatar(avatar, new VRAvatarInput(_trackedDeviceManager));
+            currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, new VRAvatarInput(_trackedDeviceManager));
 
             ResizeCurrentAvatar();
-            currentlySpawnedAvatar.OnFirstPersonEnabledChanged();
+            currentlySpawnedAvatar.OnFirstPersonEnabledChanged(); // TODO remove this
 
             avatarChanged?.Invoke(currentlySpawnedAvatar);
         }
@@ -140,9 +142,9 @@ namespace CustomAvatar
 
         public void ResizeCurrentAvatar()
         {
-            if (currentlySpawnedAvatar != null)
+            if (currentlySpawnedAvatar)
             {
-                avatarTailor.ResizeAvatar(currentlySpawnedAvatar);
+                _avatarTailor.ResizeAvatar(currentlySpawnedAvatar);
             }
         }
 
@@ -155,7 +157,7 @@ namespace CustomAvatar
 
             if (newScene.name == "PCInit" && _settings.calibrateFullBodyTrackingOnStart && _settings.GetAvatarSettings(currentlySpawnedAvatar.avatar.fullPath).useAutomaticCalibration)
             {
-                avatarTailor.CalibrateFullBodyTrackingAuto(currentlySpawnedAvatar);
+                _avatarTailor.CalibrateFullBodyTrackingAuto(currentlySpawnedAvatar);
             }
 
             ResizeCurrentAvatar();
@@ -183,15 +185,6 @@ namespace CustomAvatar
         private void OnPlayerHeightChanged(float height)
         {
             ResizeCurrentAvatar();
-        }
-
-        private SpawnedAvatar SpawnAvatar(LoadedAvatar customAvatar, AvatarInput input)
-        {
-            if (customAvatar == null) throw new ArgumentNullException(nameof(customAvatar));
-            if (input == null) throw new ArgumentNullException(nameof(input));
-            
-            GameObject avatarInstance = _container.InstantiatePrefab(customAvatar.prefab);
-            return _container.InstantiateComponent<SpawnedAvatar>(avatarInstance, new object[] { customAvatar, input });
         }
 
         private List<string> GetAvatarFileNames()
