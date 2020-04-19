@@ -133,11 +133,24 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Avatar\AvatarIK.cs" />
+    <Compile Include="Avatar\AvatarSRTracking.cs" />
     <Compile Include="Avatar\AvatarTracking.cs" />
     <Compile Include="AvatarLayers.cs" />
     <Compile Include="Avatar\AvatarFingerTracking.cs" />
     <Compile Include="Avatar\BodyAwareBehaviour.cs" />
     <Compile Include="KeyboardInputHandler.cs" />
+    <Compile Include="SRApi\Eye\SRanipal_Eye.cs" />
+    <Compile Include="SRApi\Eye\SRanipal_EyeData.cs" />
+    <Compile Include="SRApi\Eye\SRanipal_EyeDataType_v1.cs" />
+    <Compile Include="SRApi\Eye\SRanipal_EyeDataType_v2.cs" />
+    <Compile Include="SRApi\Eye\SRanipal_EyeShapeTableDrawer.cs" />
+    <Compile Include="SRApi\Eye\SRanipal_Eye_API.cs" />
+    <Compile Include="SRApi\Eye\SRanipal_Eye_Enums.cs" />
+    <Compile Include="SRApi\Eye\SRanipal_Eye_Framework.cs" />
+    <Compile Include="SRApi\Eye\SRanipal_Eye_v2.cs" />
+    <Compile Include="SRApi\SRanipal_API.cs" />
+    <Compile Include="SRApi\SRanipal_Enums.cs" />
+    <Compile Include="SRApi\SRWorks_Enums.cs" />
     <Compile Include="UI\AvatarListItem.cs" />
     <Compile Include="AvatarManager.cs" />
     <Compile Include="AvatarTailor.cs" />

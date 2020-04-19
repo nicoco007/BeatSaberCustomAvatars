@@ -118,7 +118,7 @@ namespace ViveSR
                     foreach (EyeIndex index in (EyeIndex[])Enum.GetValues(typeof(EyeIndex)))
                     {
                         GetEyeOpenness(index, out openness[(int)index], eye_data);
-                        valid[(int)index] = GetPupilPosition(index, out pupilPosition[(int)index]);
+                        valid[(int)index] = GetPupilPosition(index, out pupilPosition[(int)index], eye_data);
                     }
 
                     float[] weighting_up = new float[3] { Mathf.Max(pupilPosition[(int)GazeIndex.LEFT].y, 0f), Mathf.Max(pupilPosition[(int)GazeIndex.RIGHT].y, 0f), 0 };

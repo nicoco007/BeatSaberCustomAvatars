@@ -33,6 +33,8 @@ namespace CustomAvatar.Avatar
                 AvatarIK ik = _gameObject.AddComponent<AvatarIK>();
 
                 ik.input = input;
+
+                _gameObject.AddComponent<AvatarSRTracking>();
             }
 
             if (customAvatar.supportsFingerTracking)
