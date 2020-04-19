@@ -34,7 +34,6 @@ namespace CustomAvatar
             {
                 _settings.isAvatarVisibleInFirstPerson = !_settings.isAvatarVisibleInFirstPerson;
                 _logger.Info($"{(_settings.isAvatarVisibleInFirstPerson ? "Enabled" : "Disabled")} first person visibility");
-                _avatarManager.currentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
             }
             else if (Input.GetKeyDown(KeyCode.End))
             {

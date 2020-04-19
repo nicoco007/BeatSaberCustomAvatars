@@ -156,7 +156,6 @@ namespace CustomAvatar.UI
         private void OnVisibleInFirstPersonChanged(bool value)
         {
             _settings.isAvatarVisibleInFirstPerson = value;
-            _avatarManager.currentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
         }
 
         [UIAction("resize-mode-change")]

@@ -111,7 +111,6 @@ namespace CustomAvatar
             currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, new VRAvatarInput(_trackedDeviceManager));
 
             ResizeCurrentAvatar();
-            currentlySpawnedAvatar.OnFirstPersonEnabledChanged(); // TODO remove this
 
             avatarChanged?.Invoke(currentlySpawnedAvatar);
         }
@@ -152,7 +151,6 @@ namespace CustomAvatar
         {
             if (!currentlySpawnedAvatar) return;
 
-            currentlySpawnedAvatar.OnFirstPersonEnabledChanged();
             currentlySpawnedAvatar.eventsPlayer.Restart();
 
             if (newScene.name == "PCInit" && _settings.calibrateFullBodyTrackingOnStart && _settings.GetAvatarSettings(currentlySpawnedAvatar.avatar.fullPath).useAutomaticCalibration)

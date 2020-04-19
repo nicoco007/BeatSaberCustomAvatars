@@ -51,10 +51,15 @@ namespace CustomAvatar.Avatar
             }
 
             DontDestroyOnLoad(this);
+
+            _settings.firstPersonEnabledChanged += OnFirstPersonEnabledChanged;
+            OnFirstPersonEnabledChanged(_settings.isAvatarVisibleInFirstPerson);
         }
 
         private void OnDestroy()
         {
+            _settings.firstPersonEnabledChanged -= OnFirstPersonEnabledChanged;
+
             Destroy(gameObject);
         }
 
@@ -78,8 +83,7 @@ namespace CustomAvatar.Avatar
             _isCalibrationModeEnabled = false;
         }
 
-        // TODO make this class subscribe to an event rather than calling externally
-        public void OnFirstPersonEnabledChanged()
+        private void OnFirstPersonEnabledChanged(bool enable)
         {
 	        SetChildrenToLayer(_settings.isAvatarVisibleInFirstPerson ? AvatarLayers.AlwaysVisible : AvatarLayers.OnlyInThirdPerson);
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -15,7 +16,19 @@ namespace CustomAvatar.Utilities
     // ReSharper disable InconsistentNaming
     internal class Settings
     {
-        public bool isAvatarVisibleInFirstPerson = true;
+        public event Action<bool> firstPersonEnabledChanged;
+
+        private bool _isAvatarVisibleInFirstPerson;
+        public bool isAvatarVisibleInFirstPerson
+        {
+            get => _isAvatarVisibleInFirstPerson;
+            set
+            {
+                _isAvatarVisibleInFirstPerson = value;
+                firstPersonEnabledChanged?.Invoke(value);
+            }
+        }
+
         [JsonConverter(typeof(StringEnumConverter))] public AvatarResizeMode resizeMode = AvatarResizeMode.Height;
         public bool enableFloorAdjust = false;
         public bool moveFloorWithRoomAdjust = false;
