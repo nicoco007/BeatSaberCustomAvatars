@@ -35,7 +35,7 @@ namespace CustomAvatar
 
         public void ResizeAvatar(SpawnedAvatar avatar)
         {
-            if (!avatar.avatar.descriptor.allowHeightCalibration || !avatar.avatar.isIKAvatar) return;
+            if (!avatar.avatar.descriptor.allowHeightCalibration || !avatar.isIKAvatar) return;
 
             // compute scale
             float scale;
@@ -44,7 +44,7 @@ namespace CustomAvatar
             switch (resizeMode)
             {
                 case AvatarResizeMode.ArmSpan:
-                    float avatarArmLength = avatar.avatar.armSpan;
+                    float avatarArmLength = avatar.armSpan;
 
                     if (avatarArmLength > 0)
                     {
@@ -58,7 +58,7 @@ namespace CustomAvatar
                     break;
 
                 case AvatarResizeMode.Height:
-                    float avatarEyeHeight = avatar.avatar.eyeHeight;
+                    float avatarEyeHeight = avatar.eyeHeight;
 
                     if (avatarEyeHeight > 0)
                     {
@@ -83,7 +83,7 @@ namespace CustomAvatar
             }
 
             // apply scale
-            avatar.tracking.scale = scale;
+            avatar.scale = scale;
 
             SharedCoroutineStarter.instance.StartCoroutine(FloorMendingWithDelay(avatar));
         }
@@ -94,12 +94,12 @@ namespace CustomAvatar
 
             float floorOffset = 0f;
 
-            if (_settings.enableFloorAdjust && avatar.avatar.isIKAvatar)
+            if (_settings.enableFloorAdjust && avatar.isIKAvatar)
             {
                 float playerEyeHeight = _playerEyeHeight;
-                float avatarEyeHeight = avatar.avatar.eyeHeight;
+                float avatarEyeHeight = avatar.eyeHeight;
 
-                floorOffset = playerEyeHeight - avatarEyeHeight * avatar.tracking.scale;
+                floorOffset = playerEyeHeight - avatarEyeHeight * avatar.scale;
 
                 if (_settings.moveFloorWithRoomAdjust)
                 {
@@ -110,7 +110,7 @@ namespace CustomAvatar
             floorOffset = (float) Math.Round(floorOffset, 3); // round to millimeter
 
             // apply offset
-			avatar.tracking.verticalPosition = floorOffset;
+			avatar.verticalPosition = floorOffset;
             
             // ReSharper disable Unity.PerformanceCriticalCodeInvocation
             GameObject menuPlayersPlace = GameObject.Find("MenuPlayersPlace");

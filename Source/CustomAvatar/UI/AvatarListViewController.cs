@@ -131,7 +131,7 @@ namespace CustomAvatar.UI
                 return string.Compare(a.name, b.name, StringComparison.CurrentCulture);
             });
 
-            int currentRow = _avatars.FindIndex(a => a.avatar?.fullPath == _avatarManager.currentlySpawnedAvatar?.avatar.fullPath);
+            int currentRow = _avatarManager.currentlySpawnedAvatar ? _avatars.FindIndex(a => a.avatar?.fullPath == _avatarManager.currentlySpawnedAvatar.avatar.fullPath) : 0;
             
             avatarList.tableView.ReloadData();
             avatarList.tableView.ScrollToCellWithIdx(currentRow, TableViewScroller.ScrollPositionType.Center, true);

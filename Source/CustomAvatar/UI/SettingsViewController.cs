@@ -150,7 +150,7 @@ namespace CustomAvatar.UI
 
             _clearButton.interactable = !_currentAvatarSettings.fullBodyCalibration.isDefault;
             // TODO same here
-            _calibrateButton.interactable = _avatarManager.currentlySpawnedAvatar.avatar.isIKAvatar && (_trackedDeviceManager.waist.tracked || _trackedDeviceManager.leftFoot.tracked || _trackedDeviceManager.rightFoot.tracked);
+            _calibrateButton.interactable = _avatarManager.currentlySpawnedAvatar.isIKAvatar && (_trackedDeviceManager.waist.tracked || _trackedDeviceManager.leftFoot.tracked || _trackedDeviceManager.rightFoot.tracked);
 
             _automaticCalibrationSetting.Value = _currentAvatarSettings.useAutomaticCalibration;
             _automaticCalibrationSetting.SetInteractable(avatar.avatar.descriptor.supportsAutomaticCalibration);
@@ -160,7 +160,7 @@ namespace CustomAvatar.UI
         private void OnInputDevicesChanged(TrackedDeviceState state, DeviceUse use)
         {
             // TODO check targets exist on avatar, e.g. isFbtCapable
-            _calibrateButton.interactable = (_avatarManager.currentlySpawnedAvatar?.avatar.isIKAvatar ?? false) && (_trackedDeviceManager.waist.tracked || _trackedDeviceManager.leftFoot.tracked || _trackedDeviceManager.rightFoot.tracked);
+            _calibrateButton.interactable = (_avatarManager.currentlySpawnedAvatar?.isIKAvatar ?? false) && (_trackedDeviceManager.waist.tracked || _trackedDeviceManager.leftFoot.tracked || _trackedDeviceManager.rightFoot.tracked);
         }
 
         #region Actions

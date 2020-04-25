@@ -14,26 +14,7 @@ namespace CustomAvatar.Avatar
 {
     internal class AvatarTracking : BodyAwareBehaviour
     {
-        public float verticalPosition
-        {
-	        get => transform.position.y - _initialPosition.y;
-	        set => transform.position = _initialPosition + value * Vector3.up;
-        }
-
-        public float scale
-        {
-	        get => transform.localScale.y / _initialScale.y;
-	        set
-	        {
-		        transform.localScale = _initialScale * value;
-		        _logger.Info("Avatar resized with scale: " + value);
-	        }
-        }
-
         private Settings.AvatarSpecificSettings _avatarSpecificSettings;
-
-        private Vector3 _initialPosition;
-        private Vector3 _initialScale;
 
         private Pose _initialPelvisPose;
         private Pose _initialLeftFootPose;
@@ -50,7 +31,7 @@ namespace CustomAvatar.Avatar
         private VRPlatformHelper _vrPlatformHelper;
         
         private AvatarInput _input;
-        private LoadedAvatar _avatar;
+        private SpawnedAvatar _avatar;
         private Settings _settings;
         private MainSettingsModelSO _mainSettingsModel;
         private ILogger _logger = new UnityDebugLogger<AvatarTracking>();
@@ -59,32 +40,21 @@ namespace CustomAvatar.Avatar
         #pragma warning disable IDE0051
         // ReSharper disable UnusedMember.Local
 
-        private void Awake()
-        {
-            _initialPosition = transform.localPosition;
-            _initialScale = transform.localScale;
-		}
-
         [Inject]
-        private void Inject(Settings settings, MainSettingsModelSO mainSettingsModel, ILoggerFactory loggerFactory, AvatarInput input, LoadedAvatar avatar)
+        private void Inject(Settings settings, MainSettingsModelSO mainSettingsModel, ILoggerFactory loggerFactory, AvatarInput input, SpawnedAvatar avatar)
         {
             _settings = settings;
             _mainSettingsModel = mainSettingsModel;
-            _logger = loggerFactory.CreateLogger<AvatarTracking>(avatar.descriptor.name);
+            _logger = loggerFactory.CreateLogger<AvatarTracking>(avatar.avatar.descriptor.name);
             _input = input;
             _avatar = avatar;
         }
 
         protected override void Start()
         {
-            if (_initialPosition.magnitude > 0.0f)
-            {
-                _logger.Warning("Avatar root position is not at origin; resizing by height and floor adjust may not work properly.");
-            }
-
             base.Start();
 
-            _avatarSpecificSettings = _settings.GetAvatarSettings(_avatar.fullPath);
+            _avatarSpecificSettings = _settings.GetAvatarSettings(_avatar.avatar.fullPath);
 
             _vrPlatformHelper = PersistentSingleton<VRPlatformHelper>.instance;
 
@@ -130,19 +100,19 @@ namespace CustomAvatar.Avatar
                 {
                     if (pelvis)
                     {
-                        pelvis.position = _initialPelvisPose.position * scale;
+                        pelvis.position = _initialPelvisPose.position * _avatar.scale;
                         pelvis.rotation = _initialPelvisPose.rotation;
                     }
 
                     if (leftLeg)
                     {
-                        leftLeg.position = _initialLeftFootPose.position * scale;
+                        leftLeg.position = _initialLeftFootPose.position * _avatar.scale;
                         leftLeg.rotation = _initialLeftFootPose.rotation;
                     }
 
                     if (rightLeg)
                     {
-                        rightLeg.position = _initialRightFootPose.position * scale;
+                        rightLeg.position = _initialRightFootPose.position * _avatar.scale;
                         rightLeg.rotation = _initialRightFootPose.rotation;
                     }
                 }
@@ -227,7 +197,7 @@ namespace CustomAvatar.Avatar
         private Vector3 AdjustTransformPosition(Vector3 original, Vector3 correction, Vector3 originalPosition)
         {
             Vector3 corrected = original + correction;
-            float y = verticalPosition;
+            float y = _avatar.verticalPosition;
 
             if (_settings.moveFloorWithRoomAdjust)
             {
