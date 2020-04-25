@@ -5,7 +5,6 @@ using CustomAvatar.Tracking;
 using System;
 using CustomAvatar.Logging;
 using CustomAvatar.Utilities;
-using TMPro;
 using UnityEngine;
 using UnityEngine.XR;
 using Zenject;
@@ -153,9 +152,14 @@ namespace CustomAvatar.Avatar
                     {
                         Pose correction = _avatarSpecificSettings.fullBodyCalibration.leftLeg;
 
+                        if (_avatarSpecificSettings.useAutomaticCalibration)
+                        {
+                            correction.position -= Vector3.forward * _settings.trackerOffsets.leftLegOffset;
+                        }
+
                         _prevLeftLegPose.position = Vector3.Lerp(_prevLeftLegPose.position, AdjustTransformPosition(leftFootPose.position, correction.position, _initialLeftFootPose.position), _settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
                         _prevLeftLegPose.rotation = Quaternion.Slerp(_prevLeftLegPose.rotation, leftFootPose.rotation * correction.rotation, _settings.fullBodyMotionSmoothing.feet.rotation * Time.deltaTime);
-                        
+
                         leftLeg.position = _prevLeftLegPose.position;
                         leftLeg.rotation = _prevLeftLegPose.rotation;
                     }
@@ -164,9 +168,14 @@ namespace CustomAvatar.Avatar
                     {
                         Pose correction = _avatarSpecificSettings.fullBodyCalibration.rightLeg;
 
+                        if (_avatarSpecificSettings.useAutomaticCalibration)
+                        {
+                            correction.position -= Vector3.forward * _settings.trackerOffsets.rightLegOffset;
+                        }
+
                         _prevRightLegPose.position = Vector3.Lerp(_prevRightLegPose.position, AdjustTransformPosition(rightFootPose.position, correction.position, _initialRightFootPose.position), _settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
                         _prevRightLegPose.rotation = Quaternion.Slerp(_prevRightLegPose.rotation, rightFootPose.rotation * correction.rotation, _settings.fullBodyMotionSmoothing.feet.rotation * Time.deltaTime);
-                        
+
                         rightLeg.position = _prevRightLegPose.position;
                         rightLeg.rotation = _prevRightLegPose.rotation;
                     }
@@ -175,9 +184,14 @@ namespace CustomAvatar.Avatar
                     {
                         Pose correction = _avatarSpecificSettings.fullBodyCalibration.pelvis;
 
+                        if (_avatarSpecificSettings.useAutomaticCalibration)
+                        {
+                            correction.position -= Vector3.forward * _settings.trackerOffsets.pelvisOffset;
+                        }
+
                         _prevPelvisPose.position = Vector3.Lerp(_prevPelvisPose.position, AdjustTransformPosition(pelvisPose.position, correction.position, _initialPelvisPose.position), _settings.fullBodyMotionSmoothing.waist.position * Time.deltaTime);
                         _prevPelvisPose.rotation = Quaternion.Slerp(_prevPelvisPose.rotation, pelvisPose.rotation * correction.rotation, _settings.fullBodyMotionSmoothing.waist.rotation * Time.deltaTime);
-                        
+
                         pelvis.position = _prevPelvisPose.position;
                         pelvis.rotation = _prevPelvisPose.rotation;
                     }

@@ -80,11 +80,6 @@ namespace CustomAvatar.Avatar
 
             _avatarSettings = _settings.GetAvatarSettings(_avatar.fullPath);
 
-            if (_avatarSettings == null)
-            {
-
-            }
-
             _vrikManager = GetComponentInChildren<VRIKManager>();
             _dynamicBones = GetComponentsInChildren<BeatSaberDynamicBone::DynamicBone>();
 

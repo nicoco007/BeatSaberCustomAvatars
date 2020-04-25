@@ -18,6 +18,14 @@
     </settings-container>
   </tab>
 
+  <tab tags="avatar-tabs" tab-name="Automatic FBT Offsets" anchor-max-y="0.8">
+    <settings-container>
+      <increment-setting id="pelvis-offset" text="Pelvis Offset" hover-hint="Horizontal distance between pelvis and tracker" min="-0.5" max="0.5" increment="0.01" on-change="pelvis-offset-change"></increment-setting>
+      <increment-setting id="left-foot-offset" text="Left Foot Offset" hover-hint="Horizontal distance between left heel and tracker" min="0" max="0.8" increment="0.01" on-change="left-foot-offset-change"></increment-setting>
+      <increment-setting id="right-foot-offset" text="Right Foot Offset" hover-hint="Horizontal distance between right heel and tracker" min="0" max="0.8" increment="0.01" on-change="right-foot-offset-change"></increment-setting>
+    </settings-container>
+  </tab>
+
   <tab tags="avatar-tabs" tab-name="Avatar Specific" anchor-max-y="0.8">
     <settings-container>
       <bool-setting id="automatic-calibration" text="Use automatic calibration" hover-hint="Must be supported by avatar" on-change="automatic-calibration-change"></bool-setting>

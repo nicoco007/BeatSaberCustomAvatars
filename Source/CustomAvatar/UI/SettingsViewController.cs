@@ -55,6 +55,10 @@ namespace CustomAvatar.UI
         [UIComponent("calibrate-fbt-on-start")] private BoolSetting _calibrateFullBodyTrackingOnStart;
         [UIComponent("automatic-calibration")] private BoolSetting _automaticCalibrationSetting;
 
+        [UIComponent("pelvis-offset")] private IncrementSetting _pelvisOffset;
+        [UIComponent("left-foot-offset")] private IncrementSetting _leftFootOffset;
+        [UIComponent("right-foot-offset")] private IncrementSetting _rightFootOffset;
+
         [UIComponent("automatic-calibration")] private HoverHint _automaticCalibrationHoverHint;
 
         #endregion
@@ -88,7 +92,7 @@ namespace CustomAvatar.UI
             _cameraNearClipPlane.Value = _settings.cameraNearClipPlane;
 
             OnAvatarChanged(_avatarManager.currentlySpawnedAvatar);
-            OnInputDevicesChanged();
+            OnInputDevicesChanged(null, DeviceUse.Unknown);
 
             _armSpanLabel.SetText($"{_settings.playerArmSpan:0.00} m");
 
@@ -101,13 +105,17 @@ namespace CustomAvatar.UI
             _greenMaterial.SetColor(kColor, new Color(0, 0.8f, 0, 1));
             _blueMaterial.SetColor(kColor, new Color(0, 0.5f, 1, 1));
 
+            _pelvisOffset.Value = _settings.trackerOffsets.pelvisOffset;
+            _leftFootOffset.Value = _settings.trackerOffsets.leftLegOffset;
+            _rightFootOffset.Value = _settings.trackerOffsets.rightLegOffset;
+
             _avatarManager.avatarChanged += OnAvatarChanged;
 
             // TODO unsub from all these
-            _trackedDeviceManager.deviceAdded += (state, use) => OnInputDevicesChanged();
-            _trackedDeviceManager.deviceRemoved += (state, use) => OnInputDevicesChanged();
-            _trackedDeviceManager.deviceTrackingAcquired += (state, use) => OnInputDevicesChanged();
-            _trackedDeviceManager.deviceTrackingLost += (state, use) => OnInputDevicesChanged();
+            _trackedDeviceManager.deviceAdded += OnInputDevicesChanged;
+            _trackedDeviceManager.deviceRemoved += OnInputDevicesChanged;
+            _trackedDeviceManager.deviceTrackingAcquired += OnInputDevicesChanged;
+            _trackedDeviceManager.deviceTrackingLost += OnInputDevicesChanged;
         }
 
         protected override void DidDeactivate(DeactivationType deactivationType)
@@ -115,6 +123,11 @@ namespace CustomAvatar.UI
             base.DidDeactivate(deactivationType);
 
             _avatarManager.avatarChanged -= OnAvatarChanged;
+
+            _trackedDeviceManager.deviceAdded -= OnInputDevicesChanged;
+            _trackedDeviceManager.deviceRemoved -= OnInputDevicesChanged;
+            _trackedDeviceManager.deviceTrackingAcquired -= OnInputDevicesChanged;
+            _trackedDeviceManager.deviceTrackingLost -= OnInputDevicesChanged;
 
             DisableCalibrationMode(false);
         }
@@ -144,7 +157,7 @@ namespace CustomAvatar.UI
             _automaticCalibrationHoverHint.text = avatar.avatar.descriptor.supportsAutomaticCalibration ? "Use automatic calibration instead of manual calibration" : "Not supported by current avatar";
         }
 
-        private void OnInputDevicesChanged()
+        private void OnInputDevicesChanged(TrackedDeviceState state, DeviceUse use)
         {
             // TODO check targets exist on avatar, e.g. isFbtCapable
             _calibrateButton.interactable = (_avatarManager.currentlySpawnedAvatar?.avatar.isIKAvatar ?? false) && (_trackedDeviceManager.waist.tracked || _trackedDeviceManager.leftFoot.tracked || _trackedDeviceManager.rightFoot.tracked);
@@ -257,6 +270,24 @@ namespace CustomAvatar.UI
             {
                 _logger.Error("Could not find main camera!");
             }
+        }
+
+        [UIAction("pelvis-offset-change")]
+        private void OnPelvisOffsetChanged(float value)
+        {
+            _settings.trackerOffsets.pelvisOffset = value;
+        }
+
+        [UIAction("left-foot-offset-change")]
+        private void OnLeftFootOffsetChanged(float value)
+        {
+            _settings.trackerOffsets.leftLegOffset = value;
+        }
+
+        [UIAction("right-foot-offset-change")]
+        private void OnRightFootOffsetChanged(float value)
+        {
+            _settings.trackerOffsets.rightLegOffset = value;
         }
 
         #endregion

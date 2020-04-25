@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using CustomAvatar.Exceptions;
 using CustomAvatar.Logging;
 using UnityEngine;
@@ -28,13 +29,11 @@ namespace CustomAvatar.Avatar
 
             _logger.Info($"Loading avatar from '{filePath}'");
 
-            AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(filePath);
+            AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(Path.Combine(PlayerAvatarManager.kCustomAvatarsPath, filePath));
 
-            AssetBundleRequest assetBundleRequest = assetBundleCreateRequest.assetBundle.LoadAssetWithSubAssetsAsync<GameObject>(kGameObjectName);
-            yield return assetBundleRequest;
-            assetBundleCreateRequest.assetBundle.Unload(false);
+            yield return assetBundleCreateRequest;
 
-            if (!assetBundleRequest.isDone || assetBundleRequest.asset == null)
+            if (!assetBundleCreateRequest.isDone || !assetBundleCreateRequest.assetBundle)
             {
                 var exception = new AvatarLoadException("Could not load asset bundle");
 
@@ -44,6 +43,24 @@ namespace CustomAvatar.Avatar
                 error?.Invoke(exception);
                 yield break;
             }
+
+            AssetBundleRequest assetBundleRequest = assetBundleCreateRequest.assetBundle.LoadAssetWithSubAssetsAsync<GameObject>(kGameObjectName);
+            yield return assetBundleRequest;
+
+            if (!assetBundleRequest.isDone || assetBundleRequest.asset == null)
+            {
+                assetBundleCreateRequest.assetBundle.Unload(true);
+
+                var exception = new AvatarLoadException("Could not load asset from asset bundle");
+
+                _logger.Error($"Failed to load avatar at '{filePath}'");
+                _logger.Error(exception);
+
+                error?.Invoke(exception);
+                yield break;
+            }
+
+            assetBundleCreateRequest.assetBundle.Unload(false);
                 
             try
             {

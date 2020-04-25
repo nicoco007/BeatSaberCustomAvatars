@@ -38,13 +38,49 @@ namespace CustomAvatar.UI
         protected override void DidActivate(bool firstActivation, ActivationType type)
         {
             base.DidActivate(firstActivation, type);
-
-            _avatarManager.avatarChanged += OnAvatarChanged;
             
-            _blankAvatarIcon = LoadTextureFromResource("CustomAvatar.Resources.mystery-man.png");
-            _noAvatarIcon = LoadTextureFromResource("CustomAvatar.Resources.ban.png");
+            if (firstActivation)
+            {
+                _tableCellTemplate = Resources.FindObjectsOfTypeAll<LevelListTableCell>().First(x => x.name == "LevelListTableCell");
+            
+                _blankAvatarIcon = LoadTextureFromResource("CustomAvatar.Resources.mystery-man.png");
+                _noAvatarIcon = LoadTextureFromResource("CustomAvatar.Resources.ban.png");
 
-            if (firstActivation) FirstActivation();
+                avatarList.tableView.SetPrivateField("_pageUpButton", upButton);
+                avatarList.tableView.SetPrivateField("_pageDownButton", downButton);
+                avatarList.tableView.SetPrivateField("_hideScrollButtonsIfNotNeeded", false);
+                
+                TableViewScroller scroller = avatarList.tableView.GetPrivateField<TableView, TableViewScroller>("_scroller");
+
+                upButton.onClick.AddListener(() =>
+                {
+                    scroller.PageScrollUp();
+                    avatarList.tableView.RefreshScrollButtons(false);
+                });
+
+                downButton.onClick.AddListener(() =>
+                {
+                    scroller.PageScrollDown();
+                    avatarList.tableView.RefreshScrollButtons(false);
+                });
+            
+                avatarList.tableView.dataSource = this;
+            }
+
+            if (type == ActivationType.AddedToHierarchy)
+            {
+                _avatarManager.avatarChanged += OnAvatarChanged;
+
+                _avatars.Clear();
+                _avatars.Add(new AvatarListItem("No Avatar", _noAvatarIcon));
+            
+                _avatarManager.GetAvatarsAsync(avatar =>
+                {
+                    _avatars.Add(new AvatarListItem(avatar));
+
+                    ReloadData();
+                });
+            }
         }
 
         private Texture2D LoadTextureFromResource(string resourceName)
@@ -61,45 +97,14 @@ namespace CustomAvatar.UI
             return texture;
         }
 
-        private void FirstActivation()
-        {
-            _tableCellTemplate = Resources.FindObjectsOfTypeAll<LevelListTableCell>().First(x => x.name == "LevelListTableCell");
-
-            avatarList.tableView.SetPrivateField("_pageUpButton", upButton);
-            avatarList.tableView.SetPrivateField("_pageDownButton", downButton);
-            avatarList.tableView.SetPrivateField("_hideScrollButtonsIfNotNeeded", false);
-
-            TableViewScroller scroller = avatarList.tableView.GetPrivateField<TableView, TableViewScroller>("_scroller");
-
-            upButton.onClick.AddListener(() =>
-            {
-                scroller.PageScrollUp();
-                avatarList.tableView.RefreshScrollButtons(false);
-            });
-
-            downButton.onClick.AddListener(() =>
-            {
-                scroller.PageScrollDown();
-                avatarList.tableView.RefreshScrollButtons(false);
-            });
-            
-            avatarList.tableView.dataSource = this;
-
-            _avatars.Add(new AvatarListItem("No Avatar", _noAvatarIcon));
-            
-            _avatarManager.GetAvatarsAsync(avatar =>
-            {
-                _avatars.Add(new AvatarListItem(avatar));
-
-                ReloadData();
-            });
-        }
-
         protected override void DidDeactivate(DeactivationType deactivationType)
         {
             base.DidDeactivate(deactivationType);
 
-            _avatarManager.avatarChanged -= OnAvatarChanged;
+            if (deactivationType == DeactivationType.RemovedFromHierarchy)
+            {
+                _avatarManager.avatarChanged -= OnAvatarChanged;
+            }
         }
 
         

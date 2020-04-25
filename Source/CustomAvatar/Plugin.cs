@@ -90,6 +90,8 @@ namespace CustomAvatar
 
             SceneManager.sceneLoaded -= OnSceneLoaded;
             SceneManager.sceneUnloaded -= OnSceneUnloaded;
+
+            _settingsManager.Save(_settings);
         }
 
         private void OnSceneLoaded(Scene newScene, LoadSceneMode mode)
@@ -139,8 +141,6 @@ namespace CustomAvatar
                 Object.Destroy(_lightingRig);
                 Object.Destroy(_mirrorContainer);
                 Object.Destroy(_avatarManager.currentlySpawnedAvatar);
-
-                _settingsManager.Save(_settings);
             }
         }
 
