@@ -84,9 +84,8 @@ namespace CustomAvatar.Avatar
                     _vrPlatformHelper.AdjustPlatformSpecificControllerTransform(XRNode.RightHand, rightHand, controllerPositionOffset, controllerRotationOffset);
                 }
 
-                // mirror offset for left hand
-                controllerPositionOffset.x *= -1;
-                controllerRotationOffset.y *= -1;
+                controllerPositionOffset = new Vector3(-controllerPositionOffset.x, controllerPositionOffset.y, controllerPositionOffset.z);
+                controllerRotationOffset = new Vector3(controllerRotationOffset.x, -controllerRotationOffset.y, -controllerRotationOffset.z);
 
                 if (leftHand && _input.TryGetLeftHandPose(out Pose leftHandPose))
                 {
@@ -124,11 +123,10 @@ namespace CustomAvatar.Avatar
 
                         if (_avatarSpecificSettings.useAutomaticCalibration)
                         {
-                            correction.position -= Vector3.forward * _settings.trackerOffsets.leftLegOffset;
+                            correction.position -= Vector3.up * _settings.trackerOffsets.leftLegOffset;
                         }
 
-                        _prevLeftLegPose.position = Vector3.Lerp(_prevLeftLegPose.position, AdjustTransformPosition(leftFootPose.position, correction.position, _initialLeftFootPose.position), _settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
-                        _prevLeftLegPose.rotation = Quaternion.Slerp(_prevLeftLegPose.rotation, leftFootPose.rotation * correction.rotation, _settings.fullBodyMotionSmoothing.feet.rotation * Time.deltaTime);
+                        _prevLeftLegPose = AdjustTrackedPointPose(_prevLeftLegPose, leftFootPose, correction, _initialLeftFootPose, _settings.fullBodyMotionSmoothing.feet);
 
                         leftLeg.position = _prevLeftLegPose.position;
                         leftLeg.rotation = _prevLeftLegPose.rotation;
@@ -140,11 +138,10 @@ namespace CustomAvatar.Avatar
 
                         if (_avatarSpecificSettings.useAutomaticCalibration)
                         {
-                            correction.position -= Vector3.forward * _settings.trackerOffsets.rightLegOffset;
+                            correction.position -= Vector3.up * _settings.trackerOffsets.rightLegOffset;
                         }
 
-                        _prevRightLegPose.position = Vector3.Lerp(_prevRightLegPose.position, AdjustTransformPosition(rightFootPose.position, correction.position, _initialRightFootPose.position), _settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
-                        _prevRightLegPose.rotation = Quaternion.Slerp(_prevRightLegPose.rotation, rightFootPose.rotation * correction.rotation, _settings.fullBodyMotionSmoothing.feet.rotation * Time.deltaTime);
+                        _prevRightLegPose = AdjustTrackedPointPose(_prevRightLegPose, rightFootPose, correction, _initialRightFootPose, _settings.fullBodyMotionSmoothing.feet);
 
                         rightLeg.position = _prevRightLegPose.position;
                         rightLeg.rotation = _prevRightLegPose.rotation;
@@ -159,8 +156,7 @@ namespace CustomAvatar.Avatar
                             correction.position -= Vector3.forward * _settings.trackerOffsets.pelvisOffset;
                         }
 
-                        _prevPelvisPose.position = Vector3.Lerp(_prevPelvisPose.position, AdjustTransformPosition(pelvisPose.position, correction.position, _initialPelvisPose.position), _settings.fullBodyMotionSmoothing.waist.position * Time.deltaTime);
-                        _prevPelvisPose.rotation = Quaternion.Slerp(_prevPelvisPose.rotation, pelvisPose.rotation * correction.rotation, _settings.fullBodyMotionSmoothing.waist.rotation * Time.deltaTime);
+                        _prevPelvisPose = AdjustTrackedPointPose(_prevPelvisPose, pelvisPose, correction, _initialPelvisPose, _settings.fullBodyMotionSmoothing.waist);
 
                         pelvis.position = _prevPelvisPose.position;
                         pelvis.rotation = _prevPelvisPose.rotation;
@@ -194,9 +190,11 @@ namespace CustomAvatar.Avatar
         #pragma warning restore IDE0051
         #endregion
 
-        private Vector3 AdjustTransformPosition(Vector3 original, Vector3 correction, Vector3 originalPosition)
+        private Pose AdjustTrackedPointPose(Pose previousPose, Pose currentPose, Pose correction, Pose initialPose, Settings.TrackedPointSmoothing smoothing)
         {
-            Vector3 corrected = original + correction;
+            Vector3 corrected = currentPose.position + currentPose.rotation * correction.position; // correction is forward-facing by definition
+            Quaternion correctedRotation = currentPose.rotation * correction.rotation;
+
             float y = _avatar.verticalPosition;
 
             if (_settings.moveFloorWithRoomAdjust)
@@ -204,7 +202,9 @@ namespace CustomAvatar.Avatar
                 y -= _mainSettingsModel.roomCenter.value.y;
             }
 
-            return new Vector3(corrected.x, corrected.y + (1 - originalPosition.y / _avatar.eyeHeight) * y, corrected.z);
+            corrected.y += (1 - initialPose.position.y / _avatar.eyeHeight) * y;
+
+            return new Pose(Vector3.Lerp(previousPose.position, corrected, smoothing.position), Quaternion.Slerp(previousPose.rotation, correctedRotation, smoothing.rotation));
         }
     }
 }
