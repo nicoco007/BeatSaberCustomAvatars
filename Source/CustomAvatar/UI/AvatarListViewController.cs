@@ -19,7 +19,7 @@ namespace CustomAvatar.UI
     {
         private const string kTableCellReuseIdentifier = "CustomAvatarsTableCell";
 
-        public override string ResourceName => "CustomAvatar.Views.AvatarListViewController.bsml";
+        public override string ResourceName => "CustomAvatar.Views.AvatarList.bsml";
 
         [UIComponent("avatar-list")] public CustomListTableData avatarList;
         [UIComponent("up-button")] public Button upButton;
@@ -70,13 +70,13 @@ namespace CustomAvatar.UI
             upButton.onClick.AddListener(() =>
             {
                 scroller.PageScrollUp();
-                avatarList.tableView.InvokePrivateMethod("RefreshScrollButtons", false);
+                avatarList.tableView.RefreshScrollButtons(false);
             });
 
             downButton.onClick.AddListener(() =>
             {
                 scroller.PageScrollDown();
-                avatarList.tableView.InvokePrivateMethod("RefreshScrollButtons", false);
+                avatarList.tableView.RefreshScrollButtons(false);
             });
             
             avatarList.tableView.dataSource = this;
@@ -85,14 +85,9 @@ namespace CustomAvatar.UI
             
             AvatarManager.instance.GetAvatarsAsync(avatar =>
             {
-                Plugin.logger.Info("Loaded avatar " + avatar.descriptor.name);
-
                 _avatars.Add(new AvatarListItem(avatar));
 
                 ReloadData();
-            }, ex =>
-            {
-                Plugin.logger.Error("Failed to load avatar: " + ex.Message);
             });
         }
 
@@ -127,7 +122,7 @@ namespace CustomAvatar.UI
                 return string.Compare(a.name, b.name, StringComparison.CurrentCulture);
             });
 
-            int currentRow = _avatars.FindIndex(a => a.avatar?.fullPath == AvatarManager.instance.currentlySpawnedAvatar?.customAvatar.fullPath);
+            int currentRow = _avatars.FindIndex(a => a.avatar?.fullPath == AvatarManager.instance.currentlySpawnedAvatar?.avatar.fullPath);
             
             avatarList.tableView.ReloadData();
             avatarList.tableView.ScrollToCellWithIdx(currentRow, TableViewScroller.ScrollPositionType.Center, true);

@@ -396,6 +396,21 @@ namespace CustomAvatar
         
         internal VRIK vrik;
 
+        public bool areReferencesFilled => references_root != null &&
+                                           references_pelvis != null &&
+                                           references_spine != null &&
+                                           references_head != null &&
+                                           references_leftUpperArm != null &&
+                                           references_leftForearm != null &&
+                                           references_leftHand != null &&
+                                           references_rightUpperArm != null &&
+                                           references_rightForearm != null &&
+                                           references_rightHand != null &&
+                                           (
+                                               (references_leftThigh == null && references_leftCalf == null && references_leftFoot == null && references_rightThigh == null && references_rightCalf == null && references_rightFoot == null) ||
+                                               (references_leftThigh != null && references_leftCalf != null && references_leftFoot != null && references_rightThigh != null && references_rightCalf != null && references_rightFoot != null)
+                                           );
+
         private void Reset()
         {
             AutoDetectReferences();

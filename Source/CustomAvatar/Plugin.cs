@@ -3,6 +3,7 @@ using IPA;
 using System;
 using System.Linq;
 using BeatSaberMarkupLanguage.MenuButtons;
+using CustomAvatar.Lighting;
 using CustomAvatar.UI;
 using CustomAvatar.Utilities;
 using UnityEngine;
@@ -28,19 +29,23 @@ namespace CustomAvatar
         [Init]
         public Plugin(Logger logger)
         {
-            Plugin.logger = logger;
             instance = this;
+            Plugin.logger = logger;
+            
+            SettingsManager.Load();
+            BeatSaberEvents.ApplyPatches();
         }
 
         [OnStart]
         public void OnStart()
         {
-            SettingsManager.LoadSettings();
-            AvatarManager.instance.LoadAvatarFromSettingsAsync();
             SceneManager.sceneLoaded += OnSceneLoaded;
 
             KeyboardInputHandler keyboardInputHandler = new GameObject(nameof(KeyboardInputHandler)).AddComponent<KeyboardInputHandler>();
             Object.DontDestroyOnLoad(keyboardInputHandler.gameObject);
+
+            ShaderLoader shaderLoader = new GameObject(nameof(ShaderLoader)).AddComponent<ShaderLoader>();
+            Object.DontDestroyOnLoad(shaderLoader.gameObject);
         }
 
         [OnExit]
@@ -54,7 +59,7 @@ namespace CustomAvatar
 
             SceneManager.sceneLoaded -= OnSceneLoaded;
 
-            SettingsManager.SaveSettings();
+            SettingsManager.Save();
         }
 
         public void OnSceneLoaded(Scene newScene, LoadSceneMode mode)
@@ -70,6 +75,12 @@ namespace CustomAvatar
                 }
             }
 
+            if (newScene.name == "PCInit")
+            {
+                SetUpLighting();
+                AvatarManager.instance.LoadAvatarFromSettingsAsync();
+            }
+
             if (newScene.name == "MenuCore")
             {
                 try
@@ -77,10 +88,8 @@ namespace CustomAvatar
                     MenuButtons.instance.RegisterButton(new MenuButton("Avatars", () =>
                     {
                         var mainFlowCoordinator = Resources.FindObjectsOfTypeAll<MainFlowCoordinator>().First();
-                        var flowCoordinator = new GameObject("AvatarListFlowCoordinator")
-                            .AddComponent<AvatarListFlowCoordinator>();
-                        mainFlowCoordinator.InvokePrivateMethod("PresentFlowCoordinator", flowCoordinator, null, true,
-                            false);
+                        var flowCoordinator = new GameObject(nameof(AvatarListFlowCoordinator)).AddComponent<AvatarListFlowCoordinator>();
+                        mainFlowCoordinator.InvokePrivateMethod("PresentFlowCoordinator", flowCoordinator, null, true, false);
                     }));
                 }
                 catch (Exception)
@@ -88,8 +97,9 @@ namespace CustomAvatar
                     logger.Warn("Failed to add menu button, spawning mirror instead");
 
                     _mirrorContainer = new GameObject();
-                    GameObject.DontDestroyOnLoad(_mirrorContainer);
-                    SharedCoroutineStarter.instance.StartCoroutine(MirrorHelper.SpawnMirror(new Vector3(0, 0, -1.5f), Quaternion.Euler(-90f, 180f, 0), new Vector3(0.50f, 1f, 0.25f), _mirrorContainer.transform));
+                    Object.DontDestroyOnLoad(_mirrorContainer);
+                    Vector2 mirrorSize = SettingsManager.settings.mirror.size;
+                    MirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, -1.5f), Quaternion.Euler(-90f, 180f, 0), mirrorSize, _mirrorContainer.transform);
                 }
             }
         }
@@ -123,6 +133,26 @@ namespace CustomAvatar
             logger.Debug("Adding third person culling mask to " + camera.name);
 
             camera.cullingMask &= ~(1 << AvatarLayers.OnlyInThirdPerson);
+        }
+
+        private void SetUpLighting()
+        {
+            if (SettingsManager.settings.lighting.enabled)
+            {
+                var lighting = new LightingRig();
+
+                foreach (Settings.LightDefinition lightDefinition in SettingsManager.settings.lighting.lights)
+                {
+                    lighting.AddLight(lightDefinition);
+                }
+
+                if (SettingsManager.settings.lighting.castShadows)
+                {
+                    QualitySettings.shadows = ShadowQuality.All;
+                    QualitySettings.shadowResolution = SettingsManager.settings.lighting.shadowResolution;
+                    QualitySettings.shadowDistance = 10;
+                }
+            }
         }
     }
 }

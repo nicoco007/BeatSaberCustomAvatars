@@ -13,9 +13,11 @@ namespace CustomAvatar.Avatar
     internal class AvatarIK : BodyAwareBehaviour
     {
         public AvatarInput input;
+        public LoadedAvatar avatar;
 
         private VRIK _vrik;
         private VRIKManager _vrikManager;
+        private Settings.AvatarSpecificSettings _avatarSettings;
 
         private bool _fixTransforms;
 
@@ -48,7 +50,26 @@ namespace CustomAvatar.Avatar
 
         protected override void Start()
         {
+            if (input == null)
+            {
+                Destroy(this);
+                throw new ArgumentNullException(nameof(input));
+            }
+
+            if (avatar == null)
+            {
+                Destroy(this);
+                throw new ArgumentNullException(nameof(avatar));
+            }
+
             base.Start();
+
+            _avatarSettings = SettingsManager.settings.GetAvatarSettings(avatar.fullPath);
+
+            if (_avatarSettings == null)
+            {
+
+            }
 
             _vrikManager = GetComponentInChildren<VRIKManager>();
             _dynamicBones = GetComponentsInChildren<BeatSaberDynamicBone::DynamicBone>();
@@ -119,6 +140,16 @@ namespace CustomAvatar.Avatar
         #pragma warning restore IDE0051
         #endregion
 
+        public void EnableCalibrationMode()
+        {
+            UpdateSolverTargets(true);
+        }
+
+        public void DisableCalibrationMode()
+        {
+            UpdateSolverTargets();
+        }
+
         private void OnInputChanged()
         {
             Plugin.logger.Info("Tracking device change detected, updating VRIK references");
@@ -133,12 +164,12 @@ namespace CustomAvatar.Avatar
 
         private void CreateTargetsIfMissing()
         {
-            _vrikManager.solver_spine_headTarget   = CreateTargetIfMissing(_vrikManager.solver_spine_headTarget,   _vrik.references.head,      _head);
-            _vrikManager.solver_leftArm_target     = CreateTargetIfMissing(_vrikManager.solver_leftArm_target,     _vrik.references.leftHand,  _leftHand);
-            _vrikManager.solver_rightArm_target    = CreateTargetIfMissing(_vrikManager.solver_rightArm_target,    _vrik.references.rightHand, _rightHand);
-            _vrikManager.solver_spine_pelvisTarget = CreateTargetIfMissing(_vrikManager.solver_spine_pelvisTarget, _vrik.references.pelvis,    _pelvis);
-            _vrikManager.solver_leftLeg_target     = CreateTargetIfMissing(_vrikManager.solver_leftLeg_target,     _vrik.references.leftToes ?? _vrik.references.leftFoot,  _leftLeg);
-            _vrikManager.solver_rightLeg_target    = CreateTargetIfMissing(_vrikManager.solver_rightLeg_target,    _vrik.references.rightToes ?? _vrik.references.rightFoot, _rightLeg);
+            _vrikManager.solver_spine_headTarget   = CreateTargetIfMissing(_vrikManager.solver_spine_headTarget,   _vrik.references.head,      head);
+            _vrikManager.solver_leftArm_target     = CreateTargetIfMissing(_vrikManager.solver_leftArm_target,     _vrik.references.leftHand,  leftHand);
+            _vrikManager.solver_rightArm_target    = CreateTargetIfMissing(_vrikManager.solver_rightArm_target,    _vrik.references.rightHand, rightHand);
+            _vrikManager.solver_spine_pelvisTarget = CreateTargetIfMissing(_vrikManager.solver_spine_pelvisTarget, _vrik.references.pelvis,    pelvis);
+            _vrikManager.solver_leftLeg_target     = CreateTargetIfMissing(_vrikManager.solver_leftLeg_target,     _vrik.references.leftToes ?? _vrik.references.leftFoot,  leftLeg);
+            _vrikManager.solver_rightLeg_target    = CreateTargetIfMissing(_vrikManager.solver_rightLeg_target,    _vrik.references.rightToes ?? _vrik.references.rightFoot, rightLeg);
         }
 
         private Transform CreateTargetIfMissing(Transform target, Transform reference, Transform parent)
@@ -156,7 +187,7 @@ namespace CustomAvatar.Avatar
             return newTarget;
         }
 
-        private void UpdateSolverTargets()
+        private void UpdateSolverTargets(bool forceEnableAll = false)
         {
             Plugin.logger.Info("Updating solver targets");
 
@@ -164,9 +195,15 @@ namespace CustomAvatar.Avatar
             _vrik.solver.leftArm.target    = _vrikManager.solver_leftArm_target;
             _vrik.solver.rightArm.target   = _vrikManager.solver_rightArm_target;
 
+            if (_vrikManager.solver_spine_maintainPelvisPosition > 0 && !_avatarSettings.allowMaintainPelvisPosition)
+            {
+                Plugin.logger.Warn("maintainPelvisPosition > 0 is not recommended because it can cause strange pelvis rotation issues. To allow maintainPelvisPosition > 0, please set allowMaintainPelvisPosition to true for your avatar in the configuration file.");
+                _vrik.solver.spine.maintainPelvisPosition = 0;
+            }
+
             Plugin.logger.Info("Updating conditional solver targets");
 
-            if (input.TryGetLeftFootPose(out _))
+            if (input.TryGetLeftFootPose(out _) || forceEnableAll)
             {
                 Plugin.logger.Debug("Left foot enabled");
                 _vrik.solver.leftLeg.target = _vrikManager.solver_leftLeg_target;
@@ -181,7 +218,7 @@ namespace CustomAvatar.Avatar
                 _vrik.solver.leftLeg.rotationWeight = 0;
             }
 
-            if (input.TryGetRightFootPose(out _))
+            if (input.TryGetRightFootPose(out _) || forceEnableAll)
             {
                 Plugin.logger.Debug("Right foot enabled");
                 _vrik.solver.rightLeg.target = _vrikManager.solver_rightLeg_target;
@@ -196,7 +233,7 @@ namespace CustomAvatar.Avatar
                 _vrik.solver.rightLeg.rotationWeight = 0;
             }
 
-            if (input.TryGetWaistPose(out _))
+            if (input.TryGetWaistPose(out _) || forceEnableAll)
             {
                 Plugin.logger.Debug("Pelvis enabled");
                 _vrik.solver.spine.pelvisTarget = _vrikManager.solver_spine_pelvisTarget;

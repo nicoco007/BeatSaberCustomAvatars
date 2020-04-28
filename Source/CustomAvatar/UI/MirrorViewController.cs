@@ -1,5 +1,5 @@
 using CustomAvatar.StereoRendering;
-using System.Collections.Generic;
+using CustomAvatar.Utilities;
 using UnityEngine;
 using HMUI;
 
@@ -7,10 +7,6 @@ namespace CustomAvatar.UI
 {
     internal class MirrorViewController : ViewController
     {
-        private static readonly Vector3 kMirrorPosition = new Vector3(0, 0, 1.5f); // origin is bottom center
-        private static readonly Quaternion kMirrorRotation = Quaternion.Euler(-90f, 0, 0);
-        private static readonly Vector3 kMirrorScale = new Vector3(0.50f, 1f, 0.25f);
-
         private GameObject _mirrorContainer;
 
         protected override void DidActivate(bool firstActivation, ActivationType activationType)
@@ -21,7 +17,8 @@ namespace CustomAvatar.UI
 
             if (firstActivation)
             {
-                StartCoroutine(MirrorHelper.SpawnMirror(kMirrorPosition, kMirrorRotation, kMirrorScale, _mirrorContainer.transform));
+                Vector2 mirrorSize = SettingsManager.settings.mirror.size;
+                MirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, 3f) + SettingsManager.settings.mirror.positionOffset, Quaternion.Euler(-90f, 0, 0), mirrorSize, _mirrorContainer.transform, new Vector3(0, mirrorSize.y / 2, 1.5f));
             }
         }
 

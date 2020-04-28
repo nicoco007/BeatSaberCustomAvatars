@@ -3,6 +3,7 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using CustomAvatar.Utilities;
 
 namespace CustomAvatar.StereoRendering
 {
@@ -154,8 +155,6 @@ namespace CustomAvatar.StereoRendering
         // render texture for stereo rendering
         private Dictionary<int, RenderTexture> leftEyeTextures = new Dictionary<int, RenderTexture>();
         private Dictionary<int, RenderTexture> rightEyeTextures = new Dictionary<int, RenderTexture>();
-
-        public float textureResolutionScale = 1.0f;
 
         // the materials for displaying render result
         private Material stereoMaterial;
@@ -324,8 +323,8 @@ namespace CustomAvatar.StereoRendering
             var rightEyeOffset = new Vector3(ipd / 2, 0, 0);
 
             int hash = detector.GetHashCode();
-            int renderWidth = (int)(textureResolutionScale * detector.Camera.pixelWidth);
-            int renderHeight = (int)(textureResolutionScale * detector.Camera.pixelHeight);
+            int renderWidth = (int)(SettingsManager.settings.mirror.renderScale * detector.Camera.pixelWidth);
+            int renderHeight = (int)(SettingsManager.settings.mirror.renderScale * detector.Camera.pixelHeight);
 
             if (!leftEyeTextures.ContainsKey(hash))
             {

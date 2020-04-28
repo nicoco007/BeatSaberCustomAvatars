@@ -12,6 +12,8 @@
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -28,6 +30,9 @@
     <DefineConstants>PLUGIN</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\Libraries\0Harmony.dll</HintPath>
+    </Reference>
     <Reference Include="BSML, Version=1.0.6.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\BSML.dll</HintPath>
@@ -138,6 +143,7 @@
     <Compile Include="AvatarLayers.cs" />
     <Compile Include="Avatar\AvatarFingerTracking.cs" />
     <Compile Include="Avatar\BodyAwareBehaviour.cs" />
+    <Compile Include="BeatSaberEvents.cs" />
     <Compile Include="KeyboardInputHandler.cs" />
     <Compile Include="SRApi\Eye\SRanipal_Eye.cs" />
     <Compile Include="SRApi\Eye\SRanipal_EyeData.cs" />
@@ -151,6 +157,8 @@
     <Compile Include="SRApi\SRanipal_API.cs" />
     <Compile Include="SRApi\SRanipal_Enums.cs" />
     <Compile Include="SRApi\SRWorks_Enums.cs" />
+    <Compile Include="Lighting\LightingRig.cs" />
+    <Compile Include="ShaderLoader.cs" />
     <Compile Include="UI\AvatarListItem.cs" />
     <Compile Include="AvatarManager.cs" />
     <Compile Include="AvatarTailor.cs" />
@@ -163,6 +171,7 @@
     <Compile Include="Tracking\Extensions.cs" />
     <Compile Include="Tracking\DeviceUse.cs" />
     <Compile Include="Tracking\VRAvatarInput.cs" />
+    <Compile Include="UI\BSMLExtensions.cs" />
     <Compile Include="Utilities\BeatSaberUtil.cs" />
     <Compile Include="Avatar\LoadedAvatar.cs" />
     <Compile Include="AvatarDescriptor.cs" />
@@ -173,11 +182,14 @@
     <Compile Include="Tracking\OpenVRWrapper.cs" />
     <Compile Include="PoseManager.cs" />
     <Compile Include="EventManager.cs" />
-    <Compile Include="Utilities\QuaternionJsonConverter.cs" />
-    <Compile Include="Utilities\PoseJsonConverter.cs" />
+    <Compile Include="Utilities\Converters\FloatJsonConverter.cs" />
+    <Compile Include="Utilities\Converters\PoseJsonConverter.cs" />
+    <Compile Include="Utilities\Converters\QuaternionJsonConverter.cs" />
     <Compile Include="Utilities\ReflectionExtensions.cs" />
-    <Compile Include="Utilities\Vector3JsonConverter.cs" />
     <Compile Include="Utilities\SettingsManager.cs" />
+    <Compile Include="Utilities\Converters\Vector2JsonConverter.cs" />
+    <Compile Include="Utilities\Converters\ColorJsonConverter.cs" />
+    <Compile Include="Utilities\Converters\Vector3JsonConverter.cs" />
     <Compile Include="VRIKManager.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -200,10 +212,10 @@
     <EmbeddedResource Include="manifest.json" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Views\AvatarListViewController.bsml" />
+    <EmbeddedResource Include="Views\AvatarList.bsml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Views\SettingsViewController.bsml" />
+    <EmbeddedResource Include="Views\Settings.bsml" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\icon.png" />

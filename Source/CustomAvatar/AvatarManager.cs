@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using CustomAvatar.Avatar;
@@ -40,6 +42,7 @@ namespace CustomAvatar
             Plugin.instance.sceneTransitionDidFinish += OnSceneTransitionDidFinish;
 
             SceneManager.sceneLoaded += OnSceneLoaded;
+            BeatSaberEvents.onPlayerHeightChanged += (height) => ResizeCurrentAvatar();
         }
 
         ~AvatarManager()
@@ -49,7 +52,7 @@ namespace CustomAvatar
             SceneManager.sceneLoaded -= OnSceneLoaded;
         }
 
-        public void GetAvatarsAsync(Action<LoadedAvatar> success, Action<Exception> error)
+        public void GetAvatarsAsync(Action<LoadedAvatar> success = null, Action<Exception> error = null)
         {
             Plugin.logger.Info("Loading all avatars from " + kCustomAvatarsPath);
 
@@ -79,52 +82,60 @@ namespace CustomAvatar
 
         public void SwitchToAvatarAsync(string filePath)
         {
-            SharedCoroutineStarter.instance.StartCoroutine(LoadedAvatar.FromFileCoroutine(filePath, avatar =>
+            if (string.IsNullOrEmpty(filePath))
             {
-                Plugin.logger.Info("Successfully loaded avatar " + avatar.descriptor.name);
-                SwitchToAvatar(avatar);
-            }, ex =>
-            {
-                Plugin.logger.Error("Failed to load avatar: " + ex.Message);
-            }));
+                SwitchToAvatar(null);
+                return;
+            }
+
+            SharedCoroutineStarter.instance.StartCoroutine(LoadedAvatar.FromFileCoroutine(filePath, SwitchToAvatar));
         }
 
         public void SwitchToAvatar(LoadedAvatar avatar)
         {
-            if (currentlySpawnedAvatar?.customAvatar == avatar) return;
+            if (currentlySpawnedAvatar?.avatar == avatar) return;
 
             currentlySpawnedAvatar?.Destroy();
             currentlySpawnedAvatar = null;
 
             SettingsManager.settings.previousAvatarPath = avatar?.fullPath;
 
-            if (avatar == null) return;
+            if (avatar == null)
+            {
+                Plugin.logger.Info("No avatar selected");
+                avatarChanged?.Invoke(null);
+                return;
+            }
 
             currentlySpawnedAvatar = SpawnAvatar(avatar, new VRAvatarInput());
 
-            avatarChanged?.Invoke(currentlySpawnedAvatar);
-
             ResizeCurrentAvatar();
             currentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
+
+            avatarChanged?.Invoke(currentlySpawnedAvatar);
         }
 
         public void SwitchToNextAvatar()
         {
-            string[] files = GetAvatarFileNames();
-            int index = Array.IndexOf(files, currentlySpawnedAvatar.customAvatar.fullPath);
+            List<string> files = GetAvatarFileNames();
+            files.Insert(0, null);
 
-            index = (index + 1) % files.Length;
+            int index = files.IndexOf(currentlySpawnedAvatar?.avatar.fullPath);
+
+            index = (index + 1) % files.Count;
 
             SwitchToAvatarAsync(files[index]);
         }
 
         public void SwitchToPreviousAvatar()
         {
-            string[] files = GetAvatarFileNames();
-            int index = Array.IndexOf(files, currentlySpawnedAvatar.customAvatar.fullPath);
+            List<string> files = GetAvatarFileNames();
+            files.Insert(0, null);
+            
+            int index = files.IndexOf(currentlySpawnedAvatar?.avatar.fullPath);
 
-            index = (index + files.Length - 1) % files.Length;
-
+            index = (index + files.Count - 1) % files.Count;
+            
             SwitchToAvatarAsync(files[index]);
         }
 
@@ -138,12 +149,14 @@ namespace CustomAvatar
 
         private void OnSceneLoaded(Scene newScene, LoadSceneMode mode)
         {
-            currentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
-            currentlySpawnedAvatar?.eventsPlayer?.Restart();
+            if (currentlySpawnedAvatar == null) return;
 
-            if (newScene.name == "HealthWarning" && SettingsManager.settings.calibrateFullBodyTrackingOnStart)
+            currentlySpawnedAvatar.OnFirstPersonEnabledChanged();
+            currentlySpawnedAvatar.eventsPlayer?.Restart();
+
+            if (newScene.name == "PCInit" && SettingsManager.settings.calibrateFullBodyTrackingOnStart && SettingsManager.settings.GetAvatarSettings(currentlySpawnedAvatar.avatar.fullPath).useAutomaticCalibration)
             {
-                avatarTailor.CalibrateFullBodyTracking();
+                avatarTailor.CalibrateFullBodyTrackingAuto(currentlySpawnedAvatar);
             }
 
             ResizeCurrentAvatar();
@@ -176,9 +189,9 @@ namespace CustomAvatar
             return spawnedAvatar;
         }
 
-        private string[] GetAvatarFileNames()
+        private List<string> GetAvatarFileNames()
         {
-            return Directory.GetFiles(kCustomAvatarsPath, "*.avatar").Select(f => GetRelativePath(kCustomAvatarsPath, f)).ToArray();
+            return Directory.GetFiles(kCustomAvatarsPath, "*.avatar").Select(f => GetRelativePath(kCustomAvatarsPath, f)).ToList();
         }
 
         private string GetRelativePath(string rootDirectoryPath, string path)

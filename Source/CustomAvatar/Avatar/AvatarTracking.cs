@@ -13,8 +13,8 @@ namespace CustomAvatar.Avatar
     {
         public float verticalPosition
         {
-	        get => transform.position.y;
-	        set => transform.position = new Vector3(0, value, 0);
+	        get => transform.position.y - _initialPosition.y;
+	        set => transform.position = _initialPosition + value * Vector3.up;
         }
 
         public float scale
@@ -28,8 +28,11 @@ namespace CustomAvatar.Avatar
         }
 
         public AvatarInput input;
-        public LoadedAvatar customAvatar;
-		
+        public LoadedAvatar avatar;
+
+        private Settings.AvatarSpecificSettings _avatarSpecificSettings;
+
+        private Vector3 _initialPosition;
         private Vector3 _initialScale;
 
         private Pose _initialPelvisPose;
@@ -42,6 +45,8 @@ namespace CustomAvatar.Avatar
         private Pose _prevLeftLegPose = Pose.identity;
         private Pose _prevRightLegPose = Pose.identity;
 
+        public bool isCalibrationModeEnabled = false;
+
         private VRPlatformHelper _vrPlatformHelper;
 
         #region Behaviour Lifecycle
@@ -50,112 +55,144 @@ namespace CustomAvatar.Avatar
 
         private void Awake()
         {
+            _initialPosition = transform.localPosition;
             _initialScale = transform.localScale;
+
+            if (_initialPosition.magnitude > 0.0f)
+            {
+                Plugin.logger.Warn("Avatar root position is not at origin; resizing by height and floor adjust may not work properly.");
+            }
 		}
 
         protected override void Start()
         {
-            base.Start();
-
             if (input == null)
             {
                 Destroy(this);
                 throw new ArgumentNullException(nameof(input));
             }
 
-            if (customAvatar == null)
+            if (avatar == null)
             {
                 Destroy(this);
-                throw new ArgumentNullException(nameof(customAvatar));
+                throw new ArgumentNullException(nameof(avatar));
             }
-            
+
+            base.Start();
+
+            _avatarSpecificSettings = SettingsManager.settings.GetAvatarSettings(avatar.fullPath);
+
             _vrPlatformHelper = PersistentSingleton<VRPlatformHelper>.instance;
 
-            if (_pelvis) _initialPelvisPose = new Pose(_pelvis.position, _pelvis.rotation);
-            if (_leftLeg) _initialLeftFootPose = new Pose(_leftLeg.position, _leftLeg.rotation);
-            if (_rightLeg) _initialRightFootPose = new Pose(_rightLeg.position, _rightLeg.rotation);
+            if (pelvis) _initialPelvisPose = new Pose(pelvis.position, pelvis.rotation);
+            if (leftLeg) _initialLeftFootPose = new Pose(leftLeg.position, leftLeg.rotation);
+            if (rightLeg) _initialRightFootPose = new Pose(rightLeg.position, rightLeg.rotation);
         }
 
         private void LateUpdate()
         {
             try
             {
-                if (_head && input.TryGetHeadPose(out Pose headPose))
+                if (head && input.TryGetHeadPose(out Pose headPose))
                 {
-                    _head.position = headPose.position;
-                    _head.rotation = headPose.rotation;
+                    head.position = headPose.position;
+                    head.rotation = headPose.rotation;
                 }
                 
                 Vector3 controllerPositionOffset = BeatSaberUtil.GetControllerPositionOffset();
                 Vector3 controllerRotationOffset = BeatSaberUtil.GetControllerRotationOffset();
 
-                if (_rightHand && input.TryGetRightHandPose(out Pose rightHandPose))
+                if (rightHand && input.TryGetRightHandPose(out Pose rightHandPose))
                 {
-                    _rightHand.position = rightHandPose.position;
-                    _rightHand.rotation = rightHandPose.rotation;
+                    rightHand.position = rightHandPose.position;
+                    rightHand.rotation = rightHandPose.rotation;
                     
-                    _vrPlatformHelper.AdjustPlatformSpecificControllerTransform(XRNode.RightHand, _rightHand, controllerPositionOffset, controllerRotationOffset);
-                }
-                
-                controllerPositionOffset = new Vector3(-controllerPositionOffset.x, controllerPositionOffset.y, controllerPositionOffset.z);
-                controllerRotationOffset = new Vector3(controllerRotationOffset.x, -controllerRotationOffset.y, controllerRotationOffset.z);
-
-                if (_leftHand && input.TryGetLeftHandPose(out Pose leftHandPose))
-                {
-                    _leftHand.position = leftHandPose.position;
-                    _leftHand.rotation = leftHandPose.rotation;
-
-                    _vrPlatformHelper.AdjustPlatformSpecificControllerTransform(XRNode.LeftHand, _leftHand, controllerPositionOffset, controllerRotationOffset);
+                    _vrPlatformHelper.AdjustPlatformSpecificControllerTransform(XRNode.RightHand, rightHand, controllerPositionOffset, controllerRotationOffset);
                 }
 
-                if (_leftLeg && input.TryGetLeftFootPose(out Pose leftFootPose))
-                {
-                    Pose correction = SettingsManager.settings.fullBodyCalibration.leftLeg;
+                // mirror offset for left hand
+                controllerPositionOffset.x *= -1;
+                controllerRotationOffset.y *= -1;
 
-                    _prevLeftLegPose.position = Vector3.Lerp(_prevLeftLegPose.position, AdjustTransformPosition(leftFootPose.position, correction.position, _initialLeftFootPose.position), SettingsManager.settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
-                    _prevLeftLegPose.rotation = Quaternion.Slerp(_prevLeftLegPose.rotation, leftFootPose.rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.feet.rotation * Time.deltaTime);
-                    
-                    _leftLeg.position = _prevLeftLegPose.position;
-                    _leftLeg.rotation = _prevLeftLegPose.rotation;
+                if (leftHand && input.TryGetLeftHandPose(out Pose leftHandPose))
+                {
+                    leftHand.position = leftHandPose.position;
+                    leftHand.rotation = leftHandPose.rotation;
+
+                    _vrPlatformHelper.AdjustPlatformSpecificControllerTransform(XRNode.LeftHand, leftHand, controllerPositionOffset, controllerRotationOffset);
                 }
 
-                if (_rightLeg && input.TryGetRightFootPose(out Pose rightFootPose))
+                if (isCalibrationModeEnabled)
                 {
-                    Pose correction = SettingsManager.settings.fullBodyCalibration.rightLeg;
+                    if (pelvis)
+                    {
+                        pelvis.position = _initialPelvisPose.position * scale;
+                        pelvis.rotation = _initialPelvisPose.rotation;
+                    }
 
-                    _prevRightLegPose.position = Vector3.Lerp(_prevRightLegPose.position, AdjustTransformPosition(rightFootPose.position, correction.position, _initialRightFootPose.position), SettingsManager.settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
-                    _prevRightLegPose.rotation = Quaternion.Slerp(_prevRightLegPose.rotation, rightFootPose.rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.feet.rotation * Time.deltaTime);
-                    
-                    _rightLeg.position = _prevRightLegPose.position;
-                    _rightLeg.rotation = _prevRightLegPose.rotation;
+                    if (leftLeg)
+                    {
+                        leftLeg.position = _initialLeftFootPose.position * scale;
+                        leftLeg.rotation = _initialLeftFootPose.rotation;
+                    }
+
+                    if (rightLeg)
+                    {
+                        rightLeg.position = _initialRightFootPose.position * scale;
+                        rightLeg.rotation = _initialRightFootPose.rotation;
+                    }
+                }
+                else
+                {
+                    if (leftLeg && input.TryGetLeftFootPose(out Pose leftFootPose))
+                    {
+                        Pose correction = _avatarSpecificSettings.fullBodyCalibration.leftLeg;
+
+                        _prevLeftLegPose.position = Vector3.Lerp(_prevLeftLegPose.position, AdjustTransformPosition(leftFootPose.position, correction.position, _initialLeftFootPose.position), SettingsManager.settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
+                        _prevLeftLegPose.rotation = Quaternion.Slerp(_prevLeftLegPose.rotation, leftFootPose.rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.feet.rotation * Time.deltaTime);
+                        
+                        leftLeg.position = _prevLeftLegPose.position;
+                        leftLeg.rotation = _prevLeftLegPose.rotation;
+                    }
+
+                    if (rightLeg && input.TryGetRightFootPose(out Pose rightFootPose))
+                    {
+                        Pose correction = _avatarSpecificSettings.fullBodyCalibration.rightLeg;
+
+                        _prevRightLegPose.position = Vector3.Lerp(_prevRightLegPose.position, AdjustTransformPosition(rightFootPose.position, correction.position, _initialRightFootPose.position), SettingsManager.settings.fullBodyMotionSmoothing.feet.position * Time.deltaTime);
+                        _prevRightLegPose.rotation = Quaternion.Slerp(_prevRightLegPose.rotation, rightFootPose.rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.feet.rotation * Time.deltaTime);
+                        
+                        rightLeg.position = _prevRightLegPose.position;
+                        rightLeg.rotation = _prevRightLegPose.rotation;
+                    }
+
+                    if (pelvis && input.TryGetWaistPose(out Pose pelvisPose))
+                    {
+                        Pose correction = _avatarSpecificSettings.fullBodyCalibration.pelvis;
+
+                        _prevPelvisPose.position = Vector3.Lerp(_prevPelvisPose.position, AdjustTransformPosition(pelvisPose.position, correction.position, _initialPelvisPose.position), SettingsManager.settings.fullBodyMotionSmoothing.waist.position * Time.deltaTime);
+                        _prevPelvisPose.rotation = Quaternion.Slerp(_prevPelvisPose.rotation, pelvisPose.rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.waist.rotation * Time.deltaTime);
+                        
+                        pelvis.position = _prevPelvisPose.position;
+                        pelvis.rotation = _prevPelvisPose.rotation;
+                    }
                 }
 
-                if (_pelvis && input.TryGetWaistPose(out Pose pelvisPose))
+                if (body)
                 {
-                    Pose correction = SettingsManager.settings.fullBodyCalibration.pelvis;
+                    body.position = head.position - (head.up * 0.1f);
 
-                    _prevPelvisPose.position = Vector3.Lerp(_prevPelvisPose.position, AdjustTransformPosition(pelvisPose.position, correction.position, _initialPelvisPose.position), SettingsManager.settings.fullBodyMotionSmoothing.waist.position * Time.deltaTime);
-                    _prevPelvisPose.rotation = Quaternion.Slerp(_prevPelvisPose.rotation, pelvisPose.rotation * correction.rotation, SettingsManager.settings.fullBodyMotionSmoothing.waist.rotation * Time.deltaTime);
-                    
-                    _pelvis.position = _prevPelvisPose.position;
-                    _pelvis.rotation = _prevPelvisPose.rotation;
-                }
+                    var vel = new Vector3(body.localPosition.x - _prevBodyLocalPosition.x, 0.0f,
+                        body.localPosition.z - _prevBodyLocalPosition.z);
 
-                if (_body)
-                {
-                    _body.position = _head.position - (_head.up * 0.1f);
-
-                    var vel = new Vector3(_body.localPosition.x - _prevBodyLocalPosition.x, 0.0f,
-                        _body.localPosition.z - _prevBodyLocalPosition.z);
-
-                    var rot = Quaternion.Euler(0.0f, _head.localEulerAngles.y, 0.0f);
+                    var rot = Quaternion.Euler(0.0f, head.localEulerAngles.y, 0.0f);
                     var tiltAxis = Vector3.Cross(transform.up, vel);
 
-                    _body.localRotation = Quaternion.Lerp(_body.localRotation,
+                    body.localRotation = Quaternion.Lerp(body.localRotation,
                         Quaternion.AngleAxis(vel.magnitude * 1250.0f, tiltAxis) * rot,
                         Time.deltaTime * 10.0f);
 
-                    _prevBodyLocalPosition = _body.localPosition;
+                    _prevBodyLocalPosition = body.localPosition;
                 }
             }
             catch (Exception e)
@@ -178,7 +215,7 @@ namespace CustomAvatar.Avatar
                 y -= BeatSaberUtil.GetRoomCenter().y;
             }
 
-            return new Vector3(corrected.x, corrected.y + (1 - originalPosition.y / customAvatar.eyeHeight) * y, corrected.z);
+            return new Vector3(corrected.x, corrected.y + (1 - originalPosition.y / avatar.eyeHeight) * y, corrected.z);
         }
     }
 }

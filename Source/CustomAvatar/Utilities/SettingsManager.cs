@@ -1,15 +1,19 @@
-using System;
+﻿using System;
 using System.IO;
 using Newtonsoft.Json;
+using CustomAvatar.Utilities.Converters;
 
 namespace CustomAvatar.Utilities
 {
-    internal static class SettingsManager
+    internal class SettingsManager
     {
         public static readonly string kSettingsPath = Path.Combine(Environment.CurrentDirectory, "UserData", "CustomAvatars.json");
+
         public static Settings settings { get; private set; }
 
-        public static void LoadSettings()
+        private static bool _hasReset;
+
+        public static void Load()
         {
             Plugin.logger.Info("Loading settings from " + kSettingsPath);
 
@@ -32,15 +36,18 @@ namespace CustomAvatar.Utilities
             }
             catch (Exception ex)
             {
-                Plugin.logger.Error("Failed to load settings from file, using default settings");
+                Plugin.logger.Error("Failed to load settings from file; using default settings");
                 Plugin.logger.Error(ex);
 
+                _hasReset = true;
                 settings = new Settings();
             }
         }
 
-        public static void SaveSettings()
+        public static void Save()
         {
+            if (_hasReset) return;
+
             Plugin.logger.Info("Saving settings to " + kSettingsPath);
 
             using (var writer = new StreamWriter(kSettingsPath))
@@ -58,7 +65,7 @@ namespace CustomAvatar.Utilities
             {
                 Formatting = Formatting.Indented,
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                Converters = { new Vector3JsonConverter(), new QuaternionJsonConverter(), new PoseJsonConverter() }
+                Converters = { new Vector2JsonConverter(), new Vector3JsonConverter(), new QuaternionJsonConverter(), new PoseJsonConverter(), new FloatJsonConverter(), new ColorJsonConverter() }
             };
         }
     }

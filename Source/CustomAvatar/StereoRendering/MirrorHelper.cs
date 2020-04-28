@@ -1,42 +1,24 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace CustomAvatar.StereoRendering
 {
     internal static class MirrorHelper
     {
-        public static IEnumerator<AsyncOperation> SpawnMirror(Vector3 position, Quaternion rotation, Vector3 scale, Transform container)
+        private static readonly int kCutout = Shader.PropertyToID("_Cutout");
+
+        public static void CreateMirror(Vector3 position, Quaternion rotation, Vector2 size, Transform container, Vector3? origin = null)
         {
-            AssetBundleCreateRequest shadersBundleCreateRequest = AssetBundle.LoadFromFileAsync("CustomAvatars/Shaders/customavatars.assetbundle");
-            yield return shadersBundleCreateRequest;
-
-            if (!shadersBundleCreateRequest.isDone || shadersBundleCreateRequest.assetBundle == null)
-            {
-                Plugin.logger.Error("Failed to load stereo mirror shader");
-                yield break;
-            }
-
-            AssetBundleRequest assetBundleRequest = shadersBundleCreateRequest.assetBundle.LoadAssetAsync<Shader>("Assets/Shaders/StereoRenderShader-Unlit.shader");
-            yield return assetBundleRequest;
-            shadersBundleCreateRequest.assetBundle.Unload(false);
-
-            if (!assetBundleRequest.isDone || assetBundleRequest.asset == null)
-            {
-                Plugin.logger.Error("Failed to load stereo mirror shader");
-                yield break;
-            }
-
-            Shader stereoRenderShader = assetBundleRequest.asset as Shader;
+            Vector3 scale = new Vector3(size.x / 10, 1, size.y / 10); // plane is 10 units in size at scale 1, width is x and height is z
 
             GameObject mirrorPlane = GameObject.CreatePrimitive(PrimitiveType.Plane);
             mirrorPlane.transform.SetParent(container);
             mirrorPlane.name = "Stereo Mirror";
             mirrorPlane.transform.localScale = scale;
-            mirrorPlane.transform.localPosition = position + new Vector3(0, scale.z * 5, 0); // plane is 10 units in size at scale 1
+            mirrorPlane.transform.localPosition = position;
             mirrorPlane.transform.localRotation = rotation;
 
-            Material material = new Material(stereoRenderShader);
-            material.SetFloat("_Cutout", 0.01f);
+            Material material = new Material(ShaderLoader.stereoMirrorShader);
+            material.SetFloat(kCutout, 0.01f);
             
             Renderer renderer = mirrorPlane.GetComponent<Renderer>();
             renderer.sharedMaterial = material;
@@ -59,7 +41,7 @@ namespace CustomAvatar.StereoRendering
             stereoRenderer.stereoCameraEye = stereoCameraEye;
             stereoRenderer.isMirror = true;
             stereoRenderer.useScissor = false;
-            stereoRenderer.canvasOriginPos = mirrorPlane.transform.position + new Vector3(-10f, 0, 0);
+            stereoRenderer.canvasOriginPos = origin ?? mirrorPlane.transform.position;
             stereoRenderer.canvasOriginRot = mirrorPlane.transform.rotation;
         }
     }

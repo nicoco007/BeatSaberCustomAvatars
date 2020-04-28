@@ -9,6 +9,7 @@ namespace CustomAvatar
         public new string name;
         public string author;
         public bool allowHeightCalibration = true;
+        public bool supportsAutomaticCalibration = false;
         public Sprite cover;
 
         // Legacy stuff
