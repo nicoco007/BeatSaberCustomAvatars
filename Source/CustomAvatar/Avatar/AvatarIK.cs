@@ -32,6 +32,8 @@ namespace CustomAvatar.Avatar
         private LoadedAvatar _avatar;
         private Settings _settings;
         private ILogger _logger;
+
+        private bool _isCalibrationModeEnabled = false;
         
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
@@ -142,6 +144,7 @@ namespace CustomAvatar.Avatar
 
         private void OnDestroy()
         {
+            _vrikManager.referencesUpdated -= OnReferencesUpdated;
             _input.inputChanged -= OnInputChanged;
         }
 
@@ -151,11 +154,13 @@ namespace CustomAvatar.Avatar
 
         public void EnableCalibrationMode()
         {
-            UpdateSolverTargets(true);
+            _isCalibrationModeEnabled = true;
+            UpdateSolverTargets();
         }
 
         public void DisableCalibrationMode()
         {
+            _isCalibrationModeEnabled = false;
             UpdateSolverTargets();
         }
 
@@ -196,7 +201,7 @@ namespace CustomAvatar.Avatar
             return newTarget;
         }
 
-        private void UpdateSolverTargets(bool forceEnableAll = false)
+        private void UpdateSolverTargets()
         {
             _logger.Info("Updating solver targets");
 
@@ -212,7 +217,7 @@ namespace CustomAvatar.Avatar
 
             _logger.Info("Updating conditional solver targets");
 
-            if (_input.TryGetLeftFootPose(out _) || forceEnableAll)
+            if (_input.TryGetLeftFootPose(out _) || _isCalibrationModeEnabled)
             {
                 _logger.Debug("Left foot enabled");
                 _vrik.solver.leftLeg.target = _vrikManager.solver_leftLeg_target;
@@ -227,7 +232,7 @@ namespace CustomAvatar.Avatar
                 _vrik.solver.leftLeg.rotationWeight = 0;
             }
 
-            if (_input.TryGetRightFootPose(out _) || forceEnableAll)
+            if (_input.TryGetRightFootPose(out _) || _isCalibrationModeEnabled)
             {
                 _logger.Debug("Right foot enabled");
                 _vrik.solver.rightLeg.target = _vrikManager.solver_rightLeg_target;
@@ -242,7 +247,7 @@ namespace CustomAvatar.Avatar
                 _vrik.solver.rightLeg.rotationWeight = 0;
             }
 
-            if (_input.TryGetWaistPose(out _) || forceEnableAll)
+            if (_input.TryGetWaistPose(out _) || _isCalibrationModeEnabled)
             {
                 _logger.Debug("Pelvis enabled");
                 _vrik.solver.spine.pelvisTarget = _vrikManager.solver_spine_pelvisTarget;

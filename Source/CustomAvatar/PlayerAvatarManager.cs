@@ -155,7 +155,7 @@ namespace CustomAvatar
 
             if (newScene.name == "PCInit" && _settings.calibrateFullBodyTrackingOnStart && _settings.GetAvatarSettings(currentlySpawnedAvatar.avatar.fullPath).useAutomaticCalibration)
             {
-                _avatarTailor.CalibrateFullBodyTrackingAuto(currentlySpawnedAvatar);
+                _avatarTailor.CalibrateFullBodyTrackingAuto();
             }
 
             ResizeCurrentAvatar();

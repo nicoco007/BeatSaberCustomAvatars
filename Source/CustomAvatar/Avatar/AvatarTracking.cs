@@ -119,11 +119,16 @@ namespace CustomAvatar.Avatar
                 {
                     if (leftLeg && _input.TryGetLeftFootPose(out Pose leftFootPose))
                     {
-                        Pose correction = _avatarSpecificSettings.fullBodyCalibration.leftLeg;
+                        Pose correction;
 
                         if (_avatarSpecificSettings.useAutomaticCalibration)
                         {
-                            correction.position -= Vector3.up * _settings.trackerOffsets.leftLegOffset;
+                            correction = _settings.automaticCalibration.leftLeg;
+                            correction.position -= Vector3.up * _settings.automaticCalibration.leftLegOffset;
+                        }
+                        else
+                        {
+                            correction = _avatarSpecificSettings.fullBodyCalibration.leftLeg;
                         }
 
                         _prevLeftLegPose = AdjustTrackedPointPose(_prevLeftLegPose, leftFootPose, correction, _initialLeftFootPose, _settings.fullBodyMotionSmoothing.feet);
@@ -134,11 +139,16 @@ namespace CustomAvatar.Avatar
 
                     if (rightLeg && _input.TryGetRightFootPose(out Pose rightFootPose))
                     {
-                        Pose correction = _avatarSpecificSettings.fullBodyCalibration.rightLeg;
+                        Pose correction;
 
                         if (_avatarSpecificSettings.useAutomaticCalibration)
                         {
-                            correction.position -= Vector3.up * _settings.trackerOffsets.rightLegOffset;
+                            correction = _settings.automaticCalibration.rightLeg;
+                            correction.position -= Vector3.up * _settings.automaticCalibration.rightLegOffset;
+                        }
+                        else
+                        {
+                            correction = _avatarSpecificSettings.fullBodyCalibration.rightLeg;
                         }
 
                         _prevRightLegPose = AdjustTrackedPointPose(_prevRightLegPose, rightFootPose, correction, _initialRightFootPose, _settings.fullBodyMotionSmoothing.feet);
@@ -149,11 +159,16 @@ namespace CustomAvatar.Avatar
 
                     if (pelvis && _input.TryGetWaistPose(out Pose pelvisPose))
                     {
-                        Pose correction = _avatarSpecificSettings.fullBodyCalibration.pelvis;
+                        Pose correction;
 
                         if (_avatarSpecificSettings.useAutomaticCalibration)
                         {
-                            correction.position -= Vector3.forward * _settings.trackerOffsets.pelvisOffset;
+                            correction = _settings.automaticCalibration.pelvis;
+                            correction.position -= Vector3.up * _settings.automaticCalibration.pelvisOffset;
+                        }
+                        else
+                        {
+                            correction = _avatarSpecificSettings.fullBodyCalibration.pelvis;
                         }
 
                         _prevPelvisPose = AdjustTrackedPointPose(_prevPelvisPose, pelvisPose, correction, _initialPelvisPose, _settings.fullBodyMotionSmoothing.waist);

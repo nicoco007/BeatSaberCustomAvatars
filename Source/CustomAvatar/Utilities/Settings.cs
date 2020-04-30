@@ -38,7 +38,7 @@ namespace CustomAvatar.Utilities
         public float cameraNearClipPlane = 0.1f;
         public Lighting lighting { get; private set; } = new Lighting();
         public Mirror mirror { get; private set; } = new Mirror();
-        public ManualTrackerOffsets trackerOffsets { get; private set; } = new ManualTrackerOffsets();
+        public AutomaticFullBodyCalibration automaticCalibration { get; private set; } = new AutomaticFullBodyCalibration();
         public FullBodyMotionSmoothing fullBodyMotionSmoothing { get; private set; } = new FullBodyMotionSmoothing();
         [JsonProperty(Order = int.MaxValue)] private Dictionary<string, AvatarSpecificSettings> avatarSpecificSettings = new Dictionary<string, AvatarSpecificSettings>();
 
@@ -86,89 +86,31 @@ namespace CustomAvatar.Utilities
             public float rotation;
         }
 
-        public class FullBodyCalibration
+        public class ManualFullBodyCalibration
         {
-            public event Action calibrationChanged;
-
-            public Pose leftLeg
-            {
-                get => _leftLeg;
-                set
-                {
-                    _leftLeg = value;
-                    calibrationChanged?.Invoke();
-                }
-            }
-
-            public Pose rightLeg
-            {
-                get => _rightLeg;
-                set
-                {
-                    _rightLeg = value;
-                    calibrationChanged?.Invoke();
-                }
-            }
-
-            public Pose pelvis
-            {
-                get => _pelvis;
-                set
-                {
-                    _pelvis = value;
-                    calibrationChanged?.Invoke();
-                }
-            }
-
-            private Pose _leftLeg = Pose.identity;
-            private Pose _rightLeg = Pose.identity;
-            private Pose _pelvis = Pose.identity;
+            public Pose leftLeg = Pose.identity;
+            public Pose rightLeg = Pose.identity;
+            public Pose pelvis = Pose.identity;
 
             [JsonIgnore] public bool isDefault => leftLeg.Equals(Pose.identity) && rightLeg.Equals(Pose.identity) && pelvis.Equals(Pose.identity);
         }
 
-        public class ManualTrackerOffsets
+        public class AutomaticFullBodyCalibration
         {
-            public event Action offsetChanged;
+            public Pose leftLeg = Pose.identity;
+            public Pose rightLeg = Pose.identity;
+            public Pose pelvis = Pose.identity;
 
-            public float leftLegOffset
-            {
-                get => _leftLegOffset;
-                set
-                {
-                    _leftLegOffset = value;
-                    offsetChanged?.Invoke();
-                }
-            }
+            public float leftLegOffset = 0.15f;
+            public float rightLegOffset = 0.15f;
+            public float pelvisOffset = 0.1f;
 
-            public float rightLegOffset
-            {
-                get => _rightLegOffset;
-                set
-                {
-                    _rightLegOffset = value;
-                    offsetChanged?.Invoke();
-                }
-            }
-
-            public float pelvisOffset
-            {
-                get => _pelvisOffset;
-                set
-                {
-                    _pelvisOffset = value;
-                    offsetChanged?.Invoke();
-                }
-            }
-
-            private float _leftLegOffset = 0.15f;
-            private float _rightLegOffset = 0.15f;
-            private float _pelvisOffset = 0.1f;
+            [JsonIgnore] public bool isDefault => leftLeg.Equals(Pose.identity) && rightLeg.Equals(Pose.identity) && pelvis.Equals(Pose.identity);
         }
 
         public class AvatarSpecificSettings
         {
-            public FullBodyCalibration fullBodyCalibration { get; private set; } = new FullBodyCalibration();
+            public ManualFullBodyCalibration fullBodyCalibration { get; private set; } = new ManualFullBodyCalibration();
             public bool useAutomaticCalibration = false;
             public bool allowMaintainPelvisPosition = false;
         }

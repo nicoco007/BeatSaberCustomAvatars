@@ -167,6 +167,8 @@
     <Compile Include="Tracking\Extensions.cs" />
     <Compile Include="Tracking\DeviceUse.cs" />
     <Compile Include="Tracking\VRAvatarInput.cs" />
+    <Compile Include="UI\SettingsViewController.AutomaticFBT.cs" />
+    <Compile Include="UI\SettingsViewController.AvatarSpecificSettings.cs" />
     <Compile Include="UI\BSMLExtensions.cs" />
     <Compile Include="Avatar\LoadedAvatar.cs" />
     <Compile Include="AvatarDescriptor.cs" />
@@ -177,6 +179,7 @@
     <Compile Include="Tracking\OpenVRWrapper.cs" />
     <Compile Include="PoseManager.cs" />
     <Compile Include="EventManager.cs" />
+    <Compile Include="UI\SettingsViewController.General.cs" />
     <Compile Include="Utilities\Converters\FloatJsonConverter.cs" />
     <Compile Include="Utilities\Converters\PoseJsonConverter.cs" />
     <Compile Include="Utilities\Converters\QuaternionJsonConverter.cs" />
