@@ -16,7 +16,6 @@ namespace CustomAvatar
         private readonly ILogger _logger;
         private readonly MainSettingsModelSO _mainSettingsModel;
         private readonly PlayerDataModel _playerDataModel;
-        private readonly TrackedDeviceManager _trackedDeviceManager;
         private readonly Settings _settings;
 
         private Vector3? _initialPlatformPosition;
@@ -24,12 +23,11 @@ namespace CustomAvatar
         private Vector3 _roomCenter => _mainSettingsModel.roomCenter.value;
         private float _playerEyeHeight => _playerDataModel.playerData.playerSpecificSettings.playerHeight - MainSettingsModelSO.kHeadPosToPlayerHeightOffset;
 
-        private AvatarTailor(ILoggerFactory loggerFactory, MainSettingsModelSO mainSettingsModel, PlayerDataModel playerDataModel, TrackedDeviceManager trackedDeviceManager, Settings settings)
+        private AvatarTailor(ILoggerFactory loggerFactory, MainSettingsModelSO mainSettingsModel, PlayerDataModel playerDataModel, Settings settings)
         {
             _logger = loggerFactory.CreateLogger<AvatarTailor>();
             _mainSettingsModel = mainSettingsModel;
             _playerDataModel = playerDataModel;
-            _trackedDeviceManager = trackedDeviceManager;
             _settings = settings;
         }
 
@@ -141,13 +139,9 @@ namespace CustomAvatar
         
         public void CalibrateFullBodyTrackingManual(SpawnedAvatar spawnedAvatar)
         {
-            TrackedDeviceState leftFoot  = _trackedDeviceManager.leftFoot;
-            TrackedDeviceState rightFoot = _trackedDeviceManager.rightFoot;
-            TrackedDeviceState pelvis    = _trackedDeviceManager.waist;
-
             Settings.ManualFullBodyCalibration fullBodyCalibration = _settings.GetAvatarSettings(spawnedAvatar.avatar.fullPath).fullBodyCalibration;
 
-            if (pelvis.tracked)
+            if (spawnedAvatar.input.TryGetWaistPose(out Pose pelvis))
             {
                 Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.tracking.pelvis.rotation) * spawnedAvatar.tracking.pelvis.position - Quaternion.Inverse(pelvis.rotation) * pelvis.position;
                 Quaternion rotationOffset = Quaternion.Inverse(pelvis.rotation) * spawnedAvatar.tracking.pelvis.rotation;
@@ -156,7 +150,7 @@ namespace CustomAvatar
                 _logger.Info("Saved pelvis pose correction " + fullBodyCalibration.pelvis);
             }
 
-            if (leftFoot.tracked)
+            if (spawnedAvatar.input.TryGetLeftFootPose(out Pose leftFoot))
             {
                 Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.tracking.leftLeg.rotation) * spawnedAvatar.tracking.leftLeg.position - Quaternion.Inverse(leftFoot.rotation) * leftFoot.position;
                 Quaternion rotationOffset = Quaternion.Inverse(leftFoot.rotation) * spawnedAvatar.tracking.leftLeg.rotation;
@@ -165,7 +159,7 @@ namespace CustomAvatar
                 _logger.Info("Saved left foot pose correction " + fullBodyCalibration.leftLeg);
             }
 
-            if (rightFoot.tracked)
+            if (spawnedAvatar.input.TryGetRightFootPose(out Pose rightFoot))
             {
                 Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.tracking.rightLeg.rotation) * spawnedAvatar.tracking.rightLeg.position - Quaternion.Inverse(rightFoot.rotation) * rightFoot.position;
                 Quaternion rotationOffset = Quaternion.Inverse(rightFoot.rotation) * spawnedAvatar.tracking.rightLeg.rotation;
