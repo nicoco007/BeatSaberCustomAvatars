@@ -28,12 +28,11 @@ namespace CustomAvatar.Avatar
 
         public bool isCalibrationModeEnabled = false;
 
-        private VRPlatformHelper _vrPlatformHelper;
-        
         private AvatarInput _input;
         private SpawnedAvatar _avatar;
         private Settings _settings;
         private MainSettingsModelSO _mainSettingsModel;
+        private VRPlatformHelper _vrPlatformHelper;
         private ILogger _logger = new UnityDebugLogger<AvatarTracking>();
 
         #region Behaviour Lifecycle
@@ -41,13 +40,14 @@ namespace CustomAvatar.Avatar
         // ReSharper disable UnusedMember.Local
 
         [Inject]
-        private void Inject(Settings settings, MainSettingsModelSO mainSettingsModel, ILoggerFactory loggerFactory, AvatarInput input, SpawnedAvatar avatar)
+        private void Inject(Settings settings, MainSettingsModelSO mainSettingsModel, ILoggerFactory loggerFactory, AvatarInput input, SpawnedAvatar avatar, VRPlatformHelper vrPlatformHelper)
         {
             _settings = settings;
             _mainSettingsModel = mainSettingsModel;
             _logger = loggerFactory.CreateLogger<AvatarTracking>(avatar.avatar.descriptor.name);
             _input = input;
             _avatar = avatar;
+            _vrPlatformHelper = vrPlatformHelper;
         }
 
         protected override void Start()
@@ -55,8 +55,6 @@ namespace CustomAvatar.Avatar
             base.Start();
 
             _avatarSpecificSettings = _settings.GetAvatarSettings(_avatar.avatar.fullPath);
-
-            _vrPlatformHelper = PersistentSingleton<VRPlatformHelper>.instance;
 
             if (pelvis) _initialPelvisPose = new Pose(pelvis.position, pelvis.rotation);
             if (leftLeg) _initialLeftFootPose = new Pose(leftLeg.position, leftLeg.rotation);
@@ -84,6 +82,7 @@ namespace CustomAvatar.Avatar
                     _vrPlatformHelper.AdjustPlatformSpecificControllerTransform(XRNode.RightHand, rightHand, controllerPositionOffset, controllerRotationOffset);
                 }
 
+                // mirror across YZ plane for left hand
                 controllerPositionOffset = new Vector3(-controllerPositionOffset.x, controllerPositionOffset.y, controllerPositionOffset.z);
                 controllerRotationOffset = new Vector3(controllerRotationOffset.x, -controllerRotationOffset.y, -controllerRotationOffset.z);
 

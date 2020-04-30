@@ -169,23 +169,16 @@ namespace CustomAvatar
             }
         }
 
-        public void CalibrateFullBodyTrackingAuto()
+        public void CalibrateFullBodyTrackingAuto(SpawnedAvatar spawnedAvatar)
         {
             _logger.Info("Calibrating full body tracking");
-
-            TrackedDeviceManager input = PersistentSingleton<TrackedDeviceManager>.instance;
-
-            TrackedDeviceState head = input.head;
-            TrackedDeviceState leftFoot = input.leftFoot;
-            TrackedDeviceState rightFoot = input.rightFoot;
-            TrackedDeviceState pelvis = input.waist;
 
             Settings.AutomaticFullBodyCalibration fullBodyCalibration = _settings.automaticCalibration;
 
             Vector3 floorNormal = Vector3.up;
             float floorPosition = _settings.moveFloorWithRoomAdjust ? _roomCenter.y : 0;
 
-            if (leftFoot.tracked)
+            if (spawnedAvatar.input.TryGetLeftFootPose(out Pose leftFoot))
             {
                 Vector3 leftFootForward = leftFoot.rotation * Vector3.up; // forward on feet trackers is y (up)
                 Vector3 leftFootStraightForward = Vector3.ProjectOnPlane(leftFootForward, floorNormal); // get projection of forward vector on xz plane (floor)
@@ -194,7 +187,7 @@ namespace CustomAvatar
                 _logger.Info("Saved left foot pose correction " + fullBodyCalibration.leftLeg);
             }
 
-            if (rightFoot.tracked)
+            if (spawnedAvatar.input.TryGetRightFootPose(out Pose rightFoot))
             {
                 Vector3 rightFootForward = rightFoot.rotation * Vector3.up;
                 Vector3 rightFootStraightForward = Vector3.ProjectOnPlane(rightFootForward, floorNormal);
@@ -203,7 +196,7 @@ namespace CustomAvatar
                 _logger.Info("Saved right foot pose correction " + fullBodyCalibration.rightLeg);
             }
 
-            if (head.tracked && pelvis.tracked)
+            if (spawnedAvatar.input.TryGetHeadPose(out Pose head) && spawnedAvatar.input.TryGetWaistPose(out Pose pelvis))
             {
                 // using "standard" 8 head high body proportions w/ eyes at 1/2 head height
                 // reference: https://miro.medium.com/max/3200/1*cqTRyEGl26l4CImEmWz68Q.jpeg

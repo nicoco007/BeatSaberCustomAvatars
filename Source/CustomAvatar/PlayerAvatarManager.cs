@@ -6,7 +6,6 @@ using CustomAvatar.Avatar;
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
-using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
 using ILogger = CustomAvatar.Logging.ILogger;
@@ -155,7 +154,7 @@ namespace CustomAvatar
 
             if (newScene.name == "PCInit" && _settings.calibrateFullBodyTrackingOnStart && _settings.GetAvatarSettings(currentlySpawnedAvatar.avatar.fullPath).useAutomaticCalibration)
             {
-                _avatarTailor.CalibrateFullBodyTrackingAuto();
+                _avatarTailor.CalibrateFullBodyTrackingAuto(currentlySpawnedAvatar);
             }
 
             ResizeCurrentAvatar();
