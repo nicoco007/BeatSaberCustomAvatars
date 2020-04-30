@@ -13,6 +13,7 @@ namespace CustomAvatar.Avatar
 	public class SpawnedAvatar : MonoBehaviour
 	{
 		public LoadedAvatar avatar { get; private set; }
+		public AvatarInput input { get; private set; }
 
         public float verticalPosition
         {
@@ -57,11 +58,10 @@ namespace CustomAvatar.Avatar
         }
 
         [Inject]
-        internal void Inject(DiContainer container, ILoggerFactory loggerFactory, LoadedAvatar loadedAvatar, AvatarInput input, Settings settings)
+        internal void Inject(DiContainer container, ILoggerFactory loggerFactory, LoadedAvatar loadedAvatar, AvatarInput avatarInput, Settings settings)
         {
             avatar = loadedAvatar ?? throw new ArgumentNullException(nameof(loadedAvatar));
-            
-            if (input == null) throw new ArgumentNullException(nameof(input));
+            input = avatarInput ?? throw new ArgumentNullException(nameof(avatarInput));
 
             _logger = loggerFactory.CreateLogger<SpawnedAvatar>(loadedAvatar.descriptor.name);
             _settings = settings;
@@ -89,16 +89,16 @@ namespace CustomAvatar.Avatar
             armSpan = GetArmSpan();
 
             eventsPlayer   = container.InstantiateComponent<AvatarEventsPlayer>(gameObject);
-            tracking       = container.InstantiateComponent<AvatarTracking>(gameObject, new object[] { this, input });
+            tracking       = container.InstantiateComponent<AvatarTracking>(gameObject, new object[] { this, avatarInput });
 
             if (isIKAvatar)
             {
-                ik = container.InstantiateComponent<AvatarIK>(gameObject, new object[] { loadedAvatar, input });
+                ik = container.InstantiateComponent<AvatarIK>(gameObject, new object[] { loadedAvatar, avatarInput });
             }
 
             if (supportsFingerTracking)
             {
-                fingerTracking = container.InstantiateComponent<AvatarFingerTracking>(gameObject);
+                fingerTracking = container.InstantiateComponent<AvatarFingerTracking>(gameObject, new object[] { avatarInput });
             }
 
             if (_initialPosition.magnitude > 0.0f)
@@ -115,6 +115,11 @@ namespace CustomAvatar.Avatar
         private void OnDestroy()
         {
             _settings.firstPersonEnabledChanged -= OnFirstPersonEnabledChanged;
+
+            if (input is IDisposable disposableInput)
+            {
+                disposableInput.Dispose();
+            }
 
             Destroy(gameObject);
         }

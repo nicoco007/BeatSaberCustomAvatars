@@ -154,6 +154,7 @@
     <Compile Include="Logging\IPALoggerFactory.cs" />
     <Compile Include="Lighting\LightingRig.cs" />
     <Compile Include="ShaderLoader.cs" />
+    <Compile Include="Tracking\FingerCurl.cs" />
     <Compile Include="UIInstaller.cs" />
     <Compile Include="UI\AvatarListItem.cs" />
     <Compile Include="PlayerAvatarManager.cs" />
