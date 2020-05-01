@@ -185,6 +185,7 @@ namespace CustomAvatar.StereoRendering
         /////////////////////////////////////////////////////////////////////////////////
         // initialization
 
+        [Inject]
         private void Inject(StereoRenderManager manager, Settings settings)
         {
             _manager = manager;
