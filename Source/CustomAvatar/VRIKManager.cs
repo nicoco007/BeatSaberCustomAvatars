@@ -469,7 +469,7 @@ namespace CustomAvatar
                     FieldInfo targetField = target.GetType().GetField(parts[parts.Length - 1]);
                     object value = sourceField.GetValue(this);
 
-                    _logger.Debug($"Set {string.Join(".", parts)} = {value}");
+                    _logger.Trace($"Set {string.Join(".", parts)} = {value}");
 
                     if (targetField.FieldType.IsEnum && sourceField.FieldType != targetField.FieldType)
                     {
