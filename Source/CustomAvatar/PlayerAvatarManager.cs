@@ -150,8 +150,6 @@ namespace CustomAvatar
         {
             if (!currentlySpawnedAvatar) return;
 
-            currentlySpawnedAvatar.eventsPlayer.Restart();
-
             if (newScene.name == "PCInit" && _settings.calibrateFullBodyTrackingOnStart && _settings.GetAvatarSettings(currentlySpawnedAvatar.avatar.fullPath).useAutomaticCalibration)
             {
                 _avatarTailor.CalibrateFullBodyTrackingAuto(currentlySpawnedAvatar);
@@ -163,18 +161,6 @@ namespace CustomAvatar
         private void OnSceneTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
         {
             if (!currentlySpawnedAvatar) return;
-
-            string currentScene = SceneManager.GetActiveScene().name;
-
-            if (currentScene == "GameCore" && currentlySpawnedAvatar.eventsPlayer)
-            {
-                currentlySpawnedAvatar.eventsPlayer.LevelStartedEvent();
-            }
-
-            if (currentScene == "MenuCore" && currentlySpawnedAvatar.eventsPlayer)
-            {
-                currentlySpawnedAvatar.eventsPlayer.MenuEnteredEvent();
-            }
 
             ResizeCurrentAvatar();
         }

@@ -140,6 +140,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Avatar\AvatarGameplayEventsPlayer.cs" />
     <Compile Include="Avatar\AvatarIK.cs" />
     <Compile Include="Avatar\AvatarLoader.cs" />
     <Compile Include="Avatar\AvatarSpawner.cs" />
@@ -173,7 +174,6 @@
     <Compile Include="UI\BSMLExtensions.cs" />
     <Compile Include="Avatar\LoadedAvatar.cs" />
     <Compile Include="AvatarDescriptor.cs" />
-    <Compile Include="Avatar\AvatarEventsPlayer.cs" />
     <Compile Include="EventFilterBehaviour.cs" />
     <Compile Include="EventFilters.cs" />
     <Compile Include="Exceptions\AvatarLoadException.cs" />

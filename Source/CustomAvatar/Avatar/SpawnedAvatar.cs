@@ -39,12 +39,15 @@ namespace CustomAvatar.Avatar
 		internal AvatarTracking tracking { get; private set; }
         internal AvatarIK ik { get; private set; }
         internal AvatarFingerTracking fingerTracking { get; private set; }
-        internal AvatarEventsPlayer eventsPlayer { get; private set; }
 
-        private Settings _settings;
         private ILogger _logger;
+        private Settings _settings;
+        private GameScenesManager _gameScenesManager;
+
         private FirstPersonExclusion[] _firstPersonExclusions;
         private Renderer[] _renderers;
+        private EventManager _eventManager;
+        private AvatarGameplayEventsPlayer _gameplayEventsPlayer;
 
         private bool _isCalibrationModeEnabled;
 
@@ -56,16 +59,18 @@ namespace CustomAvatar.Avatar
             _initialPosition = transform.localPosition;
             _initialScale = transform.localScale;
         }
-
+        
         [Inject]
-        internal void Inject(DiContainer container, ILoggerFactory loggerFactory, LoadedAvatar loadedAvatar, AvatarInput avatarInput, Settings settings)
+        internal void Inject(DiContainer container, ILoggerFactory loggerFactory, LoadedAvatar loadedAvatar, AvatarInput avatarInput, Settings settings, GameScenesManager gameScenesManager)
         {
             avatar = loadedAvatar ?? throw new ArgumentNullException(nameof(loadedAvatar));
             input = avatarInput ?? throw new ArgumentNullException(nameof(avatarInput));
 
             _logger = loggerFactory.CreateLogger<SpawnedAvatar>(loadedAvatar.descriptor.name);
             _settings = settings;
+            _gameScenesManager = gameScenesManager;
 
+            _eventManager = GetComponent<EventManager>();
             _firstPersonExclusions = GetComponentsInChildren<FirstPersonExclusion>();
             _renderers = GetComponentsInChildren<Renderer>();
 
@@ -88,7 +93,6 @@ namespace CustomAvatar.Avatar
             eyeHeight = GetEyeHeight();
             armSpan = GetArmSpan();
 
-            eventsPlayer   = container.InstantiateComponent<AvatarEventsPlayer>(gameObject);
             tracking       = container.InstantiateComponent<AvatarTracking>(gameObject, new object[] { this, avatarInput });
 
             if (isIKAvatar)
@@ -110,11 +114,14 @@ namespace CustomAvatar.Avatar
 
             _settings.firstPersonEnabledChanged += OnFirstPersonEnabledChanged;
             OnFirstPersonEnabledChanged(_settings.isAvatarVisibleInFirstPerson);
+
+            _gameScenesManager.transitionDidFinishEvent += OnTransitionDidFinish;
         }
 
         private void OnDestroy()
         {
             _settings.firstPersonEnabledChanged -= OnFirstPersonEnabledChanged;
+            _gameScenesManager.transitionDidFinishEvent -= OnTransitionDidFinish;
 
             if (input is IDisposable disposableInput)
             {
@@ -122,6 +129,31 @@ namespace CustomAvatar.Avatar
             }
 
             Destroy(gameObject);
+        }
+
+        private void OnTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
+        {
+            if (_gameScenesManager.IsSceneInStack("GameplayCore"))
+            {
+                if (_eventManager && !_gameplayEventsPlayer)
+                {
+                    _logger.Info($"Adding {nameof(AvatarGameplayEventsPlayer)}");
+                    _gameplayEventsPlayer = container.InstantiateComponent<AvatarGameplayEventsPlayer>(gameObject, new object[] { avatar });
+                }
+            }
+            else
+            {
+                if (_gameplayEventsPlayer)
+                {
+                    _logger.Info($"Removing {nameof(AvatarGameplayEventsPlayer)}");
+                    Destroy(_gameplayEventsPlayer);
+                }
+
+                if (_eventManager && _gameScenesManager.IsSceneInStack("MainMenu"))
+                {
+                    _eventManager.OnMenuEnter?.Invoke();
+                }
+            }
         }
 
         public void EnableCalibrationMode()

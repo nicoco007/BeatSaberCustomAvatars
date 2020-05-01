@@ -6,6 +6,9 @@ namespace CustomAvatar
 {
     public class EventManager : MonoBehaviour
     {
+        [Serializable]
+        public class ComboChangedEvent : UnityEvent<int> { }
+
         public UnityEvent OnSlice;
         public UnityEvent OnComboBreak;
         public UnityEvent MultiplierUp;
@@ -17,12 +20,6 @@ namespace CustomAvatar
         public UnityEvent OnLevelFinish;
         public UnityEvent OnBlueLightOn;
         public UnityEvent OnRedLightOn;
-
-        [Serializable]
-        public class ComboChangedEvent : UnityEvent<int>
-        {
-        }
-
-        public ComboChangedEvent OnComboChanged = new ComboChangedEvent();
+        public ComboChangedEvent OnComboChanged;
     }
 }
