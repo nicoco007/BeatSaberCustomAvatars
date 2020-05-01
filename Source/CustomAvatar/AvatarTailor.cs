@@ -23,9 +23,9 @@ namespace CustomAvatar
         private Vector3 _roomCenter => _mainSettingsModel.roomCenter.value;
         private float _playerEyeHeight => _playerDataModel.playerData.playerSpecificSettings.playerHeight - MainSettingsModelSO.kHeadPosToPlayerHeightOffset;
 
-        private AvatarTailor(ILoggerFactory loggerFactory, MainSettingsModelSO mainSettingsModel, PlayerDataModel playerDataModel, Settings settings)
+        private AvatarTailor(ILoggerProvider loggerProvider, MainSettingsModelSO mainSettingsModel, PlayerDataModel playerDataModel, Settings settings)
         {
-            _logger = loggerFactory.CreateLogger<AvatarTailor>();
+            _logger = loggerProvider.CreateLogger<AvatarTailor>();
             _mainSettingsModel = mainSettingsModel;
             _playerDataModel = playerDataModel;
             _settings = settings;

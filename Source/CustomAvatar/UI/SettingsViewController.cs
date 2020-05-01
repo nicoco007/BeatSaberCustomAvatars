@@ -30,14 +30,14 @@ namespace CustomAvatar.UI
         private ILogger _logger;
 
         [Inject]
-        private void Inject(TrackedDeviceManager trackedDeviceManager, PlayerAvatarManager avatarManager, AvatarTailor avatarTailor, Settings settings, ShaderLoader shaderLoader, ILoggerFactory loggerFactory)
+        private void Inject(TrackedDeviceManager trackedDeviceManager, PlayerAvatarManager avatarManager, AvatarTailor avatarTailor, Settings settings, ShaderLoader shaderLoader, ILoggerProvider loggerProvider)
         {
             _trackedDeviceManager = trackedDeviceManager;
             _avatarManager = avatarManager;
             _avatarTailor = avatarTailor;
             _settings = settings;
             _shaderLoader = shaderLoader;
-            _logger = loggerFactory.CreateLogger<SettingsViewController>();
+            _logger = loggerProvider.CreateLogger<SettingsViewController>();
         }
 
         protected override void DidActivate(bool firstActivation, ActivationType type)

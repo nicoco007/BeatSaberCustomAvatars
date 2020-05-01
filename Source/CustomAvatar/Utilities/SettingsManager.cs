@@ -14,9 +14,9 @@ namespace CustomAvatar.Utilities
 
         private ILogger _logger;
 
-        private SettingsManager(ILoggerFactory loggerFactory)
+        private SettingsManager(ILoggerProvider loggerProvider)
         {
-            _logger = loggerFactory.CreateLogger<SettingsManager>();
+            _logger = loggerProvider.CreateLogger<SettingsManager>();
         }
 
         public Settings Load()

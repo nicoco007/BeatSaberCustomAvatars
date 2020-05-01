@@ -56,12 +56,12 @@ namespace CustomAvatar.Avatar
         }
 
         [Inject]
-        private void Inject(AvatarInput input, LoadedAvatar avatar, Settings settings, ILoggerFactory loggerFactory)
+        private void Inject(AvatarInput input, LoadedAvatar avatar, Settings settings, ILoggerProvider loggerProvider)
         {
             _input = input;
             _avatar = avatar;
             _settings = settings;
-            _logger = loggerFactory.CreateLogger<AvatarIK>(_avatar.descriptor.name);
+            _logger = loggerProvider.CreateLogger<AvatarIK>(_avatar.descriptor.name);
         }
 
         protected override void Start()

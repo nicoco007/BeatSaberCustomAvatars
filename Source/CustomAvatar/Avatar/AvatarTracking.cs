@@ -40,11 +40,11 @@ namespace CustomAvatar.Avatar
         // ReSharper disable UnusedMember.Local
 
         [Inject]
-        private void Inject(Settings settings, MainSettingsModelSO mainSettingsModel, ILoggerFactory loggerFactory, AvatarInput input, SpawnedAvatar avatar, VRPlatformHelper vrPlatformHelper)
+        private void Inject(Settings settings, MainSettingsModelSO mainSettingsModel, ILoggerProvider loggerProvider, AvatarInput input, SpawnedAvatar avatar, VRPlatformHelper vrPlatformHelper)
         {
             _settings = settings;
             _mainSettingsModel = mainSettingsModel;
-            _logger = loggerFactory.CreateLogger<AvatarTracking>(avatar.avatar.descriptor.name);
+            _logger = loggerProvider.CreateLogger<AvatarTracking>(avatar.avatar.descriptor.name);
             _input = input;
             _avatar = avatar;
             _vrPlatformHelper = vrPlatformHelper;

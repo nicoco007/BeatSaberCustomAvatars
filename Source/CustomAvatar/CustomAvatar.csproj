@@ -151,8 +151,8 @@
     <Compile Include="BeatSaberEvents.cs" />
     <Compile Include="CustomAvatarsInstaller.cs" />
     <Compile Include="KeyboardInputHandler.cs" />
-    <Compile Include="Logging\ILoggerFactory.cs" />
-    <Compile Include="Logging\IPALoggerFactory.cs" />
+    <Compile Include="Logging\ILoggerProvider.cs" />
+    <Compile Include="Logging\IPALoggerProvider.cs" />
     <Compile Include="Lighting\LightingRig.cs" />
     <Compile Include="ShaderLoader.cs" />
     <Compile Include="Tracking\FingerCurl.cs" />

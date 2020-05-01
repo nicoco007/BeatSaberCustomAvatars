@@ -22,7 +22,7 @@ namespace CustomAvatar
         public override void InstallBindings()
         {
             // logging
-            Container.Bind<ILoggerFactory>().FromMethod((context) => context.Container.Instantiate<IPALoggerFactory>(new object[] { _logger })).AsTransient();
+            Container.Bind<ILoggerProvider>().FromMethod((context) => context.Container.Instantiate<IPALoggerProvider>(new object[] { _logger })).AsTransient();
 
             // settings
             Container.Bind<SettingsManager>().AsSingle();

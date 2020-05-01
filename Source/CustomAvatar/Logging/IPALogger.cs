@@ -4,8 +4,8 @@ namespace CustomAvatar.Logging
 {
     internal class IPALogger<T> : ILogger
     {
-        private string _name;
-        private Logger _logger;
+        private readonly string _name;
+        private readonly Logger _logger;
 
         public IPALogger(Logger logger, string name = null)
         {

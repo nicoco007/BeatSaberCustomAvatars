@@ -19,9 +19,9 @@ namespace CustomAvatar.Avatar
         // ReSharper disable UnusedMember.Local
 
         [Inject]
-        public void Inject(ILoggerFactory loggerFactory, LoadedAvatar avatar, ScoreController scoreController, StandardLevelGameplayManager gameplayManager, BeatmapObjectCallbackController beatmapObjectCallbackController)
+        public void Inject(ILoggerProvider loggerProvider, LoadedAvatar avatar, ScoreController scoreController, StandardLevelGameplayManager gameplayManager, BeatmapObjectCallbackController beatmapObjectCallbackController)
         {
-            _logger = loggerFactory.CreateLogger<AvatarGameplayEventsPlayer>(avatar.descriptor.name);
+            _logger = loggerProvider.CreateLogger<AvatarGameplayEventsPlayer>(avatar.descriptor.name);
             _scoreController = scoreController;
             _gameplayManager = gameplayManager;
             _beatmapObjectCallbackController = beatmapObjectCallbackController;

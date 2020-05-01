@@ -12,9 +12,9 @@ namespace CustomAvatar.Avatar
         private readonly ILogger _logger;
         private readonly DiContainer _container;
 
-        internal AvatarSpawner(ILoggerFactory loggerFactory, DiContainer container)
+        internal AvatarSpawner(ILoggerProvider loggerProvider, DiContainer container)
         {
-            _logger = loggerFactory.CreateLogger<AvatarSpawner>();
+            _logger = loggerProvider.CreateLogger<AvatarSpawner>();
             _container = container;
         }
 

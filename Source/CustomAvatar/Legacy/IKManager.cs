@@ -20,9 +20,9 @@ namespace AvatarScriptPack
         private ILogger _logger;
 
         [Inject]
-        private void Inject(ILoggerFactory loggerFactory)
+        private void Inject(ILoggerProvider loggerProvider)
         {
-            _logger = loggerFactory.CreateLogger<IKManager>();
+            _logger = loggerProvider.CreateLogger<IKManager>();
         }
 
         public virtual void Start()

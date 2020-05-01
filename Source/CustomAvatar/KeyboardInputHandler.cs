@@ -13,11 +13,11 @@ namespace CustomAvatar
         private ILogger _logger;
 
         [Inject]
-        private void Inject(Settings settings, PlayerAvatarManager avatarManager, ILoggerFactory loggerFactory)
+        private void Inject(Settings settings, PlayerAvatarManager avatarManager, ILoggerProvider loggerProvider)
         {
             _settings = settings;
             _avatarManager = avatarManager;
-            _logger = loggerFactory.CreateLogger<KeyboardInputHandler>();
+            _logger = loggerProvider.CreateLogger<KeyboardInputHandler>();
         }
 
         private void Update()

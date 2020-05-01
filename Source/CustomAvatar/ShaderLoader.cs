@@ -15,9 +15,9 @@ namespace CustomAvatar
         private ILogger _logger;
 
         [Inject]
-        private void Inject(ILoggerFactory loggerFactory)
+        private void Inject(ILoggerProvider loggerProvider)
         {
-            _logger = loggerFactory.CreateLogger<ShaderLoader>();
+            _logger = loggerProvider.CreateLogger<ShaderLoader>();
         }
 
         private void Start()

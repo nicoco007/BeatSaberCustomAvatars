@@ -14,9 +14,9 @@ namespace CustomAvatar.Avatar
 
         private readonly ILogger _logger;
 
-        internal AvatarLoader(ILoggerFactory loggerFactory)
+        internal AvatarLoader(ILoggerProvider loggerProvider)
         {
-            _logger = loggerFactory.CreateLogger<AvatarLoader>();
+            _logger = loggerProvider.CreateLogger<AvatarLoader>();
         }
 
         // TODO from stream/memory

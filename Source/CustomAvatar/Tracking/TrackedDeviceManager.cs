@@ -38,10 +38,10 @@ namespace CustomAvatar.Tracking
         // ReSharper disable UnusedMember.Local
 
         [Inject]
-        private void Inject(MainSettingsModelSO mainSettingsModel, ILoggerFactory loggerFactory)
+        private void Inject(MainSettingsModelSO mainSettingsModel, ILoggerProvider loggerProvider)
         {
             _mainSettingsModel = mainSettingsModel;
-            _logger = loggerFactory.CreateLogger<TrackedDeviceManager>();
+            _logger = loggerProvider.CreateLogger<TrackedDeviceManager>();
         }
 
         public void Start()

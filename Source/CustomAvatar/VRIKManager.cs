@@ -417,9 +417,9 @@ namespace CustomAvatar
                                            );
 
         [Inject]
-        private void Inject(ILoggerFactory loggerFactory)
+        private void Inject(ILoggerProvider loggerProvider)
         {
-            _logger = loggerFactory.CreateLogger<VRIKManager>();
+            _logger = loggerProvider.CreateLogger<VRIKManager>();
         }
 
         private void Reset()

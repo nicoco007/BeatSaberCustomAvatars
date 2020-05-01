@@ -64,12 +64,12 @@ namespace CustomAvatar.Avatar
         }
         
         [Inject]
-        internal void Inject(DiContainer container, ILoggerFactory loggerFactory, LoadedAvatar loadedAvatar, AvatarInput avatarInput, Settings settings, GameScenesManager gameScenesManager)
+        internal void Inject(DiContainer container, ILoggerProvider loggerProvider, LoadedAvatar loadedAvatar, AvatarInput avatarInput, Settings settings, GameScenesManager gameScenesManager)
         {
             avatar = loadedAvatar ?? throw new ArgumentNullException(nameof(loadedAvatar));
             input = avatarInput ?? throw new ArgumentNullException(nameof(avatarInput));
 
-            _logger = loggerFactory.CreateLogger<SpawnedAvatar>(loadedAvatar.descriptor.name);
+            _logger = loggerProvider.CreateLogger<SpawnedAvatar>(loadedAvatar.descriptor.name);
             _settings = settings;
             _gameScenesManager = gameScenesManager;
 
@@ -86,7 +86,7 @@ namespace CustomAvatar.Avatar
 
             isIKAvatar = ikManager || vrikManager;
 
-            _logger = loggerFactory.CreateLogger<LoadedAvatar>(loadedAvatar.descriptor.name);
+            _logger = loggerProvider.CreateLogger<LoadedAvatar>(loadedAvatar.descriptor.name);
 
             if (vrik && !vrik.references.isFilled) vrik.AutoDetectReferences();
             if (vrikManager && !vrikManager.areReferencesFilled) vrikManager.AutoDetectReferences();

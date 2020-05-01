@@ -1,13 +1,12 @@
-﻿using UnityEngine;
-using Logger = IPA.Logging.Logger;
+﻿using Logger = IPA.Logging.Logger;
 
 namespace CustomAvatar.Logging
 {
-    internal class IPALoggerFactory : ILoggerFactory
+    internal class IPALoggerProvider : ILoggerProvider
     {
-        private Logger _logger;
+        private readonly Logger _logger;
 
-        private IPALoggerFactory(Logger logger)
+        private IPALoggerProvider(Logger logger)
         {
             _logger = logger;
         }

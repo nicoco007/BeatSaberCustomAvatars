@@ -249,9 +249,9 @@ namespace AvatarScriptPack
         private ILogger _logger;
 
         [Inject]
-        private void Inject(ILoggerFactory loggerFactory)
+        private void Inject(ILoggerProvider loggerProvider)
         {
-            _logger = loggerFactory.CreateLogger<IKManagerAdvanced>();
+            _logger = loggerProvider.CreateLogger<IKManagerAdvanced>();
         }
 
         public override void Start()
