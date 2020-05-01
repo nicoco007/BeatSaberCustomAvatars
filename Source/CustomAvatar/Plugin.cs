@@ -23,7 +23,7 @@ namespace CustomAvatar
     {
         private PlayerAvatarManager _avatarManager;
         private GameScenesManager _scenesManager;
-        private AvatarListFlowCoordinator _flowCoordinator;
+        private AvatarMenuFlowCoordinator _flowCoordinator;
         private Settings _settings;
         private SettingsManager _settingsManager;
         private MirrorHelper _mirrorHelper;
@@ -63,11 +63,11 @@ namespace CustomAvatar
         }
 
         [Inject]
-        private void Inject(PlayerAvatarManager playerAvatarManager, GameScenesManager gameScenesManager, AvatarListFlowCoordinator avatarListFlowCoordinator, Settings settings, SettingsManager settingsManager, MirrorHelper mirrorHelper)
+        private void Inject(PlayerAvatarManager playerAvatarManager, GameScenesManager gameScenesManager, AvatarMenuFlowCoordinator avatarMenuFlowCoordinator, Settings settings, SettingsManager settingsManager, MirrorHelper mirrorHelper)
         {
             _avatarManager = playerAvatarManager;
             _scenesManager = gameScenesManager;
-            _flowCoordinator = avatarListFlowCoordinator;
+            _flowCoordinator = avatarMenuFlowCoordinator;
             _settings = settings;
             _settingsManager = settingsManager;
             _mirrorHelper = mirrorHelper;

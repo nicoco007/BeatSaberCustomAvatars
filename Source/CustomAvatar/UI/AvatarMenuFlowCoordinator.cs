@@ -6,7 +6,7 @@ using Zenject;
 
 namespace CustomAvatar.UI
 {
-    internal class AvatarListFlowCoordinator : FlowCoordinator
+    internal class AvatarMenuFlowCoordinator : FlowCoordinator
     {
         private AvatarListViewController _avatarListViewController; 
         private MirrorViewController _mirrorViewController;

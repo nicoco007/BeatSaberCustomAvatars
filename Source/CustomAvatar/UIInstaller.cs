@@ -23,7 +23,7 @@ namespace CustomAvatar
             Container.Bind<AvatarListViewController>().FromInstance(avatarListViewController);
             Container.Bind<MirrorViewController>().FromInstance(mirrorViewController);
             Container.Bind<SettingsViewController>().FromInstance(settingsViewController);
-            Container.Bind<AvatarListFlowCoordinator>().FromNewComponentOnNewPrefab(new GameObject(nameof(AvatarListFlowCoordinator))).AsSingle();
+            Container.Bind<AvatarMenuFlowCoordinator>().FromNewComponentOnNewPrefab(new GameObject(nameof(AvatarMenuFlowCoordinator))).AsSingle();
 
             Container.QueueForInject(avatarListViewController);
             Container.QueueForInject(mirrorViewController);
