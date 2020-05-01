@@ -13,6 +13,10 @@ namespace CustomAvatar.Avatar
         private BeatmapObjectCallbackController _beatmapObjectCallbackController;
 
         private EventManager _eventManager;
+        
+        #region Behaviour Lifecycle
+        #pragma warning disable IDE0051
+        // ReSharper disable UnusedMember.Local
 
         [Inject]
         public void Inject(ILoggerFactory loggerFactory, LoadedAvatar avatar, ScoreController scoreController, StandardLevelGameplayManager gameplayManager, BeatmapObjectCallbackController beatmapObjectCallbackController)
@@ -58,6 +62,11 @@ namespace CustomAvatar.Avatar
 
             _beatmapObjectCallbackController.beatmapEventDidTriggerEvent -= BeatmapEventDidTrigger;
         }
+        
+
+        // ReSharper restore UnusedMember.Local
+        #pragma warning restore IDE0051
+        #endregion
 
         private void OnNoteWasCut(NoteData data, NoteCutInfo cutInfo, int multiplier)
         {

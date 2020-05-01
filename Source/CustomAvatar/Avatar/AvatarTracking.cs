@@ -12,7 +12,7 @@ using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar.Avatar
 {
-    internal class AvatarTracking : BodyAwareBehaviour
+    public class AvatarTracking : BodyAwareBehaviour
     {
         private Settings.AvatarSpecificSettings _avatarSpecificSettings;
 

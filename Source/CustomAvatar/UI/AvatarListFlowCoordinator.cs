@@ -8,12 +8,20 @@ namespace CustomAvatar.UI
 {
     internal class AvatarListFlowCoordinator : FlowCoordinator
     {
-        [Inject] private AvatarListViewController _avatarListViewController;
-        [Inject] private MirrorViewController _mirrorViewController;
-        [Inject] private SettingsViewController _settingsViewController;
+        private AvatarListViewController _avatarListViewController; 
+        private MirrorViewController _mirrorViewController;
+        private SettingsViewController _settingsViewController;
 
         private GameObject _mainScreen;
         private Vector3 _mainScreenScale;
+
+        [Inject]
+        private void Inject(AvatarListViewController avatarListViewController, MirrorViewController mirrorViewController, SettingsViewController settingsViewController)
+        {
+            _avatarListViewController = avatarListViewController;
+            _mirrorViewController = mirrorViewController;
+            _settingsViewController = settingsViewController;
+        }
 
         protected override void DidActivate(bool firstActivation, ActivationType activationType)
         {

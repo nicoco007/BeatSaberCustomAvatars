@@ -4,7 +4,7 @@ using Zenject;
 
 namespace CustomAvatar.Avatar
 {
-    internal class AvatarFingerTracking : MonoBehaviour
+    public class AvatarFingerTracking : MonoBehaviour
     {
         private Animator _animator;
         private PoseManager _poseManager;
@@ -35,7 +35,7 @@ namespace CustomAvatar.Avatar
         #pragma warning restore IDE0051
         #endregion
 
-        public void ApplyFingerTracking()
+        private void ApplyFingerTracking()
         {
             if (_input.TryGetLeftHandFingerCurl(out FingerCurl leftFingerCurl))
             {

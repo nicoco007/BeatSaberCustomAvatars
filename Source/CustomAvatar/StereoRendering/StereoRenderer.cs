@@ -179,11 +179,17 @@ namespace CustomAvatar.StereoRendering
 
         #endregion
 
-        [Inject] private StereoRenderManager _manager;
-        [Inject] private Settings _settings;
+        private StereoRenderManager _manager;
+        private Settings _settings;
 
         /////////////////////////////////////////////////////////////////////////////////
         // initialization
+
+        private void Inject(StereoRenderManager manager, Settings settings)
+        {
+            _manager = manager;
+            _settings = settings;
+        }
 
         private void Start()
         {

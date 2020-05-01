@@ -2,7 +2,7 @@
 
 namespace CustomAvatar.Avatar
 {
-    internal abstract class BodyAwareBehaviour : MonoBehaviour
+    public abstract class BodyAwareBehaviour : MonoBehaviour
     {
         public Transform head { get; private set; }
         public Transform body { get; private set; }

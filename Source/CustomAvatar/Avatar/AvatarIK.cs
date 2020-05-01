@@ -13,7 +13,7 @@ using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar.Avatar
 {
-    internal class AvatarIK : BodyAwareBehaviour
+    public class AvatarIK : BodyAwareBehaviour
     {
         private VRIK _vrik;
         private VRIKManager _vrikManager;
@@ -152,13 +152,13 @@ namespace CustomAvatar.Avatar
         #pragma warning restore IDE0051
         #endregion
 
-        public void EnableCalibrationMode()
+        internal void EnableCalibrationMode()
         {
             _isCalibrationModeEnabled = true;
             UpdateSolverTargets();
         }
 
-        public void DisableCalibrationMode()
+        internal void DisableCalibrationMode()
         {
             _isCalibrationModeEnabled = false;
             UpdateSolverTargets();

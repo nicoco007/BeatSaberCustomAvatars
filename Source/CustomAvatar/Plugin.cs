@@ -21,12 +21,12 @@ namespace CustomAvatar
     [Plugin(RuntimeOptions.SingleStartInit)]
     internal class Plugin
     {
-        [Inject] private PlayerAvatarManager _avatarManager;
-        [Inject] private GameScenesManager _scenesManager;
-        [Inject] private AvatarListFlowCoordinator _flowCoordinator;
-        [Inject] private Settings _settings;
-        [Inject] private SettingsManager _settingsManager;
-        [Inject] private MirrorHelper _mirrorHelper;
+        private PlayerAvatarManager _avatarManager;
+        private GameScenesManager _scenesManager;
+        private AvatarListFlowCoordinator _flowCoordinator;
+        private Settings _settings;
+        private SettingsManager _settingsManager;
+        private MirrorHelper _mirrorHelper;
 
         private SceneContext _sceneContext;
         private GameObject _mirrorContainer;
@@ -48,10 +48,29 @@ namespace CustomAvatar
 
             // can't inject at this point so just create it
             _logger = new IPALogger<Plugin>(logger);
-            
-            BeatSaberEvents.ApplyPatches();
+
+            try
+            {
+                BeatSaberEvents.ApplyPatches();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Failed to apply patches");
+                _logger.Error(ex);
+            }
 
             PatchAppCoreInstallerInstallBindings();
+        }
+
+        [Inject]
+        private void Inject(PlayerAvatarManager playerAvatarManager, GameScenesManager gameScenesManager, AvatarListFlowCoordinator avatarListFlowCoordinator, Settings settings, SettingsManager settingsManager, MirrorHelper mirrorHelper)
+        {
+            _avatarManager = playerAvatarManager;
+            _scenesManager = gameScenesManager;
+            _flowCoordinator = avatarListFlowCoordinator;
+            _settings = settings;
+            _settingsManager = settingsManager;
+            _mirrorHelper = mirrorHelper;
         }
 
         private void PatchAppCoreInstallerInstallBindings()

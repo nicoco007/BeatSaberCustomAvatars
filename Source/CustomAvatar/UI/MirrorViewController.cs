@@ -10,8 +10,15 @@ namespace CustomAvatar.UI
     {
         private GameObject _mirrorContainer;
 
-        [Inject] private MirrorHelper _mirrorHelper;
-        [Inject] private Settings _settings;
+        private MirrorHelper _mirrorHelper;
+        private Settings _settings;
+
+        [Inject]
+        private void Inject(MirrorHelper mirrorHelper, Settings settings)
+        {
+            _mirrorHelper = mirrorHelper;
+            _settings = settings;
+        }
 
         protected override void DidActivate(bool firstActivation, ActivationType activationType)
         {

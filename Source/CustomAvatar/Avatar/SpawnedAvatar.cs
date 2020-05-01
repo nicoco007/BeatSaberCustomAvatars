@@ -1,3 +1,5 @@
+extern alias BeatSaberFinalIK;
+
 using System;
 using System.Reflection;
 using AvatarScriptPack;
@@ -7,6 +9,7 @@ using CustomAvatar.Utilities;
 using UnityEngine;
 using Zenject;
 using ILogger = CustomAvatar.Logging.ILogger;
+using VRIK = BeatSaberFinalIK::RootMotion.FinalIK.VRIK;
 
 namespace CustomAvatar.Avatar
 {
@@ -36,9 +39,9 @@ namespace CustomAvatar.Avatar
         public bool supportsFingerTracking { get; private set; }
         public bool isIKAvatar { get; private set; }
 
-		internal AvatarTracking tracking { get; private set; }
-        internal AvatarIK ik { get; private set; }
-        internal AvatarFingerTracking fingerTracking { get; private set; }
+		public AvatarTracking tracking { get; private set; }
+        public AvatarIK ik { get; private set; }
+        public AvatarFingerTracking fingerTracking { get; private set; }
 
         private ILogger _logger;
         private Settings _settings;

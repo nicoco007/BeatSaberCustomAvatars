@@ -18,22 +18,27 @@ namespace CustomAvatar.UI
 {
     internal class AvatarListViewController : BSMLResourceViewController, TableView.IDataSource
     {
-        [Inject] private PlayerAvatarManager _avatarManager;
-
         private const string kTableCellReuseIdentifier = "CustomAvatarsTableCell";
 
         public override string ResourceName => "CustomAvatar.Views.AvatarList.bsml";
 
-
         [UIComponent("avatar-list")] public CustomListTableData avatarList;
         [UIComponent("up-button")] public Button upButton;
         [UIComponent("down-button")] public Button downButton;
+        
+        private PlayerAvatarManager _avatarManager;
 
         private readonly List<AvatarListItem> _avatars = new List<AvatarListItem>();
         private LevelListTableCell _tableCellTemplate;
 
         private Texture2D _blankAvatarIcon;
         private Texture2D _noAvatarIcon;
+
+        [Inject]
+        private void Inject(PlayerAvatarManager avatarManager)
+        {
+            _avatarManager = avatarManager;
+        }
 
         protected override void DidActivate(bool firstActivation, ActivationType type)
         {

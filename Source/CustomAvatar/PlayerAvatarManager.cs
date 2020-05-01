@@ -28,6 +28,7 @@ namespace CustomAvatar
         private readonly Settings _settings;
         private readonly AvatarSpawner _spawner;
 
+        [Inject]
         private PlayerAvatarManager(AvatarTailor avatarTailor, ILoggerFactory loggerFactory, AvatarLoader avatarLoader, TrackedDeviceManager trackedDeviceManager, Settings settings, AvatarSpawner spawner)
         {
             _logger = loggerFactory.CreateLogger<PlayerAvatarManager>();
