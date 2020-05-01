@@ -143,7 +143,7 @@ namespace CustomAvatar
 
             if (spawnedAvatar.input.TryGetWaistPose(out Pose pelvis))
             {
-                Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.tracking.pelvis.rotation) * spawnedAvatar.tracking.pelvis.position - Quaternion.Inverse(pelvis.rotation) * pelvis.position;
+                Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.tracking.pelvis.rotation) * (spawnedAvatar.tracking.pelvis.position - pelvis.position);
                 Quaternion rotationOffset = Quaternion.Inverse(pelvis.rotation) * spawnedAvatar.tracking.pelvis.rotation;
 
                 fullBodyCalibration.pelvis = new Pose(positionOffset, rotationOffset);
@@ -152,7 +152,7 @@ namespace CustomAvatar
 
             if (spawnedAvatar.input.TryGetLeftFootPose(out Pose leftFoot))
             {
-                Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.tracking.leftLeg.rotation) * spawnedAvatar.tracking.leftLeg.position - Quaternion.Inverse(leftFoot.rotation) * leftFoot.position;
+                Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.tracking.leftLeg.rotation) * (spawnedAvatar.tracking.leftLeg.position - leftFoot.position);
                 Quaternion rotationOffset = Quaternion.Inverse(leftFoot.rotation) * spawnedAvatar.tracking.leftLeg.rotation;
 
                 fullBodyCalibration.leftLeg = new Pose(positionOffset, rotationOffset);
@@ -161,7 +161,7 @@ namespace CustomAvatar
 
             if (spawnedAvatar.input.TryGetRightFootPose(out Pose rightFoot))
             {
-                Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.tracking.rightLeg.rotation) * spawnedAvatar.tracking.rightLeg.position - Quaternion.Inverse(rightFoot.rotation) * rightFoot.position;
+                Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.tracking.rightLeg.rotation) * (spawnedAvatar.tracking.rightLeg.position - rightFoot.position);
                 Quaternion rotationOffset = Quaternion.Inverse(rightFoot.rotation) * spawnedAvatar.tracking.rightLeg.rotation;
 
                 fullBodyCalibration.rightLeg = new Pose(positionOffset, rotationOffset);

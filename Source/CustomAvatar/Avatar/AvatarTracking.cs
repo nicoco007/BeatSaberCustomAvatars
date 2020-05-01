@@ -163,7 +163,7 @@ namespace CustomAvatar.Avatar
                         if (_avatarSpecificSettings.useAutomaticCalibration)
                         {
                             correction = _settings.automaticCalibration.pelvis;
-                            correction.position -= Vector3.up * _settings.automaticCalibration.pelvisOffset;
+                            correction.position -= Vector3.forward * _settings.automaticCalibration.pelvisOffset;
                         }
                         else
                         {
@@ -206,7 +206,7 @@ namespace CustomAvatar.Avatar
 
         private Pose AdjustTrackedPointPose(Pose previousPose, Pose currentPose, Pose correction, Pose initialPose, Settings.TrackedPointSmoothing smoothing)
         {
-            Vector3 corrected = currentPose.position + currentPose.rotation * correction.position; // correction is forward-facing by definition
+            Vector3 corrected = currentPose.position + currentPose.rotation * correction.rotation * correction.position; // correction is forward-facing by definition
             Quaternion correctedRotation = currentPose.rotation * correction.rotation;
 
             float y = _avatar.verticalPosition;
