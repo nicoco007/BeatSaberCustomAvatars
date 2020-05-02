@@ -5,7 +5,7 @@ using UnityEngine;
 using Zenject;
 using ILogger = CustomAvatar.Logging.ILogger;
 
-namespace CustomAvatar
+namespace CustomAvatar.Lighting
 {
     internal class GameplayLightingController : MonoBehaviour
     {
