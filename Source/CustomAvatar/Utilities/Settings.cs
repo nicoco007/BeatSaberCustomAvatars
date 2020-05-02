@@ -44,27 +44,10 @@ namespace CustomAvatar.Utilities
 
         public class Lighting
         {
-            public bool enabled = true;
+            public bool enabled = false;
             public bool castShadows = false;
             [JsonConverter(typeof(StringEnumConverter))] public ShadowResolution shadowResolution = ShadowResolution.Medium;
-
-            [JsonProperty(ObjectCreationHandling = ObjectCreationHandling.Reuse)]
-            public readonly LightDefinition[] lights =
-            {
-                new LightDefinition { type = LightType.Directional, rotation = new Vector3(135, 0, 0) },
-                new LightDefinition { type = LightType.Directional, rotation = new Vector3(45, 0, 0) }
-            };
-        }
-
-        public class LightDefinition
-        {
-            [JsonConverter(typeof(StringEnumConverter))] public LightType type = LightType.Directional;
-            public Vector3 position = Vector3.zero;
-            public Vector3 rotation = Vector3.zero;
-            public Color color = Color.white;
-            public float intensity = 1;
-            public float spotAngle = 30;
-            public float range = 10;
+            public bool enableDynamicLighting = false;
         }
 
         public class Mirror

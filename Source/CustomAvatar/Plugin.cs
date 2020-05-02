@@ -1,6 +1,7 @@
 using CustomAvatar.StereoRendering;
 using IPA;
 using System;
+using System.Linq;
 using System.Reflection;
 using BeatSaberMarkupLanguage.MenuButtons;
 using CustomAvatar.Lighting;
@@ -30,8 +31,9 @@ namespace CustomAvatar
 
         private SceneContext _sceneContext;
         private GameObject _mirrorContainer;
-        private LightingRig _lightingRig;
+        private MenuLightingController _menuLightingRig;
         private KeyboardInputHandler _keyboardInputHandler;
+        private GameplayLightingController _gameplayLightingController;
         
         public event Action<ScenesTransitionSetupDataSO, DiContainer> sceneTransitionDidFinish;
 
@@ -157,7 +159,7 @@ namespace CustomAvatar
             if (scene.name == "PCInit")
             {
                 Object.Destroy(_keyboardInputHandler);
-                Object.Destroy(_lightingRig);
+                Object.Destroy(_menuLightingRig);
                 Object.Destroy(_mirrorContainer);
                 Object.Destroy(_avatarManager.currentlySpawnedAvatar);
             }
@@ -174,7 +176,12 @@ namespace CustomAvatar
 
             _keyboardInputHandler = _sceneContext.Container.InstantiateComponentOnNewGameObject<KeyboardInputHandler>(nameof(KeyboardInputHandler));
 
-            SetUpLighting();
+            if (_settings.lighting.castShadows)
+            {
+                QualitySettings.shadows = ShadowQuality.All;
+                QualitySettings.shadowResolution = _settings.lighting.shadowResolution;
+                QualitySettings.shadowDistance = 10;
+            }
         }
 
         private void SceneTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
@@ -201,6 +208,29 @@ namespace CustomAvatar
             {
                 _logger.Error("Could not find main camera!");
             }
+
+            if (_settings.lighting.enabled)
+            {
+                if (_scenesManager.IsSceneInStack("GameplayCore") && _settings.lighting.enableDynamicLighting)
+                {
+                    Object.Destroy(_menuLightingRig);
+
+                    if (!_gameplayLightingController)
+                    {
+                        _gameplayLightingController = container.InstantiateComponentOnNewGameObject<GameplayLightingController>();
+                    }
+                }
+                else
+                {
+                    Object.Destroy(_gameplayLightingController);
+
+                    if (!_menuLightingRig)
+                    {
+                        _menuLightingRig = _sceneContext.Container.InstantiateComponentOnNewGameObject<MenuLightingController>(nameof(MenuLightingController));
+                        Object.DontDestroyOnLoad(_menuLightingRig);
+                    }
+                }
+            }
         }
 
         private void SetCameraCullingMask(Camera camera)
@@ -208,28 +238,6 @@ namespace CustomAvatar
             _logger.Debug("Adding third person culling mask to " + camera.name);
 
             camera.cullingMask &= ~(1 << AvatarLayers.OnlyInThirdPerson);
-        }
-
-        private void SetUpLighting()
-        {
-            if (_settings.lighting.enabled)
-            {
-                _lightingRig = _sceneContext.Container.InstantiateComponentOnNewGameObject<LightingRig>(nameof(LightingRig));
-                
-                Object.DontDestroyOnLoad(_lightingRig.gameObject);
-                
-                foreach (Settings.LightDefinition lightDefinition in _settings.lighting.lights)
-                {
-                    _lightingRig.AddLight(lightDefinition);
-                }
-
-                if (_settings.lighting.castShadows)
-                {
-                    QualitySettings.shadows = ShadowQuality.All;
-                    QualitySettings.shadowResolution = _settings.lighting.shadowResolution;
-                    QualitySettings.shadowDistance = 10;
-                }
-            }
         }
     }
 }

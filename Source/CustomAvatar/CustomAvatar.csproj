@@ -52,6 +52,10 @@
     <Reference Include="HMLib">
       <HintPath>..\..\Libraries\HMLib.dll</HintPath>
     </Reference>
+    <Reference Include="HMRendering, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Libraries\HMRendering.dll</HintPath>
+    </Reference>
     <Reference Include="HMUI, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\HMUI.dll</HintPath>
@@ -150,10 +154,11 @@
     <Compile Include="Avatar\BodyAwareBehaviour.cs" />
     <Compile Include="BeatSaberEvents.cs" />
     <Compile Include="CustomAvatarsInstaller.cs" />
+    <Compile Include="Lighting\GameplayLightingController.cs" />
     <Compile Include="KeyboardInputHandler.cs" />
     <Compile Include="Logging\ILoggerProvider.cs" />
     <Compile Include="Logging\IPALoggerProvider.cs" />
-    <Compile Include="Lighting\LightingRig.cs" />
+    <Compile Include="Lighting\MenuLightingController.cs" />
     <Compile Include="ShaderLoader.cs" />
     <Compile Include="Tracking\FingerCurl.cs" />
     <Compile Include="UIInstaller.cs" />
