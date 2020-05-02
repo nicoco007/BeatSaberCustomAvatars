@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
-using CustomAvatar.Logging;
 using CustomAvatar.Utilities;
 using UnityEngine;
 using Zenject;
-using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar.Lighting
 {
@@ -38,7 +36,7 @@ namespace CustomAvatar.Lighting
 
                 foreach (LightWithId lightWithId in lightsWithId[id])
                 {
-                    Vector3 direction = (lightWithId.transform.position - origin);
+                    Vector3 direction = lightWithId.transform.position - origin;
 
                     var light = new GameObject("DynamicLight").AddComponent<Light>();
                     
