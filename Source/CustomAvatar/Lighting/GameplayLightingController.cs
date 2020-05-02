@@ -9,7 +9,6 @@ namespace CustomAvatar.Lighting
 {
     internal class GameplayLightingController : MonoBehaviour
     {
-        private ILogger _logger;
         private LightWithIdManager _lightManager;
 
         private List<Light>[] _lights;
@@ -19,9 +18,8 @@ namespace CustomAvatar.Lighting
         // ReSharper disable UnusedMember.Local
 
         [Inject]
-        private void Inject(ILoggerProvider loggerProvider, LightWithIdManager lightManager)
+        private void Inject(LightWithIdManager lightManager)
         {
-            _logger = loggerProvider.CreateLogger<GameplayLightingController>();
             _lightManager = lightManager;
 
             _lightManager.didSetColorForIdEvent += OnSetColorForId;
@@ -50,8 +48,6 @@ namespace CustomAvatar.Lighting
                     light.renderMode = LightRenderMode.Auto;
                     light.intensity = 5f * (1 / direction.magnitude);
                     light.spotAngle = 45;
-
-                    _logger.Info("Intensity: " + light.intensity);
                     
                     light.transform.SetParent(transform);
                     light.transform.position = direction.normalized * 15;
@@ -74,8 +70,6 @@ namespace CustomAvatar.Lighting
         private void OnSetColorForId(int id, Color color)
         {
             if (_lights[id] == null) return;
-
-            _logger.Info("Color: " + color);
 
             foreach (Light light in _lights[id])
             {
