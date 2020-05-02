@@ -5,18 +5,18 @@ namespace CustomAvatar.Utilities
 {
     internal static class ReflectionExtensions
     {
-        internal static TResult GetPrivateField<TSubject, TResult>(this TSubject obj, string fieldName)
+        internal static TResult GetPrivateField<TResult>(this object obj, string fieldName)
         {
             if (obj == null)
             {
                 throw new ArgumentNullException(nameof(obj));
             }
 
-            FieldInfo field = typeof(TSubject).GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Static);
+            FieldInfo field = obj.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Static);
 
             if (field == null)
             {
-                throw new InvalidOperationException($"Private instance field '{fieldName}' does not exist on {typeof(TSubject).FullName}");
+                throw new InvalidOperationException($"Private instance field '{fieldName}' does not exist on {obj.GetType().FullName}");
             }
 
             return (TResult) field.GetValue(obj);
@@ -29,7 +29,7 @@ namespace CustomAvatar.Utilities
                 throw new ArgumentNullException(nameof(obj));
             }
 
-            FieldInfo field = typeof(TSubject).GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
+            FieldInfo field = typeof(TSubject).GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Static);
 
             if (field == null)
             {

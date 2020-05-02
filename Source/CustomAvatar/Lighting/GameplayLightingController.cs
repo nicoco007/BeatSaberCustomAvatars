@@ -28,8 +28,8 @@ namespace CustomAvatar.Lighting
         }
         private void Start()
         {
-            List<LightWithId>[] lightsWithId = _lightManager.GetPrivateField<LightWithIdManager, List<LightWithId>[]>("_lights");
-            int maxLightId = _lightManager.GetPrivateField<LightWithIdManager, int>("kMaxLightId");
+            List<LightWithId>[] lightsWithId = _lightManager.GetPrivateField<List<LightWithId>[]>("_lights");
+            int maxLightId = _lightManager.GetPrivateField<int>("kMaxLightId");
             Vector3 origin = new Vector3(0, 1, 0);
 
             _lights = new List<Light>[maxLightId + 1];

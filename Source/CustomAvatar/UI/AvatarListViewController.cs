@@ -55,7 +55,7 @@ namespace CustomAvatar.UI
                 avatarList.tableView.SetPrivateField("_pageDownButton", downButton);
                 avatarList.tableView.SetPrivateField("_hideScrollButtonsIfNotNeeded", false);
                 
-                TableViewScroller scroller = avatarList.tableView.GetPrivateField<TableView, TableViewScroller>("_scroller");
+                TableViewScroller scroller = avatarList.tableView.GetPrivateField<TableViewScroller>("_scroller");
 
                 upButton.onClick.AddListener(() =>
                 {
@@ -161,22 +161,22 @@ namespace CustomAvatar.UI
             {
                 tableCell = Instantiate(_tableCellTemplate);
 
-                foreach (var image in tableCell.GetPrivateField<LevelListTableCell, UnityEngine.UI.Image[]>("_beatmapCharacteristicImages"))
+                foreach (var image in tableCell.GetPrivateField<Image[]>("_beatmapCharacteristicImages"))
                 {
                     DestroyImmediate(image);
                 }
 
                 tableCell.SetPrivateField("_beatmapCharacteristicImages", new UnityEngine.UI.Image[0]);
-                tableCell.GetPrivateField<LevelListTableCell, RawImage>("_favoritesBadgeImage").enabled = false;
+                tableCell.GetPrivateField<RawImage>("_favoritesBadgeImage").enabled = false;
 
                 tableCell.reuseIdentifier = kTableCellReuseIdentifier;
             }
 
             AvatarListItem avatar = _avatars[idx];
 
-            tableCell.GetPrivateField<LevelListTableCell, TextMeshProUGUI>("_songNameText").text = avatar.name;
-            tableCell.GetPrivateField<LevelListTableCell, TextMeshProUGUI>("_authorText").text = avatar.author;
-            tableCell.GetPrivateField<LevelListTableCell, RawImage>("_coverRawImage").texture = avatar.icon ?? _blankAvatarIcon;
+            tableCell.GetPrivateField<TextMeshProUGUI>("_songNameText").text = avatar.name;
+            tableCell.GetPrivateField<TextMeshProUGUI>("_authorText").text = avatar.author;
+            tableCell.GetPrivateField<RawImage>("_coverRawImage").texture = avatar.icon ?? _blankAvatarIcon;
 
             return tableCell;
         }
