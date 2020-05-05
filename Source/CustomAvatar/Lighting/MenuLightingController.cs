@@ -10,8 +10,8 @@ namespace CustomAvatar.Lighting
 
         private void Start()
         {
-            AddLight(Vector3.zero, Quaternion.Euler(135, 0, 0), LightType.Directional, new Color(0.8f, 0.9f, 1.000f), 0.8f, 15); // front
-            AddLight(Vector3.zero, Quaternion.Euler(45, 0, 0), LightType.Directional, new Color(0.8f, 0.9f, 1.000f), 0.8f, 15); // back
+            AddLight(Vector3.zero, Quaternion.Euler(135, 0, 0), LightType.Directional, new Color(0.8f, 0.9f, 1.000f), 1.0f, 25); // front
+            AddLight(Vector3.zero, Quaternion.Euler(45, 0, 0), LightType.Directional, new Color(0.8f, 0.9f, 1.000f), 1.0f, 25); // back
         }
 
         private void OnDestroy()
