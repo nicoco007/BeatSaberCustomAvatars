@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using CustomAvatar.Utilities;
 using UnityEngine;
 using Zenject;
@@ -10,6 +12,7 @@ namespace CustomAvatar.Lighting
         private LightWithIdManager _lightManager;
 
         private List<Light>[] _lights;
+        private Vector3 _origin = new Vector3(0, 1, 0);
         
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
@@ -26,7 +29,6 @@ namespace CustomAvatar.Lighting
         {
             List<LightWithId>[] lightsWithId = _lightManager.GetPrivateField<List<LightWithId>[]>("_lights");
             int maxLightId = _lightManager.GetPrivateField<int>("kMaxLightId");
-            Vector3 origin = new Vector3(0, 1, 0);
 
             _lights = new List<Light>[maxLightId + 1];
 
@@ -36,7 +38,7 @@ namespace CustomAvatar.Lighting
 
                 foreach (LightWithId lightWithId in lightsWithId[id])
                 {
-                    Vector3 direction = lightWithId.transform.position - origin;
+                    Vector3 direction = _origin - lightWithId.transform.position;
 
                     var light = new GameObject("DynamicLight").AddComponent<Light>();
                     
@@ -47,9 +49,9 @@ namespace CustomAvatar.Lighting
                     light.intensity = 5f * (1 / direction.magnitude);
                     light.spotAngle = 45;
                     
-                    light.transform.SetParent(transform);
-                    light.transform.position = direction.normalized * 15;
-                    light.transform.rotation = Quaternion.LookRotation(-direction);
+                    light.transform.SetParent(lightWithId.transform);
+                    light.transform.localPosition = Vector3.zero;
+                    light.transform.rotation = Quaternion.LookRotation(direction);
 
                     if (_lights[id] == null)
                     {
@@ -60,7 +62,18 @@ namespace CustomAvatar.Lighting
                 }
             }
         }
-        
+
+        private void Update()
+        {
+            foreach (List<Light> lights in _lights)
+            {
+                foreach (Light light in lights)
+                {
+                    light.transform.rotation = Quaternion.LookRotation(_origin - light.transform.position);
+                }
+            }
+        }
+
         // ReSharper disable UnusedMember.Local
         #pragma warning disable IDE0051
         #endregion
