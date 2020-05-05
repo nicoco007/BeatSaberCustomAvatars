@@ -106,7 +106,7 @@ namespace CustomAvatar.Tracking
 
             InputDevices.GetDevices(inputDevices);
             
-            var deviceRoles = new Dictionary<string, TrackedDeviceRole>(inputDevices.Count);
+            var deviceRoles = new Dictionary<InputDevice, TrackedDeviceRole>(inputDevices.Count);
 
             if (_isOpenVRRunning)
             {
@@ -117,7 +117,15 @@ namespace CustomAvatar.Tracking
                     if (string.IsNullOrEmpty(serialNumbers[i])) continue;
 
                     _logger.Debug($"Got serial number '{serialNumbers[i]}' for device at index {i}");
-                    openVRDevicesBySerialNumber.Add(serialNumbers[i], i);
+
+                    if (!openVRDevicesBySerialNumber.ContainsKey(serialNumbers[i]))
+                    {
+                        openVRDevicesBySerialNumber.Add(serialNumbers[i], i);
+                    }
+                    else
+                    {
+                        _logger.Warning($"Got more than one device with serial number '{serialNumbers[i]}'");
+                    }
                 }
             }
 
@@ -134,7 +142,7 @@ namespace CustomAvatar.Tracking
             {
                 if (!device.isValid) continue;
 
-                deviceRoles.Add(device.name, TrackedDeviceRole.Unknown);
+                deviceRoles.Add(device, TrackedDeviceRole.Unknown);
 
                 if (!_foundDevices.Contains(device.name))
                 {
@@ -164,7 +172,7 @@ namespace CustomAvatar.Tracking
                     {
                         // try to figure out tracker role using OpenVR
                         var role = OpenVRWrapper.GetTrackedDeviceRole(openVRDeviceId);
-                        deviceRoles[device.name] = role;
+                        deviceRoles[device] = role;
 
                         _logger.Info($"Tracker '{device.name}' has role {role}");
 
@@ -212,12 +220,12 @@ namespace CustomAvatar.Tracking
                 waistInputDevice = unassignedDevices.Dequeue();
             }
 
-            AssignTrackedDevice(head,      headInputDevice,      DeviceUse.Head,      headInputDevice.HasValue      ? deviceRoles[headInputDevice.Value.name]      : TrackedDeviceRole.Unknown);
-            AssignTrackedDevice(leftHand,  leftHandInputDevice,  DeviceUse.LeftHand,  leftHandInputDevice.HasValue  ? deviceRoles[leftHandInputDevice.Value.name]  : TrackedDeviceRole.Unknown);
-            AssignTrackedDevice(rightHand, rightHandInputDevice, DeviceUse.RightHand, rightHandInputDevice.HasValue ? deviceRoles[rightHandInputDevice.Value.name] : TrackedDeviceRole.Unknown);
-            AssignTrackedDevice(waist,     waistInputDevice,     DeviceUse.Waist,     waistInputDevice.HasValue     ? deviceRoles[waistInputDevice.Value.name]     : TrackedDeviceRole.Unknown);
-            AssignTrackedDevice(leftFoot,  leftFootInputDevice,  DeviceUse.LeftFoot,  leftFootInputDevice.HasValue  ? deviceRoles[leftFootInputDevice.Value.name]  : TrackedDeviceRole.Unknown);
-            AssignTrackedDevice(rightFoot, rightFootInputDevice, DeviceUse.RightFoot, rightFootInputDevice.HasValue ? deviceRoles[rightFootInputDevice.Value.name] : TrackedDeviceRole.Unknown);
+            AssignTrackedDevice(head,      headInputDevice,      DeviceUse.Head,      headInputDevice.HasValue      ? deviceRoles[headInputDevice.Value]      : TrackedDeviceRole.Unknown);
+            AssignTrackedDevice(leftHand,  leftHandInputDevice,  DeviceUse.LeftHand,  leftHandInputDevice.HasValue  ? deviceRoles[leftHandInputDevice.Value]  : TrackedDeviceRole.Unknown);
+            AssignTrackedDevice(rightHand, rightHandInputDevice, DeviceUse.RightHand, rightHandInputDevice.HasValue ? deviceRoles[rightHandInputDevice.Value] : TrackedDeviceRole.Unknown);
+            AssignTrackedDevice(waist,     waistInputDevice,     DeviceUse.Waist,     waistInputDevice.HasValue     ? deviceRoles[waistInputDevice.Value]     : TrackedDeviceRole.Unknown);
+            AssignTrackedDevice(leftFoot,  leftFootInputDevice,  DeviceUse.LeftFoot,  leftFootInputDevice.HasValue  ? deviceRoles[leftFootInputDevice.Value]  : TrackedDeviceRole.Unknown);
+            AssignTrackedDevice(rightFoot, rightFootInputDevice, DeviceUse.RightFoot, rightFootInputDevice.HasValue ? deviceRoles[rightFootInputDevice.Value] : TrackedDeviceRole.Unknown);
 
             foreach (string deviceName in _foundDevices.ToList())
             {
@@ -231,7 +239,19 @@ namespace CustomAvatar.Tracking
 
         private void AssignTrackedDevice(TrackedDeviceState deviceState, InputDevice? possibleInputDevice, DeviceUse use, TrackedDeviceRole deviceRole)
         {
-            if (possibleInputDevice.HasValue && !deviceState.found)
+            if ((!possibleInputDevice.HasValue && deviceState.found) || (possibleInputDevice.HasValue && deviceState.found && possibleInputDevice.Value.name != deviceState.name)) {
+                _logger.Info($"Removing device '{deviceState.name}' that was used as {use}");
+
+                deviceState.name = null;
+                deviceState.serialNumber = null;
+                deviceState.found = false;
+                deviceState.tracked = false;
+                deviceState.role = TrackedDeviceRole.Unknown;
+
+                deviceRemoved?.Invoke(deviceState, use);
+            }
+
+            if (possibleInputDevice.HasValue && (!deviceState.found || possibleInputDevice.Value.name != deviceState.name))
             {
                 InputDevice inputDevice = possibleInputDevice.Value;
 
@@ -243,18 +263,6 @@ namespace CustomAvatar.Tracking
                 deviceState.role = deviceRole;
                 
                 deviceAdded?.Invoke(deviceState, use);
-            }
-            
-            if (!possibleInputDevice.HasValue && deviceState.found) {
-                _logger.Info($"Lost device '{deviceState.name}' that was used as {use}");
-
-                deviceState.name = null;
-                deviceState.serialNumber = null;
-                deviceState.found = false;
-                deviceState.tracked = false;
-                deviceState.role = TrackedDeviceRole.Unknown;
-
-                deviceRemoved?.Invoke(deviceState, use);
             }
         }
 
