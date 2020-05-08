@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using CustomAvatar.Utilities;
 using UnityEngine;
 using Zenject;
@@ -10,6 +8,8 @@ namespace CustomAvatar.Lighting
     internal class GameplayLightingController : MonoBehaviour
     {
         private LightWithIdManager _lightManager;
+        private ColorManager _colorManager;
+        private PlayerController _playerController;
 
         private List<Light>[] _lights;
         private Vector3 _origin = new Vector3(0, 1, 0);
@@ -19,9 +19,11 @@ namespace CustomAvatar.Lighting
         // ReSharper disable UnusedMember.Local
 
         [Inject]
-        private void Inject(LightWithIdManager lightManager)
+        private void Inject(LightWithIdManager lightManager, ColorManager colorManager, PlayerController playerController)
         {
             _lightManager = lightManager;
+            _colorManager = colorManager;
+            _playerController = playerController;
 
             _lightManager.didSetColorForIdEvent += OnSetColorForId;
         }
@@ -61,12 +63,17 @@ namespace CustomAvatar.Lighting
                     _lights[id].Add(light);
                 }
             }
+
+            AddPointLight(_colorManager.ColorForSaberType(SaberType.SaberA), _playerController.leftSaber.transform);
+            AddPointLight(_colorManager.ColorForSaberType(SaberType.SaberB), _playerController.rightSaber.transform);
         }
 
         private void Update()
         {
             foreach (List<Light> lights in _lights)
             {
+                if (lights == null) continue;
+
                 foreach (Light light in lights)
                 {
                     light.transform.rotation = Quaternion.LookRotation(_origin - light.transform.position);
@@ -87,6 +94,22 @@ namespace CustomAvatar.Lighting
                 light.color = color;
                 light.intensity = color.a;
             }
+        }
+
+        private void AddPointLight(Color color, Transform parent)
+        {
+            Light light = new GameObject(parent.name + " Light").AddComponent<Light>();
+
+            light.type = LightType.Point;
+            light.color = color;
+            light.intensity = 1;
+            light.shadows = LightShadows.Hard;
+            light.range = 5;
+            light.renderMode = LightRenderMode.ForcePixel;
+
+            light.transform.SetParent(parent, false);
+            light.transform.localPosition = new Vector3(0, 0, 0.5f); // middle of saber
+            light.transform.rotation = Quaternion.identity;
         }
     }
 }
