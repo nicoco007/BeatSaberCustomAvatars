@@ -181,7 +181,7 @@ namespace CustomAvatar.Avatar
 
         private void OnFirstPersonEnabledChanged(bool enable)
         {
-	        SetChildrenToLayer(_settings.isAvatarVisibleInFirstPerson ? AvatarLayers.AlwaysVisible : AvatarLayers.OnlyInThirdPerson);
+	        SetChildrenToLayer(_settings.isAvatarVisibleInFirstPerson ? AvatarLayers.kAlwaysVisible : AvatarLayers.kOnlyInThirdPerson);
 
             foreach (FirstPersonExclusion firstPersonExclusion in _firstPersonExclusions)
             {
@@ -190,7 +190,7 @@ namespace CustomAvatar.Avatar
                     if (!gameObj) continue;
 
                     _logger.Debug($"Excluding '{gameObj.name}' from first person view");
-                    gameObj.layer = AvatarLayers.OnlyInThirdPerson;
+                    gameObj.layer = AvatarLayers.kOnlyInThirdPerson;
                 }
             }
         }

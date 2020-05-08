@@ -33,16 +33,16 @@ namespace CustomAvatar.StereoRendering
             Renderer renderer = mirrorPlane.GetComponent<Renderer>();
             renderer.sharedMaterial = material;
 
-            GameObject stereoCameraHead = new GameObject("Stereo Camera Head [Stereo Mirror]");
+            GameObject stereoCameraHead = new GameObject($"Stereo Camera Head [{mirrorPlane.name}]");
             stereoCameraHead.transform.SetParent(mirrorPlane.transform, false);
             stereoCameraHead.transform.localScale = new Vector3(1 / scale.x, 1 / scale.y, 1 / scale.z);
 
-            GameObject stereoCameraEyeObject = new GameObject("Stereo Camera Eye [Stereo Mirror]");
+            GameObject stereoCameraEyeObject = new GameObject($"Stereo Camera Eye [{mirrorPlane.name}]");
             stereoCameraEyeObject.transform.SetParent(mirrorPlane.transform, false);
 
             Camera stereoCameraEye = stereoCameraEyeObject.AddComponent<Camera>();
             stereoCameraEye.enabled = false;
-            stereoCameraEye.cullingMask = (1 << AvatarLayers.AlwaysVisible) | (1 << AvatarLayers.OnlyInThirdPerson);
+            stereoCameraEye.cullingMask = (1 << AvatarLayers.kAlwaysVisible) | (1 << AvatarLayers.kOnlyInThirdPerson);
             stereoCameraEye.clearFlags = CameraClearFlags.SolidColor;
             stereoCameraEye.backgroundColor = new Color(0, 0, 0, 1f);
 

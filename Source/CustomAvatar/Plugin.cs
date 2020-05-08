@@ -235,9 +235,11 @@ namespace CustomAvatar
 
         private void SetCameraCullingMask(Camera camera)
         {
-            _logger.Debug("Adding third person culling mask to " + camera.name);
+            _logger.Debug($"Setting up avatar culling mask on '{camera.name}'");
 
-            camera.cullingMask &= ~(1 << AvatarLayers.OnlyInThirdPerson);
+            camera.cullingMask &= ~(1 << AvatarLayers.kOnlyInThirdPerson);
+            camera.cullingMask |= (1 << AvatarLayers.kAlwaysVisible);
+            camera.cullingMask |= (1 << AvatarLayers.kOnlyInFirstPerson);
         }
     }
 }

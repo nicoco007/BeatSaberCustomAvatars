@@ -110,7 +110,7 @@ namespace CustomAvatar.UI
         { 
             GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 
-            sphere.layer = AvatarLayers.AlwaysVisible;
+            sphere.layer = AvatarLayers.kAlwaysVisible;
             sphere.transform.localScale = Vector3.one * 0.1f;
             sphere.GetComponent<Renderer>().material = _sphereMaterial;
 
@@ -125,7 +125,7 @@ namespace CustomAvatar.UI
         {
             GameObject axis = GameObject.CreatePrimitive(PrimitiveType.Cube);
 
-            axis.layer = AvatarLayers.AlwaysVisible;
+            axis.layer = AvatarLayers.kAlwaysVisible;
             axis.transform.localPosition = position;
             axis.transform.localScale = scale;
             axis.GetComponent<Renderer>().material = material;

@@ -7,12 +7,13 @@ namespace CustomAvatar.Lighting
 {
     internal class GameplayLightingController : MonoBehaviour
     {
+        private readonly Vector3 kOrigin = new Vector3(0, 1, 0);
+
         private LightWithIdManager _lightManager;
         private ColorManager _colorManager;
         private PlayerController _playerController;
 
         private List<Light>[] _lights;
-        private Vector3 _origin = new Vector3(0, 1, 0);
         
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
@@ -40,7 +41,7 @@ namespace CustomAvatar.Lighting
 
                 foreach (LightWithId lightWithId in lightsWithId[id])
                 {
-                    Vector3 direction = _origin - lightWithId.transform.position;
+                    Vector3 direction = kOrigin - lightWithId.transform.position;
 
                     var light = new GameObject("DynamicLight").AddComponent<Light>();
                     
@@ -50,6 +51,7 @@ namespace CustomAvatar.Lighting
                     light.renderMode = LightRenderMode.Auto;
                     light.intensity = 5f * (1 / direction.magnitude);
                     light.spotAngle = 45;
+                    light.cullingMask = (1 << AvatarLayers.kOnlyInFirstPerson) | (1 << AvatarLayers.kOnlyInThirdPerson) | (1 << AvatarLayers.kAlwaysVisible);
                     
                     light.transform.SetParent(lightWithId.transform);
                     light.transform.localPosition = Vector3.zero;
@@ -76,7 +78,7 @@ namespace CustomAvatar.Lighting
 
                 foreach (Light light in lights)
                 {
-                    light.transform.rotation = Quaternion.LookRotation(_origin - light.transform.position);
+                    light.transform.rotation = Quaternion.LookRotation(kOrigin - light.transform.position);
                 }
             }
         }
@@ -98,7 +100,7 @@ namespace CustomAvatar.Lighting
 
         private void AddPointLight(Color color, Transform parent)
         {
-            Light light = new GameObject(parent.name + " Light").AddComponent<Light>();
+            Light light = new GameObject(parent.name + "Light").AddComponent<Light>();
 
             light.type = LightType.Point;
             light.color = color;
@@ -106,6 +108,7 @@ namespace CustomAvatar.Lighting
             light.shadows = LightShadows.Hard;
             light.range = 5;
             light.renderMode = LightRenderMode.ForcePixel;
+            light.cullingMask = (1 << AvatarLayers.kOnlyInFirstPerson) | (1 << AvatarLayers.kOnlyInThirdPerson) | (1 << AvatarLayers.kAlwaysVisible);
 
             light.transform.SetParent(parent, false);
             light.transform.localPosition = new Vector3(0, 0, 0.5f); // middle of saber

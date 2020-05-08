@@ -33,6 +33,7 @@ namespace CustomAvatar.Lighting
             light.shadows = LightShadows.Soft;
             light.intensity = intensity;
             light.range = range;
+            light.cullingMask = (1 << AvatarLayers.kOnlyInFirstPerson) | (1 << AvatarLayers.kOnlyInThirdPerson) | (1 << AvatarLayers.kAlwaysVisible);
 
             container.transform.SetParent(transform, false);
             container.transform.position = position;
