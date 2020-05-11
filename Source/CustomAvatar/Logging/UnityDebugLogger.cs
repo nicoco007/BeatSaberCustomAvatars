@@ -45,10 +45,10 @@
         {
             if (string.IsNullOrEmpty(_name))
             {
-                return $"{level} | [{nameof(T)}] {message}";
+                return $"{level} | [{typeof(T).Name}] {message}";
             }
 
-            return $"{level} | [{nameof(T)}({_name})] {message}";
+            return $"{level} | [{typeof(T).Name}({_name})] {message}";
         }
     }
 }
