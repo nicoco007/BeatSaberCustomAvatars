@@ -116,7 +116,7 @@ namespace CustomAvatar.Tracking
                 {
                     if (string.IsNullOrEmpty(serialNumbers[i])) continue;
 
-                    _logger.Debug($"Got serial number '{serialNumbers[i]}' for device at index {i}");
+                    _logger.Trace($"Got serial number '{serialNumbers[i]}' for device at index {i}");
 
                     if (!openVRDevicesBySerialNumber.ContainsKey(serialNumbers[i]))
                     {

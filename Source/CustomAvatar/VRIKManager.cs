@@ -444,7 +444,7 @@ namespace CustomAvatar
 
         internal void SetVrikReferences()
         {
-            _logger.Debug($"Setting VRIK references on '{name}'");
+            _logger.Info($"Setting VRIK references on '{name}'");
 
             foreach (FieldInfo sourceField in GetType().GetFields())
             {
@@ -481,7 +481,7 @@ namespace CustomAvatar
                             _logger.Warning($"Underlying types for {sourceField.Name} ({sourceType}) and {targetField.Name} ({targetType}) are not the same");
                         }
 
-                        _logger.Debug($"Converting enum value {sourceField.FieldType} ({sourceType}) -> {targetField.FieldType} ({targetType})");
+                        _logger.Trace($"Converting enum value {sourceField.FieldType} ({sourceType}) -> {targetField.FieldType} ({targetType})");
                         targetField.SetValue(target, Convert.ChangeType(value, targetType));
                     }
                     else

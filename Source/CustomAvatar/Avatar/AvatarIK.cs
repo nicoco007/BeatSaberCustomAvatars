@@ -219,14 +219,14 @@ namespace CustomAvatar.Avatar
 
             if (_input.TryGetLeftFootPose(out _) || _isCalibrationModeEnabled)
             {
-                _logger.Debug("Left foot enabled");
+                _logger.Trace("Left foot enabled");
                 _vrik.solver.leftLeg.target = _vrikManager.solver_leftLeg_target;
                 _vrik.solver.leftLeg.positionWeight = _vrikManager.solver_leftLeg_positionWeight;
                 _vrik.solver.leftLeg.rotationWeight = _vrikManager.solver_leftLeg_rotationWeight;
             }
             else
             {
-                _logger.Debug("Left foot disabled");
+                _logger.Trace("Left foot disabled");
                 _vrik.solver.leftLeg.target = null;
                 _vrik.solver.leftLeg.positionWeight = 0;
                 _vrik.solver.leftLeg.rotationWeight = 0;
@@ -234,14 +234,14 @@ namespace CustomAvatar.Avatar
 
             if (_input.TryGetRightFootPose(out _) || _isCalibrationModeEnabled)
             {
-                _logger.Debug("Right foot enabled");
+                _logger.Trace("Right foot enabled");
                 _vrik.solver.rightLeg.target = _vrikManager.solver_rightLeg_target;
                 _vrik.solver.rightLeg.positionWeight = _vrikManager.solver_rightLeg_positionWeight;
                 _vrik.solver.rightLeg.rotationWeight = _vrikManager.solver_rightLeg_rotationWeight;
             }
             else
             {
-                _logger.Debug("Right foot disabled");
+                _logger.Trace("Right foot disabled");
                 _vrik.solver.rightLeg.target = null;
                 _vrik.solver.rightLeg.positionWeight = 0;
                 _vrik.solver.rightLeg.rotationWeight = 0;
@@ -249,7 +249,7 @@ namespace CustomAvatar.Avatar
 
             if (_input.TryGetWaistPose(out _) || _isCalibrationModeEnabled)
             {
-                _logger.Debug("Pelvis enabled");
+                _logger.Trace("Pelvis enabled");
                 _vrik.solver.spine.pelvisTarget = _vrikManager.solver_spine_pelvisTarget;
                 _vrik.solver.spine.pelvisPositionWeight = _vrikManager.solver_spine_pelvisPositionWeight;
                 _vrik.solver.spine.pelvisRotationWeight = _vrikManager.solver_spine_pelvisRotationWeight;
@@ -257,7 +257,7 @@ namespace CustomAvatar.Avatar
             }
             else
             {
-                _logger.Debug("Pelvis disabled");
+                _logger.Trace("Pelvis disabled");
                 _vrik.solver.spine.pelvisTarget = null;
                 _vrik.solver.spine.pelvisPositionWeight = 0;
                 _vrik.solver.spine.pelvisRotationWeight = 0;

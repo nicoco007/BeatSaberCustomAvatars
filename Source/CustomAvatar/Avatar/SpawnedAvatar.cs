@@ -189,7 +189,7 @@ namespace CustomAvatar.Avatar
                 {
                     if (!gameObj) continue;
 
-                    _logger.Debug($"Excluding '{gameObj.name}' from first person view");
+                    _logger.Trace($"Excluding '{gameObj.name}' from first person view");
                     gameObj.layer = AvatarLayers.kOnlyInThirdPerson;
                 }
             }

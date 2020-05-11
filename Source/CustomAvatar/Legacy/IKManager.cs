@@ -18,18 +18,20 @@ namespace AvatarScriptPack
         public Transform RightHandTarget;
 
         private ILogger _logger;
+        private DiContainer _container;
 
         [Inject]
-        private void Inject(ILoggerProvider loggerProvider)
+        private void Inject(ILoggerProvider loggerProvider, DiContainer container)
         {
             _logger = loggerProvider.CreateLogger<IKManager>();
+            _container = container;
         }
 
         public virtual void Start()
         {
             _logger.Warning("Avatar is still using the legacy IKManager; please migrate to VRIKManager");
 
-            var vrikManager = gameObject.AddComponent<VRIKManager>();
+            var vrikManager = _container.InstantiateComponent<VRIKManager>(gameObject);
 
             vrikManager.solver_spine_headTarget = HeadTarget;
             vrikManager.solver_leftArm_target = LeftHandTarget;

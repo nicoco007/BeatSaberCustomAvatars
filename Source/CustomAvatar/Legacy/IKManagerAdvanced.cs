@@ -247,18 +247,20 @@ namespace AvatarScriptPack
         public UnityEvent Locomotion_onRightFootstep = new UnityEvent();
 
         private ILogger _logger;
+        private DiContainer _container;
 
         [Inject]
-        private void Inject(ILoggerProvider loggerProvider)
+        private void Inject(ILoggerProvider loggerProvider, DiContainer container)
         {
             _logger = loggerProvider.CreateLogger<IKManagerAdvanced>();
+            _container = container;
         }
 
         public override void Start()
         {
             _logger.Warning("Avatar is using the legacy IKManagerAdvanced; please migrate to VRIKManager");
 
-            VRIKManager vrikManager = gameObject.AddComponent<VRIKManager>();
+            var vrikManager = _container.InstantiateComponent<VRIKManager>(gameObject);
 
             vrikManager.solver_spine_headTarget = this.HeadTarget;
             vrikManager.solver_leftArm_target = this.LeftHandTarget;
@@ -315,7 +317,7 @@ namespace AvatarScriptPack
                     return;
                 }
 
-                _logger.Debug($"Set {field.Name} = {value}");
+                _logger.Trace($"Set {field.Name} = {value}");
 
                 if (field.FieldType.IsEnum)
                 {
@@ -328,7 +330,7 @@ namespace AvatarScriptPack
                     Type sourceType = Enum.GetUnderlyingType(value.GetType());
                     Type targetType = Enum.GetUnderlyingType(field.FieldType);
 
-                    _logger.Debug($"Converting enum value {value.GetType()} ({sourceType}) -> {field.FieldType} ({targetType})");
+                    _logger.Trace($"Converting enum value {value.GetType()} ({sourceType}) -> {field.FieldType} ({targetType})");
                     field.SetValue(obj, Convert.ChangeType(value, targetType));
                 }
                 else
