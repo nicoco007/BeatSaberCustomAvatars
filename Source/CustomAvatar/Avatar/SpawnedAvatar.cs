@@ -86,8 +86,6 @@ namespace CustomAvatar.Avatar
 
             isIKAvatar = ikManager || vrikManager;
 
-            _logger = loggerProvider.CreateLogger<LoadedAvatar>(loadedAvatar.descriptor.name);
-
             if (vrik && !vrik.references.isFilled) vrik.AutoDetectReferences();
             if (vrikManager && !vrikManager.areReferencesFilled) vrikManager.AutoDetectReferences();
 
