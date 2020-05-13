@@ -33,6 +33,8 @@
       <increment-setting id="left-foot-offset" text="Left Foot Offset" hover-hint="Horizontal distance between left heel and tracker" min="0" max="0.8" increment="0.01" on-change="left-foot-offset-change"></increment-setting>
       <increment-setting id="right-foot-offset" text="Right Foot Offset" hover-hint="Horizontal distance between right heel and tracker" min="0" max="0.8" increment="0.01" on-change="right-foot-offset-change"></increment-setting>
 
+      <list-setting text="Waist Tracker Position" id="waist-tracker-position" on-change="waist-tracker-position-change" options="waist-tracker-position-options"></list-setting>
+
       <horizontal child-align="MiddleLeft" child-expand-width="true" child-control-width="true" pad-top="1" pad-bottom="1">
         <button id="auto-calibrate-button" text="Calibrate" hover-hint="Automatically calibrate full body tracking." on-click="auto-calibrate-fbt-click"></button>
         <button id="auto-clear-button" text="Clear" hover-hint="Clear calibration data." on-click="auto-clear-fbt-calibration-data-click"></button>

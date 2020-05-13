@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using CustomAvatar.Tracking;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using UnityEngine;
@@ -87,6 +88,8 @@ namespace CustomAvatar.Utilities
             public float leftLegOffset = 0.15f;
             public float rightLegOffset = 0.15f;
             public float pelvisOffset = 0.1f;
+
+            public WaistTrackerPosition waistTrackerPosition = WaistTrackerPosition.Front;
 
             [JsonIgnore] public bool isDefault => leftLeg.Equals(Pose.identity) && rightLeg.Equals(Pose.identity) && pelvis.Equals(Pose.identity);
         }

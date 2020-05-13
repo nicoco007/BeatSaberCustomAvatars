@@ -161,6 +161,7 @@
     <Compile Include="Lighting\MenuLightingController.cs" />
     <Compile Include="ShaderLoader.cs" />
     <Compile Include="Tracking\FingerCurl.cs" />
+    <Compile Include="Tracking\WaistTrackerPosition.cs" />
     <Compile Include="UIInstaller.cs" />
     <Compile Include="UI\AvatarListItem.cs" />
     <Compile Include="PlayerAvatarManager.cs" />

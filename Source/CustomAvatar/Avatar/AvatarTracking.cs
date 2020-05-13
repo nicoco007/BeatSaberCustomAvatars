@@ -163,7 +163,11 @@ namespace CustomAvatar.Avatar
                         if (_avatarSpecificSettings.useAutomaticCalibration)
                         {
                             correction = _settings.automaticCalibration.pelvis;
-                            correction.position -= Vector3.forward * _settings.automaticCalibration.pelvisOffset;
+
+                            Quaternion rotationOffset = Quaternion.Euler(0, (int) _settings.automaticCalibration.waistTrackerPosition * -90, 0);
+
+                            correction.position -= Quaternion.Inverse(rotationOffset) * (Vector3.forward * _settings.automaticCalibration.pelvisOffset);
+                            correction.rotation *= rotationOffset;
                         }
                         else
                         {

@@ -68,6 +68,8 @@ namespace CustomAvatar.UI
             _leftFootOffset.Value = _settings.automaticCalibration.leftLegOffset;
             _rightFootOffset.Value = _settings.automaticCalibration.rightLegOffset;
 
+            _waistTrackerPosition.Value = _settings.automaticCalibration.waistTrackerPosition;
+
             _autoClearButton.interactable = !_settings.automaticCalibration.isDefault;
 
             _avatarManager.avatarChanged += OnAvatarChanged;

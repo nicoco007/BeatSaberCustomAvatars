@@ -1,5 +1,7 @@
-﻿using BeatSaberMarkupLanguage.Attributes;
+﻿using System.Collections.Generic;
+using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components.Settings;
+using CustomAvatar.Tracking;
 using UnityEngine.UI;
 
 namespace CustomAvatar.UI
@@ -14,12 +16,21 @@ namespace CustomAvatar.UI
         [UIComponent("pelvis-offset")] private IncrementSetting _pelvisOffset;
         [UIComponent("left-foot-offset")] private IncrementSetting _leftFootOffset;
         [UIComponent("right-foot-offset")] private IncrementSetting _rightFootOffset;
+        [UIComponent("waist-tracker-position")] private ListSetting _waistTrackerPosition;
 
         [UIComponent("auto-calibrate-button")] private Button _autoCalibrateButton;
         [UIComponent("auto-clear-button")] private Button _autoClearButton;
         
         #pragma warning restore 649
         #pragma warning restore IDE0044
+        #endregion
+
+        #region Values
+        // ReSharper disable UnusedMember.Local
+
+        [UIValue("waist-tracker-position-options")] private readonly List<object> _waistTrackerOptions = new List<object> { WaistTrackerPosition.Front, WaistTrackerPosition.Left, WaistTrackerPosition.Right, WaistTrackerPosition.Back };
+        
+        // ReSharper restore UnusedMember.Local
         #endregion
 
         #region Actions
@@ -61,6 +72,12 @@ namespace CustomAvatar.UI
         {
             _avatarTailor.ClearAutomaticFullBodyTrackingData();
             _autoClearButton.interactable = false;
+        }
+
+        [UIAction("waist-tracker-position-change")]
+        private void OnWaistTrackerPositionChanged(WaistTrackerPosition waistTrackerPosition)
+        {
+            _settings.automaticCalibration.waistTrackerPosition = waistTrackerPosition;
         }
         
         // ReSharper restore UnusedMember.Local
