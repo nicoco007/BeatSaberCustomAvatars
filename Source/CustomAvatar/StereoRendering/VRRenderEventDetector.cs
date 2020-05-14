@@ -9,30 +9,30 @@ namespace CustomAvatar.StereoRendering
     [DisallowMultipleComponent]
     internal class VRRenderEventDetector : MonoBehaviour
     {
-        public Camera Camera { get; private set; }
-
-        private StereoRenderManager _manager { get; set; }
+        public Camera camera { get; private set; }
+        public StereoRenderManager manager { get; private set; }
 
         [Inject]
         private void Inject(StereoRenderManager manager)
         {
-            _manager = manager;
+            this.manager = manager;
         }
 
         public void Start()
         {
-            // check instantiated properly
-            if (_manager == null)
-            {
-                Destroy(this);
-            }
-
-            Camera = GetComponent<Camera>();
+            camera = GetComponent<Camera>();
         }
 
         private void OnPreRender()
         {
-            _manager.InvokeStereoRenderers(this);
+            if (manager != null)
+            {
+                manager.InvokeStereoRenderers(this);
+            }
+            else
+            {
+                Destroy(this);
+            }
         }
     }
 }

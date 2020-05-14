@@ -334,8 +334,8 @@ namespace CustomAvatar.StereoRendering
             var rightEyeOffset = new Vector3(ipd / 2, 0, 0);
 
             int hash = detector.GetHashCode();
-            int renderWidth = (int)(_settings.mirror.renderScale * detector.Camera.pixelWidth);
-            int renderHeight = (int)(_settings.mirror.renderScale * detector.Camera.pixelHeight);
+            int renderWidth = (int)(_settings.mirror.renderScale * detector.camera.pixelWidth);
+            int renderHeight = (int)(_settings.mirror.renderScale * detector.camera.pixelHeight);
 
             if (!leftEyeTextures.ContainsKey(hash))
             {
@@ -347,24 +347,24 @@ namespace CustomAvatar.StereoRendering
                 rightEyeTextures.Add(hash, CreateRenderTexture(renderWidth, renderHeight));
             }
 
-            Matrix4x4 leftProjectionMatrix = detector.Camera.projectionMatrix;
-            Matrix4x4 rightProjectionMatrix = detector.Camera.projectionMatrix;
+            Matrix4x4 leftProjectionMatrix = detector.camera.projectionMatrix;
+            Matrix4x4 rightProjectionMatrix = detector.camera.projectionMatrix;
 
-            if (detector.Camera.stereoEnabled)
+            if (detector.camera.stereoEnabled)
             {
-                leftProjectionMatrix = detector.Camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left);
-                rightProjectionMatrix = detector.Camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right);
+                leftProjectionMatrix = detector.camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left);
+                rightProjectionMatrix = detector.camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right);
             }
 
             // render stereo textures
             RenderEye(
                 leftEyeOffset, 
-                leftProjectionMatrix, detector.Camera.worldToCameraMatrix, 
+                leftProjectionMatrix, detector.camera.worldToCameraMatrix, 
                 leftEyeTextures[hash], "_LeftEyeTexture");
 
-            if (detector.Camera.stereoEnabled)
+            if (detector.camera.stereoEnabled)
             {
-                var rightEyeWorldToCameraMatrix = detector.Camera.worldToCameraMatrix;
+                var rightEyeWorldToCameraMatrix = detector.camera.worldToCameraMatrix;
                 rightEyeWorldToCameraMatrix.m03 -= ipd;
 
                 RenderEye(
