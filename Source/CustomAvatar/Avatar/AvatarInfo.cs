@@ -30,11 +30,15 @@ namespace CustomAvatar.Avatar
 
         public static bool operator ==(AvatarInfo left, AvatarInfo right)
         {
+            if (left == null || right == null) return !(left == null ^ right == null);
+
             return left.name == right.name && left.author == right.author && left.fullPath == right.fullPath && left.size == right.size && left.created == right.created && left.modified == right.modified;
         }
 
         public static bool operator !=(AvatarInfo left, AvatarInfo right)
         {
+            if (left == null || right == null) return left == null ^ right == null;
+
             return left.name != right.name || left.author != right.author || left.fullPath != right.fullPath || left.size != right.size || left.created != right.created || left.modified != right.modified;
         }
     }
