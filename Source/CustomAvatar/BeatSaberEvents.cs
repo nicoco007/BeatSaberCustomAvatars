@@ -6,7 +6,7 @@ namespace CustomAvatar
 {
     internal static class BeatSaberEvents
     {
-        public static event Action<float> onPlayerHeightChanged;
+        public static event Action<float> playerHeightChanged;
 
         private static Harmony _harmony;
 
@@ -23,7 +23,7 @@ namespace CustomAvatar
         private static void OnPlayerHeightChanged(float value)
         {
             //Plugin.logger.Info($"Player height set to {value} m");
-            onPlayerHeightChanged?.Invoke(value);
+            playerHeightChanged?.Invoke(value);
         }
     }
 }

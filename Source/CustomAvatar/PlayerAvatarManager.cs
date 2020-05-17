@@ -40,7 +40,7 @@ namespace CustomAvatar
 
             Plugin.instance.sceneTransitionDidFinish += OnSceneTransitionDidFinish;
             SceneManager.sceneLoaded += OnSceneLoaded;
-            BeatSaberEvents.onPlayerHeightChanged += OnPlayerHeightChanged;
+            BeatSaberEvents.playerHeightChanged += OnPlayerHeightChanged;
         }
 
         public void Dispose()
@@ -49,7 +49,7 @@ namespace CustomAvatar
 
             Plugin.instance.sceneTransitionDidFinish -= OnSceneTransitionDidFinish;
             SceneManager.sceneLoaded -= OnSceneLoaded;
-            BeatSaberEvents.onPlayerHeightChanged -= OnPlayerHeightChanged;
+            BeatSaberEvents.playerHeightChanged -= OnPlayerHeightChanged;
         }
 
         public void GetAvatarsAsync(Action<LoadedAvatar> success = null, Action<Exception> error = null)
