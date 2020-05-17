@@ -8,14 +8,14 @@ namespace CustomAvatar.UI
         public string name;
         public string author;
         public Texture2D icon;
-        public LoadedAvatar avatar;
+        public string fullPath;
 
-        internal AvatarListItem(LoadedAvatar avatar)
+        internal AvatarListItem(AvatarInfo avatar)
         {
-            name = avatar.descriptor.name;
-            author = avatar.descriptor.author;
-            icon = avatar.descriptor.cover?.texture;
-            this.avatar = avatar;
+            name = avatar.name;
+            author = avatar.author;
+            icon = avatar.icon;
+            fullPath = avatar.fullPath;
         }
 
         internal AvatarListItem(string name, Texture2D icon)

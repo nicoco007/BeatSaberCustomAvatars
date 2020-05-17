@@ -146,6 +146,7 @@
   <ItemGroup>
     <Compile Include="Avatar\AvatarGameplayEventsPlayer.cs" />
     <Compile Include="Avatar\AvatarIK.cs" />
+    <Compile Include="Avatar\AvatarInfo.cs" />
     <Compile Include="Avatar\AvatarLoader.cs" />
     <Compile Include="Avatar\AvatarSpawner.cs" />
     <Compile Include="Avatar\AvatarTracking.cs" />

@@ -16,7 +16,7 @@ namespace CustomAvatar
     public class PlayerAvatarManager : IDisposable
     {
         public static readonly string kCustomAvatarsPath = Path.GetFullPath("CustomAvatars");
-        
+
         internal SpawnedAvatar currentlySpawnedAvatar { get; private set; }
 
         internal event Action<SpawnedAvatar> avatarChanged;
@@ -27,6 +27,9 @@ namespace CustomAvatar
         private readonly TrackedDeviceManager _trackedDeviceManager;
         private readonly Settings _settings;
         private readonly AvatarSpawner _spawner;
+
+        private readonly Dictionary<string, AvatarInfo> _avatarInfos = new Dictionary<string, AvatarInfo>();
+        private string _switchingToPath;
 
         [Inject]
         private PlayerAvatarManager(AvatarTailor avatarTailor, ILoggerProvider loggerProvider, AvatarLoader avatarLoader, TrackedDeviceManager trackedDeviceManager, Settings settings, AvatarSpawner spawner)
@@ -52,13 +55,35 @@ namespace CustomAvatar
             BeatSaberEvents.playerHeightChanged -= OnPlayerHeightChanged;
         }
 
-        public void GetAvatarsAsync(Action<LoadedAvatar> success = null, Action<Exception> error = null)
+        internal void GetAvatarInfosAsync(Action<AvatarInfo> success = null, Action<Exception> error = null)
         {
-            _logger.Info("Loading all avatars from " + kCustomAvatarsPath);
+            List<string> fileNames = GetAvatarFileNames();
 
-            foreach (string fileName in GetAvatarFileNames())
+            foreach (string existingFile in _avatarInfos.Keys.ToList())
             {
-                SharedCoroutineStarter.instance.StartCoroutine(_avatarLoader.FromFileCoroutine(fileName, success, error));
+                if (!fileNames.Contains(existingFile))
+                {
+                    _avatarInfos.Remove(existingFile);
+                }
+            }
+
+            foreach (string fileName in fileNames)
+            {
+                if (_avatarInfos.ContainsKey(fileName))
+                {
+                    _logger.Info($"Using cached information for '{fileName}'");
+                    success(_avatarInfos[fileName]);
+                }
+                else
+                {
+                    SharedCoroutineStarter.instance.StartCoroutine(_avatarLoader.FromFileCoroutine(Path.Combine(kCustomAvatarsPath, fileName),
+                        (avatar) =>
+                        {
+                            var info = new AvatarInfo(avatar);
+                            _avatarInfos.Add(fileName, info);
+                            success?.Invoke(info);
+                        }, error));
+                }
             }
         }
 
@@ -82,22 +107,27 @@ namespace CustomAvatar
 
         public void SwitchToAvatarAsync(string fileName)
         {
+            Object.Destroy(currentlySpawnedAvatar);
+            currentlySpawnedAvatar = null;
+
             if (string.IsNullOrEmpty(fileName))
             {
+                _switchingToPath = null;
                 SwitchToAvatar(null);
                 return;
             }
 
             string fullPath = Path.Combine(kCustomAvatarsPath, fileName);
 
+            _switchingToPath = fullPath;
+
             SharedCoroutineStarter.instance.StartCoroutine(_avatarLoader.FromFileCoroutine(fullPath, SwitchToAvatar));
         }
 
-        public void SwitchToAvatar(LoadedAvatar avatar)
+        private void SwitchToAvatar(LoadedAvatar avatar)
         {
             if (currentlySpawnedAvatar && currentlySpawnedAvatar.avatar == avatar) return;
-
-            Object.Destroy(currentlySpawnedAvatar);
+            if (avatar?.fullPath != _switchingToPath) return;
 
             _settings.previousAvatarPath = avatar?.fullPath;
 
@@ -106,6 +136,15 @@ namespace CustomAvatar
                 _logger.Info("No avatar selected");
                 avatarChanged?.Invoke(null);
                 return;
+            }
+
+            if (_avatarInfos.ContainsKey(avatar.fullPath))
+            {
+                _avatarInfos[avatar.fullPath] = new AvatarInfo(avatar);
+            }
+            else
+            {
+                _avatarInfos.Add(avatar.fullPath, new AvatarInfo(avatar));
             }
 
             currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, new VRAvatarInput(_trackedDeviceManager));

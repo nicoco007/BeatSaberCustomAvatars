@@ -79,7 +79,7 @@ namespace CustomAvatar.UI
                 _avatars.Clear();
                 _avatars.Add(new AvatarListItem("No Avatar", _noAvatarIcon));
             
-                _avatarManager.GetAvatarsAsync(avatar =>
+                _avatarManager.GetAvatarInfosAsync(avatar =>
                 {
                     _avatars.Add(new AvatarListItem(avatar));
 
@@ -118,7 +118,7 @@ namespace CustomAvatar.UI
         [UIAction("avatar-click")]
         private void OnAvatarClicked(TableView table, int row)
         {
-            _avatarManager.SwitchToAvatar(_avatars[row].avatar);
+            _avatarManager.SwitchToAvatarAsync(_avatars[row].fullPath);
         }
 
         private void OnAvatarChanged(SpawnedAvatar avatar)
@@ -130,13 +130,13 @@ namespace CustomAvatar.UI
         {
             _avatars.Sort((a, b) =>
             {
-                if (a.avatar == null) return -1;
-                if (b.avatar == null) return 1;
+                if (string.IsNullOrEmpty(a.fullPath)) return -1;
+                if (string.IsNullOrEmpty(b.fullPath)) return 1;
 
                 return string.Compare(a.name, b.name, StringComparison.CurrentCulture);
             });
 
-            int currentRow = _avatarManager.currentlySpawnedAvatar ? _avatars.FindIndex(a => a.avatar?.fullPath == _avatarManager.currentlySpawnedAvatar.avatar.fullPath) : 0;
+            int currentRow = _avatarManager.currentlySpawnedAvatar ? _avatars.FindIndex(a => a.fullPath == _avatarManager.currentlySpawnedAvatar.avatar.fullPath) : 0;
             
             avatarList.tableView.ReloadData();
             avatarList.tableView.ScrollToCellWithIdx(currentRow, TableViewScroller.ScrollPositionType.Center, true);
@@ -176,7 +176,7 @@ namespace CustomAvatar.UI
 
             tableCell.GetPrivateField<TextMeshProUGUI>("_songNameText").text = avatar.name;
             tableCell.GetPrivateField<TextMeshProUGUI>("_authorText").text = avatar.author;
-            tableCell.GetPrivateField<RawImage>("_coverRawImage").texture = avatar.icon ?? _blankAvatarIcon;
+            tableCell.GetPrivateField<RawImage>("_coverRawImage").texture = avatar.icon ? avatar.icon : _blankAvatarIcon;
 
             return tableCell;
         }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using CustomAvatar.Exceptions;
 using CustomAvatar.Logging;
 using UnityEngine;
@@ -14,19 +13,31 @@ namespace CustomAvatar.Avatar
 
         private readonly ILogger _logger;
 
+        private readonly Dictionary<string, List<LoadHandlers>> _handlers = new Dictionary<string, List<LoadHandlers>>();
+
         internal AvatarLoader(ILoggerProvider loggerProvider)
         {
             _logger = loggerProvider.CreateLogger<AvatarLoader>();
         }
 
         // TODO from stream/memory
-        public IEnumerator<AsyncOperation> FromFileCoroutine(string fileName, Action<LoadedAvatar> success = null, Action<Exception> error = null)
+        public IEnumerator<AsyncOperation> FromFileCoroutine(string fullPath, Action<LoadedAvatar> success = null, Action<Exception> error = null)
         {
-            if (string.IsNullOrEmpty(fileName)) throw new ArgumentNullException(nameof(fileName));
+            if (string.IsNullOrEmpty(fullPath)) throw new ArgumentNullException(nameof(fullPath));
 
-            _logger.Info($"Loading avatar from '{fileName}'");
+            // already loading, just add handlers
+            if (_handlers.ContainsKey(fullPath))
+            {
+                _handlers[fullPath].Add(new LoadHandlers(success, error));
 
-            AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(Path.Combine(PlayerAvatarManager.kCustomAvatarsPath, fileName));
+                yield break;
+            }
+
+            _handlers.Add(fullPath, new List<LoadHandlers> { new LoadHandlers(success, error) });
+
+            _logger.Info($"Loading avatar from '{fullPath}'");
+
+            AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(fullPath);
 
             yield return assetBundleCreateRequest;
 
@@ -34,10 +45,16 @@ namespace CustomAvatar.Avatar
             {
                 var exception = new AvatarLoadException("Could not load asset bundle");
 
-                _logger.Error($"Failed to load avatar at '{fileName}'");
+                _logger.Error($"Failed to load avatar at '{fullPath}'");
                 _logger.Error(exception);
 
-                error?.Invoke(exception);
+                foreach (LoadHandlers handler in _handlers[fullPath])
+                {
+                    handler.error?.Invoke(exception);
+                }
+
+                _handlers.Remove(fullPath);
+
                 yield break;
             }
 
@@ -50,10 +67,16 @@ namespace CustomAvatar.Avatar
 
                 var exception = new AvatarLoadException("Could not load asset from asset bundle");
 
-                _logger.Error($"Failed to load avatar at '{fileName}'");
+                _logger.Error($"Failed to load avatar at '{fullPath}'");
                 _logger.Error(exception);
 
-                error?.Invoke(exception);
+                foreach (LoadHandlers handler in _handlers[fullPath])
+                {
+                    handler.error?.Invoke(exception);
+                }
+
+                _handlers.Remove(fullPath);
+
                 yield break;
             }
 
@@ -61,18 +84,38 @@ namespace CustomAvatar.Avatar
                 
             try
             {
-                var loadedAvatar = new LoadedAvatar(fileName, (GameObject)assetBundleRequest.asset);
+                var loadedAvatar = new LoadedAvatar(fullPath, (GameObject)assetBundleRequest.asset);
 
-                _logger.Info($"Successfully loaded avatar '{loadedAvatar.descriptor.name}' from '{fileName}'");
+                _logger.Info($"Successfully loaded avatar '{loadedAvatar.descriptor.name}' from '{fullPath}'");
 
-                success?.Invoke(loadedAvatar);
+                foreach (LoadHandlers handler in _handlers[fullPath])
+                {
+                    handler.success?.Invoke(loadedAvatar);
+                }
             }
             catch (Exception ex)
             {
-                _logger.Error($"Failed to load avatar at '{fileName}'");
+                _logger.Error($"Failed to load avatar at '{fullPath}'");
                 _logger.Error(ex);
 
-                error?.Invoke(ex);
+                foreach (LoadHandlers handler in _handlers[fullPath])
+                {
+                    handler.error?.Invoke(ex);
+                }
+            }
+
+            _handlers.Remove(fullPath);
+        }
+
+        private class LoadHandlers
+        {
+            internal Action<LoadedAvatar> success;
+            internal Action<Exception> error;
+
+            internal LoadHandlers(Action<LoadedAvatar> success, Action<Exception> error)
+            {
+                this.success = success;
+                this.error = error;
             }
         }
     }

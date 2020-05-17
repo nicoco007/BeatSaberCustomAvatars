@@ -89,6 +89,8 @@ namespace CustomAvatar
         private IEnumerator FloorMendingWithDelay(SpawnedAvatar avatar)
         {
             yield return new WaitForEndOfFrame(); // wait for CustomFloorPlugin:PlatformManager:Start to hide original platform
+            
+            if (!avatar) yield break;
 
             float floorOffset = 0f;
 
