@@ -35,6 +35,11 @@ namespace CustomAvatar
                 Plugin.logger.Info($"{(SettingsManager.settings.enableFloorAdjust ? "Enabled" : "Disabled")} floor adjust");
                 avatarManager.ResizeCurrentAvatar();
             }
+            else if (Input.GetKeyDown(KeyCode.RightControl))
+            {
+                SettingsManager.LoadSettings();
+            }
+
         }
     }
 }
