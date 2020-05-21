@@ -82,6 +82,9 @@
     <Compile Include="..\CustomAvatar\EventManager.cs">
       <Link>EventManager.cs</Link>
     </Compile>
+    <Compile Include="..\CustomAvatar\EyeTrackingManager.cs">
+      <Link>EyeTrackingManager.cs</Link>
+    </Compile>
     <Compile Include="..\CustomAvatar\FirstPersonExclusion.cs">
       <Link>FirstPersonExclusion.cs</Link>
     </Compile>

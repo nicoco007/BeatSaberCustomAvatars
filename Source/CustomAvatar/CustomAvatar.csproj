@@ -138,6 +138,7 @@
     <Compile Include="AvatarLayers.cs" />
     <Compile Include="Avatar\AvatarFingerTracking.cs" />
     <Compile Include="Avatar\BodyAwareBehaviour.cs" />
+    <Compile Include="EyeTrackingManager.cs" />
     <Compile Include="KeyboardInputHandler.cs" />
     <Compile Include="SRApi\Eye\SRanipal_Eye.cs" />
     <Compile Include="SRApi\Eye\SRanipal_EyeData.cs" />
