@@ -12,6 +12,7 @@ namespace CustomAvatar.Utilities
         public float playerArmSpan = 1.7f;
         public bool calibrateFullBodyTrackingOnStart = false;
         public float cameraNearClipPlane = 0.1f;
+        public float eyeTrackingScale = 1.0f;
         public FullBodyMotionSmoothing fullBodyMotionSmoothing = new FullBodyMotionSmoothing();
         public FullBodyCalibration fullBodyCalibration = new FullBodyCalibration();
 
