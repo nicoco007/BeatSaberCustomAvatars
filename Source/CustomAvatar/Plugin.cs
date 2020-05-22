@@ -1,7 +1,6 @@
 using CustomAvatar.StereoRendering;
 using IPA;
 using System;
-using System.Linq;
 using System.Reflection;
 using BeatSaberMarkupLanguage.MenuButtons;
 using CustomAvatar.Lighting;
@@ -83,6 +82,11 @@ namespace CustomAvatar
             var patch = new HarmonyMethod(GetType().GetMethod(nameof(InstallBindings), BindingFlags.Static | BindingFlags.NonPublic));
 
             harmony.Patch(methodToPatch, null, patch);
+
+            methodToPatch = typeof(MirrorRendererSO).GetMethod("CreateOrUpdateMirrorCamera", BindingFlags.NonPublic | BindingFlags.Instance);
+            patch = new HarmonyMethod(GetType().GetMethod(nameof(PatchMirrorLayers), BindingFlags.Static | BindingFlags.NonPublic));
+
+            harmony.Patch(methodToPatch, null, patch);
         }
 
         private static void InstallBindings(AppCoreInstaller __instance)
@@ -91,6 +95,13 @@ namespace CustomAvatar
 
             container.Install<CustomAvatarsInstaller>(new object[] { _ipaLogger });
             container.Install<UIInstaller>();
+        }
+
+        private static void PatchMirrorLayers(MirrorRendererSO __instance)
+        {
+            Camera mirrorCamera = new Traverse(__instance).Field<Camera>("_mirrorCamera").Value;
+
+            mirrorCamera.cullingMask |= (1 << AvatarLayers.kOnlyInThirdPerson) | (1 << AvatarLayers.kOnlyInFirstPerson) | (1 << AvatarLayers.kAlwaysVisible);
         }
 
         [OnStart]

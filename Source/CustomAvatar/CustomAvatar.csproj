@@ -75,6 +75,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="Rendering">
+      <HintPath>..\..\Libraries\Rendering.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
@@ -235,6 +238,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\ban.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <AutomatedBuild>false</AutomatedBuild>
