@@ -3,6 +3,8 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using CustomAvatar.Utilities;
+using Zenject;
 
 namespace CustomAvatar.StereoRendering
 {
@@ -155,8 +157,6 @@ namespace CustomAvatar.StereoRendering
         private Dictionary<int, RenderTexture> leftEyeTextures = new Dictionary<int, RenderTexture>();
         private Dictionary<int, RenderTexture> rightEyeTextures = new Dictionary<int, RenderTexture>();
 
-        public float textureResolutionScale = 1.0f;
-
         // the materials for displaying render result
         private Material stereoMaterial;
 
@@ -179,8 +179,18 @@ namespace CustomAvatar.StereoRendering
 
         #endregion
 
+        private StereoRenderManager _manager;
+        private Settings _settings;
+
         /////////////////////////////////////////////////////////////////////////////////
         // initialization
+
+        [Inject]
+        private void Inject(StereoRenderManager manager, Settings settings)
+        {
+            _manager = manager;
+            _settings = settings;
+        }
 
         private void Start()
         {
@@ -193,12 +203,12 @@ namespace CustomAvatar.StereoRendering
             stereoMaterial = renderer.materials[0];
 
             // get main camera and registor to StereoRenderManager
-            StereoRenderManager.Instance.AddToManager(this);
+            _manager.AddToManager(this);
         }
 
         private void OnDestroy()
         {
-            StereoRenderManager.Instance.RemoveFromManager(this);
+            _manager.RemoveFromManager(this);
         }
 
         private void CreateStereoCameraRig()
@@ -324,8 +334,8 @@ namespace CustomAvatar.StereoRendering
             var rightEyeOffset = new Vector3(ipd / 2, 0, 0);
 
             int hash = detector.GetHashCode();
-            int renderWidth = (int)(textureResolutionScale * detector.Camera.pixelWidth);
-            int renderHeight = (int)(textureResolutionScale * detector.Camera.pixelHeight);
+            int renderWidth = (int)(_settings.mirror.renderScale * detector.camera.pixelWidth);
+            int renderHeight = (int)(_settings.mirror.renderScale * detector.camera.pixelHeight);
 
             if (!leftEyeTextures.ContainsKey(hash))
             {
@@ -337,24 +347,24 @@ namespace CustomAvatar.StereoRendering
                 rightEyeTextures.Add(hash, CreateRenderTexture(renderWidth, renderHeight));
             }
 
-            Matrix4x4 leftProjectionMatrix = detector.Camera.projectionMatrix;
-            Matrix4x4 rightProjectionMatrix = detector.Camera.projectionMatrix;
+            Matrix4x4 leftProjectionMatrix = detector.camera.projectionMatrix;
+            Matrix4x4 rightProjectionMatrix = detector.camera.projectionMatrix;
 
-            if (detector.Camera.stereoEnabled)
+            if (detector.camera.stereoEnabled)
             {
-                leftProjectionMatrix = detector.Camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left);
-                rightProjectionMatrix = detector.Camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right);
+                leftProjectionMatrix = detector.camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left);
+                rightProjectionMatrix = detector.camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right);
             }
 
             // render stereo textures
             RenderEye(
                 leftEyeOffset, 
-                leftProjectionMatrix, detector.Camera.worldToCameraMatrix, 
+                leftProjectionMatrix, detector.camera.worldToCameraMatrix, 
                 leftEyeTextures[hash], "_LeftEyeTexture");
 
-            if (detector.Camera.stereoEnabled)
+            if (detector.camera.stereoEnabled)
             {
-                var rightEyeWorldToCameraMatrix = detector.Camera.worldToCameraMatrix;
+                var rightEyeWorldToCameraMatrix = detector.camera.worldToCameraMatrix;
                 rightEyeWorldToCameraMatrix.m03 -= ipd;
 
                 RenderEye(

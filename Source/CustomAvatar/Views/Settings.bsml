@@ -1,0 +1,46 @@
+<bg id="root">
+  <tab-selector tab-tag="avatar-tabs" anchor-pos-y="-2"></tab-selector>
+
+  <tab tags="avatar-tabs" tab-name="General" anchor-max-y="0.8">
+    <settings-container>
+      <bool-setting text="Visible in First Person" id="visible-in-first-person" on-change="visible-in-first-person-change"></bool-setting>
+      <list-setting text="Resize Mode" id="resize-mode" on-change="resize-mode-change" options="resize-mode-options" formatter="resize-mode-formatter"></list-setting>
+      <bool-setting text="Floor Height Adjust" hover-hint="Move the floor so avatars' feet are flat." id="floor-adjust" on-change="floor-adjust-change"></bool-setting>
+      <increment-setting id="camera-clip-plane" text="Camera Near Clip Plane" hover-hint="Distance from the eyes at which the camera starts rendering" min="0.01" max="0.3" increment="0.01" on-change="camera-clip-plane-change"></increment-setting>
+      
+      <horizontal pad-top="1" pad-bottom="1">
+        <text text="Arm Span" font-size="5" align="Left"></text>
+        <text id="arm-span" font-size="5" align="Left"></text>
+        <button text="Measure" on-click="measure-arm-span-click" hover-hint="For optimal results, hold your arms out to either side of your body and point the ends of the controllers outwards as far as possible (turn your hands if necessary)."></button>
+      </horizontal>
+    </settings-container>
+  </tab>
+
+  <tab tags="avatar-tabs" tab-name="Avatar Specific" anchor-max-y="0.8">
+    <settings-container>
+      <bool-setting id="automatic-calibration" text="Use automatic calibration" hover-hint="Must be supported by avatar" on-change="automatic-calibration-change"></bool-setting>
+
+      <horizontal child-align="MiddleLeft" child-expand-width="true" child-control-width="true" pad-top="1" pad-bottom="1">
+        <button id="calibrate-button" text="Calibrate FBT" hover-hint="Calibrate full body tracking." on-click="calibrate-fbt-click"></button>
+        <button id="clear-button" text="Clear" hover-hint="Clear calibration data." on-click="clear-fbt-calibration-data-click"></button>
+      </horizontal>
+    </settings-container>
+  </tab>
+
+  <tab tags="avatar-tabs" tab-name="Automatic FBT" anchor-max-y="0.8">
+    <settings-container>
+      <increment-setting id="pelvis-offset" text="Pelvis Offset" hover-hint="Horizontal distance between pelvis and tracker" min="-0.5" max="0.5" increment="0.01" on-change="pelvis-offset-change"></increment-setting>
+      <increment-setting id="left-foot-offset" text="Left Foot Offset" hover-hint="Horizontal distance between left heel and tracker" min="0" max="0.8" increment="0.01" on-change="left-foot-offset-change"></increment-setting>
+      <increment-setting id="right-foot-offset" text="Right Foot Offset" hover-hint="Horizontal distance between right heel and tracker" min="0" max="0.8" increment="0.01" on-change="right-foot-offset-change"></increment-setting>
+
+      <list-setting text="Waist Tracker Position" id="waist-tracker-position" on-change="waist-tracker-position-change" options="waist-tracker-position-options"></list-setting>
+
+      <horizontal child-align="MiddleLeft" child-expand-width="true" child-control-width="true" pad-top="1" pad-bottom="1">
+        <button id="auto-calibrate-button" text="Calibrate" hover-hint="Automatically calibrate full body tracking." on-click="auto-calibrate-fbt-click"></button>
+        <button id="auto-clear-button" text="Clear" hover-hint="Clear calibration data." on-click="auto-clear-fbt-calibration-data-click"></button>
+      </horizontal>
+
+    <bool-setting text="Calibrate FBT on start" hover-hint="Run automatic full body tracking when the game starts. Only works with avatars that support automatic calibration and have it enabled." id="calibrate-fbt-on-start" on-change="calibrate-fbt-on-start-change"></bool-setting>
+    </settings-container>
+  </tab>
+</bg>

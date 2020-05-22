@@ -6,10 +6,13 @@ using ViveSR;
 using ViveSR.anipal;
 using ViveSR.anipal.Eye;
 using CustomAvatar.Utilities;
+using Zenject;
+using CustomAvatar.Logging;
+using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar.Avatar
 {
-    internal class AvatarSRTracking : MonoBehaviour
+    public class AvatarSRTracking : MonoBehaviour
     {
         private Animator _animator;
         private EyeTrackingManager _eyeMgr;
@@ -21,19 +24,33 @@ namespace CustomAvatar.Avatar
 
         Quaternion basicLeftEyeRot;
         Quaternion basicRightEyeRot;
+
+        private ILogger _logger;
+        private Settings _settings;
+
+        #region Behaviour Lifecycle
+        #pragma warning disable IDE0051
+        [Inject]
+        private void Inject(Settings settings, ILoggerProvider loggerProvider)
+        {
+            _logger = loggerProvider.CreateLogger<AvatarSRTracking>();
+            _settings = settings;
+        }
+
         private void Start()
         {
             if (!SRanipal_Eye_API.IsViveProEye())
             {
+                _logger.Trace($"Is not ProEye, exit.");
                 return;
             }
 
             _eyeMgr = GetComponentInChildren<EyeTrackingManager>();
             if(_eyeMgr)
-                Plugin.logger.Info($"[SR] Found EyeTrackingManager.");
+                _logger.Trace($"Found EyeTrackingManager.");
             _mesh = _eyeMgr.targetMesh;
             if (_mesh)
-                Plugin.logger.Info($"[SR] Found SkinnedMeshRenderer.");
+                _logger.Trace($"Found SkinnedMeshRenderer.");
 
             _animator = GetComponentInChildren<Animator>();
             if (!_animator)
@@ -44,7 +61,7 @@ namespace CustomAvatar.Avatar
             var rightEyeTransform = _animator.GetBoneTransform(HumanBodyBones.RightEye);
             if (!leftEyeTransform || !rightEyeTransform)
             {
-                Plugin.logger.Info($"[SR] Eye Tracking: Cannnot get Eye Transform.");
+                _logger.Trace($"Eye Tracking: Cannnot get Eye Transform.");
                 return;
             }
             basicLeftEyeRot = leftEyeTransform.localRotation;
@@ -57,13 +74,13 @@ namespace CustomAvatar.Avatar
             Error result = SRanipal_API.Initial(SRanipal_Eye.ANIPAL_TYPE_EYE, IntPtr.Zero);
             if (result == Error.WORK)
             {
-                Plugin.logger.Info($"[SRanipal] Initial Eye: {result}");
+                _logger.Trace($"Initial Eye: {result}");
                 SRStatus = FrameworkStatus.WORKING;
                 workable = true;
             }
             else
             {
-                Plugin.logger.Error($"[SRanipal] Initial Eye: {result}");
+                _logger.Error($"Initial Eye: {result}");
                 SRStatus = FrameworkStatus.ERROR;
             }
         }
@@ -75,7 +92,7 @@ namespace CustomAvatar.Avatar
         {
             ApplyEyeTracking();
         }
-
+        #endregion
         private void ApplyEyeTracking()
         {
             if (workable != true)
@@ -99,7 +116,7 @@ namespace CustomAvatar.Avatar
         }
         private void UpdateEye(EyeData eyeData)
         {
-            float totalScale = SettingsManager.settings.eyeTrackingScale;
+            float totalScale = _settings.eyeTrackingScale;
             bool adjustEyeWhenHalfClose = true;
             if (_eyeMgr)
             {

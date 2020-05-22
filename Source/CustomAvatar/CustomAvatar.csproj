@@ -12,6 +12,8 @@
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -28,6 +30,9 @@
     <DefineConstants>PLUGIN</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\Libraries\0Harmony.dll</HintPath>
+    </Reference>
     <Reference Include="BSML, Version=1.0.6.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\BSML.dll</HintPath>
@@ -47,6 +52,10 @@
     <Reference Include="HMLib">
       <HintPath>..\..\Libraries\HMLib.dll</HintPath>
     </Reference>
+    <Reference Include="HMRendering, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Libraries\HMRendering.dll</HintPath>
+    </Reference>
     <Reference Include="HMUI, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\HMUI.dll</HintPath>
@@ -65,6 +74,9 @@
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Rendering">
+      <HintPath>..\..\Libraries\Rendering.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -130,10 +142,17 @@
     <Reference Include="Zenject">
       <HintPath>..\..\Libraries\Zenject.dll</HintPath>
     </Reference>
+    <Reference Include="Zenject-usage">
+      <HintPath>..\..\Libraries\Zenject-usage.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Avatar\AvatarGameplayEventsPlayer.cs" />
     <Compile Include="Avatar\AvatarIK.cs" />
     <Compile Include="Avatar\AvatarSRTracking.cs" />
+    <Compile Include="Avatar\AvatarInfo.cs" />
+    <Compile Include="Avatar\AvatarLoader.cs" />
+    <Compile Include="Avatar\AvatarSpawner.cs" />
     <Compile Include="Avatar\AvatarTracking.cs" />
     <Compile Include="AvatarLayers.cs" />
     <Compile Include="Avatar\AvatarFingerTracking.cs" />
@@ -152,8 +171,18 @@
     <Compile Include="SRApi\SRanipal_API.cs" />
     <Compile Include="SRApi\SRanipal_Enums.cs" />
     <Compile Include="SRApi\SRWorks_Enums.cs" />
+    <Compile Include="BeatSaberEvents.cs" />
+    <Compile Include="CustomAvatarsInstaller.cs" />
+    <Compile Include="Lighting\GameplayLightingController.cs" />
+    <Compile Include="Logging\ILoggerProvider.cs" />
+    <Compile Include="Logging\IPALoggerProvider.cs" />
+    <Compile Include="Lighting\MenuLightingController.cs" />
+    <Compile Include="ShaderLoader.cs" />
+    <Compile Include="Tracking\FingerCurl.cs" />
+    <Compile Include="Tracking\WaistTrackerPosition.cs" />
+    <Compile Include="UIInstaller.cs" />
     <Compile Include="UI\AvatarListItem.cs" />
-    <Compile Include="AvatarManager.cs" />
+    <Compile Include="PlayerAvatarManager.cs" />
     <Compile Include="AvatarTailor.cs" />
     <Compile Include="AvatarResizeMode.cs" />
     <Compile Include="FirstPersonExclusion.cs" />
@@ -164,21 +193,29 @@
     <Compile Include="Tracking\Extensions.cs" />
     <Compile Include="Tracking\DeviceUse.cs" />
     <Compile Include="Tracking\VRAvatarInput.cs" />
-    <Compile Include="Utilities\BeatSaberUtil.cs" />
+    <Compile Include="UI\SettingsViewController.AutomaticFBT.cs" />
+    <Compile Include="UI\SettingsViewController.AvatarSpecificSettings.cs" />
+    <Compile Include="UI\BSMLExtensions.cs" />
     <Compile Include="Avatar\LoadedAvatar.cs" />
     <Compile Include="AvatarDescriptor.cs" />
-    <Compile Include="Avatar\AvatarEventsPlayer.cs" />
     <Compile Include="EventFilterBehaviour.cs" />
     <Compile Include="EventFilters.cs" />
     <Compile Include="Exceptions\AvatarLoadException.cs" />
     <Compile Include="Tracking\OpenVRWrapper.cs" />
     <Compile Include="PoseManager.cs" />
     <Compile Include="EventManager.cs" />
-    <Compile Include="Utilities\QuaternionJsonConverter.cs" />
-    <Compile Include="Utilities\PoseJsonConverter.cs" />
+    <Compile Include="UI\SettingsViewController.General.cs" />
+    <Compile Include="Utilities\Converters\FloatJsonConverter.cs" />
+    <Compile Include="Utilities\Converters\PoseJsonConverter.cs" />
+    <Compile Include="Utilities\Converters\QuaternionJsonConverter.cs" />
+    <Compile Include="Logging\ILogger.cs" />
+    <Compile Include="Logging\IPALogger.cs" />
     <Compile Include="Utilities\ReflectionExtensions.cs" />
-    <Compile Include="Utilities\Vector3JsonConverter.cs" />
     <Compile Include="Utilities\SettingsManager.cs" />
+    <Compile Include="Utilities\Converters\Vector2JsonConverter.cs" />
+    <Compile Include="Utilities\Converters\ColorJsonConverter.cs" />
+    <Compile Include="Utilities\Converters\Vector3JsonConverter.cs" />
+    <Compile Include="Logging\UnityDebugLogger.cs" />
     <Compile Include="VRIKManager.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -189,7 +226,7 @@
     <Compile Include="Tracking\TrackedDeviceManager.cs" />
     <Compile Include="Tracking\TrackedDeviceState.cs" />
     <Compile Include="Tracking\TrackedDeviceRole.cs" />
-    <Compile Include="UI\AvatarListFlowCoordinator.cs" />
+    <Compile Include="UI\AvatarMenuFlowCoordinator.cs" />
     <Compile Include="UI\AvatarListViewController.cs" />
     <Compile Include="UI\MirrorViewController.cs" />
     <Compile Include="UI\SettingsViewController.cs" />
@@ -201,10 +238,10 @@
     <EmbeddedResource Include="manifest.json" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Views\AvatarListViewController.bsml" />
+    <EmbeddedResource Include="Views\AvatarList.bsml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Views\SettingsViewController.bsml" />
+    <EmbeddedResource Include="Views\Settings.bsml" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\icon.png" />

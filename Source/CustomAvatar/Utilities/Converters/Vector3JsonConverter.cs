@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 
-namespace CustomAvatar.Utilities
+namespace CustomAvatar.Utilities.Converters
 {
     internal class Vector3JsonConverter : JsonConverter<Vector3>
     {
@@ -23,7 +23,7 @@ namespace CustomAvatar.Utilities
         {
             JObject obj = serializer.Deserialize<JObject>(reader);
 
-            if (obj == null) return Vector3.zero;
+            if (obj == null) return existingValue;
 
             return new Vector3(obj.Value<float>("x"), obj.Value<float>("y"), obj.Value<float>("z"));
         }
