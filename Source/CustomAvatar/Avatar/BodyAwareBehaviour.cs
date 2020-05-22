@@ -2,25 +2,25 @@
 
 namespace CustomAvatar.Avatar
 {
-    internal abstract class BodyAwareBehaviour : MonoBehaviour
+    public abstract class BodyAwareBehaviour : MonoBehaviour
     {
-        protected Transform _head;
-        protected Transform _body;
-        protected Transform _leftHand;
-        protected Transform _rightHand;
-        protected Transform _leftLeg;
-        protected Transform _rightLeg;
-        protected Transform _pelvis;
+        public Transform head { get; private set; }
+        public Transform body { get; private set; }
+        public Transform leftHand { get; private set; }
+        public Transform rightHand { get; private set; }
+        public Transform leftLeg { get; private set; }
+        public Transform rightLeg { get; private set; }
+        public Transform pelvis { get; private set; }
 
         protected virtual void Start()
         {
-            _head = transform.Find("Head");
-            _body = transform.Find("Body");
-            _leftHand = transform.Find("LeftHand");
-            _rightHand = transform.Find("RightHand");
-            _leftLeg = transform.Find("LeftLeg");
-            _rightLeg = transform.Find("RightLeg");
-            _pelvis = transform.Find("Pelvis");
+            head = transform.Find("Head");
+            body = transform.Find("Body");
+            leftHand = transform.Find("LeftHand");
+            rightHand = transform.Find("RightHand");
+            leftLeg = transform.Find("LeftLeg");
+            rightLeg = transform.Find("RightLeg");
+            pelvis = transform.Find("Pelvis");
         }
     }
 }

@@ -48,5 +48,16 @@ namespace CustomAvatar.Tracking
             return false;
         }
 
+        public virtual bool TryGetLeftHandFingerCurl(out FingerCurl curl)
+        {
+            curl = null;
+            return false;
+        }
+
+        public virtual bool TryGetRightHandFingerCurl(out FingerCurl curl)
+        {
+            curl = null;
+            return false;
+        }
     }
 }

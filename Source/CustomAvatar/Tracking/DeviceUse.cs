@@ -7,6 +7,7 @@
         RightHand,
         Waist,
         LeftFoot,
-        RightFoot
+        RightFoot,
+        Unknown
     }
 }

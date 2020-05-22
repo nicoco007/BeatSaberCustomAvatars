@@ -1,27 +1,29 @@
-﻿using DynamicOpenVR.IO;
+﻿using CustomAvatar.Tracking;
 using UnityEngine;
+using Zenject;
 
 namespace CustomAvatar.Avatar
 {
-    internal class AvatarFingerTracking : MonoBehaviour
+    public class AvatarFingerTracking : MonoBehaviour
     {
-        private SkeletalInput _leftHandAnimAction;
-        private SkeletalInput _rightHandAnimAction;
-
         private Animator _animator;
         private PoseManager _poseManager;
+        private AvatarInput _input;
 
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
         // ReSharper disable UnusedMember.Local
 
+        [Inject]
+        private void Inject(AvatarInput input)
+        {
+            _input = input;
+        }
+
         private void Start()
         {
             _animator = GetComponentInChildren<Animator>();
             _poseManager = GetComponentInChildren<PoseManager>();
-
-            _leftHandAnimAction  = new SkeletalInput("/actions/customavatars/in/lefthandanim");
-            _rightHandAnimAction = new SkeletalInput("/actions/customavatars/in/righthandanim");
         }
 
         private void Update()
@@ -29,33 +31,24 @@ namespace CustomAvatar.Avatar
             ApplyFingerTracking();
         }
 
-        private void OnDestroy()
-        {
-            _leftHandAnimAction?.Dispose();
-            _rightHandAnimAction?.Dispose();
-        }
-
         // ReSharper restore UnusedMember.Local
         #pragma warning restore IDE0051
         #endregion
 
-        public void ApplyFingerTracking()
+        private void ApplyFingerTracking()
         {
-            SkeletalSummaryData leftHandAnim = _leftHandAnimAction.summaryData;
-            SkeletalSummaryData rightHandAnim = _rightHandAnimAction.summaryData;
-
-            if (_leftHandAnimAction.isActive && leftHandAnim != null)
+            if (_input.TryGetLeftHandFingerCurl(out FingerCurl leftFingerCurl))
             {
-                ApplyLeftHandFingerPoses(leftHandAnim.thumbCurl, leftHandAnim.indexCurl, leftHandAnim.middleCurl, leftHandAnim.ringCurl, leftHandAnim.littleCurl);
+                ApplyLeftHandFingerPoses(leftFingerCurl.thumb, leftFingerCurl.index, leftFingerCurl.middle, leftFingerCurl.ring, leftFingerCurl.little);
             }
             else
             {
                 ApplyLeftHandFingerPoses(1, 1, 1, 1, 1);
             }
 
-            if (_rightHandAnimAction.isActive && rightHandAnim != null)
+            if (_input.TryGetRightHandFingerCurl(out FingerCurl rightFingerCurl))
             {
-                ApplyRightHandFingerPoses(rightHandAnim.thumbCurl, rightHandAnim.indexCurl, rightHandAnim.middleCurl, rightHandAnim.ringCurl, rightHandAnim.littleCurl);
+                ApplyRightHandFingerPoses(rightFingerCurl.thumb, rightFingerCurl.index, rightFingerCurl.middle, rightFingerCurl.ring, rightFingerCurl.little);
             }
             else
             {

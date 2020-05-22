@@ -1,43 +1,61 @@
-﻿using CustomAvatar.Utilities;
+﻿using CustomAvatar.Logging;
+using CustomAvatar.Utilities;
 using UnityEngine;
+using Zenject;
+using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar
 {
     internal class KeyboardInputHandler : MonoBehaviour
     {
+        private Settings _settings;
+        private SettingsManager _settingsManager;
+        private PlayerAvatarManager _avatarManager;
+        private ILogger _logger;
+
+        [Inject]
+        private void Inject(Settings settings, PlayerAvatarManager avatarManager, ILoggerProvider loggerProvider, SettingsManager settingsManager)
+        {
+            _settings = settings;
+            _avatarManager = avatarManager;
+            _logger = loggerProvider.CreateLogger<KeyboardInputHandler>();
+            _settingsManager = settingsManager;
+        }
+
         private void Update()
         {
-            AvatarManager avatarManager = AvatarManager.instance;
-
             if (Input.GetKeyDown(KeyCode.PageDown))
             {
-                avatarManager.SwitchToNextAvatar();
+                _avatarManager.SwitchToNextAvatar();
             }
             else if (Input.GetKeyDown(KeyCode.PageUp))
             {
-                avatarManager.SwitchToPreviousAvatar();
+                _avatarManager.SwitchToPreviousAvatar();
             }
             else if (Input.GetKeyDown(KeyCode.Home))
             {
-                SettingsManager.settings.isAvatarVisibleInFirstPerson = !SettingsManager.settings.isAvatarVisibleInFirstPerson;
-                Plugin.logger.Info($"{(SettingsManager.settings.isAvatarVisibleInFirstPerson ? "Enabled" : "Disabled")} first person visibility");
-                avatarManager.currentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
+                _settings.isAvatarVisibleInFirstPerson = !_settings.isAvatarVisibleInFirstPerson;
+                _logger.Info($"{(_settings.isAvatarVisibleInFirstPerson ? "Enabled" : "Disabled")} first person visibility");
             }
             else if (Input.GetKeyDown(KeyCode.End))
             {
-                SettingsManager.settings.resizeMode = (AvatarResizeMode) (((int)SettingsManager.settings.resizeMode + 1) % 3);
-                Plugin.logger.Info($"Set resize mode to {SettingsManager.settings.resizeMode}");
-                avatarManager.ResizeCurrentAvatar();
+                _settings.resizeMode = (AvatarResizeMode) (((int)_settings.resizeMode + 1) % 3);
+                _logger.Info($"Set resize mode to {_settings.resizeMode}");
+                _avatarManager.ResizeCurrentAvatar();
             }
             else if (Input.GetKeyDown(KeyCode.Insert))
             {
-                SettingsManager.settings.enableFloorAdjust = !SettingsManager.settings.enableFloorAdjust;
-                Plugin.logger.Info($"{(SettingsManager.settings.enableFloorAdjust ? "Enabled" : "Disabled")} floor adjust");
-                avatarManager.ResizeCurrentAvatar();
+                _settings.enableFloorAdjust = !_settings.enableFloorAdjust;
+                _logger.Info($"{(_settings.enableFloorAdjust ? "Enabled" : "Disabled")} floor adjust");
+                _avatarManager.ResizeCurrentAvatar();
+            }
+            else if (Input.GetKeyDown(KeyCode.RightAlt))
+            {
+                _settingsManager.Save(_settings);
             }
             else if (Input.GetKeyDown(KeyCode.RightControl))
             {
-                SettingsManager.LoadSettings();
+                _settings = _settingsManager.Load();
             }
 
         }

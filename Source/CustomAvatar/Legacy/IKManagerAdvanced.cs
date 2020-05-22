@@ -5,9 +5,12 @@ using System.Reflection;
 using CustomAvatar;
 using BeatSaberFinalIK::RootMotion;
 using BeatSaberFinalIK::RootMotion.FinalIK;
+using CustomAvatar.Logging;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
+using Zenject;
+using ILogger = CustomAvatar.Logging.ILogger;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable once CheckNamespace
@@ -15,17 +18,8 @@ using UnityEngine.Serialization;
 namespace AvatarScriptPack
 {
     [Obsolete("Use VRIKManager")]
-    internal class IKManagerAdvanced : MonoBehaviour
+    internal class IKManagerAdvanced : IKManager
     {
-        [Space(5)]
-        [Header("IK Targets")]
-        [Tooltip("The head target.")]
-        public Transform HeadTarget;
-        [Tooltip("The hand target.")]
-        public Transform LeftHandTarget;
-        [Tooltip("The hand target.")]
-        public Transform RightHandTarget;
-
         [Space(5)]
         [Header("Full Body Tracking")]
         [Tooltip("The pelvis target, useful with seated rigs.")]
@@ -252,11 +246,21 @@ namespace AvatarScriptPack
         [Tooltip("Called when the right foot has finished a step")]
         public UnityEvent Locomotion_onRightFootstep = new UnityEvent();
 
-        public void Start()
-        {
-            Plugin.logger.Warn("Avatar is still using the legacy IKManagerAdvanced; please migrate to VRIKManager");
+        private ILogger _logger;
+        private DiContainer _container;
 
-            VRIKManager vrikManager = gameObject.AddComponent<VRIKManager>();
+        [Inject]
+        private void Inject(ILoggerProvider loggerProvider, DiContainer container)
+        {
+            _logger = loggerProvider.CreateLogger<IKManagerAdvanced>();
+            _container = container;
+        }
+
+        public override void Start()
+        {
+            _logger.Warning("Avatar is using the legacy IKManagerAdvanced; please migrate to VRIKManager");
+
+            var vrikManager = _container.InstantiateComponent<VRIKManager>(gameObject);
 
             vrikManager.solver_spine_headTarget = this.HeadTarget;
             vrikManager.solver_leftArm_target = this.LeftHandTarget;
@@ -299,7 +303,7 @@ namespace AvatarScriptPack
             }
         }
 
-        public static void SetProperty(object obj, string fieldName, object value)
+        private void SetProperty(object obj, string fieldName, object value)
         {
             if (obj == null) return;
 
@@ -309,24 +313,24 @@ namespace AvatarScriptPack
 
                 if (field == null)
                 {
-                    Plugin.logger.Warn($"{fieldName} does not exist on {obj.GetType()}");
+                    _logger.Warning($"{fieldName} does not exist on {obj.GetType()}");
                     return;
                 }
 
-                Plugin.logger.Debug($"Set {field.Name} = {value}");
+                _logger.Trace($"Set {field.Name} = {value}");
 
                 if (field.FieldType.IsEnum)
                 {
                     if (value == null)
                     {
-                        Plugin.logger.Warn("Tried to set Enum type to null");
+                        _logger.Warning("Tried to set Enum type to null");
                         return;
                     }
 
                     Type sourceType = Enum.GetUnderlyingType(value.GetType());
                     Type targetType = Enum.GetUnderlyingType(field.FieldType);
 
-                    Plugin.logger.Debug($"Converting enum value {value.GetType()} ({sourceType}) -> {field.FieldType} ({targetType})");
+                    _logger.Trace($"Converting enum value {value.GetType()} ({sourceType}) -> {field.FieldType} ({targetType})");
                     field.SetValue(obj, Convert.ChangeType(value, targetType));
                 }
                 else
@@ -336,7 +340,7 @@ namespace AvatarScriptPack
             }
             catch (Exception ex)
             {
-                Plugin.logger.Error(ex);
+                _logger.Error(ex);
             }
         }
     }

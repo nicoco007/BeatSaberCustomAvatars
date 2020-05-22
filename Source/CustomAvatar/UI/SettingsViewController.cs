@@ -1,169 +1,129 @@
-using System.Collections.Generic;
-using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
+using CustomAvatar.Avatar;
+using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
-using TMPro;
 using UnityEngine;
+using Zenject;
+using ILogger = CustomAvatar.Logging.ILogger;
 
-#pragma warning disable 649 // disable "field is never assigned"
-#pragma warning disable IDE0044 // disable "make field readonly"
-// ReSharper disable UnusedMember.Local
-// ReSharper disable NotAccessedField.Local
 namespace CustomAvatar.UI
 {
-    internal class SettingsViewController : BSMLResourceViewController
+    internal partial class SettingsViewController : BSMLResourceViewController
     {
-        public override string ResourceName => "CustomAvatar.Views.SettingsViewController.bsml";
+        public override string ResourceName => "CustomAvatar.Views.Settings.bsml";
 
-        #region Components
+        private static readonly int kColor = Shader.PropertyToID("_Color");
+
+        private bool _calibrating;
+        private Material _sphereMaterial;
+        private Material _redMaterial;
+        private Material _greenMaterial;
+        private Material _blueMaterial;
+        private Settings.AvatarSpecificSettings _currentAvatarSettings;
         
-        [UIComponent("arm-span")] private TextMeshProUGUI armSpanLabel;
+        private TrackedDeviceManager _trackedDeviceManager;
+        private PlayerAvatarManager _avatarManager;
+        private AvatarTailor _avatarTailor;
+        private Settings _settings;
+        private ShaderLoader _shaderLoader;
+        private ILogger _logger;
 
-        #endregion
-
-        #region Properties
-
-        [UIValue("resize-options")] private readonly List<object> resizeModeOptions = new List<object> { AvatarResizeMode.None, AvatarResizeMode.Height, AvatarResizeMode.ArmSpan };
-
-        #endregion
-
-        #region Values
-
-        [UIValue("visible-first-person-value")] private bool visibleInFirstPerson;
-        [UIValue("resize-value")] private AvatarResizeMode resizeMode;
-        [UIValue("floor-adjust-value")] private bool floorHeightAdjust;
-        [UIValue("calibrate-fbt-on-start")] private bool calibrateFullBodyTrackingOnStart;
-
-        #endregion
+        [Inject]
+        private void Inject(TrackedDeviceManager trackedDeviceManager, PlayerAvatarManager avatarManager, AvatarTailor avatarTailor, Settings settings, ShaderLoader shaderLoader, ILoggerProvider loggerProvider)
+        {
+            _trackedDeviceManager = trackedDeviceManager;
+            _avatarManager = avatarManager;
+            _avatarTailor = avatarTailor;
+            _settings = settings;
+            _shaderLoader = shaderLoader;
+            _logger = loggerProvider.CreateLogger<SettingsViewController>();
+        }
 
         protected override void DidActivate(bool firstActivation, ActivationType type)
         {
-            visibleInFirstPerson = SettingsManager.settings.isAvatarVisibleInFirstPerson;
-            resizeMode = SettingsManager.settings.resizeMode;
-            floorHeightAdjust = SettingsManager.settings.enableFloorAdjust;
-            calibrateFullBodyTrackingOnStart = SettingsManager.settings.calibrateFullBodyTrackingOnStart;
-
             base.DidActivate(firstActivation, type);
 
-            armSpanLabel.SetText($"{SettingsManager.settings.playerArmSpan:0.00} m");
+            _visibleInFirstPerson.Value = _settings.isAvatarVisibleInFirstPerson;
+            _resizeMode.Value = _settings.resizeMode;
+            _floorHeightAdjust.Value = _settings.enableFloorAdjust;
+            _calibrateFullBodyTrackingOnStart.Value = _settings.calibrateFullBodyTrackingOnStart;
+            _cameraNearClipPlane.Value = _settings.cameraNearClipPlane;
+
+            OnAvatarChanged(_avatarManager.currentlySpawnedAvatar);
+            OnInputDevicesChanged(null, DeviceUse.Unknown);
+
+            _armSpanLabel.SetText($"{_settings.playerArmSpan:0.00} m");
+
+            _sphereMaterial = new Material(_shaderLoader.unlitShader);
+            _redMaterial = new Material(_shaderLoader.unlitShader);
+            _greenMaterial = new Material(_shaderLoader.unlitShader);
+            _blueMaterial = new Material(_shaderLoader.unlitShader);
+
+            _redMaterial.SetColor(kColor, new Color(0.8f, 0, 0, 1));
+            _greenMaterial.SetColor(kColor, new Color(0, 0.8f, 0, 1));
+            _blueMaterial.SetColor(kColor, new Color(0, 0.5f, 1, 1));
+
+            _pelvisOffset.Value = _settings.automaticCalibration.pelvisOffset;
+            _leftFootOffset.Value = _settings.automaticCalibration.leftLegOffset;
+            _rightFootOffset.Value = _settings.automaticCalibration.rightLegOffset;
+
+            _waistTrackerPosition.Value = _settings.automaticCalibration.waistTrackerPosition;
+
+            _autoClearButton.interactable = !_settings.automaticCalibration.isDefault;
+
+            _avatarManager.avatarChanged += OnAvatarChanged;
+
+            _trackedDeviceManager.deviceAdded += OnInputDevicesChanged;
+            _trackedDeviceManager.deviceRemoved += OnInputDevicesChanged;
+            _trackedDeviceManager.deviceTrackingAcquired += OnInputDevicesChanged;
+            _trackedDeviceManager.deviceTrackingLost += OnInputDevicesChanged;
         }
 
-        #region Actions
-
-        [UIAction("visible-first-person-change")]
-        private void OnVisibleInFirstPersonChanged(bool value)
+        protected override void DidDeactivate(DeactivationType deactivationType)
         {
-            SettingsManager.settings.isAvatarVisibleInFirstPerson = value;
-            AvatarManager.instance.currentlySpawnedAvatar?.OnFirstPersonEnabledChanged();
+            base.DidDeactivate(deactivationType);
+
+            _avatarManager.avatarChanged -= OnAvatarChanged;
+
+            _trackedDeviceManager.deviceAdded -= OnInputDevicesChanged;
+            _trackedDeviceManager.deviceRemoved -= OnInputDevicesChanged;
+            _trackedDeviceManager.deviceTrackingAcquired -= OnInputDevicesChanged;
+            _trackedDeviceManager.deviceTrackingLost -= OnInputDevicesChanged;
+
+            DisableCalibrationMode(false);
         }
 
-        [UIAction("resize-change")]
-        private void OnResizeModeChanged(AvatarResizeMode value)
+        private void OnAvatarChanged(SpawnedAvatar avatar)
         {
-            SettingsManager.settings.resizeMode = value;
-            AvatarManager.instance.ResizeCurrentAvatar();
-        }
+            DisableCalibrationMode(false);
 
-        [UIAction("floor-adjust-change")]
-        private void OnFloorHeightAdjustChanged(bool value)
-        {
-            SettingsManager.settings.enableFloorAdjust = value;
-            AvatarManager.instance.ResizeCurrentAvatar();
-        }
-
-        [UIAction("resize-mode-formatter")]
-        private string ResizeModeFormatter(object value)
-        {
-            if (!(value is AvatarResizeMode)) return null;
-
-            switch ((AvatarResizeMode) value)
+            if (avatar == null)
             {
-                case AvatarResizeMode.Height:
-                    return "Height";
-                case AvatarResizeMode.ArmSpan:
-                    return "Arm Span";
-                case AvatarResizeMode.None:
-                    return "Don't Resize";
-                default:
-                    return null;
-            }
-        }
+                _clearButton.interactable = false;
+                _calibrateButton.interactable = false;
+                _automaticCalibrationSetting.SetInteractable(false);
+                _automaticCalibrationHoverHint.text = "No avatar selected";
 
-        [UIAction("measure-arm-span-click")]
-        private void OnMeasureArmSpanButtonClicked()
-        {
-            MeasureArmSpan();
-        }
-
-        [UIAction("calibrate-fbt-click")]
-        private void OnCalibrateFullBodyTrackingClicked()
-        {
-            AvatarManager.instance.avatarTailor.CalibrateFullBodyTracking();
-        }
-
-        [UIAction("calibrate-fbt-on-start-change")]
-        private void OnCalibrateFullBodyTrackingOnStartChanged(bool value)
-        {
-            SettingsManager.settings.calibrateFullBodyTrackingOnStart = value;
-        }
-
-        [UIAction("clear-fbt-calibration-data-click")]
-        private void OnClearFullBodyTrackingCalibrationDataClicked()
-        {
-            AvatarManager.instance.avatarTailor.ClearFullBodyTrackingData();
-        }
-
-        #endregion
-
-        #region Arm Span Measurement
-        
-        private const float KMinArmSpan = 0.5f;
-
-        private TrackedDeviceManager playerInput = PersistentSingleton<TrackedDeviceManager>.instance;
-        private bool isMeasuring;
-        private float maxMeasuredArmSpan;
-        private float lastUpdateTime;
-
-        private void MeasureArmSpan()
-        {
-            if (isMeasuring) return;
-
-            isMeasuring = true;
-            maxMeasuredArmSpan = KMinArmSpan;
-            lastUpdateTime = Time.timeSinceLevelLoad;
-
-            InvokeRepeating(nameof(ScanArmSpan), 0.0f, 0.1f);
-        }
-
-        private void ScanArmSpan()
-        {
-            var armSpan = Vector3.Distance(playerInput.leftHand.position, playerInput.rightHand.position);
-
-            if (armSpan > maxMeasuredArmSpan)
-            {
-                maxMeasuredArmSpan = armSpan;
-                lastUpdateTime = Time.timeSinceLevelLoad;
+                return;
             }
 
-            if (Time.timeSinceLevelLoad - lastUpdateTime < 2.0f)
-            {
-                armSpanLabel.SetText($"Measuring... {maxMeasuredArmSpan:0.00} m");
-            }
-            else
-            {
-                CancelInvoke(nameof(ScanArmSpan));
-                armSpanLabel.SetText($"{maxMeasuredArmSpan:0.00} m");
-                SettingsManager.settings.playerArmSpan = maxMeasuredArmSpan;
-                isMeasuring = false;
+            _currentAvatarSettings = _settings.GetAvatarSettings(avatar.avatar.fullPath);
 
-                if (SettingsManager.settings.resizeMode == AvatarResizeMode.ArmSpan)
-                {
-                    AvatarManager.instance.ResizeCurrentAvatar();
-                }
-            }
+            _clearButton.interactable = !_currentAvatarSettings.fullBodyCalibration.isDefault;
+            // TODO same here
+            _calibrateButton.interactable = _avatarManager.currentlySpawnedAvatar.isIKAvatar && (_trackedDeviceManager.waist.tracked || _trackedDeviceManager.leftFoot.tracked || _trackedDeviceManager.rightFoot.tracked);
+
+            _automaticCalibrationSetting.Value = _currentAvatarSettings.useAutomaticCalibration;
+            _automaticCalibrationSetting.SetInteractable(avatar.avatar.descriptor.supportsAutomaticCalibration);
+            _automaticCalibrationHoverHint.text = avatar.avatar.descriptor.supportsAutomaticCalibration ? "Use automatic calibration instead of manual calibration" : "Not supported by current avatar";
         }
 
-        #endregion
+        private void OnInputDevicesChanged(TrackedDeviceState state, DeviceUse use)
+        {
+            // TODO check targets exist on avatar, e.g. isFbtCapable
+            _autoCalibrateButton.interactable = _trackedDeviceManager.waist.tracked || _trackedDeviceManager.leftFoot.tracked || _trackedDeviceManager.rightFoot.tracked;
+            _calibrateButton.interactable     = _avatarManager.currentlySpawnedAvatar && _avatarManager.currentlySpawnedAvatar.isIKAvatar && (_trackedDeviceManager.waist.tracked || _trackedDeviceManager.leftFoot.tracked || _trackedDeviceManager.rightFoot.tracked);
+        }
     }
 }

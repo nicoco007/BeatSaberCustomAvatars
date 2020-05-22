@@ -1,65 +1,57 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using Zenject;
 
 namespace CustomAvatar.StereoRendering
 {
-    internal static class MirrorHelper
+    internal class MirrorHelper
     {
-        public static IEnumerator<AsyncOperation> SpawnMirror(Vector3 position, Quaternion rotation, Vector3 scale, Transform container)
+        private static readonly int kCutout = Shader.PropertyToID("_Cutout");
+
+        private readonly DiContainer _container;
+        private readonly ShaderLoader _shaderLoader;
+
+        public MirrorHelper(DiContainer container, ShaderLoader shaderLoader)
         {
-            AssetBundleCreateRequest shadersBundleCreateRequest = AssetBundle.LoadFromFileAsync("CustomAvatars/Shaders/customavatars.assetbundle");
-            yield return shadersBundleCreateRequest;
+            _container = container;
+            _shaderLoader = shaderLoader;
+        }
 
-            if (!shadersBundleCreateRequest.isDone || shadersBundleCreateRequest.assetBundle == null)
-            {
-                Plugin.logger.Error("Failed to load stereo mirror shader");
-                yield break;
-            }
-
-            AssetBundleRequest assetBundleRequest = shadersBundleCreateRequest.assetBundle.LoadAssetAsync<Shader>("Assets/Shaders/StereoRenderShader-Unlit.shader");
-            yield return assetBundleRequest;
-            shadersBundleCreateRequest.assetBundle.Unload(false);
-
-            if (!assetBundleRequest.isDone || assetBundleRequest.asset == null)
-            {
-                Plugin.logger.Error("Failed to load stereo mirror shader");
-                yield break;
-            }
-
-            Shader stereoRenderShader = assetBundleRequest.asset as Shader;
+        public void CreateMirror(Vector3 position, Quaternion rotation, Vector2 size, Transform container, Vector3? origin = null)
+        {
+            Vector3 scale = new Vector3(size.x / 10, 1, size.y / 10); // plane is 10 units in size at scale 1, width is x and height is z
 
             GameObject mirrorPlane = GameObject.CreatePrimitive(PrimitiveType.Plane);
             mirrorPlane.transform.SetParent(container);
             mirrorPlane.name = "Stereo Mirror";
             mirrorPlane.transform.localScale = scale;
-            mirrorPlane.transform.localPosition = position + new Vector3(0, scale.z * 5, 0); // plane is 10 units in size at scale 1
+            mirrorPlane.transform.localPosition = position;
             mirrorPlane.transform.localRotation = rotation;
 
-            Material material = new Material(stereoRenderShader);
-            material.SetFloat("_Cutout", 0.01f);
+            Material material = new Material(_shaderLoader.stereoMirrorShader);
+            material.SetFloat(kCutout, 0f);
             
             Renderer renderer = mirrorPlane.GetComponent<Renderer>();
             renderer.sharedMaterial = material;
 
-            GameObject stereoCameraHead = new GameObject("Stereo Camera Head [Stereo Mirror]");
+            GameObject stereoCameraHead = new GameObject($"Stereo Camera Head [{mirrorPlane.name}]");
             stereoCameraHead.transform.SetParent(mirrorPlane.transform, false);
             stereoCameraHead.transform.localScale = new Vector3(1 / scale.x, 1 / scale.y, 1 / scale.z);
 
-            GameObject stereoCameraEyeObject = new GameObject("Stereo Camera Eye [Stereo Mirror]");
+            GameObject stereoCameraEyeObject = new GameObject($"Stereo Camera Eye [{mirrorPlane.name}]");
             stereoCameraEyeObject.transform.SetParent(mirrorPlane.transform, false);
 
             Camera stereoCameraEye = stereoCameraEyeObject.AddComponent<Camera>();
             stereoCameraEye.enabled = false;
-            stereoCameraEye.cullingMask = (1 << AvatarLayers.AlwaysVisible) | (1 << AvatarLayers.OnlyInThirdPerson);
+            stereoCameraEye.cullingMask = (1 << AvatarLayers.kAlwaysVisible) | (1 << AvatarLayers.kOnlyInThirdPerson);
             stereoCameraEye.clearFlags = CameraClearFlags.SolidColor;
             stereoCameraEye.backgroundColor = new Color(0, 0, 0, 1f);
 
-            StereoRenderer stereoRenderer = mirrorPlane.AddComponent<StereoRenderer>();
+            StereoRenderer stereoRenderer = _container.InstantiateComponent<StereoRenderer>(mirrorPlane);
             stereoRenderer.stereoCameraHead = stereoCameraHead;
             stereoRenderer.stereoCameraEye = stereoCameraEye;
             stereoRenderer.isMirror = true;
             stereoRenderer.useScissor = false;
-            stereoRenderer.canvasOriginPos = mirrorPlane.transform.position + new Vector3(-10f, 0, 0);
+            stereoRenderer.canvasOriginPos = origin ?? mirrorPlane.transform.position;
             stereoRenderer.canvasOriginRot = mirrorPlane.transform.rotation;
         }
     }
