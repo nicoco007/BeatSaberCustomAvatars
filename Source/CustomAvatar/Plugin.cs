@@ -72,16 +72,17 @@ namespace CustomAvatar
         // TODO put this somewhere else
         private void PatchMirrorRendererSO(Harmony harmony)
         {
-            MethodInfo methodToPatch = typeof(MirrorRendererSO).GetMethod("CreateOrUpdateMirrorCamera", BindingFlags.NonPublic | BindingFlags.Instance);
-
-            var patch = new HarmonyMethod(new Action<MirrorRendererSO>(__instance =>
-            {
-                Camera mirrorCamera = new Traverse(__instance).Field<Camera>("_mirrorCamera").Value;
-
-                mirrorCamera.cullingMask |= (1 << AvatarLayers.kOnlyInThirdPerson) | (1 << AvatarLayers.kOnlyInFirstPerson) | (1 << AvatarLayers.kAlwaysVisible);
-            }).Method);
+            var methodToPatch = typeof(MirrorRendererSO).GetMethod("CreateOrUpdateMirrorCamera", BindingFlags.NonPublic | BindingFlags.Instance);
+            var patch = new HarmonyMethod(typeof(Plugin).GetMethod(nameof(MirrorRendererSOPatch), BindingFlags.NonPublic | BindingFlags.Static));
 
             harmony.Patch(methodToPatch, null, patch);
+        }
+
+        private static void MirrorRendererSOPatch(MirrorRendererSO __instance)
+        {
+            Camera mirrorCamera = new Traverse(__instance).Field<Camera>("_mirrorCamera").Value;
+
+            mirrorCamera.cullingMask |= (1 << AvatarLayers.kOnlyInThirdPerson) | (1 << AvatarLayers.kOnlyInFirstPerson) | (1 << AvatarLayers.kAlwaysVisible);
         }
 
         [OnStart]
@@ -109,7 +110,7 @@ namespace CustomAvatar
         {
             if (newScene.name == "PCInit")
             {
-                ZenjectHelper.GetMainSceneContext(OnSceneContextPostInstall);
+                ZenjectHelper.GetMainSceneContextAsync(OnSceneContextPostInstall);
             }
 
             if (newScene.name == "MenuCore")

@@ -6,37 +6,35 @@ using HarmonyLib;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
+using Logger = IPA.Logging.Logger;
 
 namespace CustomAvatar
 {
     public class ZenjectHelper
     {
-        internal static void ApplyPatches(Harmony harmony, IPA.Logging.Logger logger)
+        private static Logger _ipaLogger;
+
+        internal static void ApplyPatches(Harmony harmony, Logger logger)
         {
+            _ipaLogger = logger;
+
             var methodToPatch = typeof(AppCoreInstaller).GetMethod("InstallBindings", BindingFlags.Public | BindingFlags.Instance);
-
-            var patch = new HarmonyMethod(new Action<AppCoreInstaller>((__instance) =>
-            {
-                DiContainer container = new Traverse(__instance).Property<DiContainer>("Container").Value;
-
-                container.Install<CustomAvatarsInstaller>(new object[] { logger });
-                container.Install<UIInstaller>();
-            }).Method);
+            var patch = new HarmonyMethod(typeof(ZenjectHelper).GetMethod(nameof(InstallBindings), BindingFlags.NonPublic | BindingFlags.Static));
 
             harmony.Patch(methodToPatch, null, patch);
         }
 
-        public static void GetMainSceneContext(Action<SceneContext> success)
+        public static void GetMainSceneContextAsync(Action<SceneContext> success)
         {
-            GetSceneContext(success, "PCInit");
+            GetSceneContextAsync(success, "PCInit");
         }
 
-        public static void GetGameSceneContext(Action<SceneContext> success)
+        public static void GetGameSceneContextAsync(Action<SceneContext> success)
         {
-            GetSceneContext(success, "GameplayCore");
+            GetSceneContextAsync(success, "GameplayCore");
         }
 
-        private static void GetSceneContext(Action<SceneContext> success, string sceneName)
+        private static void GetSceneContextAsync(Action<SceneContext> success, string sceneName)
         {
             if (!SceneManager.GetSceneByName(sceneName).isLoaded) throw new Exception($"Scene '{sceneName}' is not loaded");
 
@@ -62,6 +60,14 @@ namespace CustomAvatar
             {
                 sceneContext.OnPostInstall.AddListener(() => success(sceneContext));
             }
+        }
+
+        private static void InstallBindings(AppCoreInstaller __instance)
+        {
+            DiContainer container = new Traverse(__instance).Property<DiContainer>("Container").Value;
+
+            container.Install<CustomAvatarsInstaller>(new object[] { _ipaLogger });
+            container.Install<UIInstaller>();
         }
     }
 }
