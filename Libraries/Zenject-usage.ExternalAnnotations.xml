@@ -1,5 +1,0 @@
-<assembly name="Zenject-usage">
-  <member name="T:Zenject.InjectAttribute">
-    <attribute ctor="M:JetBrains.Annotations.MeansImplicitUseAttribute.#ctor"/>
-  </member>
-</assembly>
