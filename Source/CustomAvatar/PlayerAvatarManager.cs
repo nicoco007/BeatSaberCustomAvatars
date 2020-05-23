@@ -27,12 +27,13 @@ namespace CustomAvatar
         private readonly TrackedDeviceManager _trackedDeviceManager;
         private readonly Settings _settings;
         private readonly AvatarSpawner _spawner;
+        private readonly GameScenesManager _gameScenesManager;
 
         private readonly Dictionary<string, AvatarInfo> _avatarInfos = new Dictionary<string, AvatarInfo>();
         private string _switchingToPath;
 
         [Inject]
-        private PlayerAvatarManager(AvatarTailor avatarTailor, ILoggerProvider loggerProvider, AvatarLoader avatarLoader, TrackedDeviceManager trackedDeviceManager, Settings settings, AvatarSpawner spawner)
+        private PlayerAvatarManager(AvatarTailor avatarTailor, ILoggerProvider loggerProvider, AvatarLoader avatarLoader, TrackedDeviceManager trackedDeviceManager, Settings settings, AvatarSpawner spawner, GameScenesManager gameScenesManager)
         {
             _logger = loggerProvider.CreateLogger<PlayerAvatarManager>();
             _avatarLoader = avatarLoader;
@@ -40,8 +41,9 @@ namespace CustomAvatar
             _trackedDeviceManager = trackedDeviceManager;
             _settings = settings;
             _spawner = spawner;
+            _gameScenesManager = gameScenesManager;
 
-            Plugin.instance.sceneTransitionDidFinish += OnSceneTransitionDidFinish;
+            _gameScenesManager.transitionDidFinishEvent += OnSceneTransitionDidFinish;
             SceneManager.sceneLoaded += OnSceneLoaded;
             BeatSaberEvents.playerHeightChanged += OnPlayerHeightChanged;
         }
@@ -50,7 +52,7 @@ namespace CustomAvatar
         {
             Object.Destroy(currentlySpawnedAvatar);
 
-            Plugin.instance.sceneTransitionDidFinish -= OnSceneTransitionDidFinish;
+            _gameScenesManager.transitionDidFinishEvent -= OnSceneTransitionDidFinish;
             SceneManager.sceneLoaded -= OnSceneLoaded;
             BeatSaberEvents.playerHeightChanged -= OnPlayerHeightChanged;
         }

@@ -216,6 +216,7 @@
     <Compile Include="Utilities\Settings.cs" />
     <Compile Include="Legacy\IKManager.cs" />
     <Compile Include="Legacy\IKManagerAdvanced.cs" />
+    <Compile Include="ZenjectHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="manifest.json" />

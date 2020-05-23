@@ -28,44 +28,39 @@ namespace CustomAvatar
         private SettingsManager _settingsManager;
         private MirrorHelper _mirrorHelper;
 
-        private SceneContext _sceneContext;
+        private DiContainer _container;
         private GameObject _mirrorContainer;
         private MenuLightingController _menuLightingRig;
         private KeyboardInputHandler _keyboardInputHandler;
         private GameplayLightingController _gameplayLightingController;
-        
-        public event Action<ScenesTransitionSetupDataSO, DiContainer> sceneTransitionDidFinish;
-
-        public static Plugin instance { get; private set; }
 
         private ILogger _logger;
-        private static Logger _ipaLogger;
 
         [Init]
         public Plugin(Logger logger)
         {
-            instance = this;
-            _ipaLogger = logger;
-
             // can't inject at this point so just create it
             _logger = new IPALogger<Plugin>(logger);
 
             try
             {
-                BeatSaberEvents.ApplyPatches();
+                Harmony harmony = new Harmony("com.nicoco007.beatsabercustomavatars");
+
+                ZenjectHelper.ApplyPatches(harmony, logger);
+                BeatSaberEvents.ApplyPatches(harmony);
+                PatchMirrorRendererSO(harmony);
             }
             catch (Exception ex)
             {
                 _logger.Error("Failed to apply patches");
                 _logger.Error(ex);
             }
-
-            PatchAppCoreInstallerInstallBindings();
         }
 
         [Inject]
-        private void Inject(PlayerAvatarManager playerAvatarManager, GameScenesManager gameScenesManager, AvatarMenuFlowCoordinator avatarMenuFlowCoordinator, Settings settings, SettingsManager settingsManager, MirrorHelper mirrorHelper)
+        private void Inject(DiContainer container, PlayerAvatarManager playerAvatarManager, GameScenesManager gameScenesManager, AvatarMenuFlowCoordinator avatarMenuFlowCoordinator, Settings settings, SettingsManager settingsManager, MirrorHelper mirrorHelper)
         {
+            _container = container;
             _avatarManager = playerAvatarManager;
             _scenesManager = gameScenesManager;
             _flowCoordinator = avatarMenuFlowCoordinator;
@@ -74,34 +69,19 @@ namespace CustomAvatar
             _mirrorHelper = mirrorHelper;
         }
 
-        private void PatchAppCoreInstallerInstallBindings()
+        // TODO put this somewhere else
+        private void PatchMirrorRendererSO(Harmony harmony)
         {
-            Harmony harmony = new Harmony("com.nicoco007.beatsabercustomavatars");
+            MethodInfo methodToPatch = typeof(MirrorRendererSO).GetMethod("CreateOrUpdateMirrorCamera", BindingFlags.NonPublic | BindingFlags.Instance);
 
-            var methodToPatch = typeof(AppCoreInstaller).GetMethod("InstallBindings", BindingFlags.Public | BindingFlags.Instance);
-            var patch = new HarmonyMethod(GetType().GetMethod(nameof(InstallBindings), BindingFlags.Static | BindingFlags.NonPublic));
+            var patch = new HarmonyMethod(new Action<MirrorRendererSO>(__instance =>
+            {
+                Camera mirrorCamera = new Traverse(__instance).Field<Camera>("_mirrorCamera").Value;
+
+                mirrorCamera.cullingMask |= (1 << AvatarLayers.kOnlyInThirdPerson) | (1 << AvatarLayers.kOnlyInFirstPerson) | (1 << AvatarLayers.kAlwaysVisible);
+            }).Method);
 
             harmony.Patch(methodToPatch, null, patch);
-
-            methodToPatch = typeof(MirrorRendererSO).GetMethod("CreateOrUpdateMirrorCamera", BindingFlags.NonPublic | BindingFlags.Instance);
-            patch = new HarmonyMethod(GetType().GetMethod(nameof(PatchMirrorLayers), BindingFlags.Static | BindingFlags.NonPublic));
-
-            harmony.Patch(methodToPatch, null, patch);
-        }
-
-        private static void InstallBindings(AppCoreInstaller __instance)
-        {
-            DiContainer container = new Traverse(__instance).Property<DiContainer>("Container").Value;
-
-            container.Install<CustomAvatarsInstaller>(new object[] { _ipaLogger });
-            container.Install<UIInstaller>();
-        }
-
-        private static void PatchMirrorLayers(MirrorRendererSO __instance)
-        {
-            Camera mirrorCamera = new Traverse(__instance).Field<Camera>("_mirrorCamera").Value;
-
-            mirrorCamera.cullingMask |= (1 << AvatarLayers.kOnlyInThirdPerson) | (1 << AvatarLayers.kOnlyInFirstPerson) | (1 << AvatarLayers.kAlwaysVisible);
         }
 
         [OnStart]
@@ -116,7 +96,6 @@ namespace CustomAvatar
         {
             if (_scenesManager != null)
             {
-                _scenesManager.transitionDidFinishEvent -= sceneTransitionDidFinish;
                 _scenesManager.transitionDidFinishEvent -= SceneTransitionDidFinish;
             }
 
@@ -130,18 +109,7 @@ namespace CustomAvatar
         {
             if (newScene.name == "PCInit")
             {
-                // Beat Saber has one instance of SceneContext in the PCInit scene
-                _sceneContext = Object.FindObjectOfType<SceneContext>();
-
-                // handle scene context already being installed when the game is first loaded
-                if (_sceneContext.HasInstalled)
-                {
-                    OnSceneContextPostInstall();
-                }
-                else
-                {
-                    _sceneContext.OnPostInstall.AddListener(OnSceneContextPostInstall);
-                }
+                ZenjectHelper.GetMainSceneContext(OnSceneContextPostInstall);
             }
 
             if (newScene.name == "MenuCore")
@@ -176,16 +144,15 @@ namespace CustomAvatar
             }
         }
 
-        private void OnSceneContextPostInstall()
+        private void OnSceneContextPostInstall(SceneContext context)
         {
-            _sceneContext.Container.Inject(this);
+            context.Container.Inject(this);
 
-            _scenesManager.transitionDidFinishEvent += sceneTransitionDidFinish;
             _scenesManager.transitionDidFinishEvent += SceneTransitionDidFinish;
 
             _avatarManager.LoadAvatarFromSettingsAsync();
 
-            _keyboardInputHandler = _sceneContext.Container.InstantiateComponentOnNewGameObject<KeyboardInputHandler>(nameof(KeyboardInputHandler));
+            _keyboardInputHandler = _container.InstantiateComponentOnNewGameObject<KeyboardInputHandler>(nameof(KeyboardInputHandler));
 
             if (_settings.lighting.castShadows)
             {
@@ -197,29 +164,39 @@ namespace CustomAvatar
 
         private void SceneTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
         {
+            UpdateCameras();
+            UpdateLighting(container);
+        }
+
+        private void UpdateCameras()
+        {
             foreach (Camera camera in Camera.allCameras)
             {
                 var detector = camera.gameObject.GetComponent<VRRenderEventDetector>();
 
                 if (detector == null)
                 {
-                    _sceneContext.Container.InstantiateComponent<VRRenderEventDetector>(camera.gameObject);
-                    _logger.Info($"Added {nameof(VRRenderEventDetector)} to {camera}");
+                    _logger.Info($"Adding {nameof(VRRenderEventDetector)} to '{camera.name}'");
+                    _container.InstantiateComponent<VRRenderEventDetector>(camera.gameObject);
+                }
+
+                if (camera.GetComponent<MainCamera>())
+                {
+                    _logger.Info($"Setting up avatar culling mask on '{camera.name}'");
+
+                    int cullingMask = camera.cullingMask;
+
+                    cullingMask &= ~(1 << AvatarLayers.kOnlyInThirdPerson);
+                    cullingMask |= (1 << AvatarLayers.kAlwaysVisible);
+                    cullingMask |= (1 << AvatarLayers.kOnlyInFirstPerson);
+
+                    camera.cullingMask = cullingMask;
                 }
             }
-            
-            Camera mainCamera = Camera.main;
+        }
 
-            if (mainCamera)
-            {
-                SetCameraCullingMask(mainCamera);
-                mainCamera.nearClipPlane = _settings.cameraNearClipPlane;
-            }
-            else
-            {
-                _logger.Error("Could not find main camera!");
-            }
-
+        private void UpdateLighting(DiContainer container)
+        {
             if (_settings.lighting.enabled)
             {
                 if (_scenesManager.IsSceneInStack("GameplayCore") && _settings.lighting.enableDynamicLighting)
@@ -237,20 +214,11 @@ namespace CustomAvatar
 
                     if (!_menuLightingRig)
                     {
-                        _menuLightingRig = _sceneContext.Container.InstantiateComponentOnNewGameObject<MenuLightingController>(nameof(MenuLightingController));
+                        _menuLightingRig = _container.InstantiateComponentOnNewGameObject<MenuLightingController>(nameof(MenuLightingController));
                         Object.DontDestroyOnLoad(_menuLightingRig);
                     }
                 }
             }
-        }
-
-        private void SetCameraCullingMask(Camera camera)
-        {
-            _logger.Trace($"Setting up avatar culling mask on '{camera.name}'");
-
-            camera.cullingMask &= ~(1 << AvatarLayers.kOnlyInThirdPerson);
-            camera.cullingMask |= (1 << AvatarLayers.kAlwaysVisible);
-            camera.cullingMask |= (1 << AvatarLayers.kOnlyInFirstPerson);
         }
     }
 }
