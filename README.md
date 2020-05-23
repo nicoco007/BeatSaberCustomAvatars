@@ -11,7 +11,7 @@ Install [the latest release of DynamicOpenVR](https://github.com/nicoco007/Dynam
 Download [the latest release of Custom Avatars](https://github.com/nicoco007/BeatSaberCustomAvatars/releases) and extract **the entire contents** of the ZIP file into your Beat Saber folder (for Steam, this is usually `C:\Program Files (x86)\Steam\steamapps\common\Beat Saber`), **overwriting any existing files**.
 
 ## Contributing
-To automatically copy the compiled DLL into Beat Saber's installation directory, create a file called `CustomAvatar.csproj.user` next to `CustomAvatar\CustomAvatar.csproj` and paste in the following:
+To resolve references and automatically copy the compiled DLL into Beat Saber's installation directory, create a file called `CustomAvatar.csproj.user` next to both `CustomAvatar\CustomAvatar.csproj` and  `CustomAvatar-Editor\CustomAvatar-Editor.csproj` and paste in the following:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
