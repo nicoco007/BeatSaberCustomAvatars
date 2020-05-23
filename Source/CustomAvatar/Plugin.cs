@@ -191,7 +191,7 @@ namespace CustomAvatar
             {
                 QualitySettings.shadows = ShadowQuality.All;
                 QualitySettings.shadowResolution = _settings.lighting.shadowResolution;
-                QualitySettings.shadowDistance = 10;
+                QualitySettings.shadowDistance = 25;
             }
         }
 
