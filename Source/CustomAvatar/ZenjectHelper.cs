@@ -24,18 +24,21 @@ namespace CustomAvatar
             harmony.Patch(methodToPatch, null, patch);
         }
 
-        public static void GetMainSceneContextAsync(Action<SceneContext> success)
+        public static void GetMainSceneContextAsync(Action<SceneContext> contextInstalled)
         {
-            GetSceneContextAsync(success, "PCInit");
+            GetSceneContextAsync(contextInstalled, "PCInit");
         }
 
-        public static void GetGameSceneContextAsync(Action<SceneContext> success)
+        public static void GetGameSceneContextAsync(Action<SceneContext> contextInstalled)
         {
-            GetSceneContextAsync(success, "GameplayCore");
+            GetSceneContextAsync(contextInstalled, "GameplayCore");
         }
 
-        private static void GetSceneContextAsync(Action<SceneContext> success, string sceneName)
+        private static void GetSceneContextAsync(Action<SceneContext> contextInstalled, string sceneName)
         {
+            if (contextInstalled == null) throw new ArgumentNullException(nameof(contextInstalled));
+            if (string.IsNullOrEmpty(sceneName)) throw new ArgumentNullException(nameof(sceneName));
+
             if (!SceneManager.GetSceneByName(sceneName).isLoaded) throw new Exception($"Scene '{sceneName}' is not loaded");
 
             List<SceneContext> sceneContexts = Resources.FindObjectsOfTypeAll<SceneContext>().Where(sc => sc.gameObject.scene.name == sceneName).ToList();
@@ -54,11 +57,11 @@ namespace CustomAvatar
 
             if (sceneContext.HasInstalled)
             {
-                success(sceneContext);
+                contextInstalled(sceneContext);
             }
             else
             {
-                sceneContext.OnPostInstall.AddListener(() => success(sceneContext));
+                sceneContext.OnPostInstall.AddListener(() => contextInstalled(sceneContext));
             }
         }
 
