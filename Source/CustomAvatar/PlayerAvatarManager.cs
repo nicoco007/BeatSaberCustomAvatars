@@ -44,9 +44,12 @@ namespace CustomAvatar
             _gameScenesManager = gameScenesManager;
 
             _settings.moveFloorWithRoomAdjustChanged += OnMoveFloorWithRoomAdjustChanged;
+            _settings.firstPersonEnabledChanged += OnFirstPersonEnabledChanged;
             _gameScenesManager.transitionDidFinishEvent += OnSceneTransitionDidFinish;
             SceneManager.sceneLoaded += OnSceneLoaded;
             BeatSaberEvents.playerHeightChanged += OnPlayerHeightChanged;
+
+            OnFirstPersonEnabledChanged(_settings.isAvatarVisibleInFirstPerson);
         }
 
         public void Dispose()
@@ -102,7 +105,7 @@ namespace CustomAvatar
 
             if (!File.Exists(Path.Combine(kCustomAvatarsPath, previousAvatarPath)))
             {
-                _logger.Warning("Previously loaded avatar no longer exists; reverting to default");
+                _logger.Warning("Previously loaded avatar no longer exists");
                 return;
             }
 
@@ -142,6 +145,7 @@ namespace CustomAvatar
                 return;
             }
 
+            // cache avatar info since loading asset bundles is expensive
             if (_avatarInfos.ContainsKey(avatar.fullPath))
             {
                 _avatarInfos[avatar.fullPath] = new AvatarInfo(avatar);
@@ -154,6 +158,8 @@ namespace CustomAvatar
             currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, new VRAvatarInput(_trackedDeviceManager));
 
             ResizeCurrentAvatar();
+            
+            currentlySpawnedAvatar.UpdateFirstPersonVisibility(_settings.isAvatarVisibleInFirstPerson ? FirstPersonVisibility.ApplyFirstPersonExclusions : FirstPersonVisibility.None);
 
             avatarChanged?.Invoke(currentlySpawnedAvatar);
         }
@@ -193,6 +199,11 @@ namespace CustomAvatar
         private void OnMoveFloorWithRoomAdjustChanged(bool value)
         {
             ResizeCurrentAvatar();
+        }
+
+        private void OnFirstPersonEnabledChanged(bool enable)
+        {
+            currentlySpawnedAvatar.UpdateFirstPersonVisibility(enable ? FirstPersonVisibility.ApplyFirstPersonExclusions : FirstPersonVisibility.None);
         }
 
         private void OnSceneLoaded(Scene newScene, LoadSceneMode mode)

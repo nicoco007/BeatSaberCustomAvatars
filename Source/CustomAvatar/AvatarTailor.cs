@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using CustomAvatar.Avatar;
 using CustomAvatar.Logging;
-using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
 using UnityEngine;
 using ILogger = CustomAvatar.Logging.ILogger;

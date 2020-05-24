@@ -99,6 +99,11 @@ namespace CustomAvatar.Avatar
                 twistRelaxer.ik = _vrik;
                 twistRelaxer.enabled = true;
             }
+
+            if (_vrikManager.solver_spine_maintainPelvisPosition > 0 && !_avatarSettings.allowMaintainPelvisPosition)
+            {
+                _logger.Warning("solver.spine.maintainPelvisPosition > 0 is not recommended because it can cause strange pelvis rotation issues. To allow maintainPelvisPosition > 0, please set allowMaintainPelvisPosition to true for your avatar in the configuration file.");
+            }
             
             _input.inputChanged += OnInputChanged;
         }
@@ -211,7 +216,6 @@ namespace CustomAvatar.Avatar
 
             if (_vrikManager.solver_spine_maintainPelvisPosition > 0 && !_avatarSettings.allowMaintainPelvisPosition)
             {
-                _logger.Warning("maintainPelvisPosition > 0 is not recommended because it can cause strange pelvis rotation issues. To allow maintainPelvisPosition > 0, please set allowMaintainPelvisPosition to true for your avatar in the configuration file.");
                 _vrik.solver.spine.maintainPelvisPosition = 0;
             }
 

@@ -1,7 +1,6 @@
 extern alias BeatSaberFinalIK;
 
 using System;
-using System.Reflection;
 using AvatarScriptPack;
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
@@ -44,7 +43,6 @@ namespace CustomAvatar.Avatar
         public AvatarFingerTracking fingerTracking { get; private set; }
 
         private ILogger _logger;
-        private Settings _settings;
         private GameScenesManager _gameScenesManager;
 
         private FirstPersonExclusion[] _firstPersonExclusions;
@@ -57,6 +55,47 @@ namespace CustomAvatar.Avatar
         private Vector3 _initialPosition;
         private Vector3 _initialScale;
 
+        public void EnableCalibrationMode()
+        {
+            if (_isCalibrationModeEnabled || !ik) return;
+
+            _isCalibrationModeEnabled = true;
+
+            tracking.isCalibrationModeEnabled = true;
+            ik.EnableCalibrationMode();
+        }
+
+        public void DisableCalibrationMode()
+        {
+            if (!_isCalibrationModeEnabled || !ik) return;
+
+            tracking.isCalibrationModeEnabled = false;
+            ik.DisableCalibrationMode();
+
+            _isCalibrationModeEnabled = false;
+        }
+
+        public void UpdateFirstPersonVisibility(FirstPersonVisibility visibility)
+        {
+            switch (visibility)
+            {
+                case FirstPersonVisibility.Visible:
+                    SetChildrenToLayer(AvatarLayers.kAlwaysVisible);
+                    break;
+
+                case FirstPersonVisibility.ApplyFirstPersonExclusions:
+                    SetChildrenToLayer(AvatarLayers.kAlwaysVisible);
+                    ApplyFirstPersonExclusions();
+                    break;
+
+                case FirstPersonVisibility.None:
+                    SetChildrenToLayer(AvatarLayers.kOnlyInThirdPerson);
+                    break;
+            }
+        }
+
+        #region Behaviour Lifecycle
+
         private void Awake()
         {
             _initialPosition = transform.localPosition;
@@ -64,13 +103,12 @@ namespace CustomAvatar.Avatar
         }
         
         [Inject]
-        internal void Inject(DiContainer container, ILoggerProvider loggerProvider, LoadedAvatar loadedAvatar, AvatarInput avatarInput, Settings settings, GameScenesManager gameScenesManager)
+        private void Inject(DiContainer container, ILoggerProvider loggerProvider, LoadedAvatar loadedAvatar, AvatarInput avatarInput, GameScenesManager gameScenesManager)
         {
             avatar = loadedAvatar ?? throw new ArgumentNullException(nameof(loadedAvatar));
             input = avatarInput ?? throw new ArgumentNullException(nameof(avatarInput));
 
             _logger = loggerProvider.CreateLogger<SpawnedAvatar>(loadedAvatar.descriptor.name);
-            _settings = settings;
             _gameScenesManager = gameScenesManager;
 
             _eventManager = GetComponent<EventManager>();
@@ -113,15 +151,11 @@ namespace CustomAvatar.Avatar
 
             DontDestroyOnLoad(this);
 
-            _settings.firstPersonEnabledChanged += OnFirstPersonEnabledChanged;
-            OnFirstPersonEnabledChanged(_settings.isAvatarVisibleInFirstPerson);
-
             _gameScenesManager.transitionDidFinishEvent += OnTransitionDidFinish;
         }
 
         private void OnDestroy()
         {
-            _settings.firstPersonEnabledChanged -= OnFirstPersonEnabledChanged;
             _gameScenesManager.transitionDidFinishEvent -= OnTransitionDidFinish;
 
             if (input is IDisposable disposableInput)
@@ -131,6 +165,8 @@ namespace CustomAvatar.Avatar
 
             Destroy(gameObject);
         }
+
+        #endregion
 
         private void OnTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
         {
@@ -157,30 +193,16 @@ namespace CustomAvatar.Avatar
             }
         }
 
-        public void EnableCalibrationMode()
+        private void SetChildrenToLayer(int layer)
         {
-            if (_isCalibrationModeEnabled || !ik) return;
-
-            _isCalibrationModeEnabled = true;
-
-            tracking.isCalibrationModeEnabled = true;
-            ik.EnableCalibrationMode();
+	        foreach (Renderer renderer in _renderers)
+            {
+                renderer.gameObject.layer = layer;
+	        }
         }
 
-        public void DisableCalibrationMode()
+        private void ApplyFirstPersonExclusions()
         {
-            if (!_isCalibrationModeEnabled || !ik) return;
-
-            tracking.isCalibrationModeEnabled = false;
-            ik.DisableCalibrationMode();
-
-            _isCalibrationModeEnabled = false;
-        }
-
-        private void OnFirstPersonEnabledChanged(bool enable)
-        {
-	        SetChildrenToLayer(_settings.isAvatarVisibleInFirstPerson ? AvatarLayers.kAlwaysVisible : AvatarLayers.kOnlyInThirdPerson);
-
             foreach (FirstPersonExclusion firstPersonExclusion in _firstPersonExclusions)
             {
                 foreach (GameObject gameObj in firstPersonExclusion.exclude)
@@ -191,14 +213,6 @@ namespace CustomAvatar.Avatar
                     gameObj.layer = AvatarLayers.kOnlyInThirdPerson;
                 }
             }
-        }
-
-        private void SetChildrenToLayer(int layer)
-        {
-	        foreach (Renderer renderer in _renderers)
-            {
-                renderer.gameObject.layer = layer;
-	        }
         }
 
         private float GetEyeHeight()
@@ -261,17 +275,17 @@ namespace CustomAvatar.Avatar
             {
                 if (!vrikManager.references_head) vrikManager.AutoDetectReferences();
 
-                reference = GetFieldValue<Transform>(vrikManager, "references_" + referenceName);
-                target = GetFieldValue<Transform>(vrikManager, vrikManagerTargetName);
+                reference = vrikManager.GetFieldValue<Transform>("references_" + referenceName);
+                target = vrikManager.GetFieldValue<Transform>(vrikManagerTargetName);
             }
             else if (vrik)
             {
                 vrik.AutoDetectReferences();
-                reference = GetFieldValue<Transform>(vrik.references, referenceName);
+                reference = vrik.references.GetFieldValue<Transform>(referenceName);
 
                 if (ikManager)
                 {
-                    target = GetFieldValue<Transform>(ikManager, ikManagerTargetName);
+                    target = ikManager.GetFieldValue<Transform>(ikManagerTargetName);
                 }
             }
 
@@ -288,22 +302,6 @@ namespace CustomAvatar.Avatar
             }
 
             return target.position - reference.position;
-        }
-
-        // TODO move to helper class?
-        private T GetFieldValue<T>(object obj, string fieldName)
-        {
-            if (obj == null) throw new ArgumentNullException(nameof(obj));
-            if (string.IsNullOrEmpty(fieldName)) throw new ArgumentNullException(nameof(fieldName));
-
-            FieldInfo field = obj.GetType().GetField(fieldName, BindingFlags.Public | BindingFlags.Instance);
-
-            if (field == null)
-            {
-                throw new InvalidOperationException($"Public instance field '{fieldName}' does not exist");
-            }
-
-            return (T) field.GetValue(obj);
         }
 
         /// <summary>
