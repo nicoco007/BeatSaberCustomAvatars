@@ -47,6 +47,7 @@ namespace CustomAvatar.UI
             _visibleInFirstPerson.Value = _settings.isAvatarVisibleInFirstPerson;
             _resizeMode.Value = _settings.resizeMode;
             _floorHeightAdjust.Value = _settings.enableFloorAdjust;
+            _moveFloorWithRoomAdjust.Value = _settings.moveFloorWithRoomAdjust;
             _calibrateFullBodyTrackingOnStart.Value = _settings.calibrateFullBodyTrackingOnStart;
             _cameraNearClipPlane.Value = _settings.cameraNearClipPlane;
 

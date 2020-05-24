@@ -43,6 +43,7 @@ namespace CustomAvatar
             _spawner = spawner;
             _gameScenesManager = gameScenesManager;
 
+            _settings.moveFloorWithRoomAdjustChanged += OnMoveFloorWithRoomAdjustChanged;
             _gameScenesManager.transitionDidFinishEvent += OnSceneTransitionDidFinish;
             SceneManager.sceneLoaded += OnSceneLoaded;
             BeatSaberEvents.playerHeightChanged += OnPlayerHeightChanged;
@@ -52,6 +53,7 @@ namespace CustomAvatar
         {
             Object.Destroy(currentlySpawnedAvatar);
 
+            _settings.moveFloorWithRoomAdjustChanged -= OnMoveFloorWithRoomAdjustChanged;
             _gameScenesManager.transitionDidFinishEvent -= OnSceneTransitionDidFinish;
             SceneManager.sceneLoaded -= OnSceneLoaded;
             BeatSaberEvents.playerHeightChanged -= OnPlayerHeightChanged;
@@ -186,6 +188,11 @@ namespace CustomAvatar
             {
                 _avatarTailor.ResizeAvatar(currentlySpawnedAvatar);
             }
+        }
+
+        private void OnMoveFloorWithRoomAdjustChanged(bool value)
+        {
+            ResizeCurrentAvatar();
         }
 
         private void OnSceneLoaded(Scene newScene, LoadSceneMode mode)

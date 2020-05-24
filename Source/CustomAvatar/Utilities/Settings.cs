@@ -18,6 +18,7 @@ namespace CustomAvatar.Utilities
     internal class Settings
     {
         public event Action<bool> firstPersonEnabledChanged;
+        public event Action<bool> moveFloorWithRoomAdjustChanged;
 
         private bool _isAvatarVisibleInFirstPerson;
         public bool isAvatarVisibleInFirstPerson
@@ -30,9 +31,20 @@ namespace CustomAvatar.Utilities
             }
         }
 
+        private bool _moveFloorWithRoomAdjust = false;
+
+        public bool moveFloorWithRoomAdjust
+        {
+            get => _moveFloorWithRoomAdjust;
+            set
+            {
+                _moveFloorWithRoomAdjust = value;
+                moveFloorWithRoomAdjustChanged?.Invoke(value);
+            }
+        }
+
         [JsonConverter(typeof(StringEnumConverter))] public AvatarResizeMode resizeMode = AvatarResizeMode.Height;
         public bool enableFloorAdjust = false;
-        public bool moveFloorWithRoomAdjust = false;
         public string previousAvatarPath = null;
         public float playerArmSpan = AvatarTailor.kDefaultPlayerArmSpan;
         public bool calibrateFullBodyTrackingOnStart = false;

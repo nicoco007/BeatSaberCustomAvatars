@@ -14,6 +14,7 @@ namespace CustomAvatar.UI
         [UIComponent("visible-in-first-person")] private BoolSetting _visibleInFirstPerson;
         [UIComponent("resize-mode")] private ListSetting _resizeMode;
         [UIComponent("floor-adjust")] private BoolSetting _floorHeightAdjust;
+        [UIComponent("move-floor-with-room-adjust")] private BoolSetting _moveFloorWithRoomAdjust;
         [UIComponent("camera-clip-plane")] private IncrementSetting _cameraNearClipPlane;
 
         #pragma warning restore 649
@@ -91,6 +92,12 @@ namespace CustomAvatar.UI
         private void OnMeasureArmSpanButtonClicked()
         {
             MeasureArmSpan();
+        }
+
+        [UIAction("move-floor-with-room-adjust-change")]
+        private void OnMoveFloorWithRoomAdjustChanged(bool value)
+        {
+            _settings.moveFloorWithRoomAdjust = value;
         }
         
         // ReSharper restore UnusedMember.Local
