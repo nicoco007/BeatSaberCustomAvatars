@@ -48,8 +48,6 @@ namespace CustomAvatar
             _gameScenesManager.transitionDidFinishEvent += OnSceneTransitionDidFinish;
             SceneManager.sceneLoaded += OnSceneLoaded;
             BeatSaberEvents.playerHeightChanged += OnPlayerHeightChanged;
-
-            OnFirstPersonEnabledChanged(_settings.isAvatarVisibleInFirstPerson);
         }
 
         public void Dispose()
@@ -190,10 +188,9 @@ namespace CustomAvatar
 
         public void ResizeCurrentAvatar()
         {
-            if (currentlySpawnedAvatar)
-            {
-                _avatarTailor.ResizeAvatar(currentlySpawnedAvatar);
-            }
+            if (!currentlySpawnedAvatar) return;
+
+            _avatarTailor.ResizeAvatar(currentlySpawnedAvatar);
         }
 
         private void OnMoveFloorWithRoomAdjustChanged(bool value)
@@ -203,6 +200,8 @@ namespace CustomAvatar
 
         private void OnFirstPersonEnabledChanged(bool enable)
         {
+            if (!currentlySpawnedAvatar) return;
+
             currentlySpawnedAvatar.UpdateFirstPersonVisibility(enable ? FirstPersonVisibility.ApplyFirstPersonExclusions : FirstPersonVisibility.None);
         }
 
