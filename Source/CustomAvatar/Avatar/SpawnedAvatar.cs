@@ -170,7 +170,7 @@ namespace CustomAvatar.Avatar
 
         private void OnTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
         {
-            if (_gameScenesManager.IsSceneInStack("GameplayCore"))
+            if (_gameScenesManager.GetCurrentlyLoadedSceneNames().Contains("GameplayCore"))
             {
                 if (_eventManager && !_gameplayEventsPlayer)
                 {
@@ -186,7 +186,7 @@ namespace CustomAvatar.Avatar
                     Destroy(_gameplayEventsPlayer);
                 }
 
-                if (_eventManager && _gameScenesManager.IsSceneInStack("MainMenu"))
+                if (_eventManager && _gameScenesManager.GetCurrentlyLoadedSceneNames().Contains("MainMenu"))
                 {
                     _eventManager.OnMenuEnter?.Invoke();
                 }

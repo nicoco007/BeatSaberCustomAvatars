@@ -200,7 +200,7 @@ namespace CustomAvatar
         {
             if (_settings.lighting.enabled)
             {
-                if (_scenesManager.IsSceneInStack("GameplayCore") && _settings.lighting.enableDynamicLighting)
+                if (_scenesManager.GetCurrentlyLoadedSceneNames().Contains("GameplayCore") && _settings.lighting.enableDynamicLighting)
                 {
                     Object.Destroy(_menuLightingRig);
 
