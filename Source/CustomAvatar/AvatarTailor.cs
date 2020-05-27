@@ -109,7 +109,7 @@ namespace CustomAvatar
             floorOffset = (float) Math.Round(floorOffset, 3); // round to millimeter
 
             // apply offset
-			avatar.verticalPosition = floorOffset;
+            avatar.verticalPosition = floorOffset;
             
             // ReSharper disable Unity.PerformanceCriticalCodeInvocation
             GameObject menuPlayersPlace = GameObject.Find("MenuPlayersPlace");

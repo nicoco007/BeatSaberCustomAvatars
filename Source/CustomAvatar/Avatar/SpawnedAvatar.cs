@@ -12,10 +12,10 @@ using VRIK = BeatSaberFinalIK::RootMotion.FinalIK.VRIK;
 
 namespace CustomAvatar.Avatar
 {
-	public class SpawnedAvatar : MonoBehaviour
-	{
-		public LoadedAvatar avatar { get; private set; }
-		public AvatarInput input { get; private set; }
+    public class SpawnedAvatar : MonoBehaviour
+    {
+        public LoadedAvatar avatar { get; private set; }
+        public AvatarInput input { get; private set; }
 
         public float verticalPosition
         {
@@ -38,7 +38,7 @@ namespace CustomAvatar.Avatar
         public bool supportsFingerTracking { get; private set; }
         public bool isIKAvatar { get; private set; }
 
-		public AvatarTracking tracking { get; private set; }
+        public AvatarTracking tracking { get; private set; }
         public AvatarIK ik { get; private set; }
         public AvatarFingerTracking fingerTracking { get; private set; }
 
@@ -195,10 +195,10 @@ namespace CustomAvatar.Avatar
 
         private void SetChildrenToLayer(int layer)
         {
-	        foreach (Renderer renderer in _renderers)
+            foreach (Renderer renderer in _renderers)
             {
                 renderer.gameObject.layer = layer;
-	        }
+            }
         }
 
         private void ApplyFirstPersonExclusions()
