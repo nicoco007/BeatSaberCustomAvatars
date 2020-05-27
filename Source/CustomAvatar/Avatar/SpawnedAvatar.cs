@@ -20,7 +20,7 @@ namespace CustomAvatar.Avatar
         public float verticalPosition
         {
             get => transform.position.y - _initialPosition.y;
-            set => transform.position = _initialPosition + value * Vector3.up;
+            set => transform.position = _initialPosition + (value * Vector3.up);
         }
 
         public float scale

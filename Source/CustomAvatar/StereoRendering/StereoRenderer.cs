@@ -424,20 +424,20 @@ namespace CustomAvatar.StereoRendering
 
         public void CalculateReflectionMatrix(ref Matrix4x4 reflectionMat, Vector4 normal)
         {
-            reflectionMat.m00 = (1.0f - 2.0f * normal[0] * normal[0]);
-            reflectionMat.m01 = (-2.0f * normal[0] * normal[1]);
-            reflectionMat.m02 = (-2.0f * normal[0] * normal[2]);
-            reflectionMat.m03 = (-2.0f * normal[3] * normal[0]);
+            reflectionMat.m00 = 1.0f - (2.0f * normal[0] * normal[0]);
+            reflectionMat.m01 = -2.0f * normal[0] * normal[1];
+            reflectionMat.m02 = -2.0f * normal[0] * normal[2];
+            reflectionMat.m03 = -2.0f * normal[3] * normal[0];
 
-            reflectionMat.m10 = (-2.0f * normal[1] * normal[0]);
-            reflectionMat.m11 = (1.0f - 2.0f * normal[1] * normal[1]);
-            reflectionMat.m12 = (-2.0f * normal[1] * normal[2]);
-            reflectionMat.m13 = (-2.0f * normal[3] * normal[1]);
+            reflectionMat.m10 = -2.0f * normal[1] * normal[0];
+            reflectionMat.m11 = 1.0f - (2.0f * normal[1] * normal[1]);
+            reflectionMat.m12 = -2.0f * normal[1] * normal[2];
+            reflectionMat.m13 = -2.0f * normal[3] * normal[1];
 
-            reflectionMat.m20 = (-2.0f * normal[2] * normal[0]);
-            reflectionMat.m21 = (-2.0f * normal[2] * normal[1]);
-            reflectionMat.m22 = (1.0f - 2.0f * normal[2] * normal[2]);
-            reflectionMat.m23 = (-2.0f * normal[3] * normal[2]);
+            reflectionMat.m20 = -2.0f * normal[2] * normal[0];
+            reflectionMat.m21 = -2.0f * normal[2] * normal[1];
+            reflectionMat.m22 = 1.0f - (2.0f * normal[2] * normal[2]);
+            reflectionMat.m23 = -2.0f * normal[3] * normal[2];
 
             reflectionMat.m30 = 0.0f;
             reflectionMat.m31 = 0.0f;
@@ -525,7 +525,7 @@ namespace CustomAvatar.StereoRendering
         private Matrix4x4 GetScissorMatrix(Rect rect)
         {
             Matrix4x4 m2 = Matrix4x4.TRS(
-                new Vector3((1 / rect.width - 1), (1 / rect.height - 1), 0),
+                new Vector3((1 / rect.width) - 1, (1 / rect.height) - 1, 0),
                 Quaternion.identity,
                 new Vector3(1 / rect.width, 1 / rect.height, 1));
 
@@ -540,19 +540,19 @@ namespace CustomAvatar.StereoRendering
         private Vector3 WorldPointToViewport(Matrix4x4 mat, Vector3 point)
         {
             Vector3 result;
-            result.x = mat.m00 * point.x + mat.m01 * point.y + mat.m02 * point.z + mat.m03;
-            result.y = mat.m10 * point.x + mat.m11 * point.y + mat.m12 * point.z + mat.m13;
-            result.z = mat.m20 * point.x + mat.m21 * point.y + mat.m22 * point.z + mat.m23;
+            result.x = (mat.m00 * point.x) + (mat.m01 * point.y) + (mat.m02 * point.z) + mat.m03;
+            result.y = (mat.m10 * point.x) + (mat.m11 * point.y) + (mat.m12 * point.z) + mat.m13;
+            result.z = (mat.m20 * point.x) + (mat.m21 * point.y) + (mat.m22 * point.z) + mat.m23;
 
-            float a = mat.m30 * point.x + mat.m31 * point.y + mat.m32 * point.z + mat.m33;
+            float a = (mat.m30 * point.x) + (mat.m31 * point.y) + (mat.m32 * point.z) + mat.m33;
             a = 1.0f / a;
             result.x *= a;
             result.y *= a;
             result.z = a;
 
             point = result;
-            point.x = (point.x * 0.5f + 0.5f);
-            point.y = (point.y * 0.5f + 0.5f);
+            point.x = (point.x * 0.5f) + 0.5f;
+            point.y = (point.y * 0.5f) + 0.5f;
 
             return point;
         }

@@ -98,7 +98,7 @@ namespace CustomAvatar
                 float playerEyeHeight = _playerEyeHeight;
                 float avatarEyeHeight = avatar.eyeHeight;
 
-                floorOffset = playerEyeHeight - avatarEyeHeight * avatar.scale;
+                floorOffset = playerEyeHeight - (avatarEyeHeight * avatar.scale);
 
                 if (_settings.moveFloorWithRoomAdjust)
                 {
@@ -204,7 +204,7 @@ namespace CustomAvatar
                 float eyeHeight = head.position.y - floorPosition;
 
                 Vector3 wantedPelvisPosition = new Vector3(0, eyeHeight / 22.5f * 14f, 0);
-                Vector3 pelvisPositionCorrection = wantedPelvisPosition - Vector3.up * (pelvis.position.y - floorPosition);
+                Vector3 pelvisPositionCorrection = wantedPelvisPosition - (Vector3.up * (pelvis.position.y - floorPosition));
 
                 Vector3 pelvisForward = pelvis.rotation * Vector3.forward;
                 Vector3 pelvisStraightForward = Vector3.ProjectOnPlane(pelvisForward, floorNormal);

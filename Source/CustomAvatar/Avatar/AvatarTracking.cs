@@ -210,7 +210,7 @@ namespace CustomAvatar.Avatar
 
         private Pose AdjustTrackedPointPose(Pose previousPose, Pose currentPose, Pose correction, Pose initialPose, Settings.TrackedPointSmoothing smoothing)
         {
-            Vector3 corrected = currentPose.position + currentPose.rotation * correction.rotation * correction.position; // correction is forward-facing by definition
+            Vector3 corrected = currentPose.position + (currentPose.rotation * correction.rotation * correction.position); // correction is forward-facing by definition
             Quaternion correctedRotation = currentPose.rotation * correction.rotation;
 
             float y = _avatar.verticalPosition;
@@ -220,7 +220,7 @@ namespace CustomAvatar.Avatar
                 y -= _mainSettingsModel.roomCenter.value.y;
             }
 
-            corrected.y += (1 - initialPose.position.y / _avatar.eyeHeight) * y;
+            corrected.y += (1 - (initialPose.position.y / _avatar.eyeHeight)) * y;
 
             return new Pose(Vector3.Lerp(previousPose.position, corrected, smoothing.position), Quaternion.Slerp(previousPose.rotation, correctedRotation, smoothing.rotation));
         }

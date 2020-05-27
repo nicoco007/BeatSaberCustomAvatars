@@ -296,7 +296,7 @@ namespace CustomAvatar.Tracking
 
             if (inputDevice.TryGetFeatureValue(CommonUsages.devicePosition, out Vector3 position))
             {
-                deviceState.position = origin + originRotation * position;
+                deviceState.position = origin + (originRotation * position);
             }
 
             if (inputDevice.TryGetFeatureValue(CommonUsages.deviceRotation, out Quaternion rotation))

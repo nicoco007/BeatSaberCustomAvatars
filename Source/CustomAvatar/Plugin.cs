@@ -188,8 +188,8 @@ namespace CustomAvatar
                     int cullingMask = camera.cullingMask;
 
                     cullingMask &= ~(1 << AvatarLayers.kOnlyInThirdPerson);
-                    cullingMask |= (1 << AvatarLayers.kAlwaysVisible);
-                    cullingMask |= (1 << AvatarLayers.kOnlyInFirstPerson);
+                    cullingMask |= 1 << AvatarLayers.kAlwaysVisible;
+                    cullingMask |= 1 << AvatarLayers.kOnlyInFirstPerson;
 
                     camera.cullingMask = cullingMask;
                 }
