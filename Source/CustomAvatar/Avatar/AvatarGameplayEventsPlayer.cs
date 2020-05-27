@@ -62,7 +62,6 @@ namespace CustomAvatar.Avatar
 
             _beatmapObjectCallbackController.beatmapEventDidTriggerEvent -= BeatmapEventDidTrigger;
         }
-        
 
         // ReSharper restore UnusedMember.Local
         #pragma warning restore IDE0051

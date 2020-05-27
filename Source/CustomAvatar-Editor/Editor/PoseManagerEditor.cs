@@ -50,5 +50,4 @@ namespace CustomAvatar.Editor
             GUILayout.EndHorizontal();
         }
     }
-
 }

@@ -85,7 +85,6 @@ namespace AvatarScriptPack
         [Range(0f, 180f), Tooltip("Will automatically rotate the root of the character if the head target has turned past this angle.")]
         public float Spine_maxRootAngle = 25f;
 
-
         [Space(20)]
 
         /*******************
@@ -118,7 +117,6 @@ namespace AvatarScriptPack
 
         [Tooltip("Local axis of the hand bone that points from the palm towards the thumb. Used for defining hand bone orientation.")]
         public Vector3 LeftArm_palmToThumbAxis = Vector3.zero;
-
 
         [Space(20)]
 
@@ -153,7 +151,6 @@ namespace AvatarScriptPack
         [Tooltip("Local axis of the hand bone that points from the palm towards the thumb. Used for defining hand bone orientation.")]
         public Vector3 RightArm_palmToThumbAxis = Vector3.zero;
 
-
         [Space(20)]
 
         /*******************
@@ -169,7 +166,6 @@ namespace AvatarScriptPack
         [Range(-180f, 180f), Tooltip("Angular offset of the knee bending direction.")]
         public float LeftLeg_swivelOffset;
 
-
         [Space(20)]
 
         /*******************
@@ -184,7 +180,6 @@ namespace AvatarScriptPack
 
         [Range(-180f, 180f), Tooltip("Angular offset of the knee bending direction.")]
         public float RightLeg_swivelOffset;
-
 
         [Space(20)]
 
