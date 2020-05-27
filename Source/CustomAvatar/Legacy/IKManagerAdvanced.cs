@@ -275,27 +275,27 @@ namespace AvatarScriptPack
 
                 if (propertyName.Length > 1)
                 {
-                    if ("Spine" == propertyName[0])
+                    if (propertyName[0] == "Spine")
                     {
                         SetProperty(vrikManager, "solver_spine_" + propertyName[1], value);
                     }
-                    else if ("LeftArm" == propertyName[0])
+                    else if (propertyName[0] == "LeftArm")
                     {
                         SetProperty(vrikManager, "solver_leftArm_" + propertyName[1], value);
                     }
-                    else if ("RightArm" == propertyName[0])
+                    else if (propertyName[0] == "RightArm")
                     {
                         SetProperty(vrikManager, "solver_rightArm_" + propertyName[1], value);
                     }
-                    else if ("LeftLeg" == propertyName[0])
+                    else if (propertyName[0] == "LeftLeg")
                     {
                         SetProperty(vrikManager, "solver_leftLeg_" + propertyName[1], value);
                     }
-                    else if ("RightLeg" == propertyName[0])
+                    else if (propertyName[0] == "RightLeg")
                     {
                         SetProperty(vrikManager, "solver_rightLeg_" + propertyName[1], value);
                     }
-                    else if ("Locomotion" == propertyName[0])
+                    else if (propertyName[0] == "Locomotion")
                     {
                         SetProperty(vrikManager, "solver_locomotion_" + propertyName[1], value);
                     }
