@@ -27,7 +27,7 @@ namespace CustomAvatar
             // settings
             Container.Bind<SettingsManager>().AsSingle();
             Container.Bind<Settings>().FromMethod((context) => context.Container.Resolve<SettingsManager>().Load()).AsSingle();
-            
+
             // managers & helper classes
             Container.BindInterfacesAndSelfTo<PlayerAvatarManager>().AsSingle();
             Container.Bind<StereoRenderManager>().AsSingle();

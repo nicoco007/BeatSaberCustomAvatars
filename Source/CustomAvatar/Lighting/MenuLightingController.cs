@@ -18,7 +18,7 @@ namespace CustomAvatar.Lighting
         {
             Destroy(gameObject);
         }
-        
+
         // ReSharper disable UnusedMember.Local
         #pragma warning disable IDE0051
         #endregion

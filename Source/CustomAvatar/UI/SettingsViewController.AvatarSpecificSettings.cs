@@ -67,7 +67,7 @@ namespace CustomAvatar.UI
                 _clearButton.interactable = false;
             }
         }
-        
+
         // ReSharper restore UnusedMember.Local
         #endregion
 
@@ -92,7 +92,7 @@ namespace CustomAvatar.UI
                 {
                     _avatarTailor.CalibrateFullBodyTrackingManual(_avatarManager.currentlySpawnedAvatar);
                 }
-                
+
                 _avatarManager.currentlySpawnedAvatar.DisableCalibrationMode();
             }
 
@@ -107,7 +107,7 @@ namespace CustomAvatar.UI
         }
 
         private GameObject CreateCalibrationSphere()
-        { 
+        {
             GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 
             sphere.layer = AvatarLayers.kAlwaysVisible;

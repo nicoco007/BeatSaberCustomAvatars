@@ -25,7 +25,7 @@ namespace CustomAvatar
         public bool fixTransforms = true;
 
         #region References
-        
+
         [Header("References")]
 
         public Transform references_root;
@@ -74,7 +74,7 @@ namespace CustomAvatar
 
         [Tooltip("Optional")]
         public Transform references_rightToes;
-        
+
         [ContextMenu("Auto-detect References")]
         public void AutoDetectReferences() {
             var animator = transform.GetComponentInChildren<Animator>();
@@ -389,14 +389,14 @@ namespace CustomAvatar
 
         [Tooltip("Called when the left foot has finished a step.")]
         public UnityEvent solver_locomotion_onLeftFootstep = new UnityEvent();
-        
+
         [Tooltip("Called when the right foot has finished a step")]
         public UnityEvent solver_locomotion_onRightFootstep = new UnityEvent();
 
         #endregion
 
         internal event Action referencesUpdated;
-        
+
         internal VRIK vrik;
 
         private ILogger _logger = new UnityDebugLogger<VRIKManager>();

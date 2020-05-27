@@ -10,7 +10,7 @@ namespace CustomAvatar.Logging
         {
             _logger = logger;
         }
-        
+
         public ILogger CreateLogger<T>(string name = null)
         {
             return new IPALogger<T>(_logger, name);

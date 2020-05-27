@@ -13,7 +13,7 @@ namespace CustomAvatar.Avatar
         private BeatmapObjectCallbackController _beatmapObjectCallbackController;
 
         private EventManager _eventManager;
-        
+
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
         // ReSharper disable UnusedMember.Local

@@ -21,7 +21,7 @@ namespace CustomAvatar.UI
         private Material _greenMaterial;
         private Material _blueMaterial;
         private Settings.AvatarSpecificSettings _currentAvatarSettings;
-        
+
         private TrackedDeviceManager _trackedDeviceManager;
         private PlayerAvatarManager _avatarManager;
         private AvatarTailor _avatarTailor;

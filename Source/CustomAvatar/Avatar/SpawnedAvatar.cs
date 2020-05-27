@@ -101,7 +101,7 @@ namespace CustomAvatar.Avatar
             _initialPosition = transform.localPosition;
             _initialScale = transform.localScale;
         }
-        
+
         [Inject]
         private void Inject(DiContainer container, ILoggerProvider loggerProvider, LoadedAvatar loadedAvatar, AvatarInput avatarInput, GameScenesManager gameScenesManager)
         {
@@ -234,7 +234,7 @@ namespace CustomAvatar.Avatar
             Vector3 headOffset = GetTargetOffset(nameof(VRIK.References.head), nameof(VRIKManager.solver_spine_headTarget), nameof(IKManager.HeadTarget));
             Vector3 leftHandOffset = GetTargetOffset(nameof(VRIK.References.leftHand), nameof(VRIKManager.solver_leftArm_target), nameof(IKManager.LeftHandTarget));
             Vector3 rightHandOffset = GetTargetOffset(nameof(VRIK.References.rightHand), nameof(VRIKManager.solver_rightArm_target), nameof(IKManager.RightHandTarget));
-            
+
             // only warn if offset is larger than 1 mm
             if (headOffset.magnitude > 0.001f)
             {
@@ -263,14 +263,14 @@ namespace CustomAvatar.Avatar
         {
             Transform reference = null;
             Transform target = null;
-                
+
             #pragma warning disable 618
             VRIK vrik = GetComponentInChildren<VRIK>();
             IKManager ikManager = GetComponentInChildren<IKManager>();
             #pragma warning restore 618
 
             VRIKManager vrikManager = GetComponentInChildren<VRIKManager>();
-                
+
             if (vrikManager)
             {
                 if (!vrikManager.references_head) vrikManager.AutoDetectReferences();

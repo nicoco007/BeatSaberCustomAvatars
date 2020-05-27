@@ -8,7 +8,7 @@
       <bool-setting text="Floor Height Adjust" hover-hint="Move the floor so avatars' feet are flat." id="floor-adjust" on-change="floor-adjust-change"></bool-setting>
       <bool-setting text="Move Floor with Room Adjust" hover-hint="Move the floor along with the game's built-in room adjust." id="move-floor-with-room-adjust" on-change="move-floor-with-room-adjust-change"></bool-setting>
       <increment-setting id="camera-clip-plane" text="Camera Near Clip Plane" hover-hint="Distance from the eyes at which the camera starts rendering" min="0.01" max="0.3" increment="0.01" on-change="camera-clip-plane-change"></increment-setting>
-      
+
       <horizontal pad-top="1">
         <text text="Arm Span" font-size="5" align="Left"></text>
         <text id="arm-span" font-size="5" align="Left"></text>

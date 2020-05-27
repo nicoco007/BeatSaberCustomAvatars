@@ -27,18 +27,18 @@ namespace CustomAvatar.Avatar
 
         private Action<BeatSaberDynamicBone::DynamicBone> _preUpdateDelegate;
         private Action<BeatSaberDynamicBone::DynamicBone, float> _updateDynamicBonesDelegate;
-        
+
         private AvatarInput _input;
         private LoadedAvatar _avatar;
         private Settings _settings;
         private ILogger _logger;
 
         private bool _isCalibrationModeEnabled = false;
-        
+
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
         // ReSharper disable UnusedMember.Local
-        
+
         private void Awake()
         {
             // create delegates for dynamic bones private methods (more efficient than continuously calling Invoke)
@@ -91,9 +91,9 @@ namespace CustomAvatar.Avatar
             _fixTransforms = _vrikManager.fixTransforms;
 
             _vrikManager.referencesUpdated += OnReferencesUpdated;
-            
+
             OnReferencesUpdated();
-            
+
             foreach (TwistRelaxer twistRelaxer in _twistRelaxers)
             {
                 twistRelaxer.ik = _vrik;
@@ -104,7 +104,7 @@ namespace CustomAvatar.Avatar
             {
                 _logger.Warning("solver.spine.maintainPelvisPosition > 0 is not recommended because it can cause strange pelvis rotation issues. To allow maintainPelvisPosition > 0, please set allowMaintainPelvisPosition to true for your avatar in the configuration file.");
             }
-            
+
             _input.inputChanged += OnInputChanged;
         }
 

@@ -156,7 +156,7 @@ namespace CustomAvatar
             currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, new VRAvatarInput(_trackedDeviceManager));
 
             ResizeCurrentAvatar();
-            
+
             currentlySpawnedAvatar.UpdateFirstPersonVisibility(_settings.isAvatarVisibleInFirstPerson ? FirstPersonVisibility.ApplyFirstPersonExclusions : FirstPersonVisibility.None);
 
             avatarChanged?.Invoke(currentlySpawnedAvatar);
@@ -166,7 +166,7 @@ namespace CustomAvatar
         {
             List<string> files = GetAvatarFileNames();
             files.Insert(0, null);
-            
+
             int index = currentlySpawnedAvatar ? files.IndexOf(currentlySpawnedAvatar.avatar.fullPath) : 0;
 
             index = (index + 1) % files.Count;
@@ -178,11 +178,11 @@ namespace CustomAvatar
         {
             List<string> files = GetAvatarFileNames();
             files.Insert(0, null);
-            
+
             int index = currentlySpawnedAvatar ? files.IndexOf(currentlySpawnedAvatar.avatar.fullPath) : 0;
 
             index = (index + files.Count - 1) % files.Count;
-            
+
             SwitchToAvatarAsync(files[index]);
         }
 

@@ -8,7 +8,7 @@ namespace CustomAvatar.UI
 {
     internal class AvatarMenuFlowCoordinator : FlowCoordinator
     {
-        private AvatarListViewController _avatarListViewController; 
+        private AvatarListViewController _avatarListViewController;
         private MirrorViewController _mirrorViewController;
         private SettingsViewController _settingsViewController;
 

@@ -81,7 +81,7 @@ namespace CustomAvatar.Avatar
             }
 
             assetBundleCreateRequest.assetBundle.Unload(false);
-                
+
             try
             {
                 var loadedAvatar = new LoadedAvatar(fullPath, (GameObject)assetBundleRequest.asset);

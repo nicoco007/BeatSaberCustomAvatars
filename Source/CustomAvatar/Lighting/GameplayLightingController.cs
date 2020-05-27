@@ -14,7 +14,7 @@ namespace CustomAvatar.Lighting
         private PlayerController _playerController;
 
         private List<Light>[] _lights;
-        
+
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
         // ReSharper disable UnusedMember.Local
@@ -44,7 +44,7 @@ namespace CustomAvatar.Lighting
                     Vector3 direction = kOrigin - lightWithId.transform.position;
 
                     var light = new GameObject("DynamicLight").AddComponent<Light>();
-                    
+
                     light.type = LightType.Directional;
                     light.color = Color.black;
                     light.shadows = LightShadows.None; // shadows murder fps since there's so many lights being added
@@ -52,7 +52,7 @@ namespace CustomAvatar.Lighting
                     light.intensity = 5f * (1 / direction.magnitude);
                     light.spotAngle = 45;
                     light.cullingMask = (1 << AvatarLayers.kOnlyInFirstPerson) | (1 << AvatarLayers.kOnlyInThirdPerson) | (1 << AvatarLayers.kAlwaysVisible);
-                    
+
                     light.transform.SetParent(lightWithId.transform);
                     light.transform.localPosition = Vector3.zero;
                     light.transform.rotation = Quaternion.LookRotation(direction);

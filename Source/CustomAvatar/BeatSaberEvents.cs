@@ -12,7 +12,7 @@ namespace CustomAvatar
         {
             HarmonyMethod prefixPatch = new HarmonyMethod(typeof(BeatSaberEvents).GetMethod(nameof(OnPlayerHeightChanged), BindingFlags.Static | BindingFlags.NonPublic));
             MethodBase playerHeightSetter = typeof(PlayerSpecificSettings).GetProperty(nameof(PlayerSpecificSettings.playerHeight), BindingFlags.Instance | BindingFlags.Public).SetMethod;
-        
+
             harmony.Patch(playerHeightSetter, null, prefixPatch);
         }
 

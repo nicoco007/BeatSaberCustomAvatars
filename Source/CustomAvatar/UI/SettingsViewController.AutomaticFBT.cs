@@ -20,7 +20,7 @@ namespace CustomAvatar.UI
 
         [UIComponent("auto-calibrate-button")] private Button _autoCalibrateButton;
         [UIComponent("auto-clear-button")] private Button _autoClearButton;
-        
+
         #pragma warning restore 649
         #pragma warning restore IDE0044
         #endregion
@@ -29,7 +29,7 @@ namespace CustomAvatar.UI
         // ReSharper disable UnusedMember.Local
 
         [UIValue("waist-tracker-position-options")] private readonly List<object> _waistTrackerOptions = new List<object> { WaistTrackerPosition.Front, WaistTrackerPosition.Left, WaistTrackerPosition.Right, WaistTrackerPosition.Back };
-        
+
         // ReSharper restore UnusedMember.Local
         #endregion
 
@@ -79,7 +79,7 @@ namespace CustomAvatar.UI
         {
             _settings.automaticCalibration.waistTrackerPosition = waistTrackerPosition;
         }
-        
+
         // ReSharper restore UnusedMember.Local
         #endregion
     }

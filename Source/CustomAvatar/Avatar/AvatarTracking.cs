@@ -70,7 +70,7 @@ namespace CustomAvatar.Avatar
                     head.position = headPose.position;
                     head.rotation = headPose.rotation;
                 }
-                
+
                 Vector3 controllerPositionOffset = _mainSettingsModel.controllerPosition;
                 Vector3 controllerRotationOffset = _mainSettingsModel.controllerRotation;
 
@@ -78,7 +78,7 @@ namespace CustomAvatar.Avatar
                 {
                     rightHand.position = rightHandPose.position;
                     rightHand.rotation = rightHandPose.rotation;
-                    
+
                     _vrPlatformHelper.AdjustPlatformSpecificControllerTransform(XRNode.RightHand, rightHand, controllerPositionOffset, controllerRotationOffset);
                 }
 

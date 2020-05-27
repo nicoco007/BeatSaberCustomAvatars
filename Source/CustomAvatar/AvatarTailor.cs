@@ -11,14 +11,14 @@ namespace CustomAvatar
     internal class AvatarTailor
     {
         public const float kDefaultPlayerArmSpan = 1.7f;
-        
+
         private readonly ILogger _logger;
         private readonly MainSettingsModelSO _mainSettingsModel;
         private readonly PlayerDataModel _playerDataModel;
         private readonly Settings _settings;
 
         private Vector3? _initialPlatformPosition;
-        
+
         private Vector3 _roomCenter => _mainSettingsModel.roomCenter.value;
         private float _playerEyeHeight => _playerDataModel.playerData.playerSpecificSettings.playerHeight - MainSettingsModelSO.kHeadPosToPlayerHeightOffset;
 
@@ -88,7 +88,7 @@ namespace CustomAvatar
         private IEnumerator FloorMendingWithDelay(SpawnedAvatar avatar)
         {
             yield return new WaitForEndOfFrame(); // wait for CustomFloorPlugin:PlatformManager:Start to hide original platform
-            
+
             if (!avatar) yield break;
 
             float floorOffset = 0f;
@@ -110,7 +110,7 @@ namespace CustomAvatar
 
             // apply offset
             avatar.verticalPosition = floorOffset;
-            
+
             // ReSharper disable Unity.PerformanceCriticalCodeInvocation
             GameObject menuPlayersPlace = GameObject.Find("MenuPlayersPlace");
             GameObject originalFloor = GameObject.Find("Environment/PlayersPlace");
@@ -137,7 +137,7 @@ namespace CustomAvatar
                 customFloor.transform.position = (Vector3.up * floorOffset) + _initialPlatformPosition ?? Vector3.zero;
             }
         }
-        
+
         public void CalibrateFullBodyTrackingManual(SpawnedAvatar spawnedAvatar)
         {
             Settings.ManualFullBodyCalibration fullBodyCalibration = _settings.GetAvatarSettings(spawnedAvatar.avatar.fullPath).fullBodyCalibration;

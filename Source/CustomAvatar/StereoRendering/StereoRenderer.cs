@@ -197,7 +197,7 @@ namespace CustomAvatar.StereoRendering
             // initialize stereo camera rig
             if (stereoCameraHead == null)
                 CreateStereoCameraRig();
-            
+
             // use first material from renderer as stereo material
             Renderer renderer = GetComponent<Renderer>();
             stereoMaterial = renderer.materials[0];
@@ -267,10 +267,10 @@ namespace CustomAvatar.StereoRendering
                 // invert backface culling when rendering a mirror
                 if (isMirror)
                     GL.invertCulling = true;
-                
+
                 // render the canvas
                 RenderToTwoStereoTextures(detector);
-                
+
                 // reset backface culling
                 if (isMirror)
                     GL.invertCulling = false;
@@ -358,8 +358,8 @@ namespace CustomAvatar.StereoRendering
 
             // render stereo textures
             RenderEye(
-                leftEyeOffset, 
-                leftProjectionMatrix, detector.camera.worldToCameraMatrix, 
+                leftEyeOffset,
+                leftProjectionMatrix, detector.camera.worldToCameraMatrix,
                 leftEyeTextures[hash], "_LeftEyeTexture");
 
             if (detector.camera.stereoEnabled)
@@ -382,7 +382,7 @@ namespace CustomAvatar.StereoRendering
         }
 
         private void RenderEye(
-            Vector3 eyeOffset, 
+            Vector3 eyeOffset,
             Matrix4x4 projMat, Matrix4x4 worldToCameraMat,
             RenderTexture targetTexture, string textureName)
         {

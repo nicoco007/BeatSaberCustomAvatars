@@ -29,7 +29,7 @@ namespace CustomAvatar.StereoRendering
 
             Material material = new Material(_shaderLoader.stereoMirrorShader);
             material.SetFloat(kCutout, 0f);
-            
+
             Renderer renderer = mirrorPlane.GetComponent<Renderer>();
             renderer.sharedMaterial = material;
 

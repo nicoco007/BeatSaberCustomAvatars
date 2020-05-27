@@ -18,7 +18,7 @@ namespace CustomAvatar.Tracking
             _deviceManager.deviceRemoved += (device, use) => InvokeInputChanged();
             _deviceManager.deviceTrackingAcquired += (device, use) => InvokeInputChanged();
             _deviceManager.deviceTrackingLost += (device, use) => InvokeInputChanged();
-            
+
             _leftHandAnimAction  = new SkeletalInput("/actions/customavatars/in/lefthandanim");
             _rightHandAnimAction = new SkeletalInput("/actions/customavatars/in/righthandanim");
         }

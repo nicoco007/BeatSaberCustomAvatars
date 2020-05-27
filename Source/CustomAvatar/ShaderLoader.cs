@@ -53,7 +53,7 @@ namespace CustomAvatar
                         unlitShader = asset as Shader;
                         _logger.Info("Loaded unlit shader");
                         break;
-                    
+
                     case "Custom/StereoRenderShader-Unlit":
                         stereoMirrorShader = asset as Shader;
                         _logger.Info("Loaded stereo render shader");

@@ -25,7 +25,7 @@ namespace CustomAvatar.UI
         // ReSharper disable UnusedMember.Local
 
         [UIValue("resize-mode-options")] private readonly List<object> _resizeModeOptions = new List<object> { AvatarResizeMode.None, AvatarResizeMode.Height, AvatarResizeMode.ArmSpan };
-        
+
         // ReSharper restore UnusedMember.Local
         #endregion
 
@@ -99,12 +99,12 @@ namespace CustomAvatar.UI
         {
             _settings.moveFloorWithRoomAdjust = value;
         }
-        
+
         // ReSharper restore UnusedMember.Local
         #endregion
 
         #region Arm Span Measurement
-        
+
         private const float kMinArmSpan = 0.5f;
 
         private bool _isMeasuring;

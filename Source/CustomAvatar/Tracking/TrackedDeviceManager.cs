@@ -93,7 +93,7 @@ namespace CustomAvatar.Tracking
             UpdateTrackedDevice(leftFoot,  leftFootInputDevice,  DeviceUse.LeftFoot);
             UpdateTrackedDevice(rightFoot, rightFootInputDevice, DeviceUse.RightFoot);
         }
-        
+
         // ReSharper restore UnusedMember.Local
         #pragma warning restore IDE0051
         #endregion
@@ -105,7 +105,7 @@ namespace CustomAvatar.Tracking
             var openVRDevicesBySerialNumber = new Dictionary<string, uint>();
 
             InputDevices.GetDevices(inputDevices);
-            
+
             var deviceRoles = new Dictionary<InputDevice, TrackedDeviceRole>(inputDevices.Count);
 
             if (_isOpenVRRunning)
@@ -261,7 +261,7 @@ namespace CustomAvatar.Tracking
                 deviceState.serialNumber = inputDevice.serialNumber;
                 deviceState.found = true;
                 deviceState.role = deviceRole;
-                
+
                 deviceAdded?.Invoke(deviceState, use);
             }
         }
@@ -290,7 +290,7 @@ namespace CustomAvatar.Tracking
                 deviceState.tracked = true;
                 deviceTrackingAcquired?.Invoke(deviceState, use);
             }
-            
+
             Vector3 origin = _mainSettingsModel.roomCenter.value;
             Quaternion originRotation = Quaternion.Euler(0, _mainSettingsModel.roomRotation.value, 0);
 
