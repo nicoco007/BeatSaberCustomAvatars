@@ -478,7 +478,7 @@ namespace CustomAvatar
 
                         if (sourceType != targetType)
                         {
-                            _logger.Warning($"Underlying types for {sourceField.Name} ({sourceType}) and {targetField.Name} ({targetType}) are not the same");
+                            _logger.Warning($"Underlying types for {sourceField.Name} ({sourceType}) and {targetField.Name} ({targetType}) are not the same");
                         }
 
                         _logger.Trace($"Converting enum value {sourceField.FieldType} ({sourceType}) -> {targetField.FieldType} ({targetType})");
@@ -488,7 +488,7 @@ namespace CustomAvatar
                     {
                         if (sourceField.FieldType != targetField.FieldType)
                         {
-                            _logger.Warning($"Types for {sourceField.Name} ({sourceField.FieldType}) and {targetField.Name} ({targetField.FieldType}) are not the same");
+                            _logger.Warning($"Types for {sourceField.Name} ({sourceField.FieldType}) and {targetField.Name} ({targetField.FieldType}) are not the same");
                         }
 
                         targetField.SetValue(target, value);

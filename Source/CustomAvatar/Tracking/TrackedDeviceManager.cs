@@ -304,7 +304,7 @@ namespace CustomAvatar.Tracking
                 deviceState.rotation = originRotation * rotation;
 
                 // Driver4VR rotation correction
-                if (deviceState.name?.StartsWith("d4vr_tracker_") == true && (use == DeviceUse.LeftFoot || use == DeviceUse.RightFoot))
+                if (deviceState.name?.StartsWith("d4vr_tracker_") == true && (use == DeviceUse.LeftFoot || use == DeviceUse.RightFoot))
                 {
                     deviceState.rotation *= Quaternion.Euler(-90, 180, 0);
                 }
