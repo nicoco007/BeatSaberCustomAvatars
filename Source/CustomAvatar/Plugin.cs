@@ -192,6 +192,8 @@ namespace CustomAvatar
                     cullingMask |= (1 << AvatarLayers.kOnlyInFirstPerson);
 
                     camera.cullingMask = cullingMask;
+
+                    camera.nearClipPlane = _settings.cameraNearClipPlane;
                 }
             }
         }
