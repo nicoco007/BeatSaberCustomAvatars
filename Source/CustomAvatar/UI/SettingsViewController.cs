@@ -71,7 +71,7 @@ namespace CustomAvatar.UI
 
             _waistTrackerPosition.Value = _settings.automaticCalibration.waistTrackerPosition;
 
-            _autoClearButton.interactable = !_settings.automaticCalibration.isDefault;
+            _autoClearButton.interactable = _settings.automaticCalibration.isCalibrated;
 
             _avatarManager.avatarChanged += OnAvatarChanged;
 
@@ -111,7 +111,7 @@ namespace CustomAvatar.UI
 
             _currentAvatarSettings = _settings.GetAvatarSettings(avatar.avatar.fullPath);
 
-            _clearButton.interactable = !_currentAvatarSettings.fullBodyCalibration.isDefault;
+            _clearButton.interactable = _currentAvatarSettings.fullBodyCalibration.isCalibrated;
             // TODO same here
             _calibrateButton.interactable = _avatarManager.currentlySpawnedAvatar.isIKAvatar && (_trackedDeviceManager.waist.tracked || _trackedDeviceManager.leftFoot.tracked || _trackedDeviceManager.rightFoot.tracked);
 

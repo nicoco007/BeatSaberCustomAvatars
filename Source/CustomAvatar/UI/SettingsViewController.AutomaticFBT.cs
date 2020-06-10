@@ -64,7 +64,7 @@ namespace CustomAvatar.UI
         private void OnCalibrateAutoFullBodyTrackingClicked()
         {
             _avatarTailor.CalibrateFullBodyTrackingAuto(_avatarManager.currentlySpawnedAvatar);
-            _autoClearButton.interactable = !_settings.automaticCalibration.isDefault;
+            _autoClearButton.interactable = _settings.automaticCalibration.isCalibrated;
         }
 
         [UIAction("auto-clear-fbt-calibration-data-click")]
