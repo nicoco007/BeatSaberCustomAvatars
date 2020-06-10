@@ -130,7 +130,7 @@ namespace CustomAvatar.Avatar
                             correction = _avatarSpecificSettings.fullBodyCalibration.leftLeg;
                         }
 
-                        _prevLeftLegPose = AdjustTrackedPointPose(_prevLeftLegPose, leftFootPose, correction, _initialLeftFootPose, _settings.fullBodyMotionSmoothing.feet);
+                        _prevLeftLegPose = AdjustTrackedPointPose(_prevLeftLegPose, leftFootPose, correction, _settings.fullBodyMotionSmoothing.feet);
 
                         leftLeg.position = _prevLeftLegPose.position;
                         leftLeg.rotation = _prevLeftLegPose.rotation;
@@ -150,7 +150,7 @@ namespace CustomAvatar.Avatar
                             correction = _avatarSpecificSettings.fullBodyCalibration.rightLeg;
                         }
 
-                        _prevRightLegPose = AdjustTrackedPointPose(_prevRightLegPose, rightFootPose, correction, _initialRightFootPose, _settings.fullBodyMotionSmoothing.feet);
+                        _prevRightLegPose = AdjustTrackedPointPose(_prevRightLegPose, rightFootPose, correction, _settings.fullBodyMotionSmoothing.feet);
 
                         rightLeg.position = _prevRightLegPose.position;
                         rightLeg.rotation = _prevRightLegPose.rotation;
@@ -174,7 +174,7 @@ namespace CustomAvatar.Avatar
                             correction = _avatarSpecificSettings.fullBodyCalibration.pelvis;
                         }
 
-                        _prevPelvisPose = AdjustTrackedPointPose(_prevPelvisPose, pelvisPose, correction, _initialPelvisPose, _settings.fullBodyMotionSmoothing.waist);
+                        _prevPelvisPose = AdjustTrackedPointPose(_prevPelvisPose, pelvisPose, correction, _settings.fullBodyMotionSmoothing.waist);
 
                         pelvis.position = _prevPelvisPose.position;
                         pelvis.rotation = _prevPelvisPose.rotation;
@@ -208,21 +208,22 @@ namespace CustomAvatar.Avatar
         #pragma warning restore IDE0051
         #endregion
 
-        private Pose AdjustTrackedPointPose(Pose previousPose, Pose currentPose, Pose correction, Pose initialPose, Settings.TrackedPointSmoothing smoothing)
+        private Pose AdjustTrackedPointPose(Pose previousPose, Pose currentPose, Pose correction, Settings.TrackedPointSmoothing smoothing)
         {
-            Vector3 corrected = currentPose.position + currentPose.rotation * correction.rotation * correction.position; // correction is forward-facing by definition
             Quaternion correctedRotation = currentPose.rotation * correction.rotation;
+            Vector3 correctedPosition = currentPose.position + correctedRotation * correction.position; // correction is forward-facing by definition
 
-            float y = _avatar.verticalPosition;
-
-            if (_settings.moveFloorWithRoomAdjust)
+            if (_settings.enableFloorAdjust)
             {
-                y -= _mainSettingsModel.roomCenter.value.y;
+                float scaledEyeHeight = (_avatar.eyeHeight * _avatar.scale);
+
+                float yOffset = _avatar.verticalPosition;
+                float yOffsetScale = scaledEyeHeight / (scaledEyeHeight + yOffset);
+
+                correctedPosition = new Vector3(correctedPosition.x, correctedPosition.y * yOffsetScale + yOffset, correctedPosition.z);
             }
 
-            corrected.y += (1 - initialPose.position.y / _avatar.eyeHeight) * y;
-
-            return new Pose(Vector3.Lerp(previousPose.position, corrected, smoothing.position), Quaternion.Slerp(previousPose.rotation, correctedRotation, smoothing.rotation));
+            return new Pose(Vector3.Lerp(previousPose.position, correctedPosition, smoothing.position), Quaternion.Slerp(previousPose.rotation, correctedRotation, smoothing.rotation));
         }
     }
 }
