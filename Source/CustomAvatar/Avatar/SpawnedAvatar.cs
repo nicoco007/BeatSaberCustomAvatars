@@ -37,6 +37,7 @@ namespace CustomAvatar.Avatar
         public float armSpan { get; private set; }
         public bool supportsFingerTracking { get; private set; }
         public bool isIKAvatar { get; private set; }
+        public bool supportsFullBodyTracking { get; private set; }
 
 		public AvatarTracking tracking { get; private set; }
         public AvatarIK ik { get; private set; }
@@ -119,10 +120,15 @@ namespace CustomAvatar.Avatar
                                      GetComponentInChildren<PoseManager>();
 
             VRIKManager vrikManager = GetComponentInChildren<VRIKManager>();
+            IKManagerAdvanced ikManagerAdvanced = GetComponentInChildren<IKManagerAdvanced>();
             IKManager ikManager = GetComponentInChildren<IKManager>();
             VRIK vrik = GetComponentInChildren<VRIK>();
 
             isIKAvatar = ikManager || vrikManager;
+
+            supportsFullBodyTracking =
+                ikManagerAdvanced && (ikManagerAdvanced.LeftLeg_target  || ikManagerAdvanced.RightLeg_target  || ikManagerAdvanced.Spine_pelvisTarget) ||
+                vrikManager       && (vrikManager.solver_leftLeg_target || vrikManager.solver_rightLeg_target || vrikManager.solver_spine_pelvisTarget);
 
             if (vrik && !vrik.references.isFilled) vrik.AutoDetectReferences();
             if (vrikManager && !vrikManager.areReferencesFilled) vrikManager.AutoDetectReferences();

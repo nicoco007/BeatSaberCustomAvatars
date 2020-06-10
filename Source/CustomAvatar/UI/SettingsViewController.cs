@@ -111,9 +111,7 @@ namespace CustomAvatar.UI
 
             _currentAvatarSettings = _settings.GetAvatarSettings(avatar.avatar.fullPath);
 
-            _clearButton.interactable = _currentAvatarSettings.fullBodyCalibration.isCalibrated;
-            // TODO same here
-            _calibrateButton.interactable = _avatarManager.currentlySpawnedAvatar.isIKAvatar && (_trackedDeviceManager.waist.tracked || _trackedDeviceManager.leftFoot.tracked || _trackedDeviceManager.rightFoot.tracked);
+            UpdateCalibrationButtons(avatar);
 
             _automaticCalibrationSetting.Value = _currentAvatarSettings.useAutomaticCalibration;
             _automaticCalibrationSetting.SetInteractable(avatar.avatar.descriptor.supportsAutomaticCalibration);
@@ -122,9 +120,58 @@ namespace CustomAvatar.UI
 
         private void OnInputDevicesChanged(TrackedDeviceState state, DeviceUse use)
         {
-            // TODO check targets exist on avatar, e.g. isFbtCapable
-            _autoCalibrateButton.interactable = _trackedDeviceManager.waist.tracked || _trackedDeviceManager.leftFoot.tracked || _trackedDeviceManager.rightFoot.tracked;
-            _calibrateButton.interactable     = _avatarManager.currentlySpawnedAvatar && _avatarManager.currentlySpawnedAvatar.isIKAvatar && (_trackedDeviceManager.waist.tracked || _trackedDeviceManager.leftFoot.tracked || _trackedDeviceManager.rightFoot.tracked);
+            UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar);
+        }
+
+        private void UpdateCalibrationButtons(SpawnedAvatar avatar)
+        {
+            if (!_trackedDeviceManager.waist.tracked && !_trackedDeviceManager.leftFoot.tracked && !_trackedDeviceManager.rightFoot.tracked)
+            {
+                _autoCalibrateButton.interactable = false;
+                _autoClearButton.interactable = false;
+                _autoCalibrateButtonHoverHint.text = "No trackers detected";
+                _autoClearButtonHoverHint.text = "No trackers detected";
+
+                _calibrateButton.interactable = false;
+                _clearButton.interactable = false;
+                _calibrateButtonHoverHint.text = "No trackers detected";
+                _clearButtonHoverHint.text = "No trackers detected";
+
+                return;
+            }
+
+            bool isManualCalibrationPossible = avatar && avatar.isIKAvatar && avatar.supportsFullBodyTracking;
+            bool isAutomaticCalibrationPossible = isManualCalibrationPossible && avatar.avatar.descriptor.supportsAutomaticCalibration;
+
+            if (isAutomaticCalibrationPossible)
+            {
+                _autoCalibrateButton.interactable = true;
+                _autoClearButton.interactable = _settings.automaticCalibration.isCalibrated;
+                _autoCalibrateButtonHoverHint.text = "Calibrate full body tracking automatically";
+                _autoClearButtonHoverHint.text = "Clear automatic full body tracking data";
+            }
+            else
+            {
+                _autoCalibrateButton.interactable = false;
+                _autoClearButton.interactable = false;
+                _autoCalibrateButtonHoverHint.text = "Not supported by current avatar";
+                _autoClearButtonHoverHint.text = "Not supported by current avatar";
+            }
+
+            if (isManualCalibrationPossible)
+            {
+                _calibrateButton.interactable = true;
+                _clearButton.interactable = _settings.GetAvatarSettings(avatar.avatar.fullPath).fullBodyCalibration.isCalibrated;
+                _calibrateButtonHoverHint.text = "Start manual full body calibration";
+                _clearButtonHoverHint.text = "Clear manual full body tracking data";
+            }
+            else
+            {
+                _calibrateButton.interactable = false;
+                _clearButton.interactable = false;
+                _calibrateButtonHoverHint.text = "Not supported by current avatar";
+                _clearButtonHoverHint.text = "Not supported by current avatar";
+            }
         }
     }
 }

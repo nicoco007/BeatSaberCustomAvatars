@@ -23,6 +23,9 @@ namespace CustomAvatar.UI
         [UIComponent("calibrate-button")] private Button _calibrateButton;
         [UIComponent("clear-button")] private Button _clearButton;
 
+        [UIComponent("calibrate-button")] private HoverHint _calibrateButtonHoverHint;
+        [UIComponent("clear-button")] private HoverHint _clearButtonHoverHint;
+
         #pragma warning restore IDE0044
         #pragma warning restore 649
         #endregion
