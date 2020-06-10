@@ -98,19 +98,19 @@ namespace CustomAvatar.Avatar
                 {
                     if (pelvis)
                     {
-                        pelvis.position = _initialPelvisPose.position * _avatar.scale;
+                        pelvis.position = ApplyTrackedPointFloorOffset(_initialPelvisPose.position * _avatar.scale);
                         pelvis.rotation = _initialPelvisPose.rotation;
                     }
 
                     if (leftLeg)
                     {
-                        leftLeg.position = _initialLeftFootPose.position * _avatar.scale;
+                        leftLeg.position = ApplyTrackedPointFloorOffset(_initialLeftFootPose.position * _avatar.scale);
                         leftLeg.rotation = _initialLeftFootPose.rotation;
                     }
 
                     if (rightLeg)
                     {
-                        rightLeg.position = _initialRightFootPose.position * _avatar.scale;
+                        rightLeg.position = ApplyTrackedPointFloorOffset(_initialRightFootPose.position * _avatar.scale);
                         rightLeg.rotation = _initialRightFootPose.rotation;
                     }
                 }
@@ -213,17 +213,21 @@ namespace CustomAvatar.Avatar
             Quaternion correctedRotation = currentPose.rotation * correction.rotation;
             Vector3 correctedPosition = currentPose.position + correctedRotation * correction.position; // correction is forward-facing by definition
 
-            if (_settings.enableFloorAdjust)
-            {
-                float scaledEyeHeight = (_avatar.eyeHeight * _avatar.scale);
-
-                float yOffset = _avatar.verticalPosition;
-                float yOffsetScale = scaledEyeHeight / (scaledEyeHeight + yOffset);
-
-                correctedPosition = new Vector3(correctedPosition.x, correctedPosition.y * yOffsetScale + yOffset, correctedPosition.z);
-            }
+            correctedPosition = ApplyTrackedPointFloorOffset(correctedPosition);
 
             return new Pose(Vector3.Lerp(previousPose.position, correctedPosition, smoothing.position), Quaternion.Slerp(previousPose.rotation, correctedRotation, smoothing.rotation));
+        }
+
+        private Vector3 ApplyTrackedPointFloorOffset(Vector3 position)
+        {
+            if (!_settings.enableFloorAdjust) return position;
+
+            float scaledEyeHeight = (_avatar.eyeHeight * _avatar.scale);
+
+            float yOffset = _avatar.verticalPosition;
+            float yOffsetScale = scaledEyeHeight / (scaledEyeHeight + yOffset);
+
+            return new Vector3(position.x, position.y * yOffsetScale + yOffset, position.z);
         }
     }
 }
