@@ -24,7 +24,6 @@ namespace CustomAvatar.UI
         [UIComponent("clear-button")] private Button _clearButton;
 
         [UIComponent("calibrate-button")] private HoverHint _calibrateButtonHoverHint;
-        [UIComponent("clear-button")] private HoverHint _clearButtonHoverHint;
 
         #pragma warning restore IDE0044
         #pragma warning restore 649
@@ -38,7 +37,7 @@ namespace CustomAvatar.UI
         // ReSharper disable UnusedMember.Local
 
         [UIAction("automatic-calibration-change")]
-        private void OnAutomaticCalibrationChanged(bool value)
+        private void OnEnableAutomaticCalibrationChanged(bool value)
         {
             DisableCalibrationMode(false);
             _currentAvatarSettings.useAutomaticCalibration = value;
@@ -94,6 +93,7 @@ namespace CustomAvatar.UI
                 if (save)
                 {
                     _avatarTailor.CalibrateFullBodyTrackingManual(_avatarManager.currentlySpawnedAvatar);
+                    _automaticCalibrationSetting.Value = false;
                 }
                 
                 _avatarManager.currentlySpawnedAvatar.DisableCalibrationMode();

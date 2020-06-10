@@ -124,11 +124,10 @@ namespace CustomAvatar.Avatar
             IKManager ikManager = GetComponentInChildren<IKManager>();
             VRIK vrik = GetComponentInChildren<VRIK>();
 
-            isIKAvatar = ikManager || vrikManager;
+            isIKAvatar = ikManager || ikManagerAdvanced || vrikManager;
 
-            supportsFullBodyTracking =
-                ikManagerAdvanced && (ikManagerAdvanced.LeftLeg_target  || ikManagerAdvanced.RightLeg_target  || ikManagerAdvanced.Spine_pelvisTarget) ||
-                vrikManager       && (vrikManager.solver_leftLeg_target || vrikManager.solver_rightLeg_target || vrikManager.solver_spine_pelvisTarget);
+            supportsFullBodyTracking = (ikManagerAdvanced || vrikManager) &&
+                                       (transform.Find("Pelvis") || transform.Find("LeftLeg") || transform.Find("RightLeg"));
 
             if (vrik && !vrik.references.isFilled) vrik.AutoDetectReferences();
             if (vrikManager && !vrikManager.areReferencesFilled) vrikManager.AutoDetectReferences();

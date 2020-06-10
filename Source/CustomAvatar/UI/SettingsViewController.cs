@@ -130,12 +130,10 @@ namespace CustomAvatar.UI
                 _autoCalibrateButton.interactable = false;
                 _autoClearButton.interactable = false;
                 _autoCalibrateButtonHoverHint.text = "No trackers detected";
-                _autoClearButtonHoverHint.text = "No trackers detected";
 
                 _calibrateButton.interactable = false;
                 _clearButton.interactable = false;
                 _calibrateButtonHoverHint.text = "No trackers detected";
-                _clearButtonHoverHint.text = "No trackers detected";
 
                 return;
             }
@@ -148,14 +146,12 @@ namespace CustomAvatar.UI
                 _autoCalibrateButton.interactable = true;
                 _autoClearButton.interactable = _settings.automaticCalibration.isCalibrated;
                 _autoCalibrateButtonHoverHint.text = "Calibrate full body tracking automatically";
-                _autoClearButtonHoverHint.text = "Clear automatic full body tracking data";
             }
             else
             {
                 _autoCalibrateButton.interactable = false;
                 _autoClearButton.interactable = false;
                 _autoCalibrateButtonHoverHint.text = "Not supported by current avatar";
-                _autoClearButtonHoverHint.text = "Not supported by current avatar";
             }
 
             if (isManualCalibrationPossible)
@@ -163,14 +159,12 @@ namespace CustomAvatar.UI
                 _calibrateButton.interactable = true;
                 _clearButton.interactable = _settings.GetAvatarSettings(avatar.avatar.fullPath).fullBodyCalibration.isCalibrated;
                 _calibrateButtonHoverHint.text = "Start manual full body calibration";
-                _clearButtonHoverHint.text = "Clear manual full body tracking data";
             }
             else
             {
                 _calibrateButton.interactable = false;
                 _clearButton.interactable = false;
                 _calibrateButtonHoverHint.text = "Not supported by current avatar";
-                _clearButtonHoverHint.text = "Not supported by current avatar";
             }
         }
     }

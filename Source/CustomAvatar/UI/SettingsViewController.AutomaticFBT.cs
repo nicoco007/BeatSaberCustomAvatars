@@ -23,7 +23,6 @@ namespace CustomAvatar.UI
         [UIComponent("auto-clear-button")] private Button _autoClearButton;
 
         [UIComponent("auto-calibrate-button")] private HoverHint _autoCalibrateButtonHoverHint;
-        [UIComponent("auto-clear-button")] private HoverHint _autoClearButtonHoverHint;
         
         #pragma warning restore 649
         #pragma warning restore IDE0044
@@ -69,6 +68,7 @@ namespace CustomAvatar.UI
         {
             _avatarTailor.CalibrateFullBodyTrackingAuto(_avatarManager.currentlySpawnedAvatar);
             _autoClearButton.interactable = _settings.automaticCalibration.isCalibrated;
+            _automaticCalibrationSetting.Value = true;
         }
 
         [UIAction("auto-clear-fbt-calibration-data-click")]
