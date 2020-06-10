@@ -93,7 +93,9 @@ namespace CustomAvatar.UI
                 if (save)
                 {
                     _avatarTailor.CalibrateFullBodyTrackingManual(_avatarManager.currentlySpawnedAvatar);
+
                     _automaticCalibrationSetting.Value = false;
+                    OnEnableAutomaticCalibrationChanged(false);
                 }
                 
                 _avatarManager.currentlySpawnedAvatar.DisableCalibrationMode();
@@ -142,7 +144,7 @@ namespace CustomAvatar.UI
                 if (_trackedDeviceManager.waist.tracked)
                 {
                     _waistSphere.SetActive(true);
-                    _waistSphere.transform.position = _trackedDeviceManager.waist.position;
+                    _waistSphere.transform.position = _avatarTailor.ApplyTrackedPointFloorOffset(_avatarManager.currentlySpawnedAvatar, _trackedDeviceManager.waist.position);
                     _waistSphere.transform.rotation = _trackedDeviceManager.waist.rotation;
                 }
                 else
@@ -153,7 +155,7 @@ namespace CustomAvatar.UI
                 if (_trackedDeviceManager.leftFoot.tracked)
                 {
                     _leftFootSphere.SetActive(true);
-                    _leftFootSphere.transform.position = _trackedDeviceManager.leftFoot.position;
+                    _leftFootSphere.transform.position = _avatarTailor.ApplyTrackedPointFloorOffset(_avatarManager.currentlySpawnedAvatar, _trackedDeviceManager.leftFoot.position);
                     _leftFootSphere.transform.rotation = _trackedDeviceManager.leftFoot.rotation;
                 }
                 else
@@ -164,7 +166,7 @@ namespace CustomAvatar.UI
                 if (_trackedDeviceManager.rightFoot.tracked)
                 {
                     _rightFootSphere.SetActive(true);
-                    _rightFootSphere.transform.position = _trackedDeviceManager.rightFoot.position;
+                    _rightFootSphere.transform.position = _avatarTailor.ApplyTrackedPointFloorOffset(_avatarManager.currentlySpawnedAvatar, _trackedDeviceManager.rightFoot.position);
                     _rightFootSphere.transform.rotation = _trackedDeviceManager.rightFoot.rotation;
                 }
                 else

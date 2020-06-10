@@ -34,13 +34,14 @@ namespace CustomAvatar.Avatar
         private MainSettingsModelSO _mainSettingsModel;
         private VRPlatformHelper _vrPlatformHelper;
         private ILogger _logger = new UnityDebugLogger<AvatarTracking>();
+        private AvatarTailor _tailor;
 
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
         // ReSharper disable UnusedMember.Local
 
         [Inject]
-        private void Inject(Settings settings, MainSettingsModelSO mainSettingsModel, ILoggerProvider loggerProvider, AvatarInput input, SpawnedAvatar avatar, VRPlatformHelper vrPlatformHelper)
+        private void Inject(Settings settings, MainSettingsModelSO mainSettingsModel, ILoggerProvider loggerProvider, AvatarInput input, SpawnedAvatar avatar, VRPlatformHelper vrPlatformHelper, AvatarTailor tailor)
         {
             _settings = settings;
             _mainSettingsModel = mainSettingsModel;
@@ -48,6 +49,7 @@ namespace CustomAvatar.Avatar
             _input = input;
             _avatar = avatar;
             _vrPlatformHelper = vrPlatformHelper;
+            _tailor = tailor;
         }
 
         protected override void Start()
@@ -98,19 +100,19 @@ namespace CustomAvatar.Avatar
                 {
                     if (pelvis)
                     {
-                        pelvis.position = ApplyTrackedPointFloorOffset(_initialPelvisPose.position * _avatar.scale);
+                        pelvis.position = _initialPelvisPose.position * _avatar.scale + new Vector3(0, _avatar.verticalPosition, 0);
                         pelvis.rotation = _initialPelvisPose.rotation;
                     }
 
                     if (leftLeg)
                     {
-                        leftLeg.position = ApplyTrackedPointFloorOffset(_initialLeftFootPose.position * _avatar.scale);
+                        leftLeg.position = _initialLeftFootPose.position * _avatar.scale + new Vector3(0, _avatar.verticalPosition, 0);
                         leftLeg.rotation = _initialLeftFootPose.rotation;
                     }
 
                     if (rightLeg)
                     {
-                        rightLeg.position = ApplyTrackedPointFloorOffset(_initialRightFootPose.position * _avatar.scale);
+                        rightLeg.position = _initialRightFootPose.position * _avatar.scale + new Vector3(0, _avatar.verticalPosition, 0);
                         rightLeg.rotation = _initialRightFootPose.rotation;
                     }
                 }
@@ -213,21 +215,9 @@ namespace CustomAvatar.Avatar
             Quaternion correctedRotation = currentPose.rotation * correction.rotation;
             Vector3 correctedPosition = currentPose.position + correctedRotation * correction.position; // correction is forward-facing by definition
 
-            correctedPosition = ApplyTrackedPointFloorOffset(correctedPosition);
+            correctedPosition = _tailor.ApplyTrackedPointFloorOffset(_avatar, correctedPosition);
 
             return new Pose(Vector3.Lerp(previousPose.position, correctedPosition, smoothing.position), Quaternion.Slerp(previousPose.rotation, correctedRotation, smoothing.rotation));
-        }
-
-        private Vector3 ApplyTrackedPointFloorOffset(Vector3 position)
-        {
-            if (!_settings.enableFloorAdjust) return position;
-
-            float scaledEyeHeight = (_avatar.eyeHeight * _avatar.scale);
-
-            float yOffset = _avatar.verticalPosition;
-            float yOffsetScale = scaledEyeHeight / (scaledEyeHeight + yOffset);
-
-            return new Vector3(position.x, position.y * yOffsetScale + yOffset, position.z);
         }
     }
 }

@@ -144,7 +144,7 @@ namespace CustomAvatar
 
             if (spawnedAvatar.input.TryGetWaistPose(out Pose pelvis))
             {
-                Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.tracking.pelvis.rotation) * (spawnedAvatar.tracking.pelvis.position - pelvis.position);
+                Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.tracking.pelvis.rotation) * (spawnedAvatar.tracking.pelvis.position - ApplyTrackedPointFloorOffset(spawnedAvatar, pelvis.position));
                 Quaternion rotationOffset = Quaternion.Inverse(pelvis.rotation) * spawnedAvatar.tracking.pelvis.rotation;
 
                 fullBodyCalibration.pelvis = new Pose(positionOffset, rotationOffset);
@@ -153,7 +153,7 @@ namespace CustomAvatar
 
             if (spawnedAvatar.input.TryGetLeftFootPose(out Pose leftFoot))
             {
-                Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.tracking.leftLeg.rotation) * (spawnedAvatar.tracking.leftLeg.position - leftFoot.position);
+                Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.tracking.leftLeg.rotation) * (spawnedAvatar.tracking.leftLeg.position - ApplyTrackedPointFloorOffset(spawnedAvatar, leftFoot.position));
                 Quaternion rotationOffset = Quaternion.Inverse(leftFoot.rotation) * spawnedAvatar.tracking.leftLeg.rotation;
 
                 fullBodyCalibration.leftLeg = new Pose(positionOffset, rotationOffset);
@@ -162,7 +162,7 @@ namespace CustomAvatar
 
             if (spawnedAvatar.input.TryGetRightFootPose(out Pose rightFoot))
             {
-                Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.tracking.rightLeg.rotation) * (spawnedAvatar.tracking.rightLeg.position - rightFoot.position);
+                Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.tracking.rightLeg.rotation) * (spawnedAvatar.tracking.rightLeg.position - ApplyTrackedPointFloorOffset(spawnedAvatar, rightFoot.position));
                 Quaternion rotationOffset = Quaternion.Inverse(rightFoot.rotation) * spawnedAvatar.tracking.rightLeg.rotation;
 
                 fullBodyCalibration.rightLeg = new Pose(positionOffset, rotationOffset);
@@ -231,6 +231,23 @@ namespace CustomAvatar
             fullBodyCalibration.leftLeg = Pose.identity;
             fullBodyCalibration.rightLeg = Pose.identity;
             fullBodyCalibration.pelvis = Pose.identity;
+        }
+
+        public Vector3 ApplyTrackedPointFloorOffset(SpawnedAvatar avatar, Vector3 position)
+        {
+            if (!_settings.enableFloorAdjust) return position;
+
+            float scaledEyeHeight = avatar.eyeHeight * avatar.scale;
+            float yOffset = avatar.verticalPosition;
+
+            if (_settings.moveFloorWithRoomAdjust)
+            {
+                yOffset -= _mainSettingsModel.roomCenter.value.y;
+            }
+
+            float yOffsetScale = scaledEyeHeight / (scaledEyeHeight + yOffset);
+
+            return new Vector3(position.x, position.y * yOffsetScale + yOffset, position.z);
         }
     }
 }
