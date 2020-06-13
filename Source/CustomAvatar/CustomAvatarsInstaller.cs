@@ -37,7 +37,7 @@ namespace CustomAvatar
             Container.Bind<AvatarSpawner>().AsTransient();
 
             // behaviours
-            Container.Bind<TrackedDeviceManager>().FromNewComponentOnNewPrefab(new GameObject(nameof(TrackedDeviceManager))).AsSingle();
+            Container.Bind<TrackedDeviceManager>().FromNewComponentOnNewPrefab(new GameObject(nameof(TrackedDeviceManager))).AsSingle().NonLazy();
             Container.Bind<ShaderLoader>().FromNewComponentOnNewPrefab(new GameObject(nameof(ShaderLoader))).AsSingle().NonLazy();
 
             // not sure if this is a great idea but w/e

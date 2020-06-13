@@ -153,7 +153,7 @@ namespace CustomAvatar
                 _avatarInfos.Add(avatar.fullPath, new AvatarInfo(avatar));
             }
 
-            currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, new VRAvatarInput(_trackedDeviceManager));
+            currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, new VRPlayerInput(_trackedDeviceManager));
 
             ResizeCurrentAvatar();
             
@@ -211,7 +211,7 @@ namespace CustomAvatar
 
             if (newScene.name == "PCInit" && _settings.calibrateFullBodyTrackingOnStart && _settings.GetAvatarSettings(currentlySpawnedAvatar.avatar.fullPath).useAutomaticCalibration)
             {
-                _avatarTailor.CalibrateFullBodyTrackingAuto(currentlySpawnedAvatar);
+                _avatarTailor.CalibrateFullBodyTrackingAuto(currentlySpawnedAvatar.input);
             }
 
             ResizeCurrentAvatar();

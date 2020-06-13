@@ -4,14 +4,14 @@ using UnityEngine;
 
 namespace CustomAvatar.Tracking
 {
-    internal class VRAvatarInput : AvatarInput, IDisposable
+    internal class VRPlayerInput : AvatarInput, IDisposable
     {
         private readonly TrackedDeviceManager _deviceManager;
 
         private readonly SkeletalInput _leftHandAnimAction;
         private readonly SkeletalInput _rightHandAnimAction;
 
-        internal VRAvatarInput(TrackedDeviceManager trackedDeviceManager)
+        internal VRPlayerInput(TrackedDeviceManager trackedDeviceManager)
         {
             _deviceManager = trackedDeviceManager ? trackedDeviceManager : throw new ArgumentNullException(nameof(trackedDeviceManager));
             _deviceManager.deviceAdded += (device, use) => InvokeInputChanged();

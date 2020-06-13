@@ -13,6 +13,7 @@ using Logger = IPA.Logging.Logger;
 using Object = UnityEngine.Object;
 using BeatSaberMarkupLanguage;
 using CustomAvatar.Logging;
+using CustomAvatar.Tracking;
 using HarmonyLib;
 using ILogger = CustomAvatar.Logging.ILogger;
 
@@ -160,6 +161,13 @@ namespace CustomAvatar
                 QualitySettings.shadows = ShadowQuality.All;
                 QualitySettings.shadowResolution = _settings.lighting.shadowResolution;
                 QualitySettings.shadowDistance = 25;
+            }
+
+            if (_settings.calibrateFullBodyTrackingOnStart && _settings.GetAvatarSettings(_settings.previousAvatarPath).useAutomaticCalibration)
+            {
+                var input = new VRPlayerInput(context.Container.Resolve<TrackedDeviceManager>());
+                context.Container.Resolve<AvatarTailor>().CalibrateFullBodyTrackingAuto(input);
+                input.Dispose();
             }
         }
 
