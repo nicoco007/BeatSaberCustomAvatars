@@ -31,9 +31,9 @@ namespace CustomAvatar
             // managers & helper classes
             Container.BindInterfacesAndSelfTo<PlayerAvatarManager>().AsSingle();
             Container.Bind<StereoRenderManager>().AsSingle();
+            Container.Bind<AvatarLoader>().AsSingle();
             Container.Bind<AvatarTailor>().AsTransient();
             Container.Bind<MirrorHelper>().AsTransient();
-            Container.Bind<AvatarLoader>().AsTransient();
             Container.Bind<AvatarSpawner>().AsTransient();
 
             // behaviours
