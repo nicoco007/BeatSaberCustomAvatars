@@ -5,10 +5,10 @@ namespace CustomAvatar.UI
 {
     internal class AvatarListItem
     {
-        public string name;
-        public string author;
-        public Texture2D icon;
-        public string fullPath;
+        public readonly string name;
+        public readonly string author;
+        public readonly Texture2D icon;
+        public readonly string fullPath;
 
         internal AvatarListItem(AvatarInfo avatar)
         {
