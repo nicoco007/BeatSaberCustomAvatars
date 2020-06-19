@@ -22,9 +22,11 @@ namespace CustomAvatar.UI
 
         public override string ResourceName => "CustomAvatar.Views.AvatarList.bsml";
 
+        #pragma warning disable CS0649
         [UIComponent("avatar-list")] public CustomListTableData avatarList;
         [UIComponent("up-button")] public Button upButton;
         [UIComponent("down-button")] public Button downButton;
+        #pragma warning restore CS0649
         
         private PlayerAvatarManager _avatarManager;
 
