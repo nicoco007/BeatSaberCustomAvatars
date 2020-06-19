@@ -5,12 +5,12 @@
   "gameVersion": "1.10.0",
   "id": "CustomAvatars",
   "icon": "CustomAvatar.Resources.icon.png",
-  "name": "Custom Avatars",
-  "version": "5.0.0-beta.8-dev",
+  "name": "CustomAvatars",
+  "version": "5.0.0-dev",
   "features": [],
   "dependsOn": {
     "BSIPA": "^4.0.0",
-    "BeatSaberMarkupLanguage": "^1.0.0",
+    "BeatSaberMarkupLanguage": "^1.3.0",
     "DynamicOpenVR": "^0.2.0"
   },
   "files": [
