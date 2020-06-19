@@ -36,6 +36,12 @@ namespace CustomAvatar.UI
         #region Actions
         // ReSharper disable UnusedMember.Local
 
+        [UIAction("bypass-calibration-change")]
+        private void OnEnableBypassCalibrationChanged(bool value)
+        {
+            _currentAvatarSettings.bypassCalibration = value;
+        }
+
         [UIAction("automatic-calibration-change")]
         private void OnEnableAutomaticCalibrationChanged(bool value)
         {

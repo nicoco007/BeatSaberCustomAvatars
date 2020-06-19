@@ -43,8 +43,14 @@ namespace CustomAvatar.Avatar
         public AvatarIK ik { get; private set; }
         public AvatarFingerTracking fingerTracking { get; private set; }
 
+        public bool shouldTrackFullBody => _avatarSpecificSettings.bypassCalibration ||
+                                           !_avatarSpecificSettings.useAutomaticCalibration && _avatarSpecificSettings.fullBodyCalibration.isCalibrated ||
+                                           _avatarSpecificSettings.useAutomaticCalibration && _settings.automaticCalibration.isCalibrated;
+
         private ILogger _logger;
         private GameScenesManager _gameScenesManager;
+        private Settings _settings;
+        private Settings.AvatarSpecificSettings _avatarSpecificSettings;
 
         private FirstPersonExclusion[] _firstPersonExclusions;
         private Renderer[] _renderers;
@@ -104,13 +110,17 @@ namespace CustomAvatar.Avatar
         }
         
         [Inject]
-        private void Inject(DiContainer container, ILoggerProvider loggerProvider, LoadedAvatar loadedAvatar, AvatarInput avatarInput, GameScenesManager gameScenesManager)
+        private void Inject(DiContainer container, ILoggerProvider loggerProvider, LoadedAvatar loadedAvatar, AvatarInput avatarInput, GameScenesManager gameScenesManager, Settings settings, Settings.AvatarSpecificSettings avatarSpecificSettings)
         {
             avatar = loadedAvatar ?? throw new ArgumentNullException(nameof(loadedAvatar));
             input = avatarInput ?? throw new ArgumentNullException(nameof(avatarInput));
 
+            container.Bind<SpawnedAvatar>().FromInstance(this);
+
             _logger = loggerProvider.CreateLogger<SpawnedAvatar>(loadedAvatar.descriptor.name);
             _gameScenesManager = gameScenesManager;
+            _settings = settings;
+            _avatarSpecificSettings = avatarSpecificSettings;
 
             _eventManager = GetComponent<EventManager>();
             _firstPersonExclusions = GetComponentsInChildren<FirstPersonExclusion>();
@@ -137,16 +147,16 @@ namespace CustomAvatar.Avatar
             eyeHeight = GetEyeHeight();
             armSpan = GetArmSpan();
 
-            tracking       = container.InstantiateComponent<AvatarTracking>(gameObject, new object[] { this, avatarInput });
+            tracking = container.InstantiateComponent<AvatarTracking>(gameObject);
 
             if (isIKAvatar)
             {
-                ik = container.InstantiateComponent<AvatarIK>(gameObject, new object[] { loadedAvatar, avatarInput });
+                ik = container.InstantiateComponent<AvatarIK>(gameObject);
             }
 
             if (supportsFingerTracking)
             {
-                fingerTracking = container.InstantiateComponent<AvatarFingerTracking>(gameObject, new object[] { avatarInput });
+                fingerTracking = container.InstantiateComponent<AvatarFingerTracking>(gameObject);
             }
 
             if (_initialPosition.magnitude > 0.0f)
@@ -180,7 +190,7 @@ namespace CustomAvatar.Avatar
                 if (_eventManager && !_gameplayEventsPlayer)
                 {
                     _logger.Info($"Adding {nameof(AvatarGameplayEventsPlayer)}");
-                    _gameplayEventsPlayer = container.InstantiateComponent<AvatarGameplayEventsPlayer>(gameObject, new object[] { avatar });
+                    _gameplayEventsPlayer = container.InstantiateComponent<AvatarGameplayEventsPlayer>(gameObject);
                 }
             }
             else

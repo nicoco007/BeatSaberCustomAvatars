@@ -41,9 +41,10 @@ namespace CustomAvatar.Avatar
         // ReSharper disable UnusedMember.Local
 
         [Inject]
-        private void Inject(Settings settings, MainSettingsModelSO mainSettingsModel, ILoggerProvider loggerProvider, AvatarInput input, SpawnedAvatar avatar, VRPlatformHelper vrPlatformHelper, AvatarTailor tailor)
+        private void Inject(Settings settings, Settings.AvatarSpecificSettings avatarSpecificSettings, MainSettingsModelSO mainSettingsModel, ILoggerProvider loggerProvider, AvatarInput input, SpawnedAvatar avatar, VRPlatformHelper vrPlatformHelper, AvatarTailor tailor)
         {
             _settings = settings;
+            _avatarSpecificSettings = avatarSpecificSettings;
             _mainSettingsModel = mainSettingsModel;
             _logger = loggerProvider.CreateLogger<AvatarTracking>(avatar.avatar.descriptor.name);
             _input = input;
@@ -55,8 +56,6 @@ namespace CustomAvatar.Avatar
         protected override void Start()
         {
             base.Start();
-
-            _avatarSpecificSettings = _settings.GetAvatarSettings(_avatar.avatar.fullPath);
 
             if (pelvis) _initialPelvisPose = new Pose(pelvis.position, pelvis.rotation);
             if (leftLeg) _initialLeftFootPose = new Pose(leftLeg.position, leftLeg.rotation);
@@ -116,7 +115,7 @@ namespace CustomAvatar.Avatar
                         rightLeg.rotation = _initialRightFootPose.rotation;
                     }
                 }
-                else
+                else if (_avatar.shouldTrackFullBody)
                 {
                     if (leftLeg && _input.TryGetLeftFootPose(out Pose leftFootPose))
                     {
