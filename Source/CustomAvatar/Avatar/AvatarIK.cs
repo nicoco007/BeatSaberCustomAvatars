@@ -75,11 +75,9 @@ namespace CustomAvatar.Avatar
             _vrik.fixTransforms = false;
 
             _fixTransforms = _vrikManager.fixTransforms;
+            
+            CreateTargetsIfMissing();
 
-            _vrikManager.referencesUpdated += OnReferencesUpdated;
-            
-            OnReferencesUpdated();
-            
             foreach (TwistRelaxer twistRelaxer in _twistRelaxers)
             {
                 twistRelaxer.ik = _vrik;
@@ -134,11 +132,6 @@ namespace CustomAvatar.Avatar
             }
         }
 
-        private void OnDestroy()
-        {
-            _vrikManager.referencesUpdated -= OnReferencesUpdated;
-        }
-
         // ReSharper restore UnusedMember.Local
         #pragma warning restore IDE0051
         #endregion
@@ -151,12 +144,6 @@ namespace CustomAvatar.Avatar
         internal void DisableCalibrationMode()
         {
             _isCalibrationModeEnabled = false;
-        }
-
-        private void OnReferencesUpdated()
-        {
-            _logger.Trace("IK references updated");
-            CreateTargetsIfMissing();
         }
 
         private void CreateTargetsIfMissing()

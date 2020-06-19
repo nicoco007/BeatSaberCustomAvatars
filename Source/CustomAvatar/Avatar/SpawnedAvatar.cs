@@ -1,6 +1,7 @@
 extern alias BeatSaberFinalIK;
 
 using System;
+using System.Reflection;
 using AvatarScriptPack;
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
@@ -51,9 +52,13 @@ namespace CustomAvatar.Avatar
         public AvatarIK ik { get; private set; }
         public AvatarFingerTracking fingerTracking { get; private set; }
 
-        public bool shouldTrackFullBody => _avatarSpecificSettings.bypassCalibration ||
-                                           !_avatarSpecificSettings.useAutomaticCalibration && _avatarSpecificSettings.fullBodyCalibration.isCalibrated ||
-                                           _avatarSpecificSettings.useAutomaticCalibration && _settings.automaticCalibration.isCalibrated;
+        public bool shouldTrackFullBody =>
+            isIKAvatar &&
+            (
+                _avatarSpecificSettings.bypassCalibration ||
+                !_avatarSpecificSettings.useAutomaticCalibration && _avatarSpecificSettings.fullBodyCalibration.isCalibrated ||
+                _avatarSpecificSettings.useAutomaticCalibration && _settings.automaticCalibration.isCalibrated
+            );
 
         private ILogger _logger;
         private GameScenesManager _gameScenesManager;
@@ -138,19 +143,40 @@ namespace CustomAvatar.Avatar
                                      GetComponentInChildren<PoseManager>();
 
             VRIKManager vrikManager = GetComponentInChildren<VRIKManager>();
-            IKManagerAdvanced ikManagerAdvanced = GetComponentInChildren<IKManagerAdvanced>();
+
+            #pragma warning disable CS0618
             IKManager ikManager = GetComponentInChildren<IKManager>();
-            VRIK vrik = GetComponentInChildren<VRIK>();
+            #pragma warning restore CS0618
 
-            isIKAvatar = ikManager || ikManagerAdvanced || vrikManager;
+            // migrate IKManager/IKManagerAdvanced to VRIKManager
+            if (ikManager)
+            {
+                if (!vrikManager) gameObject.AddComponent<VRIKManager>();
+                
+                _logger.Warning("IKManager and IKManagerAdvanced are deprecated; please migrate to VRIKManager");
 
-            supportsFullBodyTracking = (ikManagerAdvanced || vrikManager) &&
-                                       (transform.Find("Pelvis") || transform.Find("LeftLeg") || transform.Find("RightLeg"));
+                ApplyIKManagerFields(vrikManager, ikManager);
+                Destroy(ikManager);
+            }
 
-            if (vrik && !vrik.references.isFilled) vrik.AutoDetectReferences();
-            if (vrikManager && !vrikManager.areReferencesFilled) vrikManager.AutoDetectReferences();
+            // remove any existing VRIK instances to avoid interference
+            foreach (VRIK ik in GetComponentsInChildren<VRIK>())
+            {
+                Destroy(ik);
+            }
 
-            if (isIKAvatar) FixTrackingReferences();
+            isIKAvatar = vrikManager;
+            supportsFullBodyTracking = vrikManager && (transform.Find("Pelvis") || transform.Find("LeftLeg") || transform.Find("RightLeg"));
+
+            if (vrikManager)
+            {
+                if (!vrikManager.areReferencesFilled)
+                {
+                    vrikManager.AutoDetectReferences();
+                }
+
+                FixTrackingReferences(vrikManager);
+            }
 
             eyeHeight = GetEyeHeight();
             armSpan = GetArmSpan();
@@ -179,13 +205,13 @@ namespace CustomAvatar.Avatar
 
         private void Start()
         {
-            head = transform.Find("Head");
-            body = transform.Find("Body");
-            leftHand = transform.Find("LeftHand");
+            head      = transform.Find("Head");
+            body      = transform.Find("Body");
+            leftHand  = transform.Find("LeftHand");
             rightHand = transform.Find("RightHand");
-            leftLeg = transform.Find("LeftLeg");
-            rightLeg = transform.Find("RightLeg");
-            pelvis = transform.Find("Pelvis");
+            leftLeg   = transform.Find("LeftLeg");
+            rightLeg  = transform.Find("RightLeg");
+            pelvis    = transform.Find("Pelvis");
         }
 
         private void OnDestroy()
@@ -263,11 +289,11 @@ namespace CustomAvatar.Avatar
             return head.position.y;
         }
 
-        private void FixTrackingReferences()
+        private void FixTrackingReferences(VRIKManager vrikManager)
         {
-            Vector3 headOffset = GetTargetOffset(nameof(VRIK.References.head), nameof(VRIKManager.solver_spine_headTarget), nameof(IKManager.HeadTarget));
-            Vector3 leftHandOffset = GetTargetOffset(nameof(VRIK.References.leftHand), nameof(VRIKManager.solver_leftArm_target), nameof(IKManager.LeftHandTarget));
-            Vector3 rightHandOffset = GetTargetOffset(nameof(VRIK.References.rightHand), nameof(VRIKManager.solver_rightArm_target), nameof(IKManager.RightHandTarget));
+            Vector3 headOffset      = GetTargetOffset(vrikManager, nameof(VRIK.References.head),      nameof(VRIKManager.solver_spine_headTarget));
+            Vector3 leftHandOffset  = GetTargetOffset(vrikManager, nameof(VRIK.References.leftHand),  nameof(VRIKManager.solver_leftArm_target));
+            Vector3 rightHandOffset = GetTargetOffset(vrikManager, nameof(VRIK.References.rightHand), nameof(VRIKManager.solver_rightArm_target));
             
             // only warn if offset is larger than 1 mm
             if (headOffset.magnitude > 0.001f)
@@ -293,35 +319,10 @@ namespace CustomAvatar.Avatar
         /// <summary>
         /// Gets the offset between the target and the actual bone. Avoids issues when using just the tracking reference transform for calculations.
         /// </summary>
-        private Vector3 GetTargetOffset(string referenceName, string vrikManagerTargetName, string ikManagerTargetName)
+        private Vector3 GetTargetOffset(VRIKManager vrikManager, string referenceName, string targetName)
         {
-            Transform reference = null;
-            Transform target = null;
-                
-            #pragma warning disable 618
-            VRIK vrik = GetComponentInChildren<VRIK>();
-            IKManager ikManager = GetComponentInChildren<IKManager>();
-            #pragma warning restore 618
-
-            VRIKManager vrikManager = GetComponentInChildren<VRIKManager>();
-                
-            if (vrikManager)
-            {
-                if (!vrikManager.references_head) vrikManager.AutoDetectReferences();
-
-                reference = vrikManager.GetFieldValue<Transform>("references_" + referenceName);
-                target = vrikManager.GetFieldValue<Transform>(vrikManagerTargetName);
-            }
-            else if (vrik)
-            {
-                vrik.AutoDetectReferences();
-                reference = vrik.references.GetFieldValue<Transform>(referenceName);
-
-                if (ikManager)
-                {
-                    target = ikManager.GetFieldValue<Transform>(ikManagerTargetName);
-                }
-            }
+            Transform reference = vrikManager.GetFieldValue<Transform>("references_" + referenceName);
+            Transform target = vrikManager.GetFieldValue<Transform>(targetName);
 
             if (!reference)
             {
@@ -378,6 +379,91 @@ namespace CustomAvatar.Avatar
             float totalLength = leftArmLength + shoulderToShoulderDistance + rightArmLength;
 
             return totalLength;
+        }
+
+        #pragma warning disable CS0618
+        private void ApplyIKManagerFields(VRIKManager vrikManager, IKManager ikManager)
+        {
+            vrikManager.solver_spine_headTarget = ikManager.HeadTarget;
+            vrikManager.solver_leftArm_target   = ikManager.LeftHandTarget;
+            vrikManager.solver_rightArm_target  = ikManager.RightHandTarget;
+
+            if (!(ikManager is IKManagerAdvanced ikManagerAdvanced)) return;
+
+            FieldInfo[] fieldInfos = typeof(IKManagerAdvanced).GetFields(BindingFlags.Instance | BindingFlags.Public);
+            foreach (FieldInfo fieldInfo in fieldInfos)
+            {
+                string[] propertyName = fieldInfo.Name.Split('_');
+                var value = fieldInfo.GetValue(ikManagerAdvanced);
+
+                if (propertyName.Length > 1)
+                {
+                    if ("Spine" == propertyName[0])
+                    {
+                        SetField(vrikManager, "solver_spine_" + propertyName[1], value);
+                    }
+                    else if ("LeftArm" == propertyName[0])
+                    {
+                        SetField(vrikManager, "solver_leftArm_" + propertyName[1], value);
+                    }
+                    else if ("RightArm" == propertyName[0])
+                    {
+                        SetField(vrikManager, "solver_rightArm_" + propertyName[1], value);
+                    }
+                    else if ("LeftLeg" == propertyName[0])
+                    {
+                        SetField(vrikManager, "solver_leftLeg_" + propertyName[1], value);
+                    }
+                    else if ("RightLeg" == propertyName[0])
+                    {
+                        SetField(vrikManager, "solver_rightLeg_" + propertyName[1], value);
+                    }
+                    else if ("Locomotion" == propertyName[0])
+                    {
+                        SetField(vrikManager, "solver_locomotion_" + propertyName[1], value);
+                    }
+                }
+            }
+        }
+        #pragma warning restore CS0618
+
+        private void SetField<TTarget, TValue>(TTarget target, string fieldName, TValue value)
+        {
+            try
+            {
+                FieldInfo field = typeof(TTarget).GetField(fieldName);
+
+                if (field == null)
+                {
+                    _logger.Warning($"{fieldName} does not exist on {typeof(TTarget).FullName}");
+                    return;
+                }
+
+                _logger.Trace($"Set {field.Name} = {value}");
+
+                if (field.FieldType.IsEnum)
+                {
+                    if (value == null)
+                    {
+                        _logger.Warning("Tried to set Enum type to null");
+                        return;
+                    }
+
+                    Type sourceType = Enum.GetUnderlyingType(typeof(TValue));
+                    Type targetType = Enum.GetUnderlyingType(field.FieldType);
+
+                    _logger.Trace($"Converting enum value {value.GetType()} ({sourceType}) -> {field.FieldType} ({targetType})");
+                    field.SetValue(target, Convert.ChangeType(value, targetType));
+                }
+                else
+                {
+                    field.SetValue(target, Convert.ChangeType(value, field.FieldType));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex);
+            }
         }
     }
 }
