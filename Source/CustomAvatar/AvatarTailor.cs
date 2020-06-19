@@ -145,8 +145,8 @@ namespace CustomAvatar
 
             if (spawnedAvatar.input.TryGetWaistPose(out Pose pelvis))
             {
-                Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.tracking.pelvis.rotation) * (spawnedAvatar.tracking.pelvis.position - ApplyTrackedPointFloorOffset(spawnedAvatar, pelvis.position));
-                Quaternion rotationOffset = Quaternion.Inverse(pelvis.rotation) * spawnedAvatar.tracking.pelvis.rotation;
+                Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.pelvis.rotation) * (spawnedAvatar.pelvis.position - ApplyTrackedPointFloorOffset(spawnedAvatar, pelvis.position));
+                Quaternion rotationOffset = Quaternion.Inverse(pelvis.rotation) * spawnedAvatar.pelvis.rotation;
 
                 fullBodyCalibration.pelvis = new Pose(positionOffset, rotationOffset);
                 _logger.Info("Saved pelvis pose correction " + fullBodyCalibration.pelvis);
@@ -154,8 +154,8 @@ namespace CustomAvatar
 
             if (spawnedAvatar.input.TryGetLeftFootPose(out Pose leftFoot))
             {
-                Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.tracking.leftLeg.rotation) * (spawnedAvatar.tracking.leftLeg.position - ApplyTrackedPointFloorOffset(spawnedAvatar, leftFoot.position));
-                Quaternion rotationOffset = Quaternion.Inverse(leftFoot.rotation) * spawnedAvatar.tracking.leftLeg.rotation;
+                Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.leftLeg.rotation) * (spawnedAvatar.leftLeg.position - ApplyTrackedPointFloorOffset(spawnedAvatar, leftFoot.position));
+                Quaternion rotationOffset = Quaternion.Inverse(leftFoot.rotation) * spawnedAvatar.leftLeg.rotation;
 
                 fullBodyCalibration.leftLeg = new Pose(positionOffset, rotationOffset);
                 _logger.Info("Saved left foot pose correction " + fullBodyCalibration.leftLeg);
@@ -163,8 +163,8 @@ namespace CustomAvatar
 
             if (spawnedAvatar.input.TryGetRightFootPose(out Pose rightFoot))
             {
-                Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.tracking.rightLeg.rotation) * (spawnedAvatar.tracking.rightLeg.position - ApplyTrackedPointFloorOffset(spawnedAvatar, rightFoot.position));
-                Quaternion rotationOffset = Quaternion.Inverse(rightFoot.rotation) * spawnedAvatar.tracking.rightLeg.rotation;
+                Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.rightLeg.rotation) * (spawnedAvatar.rightLeg.position - ApplyTrackedPointFloorOffset(spawnedAvatar, rightFoot.position));
+                Quaternion rotationOffset = Quaternion.Inverse(rightFoot.rotation) * spawnedAvatar.rightLeg.rotation;
 
                 fullBodyCalibration.rightLeg = new Pose(positionOffset, rotationOffset);
                 _logger.Info("Saved right foot pose correction " + fullBodyCalibration.rightLeg);

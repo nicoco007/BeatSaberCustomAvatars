@@ -152,7 +152,6 @@
     <Compile Include="Avatar\AvatarTracking.cs" />
     <Compile Include="AvatarLayers.cs" />
     <Compile Include="Avatar\AvatarFingerTracking.cs" />
-    <Compile Include="Avatar\BodyAwareBehaviour.cs" />
     <Compile Include="Avatar\FirstPersonVisibility.cs" />
     <Compile Include="BeatSaberEvents.cs" />
     <Compile Include="CustomAvatarsInstaller.cs" />

@@ -14,7 +14,7 @@ using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar.Avatar
 {
-    public class AvatarIK : BodyAwareBehaviour
+    public class AvatarIK : MonoBehaviour
     {
         private VRIK _vrik;
         private VRIKManager _vrikManager;
@@ -66,10 +66,8 @@ namespace CustomAvatar.Avatar
             _logger = loggerProvider.CreateLogger<AvatarIK>(_avatar.avatar.descriptor.name);
         }
 
-        protected override void Start()
+        private void Start()
         {
-            base.Start();
-
             _vrikManager = GetComponentInChildren<VRIKManager>();
             _dynamicBones = GetComponentsInChildren<BeatSaberDynamicBone::DynamicBone>();
 
@@ -163,12 +161,12 @@ namespace CustomAvatar.Avatar
 
         private void CreateTargetsIfMissing()
         {
-            _vrikManager.solver_spine_headTarget   = CreateTargetIfMissing(_vrikManager.solver_spine_headTarget,   _vrik.references.head,      head);
-            _vrikManager.solver_leftArm_target     = CreateTargetIfMissing(_vrikManager.solver_leftArm_target,     _vrik.references.leftHand,  leftHand);
-            _vrikManager.solver_rightArm_target    = CreateTargetIfMissing(_vrikManager.solver_rightArm_target,    _vrik.references.rightHand, rightHand);
-            _vrikManager.solver_spine_pelvisTarget = CreateTargetIfMissing(_vrikManager.solver_spine_pelvisTarget, _vrik.references.pelvis,    pelvis);
-            _vrikManager.solver_leftLeg_target     = CreateTargetIfMissing(_vrikManager.solver_leftLeg_target,     _vrik.references.leftToes ?? _vrik.references.leftFoot,  leftLeg);
-            _vrikManager.solver_rightLeg_target    = CreateTargetIfMissing(_vrikManager.solver_rightLeg_target,    _vrik.references.rightToes ?? _vrik.references.rightFoot, rightLeg);
+            _vrikManager.solver_spine_headTarget   = CreateTargetIfMissing(_vrikManager.solver_spine_headTarget,   _vrik.references.head,                                    _avatar.head);
+            _vrikManager.solver_leftArm_target     = CreateTargetIfMissing(_vrikManager.solver_leftArm_target,     _vrik.references.leftHand,                                _avatar.leftHand);
+            _vrikManager.solver_rightArm_target    = CreateTargetIfMissing(_vrikManager.solver_rightArm_target,    _vrik.references.rightHand,                               _avatar.rightHand);
+            _vrikManager.solver_spine_pelvisTarget = CreateTargetIfMissing(_vrikManager.solver_spine_pelvisTarget, _vrik.references.pelvis,                                  _avatar.pelvis);
+            _vrikManager.solver_leftLeg_target     = CreateTargetIfMissing(_vrikManager.solver_leftLeg_target,     _vrik.references.leftToes  ?? _vrik.references.leftFoot,  _avatar.leftLeg);
+            _vrikManager.solver_rightLeg_target    = CreateTargetIfMissing(_vrikManager.solver_rightLeg_target,    _vrik.references.rightToes ?? _vrik.references.rightFoot, _avatar.rightLeg);
         }
 
         private Transform CreateTargetIfMissing(Transform target, Transform reference, Transform parent)
