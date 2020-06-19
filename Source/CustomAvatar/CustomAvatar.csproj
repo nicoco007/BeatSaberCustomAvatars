@@ -178,7 +178,6 @@
     <Compile Include="Tracking\VRPlayerInput.cs" />
     <Compile Include="UI\SettingsViewController.AutomaticFBT.cs" />
     <Compile Include="UI\SettingsViewController.AvatarSpecificSettings.cs" />
-    <Compile Include="UI\BSMLExtensions.cs" />
     <Compile Include="Avatar\LoadedAvatar.cs" />
     <Compile Include="AvatarDescriptor.cs" />
     <Compile Include="EventFilterBehaviour.cs" />

@@ -3,10 +3,10 @@
 
   <tab tags="avatar-tabs" tab-name="General" anchor-max-y="0.8">
     <settings-container>
-      <bool-setting text="Visible in First Person" id="visible-in-first-person" on-change="visible-in-first-person-change"></bool-setting>
+      <checkbox-setting text="Visible in First Person" id="visible-in-first-person" on-change="visible-in-first-person-change"/>
       <list-setting text="Resize Mode" id="resize-mode" on-change="resize-mode-change" options="resize-mode-options" formatter="resize-mode-formatter"></list-setting>
-      <bool-setting text="Floor Height Adjust" hover-hint="Move the floor so avatars' feet are flat." id="floor-adjust" on-change="floor-adjust-change"></bool-setting>
-      <bool-setting text="Move Floor with Room Adjust" hover-hint="Move the floor along with the game's built-in room adjust." id="move-floor-with-room-adjust" on-change="move-floor-with-room-adjust-change"></bool-setting>
+      <checkbox-setting text="Floor Height Adjust" hover-hint="Move the floor so avatars' feet are flat." id="floor-adjust" on-change="floor-adjust-change"/>
+      <checkbox-setting text="Move Floor with Room Adjust" hover-hint="Move the floor along with the game's built-in room adjust." id="move-floor-with-room-adjust" on-change="move-floor-with-room-adjust-change"/>
       <increment-setting id="camera-clip-plane" text="Camera Near Clip Plane" hover-hint="Distance from the eyes at which the camera starts rendering" min="0.01" max="0.3" increment="0.01" on-change="camera-clip-plane-change"></increment-setting>
       
       <horizontal pad-top="1">
@@ -19,8 +19,8 @@
 
   <tab tags="avatar-tabs" tab-name="Avatar Specific" anchor-max-y="0.8">
     <settings-container>
-      <bool-setting id="bypass-calibration" text="Bypass calibration" hover-hint="Disable the need for calibration before full body tracking is applied." on-change="bypass-calibration-change"></bool-setting>
-      <bool-setting id="automatic-calibration" text="Use automatic calibration" hover-hint="Must be supported by avatar" on-change="automatic-calibration-change"></bool-setting>
+      <checkbox-setting id="bypass-calibration" text="Bypass calibration" hover-hint="Disable the need for calibration before full body tracking is applied." on-change="bypass-calibration-change"/>
+      <checkbox-setting id="automatic-calibration" text="Use automatic calibration" hover-hint="Must be supported by avatar" on-change="automatic-calibration-change"/>
 
       <horizontal child-align="MiddleLeft" child-expand-width="true" child-control-width="true" pad-top="1" pad-bottom="1">
         <button id="calibrate-button" text="Calibrate FBT" hover-hint="Calibrate full body tracking." on-click="calibrate-fbt-click"></button>
@@ -42,7 +42,7 @@
         <button id="auto-clear-button" text="Clear" hover-hint="Clear calibration data." on-click="auto-clear-fbt-calibration-data-click"></button>
       </horizontal>
 
-    <bool-setting text="Calibrate FBT on start" hover-hint="Run automatic full body tracking when the game starts. Only works with avatars that support automatic calibration and have it enabled." id="calibrate-fbt-on-start" on-change="calibrate-fbt-on-start-change"></bool-setting>
+      <checkbox-setting text="Calibrate FBT on start" hover-hint="Run automatic full body tracking when the game starts. Only works with avatars that support automatic calibration and have it enabled." id="calibrate-fbt-on-start" on-change="calibrate-fbt-on-start-change"/>
     </settings-container>
   </tab>
 </bg>

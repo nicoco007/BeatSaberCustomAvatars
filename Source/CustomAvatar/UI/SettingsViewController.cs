@@ -44,11 +44,11 @@ namespace CustomAvatar.UI
         {
             base.DidActivate(firstActivation, type);
 
-            _visibleInFirstPerson.Value = _settings.isAvatarVisibleInFirstPerson;
+            _visibleInFirstPerson.CheckboxValue = _settings.isAvatarVisibleInFirstPerson;
             _resizeMode.Value = _settings.resizeMode;
-            _floorHeightAdjust.Value = _settings.enableFloorAdjust;
-            _moveFloorWithRoomAdjust.Value = _settings.moveFloorWithRoomAdjust;
-            _calibrateFullBodyTrackingOnStart.Value = _settings.calibrateFullBodyTrackingOnStart;
+            _floorHeightAdjust.CheckboxValue = _settings.enableFloorAdjust;
+            _moveFloorWithRoomAdjust.CheckboxValue = _settings.moveFloorWithRoomAdjust;
+            _calibrateFullBodyTrackingOnStart.CheckboxValue = _settings.calibrateFullBodyTrackingOnStart;
             _cameraNearClipPlane.Value = _settings.cameraNearClipPlane;
 
             OnAvatarChanged(_avatarManager.currentlySpawnedAvatar);
@@ -103,22 +103,22 @@ namespace CustomAvatar.UI
             {
                 _clearButton.interactable = false;
                 _calibrateButton.interactable = false;
-                _automaticCalibrationSetting.SetInteractable(false);
+                _automaticCalibrationSetting.checkbox.interactable = false;
                 _automaticCalibrationHoverHint.text = "No avatar selected";
 
                 return;
             }
 
             _currentAvatarSettings = _settings.GetAvatarSettings(avatar.avatar.fullPath);
-
+            
             UpdateCalibrationButtons(avatar);
 
-            _bypassCalibration.Value = _currentAvatarSettings.bypassCalibration;
-            _bypassCalibration.SetInteractable(avatar.supportsFullBodyTracking);
+            _bypassCalibration.CheckboxValue = _currentAvatarSettings.bypassCalibration;
+            _bypassCalibration.checkbox.interactable = avatar.supportsFullBodyTracking;
             _bypassCalibrationHoverHint.text = avatar.supportsFullBodyTracking ? "Disable the need for calibration before full body tracking is applied." : "Not supported by current avatar";
 
-            _automaticCalibrationSetting.Value = _currentAvatarSettings.useAutomaticCalibration;
-            _automaticCalibrationSetting.SetInteractable(avatar.avatar.descriptor.supportsAutomaticCalibration);
+            _automaticCalibrationSetting.CheckboxValue = _currentAvatarSettings.useAutomaticCalibration;
+            _automaticCalibrationSetting.checkbox.interactable = avatar.avatar.descriptor.supportsAutomaticCalibration;
             _automaticCalibrationHoverHint.text = avatar.avatar.descriptor.supportsAutomaticCalibration ? "Use automatic calibration instead of manual calibration." : "Not supported by current avatar";
         }
 

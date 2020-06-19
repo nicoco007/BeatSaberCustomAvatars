@@ -13,7 +13,7 @@ namespace CustomAvatar.UI
         #pragma warning disable 649
         #pragma warning disable IDE0044
 
-        [UIComponent("calibrate-fbt-on-start")] private BoolSetting _calibrateFullBodyTrackingOnStart;
+        [UIComponent("calibrate-fbt-on-start")] private CheckboxSetting _calibrateFullBodyTrackingOnStart;
         [UIComponent("pelvis-offset")] private IncrementSetting _pelvisOffset;
         [UIComponent("left-foot-offset")] private IncrementSetting _leftFootOffset;
         [UIComponent("right-foot-offset")] private IncrementSetting _rightFootOffset;
@@ -69,7 +69,7 @@ namespace CustomAvatar.UI
             _avatarTailor.CalibrateFullBodyTrackingAuto(_avatarManager.currentlySpawnedAvatar.input);
             _autoClearButton.interactable = _settings.automaticCalibration.isCalibrated;
 
-            _automaticCalibrationSetting.Value = true;
+            _automaticCalibrationSetting.CheckboxValue = true;
             OnEnableAutomaticCalibrationChanged(true);
         }
 
