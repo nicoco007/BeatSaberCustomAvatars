@@ -3,6 +3,7 @@ extern alias BeatSaberDynamicBone;
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using BeatSaberFinalIK::RootMotion.FinalIK;
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
@@ -27,6 +28,7 @@ namespace CustomAvatar.Avatar
 
         private Action<BeatSaberDynamicBone::DynamicBone> _preUpdateDelegate;
         private Action<BeatSaberDynamicBone::DynamicBone, float> _updateDynamicBonesDelegate;
+        private FieldInfo _weightField;
         
         private AvatarInput _input;
         private SpawnedAvatar _avatar;
@@ -43,6 +45,7 @@ namespace CustomAvatar.Avatar
             // create delegates for dynamic bones private methods (more efficient than continuously calling Invoke)
             _preUpdateDelegate = typeof(BeatSaberDynamicBone::DynamicBone).CreatePrivateMethodDelegate<Action<BeatSaberDynamicBone::DynamicBone>>("PreUpdate");
             _updateDynamicBonesDelegate = typeof(BeatSaberDynamicBone::DynamicBone).CreatePrivateMethodDelegate<Action<BeatSaberDynamicBone::DynamicBone, float>>("UpdateDynamicBones");
+            _weightField = typeof(BeatSaberDynamicBone::DynamicBone).GetField("m_Weight", BindingFlags.Instance | BindingFlags.NonPublic);
 
             foreach (TwistRelaxer twistRelaxer in GetComponentsInChildren<TwistRelaxer>())
             {
@@ -107,9 +110,9 @@ namespace CustomAvatar.Avatar
                 if (!dynamicBone.enabled) continue;
 
                 // setting m_Weight prevents the integrated calls to PreUpdate and UpdateDynamicBones from taking effect
-                dynamicBone.SetPrivateField("m_Weight", 1);
+                _weightField.SetValue(dynamicBone, 1);
                 _preUpdateDelegate(dynamicBone);
-                dynamicBone.SetPrivateField("m_Weight", 0);
+                _weightField.SetValue(dynamicBone, 0);
             }
         }
 
