@@ -151,7 +151,7 @@ namespace CustomAvatar.Avatar
             // migrate IKManager/IKManagerAdvanced to VRIKManager
             if (ikManager)
             {
-                if (!vrikManager) gameObject.AddComponent<VRIKManager>();
+                if (!vrikManager) vrikManager = gameObject.AddComponent<VRIKManager>();
                 
                 _logger.Warning("IKManager and IKManagerAdvanced are deprecated; please migrate to VRIKManager");
 
@@ -159,14 +159,8 @@ namespace CustomAvatar.Avatar
                 Destroy(ikManager);
             }
 
-            // remove any existing VRIK instances to avoid interference
-            foreach (VRIK ik in GetComponentsInChildren<VRIK>())
-            {
-                Destroy(ik);
-            }
-
             isIKAvatar = vrikManager;
-            supportsFullBodyTracking = vrikManager && (transform.Find("Pelvis") || transform.Find("LeftLeg") || transform.Find("RightLeg"));
+            supportsFullBodyTracking = transform.Find("Pelvis") || transform.Find("LeftLeg") || transform.Find("RightLeg");
 
             if (vrikManager)
             {

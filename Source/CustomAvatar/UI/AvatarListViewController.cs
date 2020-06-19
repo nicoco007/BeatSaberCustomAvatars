@@ -62,13 +62,13 @@ namespace CustomAvatar.UI
                 upButton.onClick.AddListener(() =>
                 {
                     scroller.PageScrollUp();
-                    avatarList.tableView.InvokePrivateMethod("RefreshScrollButtons", false);
+                    avatarList.tableView.RefreshScrollButtons(false);
                 });
 
                 downButton.onClick.AddListener(() =>
                 {
                     scroller.PageScrollDown();
-                    avatarList.tableView.InvokePrivateMethod("RefreshScrollButtons", false);
+                    avatarList.tableView.RefreshScrollButtons(false);
                 });
             
                 avatarList.tableView.dataSource = this;

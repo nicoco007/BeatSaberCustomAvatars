@@ -16,8 +16,10 @@ namespace CustomAvatar.UI
         [UIComponent("arm-span")] private TextMeshProUGUI _armSpanLabel;
         [UIComponent("calibrate-button")] private TextMeshProUGUI _calibrateButtonText;
         [UIComponent("clear-button")] private TextMeshProUGUI _clearButtonText;
+        [UIComponent("bypass-calibration")] private HoverHint _bypassCalibrationHoverHint;
         [UIComponent("automatic-calibration")] private HoverHint _automaticCalibrationHoverHint;
 
+        [UIComponent("bypass-calibration")] private BoolSetting _bypassCalibration;
         [UIComponent("automatic-calibration")] private BoolSetting _automaticCalibrationSetting;
 
         [UIComponent("calibrate-button")] private Button _calibrateButton;

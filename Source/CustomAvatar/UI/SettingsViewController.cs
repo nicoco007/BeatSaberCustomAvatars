@@ -113,9 +113,13 @@ namespace CustomAvatar.UI
 
             UpdateCalibrationButtons(avatar);
 
+            _bypassCalibration.Value = _currentAvatarSettings.bypassCalibration;
+            _bypassCalibration.SetInteractable(avatar.supportsFullBodyTracking);
+            _bypassCalibrationHoverHint.text = avatar.supportsFullBodyTracking ? "Disable the need for calibration before full body tracking is applied." : "Not supported by current avatar";
+
             _automaticCalibrationSetting.Value = _currentAvatarSettings.useAutomaticCalibration;
             _automaticCalibrationSetting.SetInteractable(avatar.avatar.descriptor.supportsAutomaticCalibration);
-            _automaticCalibrationHoverHint.text = avatar.avatar.descriptor.supportsAutomaticCalibration ? "Use automatic calibration instead of manual calibration" : "Not supported by current avatar";
+            _automaticCalibrationHoverHint.text = avatar.avatar.descriptor.supportsAutomaticCalibration ? "Use automatic calibration instead of manual calibration." : "Not supported by current avatar";
         }
 
         private void OnInputDevicesChanged(TrackedDeviceState state, DeviceUse use)

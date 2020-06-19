@@ -95,7 +95,7 @@ namespace CustomAvatar.Avatar
         {
             UpdateSolverTargets();
 
-            if (_vrik && _fixTransforms)
+            if (_fixTransforms)
             {
                 _vrik.solver.FixTransforms();
             }
@@ -115,10 +115,7 @@ namespace CustomAvatar.Avatar
         private void LateUpdate()
         {
             // VRIK must run before dynamic bones
-            if (_vrik)
-            {
-                _vrik.UpdateSolverExternal();
-            }
+            _vrik.UpdateSolverExternal();
 
             // apply dynamic bones
             foreach (BeatSaberDynamicBone::DynamicBone dynamicBone in _dynamicBones)

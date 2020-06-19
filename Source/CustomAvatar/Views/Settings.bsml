@@ -19,7 +19,7 @@
 
   <tab tags="avatar-tabs" tab-name="Avatar Specific" anchor-max-y="0.8">
     <settings-container>
-      <bool-setting id="bypass-calibration" text="Disable the need for calibration before full body tracking is applied." on-change="bypass-calibration-change"></bool-setting>
+      <bool-setting id="bypass-calibration" text="Bypass calibration" hover-hint="Disable the need for calibration before full body tracking is applied." on-change="bypass-calibration-change"></bool-setting>
       <bool-setting id="automatic-calibration" text="Use automatic calibration" hover-hint="Must be supported by avatar" on-change="automatic-calibration-change"></bool-setting>
 
       <horizontal child-align="MiddleLeft" child-expand-width="true" child-control-width="true" pad-top="1" pad-bottom="1">
