@@ -122,7 +122,7 @@ namespace CustomAvatar.Avatar
                         if (_avatarSpecificSettings.useAutomaticCalibration)
                         {
                             correction = _settings.automaticCalibration.leftLeg;
-                            correction.position -= Vector3.up * _settings.automaticCalibration.leftLegOffset;
+                            correction.position -= Vector3.up * _settings.automaticCalibration.legOffset;
                         }
                         else
                         {
@@ -142,7 +142,7 @@ namespace CustomAvatar.Avatar
                         if (_avatarSpecificSettings.useAutomaticCalibration)
                         {
                             correction = _settings.automaticCalibration.rightLeg;
-                            correction.position -= Vector3.up * _settings.automaticCalibration.rightLegOffset;
+                            correction.position -= Vector3.up * _settings.automaticCalibration.legOffset;
                         }
                         else
                         {

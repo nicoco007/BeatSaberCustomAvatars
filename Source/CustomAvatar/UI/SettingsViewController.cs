@@ -66,8 +66,7 @@ namespace CustomAvatar.UI
             _blueMaterial.SetColor(kColor, new Color(0, 0.5f, 1, 1));
 
             _pelvisOffset.Value = _settings.automaticCalibration.pelvisOffset;
-            _leftFootOffset.Value = _settings.automaticCalibration.leftLegOffset;
-            _rightFootOffset.Value = _settings.automaticCalibration.rightLegOffset;
+            _footOffset.Value = _settings.automaticCalibration.legOffset;
 
             _waistTrackerPosition.Value = _settings.automaticCalibration.waistTrackerPosition;
 

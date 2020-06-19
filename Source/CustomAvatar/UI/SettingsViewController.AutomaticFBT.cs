@@ -15,8 +15,7 @@ namespace CustomAvatar.UI
 
         [UIComponent("calibrate-fbt-on-start")] private CheckboxSetting _calibrateFullBodyTrackingOnStart;
         [UIComponent("pelvis-offset")] private IncrementSetting _pelvisOffset;
-        [UIComponent("left-foot-offset")] private IncrementSetting _leftFootOffset;
-        [UIComponent("right-foot-offset")] private IncrementSetting _rightFootOffset;
+        [UIComponent("foot-offset")] private IncrementSetting _footOffset;
         [UIComponent("waist-tracker-position")] private ListSetting _waistTrackerPosition;
 
         [UIComponent("auto-calibrate-button")] private Button _autoCalibrateButton;
@@ -51,16 +50,10 @@ namespace CustomAvatar.UI
             _settings.automaticCalibration.pelvisOffset = value;
         }
 
-        [UIAction("left-foot-offset-change")]
+        [UIAction("foot-offset-change")]
         private void OnLeftFootOffsetChanged(float value)
         {
-            _settings.automaticCalibration.leftLegOffset = value;
-        }
-
-        [UIAction("right-foot-offset-change")]
-        private void OnRightFootOffsetChanged(float value)
-        {
-            _settings.automaticCalibration.rightLegOffset = value;
+            _settings.automaticCalibration.legOffset = value;
         }
 
         [UIAction("auto-calibrate-fbt-click")]

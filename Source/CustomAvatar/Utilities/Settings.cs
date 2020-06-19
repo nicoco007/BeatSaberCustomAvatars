@@ -97,8 +97,7 @@ namespace CustomAvatar.Utilities
             public Pose rightLeg = Pose.identity;
             public Pose pelvis = Pose.identity;
 
-            public float leftLegOffset = 0.15f;
-            public float rightLegOffset = 0.15f;
+            public float legOffset = 0.15f;
             public float pelvisOffset = 0.1f;
 
             public WaistTrackerPosition waistTrackerPosition = WaistTrackerPosition.Front;
