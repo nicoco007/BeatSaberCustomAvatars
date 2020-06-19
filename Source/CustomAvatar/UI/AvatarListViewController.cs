@@ -96,7 +96,7 @@ namespace CustomAvatar.UI
 
             using (Stream textureStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
             {
-                byte[] textureBytes = new byte[textureStream.Length];
+                byte[] textureBytes = new byte[textureStream.Length];
                 textureStream.Read(textureBytes, 0, (int) textureStream.Length);
                 texture.LoadImage(textureBytes);
             }

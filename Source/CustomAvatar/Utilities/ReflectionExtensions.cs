@@ -27,7 +27,7 @@ namespace CustomAvatar.Utilities
                 throw new ArgumentNullException(nameof(obj));
             }
 
-            FieldInfo field = obj.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Static);
+            FieldInfo field = obj.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Static);
 
             if (field == null)
             {
@@ -44,7 +44,7 @@ namespace CustomAvatar.Utilities
                 throw new ArgumentNullException(nameof(obj));
             }
 
-            FieldInfo field = typeof(TSubject).GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Static);
+            FieldInfo field = typeof(TSubject).GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Static);
 
             if (field == null)
             {
@@ -54,7 +54,7 @@ namespace CustomAvatar.Utilities
             field.SetValue(obj, value);
         }
 
-        internal static void InvokePrivateMethod<TSubject>(this TSubject obj, string methodName, params object[] args)
+        internal static void InvokePrivateMethod<TSubject>(this TSubject obj, string methodName, params object[] args)
         {
             if (obj == null)
             {

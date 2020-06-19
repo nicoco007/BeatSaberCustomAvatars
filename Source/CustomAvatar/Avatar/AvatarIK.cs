@@ -155,7 +155,7 @@ namespace CustomAvatar.Avatar
 
         private Transform CreateTargetIfMissing(Transform target, Transform reference, Transform parent)
         {
-            if (target || !parent) return target;
+            if (target || !parent) return target;
 
             Transform newTarget = new GameObject().transform;
 

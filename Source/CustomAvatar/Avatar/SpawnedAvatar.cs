@@ -77,7 +77,7 @@ namespace CustomAvatar.Avatar
 
         public void EnableCalibrationMode()
         {
-            if (_isCalibrationModeEnabled || !ik) return;
+            if (_isCalibrationModeEnabled || !ik) return;
 
             _isCalibrationModeEnabled = true;
 
