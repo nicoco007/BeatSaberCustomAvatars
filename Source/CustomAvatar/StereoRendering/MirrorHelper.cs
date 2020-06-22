@@ -44,7 +44,11 @@ namespace CustomAvatar.StereoRendering
             stereoCameraEye.enabled = false;
             stereoCameraEye.cullingMask = (1 << AvatarLayers.kAlwaysVisible) | (1 << AvatarLayers.kOnlyInThirdPerson);
             stereoCameraEye.clearFlags = CameraClearFlags.SolidColor;
-            stereoCameraEye.backgroundColor = new Color(0, 0, 0, 1f);
+
+            // kind of hacky but setting the color to pure black or white causes the camera to
+            // to give nothing to the render texture when there are no objects to render,
+            // resulting in a black rectangle instead of a transparent mirror
+            stereoCameraEye.backgroundColor = new Color(0, 1, 0, 1f);
 
             StereoRenderer stereoRenderer = _container.InstantiateComponent<StereoRenderer>(mirrorPlane);
             stereoRenderer.stereoCameraHead = stereoCameraHead;

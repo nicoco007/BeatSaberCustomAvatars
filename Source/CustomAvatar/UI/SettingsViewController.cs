@@ -44,10 +44,11 @@ namespace CustomAvatar.UI
         {
             base.DidActivate(firstActivation, type);
 
-            _visibleInFirstPerson.Value = _settings.isAvatarVisibleInFirstPerson;
+            _visibleInFirstPerson.CheckboxValue = _settings.isAvatarVisibleInFirstPerson;
             _resizeMode.Value = _settings.resizeMode;
-            _floorHeightAdjust.Value = _settings.enableFloorAdjust;
-            _calibrateFullBodyTrackingOnStart.Value = _settings.calibrateFullBodyTrackingOnStart;
+            _floorHeightAdjust.CheckboxValue = _settings.enableFloorAdjust;
+            _moveFloorWithRoomAdjust.CheckboxValue = _settings.moveFloorWithRoomAdjust;
+            _calibrateFullBodyTrackingOnStart.CheckboxValue = _settings.calibrateFullBodyTrackingOnStart;
             _cameraNearClipPlane.Value = _settings.cameraNearClipPlane;
 
             OnAvatarChanged(_avatarManager.currentlySpawnedAvatar);
@@ -65,12 +66,11 @@ namespace CustomAvatar.UI
             _blueMaterial.SetColor(kColor, new Color(0, 0.5f, 1, 1));
 
             _pelvisOffset.Value = _settings.automaticCalibration.pelvisOffset;
-            _leftFootOffset.Value = _settings.automaticCalibration.leftLegOffset;
-            _rightFootOffset.Value = _settings.automaticCalibration.rightLegOffset;
+            _footOffset.Value = _settings.automaticCalibration.legOffset;
 
             _waistTrackerPosition.Value = _settings.automaticCalibration.waistTrackerPosition;
 
-            _autoClearButton.interactable = !_settings.automaticCalibration.isDefault;
+            _autoClearButton.interactable = _settings.automaticCalibration.isCalibrated;
 
             _avatarManager.avatarChanged += OnAvatarChanged;
 
@@ -102,28 +102,73 @@ namespace CustomAvatar.UI
             {
                 _clearButton.interactable = false;
                 _calibrateButton.interactable = false;
-                _automaticCalibrationSetting.SetInteractable(false);
+                _automaticCalibrationSetting.checkbox.interactable = false;
                 _automaticCalibrationHoverHint.text = "No avatar selected";
 
                 return;
             }
 
             _currentAvatarSettings = _settings.GetAvatarSettings(avatar.avatar.fullPath);
+            
+            UpdateCalibrationButtons(avatar);
 
-            _clearButton.interactable = !_currentAvatarSettings.fullBodyCalibration.isDefault;
-            // TODO same here
-            _calibrateButton.interactable = _avatarManager.currentlySpawnedAvatar.isIKAvatar && (_trackedDeviceManager.waist.tracked || _trackedDeviceManager.leftFoot.tracked || _trackedDeviceManager.rightFoot.tracked);
+            _bypassCalibration.CheckboxValue = _currentAvatarSettings.bypassCalibration;
+            _bypassCalibration.checkbox.interactable = avatar.supportsFullBodyTracking;
+            _bypassCalibrationHoverHint.text = avatar.supportsFullBodyTracking ? "Disable the need for calibration before full body tracking is applied." : "Not supported by current avatar";
 
-            _automaticCalibrationSetting.Value = _currentAvatarSettings.useAutomaticCalibration;
-            _automaticCalibrationSetting.SetInteractable(avatar.avatar.descriptor.supportsAutomaticCalibration);
-            _automaticCalibrationHoverHint.text = avatar.avatar.descriptor.supportsAutomaticCalibration ? "Use automatic calibration instead of manual calibration" : "Not supported by current avatar";
+            _automaticCalibrationSetting.CheckboxValue = _currentAvatarSettings.useAutomaticCalibration;
+            _automaticCalibrationSetting.checkbox.interactable = avatar.avatar.descriptor.supportsAutomaticCalibration;
+            _automaticCalibrationHoverHint.text = avatar.avatar.descriptor.supportsAutomaticCalibration ? "Use automatic calibration instead of manual calibration." : "Not supported by current avatar";
         }
 
         private void OnInputDevicesChanged(TrackedDeviceState state, DeviceUse use)
         {
-            // TODO check targets exist on avatar, e.g. isFbtCapable
-            _autoCalibrateButton.interactable = _trackedDeviceManager.waist.tracked || _trackedDeviceManager.leftFoot.tracked || _trackedDeviceManager.rightFoot.tracked;
-            _calibrateButton.interactable     = _avatarManager.currentlySpawnedAvatar && _avatarManager.currentlySpawnedAvatar.isIKAvatar && (_trackedDeviceManager.waist.tracked || _trackedDeviceManager.leftFoot.tracked || _trackedDeviceManager.rightFoot.tracked);
+            UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar);
+        }
+
+        private void UpdateCalibrationButtons(SpawnedAvatar avatar)
+        {
+            if (!_trackedDeviceManager.waist.tracked && !_trackedDeviceManager.leftFoot.tracked && !_trackedDeviceManager.rightFoot.tracked)
+            {
+                _autoCalibrateButton.interactable = false;
+                _autoClearButton.interactable = false;
+                _autoCalibrateButtonHoverHint.text = "No trackers detected";
+
+                _calibrateButton.interactable = false;
+                _clearButton.interactable = false;
+                _calibrateButtonHoverHint.text = "No trackers detected";
+
+                return;
+            }
+
+            bool isManualCalibrationPossible = avatar && avatar.isIKAvatar && avatar.supportsFullBodyTracking;
+            bool isAutomaticCalibrationPossible = isManualCalibrationPossible && avatar.avatar.descriptor.supportsAutomaticCalibration;
+
+            if (isAutomaticCalibrationPossible)
+            {
+                _autoCalibrateButton.interactable = true;
+                _autoClearButton.interactable = _settings.automaticCalibration.isCalibrated;
+                _autoCalibrateButtonHoverHint.text = "Calibrate full body tracking automatically";
+            }
+            else
+            {
+                _autoCalibrateButton.interactable = false;
+                _autoClearButton.interactable = false;
+                _autoCalibrateButtonHoverHint.text = "Not supported by current avatar";
+            }
+
+            if (isManualCalibrationPossible)
+            {
+                _calibrateButton.interactable = true;
+                _clearButton.interactable = _settings.GetAvatarSettings(avatar.avatar.fullPath).fullBodyCalibration.isCalibrated;
+                _calibrateButtonHoverHint.text = "Start manual full body calibration";
+            }
+            else
+            {
+                _calibrateButton.interactable = false;
+                _clearButton.interactable = false;
+                _calibrateButtonHoverHint.text = "Not supported by current avatar";
+            }
         }
     }
 }

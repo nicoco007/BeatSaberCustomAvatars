@@ -1,19 +1,12 @@
 extern alias BeatSaberFinalIK;
 
 using System;
-using System.Reflection;
-using CustomAvatar;
 using BeatSaberFinalIK::RootMotion;
 using BeatSaberFinalIK::RootMotion.FinalIK;
-using CustomAvatar.Logging;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
-using Zenject;
-using ILogger = CustomAvatar.Logging.ILogger;
 
-// ReSharper disable InconsistentNaming
-// ReSharper disable once CheckNamespace
 #pragma warning disable CS0649
 namespace AvatarScriptPack
 {
@@ -245,103 +238,5 @@ namespace AvatarScriptPack
 
         [Tooltip("Called when the right foot has finished a step")]
         public UnityEvent Locomotion_onRightFootstep = new UnityEvent();
-
-        private ILogger _logger;
-        private DiContainer _container;
-
-        [Inject]
-        private void Inject(ILoggerProvider loggerProvider, DiContainer container)
-        {
-            _logger = loggerProvider.CreateLogger<IKManagerAdvanced>();
-            _container = container;
-        }
-
-        public override void Start()
-        {
-            _logger.Warning("Avatar is using the legacy IKManagerAdvanced; please migrate to VRIKManager");
-
-            var vrikManager = _container.InstantiateComponent<VRIKManager>(gameObject);
-
-            vrikManager.solver_spine_headTarget = this.HeadTarget;
-            vrikManager.solver_leftArm_target = this.LeftHandTarget;
-            vrikManager.solver_rightArm_target = this.RightHandTarget;
-
-            Type type = this.GetType();
-            FieldInfo[] fieldInfos = type.GetFields(BindingFlags.Instance | BindingFlags.Public);
-            foreach (FieldInfo fieldInfo in fieldInfos)
-            {
-                string[] propertyName = fieldInfo.Name.Split('_');
-                var value = fieldInfo.GetValue(this);
-
-                if (propertyName.Length > 1)
-                {
-                    if ("Spine" == propertyName[0])
-                    {
-                        SetProperty(vrikManager, "solver_spine_" + propertyName[1], value);
-                    }
-                    else if ("LeftArm" == propertyName[0])
-                    {
-                        SetProperty(vrikManager, "solver_leftArm_" + propertyName[1], value);
-                    }
-                    else if ("RightArm" == propertyName[0])
-                    {
-                        SetProperty(vrikManager, "solver_rightArm_" + propertyName[1], value);
-                    }
-                    else if ("LeftLeg" == propertyName[0])
-                    {
-                        SetProperty(vrikManager, "solver_leftLeg_" + propertyName[1], value);
-                    }
-                    else if ("RightLeg" == propertyName[0])
-                    {
-                        SetProperty(vrikManager, "solver_rightLeg_" + propertyName[1], value);
-                    }
-                    else if ("Locomotion" == propertyName[0])
-                    {
-                        SetProperty(vrikManager, "solver_locomotion_" + propertyName[1], value);
-                    }
-                }
-            }
-        }
-
-        private void SetProperty(object obj, string fieldName, object value)
-        {
-            if (obj == null) return;
-
-            try
-            {
-                FieldInfo field = obj.GetType().GetField(fieldName);
-
-                if (field == null)
-                {
-                    _logger.Warning($"{fieldName} does not exist on {obj.GetType()}");
-                    return;
-                }
-
-                _logger.Trace($"Set {field.Name} = {value}");
-
-                if (field.FieldType.IsEnum)
-                {
-                    if (value == null)
-                    {
-                        _logger.Warning("Tried to set Enum type to null");
-                        return;
-                    }
-
-                    Type sourceType = Enum.GetUnderlyingType(value.GetType());
-                    Type targetType = Enum.GetUnderlyingType(field.FieldType);
-
-                    _logger.Trace($"Converting enum value {value.GetType()} ({sourceType}) -> {field.FieldType} ({targetType})");
-                    field.SetValue(obj, Convert.ChangeType(value, targetType));
-                }
-                else
-                {
-                    field.SetValue(obj, Convert.ChangeType(value, field.FieldType));
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex);
-            }
-        }
     }
 }

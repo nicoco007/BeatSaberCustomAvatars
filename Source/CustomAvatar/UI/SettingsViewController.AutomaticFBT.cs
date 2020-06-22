@@ -2,6 +2,7 @@
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components.Settings;
 using CustomAvatar.Tracking;
+using HMUI;
 using UnityEngine.UI;
 
 namespace CustomAvatar.UI
@@ -12,14 +13,15 @@ namespace CustomAvatar.UI
         #pragma warning disable 649
         #pragma warning disable IDE0044
 
-        [UIComponent("calibrate-fbt-on-start")] private BoolSetting _calibrateFullBodyTrackingOnStart;
+        [UIComponent("calibrate-fbt-on-start")] private CheckboxSetting _calibrateFullBodyTrackingOnStart;
         [UIComponent("pelvis-offset")] private IncrementSetting _pelvisOffset;
-        [UIComponent("left-foot-offset")] private IncrementSetting _leftFootOffset;
-        [UIComponent("right-foot-offset")] private IncrementSetting _rightFootOffset;
+        [UIComponent("foot-offset")] private IncrementSetting _footOffset;
         [UIComponent("waist-tracker-position")] private ListSetting _waistTrackerPosition;
 
         [UIComponent("auto-calibrate-button")] private Button _autoCalibrateButton;
         [UIComponent("auto-clear-button")] private Button _autoClearButton;
+
+        [UIComponent("auto-calibrate-button")] private HoverHint _autoCalibrateButtonHoverHint;
         
         #pragma warning restore 649
         #pragma warning restore IDE0044
@@ -48,23 +50,20 @@ namespace CustomAvatar.UI
             _settings.automaticCalibration.pelvisOffset = value;
         }
 
-        [UIAction("left-foot-offset-change")]
+        [UIAction("foot-offset-change")]
         private void OnLeftFootOffsetChanged(float value)
         {
-            _settings.automaticCalibration.leftLegOffset = value;
-        }
-
-        [UIAction("right-foot-offset-change")]
-        private void OnRightFootOffsetChanged(float value)
-        {
-            _settings.automaticCalibration.rightLegOffset = value;
+            _settings.automaticCalibration.legOffset = value;
         }
 
         [UIAction("auto-calibrate-fbt-click")]
         private void OnCalibrateAutoFullBodyTrackingClicked()
         {
-            _avatarTailor.CalibrateFullBodyTrackingAuto(_avatarManager.currentlySpawnedAvatar);
-            _autoClearButton.interactable = !_settings.automaticCalibration.isDefault;
+            _avatarTailor.CalibrateFullBodyTrackingAuto(_avatarManager.currentlySpawnedAvatar.input);
+            _autoClearButton.interactable = _settings.automaticCalibration.isCalibrated;
+
+            _automaticCalibrationSetting.CheckboxValue = true;
+            OnEnableAutomaticCalibrationChanged(true);
         }
 
         [UIAction("auto-clear-fbt-calibration-data-click")]

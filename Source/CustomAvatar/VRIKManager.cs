@@ -394,8 +394,6 @@ namespace CustomAvatar
         public UnityEvent solver_locomotion_onRightFootstep = new UnityEvent();
 
         #endregion
-
-        internal event Action referencesUpdated;
         
         internal VRIK vrik;
 
@@ -415,6 +413,9 @@ namespace CustomAvatar
                                                (references_leftThigh == null && references_leftCalf == null && references_leftFoot == null && references_rightThigh == null && references_rightCalf == null && references_rightFoot == null) ||
                                                (references_leftThigh != null && references_leftCalf != null && references_leftFoot != null && references_rightThigh != null && references_rightCalf != null && references_rightFoot != null)
                                            );
+
+        #region Behaviour Lifecycle
+        #pragma warning disable IDE0051
 
         [Inject]
         private void Inject(ILoggerProvider loggerProvider)
@@ -442,7 +443,10 @@ namespace CustomAvatar
             SetVrikReferences();
         }
 
-        internal void SetVrikReferences()
+        #pragma warning restore IDE0051
+        #endregion
+
+        private void SetVrikReferences()
         {
             _logger.Info($"Setting VRIK references on '{name}'");
 
@@ -478,7 +482,7 @@ namespace CustomAvatar
 
                         if (sourceType != targetType)
                         {
-                            _logger.Warning($"Underlying types for {sourceField.Name} ({sourceType}) and {targetField.Name} ({targetType}) are not the same");
+                            _logger.Warning($"Underlying types for {sourceField.Name} ({sourceType}) and {targetField.Name} ({targetType}) are not the same");
                         }
 
                         _logger.Trace($"Converting enum value {sourceField.FieldType} ({sourceType}) -> {targetField.FieldType} ({targetType})");
@@ -488,7 +492,7 @@ namespace CustomAvatar
                     {
                         if (sourceField.FieldType != targetField.FieldType)
                         {
-                            _logger.Warning($"Types for {sourceField.Name} ({sourceField.FieldType}) and {targetField.Name} ({targetField.FieldType}) are not the same");
+                            _logger.Warning($"Types for {sourceField.Name} ({sourceField.FieldType}) and {targetField.Name} ({targetField.FieldType}) are not the same");
                         }
 
                         targetField.SetValue(target, value);
@@ -505,8 +509,6 @@ namespace CustomAvatar
                 _logger.Warning("Some required references are missing; auto detecting references");
                 vrik.AutoDetectReferences();
             }
-
-            referencesUpdated?.Invoke();
         }
     }
 }

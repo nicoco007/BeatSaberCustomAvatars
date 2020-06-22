@@ -31,13 +31,13 @@ namespace CustomAvatar
             // managers & helper classes
             Container.BindInterfacesAndSelfTo<PlayerAvatarManager>().AsSingle();
             Container.Bind<StereoRenderManager>().AsSingle();
+            Container.Bind<AvatarLoader>().AsSingle();
             Container.Bind<AvatarTailor>().AsTransient();
             Container.Bind<MirrorHelper>().AsTransient();
-            Container.Bind<AvatarLoader>().AsTransient();
             Container.Bind<AvatarSpawner>().AsTransient();
 
             // behaviours
-            Container.Bind<TrackedDeviceManager>().FromNewComponentOnNewPrefab(new GameObject(nameof(TrackedDeviceManager))).AsSingle();
+            Container.Bind<TrackedDeviceManager>().FromNewComponentOnNewPrefab(new GameObject(nameof(TrackedDeviceManager))).AsSingle().NonLazy();
             Container.Bind<ShaderLoader>().FromNewComponentOnNewPrefab(new GameObject(nameof(ShaderLoader))).AsSingle().NonLazy();
 
             // not sure if this is a great idea but w/e

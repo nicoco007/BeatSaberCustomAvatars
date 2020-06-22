@@ -11,9 +11,10 @@ namespace CustomAvatar.UI
         #pragma warning disable 649
         #pragma warning disable IDE0044
 
-        [UIComponent("visible-in-first-person")] private BoolSetting _visibleInFirstPerson;
+        [UIComponent("visible-in-first-person")] private CheckboxSetting _visibleInFirstPerson;
         [UIComponent("resize-mode")] private ListSetting _resizeMode;
-        [UIComponent("floor-adjust")] private BoolSetting _floorHeightAdjust;
+        [UIComponent("floor-adjust")] private CheckboxSetting _floorHeightAdjust;
+        [UIComponent("move-floor-with-room-adjust")] private CheckboxSetting _moveFloorWithRoomAdjust;
         [UIComponent("camera-clip-plane")] private IncrementSetting _cameraNearClipPlane;
 
         #pragma warning restore 649
@@ -91,6 +92,12 @@ namespace CustomAvatar.UI
         private void OnMeasureArmSpanButtonClicked()
         {
             MeasureArmSpan();
+        }
+
+        [UIAction("move-floor-with-room-adjust-change")]
+        private void OnMoveFloorWithRoomAdjustChanged(bool value)
+        {
+            _settings.moveFloorWithRoomAdjust = value;
         }
         
         // ReSharper restore UnusedMember.Local

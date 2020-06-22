@@ -30,16 +30,42 @@ namespace CustomAvatar.Avatar
 
         public static bool operator ==(AvatarInfo left, AvatarInfo right)
         {
-            if (left == null || right == null) return !(left == null ^ right == null);
+            if (ReferenceEquals(left, null)) return false;
 
-            return left.name == right.name && left.author == right.author && left.fullPath == right.fullPath && left.size == right.size && left.created == right.created && left.modified == right.modified;
+            return left.Equals(right);
         }
 
         public static bool operator !=(AvatarInfo left, AvatarInfo right)
         {
-            if (left == null || right == null) return left == null ^ right == null;
+            if (ReferenceEquals(left, null)) return false;
 
-            return left.name != right.name || left.author != right.author || left.fullPath != right.fullPath || left.size != right.size || left.created != right.created || left.modified != right.modified;
+            return !left.Equals(right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is AvatarInfo other)) return false;
+
+            return name == other.name && author == other.author && fullPath == other.fullPath && size == other.size && created == other.created && modified == other.modified;
+        }
+
+        public override int GetHashCode()
+        {
+            int hash = 23;
+
+            unchecked
+            {
+                if (name != null)     hash = hash * 17 + name.GetHashCode();
+                if (author != null)   hash = hash * 17 + author.GetHashCode();
+                if (icon != null)     hash = hash * 17 + icon.GetHashCode();
+                if (fullPath != null) hash = hash * 17 + fullPath.GetHashCode();
+
+                hash = hash * 17 + size.GetHashCode();
+                hash = hash * 17 + created.GetHashCode();
+                hash = hash * 17 + modified.GetHashCode();
+            }
+
+            return hash;
         }
     }
 }

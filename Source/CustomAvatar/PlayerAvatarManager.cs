@@ -27,12 +27,13 @@ namespace CustomAvatar
         private readonly TrackedDeviceManager _trackedDeviceManager;
         private readonly Settings _settings;
         private readonly AvatarSpawner _spawner;
+        private readonly GameScenesManager _gameScenesManager;
 
         private readonly Dictionary<string, AvatarInfo> _avatarInfos = new Dictionary<string, AvatarInfo>();
         private string _switchingToPath;
 
         [Inject]
-        private PlayerAvatarManager(AvatarTailor avatarTailor, ILoggerProvider loggerProvider, AvatarLoader avatarLoader, TrackedDeviceManager trackedDeviceManager, Settings settings, AvatarSpawner spawner)
+        private PlayerAvatarManager(AvatarTailor avatarTailor, ILoggerProvider loggerProvider, AvatarLoader avatarLoader, TrackedDeviceManager trackedDeviceManager, Settings settings, AvatarSpawner spawner, GameScenesManager gameScenesManager)
         {
             _logger = loggerProvider.CreateLogger<PlayerAvatarManager>();
             _avatarLoader = avatarLoader;
@@ -40,8 +41,11 @@ namespace CustomAvatar
             _trackedDeviceManager = trackedDeviceManager;
             _settings = settings;
             _spawner = spawner;
+            _gameScenesManager = gameScenesManager;
 
-            Plugin.instance.sceneTransitionDidFinish += OnSceneTransitionDidFinish;
+            _settings.moveFloorWithRoomAdjustChanged += OnMoveFloorWithRoomAdjustChanged;
+            _settings.firstPersonEnabledChanged += OnFirstPersonEnabledChanged;
+            _gameScenesManager.transitionDidFinishEvent += OnSceneTransitionDidFinish;
             SceneManager.sceneLoaded += OnSceneLoaded;
             BeatSaberEvents.playerHeightChanged += OnPlayerHeightChanged;
         }
@@ -50,7 +54,8 @@ namespace CustomAvatar
         {
             Object.Destroy(currentlySpawnedAvatar);
 
-            Plugin.instance.sceneTransitionDidFinish -= OnSceneTransitionDidFinish;
+            _settings.moveFloorWithRoomAdjustChanged -= OnMoveFloorWithRoomAdjustChanged;
+            _gameScenesManager.transitionDidFinishEvent -= OnSceneTransitionDidFinish;
             SceneManager.sceneLoaded -= OnSceneLoaded;
             BeatSaberEvents.playerHeightChanged -= OnPlayerHeightChanged;
         }
@@ -98,7 +103,7 @@ namespace CustomAvatar
 
             if (!File.Exists(Path.Combine(kCustomAvatarsPath, previousAvatarPath)))
             {
-                _logger.Warning("Previously loaded avatar no longer exists; reverting to default");
+                _logger.Warning("Previously loaded avatar no longer exists");
                 return;
             }
 
@@ -138,6 +143,7 @@ namespace CustomAvatar
                 return;
             }
 
+            // cache avatar info since loading asset bundles is expensive
             if (_avatarInfos.ContainsKey(avatar.fullPath))
             {
                 _avatarInfos[avatar.fullPath] = new AvatarInfo(avatar);
@@ -147,9 +153,11 @@ namespace CustomAvatar
                 _avatarInfos.Add(avatar.fullPath, new AvatarInfo(avatar));
             }
 
-            currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, new VRAvatarInput(_trackedDeviceManager));
+            currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, new VRPlayerInput(_trackedDeviceManager));
 
             ResizeCurrentAvatar();
+            
+            currentlySpawnedAvatar.UpdateFirstPersonVisibility(_settings.isAvatarVisibleInFirstPerson ? FirstPersonVisibility.ApplyFirstPersonExclusions : FirstPersonVisibility.None);
 
             avatarChanged?.Invoke(currentlySpawnedAvatar);
         }
@@ -180,10 +188,21 @@ namespace CustomAvatar
 
         public void ResizeCurrentAvatar()
         {
-            if (currentlySpawnedAvatar)
-            {
-                _avatarTailor.ResizeAvatar(currentlySpawnedAvatar);
-            }
+            if (!currentlySpawnedAvatar) return;
+
+            _avatarTailor.ResizeAvatar(currentlySpawnedAvatar);
+        }
+
+        private void OnMoveFloorWithRoomAdjustChanged(bool value)
+        {
+            ResizeCurrentAvatar();
+        }
+
+        private void OnFirstPersonEnabledChanged(bool enable)
+        {
+            if (!currentlySpawnedAvatar) return;
+
+            currentlySpawnedAvatar.UpdateFirstPersonVisibility(enable ? FirstPersonVisibility.ApplyFirstPersonExclusions : FirstPersonVisibility.None);
         }
 
         private void OnSceneLoaded(Scene newScene, LoadSceneMode mode)
@@ -192,7 +211,7 @@ namespace CustomAvatar
 
             if (newScene.name == "PCInit" && _settings.calibrateFullBodyTrackingOnStart && _settings.GetAvatarSettings(currentlySpawnedAvatar.avatar.fullPath).useAutomaticCalibration)
             {
-                _avatarTailor.CalibrateFullBodyTrackingAuto(currentlySpawnedAvatar);
+                _avatarTailor.CalibrateFullBodyTrackingAuto(currentlySpawnedAvatar.input);
             }
 
             ResizeCurrentAvatar();

@@ -38,7 +38,7 @@
       <HintPath>..\..\Libraries\BSML.dll</HintPath>
     </Reference>
     <Reference Include="DynamicBone">
-      <HintPath>..\..\Libraries\DynamicBone.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\DynamicBone.dll</HintPath>
       <Aliases>BeatSaberDynamicBone</Aliases>
     </Reference>
     <Reference Include="DynamicOpenVR, Version=0.1.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -46,19 +46,19 @@
       <HintPath>..\..\Libraries\DynamicOpenVR.dll</HintPath>
     </Reference>
     <Reference Include="FinalIK">
-      <HintPath>..\..\Libraries\FinalIK.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\FinalIK.dll</HintPath>
       <Aliases>BeatSaberFinalIK</Aliases>
     </Reference>
     <Reference Include="HMLib">
-      <HintPath>..\..\Libraries\HMLib.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\HMLib.dll</HintPath>
     </Reference>
     <Reference Include="HMRendering, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libraries\HMRendering.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\HMRendering.dll</HintPath>
     </Reference>
     <Reference Include="HMUI, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libraries\HMUI.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\HMUI.dll</HintPath>
     </Reference>
     <Reference Include="IPA.Injector, Version=3.13.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -69,14 +69,14 @@
       <HintPath>..\..\Libraries\IPA.Loader.dll</HintPath>
     </Reference>
     <Reference Include="Main">
-      <HintPath>..\..\Libraries\Main.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Main.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Rendering">
-      <HintPath>..\..\Libraries\Rendering.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Rendering.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -84,79 +84,66 @@
     <Reference Include="System.Xml" />
     <Reference Include="Unity.TextMeshPro, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libraries\Unity.TextMeshPro.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEditor">
-      <HintPath>..\..\Libraries\UnityEditor.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libraries\UnityEngine.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AnimationModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libraries\UnityEngine.AnimationModule.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AssetBundleModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libraries\UnityEngine.AssetBundleModule.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AudioModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libraries\UnityEngine.AudioModule.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libraries\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ImageConversionModule">
-      <HintPath>..\..\Libraries\UnityEngine.ImageConversionModule.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libraries\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>..\..\Libraries\UnityEngine.InputLegacyModule.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ParticleSystemModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libraries\UnityEngine.ParticleSystemModule.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.ParticleSystemModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libraries\UnityEngine.PhysicsModule.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libraries\UnityEngine.UI.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.VRModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libraries\UnityEngine.VRModule.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.VRModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.XRModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libraries\UnityEngine.XRModule.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.XRModule.dll</HintPath>
     </Reference>
     <Reference Include="Zenject">
-      <HintPath>..\..\Libraries\Zenject.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Zenject.dll</HintPath>
     </Reference>
     <Reference Include="Zenject-usage">
-      <HintPath>..\..\Libraries\Zenject-usage.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Zenject-usage.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Avatar\AvatarGameplayEventsPlayer.cs" />
-    <Compile Include="Avatar\AvatarIK.cs" />
-    <Compile Include="Avatar\AvatarSRTracking.cs" />
-    <Compile Include="Avatar\AvatarInfo.cs" />
-    <Compile Include="Avatar\AvatarLoader.cs" />
-    <Compile Include="Avatar\AvatarSpawner.cs" />
-    <Compile Include="Avatar\AvatarTracking.cs" />
-    <Compile Include="AvatarLayers.cs" />
-    <Compile Include="Avatar\AvatarFingerTracking.cs" />
-    <Compile Include="Avatar\BodyAwareBehaviour.cs" />
     <Compile Include="EyeTrackingManager.cs" />
     <Compile Include="KeyboardInputHandler.cs" />
     <Compile Include="SRApi\Eye\SRanipal_Eye.cs" />
@@ -171,6 +158,16 @@
     <Compile Include="SRApi\SRanipal_API.cs" />
     <Compile Include="SRApi\SRanipal_Enums.cs" />
     <Compile Include="SRApi\SRWorks_Enums.cs" />
+    <Compile Include="Avatar\AvatarGameplayEventsPlayer.cs" />
+    <Compile Include="Avatar\AvatarIK.cs" />
+    <Compile Include="Avatar\AvatarSRTracking.cs" />
+    <Compile Include="Avatar\AvatarInfo.cs" />
+    <Compile Include="Avatar\AvatarLoader.cs" />
+    <Compile Include="Avatar\AvatarSpawner.cs" />
+    <Compile Include="Avatar\AvatarTracking.cs" />
+    <Compile Include="AvatarLayers.cs" />
+    <Compile Include="Avatar\AvatarFingerTracking.cs" />
+    <Compile Include="Avatar\FirstPersonVisibility.cs" />
     <Compile Include="BeatSaberEvents.cs" />
     <Compile Include="CustomAvatarsInstaller.cs" />
     <Compile Include="Lighting\GameplayLightingController.cs" />
@@ -192,10 +189,9 @@
     <Compile Include="Tracking\AvatarInput.cs" />
     <Compile Include="Tracking\Extensions.cs" />
     <Compile Include="Tracking\DeviceUse.cs" />
-    <Compile Include="Tracking\VRAvatarInput.cs" />
+    <Compile Include="Tracking\VRPlayerInput.cs" />
     <Compile Include="UI\SettingsViewController.AutomaticFBT.cs" />
     <Compile Include="UI\SettingsViewController.AvatarSpecificSettings.cs" />
-    <Compile Include="UI\BSMLExtensions.cs" />
     <Compile Include="Avatar\LoadedAvatar.cs" />
     <Compile Include="AvatarDescriptor.cs" />
     <Compile Include="EventFilterBehaviour.cs" />
@@ -233,6 +229,7 @@
     <Compile Include="Utilities\Settings.cs" />
     <Compile Include="Legacy\IKManager.cs" />
     <Compile Include="Legacy\IKManagerAdvanced.cs" />
+    <Compile Include="ZenjectHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="manifest.json" />

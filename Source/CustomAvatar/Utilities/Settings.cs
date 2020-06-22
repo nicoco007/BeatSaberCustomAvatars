@@ -18,6 +18,7 @@ namespace CustomAvatar.Utilities
     internal class Settings
     {
         public event Action<bool> firstPersonEnabledChanged;
+        public event Action<bool> moveFloorWithRoomAdjustChanged;
 
         private bool _isAvatarVisibleInFirstPerson;
         public bool isAvatarVisibleInFirstPerson
@@ -30,9 +31,20 @@ namespace CustomAvatar.Utilities
             }
         }
 
+        private bool _moveFloorWithRoomAdjust = false;
+
+        public bool moveFloorWithRoomAdjust
+        {
+            get => _moveFloorWithRoomAdjust;
+            set
+            {
+                _moveFloorWithRoomAdjust = value;
+                moveFloorWithRoomAdjustChanged?.Invoke(value);
+            }
+        }
+
         [JsonConverter(typeof(StringEnumConverter))] public AvatarResizeMode resizeMode = AvatarResizeMode.Height;
         public bool enableFloorAdjust = false;
-        public bool moveFloorWithRoomAdjust = false;
         public string previousAvatarPath = null;
         public float playerArmSpan = AvatarTailor.kDefaultPlayerArmSpan;
         public bool calibrateFullBodyTrackingOnStart = false;
@@ -77,7 +89,7 @@ namespace CustomAvatar.Utilities
             public Pose rightLeg = Pose.identity;
             public Pose pelvis = Pose.identity;
 
-            [JsonIgnore] public bool isDefault => leftLeg.Equals(Pose.identity) && rightLeg.Equals(Pose.identity) && pelvis.Equals(Pose.identity);
+            [JsonIgnore] public bool isCalibrated => !leftLeg.Equals(Pose.identity) || !rightLeg.Equals(Pose.identity) || !pelvis.Equals(Pose.identity);
         }
 
         public class AutomaticFullBodyCalibration
@@ -86,13 +98,12 @@ namespace CustomAvatar.Utilities
             public Pose rightLeg = Pose.identity;
             public Pose pelvis = Pose.identity;
 
-            public float leftLegOffset = 0.15f;
-            public float rightLegOffset = 0.15f;
+            public float legOffset = 0.15f;
             public float pelvisOffset = 0.1f;
 
             public WaistTrackerPosition waistTrackerPosition = WaistTrackerPosition.Front;
 
-            [JsonIgnore] public bool isDefault => leftLeg.Equals(Pose.identity) && rightLeg.Equals(Pose.identity) && pelvis.Equals(Pose.identity);
+            [JsonIgnore] public bool isCalibrated => !leftLeg.Equals(Pose.identity) || !rightLeg.Equals(Pose.identity) || !pelvis.Equals(Pose.identity);
         }
 
         public class AvatarSpecificSettings
@@ -100,6 +111,7 @@ namespace CustomAvatar.Utilities
             public ManualFullBodyCalibration fullBodyCalibration { get; private set; } = new ManualFullBodyCalibration();
             public bool useAutomaticCalibration = false;
             public bool allowMaintainPelvisPosition = false;
+            public bool bypassCalibration = false;
         }
 
         public AvatarSpecificSettings GetAvatarSettings(string fullPath)

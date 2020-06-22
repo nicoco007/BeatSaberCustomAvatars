@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using CustomAvatar.Exceptions;
 using CustomAvatar.Logging;
 using UnityEngine;
@@ -21,9 +22,13 @@ namespace CustomAvatar.Avatar
         }
 
         // TODO from stream/memory
-        public IEnumerator<AsyncOperation> FromFileCoroutine(string fullPath, Action<LoadedAvatar> success = null, Action<Exception> error = null)
+        public IEnumerator<AsyncOperation> FromFileCoroutine(string path, Action<LoadedAvatar> success = null, Action<Exception> error = null)
         {
-            if (string.IsNullOrEmpty(fullPath)) throw new ArgumentNullException(nameof(fullPath));
+            if (string.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
+
+            string fullPath = Path.GetFullPath(path);
+
+            if (!File.Exists(fullPath)) throw new IOException($"File '{fullPath}' does not exist");
 
             // already loading, just add handlers
             if (_handlers.ContainsKey(fullPath))
@@ -109,8 +114,8 @@ namespace CustomAvatar.Avatar
 
         private class LoadHandlers
         {
-            internal Action<LoadedAvatar> success;
-            internal Action<Exception> error;
+            internal readonly Action<LoadedAvatar> success;
+            internal readonly Action<Exception> error;
 
             internal LoadHandlers(Action<LoadedAvatar> success, Action<Exception> error)
             {

@@ -16,12 +16,16 @@ namespace CustomAvatar.UI
         [UIComponent("arm-span")] private TextMeshProUGUI _armSpanLabel;
         [UIComponent("calibrate-button")] private TextMeshProUGUI _calibrateButtonText;
         [UIComponent("clear-button")] private TextMeshProUGUI _clearButtonText;
+        [UIComponent("bypass-calibration")] private HoverHint _bypassCalibrationHoverHint;
         [UIComponent("automatic-calibration")] private HoverHint _automaticCalibrationHoverHint;
 
-        [UIComponent("automatic-calibration")] private BoolSetting _automaticCalibrationSetting;
+        [UIComponent("bypass-calibration")] private CheckboxSetting _bypassCalibration;
+        [UIComponent("automatic-calibration")] private CheckboxSetting _automaticCalibrationSetting;
 
         [UIComponent("calibrate-button")] private Button _calibrateButton;
         [UIComponent("clear-button")] private Button _clearButton;
+
+        [UIComponent("calibrate-button")] private HoverHint _calibrateButtonHoverHint;
 
         #pragma warning restore IDE0044
         #pragma warning restore 649
@@ -34,8 +38,14 @@ namespace CustomAvatar.UI
         #region Actions
         // ReSharper disable UnusedMember.Local
 
+        [UIAction("bypass-calibration-change")]
+        private void OnEnableBypassCalibrationChanged(bool value)
+        {
+            _currentAvatarSettings.bypassCalibration = value;
+        }
+
         [UIAction("automatic-calibration-change")]
-        private void OnAutomaticCalibrationChanged(bool value)
+        private void OnEnableAutomaticCalibrationChanged(bool value)
         {
             DisableCalibrationMode(false);
             _currentAvatarSettings.useAutomaticCalibration = value;
@@ -91,6 +101,9 @@ namespace CustomAvatar.UI
                 if (save)
                 {
                     _avatarTailor.CalibrateFullBodyTrackingManual(_avatarManager.currentlySpawnedAvatar);
+
+                    _automaticCalibrationSetting.CheckboxValue = false;
+                    OnEnableAutomaticCalibrationChanged(false);
                 }
                 
                 _avatarManager.currentlySpawnedAvatar.DisableCalibrationMode();
@@ -103,7 +116,7 @@ namespace CustomAvatar.UI
             _calibrating = false;
             _calibrateButtonText.text = "Calibrate";
             _clearButtonText.text = "Clear";
-            _clearButton.interactable = !_currentAvatarSettings?.fullBodyCalibration.isDefault ?? false;
+            _clearButton.interactable = _currentAvatarSettings?.fullBodyCalibration.isCalibrated ?? false;
         }
 
         private GameObject CreateCalibrationSphere()
@@ -139,7 +152,7 @@ namespace CustomAvatar.UI
                 if (_trackedDeviceManager.waist.tracked)
                 {
                     _waistSphere.SetActive(true);
-                    _waistSphere.transform.position = _trackedDeviceManager.waist.position;
+                    _waistSphere.transform.position = _avatarTailor.ApplyTrackedPointFloorOffset(_avatarManager.currentlySpawnedAvatar, _trackedDeviceManager.waist.position);
                     _waistSphere.transform.rotation = _trackedDeviceManager.waist.rotation;
                 }
                 else
@@ -150,7 +163,7 @@ namespace CustomAvatar.UI
                 if (_trackedDeviceManager.leftFoot.tracked)
                 {
                     _leftFootSphere.SetActive(true);
-                    _leftFootSphere.transform.position = _trackedDeviceManager.leftFoot.position;
+                    _leftFootSphere.transform.position = _avatarTailor.ApplyTrackedPointFloorOffset(_avatarManager.currentlySpawnedAvatar, _trackedDeviceManager.leftFoot.position);
                     _leftFootSphere.transform.rotation = _trackedDeviceManager.leftFoot.rotation;
                 }
                 else
@@ -161,7 +174,7 @@ namespace CustomAvatar.UI
                 if (_trackedDeviceManager.rightFoot.tracked)
                 {
                     _rightFootSphere.SetActive(true);
-                    _rightFootSphere.transform.position = _trackedDeviceManager.rightFoot.position;
+                    _rightFootSphere.transform.position = _avatarTailor.ApplyTrackedPointFloorOffset(_avatarManager.currentlySpawnedAvatar, _trackedDeviceManager.rightFoot.position);
                     _rightFootSphere.transform.rotation = _trackedDeviceManager.rightFoot.rotation;
                 }
                 else
