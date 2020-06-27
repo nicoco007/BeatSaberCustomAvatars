@@ -8,14 +8,14 @@ namespace CustomAvatar.Avatar
     {
         private Animator _animator;
         private PoseManager _poseManager;
-        private AvatarInput _input;
+        private IAvatarInput _input;
 
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
         // ReSharper disable UnusedMember.Local
 
         [Inject]
-        private void Inject(AvatarInput input)
+        private void Inject(IAvatarInput input)
         {
             _input = input;
         }

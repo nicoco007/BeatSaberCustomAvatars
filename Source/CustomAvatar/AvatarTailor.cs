@@ -171,7 +171,7 @@ namespace CustomAvatar
             }
         }
 
-        public void CalibrateFullBodyTrackingAuto(AvatarInput input)
+        public void CalibrateFullBodyTrackingAuto(IAvatarInput input)
         {
             _logger.Info("Calibrating full body tracking");
 

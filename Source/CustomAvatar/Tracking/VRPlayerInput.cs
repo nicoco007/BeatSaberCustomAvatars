@@ -4,8 +4,10 @@ using UnityEngine;
 
 namespace CustomAvatar.Tracking
 {
-    internal class VRPlayerInput : AvatarInput, IDisposable
+    internal class VRPlayerInput : IAvatarInput, IDisposable
     {
+        public event Action inputChanged;
+
         private readonly TrackedDeviceManager _deviceManager;
 
         private readonly SkeletalInput _leftHandAnimAction;
@@ -14,23 +16,24 @@ namespace CustomAvatar.Tracking
         internal VRPlayerInput(TrackedDeviceManager trackedDeviceManager)
         {
             _deviceManager = trackedDeviceManager ? trackedDeviceManager : throw new ArgumentNullException(nameof(trackedDeviceManager));
-            _deviceManager.deviceAdded += (device, use) => InvokeInputChanged();
-            _deviceManager.deviceRemoved += (device, use) => InvokeInputChanged();
-            _deviceManager.deviceTrackingAcquired += (device, use) => InvokeInputChanged();
-            _deviceManager.deviceTrackingLost += (device, use) => InvokeInputChanged();
+
+            _deviceManager.deviceAdded += OnDevicesUpdated;
+            _deviceManager.deviceRemoved += OnDevicesUpdated;
+            _deviceManager.deviceTrackingAcquired += OnDevicesUpdated;
+            _deviceManager.deviceTrackingLost += OnDevicesUpdated;
             
             _leftHandAnimAction  = new SkeletalInput("/actions/customavatars/in/lefthandanim");
             _rightHandAnimAction = new SkeletalInput("/actions/customavatars/in/righthandanim");
         }
 
-        public override bool TryGetHeadPose(out Pose pose) => TryGetPose(_deviceManager.head, out pose);
-        public override bool TryGetLeftHandPose(out Pose pose) => TryGetPose(_deviceManager.leftHand, out pose);
-        public override bool TryGetRightHandPose(out Pose pose) => TryGetPose(_deviceManager.rightHand, out pose);
-        public override bool TryGetWaistPose(out Pose pose) => TryGetPose(_deviceManager.waist, out pose);
-        public override bool TryGetLeftFootPose(out Pose pose) => TryGetPose(_deviceManager.leftFoot, out pose);
-        public override bool TryGetRightFootPose(out Pose pose) => TryGetPose(_deviceManager.rightFoot, out pose);
+        public bool TryGetHeadPose(out Pose pose) => TryGetPose(_deviceManager.head, out pose);
+        public bool TryGetLeftHandPose(out Pose pose) => TryGetPose(_deviceManager.leftHand, out pose);
+        public bool TryGetRightHandPose(out Pose pose) => TryGetPose(_deviceManager.rightHand, out pose);
+        public bool TryGetWaistPose(out Pose pose) => TryGetPose(_deviceManager.waist, out pose);
+        public bool TryGetLeftFootPose(out Pose pose) => TryGetPose(_deviceManager.leftFoot, out pose);
+        public bool TryGetRightFootPose(out Pose pose) => TryGetPose(_deviceManager.rightFoot, out pose);
 
-        public override bool TryGetLeftHandFingerCurl(out FingerCurl curl)
+        public bool TryGetLeftHandFingerCurl(out FingerCurl curl)
         {
             SkeletalSummaryData leftHandAnim = _leftHandAnimAction.summaryData;
 
@@ -44,7 +47,7 @@ namespace CustomAvatar.Tracking
             return true;
         }
 
-        public override bool TryGetRightHandFingerCurl(out FingerCurl curl)
+        public bool TryGetRightHandFingerCurl(out FingerCurl curl)
         {
             SkeletalSummaryData rightHandAnim = _rightHandAnimAction.summaryData;
 
@@ -60,6 +63,11 @@ namespace CustomAvatar.Tracking
 
         public void Dispose()
         {
+            _deviceManager.deviceAdded -= OnDevicesUpdated;
+            _deviceManager.deviceRemoved -= OnDevicesUpdated;
+            _deviceManager.deviceTrackingAcquired -= OnDevicesUpdated;
+            _deviceManager.deviceTrackingLost -= OnDevicesUpdated;
+
             _leftHandAnimAction.Dispose();
             _rightHandAnimAction.Dispose();
         }
@@ -74,6 +82,11 @@ namespace CustomAvatar.Tracking
 
             pose = new Pose(device.position, device.rotation);
             return true;
+        }
+
+        private void OnDevicesUpdated(TrackedDeviceState state, DeviceUse use)
+        {
+            inputChanged?.Invoke();
         }
     }
 }

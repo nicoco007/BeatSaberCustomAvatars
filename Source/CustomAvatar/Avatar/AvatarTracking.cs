@@ -28,7 +28,7 @@ namespace CustomAvatar.Avatar
 
         public bool isCalibrationModeEnabled = false;
 
-        private AvatarInput _input;
+        private IAvatarInput _input;
         private SpawnedAvatar _avatar;
         private Settings _settings;
         private MainSettingsModelSO _mainSettingsModel;
@@ -41,7 +41,7 @@ namespace CustomAvatar.Avatar
         // ReSharper disable UnusedMember.Local
 
         [Inject]
-        private void Inject(Settings settings, Settings.AvatarSpecificSettings avatarSpecificSettings, MainSettingsModelSO mainSettingsModel, ILoggerProvider loggerProvider, AvatarInput input, SpawnedAvatar avatar, VRPlatformHelper vrPlatformHelper, AvatarTailor tailor)
+        private void Inject(Settings settings, Settings.AvatarSpecificSettings avatarSpecificSettings, MainSettingsModelSO mainSettingsModel, ILoggerProvider loggerProvider, IAvatarInput input, SpawnedAvatar avatar, VRPlatformHelper vrPlatformHelper, AvatarTailor tailor)
         {
             _settings = settings;
             _avatarSpecificSettings = avatarSpecificSettings;

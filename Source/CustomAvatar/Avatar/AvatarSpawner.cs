@@ -22,7 +22,7 @@ namespace CustomAvatar.Avatar
             _settings = settings;
         }
 
-        public SpawnedAvatar SpawnAvatar(LoadedAvatar avatar, AvatarInput input, Transform parent = null)
+        public SpawnedAvatar SpawnAvatar(LoadedAvatar avatar, IAvatarInput input, Transform parent = null)
         {
             if (avatar == null) throw new ArgumentNullException(nameof(avatar));
             if (input == null) throw new ArgumentNullException(nameof(input));
@@ -41,7 +41,7 @@ namespace CustomAvatar.Avatar
             DiContainer subContainer = new DiContainer(_container);
 
             subContainer.Bind<LoadedAvatar>().FromInstance(avatar);
-            subContainer.Bind<AvatarInput>().FromInstance(input);
+            subContainer.Bind<IAvatarInput>().FromInstance(input);
             subContainer.Bind<Settings.AvatarSpecificSettings>().FromInstance(avatarSettings);
 
             GameObject avatarInstance = subContainer.InstantiatePrefab(avatar.prefab, parent);

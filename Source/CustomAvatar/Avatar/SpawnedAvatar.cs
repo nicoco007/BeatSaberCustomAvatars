@@ -16,7 +16,7 @@ namespace CustomAvatar.Avatar
 	public class SpawnedAvatar : MonoBehaviour
 	{
 		public LoadedAvatar avatar { get; private set; }
-		public AvatarInput input { get; private set; }
+		public IAvatarInput input { get; private set; }
 
         public float verticalPosition
         {
@@ -123,7 +123,7 @@ namespace CustomAvatar.Avatar
         }
         
         [Inject]
-        private void Inject(DiContainer container, ILoggerProvider loggerProvider, LoadedAvatar loadedAvatar, AvatarInput avatarInput, GameScenesManager gameScenesManager, Settings settings, Settings.AvatarSpecificSettings avatarSpecificSettings)
+        private void Inject(DiContainer container, ILoggerProvider loggerProvider, LoadedAvatar loadedAvatar, IAvatarInput avatarInput, GameScenesManager gameScenesManager, Settings settings, Settings.AvatarSpecificSettings avatarSpecificSettings)
         {
             avatar = loadedAvatar ?? throw new ArgumentNullException(nameof(loadedAvatar));
             input = avatarInput ?? throw new ArgumentNullException(nameof(avatarInput));

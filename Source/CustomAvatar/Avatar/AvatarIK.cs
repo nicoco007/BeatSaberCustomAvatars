@@ -30,7 +30,7 @@ namespace CustomAvatar.Avatar
         private Action<BeatSaberDynamicBone::DynamicBone, float> _updateDynamicBonesDelegate;
         private FieldInfo _weightField;
         
-        private AvatarInput _input;
+        private IAvatarInput _input;
         private SpawnedAvatar _avatar;
         private ILogger _logger;
 
@@ -58,7 +58,7 @@ namespace CustomAvatar.Avatar
         }
 
         [Inject]
-        private void Inject(AvatarInput input, SpawnedAvatar avatar, Settings.AvatarSpecificSettings avatarSettings, ILoggerProvider loggerProvider)
+        private void Inject(IAvatarInput input, SpawnedAvatar avatar, Settings.AvatarSpecificSettings avatarSettings, ILoggerProvider loggerProvider)
         {
             _input = input;
             _avatar = avatar;
