@@ -149,21 +149,19 @@ namespace CustomAvatar.Tracking
                     _foundDevices.Add(device.name);
                 }
 
-                if (device.HasCharacteristics(InputDeviceCharacteristics.HeadMounted))
+                if (device.characteristics.HasFlag(InputDeviceCharacteristics.HeadMounted))
                 {
                     headInputDevice = device;
                 }
-                else if (device.HasCharacteristics(InputDeviceCharacteristics.HeldInHand |
-                                                   InputDeviceCharacteristics.Left))
+                else if (device.characteristics.HasFlag(InputDeviceCharacteristics.HeldInHand | InputDeviceCharacteristics.Left))
                 {
                     leftHandInputDevice = device;
                 }
-                else if (device.HasCharacteristics(InputDeviceCharacteristics.HeldInHand |
-                                                   InputDeviceCharacteristics.Right))
+                else if (device.characteristics.HasFlag(InputDeviceCharacteristics.HeldInHand | InputDeviceCharacteristics.Right))
                 {
                     rightHandInputDevice = device;
                 }
-                else if (device.HasCharacteristics(InputDeviceCharacteristics.TrackedDevice) && !device.HasCharacteristics(InputDeviceCharacteristics.TrackingReference))
+                else if (device.characteristics.HasFlag(InputDeviceCharacteristics.TrackedDevice) && !device.characteristics.HasFlag(InputDeviceCharacteristics.TrackingReference))
                 {
                     if (_isOpenVRRunning &&
                         !string.IsNullOrEmpty(device.serialNumber) &&

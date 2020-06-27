@@ -173,7 +173,6 @@
     <Compile Include="Legacy\Aliases.cs" />
     <Compile Include="StereoRendering\MirrorHelper.cs" />
     <Compile Include="Tracking\IAvatarInput.cs" />
-    <Compile Include="Tracking\Extensions.cs" />
     <Compile Include="Tracking\DeviceUse.cs" />
     <Compile Include="Tracking\VRPlayerInput.cs" />
     <Compile Include="UI\SettingsViewController.AutomaticFBT.cs" />
