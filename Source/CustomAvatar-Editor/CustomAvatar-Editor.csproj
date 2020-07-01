@@ -94,8 +94,8 @@
     <Compile Include="..\CustomAvatar\Logging\ILogger.cs">
       <Link>Logging\ILogger.cs</Link>
     </Compile>
-    <Compile Include="..\CustomAvatar\Logging\ILoggerFactory.cs">
-      <Link>Logging\ILoggerFactory.cs</Link>
+    <Compile Include="..\CustomAvatar\Logging\ILoggerProvider.cs">
+      <Link>Logging\ILoggerProvider.cs</Link>
     </Compile>
     <Compile Include="..\CustomAvatar\Logging\UnityDebugLogger.cs">
       <Link>Logging\UnityDebugLogger.cs</Link>
