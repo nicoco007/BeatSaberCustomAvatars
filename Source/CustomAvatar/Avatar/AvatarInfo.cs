@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.IO;
 using UnityEngine;
 
@@ -6,23 +7,28 @@ namespace CustomAvatar.Avatar
 {
     internal class AvatarInfo
     {
-        internal readonly string name;
-        internal readonly string author;
-        internal readonly Texture2D icon;
-        internal readonly string fullPath;
-        internal readonly long size;
-        internal readonly DateTime created;
-        internal readonly DateTime modified;
+        [JsonProperty] public readonly string name;
+        [JsonProperty] public readonly string author;
+        [JsonProperty] public readonly Texture2D icon;
+        [JsonProperty] public readonly string fileName;
+        [JsonProperty] public readonly long size;
+        [JsonProperty] public readonly DateTime created;
+        [JsonProperty] public readonly DateTime modified;
 
-        internal AvatarInfo(LoadedAvatar avatar)
+        [JsonIgnore] public bool isValid => !string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(author) && icon && !string.IsNullOrEmpty(fileName) && size > 0 && !created.Equals(default) && !modified.Equals(default);
+
+        [JsonConstructor]
+        private AvatarInfo() { }
+
+        public AvatarInfo(LoadedAvatar avatar)
         {
             name = avatar.descriptor.name;
             author = avatar.descriptor.author;
             icon = avatar.descriptor.cover ? avatar.descriptor.cover.texture : null;
-            fullPath = avatar.fullPath;
 
-            var fileInfo = new FileInfo(fullPath);
+            var fileInfo = new FileInfo(avatar.fullPath);
 
+            fileName = fileInfo.Name;
             size = fileInfo.Length;
             created = fileInfo.CreationTimeUtc;
             modified = fileInfo.LastWriteTimeUtc;
@@ -42,27 +48,34 @@ namespace CustomAvatar.Avatar
             return !left.Equals(right);
         }
 
+        public bool IsForFile(string filePath)
+        {
+            var fileInfo = new FileInfo(filePath);
+
+            return fileName == fileInfo.Name && size == fileInfo.Length && created == fileInfo.CreationTimeUtc && modified == fileInfo.LastWriteTimeUtc;
+        }
+
         public override bool Equals(object obj)
         {
             if (!(obj is AvatarInfo other)) return false;
 
-            return name == other.name && author == other.author && fullPath == other.fullPath && size == other.size && created == other.created && modified == other.modified;
+            return name == other.name && author == other.author && fileName == other.fileName && size == other.size && created == other.created && modified == other.modified;
         }
 
         public override int GetHashCode()
         {
             int hash = 23;
 
+            var fields = new object[] { name, author, icon, fileName, size, created, modified };
+
             unchecked
             {
-                if (name != null)     hash = hash * 17 + name.GetHashCode();
-                if (author != null)   hash = hash * 17 + author.GetHashCode();
-                if (icon != null)     hash = hash * 17 + icon.GetHashCode();
-                if (fullPath != null) hash = hash * 17 + fullPath.GetHashCode();
+                foreach (object field in fields)
+                {
+                    if (field == null) continue;
 
-                hash = hash * 17 + size.GetHashCode();
-                hash = hash * 17 + created.GetHashCode();
-                hash = hash * 17 + modified.GetHashCode();
+                    hash = hash * 17 + field.GetHashCode();
+                }
             }
 
             return hash;

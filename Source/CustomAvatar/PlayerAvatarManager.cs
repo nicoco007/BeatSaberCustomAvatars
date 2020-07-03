@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Text;
 using CustomAvatar.Avatar;
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
+using CustomAvatar.Utilities.Converters;
+using Newtonsoft.Json;
 using UnityEngine.SceneManagement;
 using Zenject;
 using ILogger = CustomAvatar.Logging.ILogger;
@@ -17,6 +19,7 @@ namespace CustomAvatar
     public class PlayerAvatarManager : IDisposable
     {
         public static readonly string kCustomAvatarsPath = Path.GetFullPath("CustomAvatars");
+        public static readonly string kAvatarInfoCacheFilePath = Path.GetFullPath(Path.Combine("UserData", "CustomAvatars.Cache.json"));
 
         internal SpawnedAvatar currentlySpawnedAvatar { get; private set; }
 
@@ -49,6 +52,8 @@ namespace CustomAvatar
             _gameScenesManager.transitionDidFinishEvent += OnSceneTransitionDidFinish;
             SceneManager.sceneLoaded += OnSceneLoaded;
             BeatSaberEvents.playerHeightChanged += OnPlayerHeightChanged;
+
+            LoadAvatarInfosFromFile();
         }
 
         public void Dispose()
@@ -59,6 +64,18 @@ namespace CustomAvatar
             _gameScenesManager.transitionDidFinishEvent -= OnSceneTransitionDidFinish;
             SceneManager.sceneLoaded -= OnSceneLoaded;
             BeatSaberEvents.playerHeightChanged -= OnPlayerHeightChanged;
+
+            SaveAvatarInfosToFile();
+        }
+
+        private JsonSerializer GetSerializer()
+        {
+            return new JsonSerializer
+            {
+                Formatting = Formatting.None,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                Converters = { new Vector2JsonConverter(), new Vector3JsonConverter(), new QuaternionJsonConverter(), new PoseJsonConverter(), new FloatJsonConverter(), new ColorJsonConverter(), new Texture2DConverter() }
+            };
         }
 
         internal void GetAvatarInfosAsync(Action<AvatarInfo> success = null, Action<Exception> error = null)
@@ -75,14 +92,16 @@ namespace CustomAvatar
 
             foreach (string fileName in fileNames)
             {
-                if (_avatarInfos.ContainsKey(fileName))
+                string fullPath = Path.Combine(kCustomAvatarsPath, fileName);
+
+                if (_avatarInfos.ContainsKey(fileName) && _avatarInfos[fileName].IsForFile(fullPath))
                 {
                     _logger.Info($"Using cached information for '{fileName}'");
                     success(_avatarInfos[fileName]);
                 }
                 else
                 {
-                    SharedCoroutineStarter.instance.StartCoroutine(_avatarLoader.FromFileCoroutine(Path.Combine(kCustomAvatarsPath, fileName),
+                    SharedCoroutineStarter.instance.StartCoroutine(_avatarLoader.FromFileCoroutine(fullPath,
                         (avatar) =>
                         {
                             var info = new AvatarInfo(avatar);
@@ -95,20 +114,20 @@ namespace CustomAvatar
 
         public void LoadAvatarFromSettingsAsync()
         {
-            string previousAvatarPath = _settings.previousAvatarPath;
+            string previousAvatarFileName = _settings.previousAvatarPath;
 
-            if (string.IsNullOrEmpty(previousAvatarPath))
+            if (string.IsNullOrEmpty(previousAvatarFileName))
             {
                 return;
             }
 
-            if (!File.Exists(Path.Combine(kCustomAvatarsPath, previousAvatarPath)))
+            if (!File.Exists(Path.Combine(kCustomAvatarsPath, previousAvatarFileName)))
             {
                 _logger.Warning("Previously loaded avatar no longer exists");
                 return;
             }
 
-            SwitchToAvatarAsync(previousAvatarPath);
+            SwitchToAvatarAsync(previousAvatarFileName);
         }
 
         public void SwitchToAvatarAsync(string fileName)
@@ -135,29 +154,32 @@ namespace CustomAvatar
             if (currentlySpawnedAvatar && currentlySpawnedAvatar.avatar == avatar) return;
             if (avatar?.fullPath != _switchingToPath) return;
 
-            _settings.previousAvatarPath = avatar?.fullPath;
-
             if (avatar == null)
             {
                 _logger.Info("No avatar selected");
                 avatarChanged?.Invoke(null);
+                _settings.previousAvatarPath = null;
                 return;
             }
+            
+            var avatarInfo = new AvatarInfo(avatar);
+
+            _settings.previousAvatarPath = avatarInfo.fileName;
 
             // cache avatar info since loading asset bundles is expensive
-            if (_avatarInfos.ContainsKey(avatar.fullPath))
+            if (_avatarInfos.ContainsKey(avatarInfo.fileName))
             {
-                _avatarInfos[avatar.fullPath] = new AvatarInfo(avatar);
+                _avatarInfos[avatarInfo.fileName] = avatarInfo;
             }
             else
             {
-                _avatarInfos.Add(avatar.fullPath, new AvatarInfo(avatar));
+                _avatarInfos.Add(avatarInfo.fileName, avatarInfo);
             }
 
             DiContainer subContainer = new DiContainer(_container);
 
             subContainer.Bind<LoadedAvatar>().FromInstance(avatar);
-            subContainer.Bind<Settings.AvatarSpecificSettings>().FromInstance(_settings.GetAvatarSettings(avatar.fullPath));
+            subContainer.Bind<Settings.AvatarSpecificSettings>().FromInstance(_settings.GetAvatarSettings(avatarInfo.fileName));
             subContainer.BindInterfacesTo<VRPlayerInput>().AsSingle();
 
             currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, subContainer.Resolve<IAvatarInput>());
@@ -216,7 +238,7 @@ namespace CustomAvatar
         {
             if (!currentlySpawnedAvatar) return;
 
-            if (newScene.name == "PCInit" && _settings.calibrateFullBodyTrackingOnStart && _settings.GetAvatarSettings(currentlySpawnedAvatar.avatar.fullPath).useAutomaticCalibration)
+            if (newScene.name == "PCInit" && _settings.calibrateFullBodyTrackingOnStart && _settings.GetAvatarSettings(currentlySpawnedAvatar.avatar.fileName).useAutomaticCalibration)
             {
                 _avatarTailor.CalibrateFullBodyTrackingAuto();
             }
@@ -238,20 +260,81 @@ namespace CustomAvatar
 
         private List<string> GetAvatarFileNames()
         {
-            return Directory.GetFiles(kCustomAvatarsPath, "*.avatar").Select(f => GetRelativePath(kCustomAvatarsPath, f)).ToList();
+            return Directory.GetFiles(kCustomAvatarsPath, "*.avatar", SearchOption.TopDirectoryOnly).Select(f => Path.GetFileName(f)).ToList();
         }
 
-        private string GetRelativePath(string rootDirectoryPath, string path)
+        private void LoadAvatarInfosFromFile()
         {
-            string fullRootDirectoryPath = Path.GetFullPath(rootDirectoryPath);
-            string fullPath = Path.GetFullPath(path);
+            if (!File.Exists(kAvatarInfoCacheFilePath)) return;
 
-            if (!fullPath.StartsWith(fullRootDirectoryPath))
+            try
             {
-                return fullPath;
+                _logger.Info($"Loading cached avatar info from '{kAvatarInfoCacheFilePath}'");
+
+                // storing in JSON isn't incredibly efficient but I'm lazy
+                using (var reader = new StreamReader(kAvatarInfoCacheFilePath, Encoding.UTF8))
+                using (var jsonReader = new JsonTextReader(reader))
+                {
+                    var serializer = GetSerializer();
+                    var avatarInfos = serializer.Deserialize<AvatarInfo[]>(jsonReader);
+
+                    if (avatarInfos == null) return;
+
+                    foreach (AvatarInfo avatarInfo in avatarInfos)
+                    {
+                        if (!avatarInfo.isValid) continue;
+
+                        string fullPath = Path.Combine(kCustomAvatarsPath, avatarInfo.fileName);
+
+                        if (!File.Exists(fullPath)) continue;
+                        if (!avatarInfo.IsForFile(fullPath)) continue;
+
+                        _logger.Info($"Got cached info for '{fullPath}'");
+
+                        if (_avatarInfos.ContainsKey(avatarInfo.fileName))
+                        {
+                            _avatarInfos[avatarInfo.fileName] = avatarInfo;
+                        }
+                        else
+                        {
+                            _avatarInfos.Add(avatarInfo.fileName, avatarInfo);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Failed to load cached avatar info");
+                _logger.Error(ex);
+            }
+        }
+
+        private void SaveAvatarInfosToFile()
+        {
+            foreach (string fileName in _avatarInfos.Keys.ToList())
+            {
+                if (!File.Exists(Path.Combine(kCustomAvatarsPath, fileName)))
+                {
+                    _avatarInfos.Remove(fileName);
+                }
             }
 
-            return fullPath.Substring(fullRootDirectoryPath.Length + 1);
+            try
+            {
+                _logger.Info($"Saving cached avatar info to '{kAvatarInfoCacheFilePath}'");
+
+                using (var writer = new StreamWriter(kAvatarInfoCacheFilePath, false, Encoding.UTF8))
+                using (var jsonWriter = new JsonTextWriter(writer))
+                {
+                    var serializer = GetSerializer();
+                    serializer.Serialize(jsonWriter, _avatarInfos.Values);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Failed to save cached avatar info");
+                _logger.Error(ex);
+            }
         }
     }
 }

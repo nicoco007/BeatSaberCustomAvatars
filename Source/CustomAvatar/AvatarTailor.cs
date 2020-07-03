@@ -145,7 +145,7 @@ namespace CustomAvatar
         
         public void CalibrateFullBodyTrackingManual(SpawnedAvatar spawnedAvatar)
         {
-            Settings.ManualFullBodyCalibration fullBodyCalibration = _settings.GetAvatarSettings(spawnedAvatar.avatar.fullPath).fullBodyCalibration;
+            Settings.ManualFullBodyCalibration fullBodyCalibration = _settings.GetAvatarSettings(spawnedAvatar.avatar.fileName).fullBodyCalibration;
 
             if (_trackedDeviceManager.waist.tracked)
             {
@@ -235,7 +235,7 @@ namespace CustomAvatar
 
         public void ClearManualFullBodyTrackingData(SpawnedAvatar spawnedAvatar)
         {
-            Settings.ManualFullBodyCalibration fullBodyCalibration = _settings.GetAvatarSettings(spawnedAvatar.avatar.fullPath).fullBodyCalibration;
+            Settings.ManualFullBodyCalibration fullBodyCalibration = _settings.GetAvatarSettings(spawnedAvatar.avatar.fileName).fullBodyCalibration;
 
             fullBodyCalibration.leftLeg = Pose.identity;
             fullBodyCalibration.rightLeg = Pose.identity;

@@ -3,6 +3,7 @@ using System.IO;
 using CustomAvatar.Logging;
 using Newtonsoft.Json;
 using CustomAvatar.Utilities.Converters;
+using System.Linq;
 
 namespace CustomAvatar.Utilities
 {
@@ -52,6 +53,14 @@ namespace CustomAvatar.Utilities
         public void Save(Settings settings)
         {
             if (_hasReset) return;
+
+            foreach (string fileName in settings.avatarSpecificSettings.Keys.ToList())
+            {
+                if (!File.Exists(Path.Combine(PlayerAvatarManager.kCustomAvatarsPath, fileName)) || Path.IsPathRooted(fileName))
+                {
+                    settings.avatarSpecificSettings.Remove(fileName);
+                }
+            }
 
             _logger.Info("Saving settings to " + kSettingsPath);
 

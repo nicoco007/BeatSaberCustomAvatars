@@ -188,6 +188,7 @@
     <Compile Include="Utilities\Converters\QuaternionJsonConverter.cs" />
     <Compile Include="Logging\ILogger.cs" />
     <Compile Include="Logging\IPALogger.cs" />
+    <Compile Include="Utilities\Converters\Texture2DConverter.cs" />
     <Compile Include="Utilities\ReflectionExtensions.cs" />
     <Compile Include="Utilities\SettingsManager.cs" />
     <Compile Include="Utilities\Converters\Vector2JsonConverter.cs" />

@@ -108,7 +108,7 @@ namespace CustomAvatar.UI
                 return;
             }
 
-            _currentAvatarSettings = _settings.GetAvatarSettings(avatar.avatar.fullPath);
+            _currentAvatarSettings = _settings.GetAvatarSettings(avatar.avatar.fileName);
 
             UpdateCalibrationButtons(avatar);
 
@@ -160,7 +160,7 @@ namespace CustomAvatar.UI
             if (isManualCalibrationPossible)
             {
                 _calibrateButton.interactable = true;
-                _clearButton.interactable = _settings.GetAvatarSettings(avatar.avatar.fullPath).fullBodyCalibration.isCalibrated;
+                _clearButton.interactable = _currentAvatarSettings.fullBodyCalibration.isCalibrated;
                 _calibrateButtonHoverHint.text = "Start manual full body calibration";
             }
             else

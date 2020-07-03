@@ -8,14 +8,14 @@ namespace CustomAvatar.UI
         public readonly string name;
         public readonly string author;
         public readonly Texture2D icon;
-        public readonly string fullPath;
+        public readonly string fileName;
 
         internal AvatarListItem(AvatarInfo avatar)
         {
             name = avatar.name;
             author = avatar.author;
             icon = avatar.icon;
-            fullPath = avatar.fullPath;
+            fileName = avatar.fileName;
         }
 
         internal AvatarListItem(string name, Texture2D icon)
