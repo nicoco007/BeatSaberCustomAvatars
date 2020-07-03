@@ -165,9 +165,7 @@ namespace CustomAvatar
 
             if (_settings.calibrateFullBodyTrackingOnStart && _settings.GetAvatarSettings(_settings.previousAvatarPath).useAutomaticCalibration)
             {
-                var input = new VRPlayerInput(context.Container.Resolve<TrackedDeviceManager>());
-                context.Container.Resolve<AvatarTailor>().CalibrateFullBodyTrackingAuto(input);
-                input.Dispose();
+                context.Container.Resolve<AvatarTailor>().CalibrateFullBodyTrackingAuto();
             }
         }
 

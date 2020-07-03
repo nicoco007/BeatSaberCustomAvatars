@@ -4,7 +4,6 @@ extern alias BeatSaberDynamicBone;
 using CustomAvatar.Tracking;
 using System;
 using CustomAvatar.Logging;
-using CustomAvatar.Utilities;
 using UnityEngine;
 using UnityEngine.XR;
 using Zenject;
@@ -14,23 +13,16 @@ namespace CustomAvatar.Avatar
 {
     public class AvatarTracking : MonoBehaviour
     {
-        private Settings.AvatarSpecificSettings _avatarSpecificSettings;
-
         private Pose _initialPelvisPose;
         private Pose _initialLeftFootPose;
         private Pose _initialRightFootPose;
 
         private Vector3 _prevBodyLocalPosition = Vector3.zero;
 
-        private Pose _prevPelvisPose = Pose.identity;
-        private Pose _prevLeftLegPose = Pose.identity;
-        private Pose _prevRightLegPose = Pose.identity;
-
         public bool isCalibrationModeEnabled = false;
 
         private IAvatarInput _input;
         private SpawnedAvatar _avatar;
-        private Settings _settings;
         private MainSettingsModelSO _mainSettingsModel;
         private VRPlatformHelper _vrPlatformHelper;
         private ILogger _logger = new UnityDebugLogger<AvatarTracking>();
@@ -41,10 +33,8 @@ namespace CustomAvatar.Avatar
         // ReSharper disable UnusedMember.Local
 
         [Inject]
-        private void Inject(Settings settings, Settings.AvatarSpecificSettings avatarSpecificSettings, MainSettingsModelSO mainSettingsModel, ILoggerProvider loggerProvider, IAvatarInput input, SpawnedAvatar avatar, VRPlatformHelper vrPlatformHelper, AvatarTailor tailor)
+        private void Inject(MainSettingsModelSO mainSettingsModel, ILoggerProvider loggerProvider, IAvatarInput input, SpawnedAvatar avatar, VRPlatformHelper vrPlatformHelper, AvatarTailor tailor)
         {
-            _settings = settings;
-            _avatarSpecificSettings = avatarSpecificSettings;
             _mainSettingsModel = mainSettingsModel;
             _logger = loggerProvider.CreateLogger<AvatarTracking>(avatar.avatar.descriptor.name);
             _input = input;
@@ -113,70 +103,30 @@ namespace CustomAvatar.Avatar
                         _avatar.rightLeg.rotation = _initialRightFootPose.rotation;
                     }
                 }
-                else if (_avatar.shouldTrackFullBody)
+                else
                 {
                     if (_avatar.leftLeg && _input.TryGetLeftFootPose(out Pose leftFootPose))
                     {
-                        Pose correction;
+                        leftFootPose.position = _tailor.ApplyTrackedPointFloorOffset(_avatar, leftFootPose.position);
 
-                        if (_avatarSpecificSettings.useAutomaticCalibration)
-                        {
-                            correction = _settings.automaticCalibration.leftLeg;
-                            correction.position -= Vector3.up * _settings.automaticCalibration.legOffset;
-                        }
-                        else
-                        {
-                            correction = _avatarSpecificSettings.fullBodyCalibration.leftLeg;
-                        }
-
-                        _prevLeftLegPose = AdjustTrackedPointPose(_prevLeftLegPose, leftFootPose, correction, _settings.fullBodyMotionSmoothing.feet);
-
-                        _avatar.leftLeg.position = _prevLeftLegPose.position;
-                        _avatar.leftLeg.rotation = _prevLeftLegPose.rotation;
+                        _avatar.leftLeg.position = leftFootPose.position;
+                        _avatar.leftLeg.rotation = leftFootPose.rotation;
                     }
 
                     if (_avatar.rightLeg && _input.TryGetRightFootPose(out Pose rightFootPose))
                     {
-                        Pose correction;
+                        rightFootPose.position = _tailor.ApplyTrackedPointFloorOffset(_avatar, rightFootPose.position);
 
-                        if (_avatarSpecificSettings.useAutomaticCalibration)
-                        {
-                            correction = _settings.automaticCalibration.rightLeg;
-                            correction.position -= Vector3.up * _settings.automaticCalibration.legOffset;
-                        }
-                        else
-                        {
-                            correction = _avatarSpecificSettings.fullBodyCalibration.rightLeg;
-                        }
-
-                        _prevRightLegPose = AdjustTrackedPointPose(_prevRightLegPose, rightFootPose, correction, _settings.fullBodyMotionSmoothing.feet);
-
-                        _avatar.rightLeg.position = _prevRightLegPose.position;
-                        _avatar.rightLeg.rotation = _prevRightLegPose.rotation;
+                        _avatar.rightLeg.position = rightFootPose.position;
+                        _avatar.rightLeg.rotation = rightFootPose.rotation;
                     }
 
                     if (_avatar.pelvis && _input.TryGetWaistPose(out Pose pelvisPose))
                     {
-                        Pose correction;
+                        pelvisPose.position = _tailor.ApplyTrackedPointFloorOffset(_avatar, pelvisPose.position);
 
-                        if (_avatarSpecificSettings.useAutomaticCalibration)
-                        {
-                            correction = _settings.automaticCalibration.pelvis;
-
-                            Quaternion rotationOffset = Quaternion.Euler(0, (int) _settings.automaticCalibration.waistTrackerPosition * -90, 0);
-
-                            correction.position -= Quaternion.Inverse(rotationOffset) * (Vector3.forward * _settings.automaticCalibration.pelvisOffset);
-                            correction.rotation *= rotationOffset;
-                        }
-                        else
-                        {
-                            correction = _avatarSpecificSettings.fullBodyCalibration.pelvis;
-                        }
-
-                        _prevPelvisPose = AdjustTrackedPointPose(_prevPelvisPose, pelvisPose, correction, _settings.fullBodyMotionSmoothing.waist);
-
-                        _avatar.pelvis.position = _prevPelvisPose.position;
-                        _avatar.pelvis.rotation = _prevPelvisPose.rotation;
+                        _avatar.pelvis.position = pelvisPose.position;
+                        _avatar.pelvis.rotation = pelvisPose.rotation;
                     }
                 }
 
@@ -206,15 +156,5 @@ namespace CustomAvatar.Avatar
         // ReSharper restore UnusedMember.Local
         #pragma warning restore IDE0051
         #endregion
-
-        private Pose AdjustTrackedPointPose(Pose previousPose, Pose currentPose, Pose correction, Settings.TrackedPointSmoothing smoothing)
-        {
-            Quaternion correctedRotation = currentPose.rotation * correction.rotation;
-            Vector3 correctedPosition = currentPose.position + correctedRotation * correction.position; // correction is forward-facing by definition
-
-            correctedPosition = _tailor.ApplyTrackedPointFloorOffset(_avatar, correctedPosition);
-
-            return new Pose(Vector3.Lerp(previousPose.position, correctedPosition, smoothing.position), Quaternion.Slerp(previousPose.rotation, correctedRotation, smoothing.rotation));
-        }
     }
 }

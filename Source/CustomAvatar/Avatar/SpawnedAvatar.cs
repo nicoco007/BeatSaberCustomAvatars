@@ -37,7 +37,6 @@ namespace CustomAvatar.Avatar
         public float eyeHeight { get; private set; }
         public float armSpan { get; private set; }
         public bool supportsFingerTracking { get; private set; }
-        public bool isIKAvatar { get; private set; }
         public bool supportsFullBodyTracking { get; private set; }
 
         public Transform head { get; private set; }
@@ -52,18 +51,8 @@ namespace CustomAvatar.Avatar
         public AvatarIK ik { get; private set; }
         public AvatarFingerTracking fingerTracking { get; private set; }
 
-        public bool shouldTrackFullBody =>
-            isIKAvatar &&
-            (
-                _avatarSpecificSettings.bypassCalibration ||
-                !_avatarSpecificSettings.useAutomaticCalibration && _avatarSpecificSettings.fullBodyCalibration.isCalibrated ||
-                _avatarSpecificSettings.useAutomaticCalibration && _settings.automaticCalibration.isCalibrated
-            );
-
         private ILogger _logger;
         private GameScenesManager _gameScenesManager;
-        private Settings _settings;
-        private Settings.AvatarSpecificSettings _avatarSpecificSettings;
 
         private FirstPersonExclusion[] _firstPersonExclusions;
         private Renderer[] _renderers;
@@ -103,7 +92,7 @@ namespace CustomAvatar.Avatar
                     SetChildrenToLayer(AvatarLayers.kAlwaysVisible);
                     break;
 
-                case FirstPersonVisibility.ApplyFirstPersonExclusions:
+                case FirstPersonVisibility.VisibleWithExclusions:
                     SetChildrenToLayer(AvatarLayers.kAlwaysVisible);
                     ApplyFirstPersonExclusions();
                     break;
@@ -123,7 +112,7 @@ namespace CustomAvatar.Avatar
         }
         
         [Inject]
-        private void Inject(DiContainer container, ILoggerProvider loggerProvider, LoadedAvatar loadedAvatar, IAvatarInput avatarInput, GameScenesManager gameScenesManager, Settings settings, Settings.AvatarSpecificSettings avatarSpecificSettings)
+        private void Inject(DiContainer container, ILoggerProvider loggerProvider, LoadedAvatar loadedAvatar, IAvatarInput avatarInput, GameScenesManager gameScenesManager)
         {
             avatar = loadedAvatar ?? throw new ArgumentNullException(nameof(loadedAvatar));
             input = avatarInput ?? throw new ArgumentNullException(nameof(avatarInput));
@@ -132,8 +121,6 @@ namespace CustomAvatar.Avatar
 
             _logger = loggerProvider.CreateLogger<SpawnedAvatar>(loadedAvatar.descriptor.name);
             _gameScenesManager = gameScenesManager;
-            _settings = settings;
-            _avatarSpecificSettings = avatarSpecificSettings;
 
             _eventManager = GetComponent<EventManager>();
             _firstPersonExclusions = GetComponentsInChildren<FirstPersonExclusion>();
@@ -159,7 +146,6 @@ namespace CustomAvatar.Avatar
                 Destroy(ikManager);
             }
 
-            isIKAvatar = vrikManager;
             supportsFullBodyTracking = transform.Find("Pelvis") || transform.Find("LeftLeg") || transform.Find("RightLeg");
 
             if (vrikManager)
@@ -177,7 +163,7 @@ namespace CustomAvatar.Avatar
 
             tracking = container.InstantiateComponent<AvatarTracking>(gameObject);
 
-            if (isIKAvatar)
+            if (avatar.isIKAvatar)
             {
                 ik = container.InstantiateComponent<AvatarIK>(gameObject);
             }

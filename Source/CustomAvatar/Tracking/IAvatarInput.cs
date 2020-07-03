@@ -3,8 +3,10 @@ using UnityEngine;
 
 namespace CustomAvatar.Tracking
 {
-    public interface IAvatarInput
+    public interface IAvatarInput : IDisposable
     {
+        bool allowMaintainPelvisPosition { get; }
+
         event Action inputChanged;
 
         bool TryGetHeadPose(out Pose pose);

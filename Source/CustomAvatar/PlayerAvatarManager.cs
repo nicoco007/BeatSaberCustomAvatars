@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using CustomAvatar.Avatar;
@@ -21,10 +22,10 @@ namespace CustomAvatar
 
         internal event Action<SpawnedAvatar> avatarChanged;
 
+        private readonly DiContainer _container;
         private readonly ILogger _logger;
         private readonly AvatarLoader _avatarLoader;
         private readonly AvatarTailor _avatarTailor;
-        private readonly TrackedDeviceManager _trackedDeviceManager;
         private readonly Settings _settings;
         private readonly AvatarSpawner _spawner;
         private readonly GameScenesManager _gameScenesManager;
@@ -33,12 +34,12 @@ namespace CustomAvatar
         private string _switchingToPath;
 
         [Inject]
-        private PlayerAvatarManager(AvatarTailor avatarTailor, ILoggerProvider loggerProvider, AvatarLoader avatarLoader, TrackedDeviceManager trackedDeviceManager, Settings settings, AvatarSpawner spawner, GameScenesManager gameScenesManager)
+        private PlayerAvatarManager(DiContainer container, AvatarTailor avatarTailor, ILoggerProvider loggerProvider, AvatarLoader avatarLoader, Settings settings, AvatarSpawner spawner, GameScenesManager gameScenesManager)
         {
+            _container = container;
             _logger = loggerProvider.CreateLogger<PlayerAvatarManager>();
             _avatarLoader = avatarLoader;
             _avatarTailor = avatarTailor;
-            _trackedDeviceManager = trackedDeviceManager;
             _settings = settings;
             _spawner = spawner;
             _gameScenesManager = gameScenesManager;
@@ -153,11 +154,17 @@ namespace CustomAvatar
                 _avatarInfos.Add(avatar.fullPath, new AvatarInfo(avatar));
             }
 
-            currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, new VRPlayerInput(_trackedDeviceManager));
+            DiContainer subContainer = new DiContainer(_container);
+
+            subContainer.Bind<LoadedAvatar>().FromInstance(avatar);
+            subContainer.Bind<Settings.AvatarSpecificSettings>().FromInstance(_settings.GetAvatarSettings(avatar.fullPath));
+            subContainer.BindInterfacesTo<VRPlayerInput>().AsSingle();
+
+            currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, subContainer.Resolve<IAvatarInput>());
 
             ResizeCurrentAvatar();
             
-            currentlySpawnedAvatar.UpdateFirstPersonVisibility(_settings.isAvatarVisibleInFirstPerson ? FirstPersonVisibility.ApplyFirstPersonExclusions : FirstPersonVisibility.None);
+            currentlySpawnedAvatar.UpdateFirstPersonVisibility(_settings.isAvatarVisibleInFirstPerson ? FirstPersonVisibility.VisibleWithExclusions : FirstPersonVisibility.None);
 
             avatarChanged?.Invoke(currentlySpawnedAvatar);
         }
@@ -202,7 +209,7 @@ namespace CustomAvatar
         {
             if (!currentlySpawnedAvatar) return;
 
-            currentlySpawnedAvatar.UpdateFirstPersonVisibility(enable ? FirstPersonVisibility.ApplyFirstPersonExclusions : FirstPersonVisibility.None);
+            currentlySpawnedAvatar.UpdateFirstPersonVisibility(enable ? FirstPersonVisibility.VisibleWithExclusions : FirstPersonVisibility.None);
         }
 
         private void OnSceneLoaded(Scene newScene, LoadSceneMode mode)
@@ -211,7 +218,7 @@ namespace CustomAvatar
 
             if (newScene.name == "PCInit" && _settings.calibrateFullBodyTrackingOnStart && _settings.GetAvatarSettings(currentlySpawnedAvatar.avatar.fullPath).useAutomaticCalibration)
             {
-                _avatarTailor.CalibrateFullBodyTrackingAuto(currentlySpawnedAvatar.input);
+                _avatarTailor.CalibrateFullBodyTrackingAuto();
             }
 
             ResizeCurrentAvatar();

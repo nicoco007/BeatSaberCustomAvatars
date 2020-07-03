@@ -20,7 +20,6 @@ namespace CustomAvatar.UI
         private Material _redMaterial;
         private Material _greenMaterial;
         private Material _blueMaterial;
-        private Settings.AvatarSpecificSettings _currentAvatarSettings;
         
         private TrackedDeviceManager _trackedDeviceManager;
         private PlayerAvatarManager _avatarManager;
@@ -28,6 +27,7 @@ namespace CustomAvatar.UI
         private Settings _settings;
         private ShaderLoader _shaderLoader;
         private ILogger _logger;
+        private Settings.AvatarSpecificSettings _currentAvatarSettings;
 
         [Inject]
         private void Inject(TrackedDeviceManager trackedDeviceManager, PlayerAvatarManager avatarManager, AvatarTailor avatarTailor, Settings settings, ShaderLoader shaderLoader, ILoggerProvider loggerProvider)
@@ -109,7 +109,7 @@ namespace CustomAvatar.UI
             }
 
             _currentAvatarSettings = _settings.GetAvatarSettings(avatar.avatar.fullPath);
-            
+
             UpdateCalibrationButtons(avatar);
 
             _bypassCalibration.CheckboxValue = _currentAvatarSettings.bypassCalibration;
@@ -141,7 +141,7 @@ namespace CustomAvatar.UI
                 return;
             }
 
-            bool isManualCalibrationPossible = avatar && avatar.isIKAvatar && avatar.supportsFullBodyTracking;
+            bool isManualCalibrationPossible = avatar != null && avatar.avatar.isIKAvatar && avatar.supportsFullBodyTracking;
             bool isAutomaticCalibrationPossible = isManualCalibrationPossible && avatar.avatar.descriptor.supportsAutomaticCalibration;
 
             if (isAutomaticCalibrationPossible)
