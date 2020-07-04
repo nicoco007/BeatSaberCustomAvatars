@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -9,8 +8,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CustomAvatar</RootNamespace>
     <AssemblyName>CustomAvatar</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <FileAlignment>512</FileAlignment>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -75,10 +75,6 @@
     <Reference Include="Rendering">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Rendering.dll</HintPath>
     </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
     <Reference Include="Unity.TextMeshPro, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Unity.TextMeshPro.dll</HintPath>
@@ -141,80 +137,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Avatar\AvatarGameplayEventsPlayer.cs" />
-    <Compile Include="Avatar\AvatarIK.cs" />
-    <Compile Include="Avatar\AvatarInfo.cs" />
-    <Compile Include="Avatar\AvatarLoader.cs" />
-    <Compile Include="Avatar\AvatarSpawner.cs" />
-    <Compile Include="Avatar\AvatarTracking.cs" />
-    <Compile Include="AvatarLayers.cs" />
-    <Compile Include="Avatar\AvatarFingerTracking.cs" />
-    <Compile Include="Avatar\FirstPersonVisibility.cs" />
-    <Compile Include="BeatSaberEvents.cs" />
-    <Compile Include="CustomAvatarsInstaller.cs" />
-    <Compile Include="Lighting\GameplayLightingController.cs" />
-    <Compile Include="KeyboardInputHandler.cs" />
-    <Compile Include="Logging\ILoggerProvider.cs" />
-    <Compile Include="Logging\IPALoggerProvider.cs" />
-    <Compile Include="Lighting\MenuLightingController.cs" />
-    <Compile Include="ShaderLoader.cs" />
-    <Compile Include="Tracking\FingerCurl.cs" />
-    <Compile Include="Tracking\WaistTrackerPosition.cs" />
-    <Compile Include="UIInstaller.cs" />
-    <Compile Include="UI\AvatarListItem.cs" />
-    <Compile Include="PlayerAvatarManager.cs" />
-    <Compile Include="AvatarTailor.cs" />
-    <Compile Include="AvatarResizeMode.cs" />
-    <Compile Include="FirstPersonExclusion.cs" />
-    <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="Legacy\Aliases.cs" />
-    <Compile Include="StereoRendering\MirrorHelper.cs" />
-    <Compile Include="Tracking\IAvatarInput.cs" />
-    <Compile Include="Tracking\DeviceUse.cs" />
-    <Compile Include="Tracking\VRPlayerInput.cs" />
-    <Compile Include="UI\SettingsViewController.AutomaticFBT.cs" />
-    <Compile Include="UI\SettingsViewController.AvatarSpecificSettings.cs" />
-    <Compile Include="Avatar\LoadedAvatar.cs" />
-    <Compile Include="AvatarDescriptor.cs" />
-    <Compile Include="EventFilterBehaviour.cs" />
-    <Compile Include="EventFilters.cs" />
-    <Compile Include="Exceptions\AvatarLoadException.cs" />
-    <Compile Include="Tracking\OpenVRWrapper.cs" />
-    <Compile Include="PoseManager.cs" />
-    <Compile Include="EventManager.cs" />
-    <Compile Include="UI\SettingsViewController.General.cs" />
-    <Compile Include="Utilities\Converters\FloatJsonConverter.cs" />
-    <Compile Include="Utilities\Converters\PoseJsonConverter.cs" />
-    <Compile Include="Utilities\Converters\QuaternionJsonConverter.cs" />
-    <Compile Include="Logging\ILogger.cs" />
-    <Compile Include="Logging\IPALogger.cs" />
-    <Compile Include="Utilities\Converters\Texture2DConverter.cs" />
-    <Compile Include="Utilities\ReflectionExtensions.cs" />
-    <Compile Include="Utilities\SettingsManager.cs" />
-    <Compile Include="Utilities\Converters\Vector2JsonConverter.cs" />
-    <Compile Include="Utilities\Converters\ColorJsonConverter.cs" />
-    <Compile Include="Utilities\Converters\Vector3JsonConverter.cs" />
-    <Compile Include="Logging\UnityDebugLogger.cs" />
-    <Compile Include="VRIKManager.cs" />
-    <Compile Include="Plugin.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Avatar\SpawnedAvatar.cs" />
-    <Compile Include="StereoRendering\StereoRenderer.cs" />
-    <Compile Include="StereoRendering\StereoRenderManager.cs" />
-    <Compile Include="StereoRendering\VRRenderEventDetector.cs" />
-    <Compile Include="Tracking\TrackedDeviceManager.cs" />
-    <Compile Include="Tracking\TrackedDeviceState.cs" />
-    <Compile Include="Tracking\TrackedDeviceRole.cs" />
-    <Compile Include="UI\AvatarMenuFlowCoordinator.cs" />
-    <Compile Include="UI\AvatarListViewController.cs" />
-    <Compile Include="UI\MirrorViewController.cs" />
-    <Compile Include="UI\SettingsViewController.cs" />
-    <Compile Include="Utilities\Settings.cs" />
-    <Compile Include="Legacy\IKManager.cs" />
-    <Compile Include="Legacy\IKManagerAdvanced.cs" />
-    <Compile Include="ZenjectHelper.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="manifest.json" />
   </ItemGroup>
   <ItemGroup>
@@ -232,8 +154,6 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\ban.png" />
   </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <AutomatedBuild>false</AutomatedBuild>
   </PropertyGroup>
