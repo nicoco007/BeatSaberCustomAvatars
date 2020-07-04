@@ -30,7 +30,16 @@ namespace CustomAvatar.Utilities.Converters
             if (bytes != null)
             {
                 Texture2D texture = new Texture2D(0, 0);
-                texture.LoadImage(bytes);
+
+                try
+                {
+                    texture.LoadImage(bytes);
+                }
+                catch
+                {
+                    return null;
+                }
+
                 return texture;
             }
             else if (hasExistingValue)
