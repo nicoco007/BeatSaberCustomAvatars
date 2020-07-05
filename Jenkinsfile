@@ -27,9 +27,9 @@ pipeline {
     }
     stage("Build Debug") {
       steps {
-        bat "msbuild Source\\CustomAvatar\\CustomAvatar.csproj /p:Configuration=Debug /p:Platform=AnyCPU /p:AutomatedBuild=true"
-        bat "copy Source\\CustomAvatar\\bin\\Debug\\CustomAvatar.dll Packaging-Debug\\Plugins"
-        bat "copy Source\\CustomAvatar\\bin\\Debug\\CustomAvatar.pdb Packaging-Debug\\Plugins"
+        bat "dotnet build Source\\CustomAvatar\\CustomAvatar.csproj -c Debug -p:AutomatedBuild=true"
+        bat "copy Source\\CustomAvatar\\bin\\Debug\\netstandard2.0\\CustomAvatar.dll Packaging-Debug\\Plugins"
+        bat "copy Source\\CustomAvatar\\bin\\Debug\\netstandard2.0\\CustomAvatar.pdb Packaging-Debug\\Plugins"
         bat "7z a BeatSaberCustomAvatars-${env.GIT_VERSION}-DEBUG.zip -r \"./Packaging-Debug/*\""
         archiveArtifacts "BeatSaberCustomAvatars-${env.GIT_VERSION}-DEBUG.zip"
       }
@@ -42,8 +42,8 @@ pipeline {
     }
     stage("Build Release") {
       steps {
-        bat "msbuild Source\\CustomAvatar\\CustomAvatar.csproj /p:Configuration=Release /p:Platform=AnyCPU /p:AutomatedBuild=true"
-        bat "copy Source\\CustomAvatar\\bin\\Release\\CustomAvatar.dll Packaging-Release\\Plugins"
+        bat "dotnet build Source\\CustomAvatar\\CustomAvatar.csproj -c Release -p:AutomatedBuild=true"
+        bat "copy Source\\CustomAvatar\\bin\\Release\\netstandard2.0\\CustomAvatar.dll Packaging-Release\\Plugins"
         bat "7z a BeatSaberCustomAvatars-${env.GIT_VERSION}-RELEASE.zip -r \"./Packaging-Release/*\""
         archiveArtifacts "BeatSaberCustomAvatars-${env.GIT_VERSION}-RELEASE.zip"
       }
@@ -55,8 +55,8 @@ pipeline {
     }
     stage("Build Editor") {
       steps {
-        bat "msbuild Source\\CustomAvatar-Editor\\CustomAvatar-Editor.csproj /p:Configuration=Release /p:Platform=AnyCPU /p:AutomatedBuild=true"
-        bat "copy Source\\CustomAvatar-Editor\\bin\\Release\\CustomAvatar.dll Packaging-Editor"
+        bat "dotnet build Source\\CustomAvatar-Editor\\CustomAvatar-Editor.csproj -c Release -p:AutomatedBuild=true"
+        bat "copy Source\\CustomAvatar-Editor\\bin\\Release\\netstandard2.0\\CustomAvatar.dll Packaging-Editor"
         bat "7z a BeatSaberCustomAvatars-${env.GIT_VERSION}-Editor.zip -r \"./Packaging-Editor/*\""
         archiveArtifacts "BeatSaberCustomAvatars-${env.GIT_VERSION}-Editor.zip"
       }
