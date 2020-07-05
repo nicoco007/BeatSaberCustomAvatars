@@ -17,6 +17,7 @@ namespace CustomAvatar.Utilities.Converters
                 RenderTexture.active = texture;
                 Graphics.Blit(value, texture);
                 value = texture.GetTexture2D();
+                RenderTexture.active = null;
                 texture.Release();
             }
 
