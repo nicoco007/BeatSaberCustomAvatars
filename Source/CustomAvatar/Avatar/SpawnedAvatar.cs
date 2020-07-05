@@ -360,7 +360,7 @@ namespace CustomAvatar.Avatar
 
             return totalLength;
         }
-
+        
         #pragma warning disable CS0618
         private void ApplyIKManagerFields(VRIKManager vrikManager, IKManager ikManager)
         {
@@ -407,38 +407,57 @@ namespace CustomAvatar.Avatar
         }
         #pragma warning restore CS0618
 
-        private void SetField<TTarget, TValue>(TTarget target, string fieldName, TValue value)
+        private void SetField(object target, string fieldName, object value)
         {
+            if (target == null) throw new NullReferenceException(nameof(target));
+            if (fieldName == null) throw new NullReferenceException(nameof(fieldName));
+
             try
             {
-                FieldInfo field = typeof(TTarget).GetField(fieldName);
+                _logger.Trace($"Set {fieldName} = {value}");
+
+                Type targetObjectType = target.GetType();
+                FieldInfo field = targetObjectType.GetField(fieldName);
 
                 if (field == null)
                 {
-                    _logger.Warning($"{fieldName} does not exist on {typeof(TTarget).FullName}");
+                    _logger.Warning($"{fieldName} does not exist on {targetObjectType.FullName}");
                     return;
                 }
+                
+                Type sourceType = value?.GetType();
+                Type targetType = field.FieldType;
 
-                _logger.Trace($"Set {field.Name} = {value}");
-
-                if (field.FieldType.IsEnum)
+                if (value == null && targetType.IsValueType && Nullable.GetUnderlyingType(targetType) == null)
                 {
-                    if (value == null)
+                    _logger.Info($"'{targetType.FullName}' '{targetType.IsValueType}' '{Nullable.GetUnderlyingType(targetType)}'");
+                    _logger.Warning($"Tried setting non-nullable type {targetType.FullName} to null");
+                    return;
+                }
+                
+                if (sourceType != null)
+                {
+                    if (sourceType != targetType)
                     {
-                        _logger.Warning("Tried to set Enum type to null");
-                        return;
+                        _logger.Warning($"Converting value from {sourceType.FullName} to {targetType.FullName}");
                     }
 
-                    Type sourceType = Enum.GetUnderlyingType(typeof(TValue));
-                    Type targetType = Enum.GetUnderlyingType(field.FieldType);
+                    if (sourceType.IsEnum)
+                    {
+                        Type sourceUnderlyingType = Enum.GetUnderlyingType(sourceType);
+                        _logger.Trace($"Underlying type for source {sourceType.FullName} is {sourceUnderlyingType.FullName}");
+                    }
+                }
 
-                    _logger.Trace($"Converting enum value {value.GetType()} ({sourceType}) -> {field.FieldType} ({targetType})");
-                    field.SetValue(target, Convert.ChangeType(value, targetType));
-                }
-                else
+                if (targetType.IsEnum)
                 {
-                    field.SetValue(target, Convert.ChangeType(value, field.FieldType));
+                    Type targetUnderlyingType = Enum.GetUnderlyingType(targetType);
+                    _logger.Trace($"Underlying type for target {targetType.FullName} is {targetUnderlyingType.FullName}");
+
+                    targetType = targetUnderlyingType;
                 }
+                
+                field.SetValue(target, Convert.ChangeType(value, targetType));
             }
             catch (Exception ex)
             {
