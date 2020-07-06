@@ -138,7 +138,7 @@ namespace CustomAvatar.Avatar
             // migrate IKManager/IKManagerAdvanced to VRIKManager
             if (ikManager)
             {
-                if (!vrikManager) vrikManager = gameObject.AddComponent<VRIKManager>();
+                if (!vrikManager) vrikManager = container.InstantiateComponent<VRIKManager>(gameObject);
                 
                 _logger.Warning("IKManager and IKManagerAdvanced are deprecated; please migrate to VRIKManager");
 
