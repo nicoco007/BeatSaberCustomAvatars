@@ -126,8 +126,9 @@ namespace CustomAvatar.Avatar
             _firstPersonExclusions = GetComponentsInChildren<FirstPersonExclusion>();
             _renderers = GetComponentsInChildren<Renderer>();
 
-            supportsFingerTracking = GetComponentInChildren<Animator>() &&
-                                     GetComponentInChildren<PoseManager>();
+            var poseManager = GetComponentInChildren<PoseManager>();
+
+            supportsFingerTracking = poseManager && poseManager.isValid;
 
             VRIKManager vrikManager = GetComponentInChildren<VRIKManager>();
 
