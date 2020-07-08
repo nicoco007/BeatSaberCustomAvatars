@@ -6,12 +6,13 @@ using BeatSaberFinalIK::RootMotion;
 using CustomAvatar.Logging;
 using UnityEngine;
 using UnityEngine.Events;
-#if !EDITOR
-using Zenject;
-#endif
 using static BeatSaberFinalIK::RootMotion.FinalIK.IKSolverVR.Arm;
 using ILogger = CustomAvatar.Logging.ILogger;
 using VRIK = BeatSaberFinalIK::RootMotion.FinalIK.VRIK;
+
+#if !UNITY_EDITOR
+using Zenject;
+#endif
 
 // ReSharper disable UnusedMember.Global
 // ReSharper disable NotAccessedField.Global
@@ -419,13 +420,13 @@ namespace CustomAvatar
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
 
-        #if !EDITOR
+        #if !UNITY_EDITOR
         [Inject]
-        #endif
         private void Inject(ILoggerProvider loggerProvider)
         {
             _logger = loggerProvider.CreateLogger<VRIKManager>();
         }
+        #endif
 
         private void Reset()
         {

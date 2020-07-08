@@ -7,7 +7,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>TRACE;EDITOR</DefineConstants>
+    <DefineConstants>TRACE;UNITY_EDITOR</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="DynamicBone">
