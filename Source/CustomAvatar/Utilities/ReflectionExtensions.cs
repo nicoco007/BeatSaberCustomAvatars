@@ -5,21 +5,6 @@ namespace CustomAvatar.Utilities
 {
     internal static class ReflectionExtensions
     {
-        internal static T GetFieldValue<T>(this object obj, string fieldName)
-        {
-            if (obj == null) throw new ArgumentNullException(nameof(obj));
-            if (string.IsNullOrEmpty(fieldName)) throw new ArgumentNullException(nameof(fieldName));
-
-            FieldInfo field = obj.GetType().GetField(fieldName, BindingFlags.Public | BindingFlags.Instance);
-
-            if (field == null)
-            {
-                throw new InvalidOperationException($"Public instance field '{fieldName}' does not exist");
-            }
-
-            return (T) field.GetValue(obj);
-        }
-
         internal static TResult GetPrivateField<TResult>(this object obj, string fieldName)
         {
             if (obj == null)

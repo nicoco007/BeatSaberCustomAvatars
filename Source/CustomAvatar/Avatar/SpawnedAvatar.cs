@@ -5,11 +5,9 @@ using System.Reflection;
 using AvatarScriptPack;
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
-using CustomAvatar.Utilities;
 using UnityEngine;
 using Zenject;
 using ILogger = CustomAvatar.Logging.ILogger;
-using VRIK = BeatSaberFinalIK::RootMotion.FinalIK.VRIK;
 
 namespace CustomAvatar.Avatar
 {
@@ -272,9 +270,9 @@ namespace CustomAvatar.Avatar
 
         private void FixTrackingReferences(VRIKManager vrikManager)
         {
-            Vector3 headOffset      = GetTargetOffset(vrikManager, nameof(VRIK.References.head),      nameof(VRIKManager.solver_spine_headTarget));
-            Vector3 leftHandOffset  = GetTargetOffset(vrikManager, nameof(VRIK.References.leftHand),  nameof(VRIKManager.solver_leftArm_target));
-            Vector3 rightHandOffset = GetTargetOffset(vrikManager, nameof(VRIK.References.rightHand), nameof(VRIKManager.solver_rightArm_target));
+            Vector3 headOffset      = GetTargetOffset("Head",       vrikManager.references_head,      vrikManager.solver_spine_headTarget);
+            Vector3 leftHandOffset  = GetTargetOffset("Left Hand",  vrikManager.references_leftHand,  vrikManager.solver_leftArm_target);
+            Vector3 rightHandOffset = GetTargetOffset("Right Hand", vrikManager.references_rightHand, vrikManager.solver_rightArm_target);
             
             // only warn if offset is larger than 1 mm
             if (headOffset.magnitude > 0.001f)
@@ -300,14 +298,11 @@ namespace CustomAvatar.Avatar
         /// <summary>
         /// Gets the offset between the target and the actual bone. Avoids issues when using just the tracking reference transform for calculations.
         /// </summary>
-        private Vector3 GetTargetOffset(VRIKManager vrikManager, string referenceName, string targetName)
+        private Vector3 GetTargetOffset(string name, Transform reference, Transform target)
         {
-            Transform reference = vrikManager.GetFieldValue<Transform>("references_" + referenceName);
-            Transform target = vrikManager.GetFieldValue<Transform>(targetName);
-
             if (!reference)
             {
-                _logger.Warning($"Could not find '{referenceName}' reference");
+                _logger.Warning($"Could not find {name} reference");
                 return Vector3.zero;
             }
 
