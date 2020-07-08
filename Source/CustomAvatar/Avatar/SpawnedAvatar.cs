@@ -92,7 +92,7 @@ namespace CustomAvatar.Avatar
                     SetChildrenToLayer(AvatarLayers.kAlwaysVisible);
                     break;
 
-                case FirstPersonVisibility.VisibleWithExclusions:
+                case FirstPersonVisibility.VisibleWithExclusionsApplied:
                     SetChildrenToLayer(AvatarLayers.kAlwaysVisible);
                     ApplyFirstPersonExclusions();
                     break;

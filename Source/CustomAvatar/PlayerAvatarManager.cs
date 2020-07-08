@@ -186,7 +186,7 @@ namespace CustomAvatar
 
             ResizeCurrentAvatar();
             
-            currentlySpawnedAvatar.UpdateFirstPersonVisibility(_settings.isAvatarVisibleInFirstPerson ? FirstPersonVisibility.VisibleWithExclusions : FirstPersonVisibility.None);
+            currentlySpawnedAvatar.UpdateFirstPersonVisibility(_settings.isAvatarVisibleInFirstPerson ? FirstPersonVisibility.VisibleWithExclusionsApplied : FirstPersonVisibility.None);
 
             avatarChanged?.Invoke(currentlySpawnedAvatar);
         }
@@ -231,7 +231,7 @@ namespace CustomAvatar
         {
             if (!currentlySpawnedAvatar) return;
 
-            currentlySpawnedAvatar.UpdateFirstPersonVisibility(enable ? FirstPersonVisibility.VisibleWithExclusions : FirstPersonVisibility.None);
+            currentlySpawnedAvatar.UpdateFirstPersonVisibility(enable ? FirstPersonVisibility.VisibleWithExclusionsApplied : FirstPersonVisibility.None);
         }
 
         private void OnSceneLoaded(Scene newScene, LoadSceneMode mode)
