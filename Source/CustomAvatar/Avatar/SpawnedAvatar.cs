@@ -145,7 +145,15 @@ namespace CustomAvatar.Avatar
                 Destroy(ikManager);
             }
 
-            supportsFullBodyTracking = transform.Find("Pelvis") || transform.Find("LeftLeg") || transform.Find("RightLeg");
+            head      = transform.Find("Head");
+            body      = transform.Find("Body");
+            leftHand  = transform.Find("LeftHand");
+            rightHand = transform.Find("RightHand");
+            leftLeg   = transform.Find("LeftLeg");
+            rightLeg  = transform.Find("RightLeg");
+            pelvis    = transform.Find("Pelvis");
+
+            supportsFullBodyTracking = pelvis || leftLeg || rightLeg;
 
             if (vrikManager)
             {
@@ -182,25 +190,11 @@ namespace CustomAvatar.Avatar
             _gameScenesManager.transitionDidFinishEvent += OnTransitionDidFinish;
         }
 
-        private void Start()
-        {
-            head      = transform.Find("Head");
-            body      = transform.Find("Body");
-            leftHand  = transform.Find("LeftHand");
-            rightHand = transform.Find("RightHand");
-            leftLeg   = transform.Find("LeftLeg");
-            rightLeg  = transform.Find("RightLeg");
-            pelvis    = transform.Find("Pelvis");
-        }
-
         private void OnDestroy()
         {
             _gameScenesManager.transitionDidFinishEvent -= OnTransitionDidFinish;
 
-            if (input is IDisposable disposableInput)
-            {
-                disposableInput.Dispose();
-            }
+            input.Dispose();
 
             Destroy(gameObject);
         }
@@ -256,8 +250,6 @@ namespace CustomAvatar.Avatar
 
         private float GetEyeHeight()
         {
-            Transform head = transform.Find("Head");
-
             if (!head)
             {
                 _logger.Error("Avatar does not have a head tracking reference");
@@ -279,19 +271,19 @@ namespace CustomAvatar.Avatar
             {
                 // manually putting each coordinate gives more resolution
                 _logger.Warning($"Head bone and target are not at the same position; offset: ({headOffset.x}, {headOffset.y}, {headOffset.z})");
-                transform.Find("Head").position -= headOffset;
+                head.position -= headOffset;
             }
 
             if (leftHandOffset.magnitude > 0.001f)
             {
                 _logger.Warning($"Left hand bone and target are not at the same position; offset: ({leftHandOffset.x}, {leftHandOffset.y}, {leftHandOffset.z})");
-                transform.Find("LeftHand").position -= headOffset;
+                leftHand.position -= headOffset;
             }
 
             if (rightHandOffset.magnitude > 0.001f)
             {
                 _logger.Warning($"Right hand bone and target are not at the same position; offset: ({rightHandOffset.x}, {rightHandOffset.y}, {rightHandOffset.z})");
-                transform.Find("RightHand").position -= headOffset;
+                rightHand.position -= headOffset;
             }
         }
 
@@ -329,12 +321,10 @@ namespace CustomAvatar.Avatar
             Transform leftShoulder = animator.GetBoneTransform(HumanBodyBones.LeftShoulder);
             Transform leftUpperArm = animator.GetBoneTransform(HumanBodyBones.LeftUpperArm);
             Transform leftLowerArm = animator.GetBoneTransform(HumanBodyBones.LeftLowerArm);
-            Transform leftHand = transform.Find("LeftHand");
 
             Transform rightShoulder = animator.GetBoneTransform(HumanBodyBones.RightShoulder);
             Transform rightUpperArm = animator.GetBoneTransform(HumanBodyBones.RightUpperArm);
             Transform rightLowerArm = animator.GetBoneTransform(HumanBodyBones.RightLowerArm);
-            Transform rightHand = transform.Find("RightHand");
 
             if (!leftShoulder || !leftUpperArm || !leftLowerArm || !rightShoulder || !rightUpperArm || !rightLowerArm)
             {

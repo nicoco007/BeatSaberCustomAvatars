@@ -41,10 +41,7 @@ namespace CustomAvatar.Avatar
             _avatar = avatar;
             _vrPlatformHelper = vrPlatformHelper;
             _tailor = tailor;
-        }
 
-        private void Start()
-        {
             if (_avatar.pelvis) _initialPelvisPose = new Pose(_avatar.pelvis.position, _avatar.pelvis.rotation);
             if (_avatar.leftLeg) _initialLeftFootPose = new Pose(_avatar.leftLeg.position, _avatar.leftLeg.rotation);
             if (_avatar.rightLeg) _initialRightFootPose = new Pose(_avatar.rightLeg.position, _avatar.rightLeg.rotation);
