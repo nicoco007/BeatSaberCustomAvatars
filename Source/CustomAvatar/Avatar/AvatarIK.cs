@@ -121,9 +121,9 @@ namespace CustomAvatar.Avatar
                 if (!dynamicBone.enabled) continue;
 
                 // setting m_Weight prevents the integrated calls to PreUpdate and UpdateDynamicBones from taking effect
-                dynamicBone.SetPrivateField("m_Weight", 1);
+                _weightField.SetValue(dynamicBone, 1);
                 _updateDynamicBonesDelegate(dynamicBone, Time.deltaTime);
-                dynamicBone.SetPrivateField("m_Weight", 0);
+                _weightField.SetValue(dynamicBone, 0);
             }
         }
 
