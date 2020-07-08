@@ -426,7 +426,6 @@ namespace CustomAvatar.Avatar
 
                 if (value == null && targetType.IsValueType && Nullable.GetUnderlyingType(targetType) == null)
                 {
-                    _logger.Info($"'{targetType.FullName}' '{targetType.IsValueType}' '{Nullable.GetUnderlyingType(targetType)}'");
                     _logger.Warning($"Tried setting non-nullable type {targetType.FullName} to null");
                     return;
                 }
