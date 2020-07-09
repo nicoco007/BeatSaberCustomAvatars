@@ -5,9 +5,7 @@
     <AssemblyName>CustomAvatar</AssemblyName>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>TRACE;UNITY_EDITOR</DefineConstants>
+    <DefineConstants>UNITY_EDITOR</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="DynamicBone">
