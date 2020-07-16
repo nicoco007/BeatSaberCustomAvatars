@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.IO;
 using UnityEngine;
 
@@ -7,18 +6,57 @@ namespace CustomAvatar.Avatar
 {
     internal class AvatarInfo
     {
-        [JsonProperty] public readonly string name;
-        [JsonProperty] public readonly string author;
-        [JsonProperty] public readonly Texture2D icon;
-        [JsonProperty] public readonly string fileName;
-        [JsonProperty] public readonly long size;
-        [JsonProperty] public readonly DateTime created;
-        [JsonProperty] public readonly DateTime modified;
+        /// <summary>
+        /// Name of the avatar.
+        /// </summary>
+        public readonly string name;
 
-        [JsonIgnore] public bool isValid => !string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(author) && icon && !string.IsNullOrEmpty(fileName) && size > 0 && !created.Equals(default) && !modified.Equals(default);
+        /// <summary>
+        /// Avatar author's name.
+        /// </summary>
+        public readonly string author;
 
-        [JsonConstructor]
-        private AvatarInfo() { }
+        /// <summary>
+        /// Avatar icon.
+        /// </summary>
+        public readonly Texture2D icon;
+
+        /// <summary>
+        /// File name of the avatar.
+        /// </summary>
+        public readonly string fileName;
+
+        /// <summary>
+        /// File size of the avatar.
+        /// </summary>
+        public readonly long fileSize;
+
+        /// <summary>
+        /// Date/time at which the avatar file was created.
+        /// </summary>
+        public readonly DateTime created;
+
+        /// <summary>
+        /// Date/time at which the avatar file was last modified.
+        /// </summary>
+        public readonly DateTime lastModified;
+
+        /// <summary>
+        /// Date/time at which this information was read from disk.
+        /// </summary>
+        public readonly DateTime timestamp;
+
+        internal AvatarInfo(string name, string author, Texture2D icon, string fileName, long fileSize, DateTime created, DateTime lastModified, DateTime timestamp)
+        {
+            this.name = name;
+            this.author = author;
+            this.icon = icon;
+            this.fileName = fileName;
+            this.fileSize = fileSize;
+            this.created = created;
+            this.lastModified = lastModified;
+            this.timestamp = timestamp;
+        }
 
         public AvatarInfo(LoadedAvatar avatar)
         {
@@ -29,9 +67,11 @@ namespace CustomAvatar.Avatar
             var fileInfo = new FileInfo(avatar.fullPath);
 
             fileName = fileInfo.Name;
-            size = fileInfo.Length;
+            fileSize = fileInfo.Length;
             created = fileInfo.CreationTimeUtc;
-            modified = fileInfo.LastWriteTimeUtc;
+            lastModified = fileInfo.LastWriteTimeUtc;
+
+            timestamp = DateTime.Now;
         }
 
         public static bool operator ==(AvatarInfo left, AvatarInfo right)
@@ -50,23 +90,25 @@ namespace CustomAvatar.Avatar
 
         public bool IsForFile(string filePath)
         {
+            if (!File.Exists(filePath)) return false;
+
             var fileInfo = new FileInfo(filePath);
 
-            return fileName == fileInfo.Name && size == fileInfo.Length && created == fileInfo.CreationTimeUtc && modified == fileInfo.LastWriteTimeUtc;
+            return fileName == fileInfo.Name && fileSize == fileInfo.Length && created == fileInfo.CreationTimeUtc && lastModified == fileInfo.LastWriteTimeUtc;
         }
 
         public override bool Equals(object obj)
         {
             if (!(obj is AvatarInfo other)) return false;
 
-            return name == other.name && author == other.author && fileName == other.fileName && size == other.size && created == other.created && modified == other.modified;
+            return name == other.name && author == other.author && fileName == other.fileName && fileSize == other.fileSize && created == other.created && lastModified == other.lastModified && other.timestamp == timestamp;
         }
 
         public override int GetHashCode()
         {
             int hash = 23;
 
-            var fields = new object[] { name, author, icon, fileName, size, created, modified };
+            var fields = new object[] { name, author, icon, fileName, fileSize, created, lastModified, timestamp };
 
             unchecked
             {

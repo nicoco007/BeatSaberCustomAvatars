@@ -2,13 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using CustomAvatar.Avatar;
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
-using CustomAvatar.Utilities.Converters;
-using Newtonsoft.Json;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
 using ILogger = CustomAvatar.Logging.ILogger;
@@ -19,7 +17,9 @@ namespace CustomAvatar
     public class PlayerAvatarManager : IDisposable
     {
         public static readonly string kCustomAvatarsPath = Path.GetFullPath("CustomAvatars");
-        public static readonly string kAvatarInfoCacheFilePath = Path.GetFullPath(Path.Combine("UserData", "CustomAvatars.Cache.json"));
+        public static readonly string kAvatarInfoCacheFilePath = Path.Combine(kCustomAvatarsPath, "cache.db");
+        public static readonly byte[] kCacheFileMagic = { 0x42, 0x53, 0x43, 0x41, 0x44, 0x42  }; // Beat Saber Custom Avatars Database
+        public static readonly byte kCacheFileVersion = 1;
 
         internal SpawnedAvatar currentlySpawnedAvatar { get; private set; }
 
@@ -66,16 +66,6 @@ namespace CustomAvatar
             BeatSaberEvents.playerHeightChanged -= OnPlayerHeightChanged;
 
             SaveAvatarInfosToFile();
-        }
-
-        private JsonSerializer GetSerializer()
-        {
-            return new JsonSerializer
-            {
-                Formatting = Formatting.None,
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                Converters = { new Vector2JsonConverter(), new Vector3JsonConverter(), new QuaternionJsonConverter(), new PoseJsonConverter(), new FloatJsonConverter(), new ColorJsonConverter(), new Texture2DConverter() }
-            };
         }
 
         internal void GetAvatarInfosAsync(Action<AvatarInfo> success = null, Action<Exception> error = null)
@@ -271,29 +261,64 @@ namespace CustomAvatar
             {
                 _logger.Info($"Loading cached avatar info from '{kAvatarInfoCacheFilePath}'");
 
-                // storing in JSON isn't incredibly efficient but I'm lazy
-                using (var reader = new StreamReader(kAvatarInfoCacheFilePath, Encoding.UTF8))
-                using (var jsonReader = new JsonTextReader(reader))
+                using (var stream = new FileStream(kAvatarInfoCacheFilePath, FileMode.Open, FileAccess.Read))
+                using (var reader = new BinaryReader(stream))
                 {
-                    var serializer = GetSerializer();
-                    var avatarInfos = serializer.Deserialize<AvatarInfo[]>(jsonReader);
-
-                    if (avatarInfos == null) return;
-
-                    foreach (AvatarInfo avatarInfo in avatarInfos)
+                    if (!reader.ReadBytes(kCacheFileMagic.Length).SequenceEqual(kCacheFileMagic))
                     {
-                        if (!avatarInfo.isValid) continue;
+                        _logger.Warning($"Invalid cache file magic");
+                        return;
+                    }
+
+                    if (reader.ReadByte() != kCacheFileVersion)
+                    {
+                        _logger.Warning($"Invalid cache file version");
+                        return;
+                    }
+
+                    int count = reader.ReadInt32();
+
+                    _logger.Trace($"Reading {count} cached infos");
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        var avatarInfo = new AvatarInfo(
+                            reader.ReadString(),
+                            reader.ReadString(),
+                            BytesToTexture2D(reader.ReadBytes(reader.ReadInt32())),
+                            reader.ReadString(),
+                            reader.ReadInt64(),
+                            DateTime.FromBinary(reader.ReadInt64()),
+                            DateTime.FromBinary(reader.ReadInt64()),
+                            DateTime.FromBinary(reader.ReadInt64())
+                        );
 
                         string fullPath = Path.Combine(kCustomAvatarsPath, avatarInfo.fileName);
 
-                        if (!File.Exists(fullPath)) continue;
-                        if (!avatarInfo.IsForFile(fullPath)) continue;
+                        if (!File.Exists(fullPath))
+                        {
+                            _logger.Notice($"File '{avatarInfo.fileName}' no longer exists; skipped");
+                            continue;
+                        }
 
-                        _logger.Info($"Got cached info for '{fullPath}'");
+                        if (!avatarInfo.IsForFile(fullPath))
+                        {
+                            _logger.Notice($"Info for '{avatarInfo.fileName}' is outdated; skipped");
+                            continue;
+                        }
+
+                        _logger.Trace($"Got cached info for '{avatarInfo.fileName}'");
 
                         if (_avatarInfos.ContainsKey(avatarInfo.fileName))
                         {
-                            _avatarInfos[avatarInfo.fileName] = avatarInfo;
+                            if (_avatarInfos[avatarInfo.fileName].timestamp > avatarInfo.timestamp)
+                            {
+                                _logger.Notice($"Current info for '{avatarInfo.fileName}' is more recent; skipped");
+                            }
+                            else
+                            {
+                                _avatarInfos[avatarInfo.fileName] = avatarInfo;
+                            }
                         }
                         else
                         {
@@ -311,6 +336,7 @@ namespace CustomAvatar
 
         private void SaveAvatarInfosToFile()
         {
+            // remove files that no longer exist
             foreach (string fileName in _avatarInfos.Keys.ToList())
             {
                 if (!File.Exists(Path.Combine(kCustomAvatarsPath, fileName)))
@@ -321,20 +347,81 @@ namespace CustomAvatar
 
             try
             {
-                _logger.Info($"Saving cached avatar info to '{kAvatarInfoCacheFilePath}'");
+                _logger.Info($"Saving avatar info cache to '{kAvatarInfoCacheFilePath}'");
 
-                using (var writer = new StreamWriter(kAvatarInfoCacheFilePath, false, Encoding.UTF8))
-                using (var jsonWriter = new JsonTextWriter(writer))
+                using (var stream = new FileStream(kAvatarInfoCacheFilePath, FileMode.Create, FileAccess.Write))
+                using (var writer = new BinaryWriter(stream))
                 {
-                    var serializer = GetSerializer();
-                    serializer.Serialize(jsonWriter, _avatarInfos.Values);
+                    writer.Write(kCacheFileMagic);
+                    writer.Write(kCacheFileVersion);
+                    writer.Write(_avatarInfos.Count);
+
+                    foreach (AvatarInfo avatarInfo in _avatarInfos.Values)
+                    {
+                        writer.Write(avatarInfo.name);
+                        writer.Write(avatarInfo.author);
+
+                        byte[] textureBytes = BytesFromTexture2D(avatarInfo.icon);
+                        writer.Write(textureBytes.Length);
+                        writer.Write(textureBytes);
+
+                        writer.Write(avatarInfo.fileName);
+                        writer.Write(avatarInfo.fileSize);
+                        writer.Write(avatarInfo.created.ToBinary());
+                        writer.Write(avatarInfo.lastModified.ToBinary());
+                        writer.Write(avatarInfo.timestamp.ToBinary());
+                    }
                 }
             }
             catch (Exception ex)
             {
-                _logger.Error("Failed to save cached avatar info");
+                _logger.Error("Failed to save avatar info cache");
                 _logger.Error(ex);
             }
+        }
+
+        private byte[] BytesFromTexture2D(Texture2D texture)
+        {
+            if (texture == null) return new byte[0];
+
+            float ratio = Mathf.Min(1f, 256f / texture.width, 256f / texture.height);
+            int width = Mathf.RoundToInt(texture.width * ratio);
+            int height = Mathf.RoundToInt(texture.height * ratio);
+
+            if (ratio < 1)
+            {
+                _logger.Trace($"Resizing texture with ratio: {ratio} (before: {texture.width} × {texture.height}, after: {width} × {height})");
+            }
+
+            if (ratio < 1 || !texture.isReadable)
+            {
+                RenderTexture renderTexture = new RenderTexture(width, height, 0, RenderTextureFormat.ARGB32);
+                RenderTexture.active = renderTexture;
+                Graphics.Blit(texture, renderTexture);
+                texture = renderTexture.GetTexture2D();
+                RenderTexture.active = null;
+                renderTexture.Release();
+            }
+            
+            return texture.EncodeToPNG();
+        }
+
+        private Texture2D BytesToTexture2D(byte[] bytes)
+        {
+            if (bytes.Length == 0) return null;
+
+            Texture2D texture = new Texture2D(0, 0, TextureFormat.ARGB32, false);
+
+            try
+            {
+                texture.LoadImage(bytes);
+            }
+            catch
+            {
+                return null;
+            }
+
+            return texture;
         }
     }
 }
