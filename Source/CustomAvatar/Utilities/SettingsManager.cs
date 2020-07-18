@@ -7,20 +7,27 @@ using System.Linq;
 
 namespace CustomAvatar.Utilities
 {
-    internal class SettingsManager
+    internal class SettingsManager : IDisposable
     {
         public readonly string kSettingsPath = Path.Combine(Environment.CurrentDirectory, "UserData", "CustomAvatars.json");
 
-        private bool _hasReset;
+        public Settings settings;
 
         private ILogger _logger;
 
         private SettingsManager(ILoggerProvider loggerProvider)
         {
             _logger = loggerProvider.CreateLogger<SettingsManager>();
+
+            Load();
         }
 
-        public Settings Load()
+        public void Dispose()
+        {
+            Save();
+        }
+
+        public void Load()
         {
             _logger.Info("Loading settings from " + kSettingsPath);
 
@@ -28,7 +35,7 @@ namespace CustomAvatar.Utilities
             {
                 _logger.Info("File does not exist, using default settings");
 
-                return new Settings();
+                settings = new Settings();
             }
 
             try
@@ -37,7 +44,7 @@ namespace CustomAvatar.Utilities
                 using (var jsonReader = new JsonTextReader(reader))
                 {
                     var serializer = GetSerializer();
-                    return serializer.Deserialize<Settings>(jsonReader) ?? new Settings();
+                    settings = serializer.Deserialize<Settings>(jsonReader) ?? new Settings();
                 }
             }
             catch (Exception ex)
@@ -45,15 +52,12 @@ namespace CustomAvatar.Utilities
                 _logger.Error("Failed to load settings from file; using default settings");
                 _logger.Error(ex);
 
-                _hasReset = true;
-                return new Settings();
+                settings = new Settings();
             }
         }
 
-        public void Save(Settings settings)
+        public void Save()
         {
-            if (_hasReset) return;
-
             foreach (string fileName in settings.avatarSpecificSettings.Keys.ToList())
             {
                 if (!File.Exists(Path.Combine(PlayerAvatarManager.kCustomAvatarsPath, fileName)) || Path.IsPathRooted(fileName))

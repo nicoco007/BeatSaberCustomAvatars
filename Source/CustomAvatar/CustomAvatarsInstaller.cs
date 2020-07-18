@@ -25,8 +25,8 @@ namespace CustomAvatar
             Container.Bind<ILoggerProvider>().FromMethod((context) => context.Container.Instantiate<IPALoggerProvider>(new object[] { _logger })).AsTransient();
 
             // settings
-            Container.Bind<SettingsManager>().AsSingle();
-            Container.Bind<Settings>().FromMethod((context) => context.Container.Resolve<SettingsManager>().Load()).AsSingle();
+            Container.BindInterfacesAndSelfTo<SettingsManager>().AsSingle();
+            Container.Bind<Settings>().FromMethod((context) => context.Container.Resolve<SettingsManager>().settings);
             
             // managers & helper classes
             Container.BindInterfacesAndSelfTo<PlayerAvatarManager>().AsSingle();
