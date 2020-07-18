@@ -252,8 +252,8 @@ namespace CustomAvatar.Avatar
         {
             if (!head)
             {
-                _logger.Error("Avatar does not have a head tracking reference");
-                Destroy(this);
+                _logger.Warning("Avatar does not have a head tracking reference");
+                return MainSettingsModelSO.kDefaultPlayerHeight - MainSettingsModelSO.kHeadPosToPlayerHeightOffset;
             }
 
             // many avatars rely on this being global because their root position isn't at (0, 0, 0)
@@ -262,49 +262,37 @@ namespace CustomAvatar.Avatar
 
         private void FixTrackingReferences(VRIKManager vrikManager)
         {
-            Vector3 headOffset      = GetTargetOffset("Head",       vrikManager.references_head,      vrikManager.solver_spine_headTarget);
-            Vector3 leftHandOffset  = GetTargetOffset("Left Hand",  vrikManager.references_leftHand,  vrikManager.solver_leftArm_target);
-            Vector3 rightHandOffset = GetTargetOffset("Right Hand", vrikManager.references_rightHand, vrikManager.solver_rightArm_target);
-            
-            // only warn if offset is larger than 1 mm
-            if (headOffset.magnitude > 0.001f)
-            {
-                // manually putting each coordinate gives more resolution
-                _logger.Warning($"Head bone and target are not at the same position; offset: ({headOffset.x}, {headOffset.y}, {headOffset.z})");
-                head.position -= headOffset;
-            }
-
-            if (leftHandOffset.magnitude > 0.001f)
-            {
-                _logger.Warning($"Left hand bone and target are not at the same position; offset: ({leftHandOffset.x}, {leftHandOffset.y}, {leftHandOffset.z})");
-                leftHand.position -= headOffset;
-            }
-
-            if (rightHandOffset.magnitude > 0.001f)
-            {
-                _logger.Warning($"Right hand bone and target are not at the same position; offset: ({rightHandOffset.x}, {rightHandOffset.y}, {rightHandOffset.z})");
-                rightHand.position -= headOffset;
-            }
+            FixTrackingReference("Head",       head,      vrikManager.references_head,                                          vrikManager.solver_spine_headTarget);
+            FixTrackingReference("Left Hand",  leftHand,  vrikManager.references_leftHand,                                      vrikManager.solver_leftArm_target);
+            FixTrackingReference("Right Hand", rightHand, vrikManager.references_rightHand,                                     vrikManager.solver_rightArm_target);
+            FixTrackingReference("Waist",      pelvis,    vrikManager.references_pelvis,                                        vrikManager.solver_spine_pelvisTarget);
+            FixTrackingReference("Left Foot",  leftLeg,   vrikManager.references_leftToes  ?? vrikManager.references_leftFoot,  vrikManager.solver_leftLeg_target);
+            FixTrackingReference("Right Foot", rightLeg,  vrikManager.references_rightToes ?? vrikManager.references_rightFoot, vrikManager.solver_rightLeg_target);
         }
 
-        /// <summary>
-        /// Gets the offset between the target and the actual bone. Avoids issues when using just the tracking reference transform for calculations.
-        /// </summary>
-        private Vector3 GetTargetOffset(string name, Transform reference, Transform target)
+        private void FixTrackingReference(string name, Transform tracker, Transform reference, Transform target)
         {
             if (!reference)
             {
                 _logger.Warning($"Could not find {name} reference");
-                return Vector3.zero;
+                return;
             }
 
             if (!target)
             {
                 // target will be added automatically, no need to adjust
-                return Vector3.zero;
+                return;
             }
 
-            return target.position - reference.position;
+            Vector3 offset = target.position - reference.position;
+            
+            // only warn if offset is larger than 1 mm
+            if (offset.magnitude > 0.001f)
+            {
+                // manually putting each coordinate gives more resolution
+                _logger.Warning($"{name} bone and target are not at the same position; moving '{tracker.name}' by ({offset.x}, {offset.y}, {offset.z})");
+                tracker.position -= offset;
+            }
         }
 
         /// <summary>
