@@ -290,7 +290,7 @@ namespace CustomAvatar.Avatar
             if (offset.magnitude > 0.001f)
             {
                 // manually putting each coordinate gives more resolution
-                _logger.Warning($"{name} bone and target are not at the same position; moving '{tracker.name}' by ({offset.x}, {offset.y}, {offset.z})");
+                _logger.Warning($"{name} bone and target are not at the same position; moving '{tracker.name}' by ({offset.x:0.000}, {offset.y:0.000}, {offset.z:0.000})");
                 tracker.position -= offset;
             }
         }
