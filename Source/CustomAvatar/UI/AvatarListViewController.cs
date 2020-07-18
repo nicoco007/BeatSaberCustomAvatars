@@ -121,6 +121,7 @@ namespace CustomAvatar.UI
         private void OnAvatarClicked(TableView table, int row)
         {
             _avatarManager.SwitchToAvatarAsync(_avatars[row].fileName);
+            avatarList.tableView.ScrollToCellWithIdx(row, TableViewScroller.ScrollPositionType.Center, true);
         }
 
         private void OnAvatarChanged(SpawnedAvatar avatar)
