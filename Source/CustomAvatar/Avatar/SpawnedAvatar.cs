@@ -5,18 +5,16 @@ using System.Reflection;
 using AvatarScriptPack;
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
-using CustomAvatar.Utilities;
 using UnityEngine;
 using Zenject;
 using ILogger = CustomAvatar.Logging.ILogger;
-using VRIK = BeatSaberFinalIK::RootMotion.FinalIK.VRIK;
 
 namespace CustomAvatar.Avatar
 {
 	public class SpawnedAvatar : MonoBehaviour
 	{
 		public LoadedAvatar avatar { get; private set; }
-		public AvatarInput input { get; private set; }
+		public IAvatarInput input { get; private set; }
 
         public float verticalPosition
         {
@@ -37,7 +35,6 @@ namespace CustomAvatar.Avatar
         public float eyeHeight { get; private set; }
         public float armSpan { get; private set; }
         public bool supportsFingerTracking { get; private set; }
-        public bool isIKAvatar { get; private set; }
         public bool supportsFullBodyTracking { get; private set; }
 
         public Transform head { get; private set; }
@@ -53,18 +50,8 @@ namespace CustomAvatar.Avatar
         public AvatarSRTracking sr { get; private set; }
         public AvatarFingerTracking fingerTracking { get; private set; }
 
-        public bool shouldTrackFullBody =>
-            isIKAvatar &&
-            (
-                _avatarSpecificSettings.bypassCalibration ||
-                !_avatarSpecificSettings.useAutomaticCalibration && _avatarSpecificSettings.fullBodyCalibration.isCalibrated ||
-                _avatarSpecificSettings.useAutomaticCalibration && _settings.automaticCalibration.isCalibrated
-            );
-
         private ILogger _logger;
         private GameScenesManager _gameScenesManager;
-        private Settings _settings;
-        private Settings.AvatarSpecificSettings _avatarSpecificSettings;
 
         private FirstPersonExclusion[] _firstPersonExclusions;
         private Renderer[] _renderers;
@@ -104,7 +91,7 @@ namespace CustomAvatar.Avatar
                     SetChildrenToLayer(AvatarLayers.kAlwaysVisible);
                     break;
 
-                case FirstPersonVisibility.ApplyFirstPersonExclusions:
+                case FirstPersonVisibility.VisibleWithExclusionsApplied:
                     SetChildrenToLayer(AvatarLayers.kAlwaysVisible);
                     ApplyFirstPersonExclusions();
                     break;
@@ -124,7 +111,7 @@ namespace CustomAvatar.Avatar
         }
         
         [Inject]
-        private void Inject(DiContainer container, ILoggerProvider loggerProvider, LoadedAvatar loadedAvatar, AvatarInput avatarInput, GameScenesManager gameScenesManager, Settings settings, Settings.AvatarSpecificSettings avatarSpecificSettings)
+        private void Inject(DiContainer container, ILoggerProvider loggerProvider, LoadedAvatar loadedAvatar, IAvatarInput avatarInput, GameScenesManager gameScenesManager)
         {
             avatar = loadedAvatar ?? throw new ArgumentNullException(nameof(loadedAvatar));
             input = avatarInput ?? throw new ArgumentNullException(nameof(avatarInput));
@@ -133,15 +120,14 @@ namespace CustomAvatar.Avatar
 
             _logger = loggerProvider.CreateLogger<SpawnedAvatar>(loadedAvatar.descriptor.name);
             _gameScenesManager = gameScenesManager;
-            _settings = settings;
-            _avatarSpecificSettings = avatarSpecificSettings;
 
             _eventManager = GetComponent<EventManager>();
             _firstPersonExclusions = GetComponentsInChildren<FirstPersonExclusion>();
             _renderers = GetComponentsInChildren<Renderer>();
 
-            supportsFingerTracking = GetComponentInChildren<Animator>() &&
-                                     GetComponentInChildren<PoseManager>();
+            var poseManager = GetComponentInChildren<PoseManager>();
+
+            supportsFingerTracking = poseManager && poseManager.isValid;
 
             VRIKManager vrikManager = GetComponentInChildren<VRIKManager>();
 
@@ -152,7 +138,7 @@ namespace CustomAvatar.Avatar
             // migrate IKManager/IKManagerAdvanced to VRIKManager
             if (ikManager)
             {
-                if (!vrikManager) vrikManager = gameObject.AddComponent<VRIKManager>();
+                if (!vrikManager) vrikManager = container.InstantiateComponent<VRIKManager>(gameObject);
                 
                 _logger.Warning("IKManager and IKManagerAdvanced are deprecated; please migrate to VRIKManager");
 
@@ -160,8 +146,15 @@ namespace CustomAvatar.Avatar
                 Destroy(ikManager);
             }
 
-            isIKAvatar = vrikManager;
-            supportsFullBodyTracking = transform.Find("Pelvis") || transform.Find("LeftLeg") || transform.Find("RightLeg");
+            head      = transform.Find("Head");
+            body      = transform.Find("Body");
+            leftHand  = transform.Find("LeftHand");
+            rightHand = transform.Find("RightHand");
+            leftLeg   = transform.Find("LeftLeg");
+            rightLeg  = transform.Find("RightLeg");
+            pelvis    = transform.Find("Pelvis");
+
+            supportsFullBodyTracking = pelvis || leftLeg || rightLeg;
 
             if (vrikManager)
             {
@@ -178,10 +171,10 @@ namespace CustomAvatar.Avatar
 
             tracking = container.InstantiateComponent<AvatarTracking>(gameObject);
 
-            if (isIKAvatar)
+            if (avatar.isIKAvatar)
             {
                 ik = container.InstantiateComponent<AvatarIK>(gameObject);
-                sr = container.InstantiateComponent<AvatarSRTracking>(gameObject, new object[] { });
+                sr = container.InstantiateComponent<AvatarSRTracking>(gameObject);
             }
 
             if (supportsFingerTracking)
@@ -199,25 +192,11 @@ namespace CustomAvatar.Avatar
             _gameScenesManager.transitionDidFinishEvent += OnTransitionDidFinish;
         }
 
-        private void Start()
-        {
-            head      = transform.Find("Head");
-            body      = transform.Find("Body");
-            leftHand  = transform.Find("LeftHand");
-            rightHand = transform.Find("RightHand");
-            leftLeg   = transform.Find("LeftLeg");
-            rightLeg  = transform.Find("RightLeg");
-            pelvis    = transform.Find("Pelvis");
-        }
-
         private void OnDestroy()
         {
             _gameScenesManager.transitionDidFinishEvent -= OnTransitionDidFinish;
 
-            if (input is IDisposable disposableInput)
-            {
-                disposableInput.Dispose();
-            }
+            input.Dispose();
 
             Destroy(gameObject);
         }
@@ -251,10 +230,10 @@ namespace CustomAvatar.Avatar
 
         private void SetChildrenToLayer(int layer)
         {
-            foreach (Renderer renderer in _renderers)
+	        foreach (Renderer renderer in _renderers)
             {
                 renderer.gameObject.layer = layer;
-            }
+	        }
         }
 
         private void ApplyFirstPersonExclusions()
@@ -273,12 +252,10 @@ namespace CustomAvatar.Avatar
 
         private float GetEyeHeight()
         {
-            Transform head = transform.Find("Head");
-
             if (!head)
             {
-                _logger.Error("Avatar does not have a head tracking reference");
-                Destroy(this);
+                _logger.Warning("Avatar does not have a head tracking reference");
+                return MainSettingsModelSO.kDefaultPlayerHeight - MainSettingsModelSO.kHeadPosToPlayerHeightOffset;
             }
 
             // many avatars rely on this being global because their root position isn't at (0, 0, 0)
@@ -287,52 +264,37 @@ namespace CustomAvatar.Avatar
 
         private void FixTrackingReferences(VRIKManager vrikManager)
         {
-            Vector3 headOffset      = GetTargetOffset(vrikManager, nameof(VRIK.References.head),      nameof(VRIKManager.solver_spine_headTarget));
-            Vector3 leftHandOffset  = GetTargetOffset(vrikManager, nameof(VRIK.References.leftHand),  nameof(VRIKManager.solver_leftArm_target));
-            Vector3 rightHandOffset = GetTargetOffset(vrikManager, nameof(VRIK.References.rightHand), nameof(VRIKManager.solver_rightArm_target));
-            
-            // only warn if offset is larger than 1 mm
-            if (headOffset.magnitude > 0.001f)
-            {
-                // manually putting each coordinate gives more resolution
-                _logger.Warning($"Head bone and target are not at the same position; offset: ({headOffset.x}, {headOffset.y}, {headOffset.z})");
-                transform.Find("Head").position -= headOffset;
-            }
-
-            if (leftHandOffset.magnitude > 0.001f)
-            {
-                _logger.Warning($"Left hand bone and target are not at the same position; offset: ({leftHandOffset.x}, {leftHandOffset.y}, {leftHandOffset.z})");
-                transform.Find("LeftHand").position -= headOffset;
-            }
-
-            if (rightHandOffset.magnitude > 0.001f)
-            {
-                _logger.Warning($"Right hand bone and target are not at the same position; offset: ({rightHandOffset.x}, {rightHandOffset.y}, {rightHandOffset.z})");
-                transform.Find("RightHand").position -= headOffset;
-            }
+            FixTrackingReference("Head",       head,      vrikManager.references_head,                                          vrikManager.solver_spine_headTarget);
+            FixTrackingReference("Left Hand",  leftHand,  vrikManager.references_leftHand,                                      vrikManager.solver_leftArm_target);
+            FixTrackingReference("Right Hand", rightHand, vrikManager.references_rightHand,                                     vrikManager.solver_rightArm_target);
+            FixTrackingReference("Waist",      pelvis,    vrikManager.references_pelvis,                                        vrikManager.solver_spine_pelvisTarget);
+            FixTrackingReference("Left Foot",  leftLeg,   vrikManager.references_leftToes  ?? vrikManager.references_leftFoot,  vrikManager.solver_leftLeg_target);
+            FixTrackingReference("Right Foot", rightLeg,  vrikManager.references_rightToes ?? vrikManager.references_rightFoot, vrikManager.solver_rightLeg_target);
         }
 
-        /// <summary>
-        /// Gets the offset between the target and the actual bone. Avoids issues when using just the tracking reference transform for calculations.
-        /// </summary>
-        private Vector3 GetTargetOffset(VRIKManager vrikManager, string referenceName, string targetName)
+        private void FixTrackingReference(string name, Transform tracker, Transform reference, Transform target)
         {
-            Transform reference = vrikManager.GetFieldValue<Transform>("references_" + referenceName);
-            Transform target = vrikManager.GetFieldValue<Transform>(targetName);
-
             if (!reference)
             {
-                _logger.Warning($"Could not find '{referenceName}' reference");
-                return Vector3.zero;
+                _logger.Warning($"Could not find {name} reference");
+                return;
             }
 
             if (!target)
             {
                 // target will be added automatically, no need to adjust
-                return Vector3.zero;
+                return;
             }
 
-            return target.position - reference.position;
+            Vector3 offset = target.position - reference.position;
+            
+            // only warn if offset is larger than 1 mm
+            if (offset.magnitude > 0.001f)
+            {
+                // manually putting each coordinate gives more resolution
+                _logger.Warning($"{name} bone and target are not at the same position; moving '{tracker.name}' by ({offset.x:0.000}, {offset.y:0.000}, {offset.z:0.000})");
+                tracker.position -= offset;
+            }
         }
 
         /// <summary>
@@ -349,12 +311,10 @@ namespace CustomAvatar.Avatar
             Transform leftShoulder = animator.GetBoneTransform(HumanBodyBones.LeftShoulder);
             Transform leftUpperArm = animator.GetBoneTransform(HumanBodyBones.LeftUpperArm);
             Transform leftLowerArm = animator.GetBoneTransform(HumanBodyBones.LeftLowerArm);
-            Transform leftHand = transform.Find("LeftHand");
 
             Transform rightShoulder = animator.GetBoneTransform(HumanBodyBones.RightShoulder);
             Transform rightUpperArm = animator.GetBoneTransform(HumanBodyBones.RightUpperArm);
             Transform rightLowerArm = animator.GetBoneTransform(HumanBodyBones.RightLowerArm);
-            Transform rightHand = transform.Find("RightHand");
 
             if (!leftShoulder || !leftUpperArm || !leftLowerArm || !rightShoulder || !rightUpperArm || !rightLowerArm)
             {
@@ -376,7 +336,7 @@ namespace CustomAvatar.Avatar
 
             return totalLength;
         }
-
+        
         #pragma warning disable CS0618
         private void ApplyIKManagerFields(VRIKManager vrikManager, IKManager ikManager)
         {
@@ -423,38 +383,56 @@ namespace CustomAvatar.Avatar
         }
         #pragma warning restore CS0618
 
-        private void SetField<TTarget, TValue>(TTarget target, string fieldName, TValue value)
+        private void SetField(object target, string fieldName, object value)
         {
+            if (target == null) throw new NullReferenceException(nameof(target));
+            if (fieldName == null) throw new NullReferenceException(nameof(fieldName));
+
             try
             {
-                FieldInfo field = typeof(TTarget).GetField(fieldName);
+                _logger.Trace($"Set {fieldName} = {value}");
+
+                Type targetObjectType = target.GetType();
+                FieldInfo field = targetObjectType.GetField(fieldName);
 
                 if (field == null)
                 {
-                    _logger.Warning($"{fieldName} does not exist on {typeof(TTarget).FullName}");
+                    _logger.Warning($"{fieldName} does not exist on {targetObjectType.FullName}");
                     return;
                 }
+                
+                Type sourceType = value?.GetType();
+                Type targetType = field.FieldType;
 
-                _logger.Trace($"Set {field.Name} = {value}");
-
-                if (field.FieldType.IsEnum)
+                if (value == null && targetType.IsValueType && Nullable.GetUnderlyingType(targetType) == null)
                 {
-                    if (value == null)
+                    _logger.Warning($"Tried setting non-nullable type {targetType.FullName} to null");
+                    return;
+                }
+                
+                if (sourceType != null)
+                {
+                    if (sourceType != targetType)
                     {
-                        _logger.Warning("Tried to set Enum type to null");
-                        return;
+                        _logger.Warning($"Converting value from {sourceType.FullName} to {targetType.FullName}");
                     }
 
-                    Type sourceType = Enum.GetUnderlyingType(typeof(TValue));
-                    Type targetType = Enum.GetUnderlyingType(field.FieldType);
+                    if (sourceType.IsEnum)
+                    {
+                        Type sourceUnderlyingType = Enum.GetUnderlyingType(sourceType);
+                        _logger.Trace($"Underlying type for source {sourceType.FullName} is {sourceUnderlyingType.FullName}");
+                    }
+                }
 
-                    _logger.Trace($"Converting enum value {value.GetType()} ({sourceType}) -> {field.FieldType} ({targetType})");
-                    field.SetValue(target, Convert.ChangeType(value, targetType));
-                }
-                else
+                if (targetType.IsEnum)
                 {
-                    field.SetValue(target, Convert.ChangeType(value, field.FieldType));
+                    Type targetUnderlyingType = Enum.GetUnderlyingType(targetType);
+                    _logger.Trace($"Underlying type for target {targetType.FullName} is {targetUnderlyingType.FullName}");
+
+                    targetType = targetUnderlyingType;
                 }
+                
+                field.SetValue(target, Convert.ChangeType(value, targetType));
             }
             catch (Exception ex)
             {

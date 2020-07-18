@@ -13,7 +13,6 @@ using Logger = IPA.Logging.Logger;
 using Object = UnityEngine.Object;
 using BeatSaberMarkupLanguage;
 using CustomAvatar.Logging;
-using CustomAvatar.Tracking;
 using HarmonyLib;
 using ILogger = CustomAvatar.Logging.ILogger;
 
@@ -103,8 +102,6 @@ namespace CustomAvatar
 
             SceneManager.sceneLoaded -= OnSceneLoaded;
             SceneManager.sceneUnloaded -= OnSceneUnloaded;
-
-            _settingsManager.Save(_settings);
         }
 
         private void OnSceneLoaded(Scene newScene, LoadSceneMode mode)
@@ -165,9 +162,7 @@ namespace CustomAvatar
 
             if (_settings.calibrateFullBodyTrackingOnStart && _settings.GetAvatarSettings(_settings.previousAvatarPath).useAutomaticCalibration)
             {
-                var input = new VRPlayerInput(context.Container.Resolve<TrackedDeviceManager>());
-                context.Container.Resolve<AvatarTailor>().CalibrateFullBodyTrackingAuto(input);
-                input.Dispose();
+                context.Container.Resolve<AvatarTailor>().CalibrateFullBodyTrackingAuto();
             }
         }
 

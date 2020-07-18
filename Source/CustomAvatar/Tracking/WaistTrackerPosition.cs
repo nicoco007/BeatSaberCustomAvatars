@@ -2,9 +2,9 @@
 {
     internal enum WaistTrackerPosition
     {
-        Front,
-        Right,
-        Back,
-        Left
+        Front = 0,
+        Left = 90,
+        Back = 180,
+        Right = 270
     }
 }

@@ -6,10 +6,13 @@ using BeatSaberFinalIK::RootMotion;
 using CustomAvatar.Logging;
 using UnityEngine;
 using UnityEngine.Events;
-using Zenject;
 using static BeatSaberFinalIK::RootMotion.FinalIK.IKSolverVR.Arm;
 using ILogger = CustomAvatar.Logging.ILogger;
 using VRIK = BeatSaberFinalIK::RootMotion.FinalIK.VRIK;
+
+#if !UNITY_EDITOR
+using Zenject;
+#endif
 
 // ReSharper disable UnusedMember.Global
 // ReSharper disable NotAccessedField.Global
@@ -417,11 +420,13 @@ namespace CustomAvatar
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
 
+        #if !UNITY_EDITOR
         [Inject]
         private void Inject(ILoggerProvider loggerProvider)
         {
             _logger = loggerProvider.CreateLogger<VRIKManager>();
         }
+        #endif
 
         private void Reset()
         {
@@ -473,30 +478,37 @@ namespace CustomAvatar
                     FieldInfo targetField = target.GetType().GetField(parts[parts.Length - 1]);
                     object value = sourceField.GetValue(this);
 
+                    Type sourceType = sourceField.FieldType;
+                    Type targetType = targetField.FieldType;
+
                     _logger.Trace($"Set {string.Join(".", parts)} = {value}");
 
-                    if (targetField.FieldType.IsEnum && sourceField.FieldType != targetField.FieldType)
+                    if (value == null && targetType.IsValueType && Nullable.GetUnderlyingType(targetType) == null)
                     {
-                        Type sourceType = Enum.GetUnderlyingType(sourceField.FieldType);
-                        Type targetType = Enum.GetUnderlyingType(targetField.FieldType);
-
-                        if (sourceType != targetType)
-                        {
-                            _logger.Warning($"Underlying types for {sourceField.Name} ({sourceType}) and {targetField.Name} ({targetType}) are not the same");
-                        }
-
-                        _logger.Trace($"Converting enum value {sourceField.FieldType} ({sourceType}) -> {targetField.FieldType} ({targetType})");
-                        targetField.SetValue(target, Convert.ChangeType(value, targetType));
+                        _logger.Warning($"Tried setting non-nullable type {targetType.FullName} to null");
+                        return;
                     }
-                    else
+                
+                    if (sourceType != targetType)
                     {
-                        if (sourceField.FieldType != targetField.FieldType)
-                        {
-                            _logger.Warning($"Types for {sourceField.Name} ({sourceField.FieldType}) and {targetField.Name} ({targetField.FieldType}) are not the same");
-                        }
-
-                        targetField.SetValue(target, value);
+                        _logger.Warning($"Converting value from {sourceType.FullName} to {targetType.FullName}");
                     }
+
+                    if (sourceType.IsEnum)
+                    {
+                        Type sourceUnderlyingType = Enum.GetUnderlyingType(sourceType);
+                        _logger.Trace($"Underlying type for source {sourceType.FullName} is {sourceUnderlyingType.FullName}");
+                    }
+
+                    if (targetType.IsEnum)
+                    {
+                        Type targetUnderlyingType = Enum.GetUnderlyingType(targetType);
+                        _logger.Trace($"Underlying type for target {targetType.FullName} is {targetUnderlyingType.FullName}");
+
+                        targetType = targetUnderlyingType;
+                    }
+                
+                    targetField.SetValue(target, Convert.ChangeType(value, targetType));
                 }
                 catch (Exception ex)
                 {

@@ -6,26 +6,72 @@ namespace CustomAvatar.Avatar
 {
     internal class AvatarInfo
     {
-        internal readonly string name;
-        internal readonly string author;
-        internal readonly Texture2D icon;
-        internal readonly string fullPath;
-        internal readonly long size;
-        internal readonly DateTime created;
-        internal readonly DateTime modified;
+        /// <summary>
+        /// Name of the avatar.
+        /// </summary>
+        public readonly string name;
 
-        internal AvatarInfo(LoadedAvatar avatar)
+        /// <summary>
+        /// Avatar author's name.
+        /// </summary>
+        public readonly string author;
+
+        /// <summary>
+        /// Avatar icon.
+        /// </summary>
+        public readonly Texture2D icon;
+
+        /// <summary>
+        /// File name of the avatar.
+        /// </summary>
+        public readonly string fileName;
+
+        /// <summary>
+        /// File size of the avatar.
+        /// </summary>
+        public readonly long fileSize;
+
+        /// <summary>
+        /// Date/time at which the avatar file was created.
+        /// </summary>
+        public readonly DateTime created;
+
+        /// <summary>
+        /// Date/time at which the avatar file was last modified.
+        /// </summary>
+        public readonly DateTime lastModified;
+
+        /// <summary>
+        /// Date/time at which this information was read from disk.
+        /// </summary>
+        public readonly DateTime timestamp;
+
+        internal AvatarInfo(string name, string author, Texture2D icon, string fileName, long fileSize, DateTime created, DateTime lastModified, DateTime timestamp)
+        {
+            this.name = name;
+            this.author = author;
+            this.icon = icon;
+            this.fileName = fileName;
+            this.fileSize = fileSize;
+            this.created = created;
+            this.lastModified = lastModified;
+            this.timestamp = timestamp;
+        }
+
+        public AvatarInfo(LoadedAvatar avatar)
         {
             name = avatar.descriptor.name;
             author = avatar.descriptor.author;
             icon = avatar.descriptor.cover ? avatar.descriptor.cover.texture : null;
-            fullPath = avatar.fullPath;
 
-            var fileInfo = new FileInfo(fullPath);
+            var fileInfo = new FileInfo(avatar.fullPath);
 
-            size = fileInfo.Length;
+            fileName = fileInfo.Name;
+            fileSize = fileInfo.Length;
             created = fileInfo.CreationTimeUtc;
-            modified = fileInfo.LastWriteTimeUtc;
+            lastModified = fileInfo.LastWriteTimeUtc;
+
+            timestamp = DateTime.Now;
         }
 
         public static bool operator ==(AvatarInfo left, AvatarInfo right)
@@ -42,27 +88,36 @@ namespace CustomAvatar.Avatar
             return !left.Equals(right);
         }
 
+        public bool IsForFile(string filePath)
+        {
+            if (!File.Exists(filePath)) return false;
+
+            var fileInfo = new FileInfo(filePath);
+
+            return fileName == fileInfo.Name && fileSize == fileInfo.Length && created == fileInfo.CreationTimeUtc && lastModified == fileInfo.LastWriteTimeUtc;
+        }
+
         public override bool Equals(object obj)
         {
             if (!(obj is AvatarInfo other)) return false;
 
-            return name == other.name && author == other.author && fullPath == other.fullPath && size == other.size && created == other.created && modified == other.modified;
+            return name == other.name && author == other.author && fileName == other.fileName && fileSize == other.fileSize && created == other.created && lastModified == other.lastModified && other.timestamp == timestamp;
         }
 
         public override int GetHashCode()
         {
             int hash = 23;
 
+            var fields = new object[] { name, author, icon, fileName, fileSize, created, lastModified, timestamp };
+
             unchecked
             {
-                if (name != null)     hash = hash * 17 + name.GetHashCode();
-                if (author != null)   hash = hash * 17 + author.GetHashCode();
-                if (icon != null)     hash = hash * 17 + icon.GetHashCode();
-                if (fullPath != null) hash = hash * 17 + fullPath.GetHashCode();
+                foreach (object field in fields)
+                {
+                    if (field == null) continue;
 
-                hash = hash * 17 + size.GetHashCode();
-                hash = hash * 17 + created.GetHashCode();
-                hash = hash * 17 + modified.GetHashCode();
+                    hash = hash * 17 + field.GetHashCode();
+                }
             }
 
             return hash;

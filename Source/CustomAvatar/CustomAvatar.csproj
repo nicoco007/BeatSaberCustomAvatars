@@ -1,33 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8207B0AC-FCA6-47AA-B634-795271F4E5D0}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CustomAvatar</RootNamespace>
     <AssemblyName>CustomAvatar</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>portable</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;PLUGIN</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>PLUGIN</DefineConstants>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AutomatedBuild>false</AutomatedBuild>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
@@ -78,10 +56,6 @@
     <Reference Include="Rendering">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Rendering.dll</HintPath>
     </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
     <Reference Include="Unity.TextMeshPro, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Unity.TextMeshPro.dll</HintPath>
@@ -144,127 +118,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EyeTrackingManager.cs" />
-    <Compile Include="KeyboardInputHandler.cs" />
-    <Compile Include="SRApi\Eye\SRanipal_Eye.cs" />
-    <Compile Include="SRApi\Eye\SRanipal_EyeData.cs" />
-    <Compile Include="SRApi\Eye\SRanipal_EyeDataType_v1.cs" />
-    <Compile Include="SRApi\Eye\SRanipal_EyeDataType_v2.cs" />
-    <Compile Include="SRApi\Eye\SRanipal_EyeShapeTableDrawer.cs" />
-    <Compile Include="SRApi\Eye\SRanipal_Eye_API.cs" />
-    <Compile Include="SRApi\Eye\SRanipal_Eye_Enums.cs" />
-    <Compile Include="SRApi\Eye\SRanipal_Eye_Framework.cs" />
-    <Compile Include="SRApi\Eye\SRanipal_Eye_v2.cs" />
-    <Compile Include="SRApi\SRanipal_API.cs" />
-    <Compile Include="SRApi\SRanipal_Enums.cs" />
-    <Compile Include="SRApi\SRWorks_Enums.cs" />
-    <Compile Include="Avatar\AvatarGameplayEventsPlayer.cs" />
-    <Compile Include="Avatar\AvatarIK.cs" />
-    <Compile Include="Avatar\AvatarSRTracking.cs" />
-    <Compile Include="Avatar\AvatarInfo.cs" />
-    <Compile Include="Avatar\AvatarLoader.cs" />
-    <Compile Include="Avatar\AvatarSpawner.cs" />
-    <Compile Include="Avatar\AvatarTracking.cs" />
-    <Compile Include="AvatarLayers.cs" />
-    <Compile Include="Avatar\AvatarFingerTracking.cs" />
-    <Compile Include="Avatar\FirstPersonVisibility.cs" />
-    <Compile Include="BeatSaberEvents.cs" />
-    <Compile Include="CustomAvatarsInstaller.cs" />
-    <Compile Include="Lighting\GameplayLightingController.cs" />
-    <Compile Include="Logging\ILoggerProvider.cs" />
-    <Compile Include="Logging\IPALoggerProvider.cs" />
-    <Compile Include="Lighting\MenuLightingController.cs" />
-    <Compile Include="ShaderLoader.cs" />
-    <Compile Include="Tracking\FingerCurl.cs" />
-    <Compile Include="Tracking\WaistTrackerPosition.cs" />
-    <Compile Include="UIInstaller.cs" />
-    <Compile Include="UI\AvatarListItem.cs" />
-    <Compile Include="PlayerAvatarManager.cs" />
-    <Compile Include="AvatarTailor.cs" />
-    <Compile Include="AvatarResizeMode.cs" />
-    <Compile Include="FirstPersonExclusion.cs" />
-    <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="Legacy\Aliases.cs" />
-    <Compile Include="StereoRendering\MirrorHelper.cs" />
-    <Compile Include="Tracking\AvatarInput.cs" />
-    <Compile Include="Tracking\Extensions.cs" />
-    <Compile Include="Tracking\DeviceUse.cs" />
-    <Compile Include="Tracking\VRPlayerInput.cs" />
-    <Compile Include="UI\SettingsViewController.AutomaticFBT.cs" />
-    <Compile Include="UI\SettingsViewController.AvatarSpecificSettings.cs" />
-    <Compile Include="Avatar\LoadedAvatar.cs" />
-    <Compile Include="AvatarDescriptor.cs" />
-    <Compile Include="EventFilterBehaviour.cs" />
-    <Compile Include="EventFilters.cs" />
-    <Compile Include="Exceptions\AvatarLoadException.cs" />
-    <Compile Include="Tracking\OpenVRWrapper.cs" />
-    <Compile Include="PoseManager.cs" />
-    <Compile Include="EventManager.cs" />
-    <Compile Include="UI\SettingsViewController.General.cs" />
-    <Compile Include="Utilities\Converters\FloatJsonConverter.cs" />
-    <Compile Include="Utilities\Converters\PoseJsonConverter.cs" />
-    <Compile Include="Utilities\Converters\QuaternionJsonConverter.cs" />
-    <Compile Include="Logging\ILogger.cs" />
-    <Compile Include="Logging\IPALogger.cs" />
-    <Compile Include="Utilities\ReflectionExtensions.cs" />
-    <Compile Include="Utilities\SettingsManager.cs" />
-    <Compile Include="Utilities\Converters\Vector2JsonConverter.cs" />
-    <Compile Include="Utilities\Converters\ColorJsonConverter.cs" />
-    <Compile Include="Utilities\Converters\Vector3JsonConverter.cs" />
-    <Compile Include="Logging\UnityDebugLogger.cs" />
-    <Compile Include="VRIKManager.cs" />
-    <Compile Include="Plugin.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Avatar\SpawnedAvatar.cs" />
-    <Compile Include="StereoRendering\StereoRenderer.cs" />
-    <Compile Include="StereoRendering\StereoRenderManager.cs" />
-    <Compile Include="StereoRendering\VRRenderEventDetector.cs" />
-    <Compile Include="Tracking\TrackedDeviceManager.cs" />
-    <Compile Include="Tracking\TrackedDeviceState.cs" />
-    <Compile Include="Tracking\TrackedDeviceRole.cs" />
-    <Compile Include="UI\AvatarMenuFlowCoordinator.cs" />
-    <Compile Include="UI\AvatarListViewController.cs" />
-    <Compile Include="UI\MirrorViewController.cs" />
-    <Compile Include="UI\SettingsViewController.cs" />
-    <Compile Include="Utilities\Settings.cs" />
-    <Compile Include="Legacy\IKManager.cs" />
-    <Compile Include="Legacy\IKManagerAdvanced.cs" />
-    <Compile Include="ZenjectHelper.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="manifest.json" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Views\AvatarList.bsml" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Views\Settings.bsml" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\icon.png" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\mystery-man.png" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\ban.png" />
   </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <AutomatedBuild>false</AutomatedBuild>
-    <PostBuildEvent>if $(AutomatedBuild) equ false (
-  if "$(BeatSaberDir)" neq "" (
-    copy "$(TargetPath)" "$(BeatSaberDir)\Plugins"
-    if "$(Configuration)" equ "Debug" (
-      copy "$(TargetDir)$(TargetName).pdb" "$(BeatSaberDir)\Plugins"
-    )
-  )
-)</PostBuildEvent>
-  </PropertyGroup>
-  <ProjectExtensions>
-    <VisualStudio>
-      <UserProperties manifest_1json__JsonSchema="" />
-    </VisualStudio>
-  </ProjectExtensions>
+  <Target Name="CopyBeatSaberFiles" AfterTargets="AfterBuild" Condition="$(AutomatedBuild) == 'false' and $(BeatSaberDir) != ''">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(BeatSaberDir)\Plugins" />
+    <Copy SourceFiles="$(TargetDir)$(TargetName).pdb" DestinationFolder="$(BeatSaberDir)\Plugins" Condition="$(Configuration) == 'Debug'" />
+  </Target>
 </Project>

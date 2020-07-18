@@ -54,7 +54,7 @@ namespace CustomAvatar.Utilities
         public Mirror mirror { get; private set; } = new Mirror();
         public AutomaticFullBodyCalibration automaticCalibration { get; private set; } = new AutomaticFullBodyCalibration();
         public FullBodyMotionSmoothing fullBodyMotionSmoothing { get; private set; } = new FullBodyMotionSmoothing();
-        [JsonProperty(Order = int.MaxValue)] private Dictionary<string, AvatarSpecificSettings> avatarSpecificSettings = new Dictionary<string, AvatarSpecificSettings>();
+        [JsonProperty(Order = int.MaxValue)] internal Dictionary<string, AvatarSpecificSettings> avatarSpecificSettings = new Dictionary<string, AvatarSpecificSettings>();
 
         public class Lighting
         {
@@ -114,14 +114,14 @@ namespace CustomAvatar.Utilities
             public bool bypassCalibration = false;
         }
 
-        public AvatarSpecificSettings GetAvatarSettings(string fullPath)
+        public AvatarSpecificSettings GetAvatarSettings(string fileName)
         {
-            if (!avatarSpecificSettings.ContainsKey(fullPath))
+            if (!avatarSpecificSettings.ContainsKey(fileName))
             {
-                avatarSpecificSettings.Add(fullPath, new AvatarSpecificSettings());
+                avatarSpecificSettings.Add(fileName, new AvatarSpecificSettings());
             }
 
-            return avatarSpecificSettings[fullPath];
+            return avatarSpecificSettings[fileName];
         }
     }
 }

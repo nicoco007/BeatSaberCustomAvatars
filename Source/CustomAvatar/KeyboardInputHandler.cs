@@ -9,17 +9,15 @@ namespace CustomAvatar
     internal class KeyboardInputHandler : MonoBehaviour
     {
         private Settings _settings;
-        private SettingsManager _settingsManager;
         private PlayerAvatarManager _avatarManager;
         private ILogger _logger;
 
         [Inject]
-        private void Inject(Settings settings, PlayerAvatarManager avatarManager, ILoggerProvider loggerProvider, SettingsManager settingsManager)
+        private void Inject(Settings settings, PlayerAvatarManager avatarManager, ILoggerProvider loggerProvider)
         {
             _settings = settings;
             _avatarManager = avatarManager;
             _logger = loggerProvider.CreateLogger<KeyboardInputHandler>();
-            _settingsManager = settingsManager;
         }
 
         private void Update()
@@ -49,15 +47,6 @@ namespace CustomAvatar
                 _logger.Info($"{(_settings.enableFloorAdjust ? "Enabled" : "Disabled")} floor adjust");
                 _avatarManager.ResizeCurrentAvatar();
             }
-            else if (Input.GetKeyDown(KeyCode.RightAlt))
-            {
-                _settingsManager.Save(_settings);
-            }
-            else if (Input.GetKeyDown(KeyCode.RightControl))
-            {
-                _settings = _settingsManager.Load();
-            }
-
         }
     }
 }

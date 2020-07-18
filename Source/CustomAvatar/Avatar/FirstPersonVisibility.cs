@@ -3,7 +3,7 @@
     public enum FirstPersonVisibility
     {
         Visible,
-        ApplyFirstPersonExclusions,
+        VisibleWithExclusionsApplied,
         None
     }
 }

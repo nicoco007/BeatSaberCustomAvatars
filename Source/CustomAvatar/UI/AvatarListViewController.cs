@@ -120,7 +120,8 @@ namespace CustomAvatar.UI
         [UIAction("avatar-click")]
         private void OnAvatarClicked(TableView table, int row)
         {
-            _avatarManager.SwitchToAvatarAsync(_avatars[row].fullPath);
+            _avatarManager.SwitchToAvatarAsync(_avatars[row].fileName);
+            avatarList.tableView.ScrollToCellWithIdx(row, TableViewScroller.ScrollPositionType.Center, true);
         }
 
         private void OnAvatarChanged(SpawnedAvatar avatar)
@@ -132,13 +133,13 @@ namespace CustomAvatar.UI
         {
             _avatars.Sort((a, b) =>
             {
-                if (string.IsNullOrEmpty(a.fullPath)) return -1;
-                if (string.IsNullOrEmpty(b.fullPath)) return 1;
+                if (string.IsNullOrEmpty(a.fileName)) return -1;
+                if (string.IsNullOrEmpty(b.fileName)) return 1;
 
                 return string.Compare(a.name, b.name, StringComparison.CurrentCulture);
             });
 
-            int currentRow = _avatarManager.currentlySpawnedAvatar ? _avatars.FindIndex(a => a.fullPath == _avatarManager.currentlySpawnedAvatar.avatar.fullPath) : 0;
+            int currentRow = _avatarManager.currentlySpawnedAvatar ? _avatars.FindIndex(a => a.fileName == _avatarManager.currentlySpawnedAvatar.avatar.fileName) : 0;
             
             avatarList.tableView.ReloadData();
             avatarList.tableView.ScrollToCellWithIdx(currentRow, TableViewScroller.ScrollPositionType.Center, true);
