@@ -18,7 +18,7 @@ namespace CustomAvatar
     {
         public static readonly string kCustomAvatarsPath = Path.GetFullPath("CustomAvatars");
         public static readonly string kAvatarInfoCacheFilePath = Path.Combine(kCustomAvatarsPath, "cache.db");
-        public static readonly byte[] kCacheFileMagic = { 0x42, 0x53, 0x43, 0x41, 0x44, 0x42  }; // Beat Saber Custom Avatars Database
+        public static readonly byte[] kCacheFileSignature = { 0x43, 0x41, 0x64, 0x62  }; // Custom Avatars Database (CAdb)
         public static readonly byte kCacheFileVersion = 1;
 
         internal SpawnedAvatar currentlySpawnedAvatar { get; private set; }
@@ -264,7 +264,7 @@ namespace CustomAvatar
                 using (var stream = new FileStream(kAvatarInfoCacheFilePath, FileMode.Open, FileAccess.Read))
                 using (var reader = new BinaryReader(stream))
                 {
-                    if (!reader.ReadBytes(kCacheFileMagic.Length).SequenceEqual(kCacheFileMagic))
+                    if (!reader.ReadBytes(kCacheFileSignature.Length).SequenceEqual(kCacheFileSignature))
                     {
                         _logger.Warning($"Invalid cache file magic");
                         return;
@@ -352,7 +352,7 @@ namespace CustomAvatar
                 using (var stream = new FileStream(kAvatarInfoCacheFilePath, FileMode.Create, FileAccess.Write))
                 using (var writer = new BinaryWriter(stream))
                 {
-                    writer.Write(kCacheFileMagic);
+                    writer.Write(kCacheFileSignature);
                     writer.Write(kCacheFileVersion);
                     writer.Write(_avatarInfos.Count);
 
