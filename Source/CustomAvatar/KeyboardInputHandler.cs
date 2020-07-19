@@ -1,5 +1,5 @@
-﻿using CustomAvatar.Logging;
-using CustomAvatar.Utilities;
+﻿using CustomAvatar.Configuration;
+using CustomAvatar.Logging;
 using UnityEngine;
 using Zenject;
 using ILogger = CustomAvatar.Logging.ILogger;

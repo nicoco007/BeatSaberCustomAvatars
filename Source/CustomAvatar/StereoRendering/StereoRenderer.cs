@@ -3,8 +3,8 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
-using CustomAvatar.Utilities;
 using Zenject;
+using CustomAvatar.Configuration;
 
 namespace CustomAvatar.StereoRendering
 {
@@ -333,6 +333,7 @@ namespace CustomAvatar.StereoRendering
             var leftEyeOffset = new Vector3(-ipd / 2, 0, 0);
             var rightEyeOffset = new Vector3(ipd / 2, 0, 0);
 
+            // TODO provide renderScale from somewhere else
             int hash = detector.GetHashCode();
             int renderWidth = (int)(_settings.mirror.renderScale * detector.camera.pixelWidth);
             int renderHeight = (int)(_settings.mirror.renderScale * detector.camera.pixelHeight);

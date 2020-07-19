@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using UnityEngine;
 
-namespace CustomAvatar.Utilities
+namespace CustomAvatar.Configuration
 {
     // ReSharper disable ClassNeverInstantiated.Global
     // ReSharper disable ClassWithVirtualMembersNeverInherited.Global

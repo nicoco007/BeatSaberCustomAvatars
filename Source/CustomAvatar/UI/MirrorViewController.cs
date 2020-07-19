@@ -1,5 +1,5 @@
+using CustomAvatar.Configuration;
 using CustomAvatar.StereoRendering;
-using CustomAvatar.Utilities;
 using UnityEngine;
 using HMUI;
 using Zenject;

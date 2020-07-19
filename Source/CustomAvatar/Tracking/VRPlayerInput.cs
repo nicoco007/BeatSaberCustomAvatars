@@ -1,6 +1,6 @@
 ﻿using System;
 using CustomAvatar.Avatar;
-using CustomAvatar.Utilities;
+using CustomAvatar.Configuration;
 using DynamicOpenVR.IO;
 using UnityEngine;
 using Zenject;

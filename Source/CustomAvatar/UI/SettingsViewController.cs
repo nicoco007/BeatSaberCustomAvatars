@@ -1,8 +1,8 @@
 using BeatSaberMarkupLanguage.ViewControllers;
 using CustomAvatar.Avatar;
+using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
-using CustomAvatar.Utilities;
 using UnityEngine;
 using Zenject;
 using ILogger = CustomAvatar.Logging.ILogger;

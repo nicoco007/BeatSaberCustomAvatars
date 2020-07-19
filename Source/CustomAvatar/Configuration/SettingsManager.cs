@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using CustomAvatar.Utilities.Converters;
 using System.Linq;
 
-namespace CustomAvatar.Utilities
+namespace CustomAvatar.Configuration
 {
     internal class SettingsManager : IDisposable
     {

@@ -1,9 +1,9 @@
 ﻿using System.Linq;
 using CustomAvatar.Avatar;
+using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.StereoRendering;
 using CustomAvatar.Tracking;
-using CustomAvatar.Utilities;
 using UnityEngine;
 using Zenject;
 using Logger = IPA.Logging.Logger;

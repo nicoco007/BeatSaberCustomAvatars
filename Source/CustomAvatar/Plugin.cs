@@ -5,7 +5,6 @@ using System.Reflection;
 using BeatSaberMarkupLanguage.MenuButtons;
 using CustomAvatar.Lighting;
 using CustomAvatar.UI;
-using CustomAvatar.Utilities;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
@@ -15,6 +14,7 @@ using BeatSaberMarkupLanguage;
 using CustomAvatar.Logging;
 using HarmonyLib;
 using ILogger = CustomAvatar.Logging.ILogger;
+using CustomAvatar.Configuration;
 
 namespace CustomAvatar
 {
@@ -25,7 +25,6 @@ namespace CustomAvatar
         private GameScenesManager _scenesManager;
         private AvatarMenuFlowCoordinator _flowCoordinator;
         private Settings _settings;
-        private SettingsManager _settingsManager;
         private MirrorHelper _mirrorHelper;
 
         private DiContainer _container;
@@ -58,14 +57,13 @@ namespace CustomAvatar
         }
 
         [Inject]
-        private void Inject(DiContainer container, PlayerAvatarManager playerAvatarManager, GameScenesManager gameScenesManager, AvatarMenuFlowCoordinator avatarMenuFlowCoordinator, Settings settings, SettingsManager settingsManager, MirrorHelper mirrorHelper)
+        private void Inject(DiContainer container, PlayerAvatarManager playerAvatarManager, GameScenesManager gameScenesManager, AvatarMenuFlowCoordinator avatarMenuFlowCoordinator, Settings settings, MirrorHelper mirrorHelper)
         {
             _container = container;
             _avatarManager = playerAvatarManager;
             _scenesManager = gameScenesManager;
             _flowCoordinator = avatarMenuFlowCoordinator;
             _settings = settings;
-            _settingsManager = settingsManager;
             _mirrorHelper = mirrorHelper;
         }
 
