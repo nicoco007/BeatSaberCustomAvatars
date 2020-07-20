@@ -60,7 +60,7 @@ namespace CustomAvatar.UI
         private void OnCalibrateAutoFullBodyTrackingClicked()
         {
             _avatarTailor.CalibrateFullBodyTrackingAuto();
-            _autoClearButton.interactable = _settings.automaticCalibration.isCalibrated;
+            _autoClearButton.interactable = _calibrationData.automaticCalibration.isCalibrated;
 
             _automaticCalibrationSetting.CheckboxValue = true;
             OnEnableAutomaticCalibrationChanged(true);

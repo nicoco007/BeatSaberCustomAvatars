@@ -82,32 +82,16 @@ namespace CustomAvatar.Configuration
             public float rotation;
         }
 
-        public class ManualFullBodyCalibration
-        {
-            public Pose leftLeg = Pose.identity;
-            public Pose rightLeg = Pose.identity;
-            public Pose pelvis = Pose.identity;
-
-            [JsonIgnore] public bool isCalibrated => !leftLeg.Equals(Pose.identity) || !rightLeg.Equals(Pose.identity) || !pelvis.Equals(Pose.identity);
-        }
-
         public class AutomaticFullBodyCalibration
         {
-            public Pose leftLeg = Pose.identity;
-            public Pose rightLeg = Pose.identity;
-            public Pose pelvis = Pose.identity;
-
             public float legOffset = 0.15f;
             public float pelvisOffset = 0.1f;
 
             public WaistTrackerPosition waistTrackerPosition = WaistTrackerPosition.Front;
-
-            [JsonIgnore] public bool isCalibrated => !leftLeg.Equals(Pose.identity) || !rightLeg.Equals(Pose.identity) || !pelvis.Equals(Pose.identity);
         }
 
         public class AvatarSpecificSettings
         {
-            public ManualFullBodyCalibration fullBodyCalibration { get; private set; } = new ManualFullBodyCalibration();
             public bool useAutomaticCalibration = false;
             public bool allowMaintainPelvisPosition = false;
             public bool bypassCalibration = false;

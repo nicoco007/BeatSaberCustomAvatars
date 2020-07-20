@@ -27,11 +27,14 @@ namespace CustomAvatar
             // settings
             Container.BindInterfacesAndSelfTo<SettingsManager>().AsSingle();
             Container.Bind<Settings>().FromMethod((context) => context.Container.Resolve<SettingsManager>().settings);
+            Container.BindInterfacesAndSelfTo<CalibrationData>().AsSingle();
             
-            // managers & helper classes
+            // managers
             Container.BindInterfacesAndSelfTo<PlayerAvatarManager>().AsSingle();
             Container.Bind<StereoRenderManager>().AsSingle();
             Container.Bind<AvatarLoader>().AsSingle();
+
+            // helper classes
             Container.Bind<AvatarTailor>().AsTransient();
             Container.Bind<MirrorHelper>().AsTransient();
             Container.Bind<AvatarSpawner>().AsTransient();

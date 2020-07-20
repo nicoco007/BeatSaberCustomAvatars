@@ -24,17 +24,20 @@ namespace CustomAvatar.UI
         private PlayerAvatarManager _avatarManager;
         private AvatarTailor _avatarTailor;
         private Settings _settings;
+        private CalibrationData _calibrationData;
         private ShaderLoader _shaderLoader;
         private ILogger<SettingsViewController> _logger;
         private Settings.AvatarSpecificSettings _currentAvatarSettings;
+        private CalibrationData.FullBodyCalibration _currentAvatarManualCalibration;
 
         [Inject]
-        private void Inject(TrackedDeviceManager trackedDeviceManager, PlayerAvatarManager avatarManager, AvatarTailor avatarTailor, Settings settings, ShaderLoader shaderLoader, ILoggerProvider loggerProvider)
+        private void Inject(TrackedDeviceManager trackedDeviceManager, PlayerAvatarManager avatarManager, AvatarTailor avatarTailor, Settings settings, CalibrationData calibrationData, ShaderLoader shaderLoader, ILoggerProvider loggerProvider)
         {
             _trackedDeviceManager = trackedDeviceManager;
             _avatarManager = avatarManager;
             _avatarTailor = avatarTailor;
             _settings = settings;
+            _calibrationData = calibrationData;
             _shaderLoader = shaderLoader;
             _logger = loggerProvider.CreateLogger<SettingsViewController>();
         }
@@ -69,7 +72,7 @@ namespace CustomAvatar.UI
 
             _waistTrackerPosition.Value = _settings.automaticCalibration.waistTrackerPosition;
 
-            _autoClearButton.interactable = _settings.automaticCalibration.isCalibrated;
+            _autoClearButton.interactable = _calibrationData.automaticCalibration.isCalibrated;
 
             _avatarManager.avatarChanged += OnAvatarChanged;
 
@@ -108,6 +111,7 @@ namespace CustomAvatar.UI
             }
 
             _currentAvatarSettings = _settings.GetAvatarSettings(avatar.avatar.fileName);
+            _currentAvatarManualCalibration = _calibrationData.GetAvatarManualCalibration(avatar.avatar.fileName);
 
             UpdateCalibrationButtons(avatar);
 
@@ -146,7 +150,7 @@ namespace CustomAvatar.UI
             if (isAutomaticCalibrationPossible)
             {
                 _autoCalibrateButton.interactable = true;
-                _autoClearButton.interactable = _settings.automaticCalibration.isCalibrated;
+                _autoClearButton.interactable = _currentAvatarManualCalibration.isCalibrated;
                 _autoCalibrateButtonHoverHint.text = "Calibrate full body tracking automatically";
             }
             else
@@ -159,7 +163,7 @@ namespace CustomAvatar.UI
             if (isManualCalibrationPossible)
             {
                 _calibrateButton.interactable = true;
-                _clearButton.interactable = _currentAvatarSettings.fullBodyCalibration.isCalibrated;
+                _clearButton.interactable = _currentAvatarManualCalibration.isCalibrated;
                 _calibrateButtonHoverHint.text = "Start manual full body calibration";
             }
             else

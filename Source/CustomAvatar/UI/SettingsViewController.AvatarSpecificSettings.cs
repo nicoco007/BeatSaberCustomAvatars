@@ -116,7 +116,7 @@ namespace CustomAvatar.UI
             _calibrating = false;
             _calibrateButtonText.text = "Calibrate";
             _clearButtonText.text = "Clear";
-            _clearButton.interactable = _currentAvatarSettings?.fullBodyCalibration.isCalibrated ?? false;
+            _clearButton.interactable = _currentAvatarManualCalibration?.isCalibrated ?? false;
         }
 
         private GameObject CreateCalibrationSphere()

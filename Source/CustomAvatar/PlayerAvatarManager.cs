@@ -165,13 +165,7 @@ namespace CustomAvatar
                 _avatarInfos.Add(avatarInfo.fileName, avatarInfo);
             }
 
-            DiContainer subContainer = new DiContainer(_container);
-
-            subContainer.Bind<LoadedAvatar>().FromInstance(avatar);
-            subContainer.Bind<Settings.AvatarSpecificSettings>().FromInstance(_settings.GetAvatarSettings(avatarInfo.fileName));
-            subContainer.BindInterfacesTo<VRPlayerInput>().AsSingle();
-
-            currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, subContainer.Resolve<IAvatarInput>());
+            currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, _container.Instantiate<VRPlayerInput>(new object[] { avatar }));
 
             ResizeCurrentAvatar();
             

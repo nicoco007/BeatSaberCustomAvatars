@@ -17,6 +17,7 @@ namespace CustomAvatar
         private readonly MainSettingsModelSO _mainSettingsModel;
         private readonly PlayerDataModel _playerDataModel;
         private readonly Settings _settings;
+        private readonly CalibrationData _calibrationData;
         private readonly TrackedDeviceManager _trackedDeviceManager;
 
         private Vector3? _initialPlatformPosition;
@@ -25,12 +26,13 @@ namespace CustomAvatar
         private float _playerEyeHeight => _playerDataModel.playerData.playerSpecificSettings.playerHeight - MainSettingsModelSO.kHeadPosToPlayerHeightOffset;
 
         [Inject]
-        private AvatarTailor(ILoggerProvider loggerProvider, MainSettingsModelSO mainSettingsModel, PlayerDataModel playerDataModel, Settings settings, TrackedDeviceManager trackedDeviceManager)
+        private AvatarTailor(ILoggerProvider loggerProvider, MainSettingsModelSO mainSettingsModel, PlayerDataModel playerDataModel, Settings settings, CalibrationData calibrationData, TrackedDeviceManager trackedDeviceManager)
         {
             _logger = loggerProvider.CreateLogger<AvatarTailor>();
             _mainSettingsModel = mainSettingsModel;
             _playerDataModel = playerDataModel;
             _settings = settings;
+            _calibrationData = calibrationData;
             _trackedDeviceManager = trackedDeviceManager;
         }
 
@@ -144,7 +146,7 @@ namespace CustomAvatar
         
         public void CalibrateFullBodyTrackingManual(SpawnedAvatar spawnedAvatar)
         {
-            Settings.ManualFullBodyCalibration fullBodyCalibration = _settings.GetAvatarSettings(spawnedAvatar.avatar.fileName).fullBodyCalibration;
+            CalibrationData.FullBodyCalibration fullBodyCalibration = _calibrationData.GetAvatarManualCalibration(spawnedAvatar.avatar.fileName);
 
             if (_trackedDeviceManager.waist.tracked)
             {
@@ -153,8 +155,8 @@ namespace CustomAvatar
                 Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.pelvis.rotation) * (spawnedAvatar.pelvis.position - ApplyTrackedPointFloorOffset(spawnedAvatar, pelvis.position));
                 Quaternion rotationOffset = Quaternion.Inverse(pelvis.rotation) * spawnedAvatar.pelvis.rotation;
 
-                fullBodyCalibration.pelvis = new Pose(positionOffset, rotationOffset);
-                _logger.Info("Saved pelvis pose correction " + fullBodyCalibration.pelvis);
+                fullBodyCalibration.waist = new Pose(positionOffset, rotationOffset);
+                _logger.Info("Set waist pose correction " + fullBodyCalibration.waist);
             }
 
             if (_trackedDeviceManager.leftFoot.tracked)
@@ -164,8 +166,8 @@ namespace CustomAvatar
                 Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.leftLeg.rotation) * (spawnedAvatar.leftLeg.position - ApplyTrackedPointFloorOffset(spawnedAvatar, leftFoot.position));
                 Quaternion rotationOffset = Quaternion.Inverse(leftFoot.rotation) * spawnedAvatar.leftLeg.rotation;
 
-                fullBodyCalibration.leftLeg = new Pose(positionOffset, rotationOffset);
-                _logger.Info("Saved left foot pose correction " + fullBodyCalibration.leftLeg);
+                fullBodyCalibration.leftFoot = new Pose(positionOffset, rotationOffset);
+                _logger.Info("Set left foot pose correction " + fullBodyCalibration.leftFoot);
             }
 
             if (_trackedDeviceManager.rightFoot.tracked)
@@ -175,8 +177,8 @@ namespace CustomAvatar
                 Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.rightLeg.rotation) * (spawnedAvatar.rightLeg.position - ApplyTrackedPointFloorOffset(spawnedAvatar, rightFoot.position));
                 Quaternion rotationOffset = Quaternion.Inverse(rightFoot.rotation) * spawnedAvatar.rightLeg.rotation;
 
-                fullBodyCalibration.rightLeg = new Pose(positionOffset, rotationOffset);
-                _logger.Info("Saved right foot pose correction " + fullBodyCalibration.rightLeg);
+                fullBodyCalibration.rightFoot = new Pose(positionOffset, rotationOffset);
+                _logger.Info("Set right foot pose correction " + fullBodyCalibration.rightFoot);
             }
         }
 
@@ -184,7 +186,7 @@ namespace CustomAvatar
         {
             _logger.Info("Calibrating full body tracking");
 
-            Settings.AutomaticFullBodyCalibration fullBodyCalibration = _settings.automaticCalibration;
+            CalibrationData.FullBodyCalibration fullBodyCalibration = _calibrationData.automaticCalibration;
 
             Vector3 floorNormal = Vector3.up;
             float floorPosition = _settings.moveFloorWithRoomAdjust ? _roomCenter.y : 0;
@@ -196,8 +198,8 @@ namespace CustomAvatar
                 Vector3 leftFootForward = leftFoot.rotation * Vector3.up; // forward on feet trackers is y (up)
                 Vector3 leftFootStraightForward = Vector3.ProjectOnPlane(leftFootForward, floorNormal); // get projection of forward vector on xz plane (floor)
                 Quaternion leftRotationCorrection = Quaternion.Inverse(leftFoot.rotation) * Quaternion.LookRotation(Vector3.up, leftFootStraightForward); // get difference between world rotation and flat forward rotation
-                fullBodyCalibration.leftLeg = new Pose((leftFoot.position.y - floorPosition) * Vector3.back, leftRotationCorrection);
-                _logger.Info("Saved left foot pose correction " + fullBodyCalibration.leftLeg);
+                fullBodyCalibration.leftFoot = new Pose((leftFoot.position.y - floorPosition) * Vector3.back, leftRotationCorrection);
+                _logger.Info("Set left foot pose correction " + fullBodyCalibration.leftFoot);
             }
 
             if (_trackedDeviceManager.rightFoot.tracked)
@@ -207,8 +209,8 @@ namespace CustomAvatar
                 Vector3 rightFootForward = rightFoot.rotation * Vector3.up;
                 Vector3 rightFootStraightForward = Vector3.ProjectOnPlane(rightFootForward, floorNormal);
                 Quaternion rightRotationCorrection = Quaternion.Inverse(rightFoot.rotation) * Quaternion.LookRotation(Vector3.up, rightFootStraightForward);
-                fullBodyCalibration.rightLeg = new Pose((rightFoot.position.y - floorPosition) * Vector3.back, rightRotationCorrection);
-                _logger.Info("Saved right foot pose correction " + fullBodyCalibration.rightLeg);
+                fullBodyCalibration.rightFoot = new Pose((rightFoot.position.y - floorPosition) * Vector3.back, rightRotationCorrection);
+                _logger.Info("Set right foot pose correction " + fullBodyCalibration.rightFoot);
             }
 
             if (_trackedDeviceManager.head.tracked && _trackedDeviceManager.waist.tracked)
@@ -227,27 +229,27 @@ namespace CustomAvatar
                 Vector3 pelvisStraightForward = Vector3.ProjectOnPlane(pelvisForward, floorNormal);
                 Quaternion pelvisRotationCorrection = Quaternion.Inverse(pelvis.rotation) * Quaternion.LookRotation(pelvisStraightForward, Vector3.up);
 
-                fullBodyCalibration.pelvis = new Pose(pelvisPositionCorrection, pelvisRotationCorrection);
-                _logger.Info("Saved pelvis pose correction " + fullBodyCalibration.pelvis);
+                fullBodyCalibration.waist = new Pose(pelvisPositionCorrection, pelvisRotationCorrection);
+                _logger.Info("Set waist pose correction " + fullBodyCalibration.waist);
             }
         }
 
         public void ClearManualFullBodyTrackingData(SpawnedAvatar spawnedAvatar)
         {
-            Settings.ManualFullBodyCalibration fullBodyCalibration = _settings.GetAvatarSettings(spawnedAvatar.avatar.fileName).fullBodyCalibration;
+            CalibrationData.FullBodyCalibration fullBodyCalibration = _calibrationData.GetAvatarManualCalibration(spawnedAvatar.avatar.fileName);
 
-            fullBodyCalibration.leftLeg = Pose.identity;
-            fullBodyCalibration.rightLeg = Pose.identity;
-            fullBodyCalibration.pelvis = Pose.identity;
+            fullBodyCalibration.leftFoot = Pose.identity;
+            fullBodyCalibration.rightFoot = Pose.identity;
+            fullBodyCalibration.waist = Pose.identity;
         }
 
         public void ClearAutomaticFullBodyTrackingData()
         {
-            Settings.AutomaticFullBodyCalibration fullBodyCalibration = _settings.automaticCalibration;
+            CalibrationData.FullBodyCalibration fullBodyCalibration = _calibrationData.automaticCalibration;
 
-            fullBodyCalibration.leftLeg = Pose.identity;
-            fullBodyCalibration.rightLeg = Pose.identity;
-            fullBodyCalibration.pelvis = Pose.identity;
+            fullBodyCalibration.leftFoot = Pose.identity;
+            fullBodyCalibration.rightFoot = Pose.identity;
+            fullBodyCalibration.waist = Pose.identity;
         }
 
         public Vector3 ApplyTrackedPointFloorOffset(SpawnedAvatar avatar, Vector3 position)
