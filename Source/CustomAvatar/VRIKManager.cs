@@ -83,7 +83,7 @@ namespace CustomAvatar
             var animator = transform.GetComponentInChildren<Animator>();
 
             if (animator == null || !animator.isHuman) {
-                //Debug.LogWarning("VRIK needs a Humanoid Animator to auto-detect biped references. Please assign references manually.");
+                _logger.Error("VRIK needs a Humanoid Animator to auto-detect biped references. Please assign references manually.");
                 return;
             }
 
@@ -433,10 +433,15 @@ namespace CustomAvatar
             AutoDetectReferences();
         }
 
-        private void Awake()
+        public void Awake()
         {
             foreach (VRIK vrik in GetComponentsInChildren<VRIK>())
             {
+                if (!areReferencesFilled && vrik.references.isFilled)
+                {
+                    CopyReferencesFromExistingVrik(vrik.references);
+                }
+
                 Destroy(vrik);
             }
 
@@ -445,13 +450,39 @@ namespace CustomAvatar
 
         private void Start()
         {
-            SetVrikReferences();
+            SetVrikFields();
         }
 
         #pragma warning restore IDE0051
         #endregion
 
-        private void SetVrikReferences()
+        private void CopyReferencesFromExistingVrik(VRIK.References references)
+        {
+            references_root          = references.root;
+            references_pelvis        = references.pelvis;
+            references_spine         = references.spine;
+            references_chest         = references.chest;
+            references_neck          = references.neck;
+            references_head          = references.head;
+            references_leftShoulder  = references.leftShoulder;
+            references_leftUpperArm  = references.leftUpperArm;
+            references_leftForearm   = references.leftForearm;
+            references_leftHand      = references.leftHand;
+            references_rightShoulder = references.rightShoulder;
+            references_rightUpperArm = references.rightUpperArm;
+            references_rightForearm  = references.rightForearm;
+            references_rightHand     = references.rightHand;
+            references_leftThigh     = references.leftThigh;
+            references_leftCalf      = references.leftCalf;
+            references_leftFoot      = references.leftFoot;
+            references_leftToes      = references.leftToes;
+            references_rightThigh    = references.rightThigh;
+            references_rightCalf     = references.rightCalf;
+            references_rightFoot     = references.rightFoot;
+            references_rightToes     = references.rightToes;
+        }
+
+        private void SetVrikFields()
         {
             _logger.Info($"Setting VRIK references on '{name}'");
 
@@ -473,7 +504,7 @@ namespace CustomAvatar
                         }
                     }
 
-                    if (target == null) break;
+                    if (target == null) continue;
 
                     FieldInfo targetField = target.GetType().GetField(parts[parts.Length - 1]);
                     object value = sourceField.GetValue(this);
@@ -486,7 +517,7 @@ namespace CustomAvatar
                     if (value == null && targetType.IsValueType && Nullable.GetUnderlyingType(targetType) == null)
                     {
                         _logger.Warning($"Tried setting non-nullable type {targetType.FullName} to null");
-                        return;
+                        continue;
                     }
                 
                     if (sourceType != targetType)
