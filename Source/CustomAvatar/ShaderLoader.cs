@@ -2,7 +2,6 @@
 using CustomAvatar.Logging;
 using UnityEngine;
 using Zenject;
-using ILogger = CustomAvatar.Logging.ILogger;
 using Object = UnityEngine.Object;
 
 namespace CustomAvatar
@@ -12,7 +11,7 @@ namespace CustomAvatar
         public Shader stereoMirrorShader;
         public Shader unlitShader;
 
-        private ILogger _logger;
+        private ILogger<ShaderLoader> _logger;
 
         [Inject]
         private void Inject(ILoggerProvider loggerProvider)

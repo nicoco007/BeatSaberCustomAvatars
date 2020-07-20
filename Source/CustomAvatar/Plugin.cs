@@ -13,7 +13,6 @@ using Object = UnityEngine.Object;
 using BeatSaberMarkupLanguage;
 using CustomAvatar.Logging;
 using HarmonyLib;
-using ILogger = CustomAvatar.Logging.ILogger;
 using CustomAvatar.Configuration;
 
 namespace CustomAvatar
@@ -33,7 +32,7 @@ namespace CustomAvatar
         private KeyboardInputHandler _keyboardInputHandler;
         private GameplayLightingController _gameplayLightingController;
 
-        private ILogger _logger;
+        private ILogger<Plugin> _logger;
 
         [Init]
         public Plugin(Logger logger)

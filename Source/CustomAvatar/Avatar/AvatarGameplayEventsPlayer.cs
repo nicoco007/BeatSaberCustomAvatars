@@ -1,13 +1,12 @@
 ﻿using CustomAvatar.Logging;
 using UnityEngine;
 using Zenject;
-using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar.Avatar
 {
     internal class AvatarGameplayEventsPlayer : MonoBehaviour
     {
-        private ILogger _logger;
+        private ILogger<AvatarGameplayEventsPlayer> _logger;
         private ScoreController _scoreController;
         private StandardLevelGameplayManager _gameplayManager;
         private BeatmapObjectCallbackController _beatmapObjectCallbackController;

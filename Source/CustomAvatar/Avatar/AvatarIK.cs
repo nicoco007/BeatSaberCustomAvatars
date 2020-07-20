@@ -10,7 +10,6 @@ using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
 using UnityEngine;
 using Zenject;
-using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar.Avatar
 {
@@ -31,7 +30,7 @@ namespace CustomAvatar.Avatar
         
         private IAvatarInput _input;
         private SpawnedAvatar _avatar;
-        private ILogger _logger;
+        private ILogger<AvatarIK> _logger;
 
         private bool _isCalibrationModeEnabled = false;
         

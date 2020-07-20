@@ -6,7 +6,6 @@ using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using UnityEngine;
 using Zenject;
-using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar
 {
@@ -14,7 +13,7 @@ namespace CustomAvatar
     {
         public const float kDefaultPlayerArmSpan = 1.7f;
         
-        private readonly ILogger _logger;
+        private readonly ILogger<AvatarTailor> _logger;
         private readonly MainSettingsModelSO _mainSettingsModel;
         private readonly PlayerDataModel _playerDataModel;
         private readonly Settings _settings;

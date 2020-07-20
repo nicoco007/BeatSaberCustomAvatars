@@ -1,6 +1,6 @@
 ﻿namespace CustomAvatar.Logging
 {
-    internal class UnityDebugLogger<T> : ILogger
+    internal class UnityDebugLogger<T> : ILogger<T>
     {
         private readonly string _name;
 

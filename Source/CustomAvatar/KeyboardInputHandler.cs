@@ -2,7 +2,6 @@
 using CustomAvatar.Logging;
 using UnityEngine;
 using Zenject;
-using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar
 {
@@ -10,7 +9,7 @@ namespace CustomAvatar
     {
         private Settings _settings;
         private PlayerAvatarManager _avatarManager;
-        private ILogger _logger;
+        private ILogger<KeyboardInputHandler> _logger;
 
         [Inject]
         private void Inject(Settings settings, PlayerAvatarManager avatarManager, ILoggerProvider loggerProvider)

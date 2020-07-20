@@ -7,7 +7,6 @@ using CustomAvatar.Logging;
 using UnityEngine;
 using UnityEngine.Events;
 using static BeatSaberFinalIK::RootMotion.FinalIK.IKSolverVR.Arm;
-using ILogger = CustomAvatar.Logging.ILogger;
 using VRIK = BeatSaberFinalIK::RootMotion.FinalIK.VRIK;
 
 #if !UNITY_EDITOR
@@ -400,7 +399,7 @@ namespace CustomAvatar
         
         internal VRIK vrik;
 
-        private ILogger _logger = new UnityDebugLogger<VRIKManager>();
+        private ILogger<VRIKManager> _logger = new UnityDebugLogger<VRIKManager>();
 
         public bool areReferencesFilled => references_root != null &&
                                            references_pelvis != null &&

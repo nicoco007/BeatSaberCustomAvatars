@@ -1,6 +1,6 @@
 ﻿namespace CustomAvatar.Logging
 {
-    internal interface ILogger
+    internal interface ILogger<T>
     {
         void Trace(object message);
         void Debug(object message);

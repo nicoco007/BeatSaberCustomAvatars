@@ -9,7 +9,6 @@ using CustomAvatar.Tracking;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
-using ILogger = CustomAvatar.Logging.ILogger;
 using Object = UnityEngine.Object;
 
 namespace CustomAvatar
@@ -26,7 +25,7 @@ namespace CustomAvatar
         internal event Action<SpawnedAvatar> avatarChanged;
 
         private readonly DiContainer _container;
-        private readonly ILogger _logger;
+        private readonly ILogger<PlayerAvatarManager> _logger;
         private readonly AvatarLoader _avatarLoader;
         private readonly AvatarTailor _avatarTailor;
         private readonly Settings _settings;

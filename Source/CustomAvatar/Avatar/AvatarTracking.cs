@@ -7,7 +7,6 @@ using CustomAvatar.Logging;
 using UnityEngine;
 using UnityEngine.XR;
 using Zenject;
-using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar.Avatar
 {
@@ -25,7 +24,7 @@ namespace CustomAvatar.Avatar
         private SpawnedAvatar _avatar;
         private MainSettingsModelSO _mainSettingsModel;
         private VRPlatformHelper _vrPlatformHelper;
-        private ILogger _logger = new UnityDebugLogger<AvatarTracking>();
+        private ILogger<AvatarTracking> _logger = new UnityDebugLogger<AvatarTracking>();
         private AvatarTailor _tailor;
 
         #region Behaviour Lifecycle

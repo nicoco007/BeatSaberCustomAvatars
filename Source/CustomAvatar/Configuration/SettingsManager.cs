@@ -13,7 +13,7 @@ namespace CustomAvatar.Configuration
 
         public Settings settings;
 
-        private ILogger _logger;
+        private ILogger<SettingsManager> _logger;
 
         private SettingsManager(ILoggerProvider loggerProvider)
         {
@@ -21,7 +21,7 @@ namespace CustomAvatar.Configuration
 
             Load();
         }
-
+        
         public void Dispose()
         {
             Save();

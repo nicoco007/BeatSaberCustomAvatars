@@ -14,7 +14,6 @@ namespace CustomAvatar.Tracking
         public event Action inputChanged;
 
         private readonly TrackedDeviceManager _deviceManager;
-        private readonly LoadedAvatar _avatar;
         private readonly Settings _settings;
         private readonly Settings.AvatarSpecificSettings _avatarSettings;
 

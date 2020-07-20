@@ -3,13 +3,12 @@ using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using UnityEngine;
 using Zenject;
-using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar.Avatar
 {
     public class AvatarSpawner
     {
-        private readonly ILogger _logger;
+        private readonly ILogger<AvatarSpawner> _logger;
         private readonly DiContainer _container;
 
         internal AvatarSpawner(ILoggerProvider loggerProvider, DiContainer container)

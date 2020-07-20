@@ -2,6 +2,6 @@
 {
     internal interface ILoggerProvider
     {
-        ILogger CreateLogger<T>(string name = null);
+        ILogger<T> CreateLogger<T>(string name = null);
     }
 }

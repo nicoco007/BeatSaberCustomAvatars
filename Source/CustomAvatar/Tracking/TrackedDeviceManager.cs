@@ -6,7 +6,6 @@ using UnityEngine;
 using UnityEngine.XR;
 using Valve.VR;
 using Zenject;
-using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar.Tracking
 {
@@ -28,7 +27,7 @@ namespace CustomAvatar.Tracking
         private readonly HashSet<string> _foundDevices = new HashSet<string>();
 
         private MainSettingsModelSO _mainSettingsModel;
-        private ILogger _logger;
+        private ILogger<TrackedDeviceManager> _logger;
 
         private bool _isOpenVRRunning;
 

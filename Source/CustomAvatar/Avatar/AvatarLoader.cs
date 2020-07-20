@@ -4,7 +4,6 @@ using System.IO;
 using CustomAvatar.Exceptions;
 using CustomAvatar.Logging;
 using UnityEngine;
-using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar.Avatar
 {
@@ -12,7 +11,7 @@ namespace CustomAvatar.Avatar
     {
         private const string kGameObjectName = "_CustomAvatar";
 
-        private readonly ILogger _logger;
+        private readonly ILogger<AvatarLoader> _logger;
 
         private readonly Dictionary<string, List<LoadHandlers>> _handlers = new Dictionary<string, List<LoadHandlers>>();
 

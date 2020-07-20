@@ -5,7 +5,6 @@ using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using UnityEngine;
 using Zenject;
-using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar.UI
 {
@@ -26,7 +25,7 @@ namespace CustomAvatar.UI
         private AvatarTailor _avatarTailor;
         private Settings _settings;
         private ShaderLoader _shaderLoader;
-        private ILogger _logger;
+        private ILogger<SettingsViewController> _logger;
         private Settings.AvatarSpecificSettings _currentAvatarSettings;
 
         [Inject]
