@@ -46,7 +46,7 @@ public class DBTransfer : MonoBehaviour
                                                         BindingFlags.NonPublic |
                                                         BindingFlags.Instance
                                                      );
-        
+
         for (int i = 0; i < sourceFields.Length; i++)
         {
             var value = sourceFields[i].GetValue(srcComp);
@@ -125,7 +125,7 @@ public class DBTransfer : MonoBehaviour
         }
     }
 
-    static void DescendTransfer(GameObject source, GameObject dest, GameObject srcTop, GameObject destTop)
+    static void DescendTransfer(GameObject source, GameObject dest, GameObject srcTop, GameObject destTop, int pass = 0)
     {
         foreach (Transform child in source.transform)
         {
@@ -139,15 +139,21 @@ public class DBTransfer : MonoBehaviour
                 destObj = new GameObject(srcObj.name);
                 destObj.transform.parent = dest.transform;
             }
-            destObj.transform.localPosition = srcObj.transform.localPosition;
-            destObj.transform.localEulerAngles = srcObj.transform.localEulerAngles;
-            destObj.transform.localScale = srcObj.transform.localScale;
+            if (pass < 1)
+            {
+                destObj.transform.localPosition = srcObj.transform.localPosition;
+                destObj.transform.localEulerAngles = srcObj.transform.localEulerAngles;
+                destObj.transform.localScale = srcObj.transform.localScale;
 
-            TransferComponent<BeatSaberDynamicBone::DynamicBone>(srcObj, destObj, srcTop, destTop);
-            TransferComponent<BeatSaberDynamicBone::DynamicBoneCollider>(srcObj, destObj, srcTop, destTop);
-            TransferComponent<BeatSaberDynamicBone::DynamicBonePlaneCollider>(srcObj, destObj, srcTop, destTop);
+                TransferComponent<BeatSaberDynamicBone::DynamicBoneCollider>(srcObj, destObj, srcTop, destTop);
+                TransferComponent<BeatSaberDynamicBone::DynamicBonePlaneCollider>(srcObj, destObj, srcTop, destTop);
+            }
+            else
+            {
+                TransferComponent<BeatSaberDynamicBone::DynamicBone>(srcObj, destObj, srcTop, destTop);
+            }
 
-            DescendTransfer(srcObj, destObj, srcTop, destTop);
+            DescendTransfer(srcObj, destObj, srcTop, destTop, pass);
         }
     }
 
@@ -161,10 +167,18 @@ public class DBTransfer : MonoBehaviour
         {
             throw new NullReferenceException();
         }
-        DescendTransfer(source, destAvatar, source, destAvatar);
+        if (source.GetComponent<Animator>())
+        {
+            DescendTransfer(source, destAvatar, source, destAvatar);
+            DescendTransfer(source, destAvatar, source, destAvatar, 1);
+        }
+        else
+        {
+            DescendTransfer(source, destTop, source, destAvatar);
+            DescendTransfer(source, destTop, source, destAvatar, 1);
+        }
     }
 }
-
 
 public class GenericGenerate : MonoBehaviour
 {
