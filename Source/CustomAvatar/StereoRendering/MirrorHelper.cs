@@ -1,7 +1,6 @@
 ﻿using CustomAvatar.Logging;
 using UnityEngine;
 using Zenject;
-using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar.StereoRendering
 {
@@ -9,7 +8,7 @@ namespace CustomAvatar.StereoRendering
     {
         private static readonly int kCutout = Shader.PropertyToID("_Cutout");
 
-        private readonly ILogger _logger;
+        private readonly ILogger<MirrorHelper> _logger;
         private readonly DiContainer _container;
         private readonly ShaderLoader _shaderLoader;
 
