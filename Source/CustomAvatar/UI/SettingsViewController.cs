@@ -56,14 +56,21 @@ namespace CustomAvatar.UI
 
             _armSpanLabel.SetText($"{_settings.playerArmSpan:0.00} m");
 
-            _sphereMaterial = new Material(_shaderLoader.unlitShader);
-            _redMaterial = new Material(_shaderLoader.unlitShader);
-            _greenMaterial = new Material(_shaderLoader.unlitShader);
-            _blueMaterial = new Material(_shaderLoader.unlitShader);
+            if (_shaderLoader.unlitShader)
+            {
+                _sphereMaterial = new Material(_shaderLoader.unlitShader);
+                _redMaterial = new Material(_shaderLoader.unlitShader);
+                _greenMaterial = new Material(_shaderLoader.unlitShader);
+                _blueMaterial = new Material(_shaderLoader.unlitShader);
 
-            _redMaterial.SetColor(kColor, new Color(0.8f, 0, 0, 1));
-            _greenMaterial.SetColor(kColor, new Color(0, 0.8f, 0, 1));
-            _blueMaterial.SetColor(kColor, new Color(0, 0.5f, 1, 1));
+                _redMaterial.SetColor(kColor, new Color(0.8f, 0, 0, 1));
+                _greenMaterial.SetColor(kColor, new Color(0, 0.8f, 0, 1));
+                _blueMaterial.SetColor(kColor, new Color(0, 0.5f, 1, 1));
+            }
+            else
+            {
+                _logger.Error("Unlit shader not loaded; manual calibration points may not be visible");
+            }
 
             _pelvisOffset.Value = _settings.automaticCalibration.pelvisOffset;
             _footOffset.Value = _settings.automaticCalibration.legOffset;

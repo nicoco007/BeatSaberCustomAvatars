@@ -1,5 +1,7 @@
-﻿using UnityEngine;
+﻿using CustomAvatar.Logging;
+using UnityEngine;
 using Zenject;
+using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar.StereoRendering
 {
@@ -7,17 +9,25 @@ namespace CustomAvatar.StereoRendering
     {
         private static readonly int kCutout = Shader.PropertyToID("_Cutout");
 
+        private readonly ILogger _logger;
         private readonly DiContainer _container;
         private readonly ShaderLoader _shaderLoader;
 
-        public MirrorHelper(DiContainer container, ShaderLoader shaderLoader)
+        public MirrorHelper(ILoggerProvider loggerProvider, DiContainer container, ShaderLoader shaderLoader)
         {
+            _logger = loggerProvider.CreateLogger<MirrorHelper>();
             _container = container;
             _shaderLoader = shaderLoader;
         }
 
         public void CreateMirror(Vector3 position, Quaternion rotation, Vector2 size, Transform container, Vector3? origin = null)
         {
+            if (!_shaderLoader.stereoMirrorShader)
+            {
+                _logger.Error("Stereo Mirror shader not loaded; mirror will not be created");
+                return;
+            }
+
             Vector3 scale = new Vector3(size.x / 10, 1, size.y / 10); // plane is 10 units in size at scale 1, width is x and height is z
 
             GameObject mirrorPlane = GameObject.CreatePrimitive(PrimitiveType.Plane);
