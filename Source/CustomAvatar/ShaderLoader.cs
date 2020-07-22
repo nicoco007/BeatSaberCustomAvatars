@@ -51,17 +51,30 @@ namespace CustomAvatar
                 {
                     case "BeatSaber/Unlit Glow":
                         unlitShader = asset as Shader;
-                        _logger.Info("Loaded unlit shader");
                         break;
                     
                     case "Custom/StereoRenderShader-Unlit":
                         stereoMirrorShader = asset as Shader;
-                        _logger.Info("Loaded stereo render shader");
                         break;
                 }
             }
 
+            CheckShaderLoaded(unlitShader, "Unlit");
+            CheckShaderLoaded(stereoMirrorShader, "Stereo Renderer");
+
             shadersBundleCreateRequest.assetBundle.Unload(false);
+        }
+
+        private void CheckShaderLoaded(Shader shader, string name)
+        {
+            if (shader)
+            {
+                _logger.Info($"{name} shader loaded");
+            }
+            else
+            {
+                _logger.Error($"{name} shader not found");
+            }
         }
     }
 }
