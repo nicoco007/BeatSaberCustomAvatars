@@ -4,7 +4,6 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using Zenject;
-using CustomAvatar.Configuration;
 
 namespace CustomAvatar.StereoRendering
 {
@@ -154,8 +153,8 @@ namespace CustomAvatar.StereoRendering
         public Camera stereoCameraEye = null;
 
         // render texture for stereo rendering
-        private Dictionary<int, RenderTexture> leftEyeTextures = new Dictionary<int, RenderTexture>();
-        private Dictionary<int, RenderTexture> rightEyeTextures = new Dictionary<int, RenderTexture>();
+        private Dictionary<Guid, RenderTexture> leftEyeTextures = new Dictionary<Guid, RenderTexture>();
+        private Dictionary<Guid, RenderTexture> rightEyeTextures = new Dictionary<Guid, RenderTexture>();
 
         // the materials for displaying render result
         private Material stereoMaterial;
@@ -167,6 +166,7 @@ namespace CustomAvatar.StereoRendering
 
         // other params
         public float reflectionOffset = 0.05f;
+        public float renderScale = 1;
         private Rect fullViewport = new Rect(0, 0, 1, 1);
 
         // for mirror rendering
@@ -180,16 +180,14 @@ namespace CustomAvatar.StereoRendering
         #endregion
 
         private StereoRenderManager _manager;
-        private Settings _settings;
 
         /////////////////////////////////////////////////////////////////////////////////
         // initialization
 
         [Inject]
-        private void Inject(StereoRenderManager manager, Settings settings)
+        private void Inject(StereoRenderManager manager)
         {
             _manager = manager;
-            _settings = settings;
         }
 
         private void Start()
@@ -209,6 +207,18 @@ namespace CustomAvatar.StereoRendering
         private void OnDestroy()
         {
             _manager.RemoveFromManager(this);
+
+            foreach (var texture in leftEyeTextures.Values)
+            {
+                texture.Release();
+                Destroy(texture);
+            }
+
+            foreach (var texture in rightEyeTextures.Values)
+            {
+                texture.Release();
+                Destroy(texture);
+            }
         }
 
         private void CreateStereoCameraRig()
@@ -248,7 +258,7 @@ namespace CustomAvatar.StereoRendering
         public void Render(VRRenderEventDetector detector)
         {
             // move stereo camera around based on HMD pose
-            MoveStereoCameraBasedOnHmdPose(detector);
+            MoveStereoCameraBasedOnCameraPose(detector);
 
             // invoke pre-render events
             if (preRenderListeners != null)
@@ -288,7 +298,7 @@ namespace CustomAvatar.StereoRendering
                 postRenderListeners.Invoke();
         }
 
-        public void MoveStereoCameraBasedOnHmdPose(VRRenderEventDetector detector)
+        public void MoveStereoCameraBasedOnCameraPose(VRRenderEventDetector detector)
         {
             Vector3 mainCamPos = detector.transform.position;
             Quaternion mainCamRot = detector.transform.rotation;
@@ -333,19 +343,17 @@ namespace CustomAvatar.StereoRendering
             var leftEyeOffset = new Vector3(-ipd / 2, 0, 0);
             var rightEyeOffset = new Vector3(ipd / 2, 0, 0);
 
-            // TODO provide renderScale from somewhere else
-            int hash = detector.GetHashCode();
-            int renderWidth = (int)(_settings.mirror.renderScale * detector.camera.pixelWidth);
-            int renderHeight = (int)(_settings.mirror.renderScale * detector.camera.pixelHeight);
+            int renderWidth = (int)(renderScale * detector.camera.pixelWidth);
+            int renderHeight = (int)(renderScale * detector.camera.pixelHeight);
 
-            if (!leftEyeTextures.ContainsKey(hash))
+            if (!leftEyeTextures.ContainsKey(detector.id))
             {
-                leftEyeTextures.Add(hash, CreateRenderTexture(renderWidth, renderHeight));
+                leftEyeTextures.Add(detector.id, CreateRenderTexture(detector.id, renderWidth, renderHeight));
             }
 
-            if (!rightEyeTextures.ContainsKey(hash))
+            if (!rightEyeTextures.ContainsKey(detector.id))
             {
-                rightEyeTextures.Add(hash, CreateRenderTexture(renderWidth, renderHeight));
+                rightEyeTextures.Add(detector.id, CreateRenderTexture(detector.id, renderWidth, renderHeight));
             }
 
             Matrix4x4 leftProjectionMatrix = detector.camera.projectionMatrix;
@@ -361,7 +369,7 @@ namespace CustomAvatar.StereoRendering
             RenderEye(
                 leftEyeOffset, 
                 leftProjectionMatrix, detector.camera.worldToCameraMatrix, 
-                leftEyeTextures[hash], "_LeftEyeTexture");
+                leftEyeTextures[detector.id], "_LeftEyeTexture");
 
             if (detector.camera.stereoEnabled)
             {
@@ -371,14 +379,18 @@ namespace CustomAvatar.StereoRendering
                 RenderEye(
                     rightEyeOffset,
                     rightProjectionMatrix, rightEyeWorldToCameraMatrix,
-                    rightEyeTextures[hash], "_RightEyeTexture");
+                    rightEyeTextures[detector.id], "_RightEyeTexture");
             }
         }
 
-        private RenderTexture CreateRenderTexture(int renderWidth, int renderHeight, int depth = 32, int aaLevel = 4)
+        private RenderTexture CreateRenderTexture(Guid id, int renderWidth, int renderHeight)
         {
-            var renderTexture = new RenderTexture(renderWidth, renderHeight, depth, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
-            renderTexture.antiAliasing = aaLevel;
+            var renderTexture = new RenderTexture(renderWidth, renderHeight, 0)
+            {
+                name = $"VRRenderEventDetector {id}",
+                antiAliasing = 1
+            };
+
             return renderTexture;
         }
 
