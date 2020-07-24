@@ -46,7 +46,7 @@ namespace CustomAvatar.Tracking
         {
             try
             {
-                _isOpenVRRunning = OpenVR.IsRuntimeInstalled();
+                _isOpenVRRunning = XRSettings.loadedDeviceName.Equals("openvr", StringComparison.InvariantCultureIgnoreCase) && OpenVR.IsRuntimeInstalled();
             }
             catch (Exception ex)
             {
