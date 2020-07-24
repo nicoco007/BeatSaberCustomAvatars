@@ -17,16 +17,16 @@ namespace CustomAvatar.Avatar
 
         public float verticalPosition
         {
-            get => transform.position.y - _initialPosition.y;
-            set => transform.position = _initialPosition + value * Vector3.up;
+            get => transform.localPosition.y - _initialLocalPosition.y;
+            set => transform.localPosition = new Vector3(transform.localPosition.x, _initialLocalPosition.y + value, transform.localPosition.z);
         }
 
         public float scale
         {
-            get => transform.localScale.y / _initialScale.y;
+            get => transform.localScale.y / _initialLocalScale.y;
             set
             {
-                transform.localScale = _initialScale * value;
+                transform.localScale = _initialLocalScale * value;
                 _logger.Info("Avatar resized with scale: " + value);
             }
         }
@@ -58,8 +58,8 @@ namespace CustomAvatar.Avatar
 
         private bool _isCalibrationModeEnabled;
 
-        private Vector3 _initialPosition;
-        private Vector3 _initialScale;
+        private Vector3 _initialLocalPosition;
+        private Vector3 _initialLocalScale;
 
         public void EnableCalibrationMode()
         {
@@ -104,8 +104,8 @@ namespace CustomAvatar.Avatar
 
         private void Awake()
         {
-            _initialPosition = transform.localPosition;
-            _initialScale = transform.localScale;
+            _initialLocalPosition = transform.localPosition;
+            _initialLocalScale = transform.localScale;
         }
         
         [Inject]
@@ -179,7 +179,7 @@ namespace CustomAvatar.Avatar
                 fingerTracking = container.InstantiateComponent<AvatarFingerTracking>(gameObject);
             }
 
-            if (_initialPosition.magnitude > 0.0f)
+            if (_initialLocalPosition.magnitude > 0.0f)
             {
                 _logger.Warning("Avatar root position is not at origin; resizing by height and floor adjust may not work properly.");
             }
