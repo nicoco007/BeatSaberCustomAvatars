@@ -4,6 +4,7 @@ using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.StereoRendering;
 using CustomAvatar.Tracking;
+using CustomAvatar.Utilities;
 using UnityEngine;
 using Zenject;
 using Logger = IPA.Logging.Logger;
@@ -38,6 +39,7 @@ namespace CustomAvatar
             Container.Bind<AvatarTailor>().AsTransient();
             Container.Bind<MirrorHelper>().AsTransient();
             Container.Bind<AvatarSpawner>().AsTransient();
+            Container.Bind<GameScenesHelper>().AsTransient();
 
             // behaviours
             Container.Bind<TrackedDeviceManager>().FromNewComponentOnNewPrefab(new GameObject(nameof(TrackedDeviceManager))).AsSingle().NonLazy();

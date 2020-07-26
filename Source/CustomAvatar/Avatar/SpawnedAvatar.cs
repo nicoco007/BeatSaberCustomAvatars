@@ -5,6 +5,7 @@ using System.Reflection;
 using AvatarScriptPack;
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
+using CustomAvatar.Utilities;
 using UnityEngine;
 using Zenject;
 
@@ -49,7 +50,7 @@ namespace CustomAvatar.Avatar
         public AvatarFingerTracking fingerTracking { get; private set; }
 
         private ILogger<SpawnedAvatar> _logger;
-        private GameScenesManager _gameScenesManager;
+        private GameScenesHelper _gameScenesHelper;
 
         private FirstPersonExclusion[] _firstPersonExclusions;
         private Renderer[] _renderers;
@@ -109,7 +110,7 @@ namespace CustomAvatar.Avatar
         }
         
         [Inject]
-        private void Inject(DiContainer container, ILoggerProvider loggerProvider, LoadedAvatar loadedAvatar, IAvatarInput avatarInput, GameScenesManager gameScenesManager)
+        private void Inject(DiContainer container, ILoggerProvider loggerProvider, LoadedAvatar loadedAvatar, IAvatarInput avatarInput, GameScenesHelper gameScenesHelper)
         {
             avatar = loadedAvatar ?? throw new ArgumentNullException(nameof(loadedAvatar));
             input = avatarInput ?? throw new ArgumentNullException(nameof(avatarInput));
@@ -117,7 +118,7 @@ namespace CustomAvatar.Avatar
             container.Bind<SpawnedAvatar>().FromInstance(this);
 
             _logger = loggerProvider.CreateLogger<SpawnedAvatar>(loadedAvatar.descriptor.name);
-            _gameScenesManager = gameScenesManager;
+            _gameScenesHelper = gameScenesHelper;
 
             _eventManager = GetComponent<EventManager>();
             _firstPersonExclusions = GetComponentsInChildren<FirstPersonExclusion>();
@@ -186,12 +187,12 @@ namespace CustomAvatar.Avatar
 
             DontDestroyOnLoad(this);
 
-            _gameScenesManager.transitionDidFinishEvent += OnTransitionDidFinish;
+            _gameScenesHelper.transitionDidFinish += OnTransitionDidFinish;
         }
 
         private void OnDestroy()
         {
-            _gameScenesManager.transitionDidFinishEvent -= OnTransitionDidFinish;
+            _gameScenesHelper.transitionDidFinish -= OnTransitionDidFinish;
 
             input.Dispose();
 
@@ -200,9 +201,9 @@ namespace CustomAvatar.Avatar
 
         #endregion
 
-        private void OnTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
+        private void OnTransitionDidFinish(BeatSaberScene scene, DiContainer container)
         {
-            if (_gameScenesManager.GetCurrentlyLoadedSceneNames().Contains("GameplayCore"))
+            if (scene == BeatSaberScene.Game)
             {
                 if (_eventManager && !_gameplayEventsPlayer)
                 {
@@ -218,7 +219,7 @@ namespace CustomAvatar.Avatar
                     Destroy(_gameplayEventsPlayer);
                 }
 
-                if (_eventManager && _gameScenesManager.GetCurrentlyLoadedSceneNames().Contains("MainMenu"))
+                if (_eventManager && scene == BeatSaberScene.MainMenu)
                 {
                     _eventManager.OnMenuEnter?.Invoke();
                 }
