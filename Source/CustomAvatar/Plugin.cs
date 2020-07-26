@@ -14,6 +14,7 @@ using BeatSaberMarkupLanguage;
 using CustomAvatar.Logging;
 using HarmonyLib;
 using CustomAvatar.Configuration;
+using CustomAvatar.Utilities;
 
 namespace CustomAvatar
 {
@@ -21,7 +22,7 @@ namespace CustomAvatar
     internal class Plugin
     {
         private PlayerAvatarManager _avatarManager;
-        private GameScenesManager _scenesManager;
+        private GameScenesHelper _gameScenesHelper;
         private AvatarMenuFlowCoordinator _flowCoordinator;
         private Settings _settings;
         private MirrorHelper _mirrorHelper;
@@ -58,11 +59,11 @@ namespace CustomAvatar
         }
 
         [Inject]
-        private void Inject(DiContainer container, PlayerAvatarManager playerAvatarManager, GameScenesManager gameScenesManager, AvatarMenuFlowCoordinator avatarMenuFlowCoordinator, Settings settings, MirrorHelper mirrorHelper)
+        private void Inject(DiContainer container, PlayerAvatarManager playerAvatarManager, GameScenesHelper gameScenesHelper, AvatarMenuFlowCoordinator avatarMenuFlowCoordinator, Settings settings, MirrorHelper mirrorHelper)
         {
             _container = container;
             _avatarManager = playerAvatarManager;
-            _scenesManager = gameScenesManager;
+            _gameScenesHelper = gameScenesHelper;
             _flowCoordinator = avatarMenuFlowCoordinator;
             _settings = settings;
             _mirrorHelper = mirrorHelper;
@@ -94,9 +95,9 @@ namespace CustomAvatar
         [OnExit]
         public void OnExit()
         {
-            if (_scenesManager != null)
+            if (_gameScenesHelper != null)
             {
-                _scenesManager.transitionDidFinishEvent -= SceneTransitionDidFinish;
+                _gameScenesHelper.transitionDidFinish -= OnTransitionDidFinish;
             }
 
             SceneManager.sceneLoaded -= OnSceneLoaded;
@@ -146,7 +147,7 @@ namespace CustomAvatar
         {
             context.Container.Inject(this);
 
-            _scenesManager.transitionDidFinishEvent += SceneTransitionDidFinish;
+            _gameScenesHelper.transitionDidFinish += OnTransitionDidFinish;
 
             _avatarManager.LoadAvatarFromSettingsAsync();
 
@@ -165,10 +166,10 @@ namespace CustomAvatar
             }
         }
 
-        private void SceneTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
+        private void OnTransitionDidFinish(BeatSaberScene scene, DiContainer container)
         {
             UpdateCameras();
-            UpdateLighting(container);
+            UpdateLighting(scene, container);
         }
 
         private void UpdateCameras()
@@ -200,11 +201,11 @@ namespace CustomAvatar
             }
         }
 
-        private void UpdateLighting(DiContainer container)
+        private void UpdateLighting(BeatSaberScene scene, DiContainer container)
         {
             if (_settings.lighting.enabled)
             {
-                if (_scenesManager.GetCurrentlyLoadedSceneNames().Contains("GameplayCore") && _settings.lighting.enableDynamicLighting)
+                if (scene == BeatSaberScene.Game && _settings.lighting.enableDynamicLighting)
                 {
                     Object.Destroy(_menuLightingRig);
 
