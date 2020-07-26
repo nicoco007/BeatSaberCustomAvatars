@@ -47,7 +47,7 @@ namespace CustomAvatar
             _settings.moveFloorWithRoomAdjustChanged += OnMoveFloorWithRoomAdjustChanged;
             _settings.firstPersonEnabledChanged += OnFirstPersonEnabledChanged;
             SceneManager.sceneLoaded += OnSceneLoaded;
-            BeatSaberEvents.playerHeightChanged += OnPlayerHeightChanged;
+            BeatSaberUtilities.playerHeightChanged += OnPlayerHeightChanged;
 
             if (settings.calibrateFullBodyTrackingOnStart && settings.GetAvatarSettings(settings.previousAvatarPath).useAutomaticCalibration)
             {
@@ -64,7 +64,7 @@ namespace CustomAvatar
 
             _settings.moveFloorWithRoomAdjustChanged -= OnMoveFloorWithRoomAdjustChanged;
             SceneManager.sceneLoaded -= OnSceneLoaded;
-            BeatSaberEvents.playerHeightChanged -= OnPlayerHeightChanged;
+            BeatSaberUtilities.playerHeightChanged -= OnPlayerHeightChanged;
 
             SaveAvatarInfosToFile();
         }

@@ -45,14 +45,14 @@ namespace CustomAvatar.Zenject
                 _logger.Trace($"Registering '{typeof(TInstaller).Name}' in scene '{sceneName}'");
             }
 
-            Type installerType = typeof(TInstaller);
-
-            if (_installers.Values.SelectMany(l => l).Any(r => r.installerType == installerType)) throw new InvalidOperationException($"'{typeof(TInstaller).Name}' was already registered");
-
             if (!_installers.ContainsKey(sceneName))
             {
                 _installers.Add(sceneName, new List<InstallerRegistration>());
             }
+
+            Type installerType = typeof(TInstaller);
+
+            if (_installers[sceneName].Any(r => r.installerType == installerType && r.sceneContextName == sceneContextName)) throw new InvalidOperationException($"'{installerType.Name}' already registered on '{sceneContextName}' in '{sceneName}'");
 
             _installers[sceneName].Add(new InstallerRegistration(installerType, sceneContextName, extraArgs));
         }
