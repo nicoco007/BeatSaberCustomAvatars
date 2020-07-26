@@ -1,10 +1,9 @@
 ﻿using BeatSaberMarkupLanguage;
+using BeatSaberMarkupLanguage.MenuButtons;
 using CustomAvatar.UI;
-using HMUI;
-using UnityEngine;
 using Zenject;
 
-namespace CustomAvatar
+namespace CustomAvatar.Zenject
 {
     internal class UIInstaller : Installer
     {
@@ -14,20 +13,19 @@ namespace CustomAvatar
             var mirrorViewController = BeatSaberUI.CreateViewController<MirrorViewController>();
             var settingsViewController = BeatSaberUI.CreateViewController<SettingsViewController>();
 
-            // required since BaseInputModule isn't actually registered for some reason...?
-            if (!Container.HasBinding<BaseInputModule>())
-            {
-                Container.Bind<BaseInputModule>().FromInstance(null);
-            }
-
             Container.Bind<AvatarListViewController>().FromInstance(avatarListViewController);
             Container.Bind<MirrorViewController>().FromInstance(mirrorViewController);
             Container.Bind<SettingsViewController>().FromInstance(settingsViewController);
-            Container.Bind<AvatarMenuFlowCoordinator>().FromNewComponentOnNewPrefab(new GameObject(nameof(AvatarMenuFlowCoordinator))).AsSingle();
+            Container.Bind<AvatarMenuFlowCoordinator>().FromNewComponentOnNewGameObject();
 
             Container.QueueForInject(avatarListViewController);
             Container.QueueForInject(mirrorViewController);
             Container.QueueForInject(settingsViewController);
+
+            MenuButtons.instance.RegisterButton(new MenuButton("Avatars", () =>
+            {
+                BeatSaberUI.MainFlowCoordinator.PresentFlowCoordinator(Container.Resolve<AvatarMenuFlowCoordinator>(), null, true);
+            }));
         }
     }
 }

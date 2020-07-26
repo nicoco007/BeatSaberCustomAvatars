@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
+using CustomAvatar.Lighting;
 using CustomAvatar.Logging;
 using CustomAvatar.StereoRendering;
 using CustomAvatar.Tracking;
@@ -9,7 +10,7 @@ using UnityEngine;
 using Zenject;
 using Logger = IPA.Logging.Logger;
 
-namespace CustomAvatar
+namespace CustomAvatar.Zenject
 {
     internal class CustomAvatarsInstaller : Installer
     {
@@ -31,7 +32,7 @@ namespace CustomAvatar
             Container.BindInterfacesAndSelfTo<CalibrationData>().AsSingle();
             
             // managers
-            Container.BindInterfacesAndSelfTo<PlayerAvatarManager>().AsSingle();
+            Container.BindInterfacesAndSelfTo<PlayerAvatarManager>().AsSingle().NonLazy();
             Container.Bind<StereoRenderManager>().AsSingle();
             Container.Bind<AvatarLoader>().AsSingle();
 
@@ -41,9 +42,12 @@ namespace CustomAvatar
             Container.Bind<AvatarSpawner>().AsTransient();
             Container.Bind<GameScenesHelper>().AsTransient();
 
-            // behaviours
-            Container.Bind<TrackedDeviceManager>().FromNewComponentOnNewPrefab(new GameObject(nameof(TrackedDeviceManager))).AsSingle().NonLazy();
-            Container.Bind<ShaderLoader>().FromNewComponentOnNewPrefab(new GameObject(nameof(ShaderLoader))).AsSingle().NonLazy();
+            // behaviours (persistent & initialized at start)
+            Container.Bind<TrackedDeviceManager>().FromNewComponentOnNewGameObject().NonLazy();
+            Container.Bind<ShaderLoader>().FromNewComponentOnNewGameObject().NonLazy();
+            Container.Bind<KeyboardInputHandler>().FromNewComponentOnNewGameObject().NonLazy();
+            Container.Bind<MenuLightingController>().FromNewComponentOnNewGameObject().NonLazy();
+            Container.Bind<CameraManager>().FromNewComponentOnNewGameObject().NonLazy();
 
             // not sure if this is a great idea but w/e
             if (!Container.HasBinding<MainSettingsModelSO>())

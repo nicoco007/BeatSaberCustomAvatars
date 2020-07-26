@@ -49,7 +49,13 @@ namespace CustomAvatar
             SceneManager.sceneLoaded += OnSceneLoaded;
             BeatSaberEvents.playerHeightChanged += OnPlayerHeightChanged;
 
+            if (settings.calibrateFullBodyTrackingOnStart && settings.GetAvatarSettings(settings.previousAvatarPath).useAutomaticCalibration)
+            {
+                avatarTailor.CalibrateFullBodyTrackingAuto();
+            }
+
             LoadAvatarInfosFromFile();
+            LoadAvatarFromSettingsAsync();
         }
 
         public void Dispose()

@@ -28,6 +28,7 @@ namespace CustomAvatar.Lighting
 
             _lightManager.didSetColorForIdEvent += OnSetColorForId;
         }
+
         private void Start()
         {
             List<LightWithId>[] lightsWithId = _lightManager.GetPrivateField<List<LightWithId>[]>("_lights");
