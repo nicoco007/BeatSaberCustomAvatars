@@ -30,13 +30,12 @@ namespace CustomAvatar
         private readonly AvatarTailor _avatarTailor;
         private readonly Settings _settings;
         private readonly AvatarSpawner _spawner;
-        private readonly GameScenesManager _gameScenesManager;
 
         private readonly Dictionary<string, AvatarInfo> _avatarInfos = new Dictionary<string, AvatarInfo>();
         private string _switchingToPath;
 
         [Inject]
-        private PlayerAvatarManager(DiContainer container, AvatarTailor avatarTailor, ILoggerProvider loggerProvider, AvatarLoader avatarLoader, Settings settings, AvatarSpawner spawner, GameScenesManager gameScenesManager)
+        private PlayerAvatarManager(DiContainer container, AvatarTailor avatarTailor, ILoggerProvider loggerProvider, AvatarLoader avatarLoader, Settings settings, AvatarSpawner spawner)
         {
             _container = container;
             _logger = loggerProvider.CreateLogger<PlayerAvatarManager>();
@@ -44,11 +43,9 @@ namespace CustomAvatar
             _avatarTailor = avatarTailor;
             _settings = settings;
             _spawner = spawner;
-            _gameScenesManager = gameScenesManager;
 
             _settings.moveFloorWithRoomAdjustChanged += OnMoveFloorWithRoomAdjustChanged;
             _settings.firstPersonEnabledChanged += OnFirstPersonEnabledChanged;
-            _gameScenesManager.transitionDidFinishEvent += OnSceneTransitionDidFinish;
             SceneManager.sceneLoaded += OnSceneLoaded;
             BeatSaberEvents.playerHeightChanged += OnPlayerHeightChanged;
 
@@ -60,7 +57,6 @@ namespace CustomAvatar
             Object.Destroy(currentlySpawnedAvatar);
 
             _settings.moveFloorWithRoomAdjustChanged -= OnMoveFloorWithRoomAdjustChanged;
-            _gameScenesManager.transitionDidFinishEvent -= OnSceneTransitionDidFinish;
             SceneManager.sceneLoaded -= OnSceneLoaded;
             BeatSaberEvents.playerHeightChanged -= OnPlayerHeightChanged;
 
@@ -225,15 +221,6 @@ namespace CustomAvatar
             {
                 _avatarTailor.CalibrateFullBodyTrackingAuto();
             }
-
-            ResizeCurrentAvatar();
-        }
-
-        private void OnSceneTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
-        {
-            if (!currentlySpawnedAvatar) return;
-
-            ResizeCurrentAvatar();
         }
 
         private void OnPlayerHeightChanged(float height)
