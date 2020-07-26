@@ -29,13 +29,15 @@ namespace CustomAvatar.Configuration
 
         public void Load()
         {
-            _logger.Info("Loading settings from " + kSettingsPath);
+            _logger.Info($"Loading settings from '{kSettingsPath}'");
 
             if (!File.Exists(kSettingsPath))
             {
                 _logger.Info("File does not exist, using default settings");
 
                 settings = new Settings();
+
+                return;
             }
 
             try
@@ -66,7 +68,7 @@ namespace CustomAvatar.Configuration
                 }
             }
 
-            _logger.Info("Saving settings to " + kSettingsPath);
+            _logger.Info($"Saving settings to '{kSettingsPath}'");
 
             using (var writer = new StreamWriter(kSettingsPath))
             using (var jsonWriter = new JsonTextWriter(writer))
