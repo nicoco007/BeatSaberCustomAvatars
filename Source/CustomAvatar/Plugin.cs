@@ -40,11 +40,13 @@ namespace CustomAvatar
             // can't inject at this point so just create it
             _logger = new IPALogger<Plugin>(logger);
 
+            _logger.Info("Initializing Custom Avatars");
+
             try
             {
                 Harmony harmony = new Harmony("com.nicoco007.beatsabercustomavatars");
 
-                ZenjectHelper.ApplyPatches(harmony, logger);
+                ZenjectHelper.Init(harmony, logger);
                 BeatSaberEvents.ApplyPatches(harmony);
                 PatchMirrorRendererSO(harmony);
             }
