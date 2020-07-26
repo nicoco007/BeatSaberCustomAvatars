@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using UnityEngine;
 
 namespace CustomAvatar.Utilities
@@ -18,6 +19,27 @@ namespace CustomAvatar.Utilities
         public static Quaternion ReadQuaternion(this BinaryReader reader)
         {
             return new Quaternion(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+        }
+
+        public static Texture2D ReadTexture2D(this BinaryReader reader)
+        {
+            return BytesToTexture2D(reader.ReadBytes(reader.ReadInt32()));
+        }
+
+        public static DateTime ReadDateTime(this BinaryReader reader)
+        {
+            return DateTime.FromBinary(reader.ReadInt64());
+        }
+
+        private static Texture2D BytesToTexture2D(byte[] bytes)
+        {
+            if (bytes.Length == 0) return null;
+
+            Texture2D texture = new Texture2D(0, 0, TextureFormat.ARGB32, false);
+
+            texture.LoadImage(bytes);
+
+            return texture;
         }
     }
 }

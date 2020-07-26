@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using UnityEngine;
 
 namespace CustomAvatar.Utilities
@@ -24,6 +25,37 @@ namespace CustomAvatar.Utilities
             writer.Write(quaternion.y);
             writer.Write(quaternion.z);
             writer.Write(quaternion.w);
+        }
+
+        public static void Write(this BinaryWriter writer, Texture2D texture, bool forceReadable)
+        {
+            byte[] textureBytes = BytesFromTexture2D(texture, forceReadable);
+
+            writer.Write(textureBytes.Length);
+            writer.Write(textureBytes);
+        }
+
+        public static void Write(this BinaryWriter writer, DateTime dateTime)
+        {
+            writer.Write(dateTime.ToBinary());
+        }
+
+        private static byte[] BytesFromTexture2D(Texture2D texture, bool forceReadable)
+        {
+            if (texture == null || (!texture.isReadable && !forceReadable)) return new byte[0];
+
+            // create readable texture by rendering onto a RenderTexture
+            if (!texture.isReadable)
+            {
+                RenderTexture renderTexture = RenderTexture.GetTemporary(texture.width, texture.height, 0, RenderTextureFormat.ARGB32);
+                RenderTexture.active = renderTexture;
+                Graphics.Blit(texture, renderTexture);
+                texture = renderTexture.GetTexture2D();
+                RenderTexture.active = null;
+                RenderTexture.ReleaseTemporary(renderTexture);
+            }
+            
+            return texture.EncodeToPNG();
         }
     }
 }

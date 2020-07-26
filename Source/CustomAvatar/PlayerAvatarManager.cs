@@ -6,7 +6,7 @@ using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
-using UnityEngine;
+using CustomAvatar.Utilities;
 using UnityEngine.SceneManagement;
 using Zenject;
 using Object = UnityEngine.Object;
@@ -16,7 +16,7 @@ namespace CustomAvatar
     public class PlayerAvatarManager : IDisposable
     {
         public static readonly string kCustomAvatarsPath = Path.GetFullPath("CustomAvatars");
-        public static readonly string kAvatarInfoCacheFilePath = Path.Combine(kCustomAvatarsPath, "cache.db");
+        public static readonly string kAvatarInfoCacheFilePath = Path.Combine(kCustomAvatarsPath, "cache.dat");
         public static readonly byte[] kCacheFileSignature = { 0x43, 0x41, 0x64, 0x62  }; // Custom Avatars Database (CAdb)
         public static readonly byte kCacheFileVersion = 1;
 
@@ -265,12 +265,12 @@ namespace CustomAvatar
                         var avatarInfo = new AvatarInfo(
                             reader.ReadString(),
                             reader.ReadString(),
-                            BytesToTexture2D(reader.ReadBytes(reader.ReadInt32())),
+                            reader.ReadTexture2D(),
                             reader.ReadString(),
                             reader.ReadInt64(),
-                            DateTime.FromBinary(reader.ReadInt64()),
-                            DateTime.FromBinary(reader.ReadInt64()),
-                            DateTime.FromBinary(reader.ReadInt64())
+                            reader.ReadDateTime(),
+                            reader.ReadDateTime(),
+                            reader.ReadDateTime()
                         );
 
                         string fullPath = Path.Combine(kCustomAvatarsPath, avatarInfo.fileName);
@@ -340,16 +340,12 @@ namespace CustomAvatar
                     {
                         writer.Write(avatarInfo.name);
                         writer.Write(avatarInfo.author);
-
-                        byte[] textureBytes = BytesFromTexture2D(avatarInfo.icon);
-                        writer.Write(textureBytes.Length);
-                        writer.Write(textureBytes);
-
+                        writer.Write(avatarInfo.icon, true);
                         writer.Write(avatarInfo.fileName);
                         writer.Write(avatarInfo.fileSize);
-                        writer.Write(avatarInfo.created.ToBinary());
-                        writer.Write(avatarInfo.lastModified.ToBinary());
-                        writer.Write(avatarInfo.timestamp.ToBinary());
+                        writer.Write(avatarInfo.created);
+                        writer.Write(avatarInfo.lastModified);
+                        writer.Write(avatarInfo.timestamp);
                     }
                 }
             }
@@ -358,50 +354,6 @@ namespace CustomAvatar
                 _logger.Error("Failed to save avatar info cache");
                 _logger.Error(ex);
             }
-        }
-
-        private byte[] BytesFromTexture2D(Texture2D texture)
-        {
-            if (texture == null) return new byte[0];
-
-            float ratio = Mathf.Min(1f, 256f / texture.width, 256f / texture.height);
-            int width = Mathf.RoundToInt(texture.width * ratio);
-            int height = Mathf.RoundToInt(texture.height * ratio);
-
-            if (ratio < 1)
-            {
-                _logger.Trace($"Resizing texture with ratio: {ratio} (before: {texture.width} × {texture.height}, after: {width} × {height})");
-            }
-
-            if (ratio < 1 || !texture.isReadable)
-            {
-                RenderTexture renderTexture = new RenderTexture(width, height, 0, RenderTextureFormat.ARGB32);
-                RenderTexture.active = renderTexture;
-                Graphics.Blit(texture, renderTexture);
-                texture = renderTexture.GetTexture2D();
-                RenderTexture.active = null;
-                renderTexture.Release();
-            }
-            
-            return texture.EncodeToPNG();
-        }
-
-        private Texture2D BytesToTexture2D(byte[] bytes)
-        {
-            if (bytes.Length == 0) return null;
-
-            Texture2D texture = new Texture2D(0, 0, TextureFormat.ARGB32, false);
-
-            try
-            {
-                texture.LoadImage(bytes);
-            }
-            catch
-            {
-                return null;
-            }
-
-            return texture;
         }
     }
 }
