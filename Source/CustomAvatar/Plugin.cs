@@ -3,7 +3,6 @@ using CustomAvatar.Utilities;
 using CustomAvatar.Zenject;
 using HarmonyLib;
 using IPA;
-using System;
 using Logger = IPA.Logging.Logger;
 
 namespace CustomAvatar
@@ -24,9 +23,9 @@ namespace CustomAvatar
             ZenjectHelper.Init(harmony, ipaLogger);
             BeatSaberUtilities.ApplyPatches(harmony);
 
-            ZenjectHelper.RegisterInstaller<CustomAvatarsInstaller>("PCInit", "AppCoreSceneContext", ipaLogger);
-            ZenjectHelper.RegisterInstaller<UIInstaller>("MenuViewControllers");
-            ZenjectHelper.RegisterInstaller<GameplayInstaller>("GameplayCore");
+            ZenjectHelper.RegisterCoreInstaller<CustomAvatarsInstaller>(ipaLogger);
+            ZenjectHelper.RegisterMenuViewControllersInstaller<UIInstaller>();
+            ZenjectHelper.RegisterGameplayInstaller<GameplayInstaller>();
         }
     }
 }

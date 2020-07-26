@@ -29,6 +29,11 @@ namespace CustomAvatar.Zenject
             harmony.Patch(methodToPatch, null, patch);
         }
 
+        public static void RegisterCoreInstaller<TInstaller>(params object[] extraArgs) where TInstaller : IInstaller => RegisterInstaller<TInstaller>("PCInit", "AppCoreSceneContext", extraArgs);
+        public static void RegisterMenuInstaller<TInstaller>(params object[] extraArgs) where TInstaller : IInstaller => RegisterInstaller<TInstaller>("MenuCore", null, extraArgs);
+        public static void RegisterMenuViewControllersInstaller<TInstaller>(params object[] extraArgs) where TInstaller : IInstaller => RegisterInstaller<TInstaller>("MenuViewControllers", null, extraArgs);
+        public static void RegisterGameplayInstaller<TInstaller>(params object[] extraArgs) where TInstaller : IInstaller => RegisterInstaller<TInstaller>("GameplayCore", null, extraArgs);
+
         public static void RegisterInstaller<TInstaller>(string sceneName, string sceneContextName = null, params object[] extraArgs) where TInstaller : IInstaller
         {
             if (string.IsNullOrEmpty(sceneName)) throw new ArgumentNullException(nameof(sceneName));
