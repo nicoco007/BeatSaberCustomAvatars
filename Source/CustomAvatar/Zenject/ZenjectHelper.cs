@@ -87,9 +87,98 @@ namespace CustomAvatar.Zenject
 
             Type installerType = typeof(TInstaller);
 
+            if (_installers[sceneName].Any(r => r.installerType == installerType && string.IsNullOrEmpty(r.sceneContextName))) throw new InvalidOperationException($"'{installerType.Name}' already registered globally in '{sceneName}'");
             if (_installers[sceneName].Any(r => r.installerType == installerType && r.sceneContextName == sceneContextName)) throw new InvalidOperationException($"'{installerType.Name}' already registered on '{sceneContextName}' in '{sceneName}'");
 
             _installers[sceneName].Add(new InstallerRegistration(installerType, sceneContextName, extraArgs));
+        }
+
+        /// <summary>
+        /// Checks if the specified installer has been registered in the PCInit scene.
+        /// </summary>
+        /// <typeparam name="TInstaller">Installer for which to check registration</typeparam>
+        /// <returns>Whether the installer has been registered or not</returns>
+        public static bool IsCoreInstallerRegistered<TInstaller>() where TInstaller : Installer => IsInstallerRegistered<TInstaller>("PCInit", "AppCoreSceneContext");
+
+        /// <summary>
+        /// Checks if the specified installer has been registered in the MenuCore scene.
+        /// </summary>
+        /// <typeparam name="TInstaller">Installer for which to check registration</typeparam>
+        /// <returns>Whether the installer has been registered or not</returns>
+        public static bool IsMenuInstallerRegistered<TInstaller>() where TInstaller : Installer => IsInstallerRegistered<TInstaller>("MenuCore");
+
+        /// <summary>
+        /// Checks if the specified installer has been registered in the MenuViewControllers scene.
+        /// </summary>
+        /// <typeparam name="TInstaller">Installer for which to check registration</typeparam>
+        /// <returns>Whether the installer has been registered or not</returns>
+        public static bool IsMenuViewControllersInstallerRegistered<TInstaller>() where TInstaller : Installer => IsInstallerRegistered<TInstaller>("MenuViewControllers");
+
+        /// <summary>
+        /// Checks if the specified installer has been registered in the GameplayCore scene.
+        /// </summary>
+        /// <typeparam name="TInstaller">Installer for which to check registration</typeparam>
+        /// <returns>Whether the installer has been registered or not</returns>
+        public static bool IsGameplayInstallerRegistered<TInstaller>() where TInstaller : Installer => IsInstallerRegistered<TInstaller>("GameplayCore");
+
+        /// <summary>
+        /// Checks if the specified installer has been registered in the specified scene & scene context (if applicable).
+        /// </summary>
+        /// <typeparam name="TInstaller">Installer for which to check registration</typeparam>
+        /// <param name="sceneName">Name of the Scene Context's scene</param>
+        /// <param name="sceneContextName">Name of the Scene Context (optional)</param>
+        /// <returns>Whether the installer has been registered or not</returns>
+        public static bool IsInstallerRegistered<TInstaller>(string sceneName, string sceneContextName = null)
+        {
+            return _installers.ContainsKey(sceneName) && _installers[sceneName].Any(r => r.sceneContextName == sceneContextName);
+        }
+
+        /// <summary>
+        /// Deregisters an installer from the PCInit scene. This does not destroy injected instances of components bound by the installer.
+        /// </summary>
+        /// <typeparam name="TInstaller">Installer to deregister</typeparam>
+        public static void DeregisterCoreInstaller<TInstaller>() where TInstaller : Installer => DeregisterInstaller<TInstaller>("PCInit", "AppCoreSceneContext");
+
+        /// <summary>
+        /// Deregisters an installer from the MenuCore scene. This does not destroy injected instances of components bound by the installer.
+        /// </summary>
+        /// <typeparam name="TInstaller">Installer to deregister</typeparam>
+        public static void DeregisterMenuInstaller<TInstaller>() where TInstaller : Installer => DeregisterInstaller<TInstaller>("MenuCore");
+
+        /// <summary>
+        /// Deregisters an installer from the MenuViewControllers scene. This does not destroy injected instances of components bound by the installer.
+        /// </summary>
+        /// <typeparam name="TInstaller">Installer to deregister</typeparam>
+        public static void DeregisterMenuViewControllersInstaller<TInstaller>() where TInstaller : Installer => DeregisterInstaller<TInstaller>("MenuViewControllers");
+
+        /// <summary>
+        /// Deregisters an installer from the GameplayCore scene. This does not destroy injected instances of components bound by the installer.
+        /// </summary>
+        /// <typeparam name="TInstaller">Installer to deregister</typeparam>
+        public static void DeregisterGameplayInstaller<TInstaller>() where TInstaller : Installer => DeregisterInstaller<TInstaller>("GameplayCore");
+
+        /// <summary>
+        /// Deregisters an installer from the specified scene. If there is more than one scene context in a scene (e.g. in PCInit), use <paramref name="sceneContextName"/> to specify the name of the Scene Context. This does not destroy injected instances of components bound by the installer.
+        /// </summary>
+        /// <typeparam name="TInstaller">Installer to deregister</typeparam>
+        /// <param name="sceneName">Name of the Scene Context's scene</param>
+        /// <param name="sceneContextName">Name of the Scene Context (optional)</param>
+        public static void DeregisterInstaller<TInstaller>(string sceneName, string sceneContextName = null)
+        {
+            Type installerType = typeof(TInstaller);
+
+            if (!IsInstallerRegistered<TInstaller>(sceneName, sceneContextName)) throw new InvalidOperationException($"'{installerType.Name}' is not registered on scene context '{sceneContextName}' in scene '{sceneName}'");
+
+            if (!string.IsNullOrEmpty(sceneContextName))
+            {
+                _logger.Trace($"Deregistering '{typeof(TInstaller).Name}' from scene context '{sceneContextName}' in scene '{sceneName}'");
+            }
+            else
+            {
+                _logger.Trace($"Deregistering '{typeof(TInstaller).Name}' from scene '{sceneName}'");
+            }
+
+            _installers[sceneName].RemoveAll(r => r.installerType == installerType && r.sceneContextName == sceneContextName);
         }
 
         private static void InstallInstallers(Context __instance)
