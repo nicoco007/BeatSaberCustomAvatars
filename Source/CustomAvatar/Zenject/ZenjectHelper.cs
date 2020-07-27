@@ -29,11 +29,41 @@ namespace CustomAvatar.Zenject
             harmony.Patch(methodToPatch, null, patch);
         }
 
+        /// <summary>
+        /// Registers an installer in the PCInit scene. This is the first scene that loads when starting the game.
+        /// </summary>
+        /// <typeparam name="TInstaller">Installer to register</typeparam>
+        /// <param name="extraArgs">Extra values to be injected into <typeparamref name="TInstaller"/></param>
         public static void RegisterCoreInstaller<TInstaller>(params object[] extraArgs) where TInstaller : Installer => RegisterInstaller<TInstaller>("PCInit", "AppCoreSceneContext", extraArgs);
+
+        /// <summary>
+        /// Registers an installer in the MenuCore scene.
+        /// </summary>
+        /// <typeparam name="TInstaller">Installer to register</typeparam>
+        /// <param name="extraArgs">Extra values to be injected into <typeparamref name="TInstaller"/></param>
         public static void RegisterMenuInstaller<TInstaller>(params object[] extraArgs) where TInstaller : Installer => RegisterInstaller<TInstaller>("MenuCore", null, extraArgs);
+
+        /// <summary>
+        /// Registers an installer in the MenuViewControllers scene. This is usually used for UI-specific classes; for anything else, use <see cref="RegisterMenuInstaller{TInstaller}(object[])"/>.
+        /// </summary>
+        /// <typeparam name="TInstaller">Installer to register</typeparam>
+        /// <param name="extraArgs">Extra values to be injected into <typeparamref name="TInstaller"/></param>
         public static void RegisterMenuViewControllersInstaller<TInstaller>(params object[] extraArgs) where TInstaller : Installer => RegisterInstaller<TInstaller>("MenuViewControllers", null, extraArgs);
+        
+        /// <summary>
+        /// Registers an installer in the GameplayCore scene.
+        /// </summary>
+        /// <typeparam name="TInstaller">Installer to register</typeparam>
+        /// <param name="extraArgs">Extra values to be injected into <typeparamref name="TInstaller"/></param>
         public static void RegisterGameplayInstaller<TInstaller>(params object[] extraArgs) where TInstaller : Installer => RegisterInstaller<TInstaller>("GameplayCore", null, extraArgs);
 
+        /// <summary>
+        /// Registers an installer in the specified scene. If there is more than one scene context in a scene (e.g. in PCInit), use <paramref name="sceneContextName"/> to specify the name of the Scene Context.
+        /// </summary>
+        /// <typeparam name="TInstaller">Installer to register</typeparam>
+        /// <param name="sceneName">Name of the Scene Context's scene</param>
+        /// <param name="sceneContextName">Name of the Scene Context (optional)</param>
+        /// <param name="extraArgs">Extra values to be injected into <typeparamref name="TInstaller"/></param>
         public static void RegisterInstaller<TInstaller>(string sceneName, string sceneContextName = null, params object[] extraArgs) where TInstaller : Installer
         {
             if (string.IsNullOrEmpty(sceneName)) throw new ArgumentNullException(nameof(sceneName));
