@@ -1,4 +1,7 @@
+using System;
 using System.Linq;
+using BeatSaberMarkupLanguage;
+using BeatSaberMarkupLanguage.MenuButtons;
 using CustomAvatar.Utilities;
 using HMUI;
 using UnityEngine;
@@ -6,7 +9,7 @@ using Zenject;
 
 namespace CustomAvatar.UI
 {
-    internal class AvatarMenuFlowCoordinator : FlowCoordinator
+    internal class AvatarMenuFlowCoordinator : FlowCoordinator, IInitializable, IDisposable
     {
         private AvatarListViewController _avatarListViewController; 
         private MirrorViewController _mirrorViewController;
@@ -14,6 +17,23 @@ namespace CustomAvatar.UI
 
         private GameObject _mainScreen;
         private Vector3 _mainScreenScale;
+
+        private MenuButton menuButton;
+
+        public void Initialize()
+        {
+            menuButton = new MenuButton("Avatars", () =>
+            {
+                BeatSaberUI.MainFlowCoordinator.PresentFlowCoordinator(this, null, true);
+            });
+
+            MenuButtons.instance.RegisterButton(menuButton);
+        }
+
+        public void Dispose()
+        {
+            MenuButtons.instance.UnregisterButton(menuButton);
+        }
 
         [Inject]
         private void Inject(AvatarListViewController avatarListViewController, MirrorViewController mirrorViewController, SettingsViewController settingsViewController)
