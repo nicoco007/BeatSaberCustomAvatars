@@ -32,7 +32,10 @@ namespace CustomAvatar.UI
 
         public void Dispose()
         {
-            MenuButtons.instance.UnregisterButton(menuButton);
+            if (MenuButtons.IsSingletonAvailable)
+            {
+                MenuButtons.instance.UnregisterButton(menuButton);
+            }
         }
 
         [Inject]
