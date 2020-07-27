@@ -7,7 +7,6 @@ using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
-using UnityEngine.SceneManagement;
 using Zenject;
 using Object = UnityEngine.Object;
 
@@ -49,7 +48,6 @@ namespace CustomAvatar
         {
             _settings.moveFloorWithRoomAdjustChanged += OnMoveFloorWithRoomAdjustChanged;
             _settings.firstPersonEnabledChanged += OnFirstPersonEnabledChanged;
-            SceneManager.sceneLoaded += OnSceneLoaded;
             BeatSaberUtilities.playerHeightChanged += OnPlayerHeightChanged;
 
             if (_settings.calibrateFullBodyTrackingOnStart && _settings.GetAvatarSettings(_settings.previousAvatarPath).useAutomaticCalibration)
@@ -66,7 +64,6 @@ namespace CustomAvatar
             Object.Destroy(currentlySpawnedAvatar);
 
             _settings.moveFloorWithRoomAdjustChanged -= OnMoveFloorWithRoomAdjustChanged;
-            SceneManager.sceneLoaded -= OnSceneLoaded;
             BeatSaberUtilities.playerHeightChanged -= OnPlayerHeightChanged;
 
             SaveAvatarInfosToFile();
@@ -220,16 +217,6 @@ namespace CustomAvatar
             if (!currentlySpawnedAvatar) return;
 
             currentlySpawnedAvatar.UpdateFirstPersonVisibility(enable ? FirstPersonVisibility.VisibleWithExclusionsApplied : FirstPersonVisibility.None);
-        }
-
-        private void OnSceneLoaded(Scene newScene, LoadSceneMode mode)
-        {
-            if (!currentlySpawnedAvatar) return;
-
-            if (newScene.name == "PCInit" && _settings.calibrateFullBodyTrackingOnStart && _settings.GetAvatarSettings(currentlySpawnedAvatar.avatar.fileName).useAutomaticCalibration)
-            {
-                _avatarTailor.CalibrateFullBodyTrackingAuto();
-            }
         }
 
         private void OnPlayerHeightChanged(float height)
