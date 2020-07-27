@@ -13,7 +13,7 @@ using Object = UnityEngine.Object;
 
 namespace CustomAvatar
 {
-    public class PlayerAvatarManager : IDisposable
+    public class PlayerAvatarManager : IInitializable, IDisposable
     {
         public static readonly string kCustomAvatarsPath = Path.GetFullPath("CustomAvatars");
         public static readonly string kAvatarInfoCacheFilePath = Path.Combine(kCustomAvatarsPath, "cache.dat");
@@ -43,15 +43,18 @@ namespace CustomAvatar
             _avatarTailor = avatarTailor;
             _settings = settings;
             _spawner = spawner;
+        }
 
+        public void Initialize()
+        {
             _settings.moveFloorWithRoomAdjustChanged += OnMoveFloorWithRoomAdjustChanged;
             _settings.firstPersonEnabledChanged += OnFirstPersonEnabledChanged;
             SceneManager.sceneLoaded += OnSceneLoaded;
             BeatSaberUtilities.playerHeightChanged += OnPlayerHeightChanged;
 
-            if (settings.calibrateFullBodyTrackingOnStart && settings.GetAvatarSettings(settings.previousAvatarPath).useAutomaticCalibration)
+            if (_settings.calibrateFullBodyTrackingOnStart && _settings.GetAvatarSettings(_settings.previousAvatarPath).useAutomaticCalibration)
             {
-                avatarTailor.CalibrateFullBodyTrackingAuto();
+                _avatarTailor.CalibrateFullBodyTrackingAuto();
             }
 
             LoadAvatarInfosFromFile();
