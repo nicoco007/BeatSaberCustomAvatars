@@ -1,4 +1,5 @@
-﻿using CustomAvatar.Logging;
+﻿using CustomAvatar.Configuration;
+using CustomAvatar.Logging;
 using UnityEngine;
 using Zenject;
 
@@ -11,12 +12,14 @@ namespace CustomAvatar.StereoRendering
         private readonly ILogger<MirrorHelper> _logger;
         private readonly DiContainer _container;
         private readonly ShaderLoader _shaderLoader;
+        private readonly Settings _settings;
 
-        public MirrorHelper(ILoggerProvider loggerProvider, DiContainer container, ShaderLoader shaderLoader)
+        public MirrorHelper(ILoggerProvider loggerProvider, DiContainer container, ShaderLoader shaderLoader, Settings settings)
         {
             _logger = loggerProvider.CreateLogger<MirrorHelper>();
             _container = container;
             _shaderLoader = shaderLoader;
+            _settings = settings;
         }
 
         public void CreateMirror(Vector3 position, Quaternion rotation, Vector2 size, Transform container, Vector3? origin = null)
@@ -66,6 +69,7 @@ namespace CustomAvatar.StereoRendering
             stereoRenderer.useScissor = false;
             stereoRenderer.canvasOriginPos = origin ?? mirrorPlane.transform.position;
             stereoRenderer.canvasOriginRot = mirrorPlane.transform.rotation;
+            stereoRenderer.renderScale = _settings.mirror.renderScale;
         }
     }
 }
