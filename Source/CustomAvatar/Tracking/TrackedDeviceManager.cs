@@ -9,7 +9,7 @@ using Zenject;
 
 namespace CustomAvatar.Tracking
 {
-    internal class TrackedDeviceManager : MonoBehaviour
+    internal class TrackedDeviceManager : IInitializable, ITickable, IDisposable
     {
         public TrackedDeviceState head      { get; } = new TrackedDeviceState();
         public TrackedDeviceState leftHand  { get; } = new TrackedDeviceState();
@@ -24,25 +24,20 @@ namespace CustomAvatar.Tracking
         public event Action<TrackedDeviceState, DeviceUse> deviceTrackingAcquired;
         public event Action<TrackedDeviceState, DeviceUse> deviceTrackingLost;
 
-        private readonly HashSet<string> _foundDevices = new HashSet<string>();
+        private readonly MainSettingsModelSO _mainSettingsModel;
+        private readonly ILogger<TrackedDeviceManager> _logger;
 
-        private MainSettingsModelSO _mainSettingsModel;
-        private ILogger<TrackedDeviceManager> _logger;
 
         private bool _isOpenVRRunning;
+        private readonly HashSet<string> _foundDevices = new HashSet<string>();
 
-        #region Behaviour Lifecycle
-        #pragma warning disable IDE0051
-        // ReSharper disable UnusedMember.Local
-
-        [Inject]
-        private void Inject(MainSettingsModelSO mainSettingsModel, ILoggerProvider loggerProvider)
+        public TrackedDeviceManager(ILoggerProvider loggerProvider, MainSettingsModelSO mainSettingsModel)
         {
             _mainSettingsModel = mainSettingsModel;
             _logger = loggerProvider.CreateLogger<TrackedDeviceManager>();
         }
 
-        public void Start()
+        public void Initialize()
         {
             try
             {
@@ -54,14 +49,14 @@ namespace CustomAvatar.Tracking
                 _logger.Error(ex);
             }
 
-            InputDevices.deviceConnected += device => UpdateInputDevices();
-            InputDevices.deviceDisconnected += device => UpdateInputDevices();
-            InputDevices.deviceConfigChanged += device => UpdateInputDevices();
+            InputDevices.deviceConnected += OnInputDevicesUpdated;
+            InputDevices.deviceDisconnected += OnInputDevicesUpdated;
+            InputDevices.deviceConfigChanged += OnInputDevicesUpdated;
 
             UpdateInputDevices();
         }
 
-        private void Update()
+        public void Tick()
         {
             var inputDevices = new List<InputDevice>();
 
@@ -91,10 +86,15 @@ namespace CustomAvatar.Tracking
             UpdateTrackedDevice(leftFoot,  leftFootInputDevice,  DeviceUse.LeftFoot);
             UpdateTrackedDevice(rightFoot, rightFootInputDevice, DeviceUse.RightFoot);
         }
-        
-        // ReSharper restore UnusedMember.Local
-        #pragma warning restore IDE0051
-        #endregion
+
+        public void Dispose()
+        {
+            InputDevices.deviceConnected -= OnInputDevicesUpdated;
+            InputDevices.deviceDisconnected -= OnInputDevicesUpdated;
+            InputDevices.deviceConfigChanged -= OnInputDevicesUpdated;
+        }
+
+        private void OnInputDevicesUpdated(InputDevice device) => UpdateInputDevices();
 
         private void UpdateInputDevices()
         {

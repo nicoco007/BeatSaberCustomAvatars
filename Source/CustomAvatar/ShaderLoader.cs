@@ -6,22 +6,21 @@ using Object = UnityEngine.Object;
 
 namespace CustomAvatar
 {
-    internal class ShaderLoader : MonoBehaviour
+    internal class ShaderLoader : IInitializable
     {
         public Shader stereoMirrorShader;
         public Shader unlitShader;
 
-        private ILogger<ShaderLoader> _logger;
+        private readonly ILogger<ShaderLoader> _logger;
 
-        [Inject]
-        private void Inject(ILoggerProvider loggerProvider)
+        public ShaderLoader(ILoggerProvider loggerProvider)
         {
             _logger = loggerProvider.CreateLogger<ShaderLoader>();
         }
 
-        private void Start()
+        public void Initialize()
         {
-            StartCoroutine(GetShaders());
+            SharedCoroutineStarter.instance.StartCoroutine(GetShaders());
         }
 
         private IEnumerator GetShaders()

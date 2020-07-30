@@ -5,21 +5,20 @@ using Zenject;
 
 namespace CustomAvatar
 {
-    internal class KeyboardInputHandler : MonoBehaviour
+    internal class KeyboardInputHandler : ITickable
     {
-        private Settings _settings;
-        private PlayerAvatarManager _avatarManager;
-        private ILogger<KeyboardInputHandler> _logger;
+        private readonly Settings _settings;
+        private readonly PlayerAvatarManager _avatarManager;
+        private readonly ILogger<KeyboardInputHandler> _logger;
 
-        [Inject]
-        private void Inject(Settings settings, PlayerAvatarManager avatarManager, ILoggerProvider loggerProvider)
+        public KeyboardInputHandler(Settings settings, PlayerAvatarManager avatarManager, ILoggerProvider loggerProvider)
         {
             _settings = settings;
             _avatarManager = avatarManager;
             _logger = loggerProvider.CreateLogger<KeyboardInputHandler>();
         }
 
-        private void Update()
+        public void Tick()
         {
             if (Input.GetKeyDown(KeyCode.PageDown))
             {
@@ -36,7 +35,7 @@ namespace CustomAvatar
             }
             else if (Input.GetKeyDown(KeyCode.End))
             {
-                _settings.resizeMode = (AvatarResizeMode) (((int)_settings.resizeMode + 1) % 3);
+                _settings.resizeMode = (AvatarResizeMode)(((int)_settings.resizeMode + 1) % 3);
                 _logger.Info($"Set resize mode to {_settings.resizeMode}");
                 _avatarManager.ResizeCurrentAvatar();
             }

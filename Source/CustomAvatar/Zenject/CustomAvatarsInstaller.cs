@@ -33,7 +33,11 @@ namespace CustomAvatar.Zenject
             
             // managers
             Container.BindInterfacesAndSelfTo<PlayerAvatarManager>().AsSingle().NonLazy();
+            Container.BindInterfacesAndSelfTo<TrackedDeviceManager>().AsSingle().NonLazy();
             Container.BindInterfacesAndSelfTo<MainCameraController>().AsSingle().NonLazy();
+            Container.BindInterfacesAndSelfTo<KeyboardInputHandler>().AsSingle().NonLazy();
+            Container.BindInterfacesAndSelfTo<ShaderLoader>().AsSingle().NonLazy();
+
             Container.Bind<StereoRenderManager>().AsSingle();
             Container.Bind<AvatarLoader>().AsSingle();
 
@@ -43,10 +47,7 @@ namespace CustomAvatar.Zenject
             Container.Bind<AvatarSpawner>().AsTransient();
             Container.Bind<GameScenesHelper>().AsTransient();
 
-            // behaviours (persistent & initialized at start)
-            Container.Bind<TrackedDeviceManager>().FromNewComponentOnNewGameObject().NonLazy();
-            Container.Bind<ShaderLoader>().FromNewComponentOnNewGameObject().NonLazy();
-            Container.Bind<KeyboardInputHandler>().FromNewComponentOnNewGameObject().NonLazy();
+            // behaviours
             Container.Bind<MenuLightingController>().FromNewComponentOnNewGameObject().NonLazy();
 
             // not sure if this is a great idea but w/e
