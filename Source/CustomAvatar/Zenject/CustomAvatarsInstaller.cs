@@ -33,6 +33,7 @@ namespace CustomAvatar.Zenject
             
             // managers
             Container.BindInterfacesAndSelfTo<PlayerAvatarManager>().AsSingle().NonLazy();
+            Container.BindInterfacesAndSelfTo<MainCameraController>().AsSingle().NonLazy();
             Container.Bind<StereoRenderManager>().AsSingle();
             Container.Bind<AvatarLoader>().AsSingle();
 
@@ -47,7 +48,6 @@ namespace CustomAvatar.Zenject
             Container.Bind<ShaderLoader>().FromNewComponentOnNewGameObject().NonLazy();
             Container.Bind<KeyboardInputHandler>().FromNewComponentOnNewGameObject().NonLazy();
             Container.Bind<MenuLightingController>().FromNewComponentOnNewGameObject().NonLazy();
-            Container.Bind<CameraManager>().FromNewComponentOnNewGameObject().NonLazy();
 
             // not sure if this is a great idea but w/e
             if (!Container.HasBinding<MainSettingsModelSO>())

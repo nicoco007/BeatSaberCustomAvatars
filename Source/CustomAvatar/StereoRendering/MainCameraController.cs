@@ -1,27 +1,30 @@
 ﻿using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
+using System;
 using UnityEngine;
 using Zenject;
 
 namespace CustomAvatar.StereoRendering
 {
-    class CameraManager : MonoBehaviour
+    internal class MainCameraController : IInitializable, IDisposable
     {
-        private ILogger<CameraManager> _logger;
+        private ILogger<MainCameraController> _logger;
         private Settings _settings;
         private GameScenesManager _gameScenesManager;
 
-        [Inject]
-        private void Inject(ILoggerProvider loggerProvider, Settings settings, GameScenesManager gameScenesManager)
+        public MainCameraController(ILoggerProvider loggerProvider, Settings settings, GameScenesManager gameScenesManager)
         {
-            _logger = loggerProvider.CreateLogger<CameraManager>();
+            _logger = loggerProvider.CreateLogger<MainCameraController>();
             _settings = settings;
             _gameScenesManager = gameScenesManager;
+        }
 
+        public void Initialize()
+        {
             _gameScenesManager.transitionDidFinishEvent += OnTransitionDidFinish;
         }
 
-        private void OnDestroy()
+        public void Dispose()
         {
             _gameScenesManager.transitionDidFinishEvent -= OnTransitionDidFinish;
         }
