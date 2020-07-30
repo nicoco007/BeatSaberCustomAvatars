@@ -36,9 +36,9 @@ namespace CustomAvatar
             _trackedDeviceManager = trackedDeviceManager;
         }
 
-        public void ResizeAvatar(SpawnedAvatar avatar)
+        public void ResizeAvatar(SpawnedAvatar spawnedAvatar)
         {
-            if (!avatar.avatar.descriptor.allowHeightCalibration || !avatar.avatar.isIKAvatar) return;
+            if (!spawnedAvatar.avatar.descriptor.allowHeightCalibration || !spawnedAvatar.avatar.isIKAvatar) return;
 
             // compute scale
             float scale;
@@ -47,7 +47,7 @@ namespace CustomAvatar
             switch (resizeMode)
             {
                 case AvatarResizeMode.ArmSpan:
-                    float avatarArmLength = avatar.armSpan;
+                    float avatarArmLength = spawnedAvatar.avatar.armSpan;
 
                     if (avatarArmLength > 0)
                     {
@@ -61,7 +61,7 @@ namespace CustomAvatar
                     break;
 
                 case AvatarResizeMode.Height:
-                    float avatarEyeHeight = avatar.eyeHeight;
+                    float avatarEyeHeight = spawnedAvatar.avatar.eyeHeight;
 
                     if (avatarEyeHeight > 0)
                     {
@@ -86,25 +86,25 @@ namespace CustomAvatar
             }
 
             // apply scale
-            avatar.scale = scale;
+            spawnedAvatar.scale = scale;
 
-            SharedCoroutineStarter.instance.StartCoroutine(FloorMendingWithDelay(avatar));
+            SharedCoroutineStarter.instance.StartCoroutine(FloorMendingWithDelay(spawnedAvatar));
         }
 
-        private IEnumerator FloorMendingWithDelay(SpawnedAvatar avatar)
+        private IEnumerator FloorMendingWithDelay(SpawnedAvatar spawnedAvatar)
         {
             yield return new WaitForEndOfFrame(); // wait for CustomFloorPlugin:PlatformManager:Start to hide original platform
             
-            if (!avatar) yield break;
+            if (!spawnedAvatar) yield break;
 
             float floorOffset = 0f;
 
-            if (_settings.enableFloorAdjust && avatar.avatar.isIKAvatar)
+            if (_settings.enableFloorAdjust && spawnedAvatar.avatar.isIKAvatar)
             {
                 float playerEyeHeight = _playerEyeHeight;
-                float avatarEyeHeight = avatar.eyeHeight;
+                float avatarEyeHeight = spawnedAvatar.avatar.eyeHeight;
 
-                floorOffset = playerEyeHeight - avatarEyeHeight * avatar.scale;
+                floorOffset = playerEyeHeight - avatarEyeHeight * spawnedAvatar.scale;
 
                 if (_settings.moveFloorWithRoomAdjust)
                 {
@@ -115,7 +115,7 @@ namespace CustomAvatar
             floorOffset = (float) Math.Round(floorOffset, 3); // round to millimeter
 
             // apply offset
-			avatar.verticalPosition = floorOffset;
+			spawnedAvatar.verticalPosition = floorOffset;
             
             // ReSharper disable Unity.PerformanceCriticalCodeInvocation
             GameObject menuPlayersPlace = GameObject.Find("MenuPlayersPlace");
@@ -252,12 +252,12 @@ namespace CustomAvatar
             fullBodyCalibration.waist = Pose.identity;
         }
 
-        public Vector3 ApplyTrackedPointFloorOffset(SpawnedAvatar avatar, Vector3 position)
+        public Vector3 ApplyTrackedPointFloorOffset(SpawnedAvatar spawnedAvatar, Vector3 position)
         {
             if (!_settings.enableFloorAdjust) return position;
 
-            float scaledEyeHeight = avatar.eyeHeight * avatar.scale;
-            float yOffset = avatar.verticalPosition;
+            float scaledEyeHeight = spawnedAvatar.avatar.eyeHeight * spawnedAvatar.scale;
+            float yOffset = spawnedAvatar.verticalPosition;
 
             if (_settings.moveFloorWithRoomAdjust)
             {

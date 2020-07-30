@@ -53,7 +53,7 @@ namespace CustomAvatar.UI
             _calibrateFullBodyTrackingOnStart.CheckboxValue = _settings.calibrateFullBodyTrackingOnStart;
             _cameraNearClipPlane.Value = _settings.cameraNearClipPlane;
 
-            OnAvatarChanged(_avatarManager.currentlySpawnedAvatar);
+            UpdateUI(_avatarManager.currentlySpawnedAvatar.avatar);
             OnInputDevicesChanged(null, DeviceUse.Unknown);
 
             _armSpanLabel.SetText($"{_settings.playerArmSpan:0.00} m");
@@ -103,7 +103,12 @@ namespace CustomAvatar.UI
             DisableCalibrationMode(false);
         }
 
-        private void OnAvatarChanged(SpawnedAvatar avatar)
+        private void OnAvatarChanged(SpawnedAvatar spawnedAvatar)
+        {
+            UpdateUI(spawnedAvatar.avatar);
+        }
+
+        private void UpdateUI(LoadedAvatar avatar)
         {
             DisableCalibrationMode(false);
 
@@ -117,8 +122,8 @@ namespace CustomAvatar.UI
                 return;
             }
 
-            _currentAvatarSettings = _settings.GetAvatarSettings(avatar.avatar.fileName);
-            _currentAvatarManualCalibration = _calibrationData.GetAvatarManualCalibration(avatar.avatar.fileName);
+            _currentAvatarSettings = _settings.GetAvatarSettings(avatar.fileName);
+            _currentAvatarManualCalibration = _calibrationData.GetAvatarManualCalibration(avatar.fileName);
 
             UpdateCalibrationButtons(avatar);
 
@@ -127,16 +132,16 @@ namespace CustomAvatar.UI
             _bypassCalibrationHoverHint.text = avatar.supportsFullBodyTracking ? "Disable the need for calibration before full body tracking is applied." : "Not supported by current avatar";
 
             _automaticCalibrationSetting.CheckboxValue = _currentAvatarSettings.useAutomaticCalibration;
-            _automaticCalibrationSetting.checkbox.interactable = avatar.avatar.descriptor.supportsAutomaticCalibration;
-            _automaticCalibrationHoverHint.text = avatar.avatar.descriptor.supportsAutomaticCalibration ? "Use automatic calibration instead of manual calibration." : "Not supported by current avatar";
+            _automaticCalibrationSetting.checkbox.interactable = avatar.descriptor.supportsAutomaticCalibration;
+            _automaticCalibrationHoverHint.text = avatar.descriptor.supportsAutomaticCalibration ? "Use automatic calibration instead of manual calibration." : "Not supported by current avatar";
         }
 
         private void OnInputDevicesChanged(TrackedDeviceState state, DeviceUse use)
         {
-            UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar);
+            UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.avatar);
         }
 
-        private void UpdateCalibrationButtons(SpawnedAvatar avatar)
+        private void UpdateCalibrationButtons(LoadedAvatar avatar)
         {
             if (!_trackedDeviceManager.waist.tracked && !_trackedDeviceManager.leftFoot.tracked && !_trackedDeviceManager.rightFoot.tracked)
             {
@@ -151,8 +156,8 @@ namespace CustomAvatar.UI
                 return;
             }
 
-            bool isManualCalibrationPossible = avatar != null && avatar.avatar.isIKAvatar && avatar.supportsFullBodyTracking;
-            bool isAutomaticCalibrationPossible = isManualCalibrationPossible && avatar.avatar.descriptor.supportsAutomaticCalibration;
+            bool isManualCalibrationPossible = avatar != null && avatar.isIKAvatar && avatar.supportsFullBodyTracking;
+            bool isAutomaticCalibrationPossible = isManualCalibrationPossible && avatar.descriptor.supportsAutomaticCalibration;
 
             if (isAutomaticCalibrationPossible)
             {

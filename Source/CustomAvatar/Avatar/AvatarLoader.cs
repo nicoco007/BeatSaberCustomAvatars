@@ -4,6 +4,7 @@ using System.IO;
 using CustomAvatar.Exceptions;
 using CustomAvatar.Logging;
 using UnityEngine;
+using Zenject;
 
 namespace CustomAvatar.Avatar
 {
@@ -12,12 +13,14 @@ namespace CustomAvatar.Avatar
         private const string kGameObjectName = "_CustomAvatar";
 
         private readonly ILogger<AvatarLoader> _logger;
+        private readonly DiContainer _container;
 
         private readonly Dictionary<string, List<LoadHandlers>> _handlers = new Dictionary<string, List<LoadHandlers>>();
 
-        internal AvatarLoader(ILoggerProvider loggerProvider)
+        internal AvatarLoader(ILoggerProvider loggerProvider, DiContainer container)
         {
             _logger = loggerProvider.CreateLogger<AvatarLoader>();
+            _container = container;
         }
 
         // TODO from stream/memory
@@ -88,7 +91,7 @@ namespace CustomAvatar.Avatar
                 
             try
             {
-                var loadedAvatar = new LoadedAvatar(fullPath, (GameObject)assetBundleRequest.asset);
+                var loadedAvatar = new LoadedAvatar(fullPath, (GameObject)assetBundleRequest.asset, _container.Resolve<ILoggerProvider>());
 
                 _logger.Info($"Successfully loaded avatar '{loadedAvatar.descriptor.name}' from '{fullPath}'");
 
