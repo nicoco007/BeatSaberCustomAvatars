@@ -179,15 +179,17 @@ namespace CustomAvatar.StereoRendering
 
         #endregion
 
+        private DiContainer _container;
         private StereoRenderManager _manager;
 
         /////////////////////////////////////////////////////////////////////////////////
         // initialization
 
         [Inject]
-        private void Inject(StereoRenderManager manager)
+        private void Inject(DiContainer container, StereoRenderManager manager)
         {
             _manager = manager;
+            _container = container;
         }
 
         private void Start()
@@ -249,10 +251,15 @@ namespace CustomAvatar.StereoRendering
 
         private void OnWillRenderObject()
         {
-            if (Camera.current.GetComponent<VRRenderEventDetector>() != null)
+            Camera currentCamera = Camera.current;
+
+            // force all cameras to render the mirror from their own perspective
+            if (!currentCamera.GetComponent<VRRenderEventDetector>())
             {
-                canvasVisible = true;
+                _container.InstantiateComponent<VRRenderEventDetector>(currentCamera.gameObject);
             }
+
+            canvasVisible = true;
         }
 
         public void Render(VRRenderEventDetector detector)

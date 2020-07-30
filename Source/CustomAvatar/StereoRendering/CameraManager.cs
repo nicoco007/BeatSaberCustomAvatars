@@ -8,15 +8,13 @@ namespace CustomAvatar.StereoRendering
     class CameraManager : MonoBehaviour
     {
         private ILogger<CameraManager> _logger;
-        private DiContainer _container;
         private Settings _settings;
         private GameScenesManager _gameScenesManager;
 
         [Inject]
-        private void Inject(ILoggerProvider loggerProvider, DiContainer container, Settings settings, GameScenesManager gameScenesManager)
+        private void Inject(ILoggerProvider loggerProvider, Settings settings, GameScenesManager gameScenesManager)
         {
             _logger = loggerProvider.CreateLogger<CameraManager>();
-            _container = container;
             _settings = settings;
             _gameScenesManager = gameScenesManager;
 
@@ -30,30 +28,22 @@ namespace CustomAvatar.StereoRendering
 
         private void OnTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
         {
-            UpdateCameras();
+            UpdateMainCamera();
         }
 
-        private void UpdateCameras()
+        private void UpdateMainCamera()
         {
-            foreach (Camera camera in Camera.allCameras)
+            Camera mainCamera = Camera.main;
+
+            if (!mainCamera)
             {
-                var detector = camera.gameObject.GetComponent<VRRenderEventDetector>();
-
-                if (detector == null)
-                {
-                    _logger.Info($"Adding {nameof(VRRenderEventDetector)} to '{camera.name}'");
-                    _container.InstantiateComponent<VRRenderEventDetector>(camera.gameObject);
-                }
-
-                if (camera.GetComponent<MainCamera>())
-                {
-                    _logger.Info($"Setting up avatar culling mask on '{camera.name}'");
-
-                    camera.cullingMask = (camera.cullingMask & ~AvatarLayers.kOnlyInThirdPersonMask) | AvatarLayers.kAlwaysVisibleMask;
-
-                    camera.nearClipPlane = _settings.cameraNearClipPlane;
-                }
+                _logger.Warning("Main camera not found");
             }
+
+            _logger.Info($"Setting avatar culling mask and near clip plane on '{mainCamera.name}'");
+
+            mainCamera.cullingMask = (mainCamera.cullingMask & ~AvatarLayers.kOnlyInThirdPersonMask) | AvatarLayers.kAlwaysVisibleMask;
+            mainCamera.nearClipPlane = _settings.cameraNearClipPlane;
         }
     }
 }
