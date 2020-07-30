@@ -93,7 +93,7 @@ namespace CustomAvatar
         public Animator animator;
 
         public bool openHandIsValid =>
-            animator.isHuman &&
+            animator && animator.isHuman &&
             (!animator.GetBoneTransform(HumanBodyBones.LeftThumbProximal)       || !openHand_LeftThumbProximal.Equals(Pose.identity)) &&
             (!animator.GetBoneTransform(HumanBodyBones.LeftThumbIntermediate)   || !openHand_LeftThumbIntermediate.Equals(Pose.identity)) &&
             (!animator.GetBoneTransform(HumanBodyBones.LeftThumbDistal)         || !openHand_LeftThumbDistal.Equals(Pose.identity)) &&
@@ -126,7 +126,7 @@ namespace CustomAvatar
             (!animator.GetBoneTransform(HumanBodyBones.RightLittleDistal)       || !openHand_RightLittleDistal.Equals(Pose.identity));
 
         public bool closedHandIsValid =>
-            animator.isHuman &&
+            animator && animator.isHuman &&
             (!animator.GetBoneTransform(HumanBodyBones.LeftThumbProximal)       || !closedHand_LeftThumbProximal.Equals(Pose.identity)) &&
             (!animator.GetBoneTransform(HumanBodyBones.LeftThumbIntermediate)   || !closedHand_LeftThumbIntermediate.Equals(Pose.identity)) &&
             (!animator.GetBoneTransform(HumanBodyBones.LeftThumbDistal)         || !closedHand_LeftThumbDistal.Equals(Pose.identity)) &&
