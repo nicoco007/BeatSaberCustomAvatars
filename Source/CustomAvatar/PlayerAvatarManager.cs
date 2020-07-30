@@ -180,8 +180,8 @@ namespace CustomAvatar
         {
             List<string> files = GetAvatarFileNames();
             files.Insert(0, null);
-            
-            int index = currentlySpawnedAvatar ? files.IndexOf(currentlySpawnedAvatar.avatar.fullPath) : 0;
+
+            int index = !string.IsNullOrEmpty(_switchingToPath) ? files.IndexOf(Path.GetFileName(_switchingToPath)) : 0;
 
             index = (index + 1) % files.Count;
 
@@ -193,7 +193,7 @@ namespace CustomAvatar
             List<string> files = GetAvatarFileNames();
             files.Insert(0, null);
             
-            int index = currentlySpawnedAvatar ? files.IndexOf(currentlySpawnedAvatar.avatar.fullPath) : 0;
+            int index = !string.IsNullOrEmpty(_switchingToPath) ? files.IndexOf(Path.GetFileName(_switchingToPath)) : 0;
 
             index = (index + files.Count - 1) % files.Count;
             
@@ -226,7 +226,7 @@ namespace CustomAvatar
 
         private List<string> GetAvatarFileNames()
         {
-            return Directory.GetFiles(kCustomAvatarsPath, "*.avatar", SearchOption.TopDirectoryOnly).Select(f => Path.GetFileName(f)).ToList();
+            return Directory.GetFiles(kCustomAvatarsPath, "*.avatar", SearchOption.TopDirectoryOnly).Select(f => Path.GetFileName(f)).OrderBy(f => f).ToList();
         }
 
         private void LoadAvatarInfosFromFile()
