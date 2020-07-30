@@ -12,6 +12,12 @@ namespace CustomAvatar.Zenject
 {
     public class ZenjectHelper
     {
+        public static readonly string kInitSceneName = "PCInit";
+        public static readonly string kInitSceneContextName = "AppCoreSceneContext";
+        public static readonly string kMenuSceneName = "MenuCore";
+        public static readonly string kMenuViewControllersSceneName = "MenuViewControllers";
+        public static readonly string kGameplaySceneName = "GameplayCore";
+
         private static ILogger<ZenjectHelper> _logger;
         private static Harmony _harmony;
 
@@ -34,28 +40,28 @@ namespace CustomAvatar.Zenject
         /// </summary>
         /// <typeparam name="TInstaller">Installer to register</typeparam>
         /// <param name="extraArgs">Extra values to be injected into <typeparamref name="TInstaller"/></param>
-        public static void RegisterCoreInstaller<TInstaller>(params object[] extraArgs) where TInstaller : Installer => RegisterInstaller<TInstaller>("PCInit", "AppCoreSceneContext", extraArgs);
+        public static void RegisterInitInstaller<TInstaller>(params object[] extraArgs) where TInstaller : Installer => RegisterInstaller<TInstaller>(kInitSceneName, kInitSceneContextName, extraArgs);
 
         /// <summary>
         /// Registers an installer in the MenuCore scene.
         /// </summary>
         /// <typeparam name="TInstaller">Installer to register</typeparam>
         /// <param name="extraArgs">Extra values to be injected into <typeparamref name="TInstaller"/></param>
-        public static void RegisterMenuInstaller<TInstaller>(params object[] extraArgs) where TInstaller : Installer => RegisterInstaller<TInstaller>("MenuCore", null, extraArgs);
+        public static void RegisterMenuInstaller<TInstaller>(params object[] extraArgs) where TInstaller : Installer => RegisterInstaller<TInstaller>(kMenuSceneName, null, extraArgs);
 
         /// <summary>
         /// Registers an installer in the MenuViewControllers scene. This is usually used for UI-specific classes; for anything else, use <see cref="RegisterMenuInstaller{TInstaller}(object[])"/>.
         /// </summary>
         /// <typeparam name="TInstaller">Installer to register</typeparam>
         /// <param name="extraArgs">Extra values to be injected into <typeparamref name="TInstaller"/></param>
-        public static void RegisterMenuViewControllersInstaller<TInstaller>(params object[] extraArgs) where TInstaller : Installer => RegisterInstaller<TInstaller>("MenuViewControllers", null, extraArgs);
+        public static void RegisterMenuViewControllersInstaller<TInstaller>(params object[] extraArgs) where TInstaller : Installer => RegisterInstaller<TInstaller>(kMenuViewControllersSceneName, null, extraArgs);
         
         /// <summary>
         /// Registers an installer in the GameplayCore scene.
         /// </summary>
         /// <typeparam name="TInstaller">Installer to register</typeparam>
         /// <param name="extraArgs">Extra values to be injected into <typeparamref name="TInstaller"/></param>
-        public static void RegisterGameplayInstaller<TInstaller>(params object[] extraArgs) where TInstaller : Installer => RegisterInstaller<TInstaller>("GameplayCore", null, extraArgs);
+        public static void RegisterGameplayInstaller<TInstaller>(params object[] extraArgs) where TInstaller : Installer => RegisterInstaller<TInstaller>(kGameplaySceneName, null, extraArgs);
 
         /// <summary>
         /// Registers an installer in the specified scene. If there is more than one scene context in a scene (e.g. in PCInit), use <paramref name="sceneContextName"/> to specify the name of the Scene Context.
@@ -98,28 +104,28 @@ namespace CustomAvatar.Zenject
         /// </summary>
         /// <typeparam name="TInstaller">Installer for which to check registration</typeparam>
         /// <returns>Whether the installer has been registered or not</returns>
-        public static bool IsCoreInstallerRegistered<TInstaller>() where TInstaller : Installer => IsInstallerRegistered<TInstaller>("PCInit", "AppCoreSceneContext");
+        public static bool IsInitInstallerRegistered<TInstaller>() where TInstaller : Installer => IsInstallerRegistered<TInstaller>(kInitSceneName, kInitSceneContextName);
 
         /// <summary>
         /// Checks if the specified installer has been registered in the MenuCore scene.
         /// </summary>
         /// <typeparam name="TInstaller">Installer for which to check registration</typeparam>
         /// <returns>Whether the installer has been registered or not</returns>
-        public static bool IsMenuInstallerRegistered<TInstaller>() where TInstaller : Installer => IsInstallerRegistered<TInstaller>("MenuCore");
+        public static bool IsMenuInstallerRegistered<TInstaller>() where TInstaller : Installer => IsInstallerRegistered<TInstaller>(kMenuSceneName);
 
         /// <summary>
         /// Checks if the specified installer has been registered in the MenuViewControllers scene.
         /// </summary>
         /// <typeparam name="TInstaller">Installer for which to check registration</typeparam>
         /// <returns>Whether the installer has been registered or not</returns>
-        public static bool IsMenuViewControllersInstallerRegistered<TInstaller>() where TInstaller : Installer => IsInstallerRegistered<TInstaller>("MenuViewControllers");
+        public static bool IsMenuViewControllersInstallerRegistered<TInstaller>() where TInstaller : Installer => IsInstallerRegistered<TInstaller>(kMenuViewControllersSceneName);
 
         /// <summary>
         /// Checks if the specified installer has been registered in the GameplayCore scene.
         /// </summary>
         /// <typeparam name="TInstaller">Installer for which to check registration</typeparam>
         /// <returns>Whether the installer has been registered or not</returns>
-        public static bool IsGameplayInstallerRegistered<TInstaller>() where TInstaller : Installer => IsInstallerRegistered<TInstaller>("GameplayCore");
+        public static bool IsGameplayInstallerRegistered<TInstaller>() where TInstaller : Installer => IsInstallerRegistered<TInstaller>(kGameplaySceneName);
 
         /// <summary>
         /// Checks if the specified installer has been registered in the specified scene & scene context (if applicable).
@@ -137,25 +143,24 @@ namespace CustomAvatar.Zenject
         /// Deregisters an installer from the PCInit scene. This does not destroy injected instances of components bound by the installer.
         /// </summary>
         /// <typeparam name="TInstaller">Installer to deregister</typeparam>
-        public static void DeregisterCoreInstaller<TInstaller>() where TInstaller : Installer => DeregisterInstaller<TInstaller>("PCInit", "AppCoreSceneContext");
-
+        public static void DeregisterInitInstaller<TInstaller>() where TInstaller : Installer => DeregisterInstaller<TInstaller>(kInitSceneName, kInitSceneContextName);
         /// <summary>
         /// Deregisters an installer from the MenuCore scene. This does not destroy injected instances of components bound by the installer.
         /// </summary>
         /// <typeparam name="TInstaller">Installer to deregister</typeparam>
-        public static void DeregisterMenuInstaller<TInstaller>() where TInstaller : Installer => DeregisterInstaller<TInstaller>("MenuCore");
+        public static void DeregisterMenuInstaller<TInstaller>() where TInstaller : Installer => DeregisterInstaller<TInstaller>(kMenuSceneName);
 
         /// <summary>
         /// Deregisters an installer from the MenuViewControllers scene. This does not destroy injected instances of components bound by the installer.
         /// </summary>
         /// <typeparam name="TInstaller">Installer to deregister</typeparam>
-        public static void DeregisterMenuViewControllersInstaller<TInstaller>() where TInstaller : Installer => DeregisterInstaller<TInstaller>("MenuViewControllers");
+        public static void DeregisterMenuViewControllersInstaller<TInstaller>() where TInstaller : Installer => DeregisterInstaller<TInstaller>(kMenuViewControllersSceneName);
 
         /// <summary>
         /// Deregisters an installer from the GameplayCore scene. This does not destroy injected instances of components bound by the installer.
         /// </summary>
         /// <typeparam name="TInstaller">Installer to deregister</typeparam>
-        public static void DeregisterGameplayInstaller<TInstaller>() where TInstaller : Installer => DeregisterInstaller<TInstaller>("GameplayCore");
+        public static void DeregisterGameplayInstaller<TInstaller>() where TInstaller : Installer => DeregisterInstaller<TInstaller>(kGameplaySceneName);
 
         /// <summary>
         /// Deregisters an installer from the specified scene. If there is more than one scene context in a scene (e.g. in PCInit), use <paramref name="sceneContextName"/> to specify the name of the Scene Context. This does not destroy injected instances of components bound by the installer.
