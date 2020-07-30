@@ -19,11 +19,7 @@ namespace CustomAvatar.StereoRendering
         {
             this.id = Guid.NewGuid();
             this.manager = manager;
-        }
-
-        public void Start()
-        {
-            camera = GetComponent<Camera>();
+            this.camera = GetComponent<Camera>();
         }
 
         private void OnPreRender()
