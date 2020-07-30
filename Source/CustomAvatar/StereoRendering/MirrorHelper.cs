@@ -54,7 +54,7 @@ namespace CustomAvatar.StereoRendering
 
             Camera stereoCameraEye = stereoCameraEyeObject.AddComponent<Camera>();
             stereoCameraEye.enabled = false;
-            stereoCameraEye.cullingMask = (1 << AvatarLayers.kAlwaysVisible) | (1 << AvatarLayers.kOnlyInThirdPerson);
+            stereoCameraEye.cullingMask = AvatarLayers.kAllLayersMask;
             stereoCameraEye.clearFlags = CameraClearFlags.SolidColor;
 
             // kind of hacky but setting the color to pure black or white causes the camera to

@@ -49,13 +49,7 @@ namespace CustomAvatar.StereoRendering
                 {
                     _logger.Info($"Setting up avatar culling mask on '{camera.name}'");
 
-                    int cullingMask = camera.cullingMask;
-
-                    cullingMask &= ~(1 << AvatarLayers.kOnlyInThirdPerson);
-                    cullingMask |= (1 << AvatarLayers.kAlwaysVisible);
-                    cullingMask |= (1 << AvatarLayers.kOnlyInFirstPerson);
-
-                    camera.cullingMask = cullingMask;
+                    camera.cullingMask = (camera.cullingMask & ~AvatarLayers.kOnlyInThirdPersonMask) | AvatarLayers.kAlwaysVisibleMask;
 
                     camera.nearClipPlane = _settings.cameraNearClipPlane;
                 }

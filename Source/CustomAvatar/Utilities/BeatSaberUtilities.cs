@@ -40,7 +40,7 @@ namespace CustomAvatar.Utilities
         {
             Camera mirrorCamera = new Traverse(__instance).Field<Camera>("_mirrorCamera").Value;
 
-            mirrorCamera.cullingMask |= (1 << AvatarLayers.kOnlyInThirdPerson) | (1 << AvatarLayers.kOnlyInFirstPerson) | (1 << AvatarLayers.kAlwaysVisible);
+            mirrorCamera.cullingMask |= AvatarLayers.kAllLayersMask;
         }
     }
 }

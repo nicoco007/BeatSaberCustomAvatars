@@ -52,7 +52,7 @@ namespace CustomAvatar.Lighting
                     light.renderMode = LightRenderMode.Auto;
                     light.intensity = 5f * (1 / direction.magnitude);
                     light.spotAngle = 45;
-                    light.cullingMask = (1 << AvatarLayers.kOnlyInFirstPerson) | (1 << AvatarLayers.kOnlyInThirdPerson) | (1 << AvatarLayers.kAlwaysVisible);
+                    light.cullingMask = AvatarLayers.kAllLayersMask;
                     
                     light.transform.SetParent(lightWithId.transform);
                     light.transform.localPosition = Vector3.zero;
@@ -109,7 +109,7 @@ namespace CustomAvatar.Lighting
             light.shadows = LightShadows.Hard;
             light.range = 5;
             light.renderMode = LightRenderMode.ForcePixel;
-            light.cullingMask = (1 << AvatarLayers.kOnlyInFirstPerson) | (1 << AvatarLayers.kOnlyInThirdPerson) | (1 << AvatarLayers.kAlwaysVisible);
+            light.cullingMask = AvatarLayers.kAllLayersMask;
 
             light.transform.SetParent(parent, false);
             light.transform.localPosition = new Vector3(0, 0, 0.5f); // middle of saber
