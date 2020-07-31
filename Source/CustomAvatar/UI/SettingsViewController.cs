@@ -105,7 +105,7 @@ namespace CustomAvatar.UI
 
         private void OnAvatarChanged(SpawnedAvatar spawnedAvatar)
         {
-            UpdateUI(spawnedAvatar.avatar);
+            UpdateUI(spawnedAvatar?.avatar);
         }
 
         private void UpdateUI(LoadedAvatar avatar)
