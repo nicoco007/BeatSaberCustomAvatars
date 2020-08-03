@@ -22,7 +22,7 @@ pipeline {
       steps {
         bat "robocopy Packaging Packaging-Debug /E & if %ERRORLEVEL% LEQ 3 (exit /b 0)"
         bat "mkdir Packaging-Debug\\Plugins"
-        bat 'python bsipa_version_hash.py'
+        bat 'python bsipa_version_hash.py "Source\\CustomAvatar\\manifest.json" "Source\\CustomAvatar\\Properties\\AssemblyInfo.cs"'
       }
     }
     stage("Build Debug") {
