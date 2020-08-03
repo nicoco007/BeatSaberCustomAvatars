@@ -32,7 +32,7 @@ namespace CustomAvatar.Tracking
 
         public event Action inputChanged;
 
-        private readonly TrackedDeviceManager _deviceManager;
+        private readonly ITrackedDeviceManager _deviceManager;
         private readonly Settings _settings;
         private readonly Settings.AvatarSpecificSettings _avatarSettings;
         private readonly CalibrationData _calibrationData;
@@ -51,7 +51,7 @@ namespace CustomAvatar.Tracking
             _avatarSettings.useAutomaticCalibration && _calibrationData.automaticCalibration.isCalibrated;
 
         [Inject]
-        internal VRPlayerInput(TrackedDeviceManager trackedDeviceManager, LoadedAvatar avatar, Settings settings, CalibrationData calibrationData)
+        internal VRPlayerInput(ITrackedDeviceManager trackedDeviceManager, LoadedAvatar avatar, Settings settings, CalibrationData calibrationData)
         {
             _deviceManager = trackedDeviceManager;
             _settings = settings;
@@ -184,9 +184,9 @@ namespace CustomAvatar.Tracking
             _rightHandAnimAction.Dispose();
         }
 
-        private bool TryGetPose(TrackedDeviceState device, out Pose pose)
+        private bool TryGetPose(ITrackedDeviceState device, out Pose pose)
         {
-            if (!device.found || !device.tracked)
+            if (!device.isConnected || !device.isTracking)
             {
                 pose = Pose.identity;
                 return false;
@@ -196,7 +196,7 @@ namespace CustomAvatar.Tracking
             return true;
         }
 
-        private bool TryGetTrackerPose(TrackedDeviceState device, Pose previousPose, Pose correction, Settings.TrackedPointSmoothing smoothing, out Pose pose)
+        private bool TryGetTrackerPose(ITrackedDeviceState device, Pose previousPose, Pose correction, Settings.TrackedPointSmoothing smoothing, out Pose pose)
         {
             if (!_shouldTrackFullBody || !TryGetPose(device, out Pose currentPose))
             {
@@ -211,7 +211,7 @@ namespace CustomAvatar.Tracking
             return true;
         }
 
-        private void OnDevicesUpdated(TrackedDeviceState state, DeviceUse use)
+        private void OnDevicesUpdated(ITrackedDeviceState state)
         {
             inputChanged?.Invoke();
         }

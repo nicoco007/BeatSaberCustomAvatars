@@ -20,9 +20,12 @@ using CustomAvatar.Configuration;
 using CustomAvatar.Lighting;
 using CustomAvatar.Logging;
 using CustomAvatar.StereoRendering;
-using CustomAvatar.Tracking;
+using CustomAvatar.Tracking.OpenVR;
+using CustomAvatar.Tracking.UnityXR;
 using CustomAvatar.Utilities;
 using UnityEngine;
+using UnityEngine.XR;
+using Valve.VR;
 using Zenject;
 using Logger = IPA.Logging.Logger;
 
@@ -46,10 +49,19 @@ namespace CustomAvatar.Zenject
             Container.BindInterfacesAndSelfTo<SettingsManager>().AsSingle();
             Container.Bind<Settings>().FromMethod((context) => context.Container.Resolve<SettingsManager>().settings);
             Container.BindInterfacesAndSelfTo<CalibrationData>().AsSingle();
-            
+
+            if (XRSettings.loadedDeviceName.Equals("openvr", System.StringComparison.InvariantCultureIgnoreCase) && OpenVR.IsRuntimeInstalled())
+            {
+                Container.Bind<OpenVRFacade>().AsTransient();
+                Container.BindInterfacesTo<OpenVRDeviceManager>().AsSingle().NonLazy();
+            }
+            else
+            {
+                Container.BindInterfacesTo<UnityXRDeviceManager>().AsSingle().NonLazy();
+            }
+
             // managers
             Container.BindInterfacesAndSelfTo<PlayerAvatarManager>().AsSingle().NonLazy();
-            Container.BindInterfacesAndSelfTo<TrackedDeviceManager>().AsSingle().NonLazy();
             Container.BindInterfacesAndSelfTo<MainCameraController>().AsSingle().NonLazy();
             Container.BindInterfacesAndSelfTo<KeyboardInputHandler>().AsSingle().NonLazy();
             Container.BindInterfacesAndSelfTo<ShaderLoader>().AsSingle().NonLazy();

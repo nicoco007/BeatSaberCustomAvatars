@@ -18,14 +18,12 @@ using UnityEngine;
 
 namespace CustomAvatar.Tracking
 {
-    internal class TrackedDeviceState
+    internal interface ITrackedDeviceState
     {
-        public string name { get; set; }
-        public string serialNumber { get; set; }
-        public Vector3 position { get; set; }
-        public Quaternion rotation { get; set; }
-        public bool found { get; set; }
-        public bool tracked { get; set; }
-        public TrackedDeviceRole role { get; set; }
+        DeviceUse use { get; }
+        Vector3 position { get; }
+        Quaternion rotation { get; }
+        bool isConnected { get; }
+        bool isTracking { get; }
     }
 }
