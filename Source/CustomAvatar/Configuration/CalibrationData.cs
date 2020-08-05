@@ -14,8 +14,9 @@ namespace CustomAvatar.Configuration
         public static readonly byte[] kCalibrationDataFileSignature = { 0x43, 0x41, 0x63, 0x64 }; // Custom Avatars calibration data (CAcd)
         public static readonly byte kCalibrationDataFileVersion = 1;
 
-        public FullBodyCalibration automaticCalibration { get; private set; } = new FullBodyCalibration();
-        public Dictionary<string, FullBodyCalibration> manualCalibration { get; private set; } = new Dictionary<string, FullBodyCalibration>();
+        public readonly FullBodyCalibration automaticCalibration = new FullBodyCalibration();
+
+        private readonly Dictionary<string, FullBodyCalibration> _manualCalibration = new Dictionary<string, FullBodyCalibration>();
 
         private ILogger<CalibrationData> _logger;
 
@@ -51,12 +52,12 @@ namespace CustomAvatar.Configuration
         {
             if (!IsValidFileName(fileName)) throw new ArgumentException("Invalid file name", nameof(fileName));
 
-            if (!manualCalibration.ContainsKey(fileName))
+            if (!_manualCalibration.ContainsKey(fileName))
             {
-                manualCalibration.Add(fileName, new FullBodyCalibration());
+                _manualCalibration.Add(fileName, new FullBodyCalibration());
             }
 
-            return manualCalibration[fileName];
+            return _manualCalibration[fileName];
         }
 
         private void Load()
@@ -98,14 +99,14 @@ namespace CustomAvatar.Configuration
                         _logger.Warning($"'{fullPath}' no longer exists; skipped");
                     }
 
-                    if (!manualCalibration.ContainsKey(fileName))
+                    if (!_manualCalibration.ContainsKey(fileName))
                     {
-                        manualCalibration.Add(fileName, new FullBodyCalibration());
+                        _manualCalibration.Add(fileName, new FullBodyCalibration());
                     }
 
-                    manualCalibration[fileName].waist     = reader.ReadPose();
-                    manualCalibration[fileName].leftFoot  = reader.ReadPose();
-                    manualCalibration[fileName].rightFoot = reader.ReadPose();
+                    _manualCalibration[fileName].waist     = reader.ReadPose();
+                    _manualCalibration[fileName].leftFoot  = reader.ReadPose();
+                    _manualCalibration[fileName].rightFoot = reader.ReadPose();
                 }
             }
         }
@@ -124,9 +125,9 @@ namespace CustomAvatar.Configuration
                 writer.Write(automaticCalibration.leftFoot);
                 writer.Write(automaticCalibration.rightFoot);
 
-                writer.Write(manualCalibration.Count);
+                writer.Write(_manualCalibration.Count);
 
-                foreach (KeyValuePair<string, FullBodyCalibration> kvp in manualCalibration)
+                foreach (KeyValuePair<string, FullBodyCalibration> kvp in _manualCalibration)
                 {
                     writer.Write(kvp.Key); // file name
 
