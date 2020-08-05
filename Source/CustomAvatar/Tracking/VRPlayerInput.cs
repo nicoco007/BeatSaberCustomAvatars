@@ -7,7 +7,10 @@ using Zenject;
 
 namespace CustomAvatar.Tracking
 {
-    internal class VRPlayerInput : IAvatarInput
+    /// <summary>
+    /// The player's <see cref="IAvatarInput"/> with calibration and other settings applied.
+    /// </summary>
+    public class VRPlayerInput : IAvatarInput
     {
         public bool allowMaintainPelvisPosition => _avatarSettings.allowMaintainPelvisPosition;
 
