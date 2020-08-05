@@ -235,17 +235,14 @@ namespace CustomAvatar.Tracking.UnityXR
                 deviceTrackingAcquired?.Invoke(deviceState);
             }
             
-            Vector3 origin = _mainSettingsModel.roomCenter.value;
-            Quaternion originRotation = Quaternion.Euler(0, _mainSettingsModel.roomRotation.value, 0);
-
             if (inputDevice.TryGetFeatureValue(CommonUsages.devicePosition, out Vector3 position))
             {
-                deviceState.position = origin + originRotation * position;
+                deviceState.position = position;
             }
 
             if (inputDevice.TryGetFeatureValue(CommonUsages.deviceRotation, out Quaternion rotation))
             {
-                deviceState.rotation = originRotation * rotation;
+                deviceState.rotation = rotation;
             }
         }
     }
