@@ -3,7 +3,6 @@ using System.IO;
 using CustomAvatar.Logging;
 using Newtonsoft.Json;
 using CustomAvatar.Utilities.Converters;
-using System.Linq;
 
 namespace CustomAvatar.Configuration
 {
@@ -60,14 +59,6 @@ namespace CustomAvatar.Configuration
 
         public void Save()
         {
-            foreach (string fileName in settings.avatarSpecificSettings.Keys.ToList())
-            {
-                if (!File.Exists(Path.Combine(PlayerAvatarManager.kCustomAvatarsPath, fileName)) || Path.IsPathRooted(fileName))
-                {
-                    settings.avatarSpecificSettings.Remove(fileName);
-                }
-            }
-
             _logger.Info($"Saving settings to '{kSettingsPath}'");
 
             using (var writer = new StreamWriter(kSettingsPath))

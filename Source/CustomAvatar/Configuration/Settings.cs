@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.Serialization;
 using CustomAvatar.Tracking;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -49,11 +52,35 @@ namespace CustomAvatar.Configuration
         public float playerArmSpan = AvatarTailor.kDefaultPlayerArmSpan;
         public bool calibrateFullBodyTrackingOnStart = false;
         public float cameraNearClipPlane = 0.1f;
-        public Lighting lighting { get; private set; } = new Lighting();
-        public Mirror mirror { get; private set; } = new Mirror();
-        public AutomaticFullBodyCalibration automaticCalibration { get; private set; } = new AutomaticFullBodyCalibration();
-        public FullBodyMotionSmoothing fullBodyMotionSmoothing { get; private set; } = new FullBodyMotionSmoothing();
-        [JsonProperty(Order = int.MaxValue)] internal Dictionary<string, AvatarSpecificSettings> avatarSpecificSettings = new Dictionary<string, AvatarSpecificSettings>();
+        public readonly Lighting lighting = new Lighting();
+        public readonly Mirror mirror = new Mirror();
+        public readonly AutomaticFullBodyCalibration automaticCalibration = new AutomaticFullBodyCalibration();
+        public readonly FullBodyMotionSmoothing fullBodyMotionSmoothing = new FullBodyMotionSmoothing();
+
+        [JsonProperty(PropertyName = "avatarSpecificSettings", Order = int.MaxValue)] private Dictionary<string, AvatarSpecificSettings> _avatarSpecificSettings = new Dictionary<string, AvatarSpecificSettings>();
+
+        [OnSerializing]
+        private void OnSerializing(StreamingContext context)
+        {
+            RemoveInvalidAvatarSettings();
+        }
+
+        [OnDeserialized]
+        private void OnDeserialized(StreamingContext context)
+        {
+            RemoveInvalidAvatarSettings();
+        }
+
+        private void RemoveInvalidAvatarSettings()
+        {
+            foreach (string fileName in _avatarSpecificSettings.Keys.ToList())
+            {
+                if (!File.Exists(Path.Combine(PlayerAvatarManager.kCustomAvatarsPath, fileName)) || Path.IsPathRooted(fileName))
+                {
+                    _avatarSpecificSettings.Remove(fileName);
+                }
+            }
+        }
 
         public class Lighting
         {
@@ -72,8 +99,8 @@ namespace CustomAvatar.Configuration
 
         public class FullBodyMotionSmoothing
         {
-            public TrackedPointSmoothing waist { get; private set; } = new TrackedPointSmoothing { position = 15, rotation = 10 };
-            public TrackedPointSmoothing feet { get; private set; } = new TrackedPointSmoothing { position = 13, rotation = 17 };
+            public readonly TrackedPointSmoothing waist = new TrackedPointSmoothing { position = 15, rotation = 10 };
+            public readonly TrackedPointSmoothing feet = new TrackedPointSmoothing { position = 13, rotation = 17 };
         }
 
         public class TrackedPointSmoothing
@@ -99,12 +126,12 @@ namespace CustomAvatar.Configuration
 
         public AvatarSpecificSettings GetAvatarSettings(string fileName)
         {
-            if (!avatarSpecificSettings.ContainsKey(fileName))
+            if (!_avatarSpecificSettings.ContainsKey(fileName))
             {
-                avatarSpecificSettings.Add(fileName, new AvatarSpecificSettings());
+                _avatarSpecificSettings.Add(fileName, new AvatarSpecificSettings());
             }
 
-            return avatarSpecificSettings[fileName];
+            return _avatarSpecificSettings[fileName];
         }
     }
 }
