@@ -60,14 +60,21 @@ namespace CustomAvatar.Tracking.OpenVR
         {
             _openVRFacade.GetDeviceToAbsoluteTrackingPose(ETrackingUniverseOrigin.TrackingUniverseStanding, _poses);
 
+            bool deviceChanged = false;
+
             for (uint i = 0; i < OpenVRFacade.kMaxTrackedDeviceCount; i++)
             {
                 string role = _openVRFacade.GetStringTrackedDeviceProperty(i, ETrackedDeviceProperty.Prop_ControllerType_String);
 
                 if (_poses[i].bDeviceIsConnected != _connectedDevices[i] || _roles[i] != role)
                 {
-                    UpdateDevice(i, _poses[i].bDeviceIsConnected, role);
+                    deviceChanged = true;
                 }
+            }
+
+            if (deviceChanged)
+            {
+                UpdateDevices();
             }
 
             UpdateDeviceState(_head);
@@ -78,77 +85,85 @@ namespace CustomAvatar.Tracking.OpenVR
             UpdateDeviceState(_rightFoot);
         }
 
-        private void UpdateDevice(uint deviceIndex, bool connected, string role)
+        private void UpdateDevices()
         {
-            string modelName = _openVRFacade.GetStringTrackedDeviceProperty(deviceIndex, ETrackedDeviceProperty.Prop_ModelNumber_String);
-            string serialNumber = _openVRFacade.GetStringTrackedDeviceProperty(deviceIndex, ETrackedDeviceProperty.Prop_SerialNumber_String);
-
-            if (_connectedDevices[deviceIndex] != connected)
+            for (uint deviceIndex = 0; deviceIndex < OpenVRFacade.kMaxTrackedDeviceCount; deviceIndex++)
             {
-                if (connected)
+                bool connected = _poses[deviceIndex].bDeviceIsConnected;
+
+                string modelName    = _openVRFacade.GetStringTrackedDeviceProperty(deviceIndex, ETrackedDeviceProperty.Prop_ModelNumber_String);
+                string serialNumber = _openVRFacade.GetStringTrackedDeviceProperty(deviceIndex, ETrackedDeviceProperty.Prop_SerialNumber_String);
+                string role         = _openVRFacade.GetStringTrackedDeviceProperty(deviceIndex, ETrackedDeviceProperty.Prop_ControllerType_String);
+
+                if (_connectedDevices[deviceIndex] != connected)
                 {
-                    _logger.Info($"Device '{modelName}' (S/N '{serialNumber}') connected at index {deviceIndex}");
+                    _connectedDevices[deviceIndex] = connected;
+
+                    if (connected)
+                    {
+                        _logger.Info($"Device '{modelName}' (S/N '{serialNumber}') connected at index {deviceIndex}");
+                    }
+                    else
+                    {
+                        _logger.Info($"Device '{modelName}' (S/N '{serialNumber}') disconnected at index {deviceIndex}");
+                    }
                 }
-                else
+
+                if (!string.IsNullOrEmpty(_roles[deviceIndex]) && _roles[deviceIndex] != role)
                 {
-                    _logger.Info($"Device '{modelName}' (S/N '{serialNumber}') disconnected at index {deviceIndex}");
-                    return;
+                    _logger.Info($"Device {deviceIndex} changed roles from '{_roles[deviceIndex]}' to '{role}'");
                 }
-            }
 
-            _logger.Trace($"Device {deviceIndex} has role '{role}'");
+                _roles[deviceIndex] = role;
 
-            if (!string.IsNullOrEmpty(_roles[deviceIndex]) && _roles[deviceIndex] != role)
-            {
-                _logger.Info($"Device {deviceIndex} changed roles from '{_roles[deviceIndex]}' to '{role}'");
-            }
+                if (!connected) continue;
 
-            _connectedDevices[deviceIndex] = connected;
-            _roles[deviceIndex] = role;
+                _logger.Trace($"Device {deviceIndex} has role '{role}'");
 
-            ETrackedDeviceClass deviceClass = (ETrackedDeviceClass) _openVRFacade.GetInt32TrackedDeviceProperty(deviceIndex, ETrackedDeviceProperty.Prop_DeviceClass_Int32);
+                ETrackedDeviceClass deviceClass = (ETrackedDeviceClass) _openVRFacade.GetInt32TrackedDeviceProperty(deviceIndex, ETrackedDeviceProperty.Prop_DeviceClass_Int32);
 
-            _logger.Trace($"Device {deviceIndex} has class '{deviceClass}'");
-            
-            switch (deviceClass)
-            {
-                case ETrackedDeviceClass.HMD:
-                    AssignTrackedDevice(_head, deviceIndex, modelName, serialNumber, role);
-                    break;
+                _logger.Trace($"Device {deviceIndex} has class '{deviceClass}'");
 
-                case ETrackedDeviceClass.Controller:
-                    ETrackedControllerRole hand = _openVRFacade.GetControllerRoleForTrackedDeviceIndex(deviceIndex);
+                switch (deviceClass)
+                {
+                    case ETrackedDeviceClass.HMD:
+                        AssignTrackedDevice(_head, deviceIndex, modelName, serialNumber, role);
+                        break;
 
-                    switch (hand)
-                    {
-                        case ETrackedControllerRole.LeftHand:
-                            AssignTrackedDevice(_leftHand, deviceIndex, modelName, serialNumber, role);
-                            break;
+                    case ETrackedDeviceClass.Controller:
+                        ETrackedControllerRole hand = _openVRFacade.GetControllerRoleForTrackedDeviceIndex(deviceIndex);
 
-                        case ETrackedControllerRole.RightHand:
-                            AssignTrackedDevice(_rightHand, deviceIndex, modelName, serialNumber, role);
-                            break;
-                    }
+                        switch (hand)
+                        {
+                            case ETrackedControllerRole.LeftHand:
+                                AssignTrackedDevice(_leftHand, deviceIndex, modelName, serialNumber, role);
+                                break;
 
-                    break;
+                            case ETrackedControllerRole.RightHand:
+                                AssignTrackedDevice(_rightHand, deviceIndex, modelName, serialNumber, role);
+                                break;
+                        }
 
-                case ETrackedDeviceClass.GenericTracker:
-                    switch (role)
-                    {
-                        case "vive_tracker_waist":
-                            AssignTrackedDevice(_waist, deviceIndex, modelName, serialNumber, role);
-                            break;
+                        break;
 
-                        case "vive_tracker_left_foot":
-                            AssignTrackedDevice(_leftFoot, deviceIndex, modelName, serialNumber, role);
-                            break;
+                    case ETrackedDeviceClass.GenericTracker:
+                        switch (role)
+                        {
+                            case "vive_tracker_waist":
+                                AssignTrackedDevice(_waist, deviceIndex, modelName, serialNumber, role);
+                                break;
 
-                        case "vive_tracker_right_foot":
-                            AssignTrackedDevice(_rightFoot, deviceIndex, modelName, serialNumber, role);
-                            break;
-                    }
+                            case "vive_tracker_left_foot":
+                                AssignTrackedDevice(_leftFoot, deviceIndex, modelName, serialNumber, role);
+                                break;
 
-                    break;
+                            case "vive_tracker_right_foot":
+                                AssignTrackedDevice(_rightFoot, deviceIndex, modelName, serialNumber, role);
+                                break;
+                        }
+
+                        break;
+                }
             }
         }
 
@@ -156,7 +171,8 @@ namespace CustomAvatar.Tracking.OpenVR
         {
             if (deviceState.isConnected && deviceState.deviceIndex != deviceIndex)
             {
-                _logger.Info($"Deassigning device '{deviceState.modelName}' (S/N '{deviceState.serialNumber}') from '{deviceState.use}'");
+                _logger.Info($"Tried assigning '{deviceState.use}' to device {deviceIndex} but it is already assigned to device {deviceState.deviceIndex}");
+                return;
             }
 
             deviceState.deviceIndex = deviceIndex;
@@ -165,7 +181,7 @@ namespace CustomAvatar.Tracking.OpenVR
             deviceState.role = role;
             deviceState.isConnected = true;
 
-            _logger.Info($"Assigned device '{deviceState.modelName}' (S/N '{deviceState.serialNumber}') to '{deviceState.use}'");
+            _logger.Info($"Assigned device {deviceIndex} to '{deviceState.use}'");
 
             deviceAdded?.Invoke(deviceState);
         }
