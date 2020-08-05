@@ -23,18 +23,9 @@ namespace CustomAvatar.Tracking.OpenVR
 {
     using OpenVR = Valve.VR.OpenVR;
 
-    internal class OpenVRFacade : IInitializable
+    internal class OpenVRFacade
     {
         public const uint kMaxTrackedDeviceCount = OpenVR.k_unMaxTrackedDeviceCount;
-
-        private float _displayFrequency;
-        private float _vsyncToPhotons;
-
-        public void Initialize()
-        {
-            _displayFrequency = GetFloatTrackedDeviceProperty(OpenVR.k_unTrackedDeviceIndex_Hmd, ETrackedDeviceProperty.Prop_DisplayFrequency_Float);
-            _vsyncToPhotons = GetFloatTrackedDeviceProperty(OpenVR.k_unTrackedDeviceIndex_Hmd, ETrackedDeviceProperty.Prop_SecondsFromVsyncToPhotons_Float);
-        }
 
         public string[] GetTrackedDeviceSerialNumbers()
         {
@@ -140,14 +131,17 @@ namespace CustomAvatar.Tracking.OpenVR
         /// <returns>The number of seconds from now to when the next photons will come out of the HMD</returns>
         private float GetPredictedSecondsToPhotons()
         {
+            float displayFrequency = GetFloatTrackedDeviceProperty(OpenVR.k_unTrackedDeviceIndex_Hmd, ETrackedDeviceProperty.Prop_DisplayFrequency_Float);
+            float vsyncToPhotons = GetFloatTrackedDeviceProperty(OpenVR.k_unTrackedDeviceIndex_Hmd, ETrackedDeviceProperty.Prop_SecondsFromVsyncToPhotons_Float);
+
             float secondsSinceLastVsync = 0;
             ulong frameCounter = 0;
 
             OpenVR.System.GetTimeSinceLastVsync(ref secondsSinceLastVsync, ref frameCounter);
 
-            float frameDuration = 1f / _displayFrequency;
+            float frameDuration = 1f / displayFrequency;
 
-            return frameDuration - secondsSinceLastVsync + _vsyncToPhotons;
+            return frameDuration - secondsSinceLastVsync + vsyncToPhotons;
         }
 
         private static void CopySign(ref float sizeVal, float signVal)

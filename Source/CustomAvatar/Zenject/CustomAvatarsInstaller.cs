@@ -52,7 +52,7 @@ namespace CustomAvatar.Zenject
 
             if (XRSettings.loadedDeviceName.Equals("openvr", System.StringComparison.InvariantCultureIgnoreCase) && OpenVR.IsRuntimeInstalled())
             {
-                Container.BindInterfacesAndSelfTo<OpenVRFacade>().AsTransient();
+                Container.Bind<OpenVRFacade>().AsTransient();
                 Container.BindInterfacesTo<OpenVRDeviceManager>().AsSingle().NonLazy();
             }
             else
