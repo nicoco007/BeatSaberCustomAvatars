@@ -22,9 +22,7 @@ using Zenject;
 
 namespace CustomAvatar.Tracking.OpenVR
 {
-    using OpenVR = Valve.VR.OpenVR;
-
-    internal class OpenVRDeviceManager : ITrackedDeviceManager, IInitializable, ITickable
+    internal class OpenVRDeviceManager : ITrackedDeviceManager, ITickable
     {
         public ITrackedDeviceState head      => _head;
         public ITrackedDeviceState leftHand  => _leftHand;
@@ -48,12 +46,9 @@ namespace CustomAvatar.Tracking.OpenVR
         private ILogger<OpenVRDeviceManager> _logger;
         private OpenVRFacade _openVRFacade;
 
-        private readonly bool[] _connectedDevices = new bool[OpenVR.k_unMaxTrackedDeviceCount];
-        private readonly string[] _roles = new string[OpenVR.k_unMaxTrackedDeviceCount];
-        private readonly TrackedDevicePose_t[] _poses = new TrackedDevicePose_t[OpenVR.k_unMaxTrackedDeviceCount];
-
-        private float _displayFrequency;
-        private float _vsyncToPhotons;
+        private readonly bool[] _connectedDevices = new bool[OpenVRFacade.kMaxTrackedDeviceCount];
+        private readonly string[] _roles = new string[OpenVRFacade.kMaxTrackedDeviceCount];
+        private readonly TrackedDevicePose_t[] _poses = new TrackedDevicePose_t[OpenVRFacade.kMaxTrackedDeviceCount];
 
         public OpenVRDeviceManager(ILoggerProvider loggerProvider, OpenVRFacade openVRFacade)
         {
@@ -61,19 +56,11 @@ namespace CustomAvatar.Tracking.OpenVR
             _openVRFacade = openVRFacade;
         }
 
-        public void Initialize()
-        {
-            _logger.Info($"Initializing {nameof(OpenVRDeviceManager)}");
-
-            _displayFrequency = _openVRFacade.GetFloatTrackedDeviceProperty(OpenVR.k_unTrackedDeviceIndex_Hmd, ETrackedDeviceProperty.Prop_DisplayFrequency_Float);
-            _vsyncToPhotons = _openVRFacade.GetFloatTrackedDeviceProperty(OpenVR.k_unTrackedDeviceIndex_Hmd, ETrackedDeviceProperty.Prop_SecondsFromVsyncToPhotons_Float);
-        }
-
         public void Tick()
         {
-            OpenVR.System.GetDeviceToAbsoluteTrackingPose(ETrackingUniverseOrigin.TrackingUniverseStanding, GetPredictedSecondsToPhotons(), _poses);
+            _openVRFacade.GetDeviceToAbsoluteTrackingPose(ETrackingUniverseOrigin.TrackingUniverseStanding, _poses);
 
-            for (uint i = 0; i < OpenVR.k_unMaxTrackedDeviceCount; i++)
+            for (uint i = 0; i < OpenVRFacade.kMaxTrackedDeviceCount; i++)
             {
                 string role = _openVRFacade.GetStringTrackedDeviceProperty(i, ETrackedDeviceProperty.Prop_ControllerType_String);
 
@@ -130,7 +117,7 @@ namespace CustomAvatar.Tracking.OpenVR
                     break;
 
                 case ETrackedDeviceClass.Controller:
-                    ETrackedControllerRole hand = OpenVR.System.GetControllerRoleForTrackedDeviceIndex(deviceIndex);
+                    ETrackedControllerRole hand = _openVRFacade.GetControllerRoleForTrackedDeviceIndex(deviceIndex);
 
                     switch (hand)
                     {
@@ -226,8 +213,8 @@ namespace CustomAvatar.Tracking.OpenVR
 
             if (!isTracking) return;
 
-            Vector3 position = GetPosition(pose.mDeviceToAbsoluteTracking);
-            Quaternion rotation = GetRotation(pose.mDeviceToAbsoluteTracking);
+            Vector3 position = _openVRFacade.GetPosition(pose.mDeviceToAbsoluteTracking);
+            Quaternion rotation = _openVRFacade.GetRotation(pose.mDeviceToAbsoluteTracking);
 
             // Driver4VR rotation correction
             if (deviceState.role.StartsWith("d4vr_tracker_") && (deviceState.use == DeviceUse.LeftFoot || deviceState.use == DeviceUse.RightFoot))
@@ -251,56 +238,6 @@ namespace CustomAvatar.Tracking.OpenVR
 
             deviceState.position = position;
             deviceState.rotation = rotation;
-        }
-
-        /// <summary>
-        /// Calculates the number of seconds from now to when the next photons will come out of the HMD. See https://github.com/ValveSoftware/openvr/wiki/IVRSystem::GetDeviceToAbsoluteTrackingPose.
-        /// </summary>
-        /// <returns>The number of seconds from now to when the next photons will come out of the HMD</returns>
-        private float GetPredictedSecondsToPhotons()
-        {
-            float secondsSinceLastVsync = 0;
-            ulong frameCounter = 0;
-
-            OpenVR.System.GetTimeSinceLastVsync(ref secondsSinceLastVsync, ref frameCounter);
-
-            float frameDuration = 1f / _displayFrequency;
-
-            return frameDuration - secondsSinceLastVsync + _vsyncToPhotons;
-        }
-        
-        private Vector3 GetPosition(HmdMatrix34_t rawMatrix)
-        {
-            return new Vector3(rawMatrix.m3, rawMatrix.m7, -rawMatrix.m11);
-        }
-
-        private Quaternion GetRotation(HmdMatrix34_t rawMatrix)
-        {
-            if (IsRotationValid(rawMatrix))
-            {
-                float w = Mathf.Sqrt(Mathf.Max(0, 1 + rawMatrix.m0 + rawMatrix.m5 + rawMatrix.m10)) / 2;
-                float x = Mathf.Sqrt(Mathf.Max(0, 1 + rawMatrix.m0 - rawMatrix.m5 - rawMatrix.m10)) / 2;
-                float y = Mathf.Sqrt(Mathf.Max(0, 1 - rawMatrix.m0 + rawMatrix.m5 - rawMatrix.m10)) / 2;
-                float z = Mathf.Sqrt(Mathf.Max(0, 1 - rawMatrix.m0 - rawMatrix.m5 + rawMatrix.m10)) / 2;
-
-                CopySign(ref x, rawMatrix.m6 - rawMatrix.m9);
-                CopySign(ref y, rawMatrix.m8 - rawMatrix.m2);
-                CopySign(ref z, rawMatrix.m4 - rawMatrix.m1);
-
-                return new Quaternion(x, y, z, w);
-            }
-
-            return Quaternion.identity;
-        }
-
-        private static void CopySign(ref float sizeVal, float signVal)
-        {
-            if (signVal > 0 != sizeVal > 0) sizeVal = -sizeVal;
-        }
-
-        private bool IsRotationValid(HmdMatrix34_t rawMatrix)
-        {
-            return (rawMatrix.m2 != 0 || rawMatrix.m6 != 0 || rawMatrix.m10 != 0) && (rawMatrix.m1 != 0 || rawMatrix.m5 != 0 || rawMatrix.m9 != 0);
         }
     }
 }

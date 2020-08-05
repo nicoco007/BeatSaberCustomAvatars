@@ -15,14 +15,27 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Text;
+using UnityEngine;
 using Valve.VR;
+using Zenject;
 
 namespace CustomAvatar.Tracking.OpenVR
 {
     using OpenVR = Valve.VR.OpenVR;
 
-    internal class OpenVRFacade
+    internal class OpenVRFacade : IInitializable
     {
+        public const uint kMaxTrackedDeviceCount = OpenVR.k_unMaxTrackedDeviceCount;
+
+        private float _displayFrequency;
+        private float _vsyncToPhotons;
+
+        public void Initialize()
+        {
+            _displayFrequency = GetFloatTrackedDeviceProperty(OpenVR.k_unTrackedDeviceIndex_Hmd, ETrackedDeviceProperty.Prop_DisplayFrequency_Float);
+            _vsyncToPhotons = GetFloatTrackedDeviceProperty(OpenVR.k_unTrackedDeviceIndex_Hmd, ETrackedDeviceProperty.Prop_SecondsFromVsyncToPhotons_Float);
+        }
+
         public string[] GetTrackedDeviceSerialNumbers()
         {
             string[] serialNumbers = new string[OpenVR.k_unMaxTrackedDeviceCount];
@@ -85,6 +98,66 @@ namespace CustomAvatar.Tracking.OpenVR
             }
 
             return null;
+        }
+
+        public ETrackedControllerRole GetControllerRoleForTrackedDeviceIndex(uint deviceIndex)
+        {
+            return OpenVR.System.GetControllerRoleForTrackedDeviceIndex(deviceIndex);
+        }
+
+        public void GetDeviceToAbsoluteTrackingPose(ETrackingUniverseOrigin universeOrigin, TrackedDevicePose_t[] poses)
+        {
+            OpenVR.System.GetDeviceToAbsoluteTrackingPose(universeOrigin, GetPredictedSecondsToPhotons(), poses);
+        }
+
+        public Vector3 GetPosition(HmdMatrix34_t rawMatrix)
+        {
+            return new Vector3(rawMatrix.m3, rawMatrix.m7, -rawMatrix.m11);
+        }
+
+        public Quaternion GetRotation(HmdMatrix34_t rawMatrix)
+        {
+            if (IsRotationValid(rawMatrix))
+            {
+                float w = Mathf.Sqrt(Mathf.Max(0, 1 + rawMatrix.m0 + rawMatrix.m5 + rawMatrix.m10)) / 2;
+                float x = Mathf.Sqrt(Mathf.Max(0, 1 + rawMatrix.m0 - rawMatrix.m5 - rawMatrix.m10)) / 2;
+                float y = Mathf.Sqrt(Mathf.Max(0, 1 - rawMatrix.m0 + rawMatrix.m5 - rawMatrix.m10)) / 2;
+                float z = Mathf.Sqrt(Mathf.Max(0, 1 - rawMatrix.m0 - rawMatrix.m5 + rawMatrix.m10)) / 2;
+
+                CopySign(ref x, rawMatrix.m6 - rawMatrix.m9);
+                CopySign(ref y, rawMatrix.m8 - rawMatrix.m2);
+                CopySign(ref z, rawMatrix.m4 - rawMatrix.m1);
+
+                return new Quaternion(x, y, z, w);
+            }
+
+            return Quaternion.identity;
+        }
+
+        /// <summary>
+        /// Calculates the number of seconds from now to when the next photons will come out of the HMD. See https://github.com/ValveSoftware/openvr/wiki/IVRSystem::GetDeviceToAbsoluteTrackingPose.
+        /// </summary>
+        /// <returns>The number of seconds from now to when the next photons will come out of the HMD</returns>
+        private float GetPredictedSecondsToPhotons()
+        {
+            float secondsSinceLastVsync = 0;
+            ulong frameCounter = 0;
+
+            OpenVR.System.GetTimeSinceLastVsync(ref secondsSinceLastVsync, ref frameCounter);
+
+            float frameDuration = 1f / _displayFrequency;
+
+            return frameDuration - secondsSinceLastVsync + _vsyncToPhotons;
+        }
+
+        private static void CopySign(ref float sizeVal, float signVal)
+        {
+            if (signVal > 0 != sizeVal > 0) sizeVal = -sizeVal;
+        }
+
+        private bool IsRotationValid(HmdMatrix34_t rawMatrix)
+        {
+            return (rawMatrix.m2 != 0 || rawMatrix.m6 != 0 || rawMatrix.m10 != 0) && (rawMatrix.m1 != 0 || rawMatrix.m5 != 0 || rawMatrix.m9 != 0);
         }
     }
 }
