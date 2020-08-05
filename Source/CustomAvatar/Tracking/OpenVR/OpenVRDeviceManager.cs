@@ -43,8 +43,8 @@ namespace CustomAvatar.Tracking.OpenVR
         private readonly OpenVRDeviceState _leftFoot  = new OpenVRDeviceState(DeviceUse.LeftFoot);
         private readonly OpenVRDeviceState _rightFoot = new OpenVRDeviceState(DeviceUse.RightFoot);
 
-        private ILogger<OpenVRDeviceManager> _logger;
-        private OpenVRFacade _openVRFacade;
+        private readonly ILogger<OpenVRDeviceManager> _logger;
+        private readonly OpenVRFacade _openVRFacade;
 
         private readonly bool[] _connectedDevices = new bool[OpenVRFacade.kMaxTrackedDeviceCount];
         private readonly string[] _roles = new string[OpenVRFacade.kMaxTrackedDeviceCount];
