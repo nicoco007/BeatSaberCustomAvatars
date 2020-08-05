@@ -219,9 +219,12 @@ namespace CustomAvatar.Tracking.OpenVR
                 {
                     _logger.Info($"Lost tracking of device '{deviceState.modelName}' (S/N '{deviceState.serialNumber}')");
                     deviceTrackingLost?.Invoke(deviceState);
-                    return;
                 }
             }
+
+            deviceState.isTracking = isTracking;
+
+            if (!isTracking) return;
 
             Vector3 position = GetPosition(pose.mDeviceToAbsoluteTracking);
             Quaternion rotation = GetRotation(pose.mDeviceToAbsoluteTracking);
@@ -246,7 +249,6 @@ namespace CustomAvatar.Tracking.OpenVR
                 }
             }
 
-            deviceState.isTracking = isTracking;
             deviceState.position = position;
             deviceState.rotation = rotation;
         }
@@ -266,13 +268,13 @@ namespace CustomAvatar.Tracking.OpenVR
 
             return frameDuration - secondsSinceLastVsync + _vsyncToPhotons;
         }
-
-        public Vector3 GetPosition(HmdMatrix34_t rawMatrix)
+        
+        private Vector3 GetPosition(HmdMatrix34_t rawMatrix)
         {
             return new Vector3(rawMatrix.m3, rawMatrix.m7, -rawMatrix.m11);
         }
 
-        public Quaternion GetRotation(HmdMatrix34_t rawMatrix)
+        private Quaternion GetRotation(HmdMatrix34_t rawMatrix)
         {
             if (IsRotationValid(rawMatrix))
             {
