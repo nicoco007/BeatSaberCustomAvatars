@@ -97,8 +97,6 @@ namespace CustomAvatar.Tracking.OpenVR
 
                 if (_connectedDevices[deviceIndex] != connected)
                 {
-                    _connectedDevices[deviceIndex] = connected;
-
                     if (connected)
                     {
                         _logger.Info($"Device '{modelName}' (S/N '{serialNumber}') connected at index {deviceIndex}");
@@ -109,11 +107,12 @@ namespace CustomAvatar.Tracking.OpenVR
                     }
                 }
 
-                if (!string.IsNullOrEmpty(_roles[deviceIndex]) && _roles[deviceIndex] != role)
+                if (_roles[deviceIndex] != null && _roles[deviceIndex] != role)
                 {
                     _logger.Info($"Device {deviceIndex} changed roles from '{_roles[deviceIndex]}' to '{role}'");
                 }
 
+                _connectedDevices[deviceIndex] = connected;
                 _roles[deviceIndex] = role;
 
                 if (!connected) continue;
