@@ -35,7 +35,7 @@ namespace CustomAvatar.Configuration
 
         private readonly Dictionary<string, FullBodyCalibration> _manualCalibration = new Dictionary<string, FullBodyCalibration>();
 
-        private ILogger<CalibrationData> _logger;
+        private readonly ILogger<CalibrationData> _logger;
 
         public CalibrationData(ILoggerProvider loggerProvider)
         {
@@ -100,6 +100,8 @@ namespace CustomAvatar.Configuration
 
                 int count = reader.ReadInt32();
 
+                _logger.Trace($"Reading {count} calibrations");
+
                 for (int i = 0; i < count; i++)
                 {
                     string fileName = reader.ReadString();
@@ -117,6 +119,8 @@ namespace CustomAvatar.Configuration
                         _logger.Warning($"'{fullPath}' no longer exists; skipped");
                         continue;
                     }
+
+                    _logger.Trace($"Got calibration data for '{fileName}'");
 
                     if (!_manualCalibration.ContainsKey(fileName))
                     {
