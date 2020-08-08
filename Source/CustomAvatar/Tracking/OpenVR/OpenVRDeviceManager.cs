@@ -168,9 +168,17 @@ namespace CustomAvatar.Tracking.OpenVR
 
         private void AssignTrackedDevice(OpenVRDeviceState deviceState, uint deviceIndex, string modelName, string serialNumber, string role)
         {
-            if (deviceState.isConnected && deviceState.deviceIndex != deviceIndex)
+            if (deviceState.isConnected)
             {
-                _logger.Info($"Tried assigning '{deviceState.use}' to device {deviceIndex} but it is already assigned to device {deviceState.deviceIndex}");
+                if (deviceState.deviceIndex != deviceIndex)
+                {
+                    _logger.Warning($"Tried assigning '{deviceState.use}' to device {deviceIndex} but it is already assigned to device {deviceState.deviceIndex}");
+                }
+                else
+                {
+                    _logger.Trace($"Device {deviceIndex} already assigned to '{deviceState.use}'; nothing to do");
+                }
+
                 return;
             }
 
