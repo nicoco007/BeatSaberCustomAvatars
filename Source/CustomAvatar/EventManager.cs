@@ -36,6 +36,6 @@ namespace CustomAvatar
         public UnityEvent OnLevelFinish;
         public UnityEvent OnBlueLightOn;
         public UnityEvent OnRedLightOn;
-        public ComboChangedEvent OnComboChanged;
+        public ComboChangedEvent OnComboChanged = new ComboChangedEvent();
     }
 }
