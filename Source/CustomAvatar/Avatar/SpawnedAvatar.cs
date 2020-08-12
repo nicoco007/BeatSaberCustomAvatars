@@ -189,7 +189,7 @@ namespace CustomAvatar.Avatar
                 if (_eventManager && !_gameplayEventsPlayer)
                 {
                     _logger.Info($"Adding {nameof(AvatarGameplayEventsPlayer)}");
-                    _gameplayEventsPlayer = container.InstantiateComponent<AvatarGameplayEventsPlayer>(gameObject);
+                    _gameplayEventsPlayer = container.InstantiateComponent<AvatarGameplayEventsPlayer>(gameObject, new object[] { avatar });
                 }
             }
             else
