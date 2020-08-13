@@ -14,16 +14,15 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-
-namespace CustomAvatar
+namespace CustomAvatar.Avatar
 {
-    [JsonConverter(typeof(StringEnumConverter))]
-    internal enum AvatarResizeMode
+    public static class AvatarLayers
     {
-        ArmSpan,
-        Height,
-        None
+        public static readonly int kAlwaysVisible = 10; // Beat Saber's "Avatar" layer
+        public static readonly int kOnlyInThirdPerson = 20;
+
+        public static readonly int kAlwaysVisibleMask = 1 << kAlwaysVisible;
+        public static readonly int kOnlyInThirdPersonMask = 1 << kOnlyInThirdPerson;
+        public static readonly int kAllLayersMask = kAlwaysVisibleMask | kOnlyInThirdPersonMask;
     }
 }

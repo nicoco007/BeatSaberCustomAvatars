@@ -14,9 +14,10 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using CustomAvatar.Avatar;
+using HarmonyLib;
 using System;
 using System.Reflection;
-using HarmonyLib;
 using UnityEngine;
 
 namespace CustomAvatar.Utilities

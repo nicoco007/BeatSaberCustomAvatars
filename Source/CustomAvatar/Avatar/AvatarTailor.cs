@@ -16,14 +16,13 @@
 
 using System;
 using System.Collections;
-using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using UnityEngine;
 using Zenject;
 
-namespace CustomAvatar
+namespace CustomAvatar.Avatar
 {
     internal class AvatarTailor
     {

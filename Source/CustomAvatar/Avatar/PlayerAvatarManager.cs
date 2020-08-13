@@ -18,7 +18,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
@@ -26,7 +25,7 @@ using CustomAvatar.Utilities;
 using Zenject;
 using Object = UnityEngine.Object;
 
-namespace CustomAvatar
+namespace CustomAvatar.Avatar
 {
     public class PlayerAvatarManager : IInitializable, IDisposable
     {
