@@ -448,18 +448,8 @@ namespace CustomAvatar
             AutoDetectReferences();
         }
 
-        public void Awake()
+        private void Awake()
         {
-            foreach (VRIK vrik in GetComponentsInChildren<VRIK>())
-            {
-                if (!areReferencesFilled && vrik.references.isFilled)
-                {
-                    CopyReferencesFromExistingVrik(vrik.references);
-                }
-
-                Destroy(vrik);
-            }
-
             vrik = gameObject.AddComponent<VRIK>();
         }
 
@@ -470,32 +460,6 @@ namespace CustomAvatar
 
         #pragma warning restore IDE0051
         #endregion
-
-        private void CopyReferencesFromExistingVrik(VRIK.References references)
-        {
-            references_root          = references.root;
-            references_pelvis        = references.pelvis;
-            references_spine         = references.spine;
-            references_chest         = references.chest;
-            references_neck          = references.neck;
-            references_head          = references.head;
-            references_leftShoulder  = references.leftShoulder;
-            references_leftUpperArm  = references.leftUpperArm;
-            references_leftForearm   = references.leftForearm;
-            references_leftHand      = references.leftHand;
-            references_rightShoulder = references.rightShoulder;
-            references_rightUpperArm = references.rightUpperArm;
-            references_rightForearm  = references.rightForearm;
-            references_rightHand     = references.rightHand;
-            references_leftThigh     = references.leftThigh;
-            references_leftCalf      = references.leftCalf;
-            references_leftFoot      = references.leftFoot;
-            references_leftToes      = references.leftToes;
-            references_rightThigh    = references.rightThigh;
-            references_rightCalf     = references.rightCalf;
-            references_rightFoot     = references.rightFoot;
-            references_rightToes     = references.rightToes;
-        }
 
         private void SetVrikFields()
         {

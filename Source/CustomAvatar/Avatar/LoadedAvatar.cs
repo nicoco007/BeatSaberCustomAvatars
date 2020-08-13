@@ -14,14 +14,17 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.IO;
-using System.Reflection;
+extern alias BeatSaberFinalIK;
+
 using AvatarScriptPack;
 using CustomAvatar.Exceptions;
 using CustomAvatar.Logging;
+using System;
+using System.IO;
+using System.Reflection;
 using UnityEngine;
 using Object = UnityEngine.Object;
+using VRIK = BeatSaberFinalIK::RootMotion.FinalIK.VRIK;
 
 namespace CustomAvatar.Avatar
 {
@@ -75,6 +78,20 @@ namespace CustomAvatar.Avatar
                 Object.Destroy(ikManager);
             }
 
+            // remove any existing VRIK instances
+            foreach (VRIK existingVrik in prefab.GetComponentsInChildren<VRIK>())
+            {
+                _logger.Warning($"Found VRIK on '{existingVrik.name}'; manually adding VRIK to an avatar is no longer needed, please remove it");
+
+                if (existingVrik && vrikManager && existingVrik.references.isFilled && !vrikManager.areReferencesFilled)
+                {
+                    _logger.Warning($"Copying references from VRIK on '{existingVrik.name}'; this is deprecated behaviour and will be removed in a future release");
+                    CopyReferencesFromExistingVrik(vrikManager, existingVrik.references);
+                }
+
+                Object.Destroy(existingVrik);
+            }
+
             _head      = prefab.transform.Find("Head");
             _leftHand  = prefab.transform.Find("LeftHand");
             _rightHand = prefab.transform.Find("RightHand");
@@ -95,7 +112,7 @@ namespace CustomAvatar.Avatar
             var poseManager = prefab.GetComponentInChildren<PoseManager>();
 
             isIKAvatar = vrikManager;
-            supportsFullBodyTracking = prefab.transform.Find("Pelvis") || prefab.transform.Find("LeftLeg") || prefab.transform.Find("RightLeg");
+            supportsFullBodyTracking = _pelvis || _leftLeg || _rightLeg;
             supportsFingerTracking = poseManager && poseManager.isValid;
 
             eyeHeight = GetEyeHeight();
@@ -187,6 +204,32 @@ namespace CustomAvatar.Avatar
             float totalLength = leftArmLength + shoulderToShoulderDistance + rightArmLength;
 
             return totalLength;
+        }
+
+        private void CopyReferencesFromExistingVrik(VRIKManager vrikManager, VRIK.References references)
+        {
+            vrikManager.references_root          = references.root;
+            vrikManager.references_pelvis        = references.pelvis;
+            vrikManager.references_spine         = references.spine;
+            vrikManager.references_chest         = references.chest;
+            vrikManager.references_neck          = references.neck;
+            vrikManager.references_head          = references.head;
+            vrikManager.references_leftShoulder  = references.leftShoulder;
+            vrikManager.references_leftUpperArm  = references.leftUpperArm;
+            vrikManager.references_leftForearm   = references.leftForearm;
+            vrikManager.references_leftHand      = references.leftHand;
+            vrikManager.references_rightShoulder = references.rightShoulder;
+            vrikManager.references_rightUpperArm = references.rightUpperArm;
+            vrikManager.references_rightForearm  = references.rightForearm;
+            vrikManager.references_rightHand     = references.rightHand;
+            vrikManager.references_leftThigh     = references.leftThigh;
+            vrikManager.references_leftCalf      = references.leftCalf;
+            vrikManager.references_leftFoot      = references.leftFoot;
+            vrikManager.references_leftToes      = references.leftToes;
+            vrikManager.references_rightThigh    = references.rightThigh;
+            vrikManager.references_rightCalf     = references.rightCalf;
+            vrikManager.references_rightFoot     = references.rightFoot;
+            vrikManager.references_rightToes     = references.rightToes;
         }
 
         #pragma warning disable CS0618
