@@ -85,6 +85,7 @@ namespace CustomAvatar.Lighting
             light.intensity = intensity;
             light.range = range;
             light.cullingMask = AvatarLayers.kAllLayersMask;
+            light.renderMode = LightRenderMode.ForcePixel; // force high-quality lighting
 
             container.transform.SetParent(transform, false);
             container.transform.position = position;
