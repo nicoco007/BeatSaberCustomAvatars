@@ -53,15 +53,14 @@
     <Compile Include="..\CustomAvatar\AvatarDescriptor.cs">
       <Link>AvatarDescriptor.cs</Link>
     </Compile>
+    <Compile Include="..\CustomAvatar\ComboReachedEvent.cs" Link="ComboReachedEvent.cs" />
     <Compile Include="..\CustomAvatar\EventFilterBehaviour.cs">
       <Link>EventFilterBehaviour.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\EventFilters.cs">
-      <Link>EventFilters.cs</Link>
     </Compile>
     <Compile Include="..\CustomAvatar\EventManager.cs">
       <Link>EventManager.cs</Link>
     </Compile>
+    <Compile Include="..\CustomAvatar\EveryNthComboFilter.cs" Link="EveryNthComboFilter.cs" />
     <Compile Include="..\CustomAvatar\FirstPersonExclusion.cs">
       <Link>FirstPersonExclusion.cs</Link>
     </Compile>

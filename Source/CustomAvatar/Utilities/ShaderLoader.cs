@@ -20,7 +20,7 @@ using UnityEngine;
 using Zenject;
 using Object = UnityEngine.Object;
 
-namespace CustomAvatar
+namespace CustomAvatar.Utilities
 {
     internal class ShaderLoader : IInitializable
     {
