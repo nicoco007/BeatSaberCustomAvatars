@@ -15,8 +15,10 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using CustomAvatar.Avatar;
+using CustomAvatar.Logging;
 using CustomAvatar.Utilities;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Zenject;
 
@@ -26,6 +28,7 @@ namespace CustomAvatar.Lighting
     {
         private readonly Vector3 kOrigin = new Vector3(0, 1, 0);
 
+        private ILogger<GameplayLightingController> _logger;
         private LightWithIdManager _lightManager;
         private ColorManager _colorManager;
         private PlayerController _playerController;
@@ -37,8 +40,9 @@ namespace CustomAvatar.Lighting
         // ReSharper disable UnusedMember.Local
 
         [Inject]
-        private void Inject(LightWithIdManager lightManager, ColorManager colorManager, PlayerController playerController)
+        private void Inject(ILoggerProvider loggerProvider, LightWithIdManager lightManager, ColorManager colorManager, PlayerController playerController)
         {
+            _logger = loggerProvider.CreateLogger<GameplayLightingController>();
             _lightManager = lightManager;
             _colorManager = colorManager;
             _playerController = playerController;
@@ -67,7 +71,7 @@ namespace CustomAvatar.Lighting
                     light.color = Color.black;
                     light.shadows = LightShadows.None; // shadows murder fps since there's so many lights being added
                     light.renderMode = LightRenderMode.ForceVertex; // reduce performance toll
-                    light.intensity = 5f * (1 / direction.magnitude);
+                    light.intensity = 1f / (direction.sqrMagnitude * 5);
                     light.spotAngle = 45;
                     light.cullingMask = AvatarLayers.kAllLayersMask;
                     
@@ -83,6 +87,9 @@ namespace CustomAvatar.Lighting
                     _lights[id].Add(light);
                 }
             }
+
+            _logger.Trace($"Created {_lights.Sum(l => l?.Count)} lights");
+            _logger.Trace($"Maximum intensity: {_lights.Where(l => l != null).SelectMany(l => l).Sum(l => l.intensity)}");
 
             AddPointLight(_colorManager.ColorForSaberType(SaberType.SaberA), _playerController.leftSaber.transform);
             AddPointLight(_colorManager.ColorForSaberType(SaberType.SaberB), _playerController.rightSaber.transform);
