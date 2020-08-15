@@ -14,6 +14,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using CustomAvatar.Configuration;
 using CustomAvatar.Lighting;
 using Zenject;
 
@@ -23,7 +24,10 @@ namespace CustomAvatar.Zenject
     {
         public override void InstallBindings()
         {
-            Container.Bind<GameplayLightingController>().FromNewComponentOnNewGameObject().NonLazy();
+            if (Container.Resolve<Settings>().lighting.enableDynamicLighting)
+            {
+                Container.Bind<GameplayLightingController>().FromNewComponentOnNewGameObject().NonLazy();
+            }
         }
     }
 }
