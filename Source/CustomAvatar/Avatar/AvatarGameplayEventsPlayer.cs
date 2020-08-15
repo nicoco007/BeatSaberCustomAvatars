@@ -24,21 +24,21 @@ namespace CustomAvatar.Avatar
     {
         private ILogger<AvatarGameplayEventsPlayer> _logger;
         private ScoreController _scoreController;
-        private StandardLevelGameplayManager _gameplayManager;
+        private ILevelEndActions _levelEndActions;
         private BeatmapObjectCallbackController _beatmapObjectCallbackController;
 
         private EventManager _eventManager;
-        
+
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
         // ReSharper disable UnusedMember.Local
 
         [Inject]
-        public void Inject(ILoggerProvider loggerProvider, LoadedAvatar avatar, ScoreController scoreController, StandardLevelGameplayManager gameplayManager, BeatmapObjectCallbackController beatmapObjectCallbackController)
+        public void Inject(ILoggerProvider loggerProvider, LoadedAvatar avatar, ScoreController scoreController, BeatmapObjectCallbackController beatmapObjectCallbackController, ILevelEndActions levelEndActions)
         {
             _logger = loggerProvider.CreateLogger<AvatarGameplayEventsPlayer>(avatar.descriptor.name);
             _scoreController = scoreController;
-            _gameplayManager = gameplayManager;
+            _levelEndActions = levelEndActions;
             _beatmapObjectCallbackController = beatmapObjectCallbackController;
         }
 
@@ -59,8 +59,8 @@ namespace CustomAvatar.Avatar
             _scoreController.comboDidChangeEvent += OnComboDidChange;
             _scoreController.comboBreakingEventHappenedEvent += OnComboBreakingEventHappened;
 
-            _gameplayManager.levelFinishedEvent += OnLevelFinished;
-            _gameplayManager.levelFailedEvent += OnLevelFailed;
+            _levelEndActions.levelFinishedEvent += OnLevelFinished;
+            _levelEndActions.levelFailedEvent += OnLevelFailed;
 
             _beatmapObjectCallbackController.beatmapEventDidTriggerEvent += BeatmapEventDidTrigger;
         }
@@ -72,8 +72,8 @@ namespace CustomAvatar.Avatar
             _scoreController.comboDidChangeEvent -= OnComboDidChange;
             _scoreController.comboBreakingEventHappenedEvent -= OnComboBreakingEventHappened;
 
-            _gameplayManager.levelFinishedEvent -= OnLevelFinished;
-            _gameplayManager.levelFailedEvent -= OnLevelFailed;
+            _levelEndActions.levelFinishedEvent -= OnLevelFinished;
+            _levelEndActions.levelFailedEvent -= OnLevelFailed;
 
             _beatmapObjectCallbackController.beatmapEventDidTriggerEvent -= BeatmapEventDidTrigger;
         }
