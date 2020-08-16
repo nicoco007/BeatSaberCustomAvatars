@@ -7,6 +7,10 @@ daysUntilStale: 7
 # Set to false to disable. If disabled, issues still need to be closed manually, but will remain marked as stale.
 daysUntilClose: 7
 
+# Issues or Pull Requests with these labels will never be considered stale. Set to `[]` to disable
+exemptLabels:
+  - backlog
+
 # Label to use when marking as stale
 staleLabel: stale
 
