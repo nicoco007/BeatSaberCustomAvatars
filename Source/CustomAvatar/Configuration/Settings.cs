@@ -139,6 +139,7 @@ namespace CustomAvatar.Configuration
             public bool useAutomaticCalibration = false;
             public bool allowMaintainPelvisPosition = false;
             public bool bypassCalibration = false;
+            public bool ignoreExclusions = false;
         }
 
         public AvatarSpecificSettings GetAvatarSettings(string fileName)

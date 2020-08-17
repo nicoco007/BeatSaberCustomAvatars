@@ -144,6 +144,8 @@ namespace CustomAvatar.UI
 
             UpdateCalibrationButtons(avatar);
 
+            _ignoreExclusionsSetting.CheckboxValue = _currentAvatarSettings.ignoreExclusions;
+
             _bypassCalibration.CheckboxValue = _currentAvatarSettings.bypassCalibration;
             _bypassCalibration.checkbox.interactable = avatar.supportsFullBodyTracking;
             _bypassCalibrationHoverHint.text = avatar.supportsFullBodyTracking ? "Disable the need for calibration before full body tracking is applied." : "Not supported by current avatar";

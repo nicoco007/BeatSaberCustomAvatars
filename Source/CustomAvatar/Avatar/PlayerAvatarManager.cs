@@ -46,7 +46,9 @@ namespace CustomAvatar.Avatar
         private readonly AvatarSpawner _spawner;
 
         private readonly Dictionary<string, AvatarInfo> _avatarInfos = new Dictionary<string, AvatarInfo>();
+
         private string _switchingToPath;
+        private Settings.AvatarSpecificSettings _currentAvatarSettings;
 
         [Inject]
         private PlayerAvatarManager(DiContainer container, AvatarTailor avatarTailor, ILoggerProvider loggerProvider, AvatarLoader avatarLoader, Settings settings, AvatarSpawner spawner)
@@ -140,6 +142,7 @@ namespace CustomAvatar.Avatar
         {
             Object.Destroy(currentlySpawnedAvatar);
             currentlySpawnedAvatar = null;
+            _currentAvatarSettings = null;
 
             if (string.IsNullOrEmpty(fileName))
             {
@@ -183,10 +186,10 @@ namespace CustomAvatar.Avatar
             }
 
             currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, _container.Instantiate<VRPlayerInput>(new object[] { avatar }));
+            _currentAvatarSettings = _settings.GetAvatarSettings(avatar.fileName);
 
             ResizeCurrentAvatar();
-            
-            currentlySpawnedAvatar.UpdateFirstPersonVisibility(_settings.isAvatarVisibleInFirstPerson ? FirstPersonVisibility.VisibleWithExclusionsApplied : FirstPersonVisibility.None);
+            UpdateFirstPersonVisibility();
 
             avatarChanged?.Invoke(currentlySpawnedAvatar);
         }
@@ -215,11 +218,32 @@ namespace CustomAvatar.Avatar
             SwitchToAvatarAsync(files[index]);
         }
 
-        public void ResizeCurrentAvatar()
+        internal void ResizeCurrentAvatar()
         {
             if (!currentlySpawnedAvatar) return;
 
             _avatarTailor.ResizeAvatar(currentlySpawnedAvatar);
+        }
+
+        internal void UpdateFirstPersonVisibility()
+        {
+            if (!currentlySpawnedAvatar) return;
+
+            var visibility = FirstPersonVisibility.None;
+
+            if (_settings.isAvatarVisibleInFirstPerson)
+            {
+                if (_currentAvatarSettings.ignoreExclusions)
+                {
+                    visibility = FirstPersonVisibility.Visible;
+                }
+                else
+                {
+                    visibility = FirstPersonVisibility.VisibleWithExclusionsApplied;
+                }
+            }
+
+            currentlySpawnedAvatar.SetFirstPersonVisibility(visibility);
         }
 
         private void OnMoveFloorWithRoomAdjustChanged(bool value)
@@ -229,9 +253,7 @@ namespace CustomAvatar.Avatar
 
         private void OnFirstPersonEnabledChanged(bool enable)
         {
-            if (!currentlySpawnedAvatar) return;
-
-            currentlySpawnedAvatar.UpdateFirstPersonVisibility(enable ? FirstPersonVisibility.VisibleWithExclusionsApplied : FirstPersonVisibility.None);
+            UpdateFirstPersonVisibility();
         }
 
         private void OnPlayerHeightChanged(float height)

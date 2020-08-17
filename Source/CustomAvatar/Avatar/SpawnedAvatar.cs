@@ -95,7 +95,7 @@ namespace CustomAvatar.Avatar
             _isCalibrationModeEnabled = false;
         }
 
-        public void UpdateFirstPersonVisibility(FirstPersonVisibility visibility)
+        public void SetFirstPersonVisibility(FirstPersonVisibility visibility)
         {
             switch (visibility)
             {

@@ -36,6 +36,7 @@ namespace CustomAvatar.UI
         [UIComponent("bypass-calibration")] private HoverHint _bypassCalibrationHoverHint;
         [UIComponent("automatic-calibration")] private HoverHint _automaticCalibrationHoverHint;
 
+        [UIComponent("ignore-exclusions")] private CheckboxSetting _ignoreExclusionsSetting;
         [UIComponent("bypass-calibration")] private CheckboxSetting _bypassCalibration;
         [UIComponent("automatic-calibration")] private CheckboxSetting _automaticCalibrationSetting;
 
@@ -54,6 +55,13 @@ namespace CustomAvatar.UI
 
         #region Actions
         // ReSharper disable UnusedMember.Local
+
+        [UIAction("ignore-exclusions-change")]
+        private void OnIgnoreExclusionsChanged(bool value)
+        {
+            _currentAvatarSettings.ignoreExclusions = value;
+            _avatarManager.UpdateFirstPersonVisibility();
+        }
 
         [UIAction("bypass-calibration-change")]
         private void OnEnableBypassCalibrationChanged(bool value)
