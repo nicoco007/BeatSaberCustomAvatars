@@ -8,7 +8,7 @@ using ViveSR.anipal.Eye;
 using CustomAvatar.Utilities;
 using Zenject;
 using CustomAvatar.Logging;
-using ILogger = CustomAvatar.Logging.ILogger;
+using CustomAvatar.Configuration;
 
 namespace CustomAvatar.Avatar
 {
@@ -25,7 +25,7 @@ namespace CustomAvatar.Avatar
         Quaternion basicLeftEyeRot;
         Quaternion basicRightEyeRot;
 
-        private ILogger _logger;
+        private ILogger<AvatarSRTracking> _logger;
         private Settings _settings;
 
         #region Behaviour Lifecycle
@@ -33,6 +33,7 @@ namespace CustomAvatar.Avatar
         [Inject]
         private void Inject(Settings settings, ILoggerProvider loggerProvider)
         {
+
             _logger = loggerProvider.CreateLogger<AvatarSRTracking>();
             _settings = settings;
         }
