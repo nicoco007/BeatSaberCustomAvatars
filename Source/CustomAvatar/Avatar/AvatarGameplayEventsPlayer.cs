@@ -1,29 +1,44 @@
-﻿using CustomAvatar.Logging;
+﻿//  Beat Saber Custom Avatars - Custom player models for body presence in Beat Saber.
+//  Copyright © 2018-2020  Beat Saber Custom Avatars Contributors
+//
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+using CustomAvatar.Logging;
 using UnityEngine;
 using Zenject;
-using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar.Avatar
 {
     internal class AvatarGameplayEventsPlayer : MonoBehaviour
     {
-        private ILogger _logger;
+        private ILogger<AvatarGameplayEventsPlayer> _logger;
         private ScoreController _scoreController;
-        private StandardLevelGameplayManager _gameplayManager;
+        private ILevelEndActions _levelEndActions;
         private BeatmapObjectCallbackController _beatmapObjectCallbackController;
 
         private EventManager _eventManager;
-        
+
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
         // ReSharper disable UnusedMember.Local
 
         [Inject]
-        public void Inject(ILoggerProvider loggerProvider, LoadedAvatar avatar, ScoreController scoreController, StandardLevelGameplayManager gameplayManager, BeatmapObjectCallbackController beatmapObjectCallbackController)
+        public void Inject(ILoggerProvider loggerProvider, LoadedAvatar avatar, ScoreController scoreController, BeatmapObjectCallbackController beatmapObjectCallbackController, ILevelEndActions levelEndActions)
         {
             _logger = loggerProvider.CreateLogger<AvatarGameplayEventsPlayer>(avatar.descriptor.name);
             _scoreController = scoreController;
-            _gameplayManager = gameplayManager;
+            _levelEndActions = levelEndActions;
             _beatmapObjectCallbackController = beatmapObjectCallbackController;
         }
 
@@ -44,8 +59,8 @@ namespace CustomAvatar.Avatar
             _scoreController.comboDidChangeEvent += OnComboDidChange;
             _scoreController.comboBreakingEventHappenedEvent += OnComboBreakingEventHappened;
 
-            _gameplayManager.levelFinishedEvent += OnLevelFinished;
-            _gameplayManager.levelFailedEvent += OnLevelFailed;
+            _levelEndActions.levelFinishedEvent += OnLevelFinished;
+            _levelEndActions.levelFailedEvent += OnLevelFailed;
 
             _beatmapObjectCallbackController.beatmapEventDidTriggerEvent += BeatmapEventDidTrigger;
         }
@@ -57,8 +72,8 @@ namespace CustomAvatar.Avatar
             _scoreController.comboDidChangeEvent -= OnComboDidChange;
             _scoreController.comboBreakingEventHappenedEvent -= OnComboBreakingEventHappened;
 
-            _gameplayManager.levelFinishedEvent -= OnLevelFinished;
-            _gameplayManager.levelFailedEvent -= OnLevelFailed;
+            _levelEndActions.levelFinishedEvent -= OnLevelFinished;
+            _levelEndActions.levelFailedEvent -= OnLevelFailed;
 
             _beatmapObjectCallbackController.beatmapEventDidTriggerEvent -= BeatmapEventDidTrigger;
         }

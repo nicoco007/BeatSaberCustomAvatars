@@ -1,11 +1,26 @@
-﻿using System;
+﻿//  Beat Saber Custom Avatars - Custom player models for body presence in Beat Saber.
+//  Copyright © 2018-2020  Beat Saber Custom Avatars Contributors
+//
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+using System;
 using System.IO;
 using CustomAvatar.Logging;
 using Newtonsoft.Json;
 using CustomAvatar.Utilities.Converters;
-using System.Linq;
 
-namespace CustomAvatar.Utilities
+namespace CustomAvatar.Configuration
 {
     internal class SettingsManager : IDisposable
     {
@@ -13,7 +28,7 @@ namespace CustomAvatar.Utilities
 
         public Settings settings;
 
-        private ILogger _logger;
+        private ILogger<SettingsManager> _logger;
 
         private SettingsManager(ILoggerProvider loggerProvider)
         {
@@ -21,7 +36,7 @@ namespace CustomAvatar.Utilities
 
             Load();
         }
-
+        
         public void Dispose()
         {
             Save();
@@ -29,13 +44,15 @@ namespace CustomAvatar.Utilities
 
         public void Load()
         {
-            _logger.Info("Loading settings from " + kSettingsPath);
+            _logger.Info($"Loading settings from '{kSettingsPath}'");
 
             if (!File.Exists(kSettingsPath))
             {
                 _logger.Info("File does not exist, using default settings");
 
                 settings = new Settings();
+
+                return;
             }
 
             try
@@ -58,15 +75,7 @@ namespace CustomAvatar.Utilities
 
         public void Save()
         {
-            foreach (string fileName in settings.avatarSpecificSettings.Keys.ToList())
-            {
-                if (!File.Exists(Path.Combine(PlayerAvatarManager.kCustomAvatarsPath, fileName)) || Path.IsPathRooted(fileName))
-                {
-                    settings.avatarSpecificSettings.Remove(fileName);
-                }
-            }
-
-            _logger.Info("Saving settings to " + kSettingsPath);
+            _logger.Info($"Saving settings to '{kSettingsPath}'");
 
             using (var writer = new StreamWriter(kSettingsPath))
             using (var jsonWriter = new JsonTextWriter(writer))

@@ -1,3 +1,19 @@
+//  Beat Saber Custom Avatars - Custom player models for body presence in Beat Saber.
+//  Copyright © 2018-2020  Beat Saber Custom Avatars Contributors
+//
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,11 +22,10 @@ using UnityEngine;
 using UnityEngine.XR;
 using Valve.VR;
 using Zenject;
-using ILogger = CustomAvatar.Logging.ILogger;
 
 namespace CustomAvatar.Tracking
 {
-    internal class TrackedDeviceManager : MonoBehaviour
+    internal class TrackedDeviceManager : IInitializable, ITickable, IDisposable
     {
         public TrackedDeviceState head      { get; } = new TrackedDeviceState();
         public TrackedDeviceState leftHand  { get; } = new TrackedDeviceState();
@@ -25,29 +40,24 @@ namespace CustomAvatar.Tracking
         public event Action<TrackedDeviceState, DeviceUse> deviceTrackingAcquired;
         public event Action<TrackedDeviceState, DeviceUse> deviceTrackingLost;
 
-        private readonly HashSet<string> _foundDevices = new HashSet<string>();
+        private readonly MainSettingsModelSO _mainSettingsModel;
+        private readonly ILogger<TrackedDeviceManager> _logger;
 
-        private MainSettingsModelSO _mainSettingsModel;
-        private ILogger _logger;
 
         private bool _isOpenVRRunning;
+        private readonly HashSet<string> _foundDevices = new HashSet<string>();
 
-        #region Behaviour Lifecycle
-        #pragma warning disable IDE0051
-        // ReSharper disable UnusedMember.Local
-
-        [Inject]
-        private void Inject(MainSettingsModelSO mainSettingsModel, ILoggerProvider loggerProvider)
+        public TrackedDeviceManager(ILoggerProvider loggerProvider, MainSettingsModelSO mainSettingsModel)
         {
             _mainSettingsModel = mainSettingsModel;
             _logger = loggerProvider.CreateLogger<TrackedDeviceManager>();
         }
 
-        public void Start()
+        public void Initialize()
         {
             try
             {
-                _isOpenVRRunning = OpenVR.IsRuntimeInstalled();
+                _isOpenVRRunning = XRSettings.loadedDeviceName.Equals("openvr", StringComparison.InvariantCultureIgnoreCase) && OpenVR.IsRuntimeInstalled();
             }
             catch (Exception ex)
             {
@@ -55,14 +65,14 @@ namespace CustomAvatar.Tracking
                 _logger.Error(ex);
             }
 
-            InputDevices.deviceConnected += device => UpdateInputDevices();
-            InputDevices.deviceDisconnected += device => UpdateInputDevices();
-            InputDevices.deviceConfigChanged += device => UpdateInputDevices();
+            InputDevices.deviceConnected += OnInputDevicesUpdated;
+            InputDevices.deviceDisconnected += OnInputDevicesUpdated;
+            InputDevices.deviceConfigChanged += OnInputDevicesUpdated;
 
             UpdateInputDevices();
         }
 
-        private void Update()
+        public void Tick()
         {
             var inputDevices = new List<InputDevice>();
 
@@ -92,10 +102,15 @@ namespace CustomAvatar.Tracking
             UpdateTrackedDevice(leftFoot,  leftFootInputDevice,  DeviceUse.LeftFoot);
             UpdateTrackedDevice(rightFoot, rightFootInputDevice, DeviceUse.RightFoot);
         }
-        
-        // ReSharper restore UnusedMember.Local
-        #pragma warning restore IDE0051
-        #endregion
+
+        public void Dispose()
+        {
+            InputDevices.deviceConnected -= OnInputDevicesUpdated;
+            InputDevices.deviceDisconnected -= OnInputDevicesUpdated;
+            InputDevices.deviceConfigChanged -= OnInputDevicesUpdated;
+        }
+
+        private void OnInputDevicesUpdated(InputDevice device) => UpdateInputDevices();
 
         private void UpdateInputDevices()
         {
