@@ -49,6 +49,7 @@ namespace CustomAvatar.Tracking.OpenVR
         private readonly bool[] _connectedDevices = new bool[OpenVRFacade.kMaxTrackedDeviceCount];
         private readonly string[] _roles = new string[OpenVRFacade.kMaxTrackedDeviceCount];
         private readonly TrackedDevicePose_t[] _poses = new TrackedDevicePose_t[OpenVRFacade.kMaxTrackedDeviceCount];
+        private readonly ETrackingResult[] _trackingResults = new ETrackingResult[OpenVRFacade.kMaxTrackedDeviceCount];
 
         public OpenVRDeviceManager(ILoggerProvider loggerProvider, OpenVRFacade openVRFacade)
         {
@@ -69,6 +70,12 @@ namespace CustomAvatar.Tracking.OpenVR
                 if (_poses[i].bDeviceIsConnected != _connectedDevices[i] || _roles[i] != role)
                 {
                     deviceChanged = true;
+                }
+
+                if (_trackingResults[i] != _poses[i].eTrackingResult)
+                {
+                    _logger.Info($"Device {i} changed tracking result from '{_trackingResults[i]}' to '{_poses[i].eTrackingResult}'");
+                    _trackingResults[i] = _poses[i].eTrackingResult;
                 }
             }
 
@@ -216,7 +223,7 @@ namespace CustomAvatar.Tracking.OpenVR
 
             TrackedDevicePose_t pose = _poses[deviceState.deviceIndex];
 
-            bool isTracking = pose.bPoseIsValid && pose.eTrackingResult == ETrackingResult.Running_OK;
+            bool isTracking = pose.bPoseIsValid && (pose.eTrackingResult == ETrackingResult.Running_OK || pose.eTrackingResult == ETrackingResult.Calibrating_InProgress);
 
             if (deviceState.isTracking != isTracking)
             {
