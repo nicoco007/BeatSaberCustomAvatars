@@ -67,7 +67,7 @@ namespace CustomAvatar.Avatar
             _settings.firstPersonEnabledChanged += OnFirstPersonEnabledChanged;
             BeatSaberUtilities.playerHeightChanged += OnPlayerHeightChanged;
 
-            if (_settings.calibrateFullBodyTrackingOnStart && _settings.GetAvatarSettings(_settings.previousAvatarPath).useAutomaticCalibration)
+            if (_settings.calibrateFullBodyTrackingOnStart && !string.IsNullOrEmpty(_settings.previousAvatarPath) && _settings.GetAvatarSettings(_settings.previousAvatarPath).useAutomaticCalibration)
             {
                 _avatarTailor.CalibrateFullBodyTrackingAuto();
             }
