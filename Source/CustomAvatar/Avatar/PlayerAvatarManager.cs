@@ -1,23 +1,36 @@
+//  Beat Saber Custom Avatars - Custom player models for body presence in Beat Saber.
+//  Copyright © 2018-2020  Beat Saber Custom Avatars Contributors
+//
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using CustomAvatar.Avatar;
+using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
-using UnityEngine;
-using UnityEngine.SceneManagement;
 using Zenject;
-using ILogger = CustomAvatar.Logging.ILogger;
 using Object = UnityEngine.Object;
 
-namespace CustomAvatar
+namespace CustomAvatar.Avatar
 {
-    public class PlayerAvatarManager : IDisposable
+    public class PlayerAvatarManager : IInitializable, IDisposable
     {
         public static readonly string kCustomAvatarsPath = Path.GetFullPath("CustomAvatars");
-        public static readonly string kAvatarInfoCacheFilePath = Path.Combine(kCustomAvatarsPath, "cache.db");
+        public static readonly string kAvatarInfoCacheFilePath = Path.Combine(kCustomAvatarsPath, "cache.dat");
         public static readonly byte[] kCacheFileSignature = { 0x43, 0x41, 0x64, 0x62  }; // Custom Avatars Database (CAdb)
         public static readonly byte kCacheFileVersion = 1;
 
@@ -26,18 +39,19 @@ namespace CustomAvatar
         internal event Action<SpawnedAvatar> avatarChanged;
 
         private readonly DiContainer _container;
-        private readonly ILogger _logger;
+        private readonly ILogger<PlayerAvatarManager> _logger;
         private readonly AvatarLoader _avatarLoader;
         private readonly AvatarTailor _avatarTailor;
         private readonly Settings _settings;
         private readonly AvatarSpawner _spawner;
-        private readonly GameScenesManager _gameScenesManager;
 
         private readonly Dictionary<string, AvatarInfo> _avatarInfos = new Dictionary<string, AvatarInfo>();
+
         private string _switchingToPath;
+        private Settings.AvatarSpecificSettings _currentAvatarSettings;
 
         [Inject]
-        private PlayerAvatarManager(DiContainer container, AvatarTailor avatarTailor, ILoggerProvider loggerProvider, AvatarLoader avatarLoader, Settings settings, AvatarSpawner spawner, GameScenesManager gameScenesManager)
+        private PlayerAvatarManager(DiContainer container, AvatarTailor avatarTailor, ILoggerProvider loggerProvider, AvatarLoader avatarLoader, Settings settings, AvatarSpawner spawner)
         {
             _container = container;
             _logger = loggerProvider.CreateLogger<PlayerAvatarManager>();
@@ -45,15 +59,21 @@ namespace CustomAvatar
             _avatarTailor = avatarTailor;
             _settings = settings;
             _spawner = spawner;
-            _gameScenesManager = gameScenesManager;
+        }
 
+        public void Initialize()
+        {
             _settings.moveFloorWithRoomAdjustChanged += OnMoveFloorWithRoomAdjustChanged;
             _settings.firstPersonEnabledChanged += OnFirstPersonEnabledChanged;
-            _gameScenesManager.transitionDidFinishEvent += OnSceneTransitionDidFinish;
-            SceneManager.sceneLoaded += OnSceneLoaded;
-            BeatSaberEvents.playerHeightChanged += OnPlayerHeightChanged;
+            BeatSaberUtilities.playerHeightChanged += OnPlayerHeightChanged;
+
+            if (_settings.calibrateFullBodyTrackingOnStart && _settings.GetAvatarSettings(_settings.previousAvatarPath).useAutomaticCalibration)
+            {
+                _avatarTailor.CalibrateFullBodyTrackingAuto();
+            }
 
             LoadAvatarInfosFromFile();
+            LoadAvatarFromSettingsAsync();
         }
 
         public void Dispose()
@@ -61,9 +81,7 @@ namespace CustomAvatar
             Object.Destroy(currentlySpawnedAvatar);
 
             _settings.moveFloorWithRoomAdjustChanged -= OnMoveFloorWithRoomAdjustChanged;
-            _gameScenesManager.transitionDidFinishEvent -= OnSceneTransitionDidFinish;
-            SceneManager.sceneLoaded -= OnSceneLoaded;
-            BeatSaberEvents.playerHeightChanged -= OnPlayerHeightChanged;
+            BeatSaberUtilities.playerHeightChanged -= OnPlayerHeightChanged;
 
             SaveAvatarInfosToFile();
         }
@@ -124,6 +142,7 @@ namespace CustomAvatar
         {
             Object.Destroy(currentlySpawnedAvatar);
             currentlySpawnedAvatar = null;
+            _currentAvatarSettings = null;
 
             if (string.IsNullOrEmpty(fileName))
             {
@@ -166,17 +185,11 @@ namespace CustomAvatar
                 _avatarInfos.Add(avatarInfo.fileName, avatarInfo);
             }
 
-            DiContainer subContainer = new DiContainer(_container);
-
-            subContainer.Bind<LoadedAvatar>().FromInstance(avatar);
-            subContainer.Bind<Settings.AvatarSpecificSettings>().FromInstance(_settings.GetAvatarSettings(avatarInfo.fileName));
-            subContainer.BindInterfacesTo<VRPlayerInput>().AsSingle();
-
-            currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, subContainer.Resolve<IAvatarInput>());
+            currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, _container.Instantiate<VRPlayerInput>(new object[] { avatar }));
+            _currentAvatarSettings = _settings.GetAvatarSettings(avatar.fileName);
 
             ResizeCurrentAvatar();
-            
-            currentlySpawnedAvatar.UpdateFirstPersonVisibility(_settings.isAvatarVisibleInFirstPerson ? FirstPersonVisibility.VisibleWithExclusionsApplied : FirstPersonVisibility.None);
+            UpdateFirstPersonVisibility();
 
             avatarChanged?.Invoke(currentlySpawnedAvatar);
         }
@@ -185,8 +198,8 @@ namespace CustomAvatar
         {
             List<string> files = GetAvatarFileNames();
             files.Insert(0, null);
-            
-            int index = currentlySpawnedAvatar ? files.IndexOf(currentlySpawnedAvatar.avatar.fullPath) : 0;
+
+            int index = !string.IsNullOrEmpty(_switchingToPath) ? files.IndexOf(Path.GetFileName(_switchingToPath)) : 0;
 
             index = (index + 1) % files.Count;
 
@@ -198,18 +211,39 @@ namespace CustomAvatar
             List<string> files = GetAvatarFileNames();
             files.Insert(0, null);
             
-            int index = currentlySpawnedAvatar ? files.IndexOf(currentlySpawnedAvatar.avatar.fullPath) : 0;
+            int index = !string.IsNullOrEmpty(_switchingToPath) ? files.IndexOf(Path.GetFileName(_switchingToPath)) : 0;
 
             index = (index + files.Count - 1) % files.Count;
             
             SwitchToAvatarAsync(files[index]);
         }
 
-        public void ResizeCurrentAvatar()
+        internal void ResizeCurrentAvatar()
         {
             if (!currentlySpawnedAvatar) return;
 
             _avatarTailor.ResizeAvatar(currentlySpawnedAvatar);
+        }
+
+        internal void UpdateFirstPersonVisibility()
+        {
+            if (!currentlySpawnedAvatar) return;
+
+            var visibility = FirstPersonVisibility.None;
+
+            if (_settings.isAvatarVisibleInFirstPerson)
+            {
+                if (_currentAvatarSettings.ignoreExclusions)
+                {
+                    visibility = FirstPersonVisibility.Visible;
+                }
+                else
+                {
+                    visibility = FirstPersonVisibility.VisibleWithExclusionsApplied;
+                }
+            }
+
+            currentlySpawnedAvatar.SetFirstPersonVisibility(visibility);
         }
 
         private void OnMoveFloorWithRoomAdjustChanged(bool value)
@@ -219,28 +253,7 @@ namespace CustomAvatar
 
         private void OnFirstPersonEnabledChanged(bool enable)
         {
-            if (!currentlySpawnedAvatar) return;
-
-            currentlySpawnedAvatar.UpdateFirstPersonVisibility(enable ? FirstPersonVisibility.VisibleWithExclusionsApplied : FirstPersonVisibility.None);
-        }
-
-        private void OnSceneLoaded(Scene newScene, LoadSceneMode mode)
-        {
-            if (!currentlySpawnedAvatar) return;
-
-            if (newScene.name == "PCInit" && _settings.calibrateFullBodyTrackingOnStart && _settings.GetAvatarSettings(currentlySpawnedAvatar.avatar.fileName).useAutomaticCalibration)
-            {
-                _avatarTailor.CalibrateFullBodyTrackingAuto();
-            }
-
-            ResizeCurrentAvatar();
-        }
-
-        private void OnSceneTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
-        {
-            if (!currentlySpawnedAvatar) return;
-
-            ResizeCurrentAvatar();
+            UpdateFirstPersonVisibility();
         }
 
         private void OnPlayerHeightChanged(float height)
@@ -250,7 +263,7 @@ namespace CustomAvatar
 
         private List<string> GetAvatarFileNames()
         {
-            return Directory.GetFiles(kCustomAvatarsPath, "*.avatar", SearchOption.TopDirectoryOnly).Select(f => Path.GetFileName(f)).ToList();
+            return Directory.GetFiles(kCustomAvatarsPath, "*.avatar", SearchOption.TopDirectoryOnly).Select(f => Path.GetFileName(f)).OrderBy(f => f).ToList();
         }
 
         private void LoadAvatarInfosFromFile()
@@ -285,12 +298,12 @@ namespace CustomAvatar
                         var avatarInfo = new AvatarInfo(
                             reader.ReadString(),
                             reader.ReadString(),
-                            BytesToTexture2D(reader.ReadBytes(reader.ReadInt32())),
+                            reader.ReadTexture2D(),
                             reader.ReadString(),
                             reader.ReadInt64(),
-                            DateTime.FromBinary(reader.ReadInt64()),
-                            DateTime.FromBinary(reader.ReadInt64()),
-                            DateTime.FromBinary(reader.ReadInt64())
+                            reader.ReadDateTime(),
+                            reader.ReadDateTime(),
+                            reader.ReadDateTime()
                         );
 
                         string fullPath = Path.Combine(kCustomAvatarsPath, avatarInfo.fileName);
@@ -360,16 +373,12 @@ namespace CustomAvatar
                     {
                         writer.Write(avatarInfo.name);
                         writer.Write(avatarInfo.author);
-
-                        byte[] textureBytes = BytesFromTexture2D(avatarInfo.icon);
-                        writer.Write(textureBytes.Length);
-                        writer.Write(textureBytes);
-
+                        writer.Write(avatarInfo.icon, true);
                         writer.Write(avatarInfo.fileName);
                         writer.Write(avatarInfo.fileSize);
-                        writer.Write(avatarInfo.created.ToBinary());
-                        writer.Write(avatarInfo.lastModified.ToBinary());
-                        writer.Write(avatarInfo.timestamp.ToBinary());
+                        writer.Write(avatarInfo.created);
+                        writer.Write(avatarInfo.lastModified);
+                        writer.Write(avatarInfo.timestamp);
                     }
                 }
             }
@@ -378,50 +387,6 @@ namespace CustomAvatar
                 _logger.Error("Failed to save avatar info cache");
                 _logger.Error(ex);
             }
-        }
-
-        private byte[] BytesFromTexture2D(Texture2D texture)
-        {
-            if (texture == null) return new byte[0];
-
-            float ratio = Mathf.Min(1f, 256f / texture.width, 256f / texture.height);
-            int width = Mathf.RoundToInt(texture.width * ratio);
-            int height = Mathf.RoundToInt(texture.height * ratio);
-
-            if (ratio < 1)
-            {
-                _logger.Trace($"Resizing texture with ratio: {ratio} (before: {texture.width} × {texture.height}, after: {width} × {height})");
-            }
-
-            if (ratio < 1 || !texture.isReadable)
-            {
-                RenderTexture renderTexture = new RenderTexture(width, height, 0, RenderTextureFormat.ARGB32);
-                RenderTexture.active = renderTexture;
-                Graphics.Blit(texture, renderTexture);
-                texture = renderTexture.GetTexture2D();
-                RenderTexture.active = null;
-                renderTexture.Release();
-            }
-            
-            return texture.EncodeToPNG();
-        }
-
-        private Texture2D BytesToTexture2D(byte[] bytes)
-        {
-            if (bytes.Length == 0) return null;
-
-            Texture2D texture = new Texture2D(0, 0, TextureFormat.ARGB32, false);
-
-            try
-            {
-                texture.LoadImage(bytes);
-            }
-            catch
-            {
-                return null;
-            }
-
-            return texture;
         }
     }
 }

@@ -1,22 +1,42 @@
-﻿using System;
+﻿//  Beat Saber Custom Avatars - Custom player models for body presence in Beat Saber.
+//  Copyright © 2018-2020  Beat Saber Custom Avatars Contributors
+//
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+using System;
 using CustomAvatar.Avatar;
-using CustomAvatar.Utilities;
+using CustomAvatar.Configuration;
 using DynamicOpenVR.IO;
 using UnityEngine;
 using Zenject;
 
 namespace CustomAvatar.Tracking
 {
-    internal class VRPlayerInput : IAvatarInput
+    /// <summary>
+    /// The player's <see cref="IAvatarInput"/> with calibration and other settings applied.
+    /// </summary>
+    public class VRPlayerInput : IAvatarInput
     {
         public bool allowMaintainPelvisPosition => _avatarSettings.allowMaintainPelvisPosition;
 
         public event Action inputChanged;
 
         private readonly TrackedDeviceManager _deviceManager;
-        private readonly LoadedAvatar _avatar;
         private readonly Settings _settings;
         private readonly Settings.AvatarSpecificSettings _avatarSettings;
+        private readonly CalibrationData _calibrationData;
+        private readonly CalibrationData.FullBodyCalibration _manualCalibration;
 
         private readonly SkeletalInput _leftHandAnimAction;
         private readonly SkeletalInput _rightHandAnimAction;
@@ -26,20 +46,18 @@ namespace CustomAvatar.Tracking
         private Pose _previousRightFootPose;
 
         private bool _shouldTrackFullBody =>
-            _avatar.isIKAvatar &&
-            (
-                _avatarSettings.bypassCalibration ||
-                !_avatarSettings.useAutomaticCalibration && _avatarSettings.fullBodyCalibration.isCalibrated ||
-                _avatarSettings.useAutomaticCalibration && _settings.automaticCalibration.isCalibrated
-            );
+            _avatarSettings.bypassCalibration ||
+            !_avatarSettings.useAutomaticCalibration && _manualCalibration.isCalibrated ||
+            _avatarSettings.useAutomaticCalibration && _calibrationData.automaticCalibration.isCalibrated;
 
         [Inject]
-        internal VRPlayerInput(TrackedDeviceManager trackedDeviceManager, LoadedAvatar avatar, Settings settings, Settings.AvatarSpecificSettings avatarSettings)
+        internal VRPlayerInput(TrackedDeviceManager trackedDeviceManager, LoadedAvatar avatar, Settings settings, CalibrationData calibrationData)
         {
             _deviceManager = trackedDeviceManager;
-            _avatar = avatar;
             _settings = settings;
-            _avatarSettings = avatarSettings;
+            _avatarSettings = settings.GetAvatarSettings(avatar.fileName);
+            _calibrationData = calibrationData;
+            _manualCalibration = calibrationData.GetAvatarManualCalibration(avatar.fileName);
 
             _deviceManager.deviceAdded += OnDevicesUpdated;
             _deviceManager.deviceRemoved += OnDevicesUpdated;
@@ -60,7 +78,7 @@ namespace CustomAvatar.Tracking
 
             if (_avatarSettings.useAutomaticCalibration)
             {
-                correction = _settings.automaticCalibration.pelvis;
+                correction = _calibrationData.automaticCalibration.waist;
 
                 Quaternion rotationOffset = Quaternion.Euler(0, (int) _settings.automaticCalibration.waistTrackerPosition, 0);
 
@@ -69,7 +87,7 @@ namespace CustomAvatar.Tracking
             }
             else
             {
-                correction = _avatarSettings.fullBodyCalibration.pelvis;
+                correction = _manualCalibration.waist;
             }
 
             if (!TryGetTrackerPose(_deviceManager.waist, _previousWaistPose, correction, _settings.fullBodyMotionSmoothing.waist, out pose))
@@ -87,12 +105,12 @@ namespace CustomAvatar.Tracking
 
             if (_avatarSettings.useAutomaticCalibration)
             {
-                correction = _settings.automaticCalibration.leftLeg;
+                correction = _calibrationData.automaticCalibration.leftFoot;
                 correction.position -= Vector3.up * _settings.automaticCalibration.legOffset;
             }
             else
             {
-                correction = _avatarSettings.fullBodyCalibration.leftLeg;
+                correction = _manualCalibration.leftFoot;
             }
 
             if (!TryGetTrackerPose(_deviceManager.leftFoot, _previousLeftFootPose, correction, _settings.fullBodyMotionSmoothing.feet, out pose))
@@ -110,12 +128,12 @@ namespace CustomAvatar.Tracking
 
             if (_avatarSettings.useAutomaticCalibration)
             {
-                correction = _settings.automaticCalibration.rightLeg;
+                correction = _calibrationData.automaticCalibration.rightFoot;
                 correction.position -= Vector3.up * _settings.automaticCalibration.legOffset;
             }
             else
             {
-                correction = _avatarSettings.fullBodyCalibration.rightLeg;
+                correction = _manualCalibration.rightFoot;
             }
 
             if (!TryGetTrackerPose(_deviceManager.rightFoot, _previousRightFootPose, correction, _settings.fullBodyMotionSmoothing.feet, out pose))

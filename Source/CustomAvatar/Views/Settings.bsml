@@ -19,6 +19,7 @@
 
   <tab tags="avatar-tabs" tab-name="Avatar Specific" anchor-max-y="0.8">
     <settings-container>
+      <checkbox-setting id="ignore-exclusions" text="Ignore first person exclusions" hover-hint="Show the entire model in first person, even if some parts were configured to be hidden in first person. This may cause issues on certain avatars." on-change="ignore-exclusions-change"/>
       <checkbox-setting id="bypass-calibration" text="Bypass calibration" hover-hint="Disable the need for calibration before full body tracking is applied." on-change="bypass-calibration-change"/>
       <checkbox-setting id="automatic-calibration" text="Use automatic calibration" hover-hint="Must be supported by avatar" on-change="automatic-calibration-change"/>
 

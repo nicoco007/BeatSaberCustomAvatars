@@ -1,11 +1,31 @@
+//  Beat Saber Custom Avatars - Custom player models for body presence in Beat Saber.
+//  Copyright © 2018-2020  Beat Saber Custom Avatars Contributors
+//
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.Serialization;
+using CustomAvatar.Avatar;
 using CustomAvatar.Tracking;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using UnityEngine;
 
-namespace CustomAvatar.Utilities
+namespace CustomAvatar.Configuration
 {
     // ReSharper disable ClassNeverInstantiated.Global
     // ReSharper disable ClassWithVirtualMembersNeverInherited.Global
@@ -50,11 +70,35 @@ namespace CustomAvatar.Utilities
         public bool calibrateFullBodyTrackingOnStart = false;
         public float cameraNearClipPlane = 0.1f;
         public float eyeTrackingScale = 1.0f;
-        public Lighting lighting { get; private set; } = new Lighting();
-        public Mirror mirror { get; private set; } = new Mirror();
-        public AutomaticFullBodyCalibration automaticCalibration { get; private set; } = new AutomaticFullBodyCalibration();
-        public FullBodyMotionSmoothing fullBodyMotionSmoothing { get; private set; } = new FullBodyMotionSmoothing();
-        [JsonProperty(Order = int.MaxValue)] internal Dictionary<string, AvatarSpecificSettings> avatarSpecificSettings = new Dictionary<string, AvatarSpecificSettings>();
+        public readonly Lighting lighting = new Lighting();
+        public readonly Mirror mirror = new Mirror();
+        public readonly AutomaticFullBodyCalibration automaticCalibration = new AutomaticFullBodyCalibration();
+        public readonly FullBodyMotionSmoothing fullBodyMotionSmoothing = new FullBodyMotionSmoothing();
+
+        [JsonProperty(PropertyName = "avatarSpecificSettings", Order = int.MaxValue)] private Dictionary<string, AvatarSpecificSettings> _avatarSpecificSettings = new Dictionary<string, AvatarSpecificSettings>();
+
+        [OnSerializing]
+        private void OnSerializing(StreamingContext context)
+        {
+            RemoveInvalidAvatarSettings();
+        }
+
+        [OnDeserialized]
+        private void OnDeserialized(StreamingContext context)
+        {
+            RemoveInvalidAvatarSettings();
+        }
+
+        private void RemoveInvalidAvatarSettings()
+        {
+            foreach (string fileName in _avatarSpecificSettings.Keys.ToList())
+            {
+                if (!File.Exists(Path.Combine(PlayerAvatarManager.kCustomAvatarsPath, fileName)) || Path.IsPathRooted(fileName))
+                {
+                    _avatarSpecificSettings.Remove(fileName);
+                }
+            }
+        }
 
         public class Lighting
         {
@@ -73,8 +117,8 @@ namespace CustomAvatar.Utilities
 
         public class FullBodyMotionSmoothing
         {
-            public TrackedPointSmoothing waist { get; private set; } = new TrackedPointSmoothing { position = 15, rotation = 10 };
-            public TrackedPointSmoothing feet { get; private set; } = new TrackedPointSmoothing { position = 13, rotation = 17 };
+            public readonly TrackedPointSmoothing waist = new TrackedPointSmoothing { position = 15, rotation = 10 };
+            public readonly TrackedPointSmoothing feet = new TrackedPointSmoothing { position = 13, rotation = 17 };
         }
 
         public class TrackedPointSmoothing
@@ -83,45 +127,30 @@ namespace CustomAvatar.Utilities
             public float rotation;
         }
 
-        public class ManualFullBodyCalibration
-        {
-            public Pose leftLeg = Pose.identity;
-            public Pose rightLeg = Pose.identity;
-            public Pose pelvis = Pose.identity;
-
-            [JsonIgnore] public bool isCalibrated => !leftLeg.Equals(Pose.identity) || !rightLeg.Equals(Pose.identity) || !pelvis.Equals(Pose.identity);
-        }
-
         public class AutomaticFullBodyCalibration
         {
-            public Pose leftLeg = Pose.identity;
-            public Pose rightLeg = Pose.identity;
-            public Pose pelvis = Pose.identity;
-
             public float legOffset = 0.15f;
             public float pelvisOffset = 0.1f;
 
             public WaistTrackerPosition waistTrackerPosition = WaistTrackerPosition.Front;
-
-            [JsonIgnore] public bool isCalibrated => !leftLeg.Equals(Pose.identity) || !rightLeg.Equals(Pose.identity) || !pelvis.Equals(Pose.identity);
         }
 
         public class AvatarSpecificSettings
         {
-            public ManualFullBodyCalibration fullBodyCalibration { get; private set; } = new ManualFullBodyCalibration();
             public bool useAutomaticCalibration = false;
             public bool allowMaintainPelvisPosition = false;
             public bool bypassCalibration = false;
+            public bool ignoreExclusions = false;
         }
 
         public AvatarSpecificSettings GetAvatarSettings(string fileName)
         {
-            if (!avatarSpecificSettings.ContainsKey(fileName))
+            if (!_avatarSpecificSettings.ContainsKey(fileName))
             {
-                avatarSpecificSettings.Add(fileName, new AvatarSpecificSettings());
+                _avatarSpecificSettings.Add(fileName, new AvatarSpecificSettings());
             }
 
-            return avatarSpecificSettings[fileName];
+            return _avatarSpecificSettings[fileName];
         }
     }
 }

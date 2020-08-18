@@ -1,5 +1,24 @@
-﻿using System.Collections.Generic;
+﻿//  Beat Saber Custom Avatars - Custom player models for body presence in Beat Saber.
+//  Copyright © 2018-2020  Beat Saber Custom Avatars Contributors
+//
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+using CustomAvatar.Avatar;
+using CustomAvatar.Logging;
 using CustomAvatar.Utilities;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Zenject;
 
@@ -9,6 +28,7 @@ namespace CustomAvatar.Lighting
     {
         private readonly Vector3 kOrigin = new Vector3(0, 1, 0);
 
+        private ILogger<GameplayLightingController> _logger;
         private LightWithIdManager _lightManager;
         private ColorManager _colorManager;
         private PlayerController _playerController;
@@ -20,14 +40,16 @@ namespace CustomAvatar.Lighting
         // ReSharper disable UnusedMember.Local
 
         [Inject]
-        private void Inject(LightWithIdManager lightManager, ColorManager colorManager, PlayerController playerController)
+        private void Inject(ILoggerProvider loggerProvider, LightWithIdManager lightManager, ColorManager colorManager, PlayerController playerController)
         {
+            _logger = loggerProvider.CreateLogger<GameplayLightingController>();
             _lightManager = lightManager;
             _colorManager = colorManager;
             _playerController = playerController;
 
             _lightManager.didSetColorForIdEvent += OnSetColorForId;
         }
+
         private void Start()
         {
             List<LightWithId>[] lightsWithId = _lightManager.GetPrivateField<List<LightWithId>[]>("_lights");
@@ -48,10 +70,10 @@ namespace CustomAvatar.Lighting
                     light.type = LightType.Directional;
                     light.color = Color.black;
                     light.shadows = LightShadows.None; // shadows murder fps since there's so many lights being added
-                    light.renderMode = LightRenderMode.Auto;
-                    light.intensity = 5f * (1 / direction.magnitude);
+                    light.renderMode = LightRenderMode.ForceVertex; // reduce performance toll
+                    light.intensity = 1f / (direction.sqrMagnitude * 5);
                     light.spotAngle = 45;
-                    light.cullingMask = (1 << AvatarLayers.kOnlyInFirstPerson) | (1 << AvatarLayers.kOnlyInThirdPerson) | (1 << AvatarLayers.kAlwaysVisible);
+                    light.cullingMask = AvatarLayers.kAllLayersMask;
                     
                     light.transform.SetParent(lightWithId.transform);
                     light.transform.localPosition = Vector3.zero;
@@ -65,6 +87,9 @@ namespace CustomAvatar.Lighting
                     _lights[id].Add(light);
                 }
             }
+
+            _logger.Trace($"Created {_lights.Sum(l => l?.Count)} lights");
+            _logger.Trace($"Maximum intensity: {_lights.Where(l => l != null).SelectMany(l => l).Sum(l => l.intensity)}");
 
             AddPointLight(_colorManager.ColorForSaberType(SaberType.SaberA), _playerController.leftSaber.transform);
             AddPointLight(_colorManager.ColorForSaberType(SaberType.SaberB), _playerController.rightSaber.transform);
@@ -108,7 +133,7 @@ namespace CustomAvatar.Lighting
             light.shadows = LightShadows.Hard;
             light.range = 5;
             light.renderMode = LightRenderMode.ForcePixel;
-            light.cullingMask = (1 << AvatarLayers.kOnlyInFirstPerson) | (1 << AvatarLayers.kOnlyInThirdPerson) | (1 << AvatarLayers.kAlwaysVisible);
+            light.cullingMask = AvatarLayers.kAllLayersMask;
 
             light.transform.SetParent(parent, false);
             light.transform.localPosition = new Vector3(0, 0, 0.5f); // middle of saber

@@ -1,4 +1,20 @@
-﻿extern alias BeatSaberFinalIK;
+﻿//  Beat Saber Custom Avatars - Custom player models for body presence in Beat Saber.
+//  Copyright © 2018-2020  Beat Saber Custom Avatars Contributors
+//
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+extern alias BeatSaberFinalIK;
 
 using System;
 using System.Reflection;
@@ -7,7 +23,6 @@ using CustomAvatar.Logging;
 using UnityEngine;
 using UnityEngine.Events;
 using static BeatSaberFinalIK::RootMotion.FinalIK.IKSolverVR.Arm;
-using ILogger = CustomAvatar.Logging.ILogger;
 using VRIK = BeatSaberFinalIK::RootMotion.FinalIK.VRIK;
 
 #if !UNITY_EDITOR
@@ -83,7 +98,7 @@ namespace CustomAvatar
             var animator = transform.GetComponentInChildren<Animator>();
 
             if (animator == null || !animator.isHuman) {
-                //Debug.LogWarning("VRIK needs a Humanoid Animator to auto-detect biped references. Please assign references manually.");
+                _logger.Error("VRIK needs a Humanoid Animator to auto-detect biped references. Please assign references manually.");
                 return;
             }
 
@@ -400,7 +415,7 @@ namespace CustomAvatar
         
         internal VRIK vrik;
 
-        private ILogger _logger = new UnityDebugLogger<VRIKManager>();
+        private ILogger<VRIKManager> _logger = new UnityDebugLogger<VRIKManager>();
 
         public bool areReferencesFilled => references_root != null &&
                                            references_pelvis != null &&
@@ -435,23 +450,18 @@ namespace CustomAvatar
 
         private void Awake()
         {
-            foreach (VRIK vrik in GetComponentsInChildren<VRIK>())
-            {
-                Destroy(vrik);
-            }
-
             vrik = gameObject.AddComponent<VRIK>();
         }
 
         private void Start()
         {
-            SetVrikReferences();
+            SetVrikFields();
         }
 
         #pragma warning restore IDE0051
         #endregion
 
-        private void SetVrikReferences()
+        private void SetVrikFields()
         {
             _logger.Info($"Setting VRIK references on '{name}'");
 
@@ -473,7 +483,7 @@ namespace CustomAvatar
                         }
                     }
 
-                    if (target == null) break;
+                    if (target == null) continue;
 
                     FieldInfo targetField = target.GetType().GetField(parts[parts.Length - 1]);
                     object value = sourceField.GetValue(this);
@@ -486,7 +496,7 @@ namespace CustomAvatar
                     if (value == null && targetType.IsValueType && Nullable.GetUnderlyingType(targetType) == null)
                     {
                         _logger.Warning($"Tried setting non-nullable type {targetType.FullName} to null");
-                        return;
+                        continue;
                     }
                 
                     if (sourceType != targetType)

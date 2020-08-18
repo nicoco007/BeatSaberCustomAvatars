@@ -1,28 +1,42 @@
-﻿using System.Collections;
+﻿//  Beat Saber Custom Avatars - Custom player models for body presence in Beat Saber.
+//  Copyright © 2018-2020  Beat Saber Custom Avatars Contributors
+//
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+using System.Collections;
 using CustomAvatar.Logging;
 using UnityEngine;
 using Zenject;
-using ILogger = CustomAvatar.Logging.ILogger;
 using Object = UnityEngine.Object;
 
-namespace CustomAvatar
+namespace CustomAvatar.Utilities
 {
-    internal class ShaderLoader : MonoBehaviour
+    internal class ShaderLoader : IInitializable
     {
         public Shader stereoMirrorShader;
         public Shader unlitShader;
 
-        private ILogger _logger;
+        private readonly ILogger<ShaderLoader> _logger;
 
-        [Inject]
-        private void Inject(ILoggerProvider loggerProvider)
+        public ShaderLoader(ILoggerProvider loggerProvider)
         {
             _logger = loggerProvider.CreateLogger<ShaderLoader>();
         }
 
-        private void Start()
+        public void Initialize()
         {
-            StartCoroutine(GetShaders());
+            SharedCoroutineStarter.instance.StartCoroutine(GetShaders());
         }
 
         private IEnumerator GetShaders()
@@ -51,17 +65,30 @@ namespace CustomAvatar
                 {
                     case "BeatSaber/Unlit Glow":
                         unlitShader = asset as Shader;
-                        _logger.Info("Loaded unlit shader");
                         break;
                     
                     case "Custom/StereoRenderShader-Unlit":
                         stereoMirrorShader = asset as Shader;
-                        _logger.Info("Loaded stereo render shader");
                         break;
                 }
             }
 
+            CheckShaderLoaded(unlitShader, "Unlit");
+            CheckShaderLoaded(stereoMirrorShader, "Stereo Renderer");
+
             shadersBundleCreateRequest.assetBundle.Unload(false);
+        }
+
+        private void CheckShaderLoaded(Shader shader, string name)
+        {
+            if (shader)
+            {
+                _logger.Info($"{name} shader loaded");
+            }
+            else
+            {
+                _logger.Error($"{name} shader not found");
+            }
         }
     }
 }

@@ -1,4 +1,21 @@
-﻿using BeatSaberMarkupLanguage.Attributes;
+﻿//  Beat Saber Custom Avatars - Custom player models for body presence in Beat Saber.
+//  Copyright © 2018-2020  Beat Saber Custom Avatars Contributors
+//
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+using CustomAvatar.Avatar;
+using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components.Settings;
 using HMUI;
 using TMPro;
@@ -19,6 +36,7 @@ namespace CustomAvatar.UI
         [UIComponent("bypass-calibration")] private HoverHint _bypassCalibrationHoverHint;
         [UIComponent("automatic-calibration")] private HoverHint _automaticCalibrationHoverHint;
 
+        [UIComponent("ignore-exclusions")] private CheckboxSetting _ignoreExclusionsSetting;
         [UIComponent("bypass-calibration")] private CheckboxSetting _bypassCalibration;
         [UIComponent("automatic-calibration")] private CheckboxSetting _automaticCalibrationSetting;
 
@@ -37,6 +55,13 @@ namespace CustomAvatar.UI
 
         #region Actions
         // ReSharper disable UnusedMember.Local
+
+        [UIAction("ignore-exclusions-change")]
+        private void OnIgnoreExclusionsChanged(bool value)
+        {
+            _currentAvatarSettings.ignoreExclusions = value;
+            _avatarManager.UpdateFirstPersonVisibility();
+        }
 
         [UIAction("bypass-calibration-change")]
         private void OnEnableBypassCalibrationChanged(bool value)
@@ -116,7 +141,7 @@ namespace CustomAvatar.UI
             _calibrating = false;
             _calibrateButtonText.text = "Calibrate";
             _clearButtonText.text = "Clear";
-            _clearButton.interactable = _currentAvatarSettings?.fullBodyCalibration.isCalibrated ?? false;
+            _clearButton.interactable = _currentAvatarManualCalibration?.isCalibrated ?? false;
         }
 
         private GameObject CreateCalibrationSphere()
