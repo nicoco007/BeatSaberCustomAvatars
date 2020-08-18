@@ -293,14 +293,14 @@ public class GenericGenerate : MonoBehaviour
         }
 
         {
-            ikMgr.solver_spine_headTarget = top.transform.Find("HeadTarget");
-            ikMgr.solver_spine_pelvisTarget = top.transform.Find("PelvisTarget");
+            ikMgr.solver_spine_headTarget = FindGameObject(top, "HeadTarget").transform;
+            ikMgr.solver_spine_pelvisTarget = FindGameObject(top, "PelvisTarget").transform;
 
-            ikMgr.solver_leftArm_target = top.transform.Find("LeftHandTarget");
-            ikMgr.solver_rightArm_target = top.transform.Find("RightHandTarget");
+            // ikMgr.solver_leftArm_target = FindGameObject(top, "LeftHandTarget").transform;
+            // ikMgr.solver_rightArm_target = FindGameObject(top, "RightHandTarget").transform;
 
-            ikMgr.solver_leftLeg_target = top.transform.Find("LeftLegTarget");
-            ikMgr.solver_rightLeg_target = top.transform.Find("RightLegTarget");
+            ikMgr.solver_leftLeg_target = FindGameObject(top, "LeftLegTarget").transform;
+            ikMgr.solver_rightLeg_target = FindGameObject(top, "RightLegTarget").transform;
         }
     }
 
