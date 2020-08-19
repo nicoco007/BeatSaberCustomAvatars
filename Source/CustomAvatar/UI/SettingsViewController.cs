@@ -70,7 +70,7 @@ namespace CustomAvatar.UI
             _calibrateFullBodyTrackingOnStart.CheckboxValue = _settings.calibrateFullBodyTrackingOnStart;
             _cameraNearClipPlane.Value = _settings.cameraNearClipPlane;
 
-            UpdateUI(_avatarManager.currentlySpawnedAvatar.avatar);
+            UpdateUI(_avatarManager.currentlySpawnedAvatar?.avatar);
             OnInputDevicesChanged(null, DeviceUse.Unknown);
 
             _armSpanLabel.SetText($"{_settings.playerArmSpan:0.00} m");
@@ -157,7 +157,7 @@ namespace CustomAvatar.UI
 
         private void OnInputDevicesChanged(TrackedDeviceState state, DeviceUse use)
         {
-            UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.avatar);
+            UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar?.avatar);
         }
 
         private void UpdateCalibrationButtons(LoadedAvatar avatar)
