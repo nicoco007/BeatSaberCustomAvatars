@@ -64,7 +64,7 @@ namespace CustomAvatar.Zenject
             Container.Bind<GameScenesHelper>().AsTransient();
 
             // behaviours
-            Container.Bind<MenuLightingController>().FromNewComponentOnNewGameObject().NonLazy();
+            Container.Bind<TwoSidedLightingController>().FromNewComponentOnNewGameObject().NonLazy();
 
             // not sure if this is a great idea but w/e
             if (!Container.HasBinding<MainSettingsModelSO>())

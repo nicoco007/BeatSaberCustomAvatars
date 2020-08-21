@@ -32,6 +32,7 @@ namespace CustomAvatar.Lighting
         private LightWithIdManager _lightManager;
         private ColorManager _colorManager;
         private PlayerController _playerController;
+        private TwoSidedLightingController _twoSidedLightingController;
 
         private List<Light>[] _lights;
         
@@ -40,18 +41,21 @@ namespace CustomAvatar.Lighting
         // ReSharper disable UnusedMember.Local
 
         [Inject]
-        private void Inject(ILoggerProvider loggerProvider, LightWithIdManager lightManager, ColorManager colorManager, PlayerController playerController)
+        private void Inject(ILoggerProvider loggerProvider, LightWithIdManager lightManager, ColorManager colorManager, PlayerController playerController, TwoSidedLightingController twoSidedLightingController)
         {
             _logger = loggerProvider.CreateLogger<GameplayLightingController>();
             _lightManager = lightManager;
             _colorManager = colorManager;
             _playerController = playerController;
+            _twoSidedLightingController = twoSidedLightingController;
 
             _lightManager.didSetColorForIdEvent += OnSetColorForId;
         }
 
         private void Start()
         {
+            _twoSidedLightingController.gameObject.SetActive(false);
+
             List<LightWithId>[] lightsWithId = _lightManager.GetPrivateField<List<LightWithId>[]>("_lights");
             int maxLightId = _lightManager.GetPrivateField<int>("kMaxLightId");
 
@@ -106,6 +110,11 @@ namespace CustomAvatar.Lighting
                     light.transform.rotation = Quaternion.LookRotation(kOrigin - light.transform.position);
                 }
             }
+        }
+
+        private void OnDestroy()
+        {
+            _twoSidedLightingController.gameObject.SetActive(true);
         }
 
         // ReSharper disable UnusedMember.Local
