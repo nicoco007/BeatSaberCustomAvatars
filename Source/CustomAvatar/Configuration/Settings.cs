@@ -116,8 +116,8 @@ namespace CustomAvatar.Configuration
 
         public class FullBodyMotionSmoothing
         {
-            public readonly TrackedPointSmoothing waist = new TrackedPointSmoothing { position = 15, rotation = 10 };
-            public readonly TrackedPointSmoothing feet = new TrackedPointSmoothing { position = 13, rotation = 17 };
+            public readonly TrackedPointSmoothing waist = new TrackedPointSmoothing { position = 0.5f, rotation = 0.2f };
+            public readonly TrackedPointSmoothing feet = new TrackedPointSmoothing { position = 0.5f, rotation = 0.2f };
         }
 
         public class TrackedPointSmoothing
