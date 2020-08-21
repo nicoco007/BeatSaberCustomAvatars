@@ -26,7 +26,8 @@ namespace CustomAvatar.Lighting
 {
     internal class GameplayLightingController : MonoBehaviour
     {
-        private readonly Vector3 kOrigin = new Vector3(0, 1, 0);
+        // TODO this should be adjusted according to room config
+        private static readonly Vector3 kOrigin = new Vector3(0, 1, 0);
 
         private ILogger<GameplayLightingController> _logger;
         private LightWithIdManager _lightManager;
@@ -34,7 +35,7 @@ namespace CustomAvatar.Lighting
         private PlayerController _playerController;
         private TwoSidedLightingController _twoSidedLightingController;
 
-        private List<Light>[] _lights;
+        private List<GameLight>[] _lights;
         
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
@@ -56,44 +57,7 @@ namespace CustomAvatar.Lighting
         {
             _twoSidedLightingController.gameObject.SetActive(false);
 
-            List<LightWithId>[] lightsWithId = _lightManager.GetPrivateField<List<LightWithId>[]>("_lights");
-            int maxLightId = _lightManager.GetPrivateField<int>("kMaxLightId");
-
-            _lights = new List<Light>[maxLightId + 1];
-
-            for (int id = 0; id < lightsWithId.Length; id++)
-            {
-                if (lightsWithId[id] == null) continue;
-
-                foreach (LightWithId lightWithId in lightsWithId[id])
-                {
-                    Vector3 direction = kOrigin - lightWithId.transform.position;
-
-                    var light = new GameObject("DynamicLight").AddComponent<Light>();
-                    
-                    light.type = LightType.Directional;
-                    light.color = Color.black;
-                    light.shadows = LightShadows.None; // shadows murder fps since there's so many lights being added
-                    light.renderMode = LightRenderMode.ForceVertex; // reduce performance toll
-                    light.intensity = 1f / (direction.sqrMagnitude * 5);
-                    light.spotAngle = 45;
-                    light.cullingMask = AvatarLayers.kAllLayersMask;
-                    
-                    light.transform.SetParent(lightWithId.transform);
-                    light.transform.localPosition = Vector3.zero;
-                    light.transform.rotation = Quaternion.LookRotation(direction);
-
-                    if (_lights[id] == null)
-                    {
-                        _lights[id] = new List<Light>(10);
-                    }
-
-                    _lights[id].Add(light);
-                }
-            }
-
-            _logger.Trace($"Created {_lights.Sum(l => l?.Count)} lights");
-            _logger.Trace($"Maximum intensity: {_lights.Where(l => l != null).SelectMany(l => l).Sum(l => l.intensity)}");
+            CreateLights();
 
             AddPointLight(_colorManager.ColorForSaberType(SaberType.SaberA), _playerController.leftSaber.transform);
             AddPointLight(_colorManager.ColorForSaberType(SaberType.SaberB), _playerController.rightSaber.transform);
@@ -101,13 +65,13 @@ namespace CustomAvatar.Lighting
 
         private void Update()
         {
-            foreach (List<Light> lights in _lights)
+            for (int id = 0; id < _lights.Length; id++)
             {
-                if (lights == null) continue;
+                if (_lights[id] == null) continue;
 
-                foreach (Light light in lights)
+                foreach (GameLight gameLight in _lights[id])
                 {
-                    light.transform.rotation = Quaternion.LookRotation(kOrigin - light.transform.position);
+                    gameLight.light.transform.LookAt(kOrigin - gameLight.lightWithId.transform.position);
                 }
             }
         }
@@ -118,17 +82,58 @@ namespace CustomAvatar.Lighting
         }
 
         // ReSharper disable UnusedMember.Local
-        #pragma warning disable IDE0051
+        #pragma warning restore IDE0051
         #endregion
+
+        private void CreateLights()
+        {
+            List<LightWithId>[] lightsWithId = _lightManager.GetPrivateField<List<LightWithId>[]>("_lights");
+            int maxLightId = _lightManager.GetPrivateField<int>("kMaxLightId");
+
+            _lights = new List<GameLight>[maxLightId + 1];
+            
+            for (int id = 0; id < lightsWithId.Length; id++)
+            {
+                if (lightsWithId[id] == null) continue;
+
+                foreach (LightWithId lightWithId in lightsWithId[id])
+                {
+                    Vector3 direction = kOrigin - lightWithId.transform.position;
+
+                    var light = new GameObject("DynamicLight").AddComponent<Light>();
+
+                    light.type = LightType.Directional;
+                    light.color = Color.black;
+                    light.shadows = LightShadows.None; // shadows murder fps since there's so many lights being added
+                    light.renderMode = LightRenderMode.ForcePixel; // reduce performance toll
+                    light.intensity = 0;
+                    light.spotAngle = 45;
+                    light.cullingMask = AvatarLayers.kAllLayersMask;
+
+                    light.transform.SetParent(transform);
+                    light.transform.position = Vector3.zero;
+                    light.transform.rotation = Quaternion.identity;
+
+                    if (_lights[id] == null)
+                    {
+                        _lights[id] = new List<GameLight>(10);
+                    }
+
+                    _lights[id].Add(new GameLight(lightWithId, light));
+                }
+            }
+
+            _logger.Trace($"Created {_lights.Sum(l => l?.Count)} lights");
+        }
 
         private void OnSetColorForId(int id, Color color)
         {
             if (_lights[id] == null) return;
 
-            foreach (Light light in _lights[id])
+            foreach (GameLight light in _lights[id])
             {
-                light.color = color;
-                light.intensity = color.a;
+                light.light.color = color;
+                light.light.intensity = color.a;
             }
         }
 
@@ -138,7 +143,7 @@ namespace CustomAvatar.Lighting
 
             light.type = LightType.Point;
             light.color = color;
-            light.intensity = 1;
+            light.intensity = 0.35f;
             light.shadows = LightShadows.Hard;
             light.range = 5;
             light.renderMode = LightRenderMode.ForcePixel;
@@ -147,6 +152,22 @@ namespace CustomAvatar.Lighting
             light.transform.SetParent(parent, false);
             light.transform.localPosition = new Vector3(0, 0, 0.5f); // middle of saber
             light.transform.rotation = Quaternion.identity;
+        }
+
+        private struct GameLight
+        {
+            public readonly LightWithId lightWithId;
+            public readonly Light light;
+            public readonly float magnitude;
+
+            public GameLight(LightWithId lightWithId, Light light)
+            {
+                this.lightWithId = lightWithId;
+                this.light = light;
+
+                // this doesn't really make sense physically but it works out nicer than sqrMagnitude
+                magnitude = (kOrigin - lightWithId.transform.position).magnitude;
+            }
         }
     }
 }
