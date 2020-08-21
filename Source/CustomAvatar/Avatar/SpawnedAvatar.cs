@@ -108,7 +108,7 @@ namespace CustomAvatar.Avatar
                     ApplyFirstPersonExclusions();
                     break;
 
-                case FirstPersonVisibility.None:
+                case FirstPersonVisibility.Hidden:
                     SetChildrenToLayer(AvatarLayers.kOnlyInThirdPerson);
                     break;
             }

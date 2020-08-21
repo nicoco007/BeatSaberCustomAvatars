@@ -229,7 +229,7 @@ namespace CustomAvatar.Avatar
         {
             if (!currentlySpawnedAvatar) return;
 
-            var visibility = FirstPersonVisibility.None;
+            var visibility = FirstPersonVisibility.Hidden;
 
             if (_settings.isAvatarVisibleInFirstPerson)
             {
