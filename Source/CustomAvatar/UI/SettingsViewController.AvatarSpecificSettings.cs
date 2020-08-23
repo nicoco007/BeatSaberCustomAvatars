@@ -21,6 +21,7 @@ using HMUI;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using CustomAvatar.Tracking;
 
 namespace CustomAvatar.UI
 {
@@ -172,33 +173,33 @@ namespace CustomAvatar.UI
         {
             if (_calibrating)
             {
-                if (_trackedDeviceManager.waist.isTracking)
+                if (_trackedDeviceManager.TryGetDeviceState(DeviceUse.Waist, out ITrackedDeviceState waist) && waist.isTracking)
                 {
                     _waistSphere.SetActive(true);
-                    _waistSphere.transform.position = _avatarTailor.ApplyTrackedPointFloorOffset(_avatarManager.currentlySpawnedAvatar, _trackedDeviceManager.waist.position);
-                    _waistSphere.transform.rotation = _trackedDeviceManager.waist.rotation;
+                    _waistSphere.transform.position = _avatarTailor.ApplyTrackedPointFloorOffset(_avatarManager.currentlySpawnedAvatar, waist.position);
+                    _waistSphere.transform.rotation = waist.rotation;
                 }
                 else
                 {
                     _waistSphere.SetActive(false);
                 }
 
-                if (_trackedDeviceManager.leftFoot.isTracking)
+                if (_trackedDeviceManager.TryGetDeviceState(DeviceUse.LeftFoot, out ITrackedDeviceState leftFoot) && leftFoot.isTracking)
                 {
                     _leftFootSphere.SetActive(true);
-                    _leftFootSphere.transform.position = _avatarTailor.ApplyTrackedPointFloorOffset(_avatarManager.currentlySpawnedAvatar, _trackedDeviceManager.leftFoot.position);
-                    _leftFootSphere.transform.rotation = _trackedDeviceManager.leftFoot.rotation;
+                    _leftFootSphere.transform.position = _avatarTailor.ApplyTrackedPointFloorOffset(_avatarManager.currentlySpawnedAvatar, leftFoot.position);
+                    _leftFootSphere.transform.rotation = leftFoot.rotation;
                 }
                 else
                 {
                     _leftFootSphere.SetActive(false);
                 }
 
-                if (_trackedDeviceManager.rightFoot.isTracking)
+                if (_trackedDeviceManager.TryGetDeviceState(DeviceUse.RightFoot, out ITrackedDeviceState rightFoot) && rightFoot.isTracking)
                 {
                     _rightFootSphere.SetActive(true);
-                    _rightFootSphere.transform.position = _avatarTailor.ApplyTrackedPointFloorOffset(_avatarManager.currentlySpawnedAvatar, _trackedDeviceManager.rightFoot.position);
-                    _rightFootSphere.transform.rotation = _trackedDeviceManager.rightFoot.rotation;
+                    _rightFootSphere.transform.position = _avatarTailor.ApplyTrackedPointFloorOffset(_avatarManager.currentlySpawnedAvatar, rightFoot.position);
+                    _rightFootSphere.transform.rotation = rightFoot.rotation;
                 }
                 else
                 {

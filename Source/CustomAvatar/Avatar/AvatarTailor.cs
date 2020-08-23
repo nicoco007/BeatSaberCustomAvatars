@@ -163,21 +163,17 @@ namespace CustomAvatar.Avatar
         {
             CalibrationData.FullBodyCalibration fullBodyCalibration = _calibrationData.GetAvatarManualCalibration(spawnedAvatar.avatar.fileName);
 
-            if (_trackedDeviceManager.waist.isTracking)
+            if (_trackedDeviceManager.TryGetDeviceState(DeviceUse.Waist, out ITrackedDeviceState waist) && waist.isTracking)
             {
-                ITrackedDeviceState pelvis = _trackedDeviceManager.waist;
-
-                Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.pelvis.rotation) * (spawnedAvatar.pelvis.position - ApplyTrackedPointFloorOffset(spawnedAvatar, pelvis.position));
-                Quaternion rotationOffset = Quaternion.Inverse(pelvis.rotation) * spawnedAvatar.pelvis.rotation;
+                Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.pelvis.rotation) * (spawnedAvatar.pelvis.position - ApplyTrackedPointFloorOffset(spawnedAvatar, waist.position));
+                Quaternion rotationOffset = Quaternion.Inverse(waist.rotation) * spawnedAvatar.pelvis.rotation;
 
                 fullBodyCalibration.waist = new Pose(positionOffset, rotationOffset);
                 _logger.Info("Set waist pose correction " + fullBodyCalibration.waist);
             }
 
-            if (_trackedDeviceManager.leftFoot.isTracking)
+            if (_trackedDeviceManager.TryGetDeviceState(DeviceUse.LeftFoot, out ITrackedDeviceState leftFoot) && leftFoot.isTracking)
             {
-                ITrackedDeviceState leftFoot = _trackedDeviceManager.leftFoot;
-
                 Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.leftLeg.rotation) * (spawnedAvatar.leftLeg.position - ApplyTrackedPointFloorOffset(spawnedAvatar, leftFoot.position));
                 Quaternion rotationOffset = Quaternion.Inverse(leftFoot.rotation) * spawnedAvatar.leftLeg.rotation;
 
@@ -185,10 +181,8 @@ namespace CustomAvatar.Avatar
                 _logger.Info("Set left foot pose correction " + fullBodyCalibration.leftFoot);
             }
 
-            if (_trackedDeviceManager.rightFoot.isTracking)
+            if (_trackedDeviceManager.TryGetDeviceState(DeviceUse.RightFoot, out ITrackedDeviceState rightFoot) && rightFoot.isTracking)
             {
-                ITrackedDeviceState rightFoot = _trackedDeviceManager.rightFoot;
-
                 Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.rightLeg.rotation) * (spawnedAvatar.rightLeg.position - ApplyTrackedPointFloorOffset(spawnedAvatar, rightFoot.position));
                 Quaternion rotationOffset = Quaternion.Inverse(rightFoot.rotation) * spawnedAvatar.rightLeg.rotation;
 
@@ -206,10 +200,8 @@ namespace CustomAvatar.Avatar
             Vector3 floorNormal = Vector3.up;
             float floorPosition = _settings.moveFloorWithRoomAdjust ? _roomCenter.y : 0;
 
-            if (_trackedDeviceManager.leftFoot.isTracking)
+            if (_trackedDeviceManager.TryGetDeviceState(DeviceUse.LeftFoot, out ITrackedDeviceState leftFoot) && leftFoot.isTracking)
             {
-                ITrackedDeviceState leftFoot = _trackedDeviceManager.leftFoot;
-
                 Vector3 leftFootForward = leftFoot.rotation * Vector3.up; // forward on feet trackers is y (up)
                 Vector3 leftFootStraightForward = Vector3.ProjectOnPlane(leftFootForward, floorNormal); // get projection of forward vector on xz plane (floor)
                 Quaternion leftRotationCorrection = Quaternion.Inverse(leftFoot.rotation) * Quaternion.LookRotation(Vector3.up, leftFootStraightForward); // get difference between world rotation and flat forward rotation
@@ -217,10 +209,8 @@ namespace CustomAvatar.Avatar
                 _logger.Info("Set left foot pose correction " + fullBodyCalibration.leftFoot);
             }
 
-            if (_trackedDeviceManager.rightFoot.isTracking)
+            if (_trackedDeviceManager.TryGetDeviceState(DeviceUse.RightFoot, out ITrackedDeviceState rightFoot) && rightFoot.isTracking)
             {
-                ITrackedDeviceState rightFoot = _trackedDeviceManager.rightFoot;
-
                 Vector3 rightFootForward = rightFoot.rotation * Vector3.up;
                 Vector3 rightFootStraightForward = Vector3.ProjectOnPlane(rightFootForward, floorNormal);
                 Quaternion rightRotationCorrection = Quaternion.Inverse(rightFoot.rotation) * Quaternion.LookRotation(Vector3.up, rightFootStraightForward);
@@ -228,23 +218,23 @@ namespace CustomAvatar.Avatar
                 _logger.Info("Set right foot pose correction " + fullBodyCalibration.rightFoot);
             }
 
-            if (_trackedDeviceManager.head.isTracking && _trackedDeviceManager.waist.isTracking)
+            if (_trackedDeviceManager.TryGetDeviceState(DeviceUse.Head, out ITrackedDeviceState head) &&
+                _trackedDeviceManager.TryGetDeviceState(DeviceUse.Waist, out ITrackedDeviceState waist) &&
+                head.isTracking &&
+                waist.isTracking)
             {
-                ITrackedDeviceState head = _trackedDeviceManager.head;
-                ITrackedDeviceState pelvis = _trackedDeviceManager.waist;
-
                 // using "standard" 8 head high body proportions w/ eyes at 1/2 head height
                 // reference: https://miro.medium.com/max/3200/1*cqTRyEGl26l4CImEmWz68Q.jpeg
                 float eyeHeight = head.position.y - floorPosition;
 
-                Vector3 wantedPelvisPosition = new Vector3(0, eyeHeight / 22.5f * 14f, 0);
-                Vector3 pelvisPositionCorrection = wantedPelvisPosition - Vector3.up * (pelvis.position.y - floorPosition);
+                Vector3 wantedWaistPosition = new Vector3(0, eyeHeight / 22.5f * 14f, 0);
+                Vector3 waistPositionCorrection = wantedWaistPosition - Vector3.up * (waist.position.y - floorPosition);
 
-                Vector3 pelvisForward = pelvis.rotation * Vector3.forward;
-                Vector3 pelvisStraightForward = Vector3.ProjectOnPlane(pelvisForward, floorNormal);
-                Quaternion pelvisRotationCorrection = Quaternion.Inverse(pelvis.rotation) * Quaternion.LookRotation(pelvisStraightForward, Vector3.up);
+                Vector3 waistForward = waist.rotation * Vector3.forward;
+                Vector3 waistStraightForward = Vector3.ProjectOnPlane(waistForward, floorNormal);
+                Quaternion waistRotationCorrection = Quaternion.Inverse(waist.rotation) * Quaternion.LookRotation(waistStraightForward, Vector3.up);
 
-                fullBodyCalibration.waist = new Pose(pelvisPositionCorrection, pelvisRotationCorrection);
+                fullBodyCalibration.waist = new Pose(waistPositionCorrection, waistRotationCorrection);
                 _logger.Info("Set waist pose correction " + fullBodyCalibration.waist);
             }
         }

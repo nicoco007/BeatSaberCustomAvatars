@@ -15,6 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using CustomAvatar.Avatar;
+using CustomAvatar.Tracking;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components.Settings;
 using System.Collections.Generic;
@@ -145,7 +146,13 @@ namespace CustomAvatar.UI
 
         private void ScanArmSpan()
         {
-            var armSpan = Vector3.Distance(_trackedDeviceManager.leftHand.position, _trackedDeviceManager.rightHand.position);
+            if (!_trackedDeviceManager.TryGetDeviceState(DeviceUse.RightHand, out ITrackedDeviceState leftHand) || !_trackedDeviceManager.TryGetDeviceState(DeviceUse.RightHand, out ITrackedDeviceState rightHand))
+            {
+                CancelInvoke(nameof(ScanArmSpan));
+                return;
+            }
+
+            var armSpan = Vector3.Distance(leftHand.position, rightHand.position);
 
             if (armSpan > _maxMeasuredArmSpan)
             {

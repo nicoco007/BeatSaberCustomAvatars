@@ -229,7 +229,12 @@ namespace CustomAvatar.UI
 
         private void UpdateCalibrationButtons(LoadedAvatar avatar)
         {
-            if (!_trackedDeviceManager.waist.isTracking && !_trackedDeviceManager.leftFoot.isTracking && !_trackedDeviceManager.rightFoot.isTracking)
+            if (!_trackedDeviceManager.TryGetDeviceState(DeviceUse.Waist, out ITrackedDeviceState waist) &&
+                !_trackedDeviceManager.TryGetDeviceState(DeviceUse.LeftFoot, out ITrackedDeviceState leftFoot) &&
+                !_trackedDeviceManager.TryGetDeviceState(DeviceUse.RightFoot, out ITrackedDeviceState rightFoot) &&
+                !waist.isTracking &&
+                !leftFoot.isTracking &&
+                !rightFoot.isTracking)
             {
                 _autoCalibrateButton.interactable = false;
                 _autoClearButton.interactable = false;

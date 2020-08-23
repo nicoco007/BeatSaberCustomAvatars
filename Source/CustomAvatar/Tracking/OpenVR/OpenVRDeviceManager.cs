@@ -25,13 +25,6 @@ namespace CustomAvatar.Tracking.OpenVR
 {
     internal class OpenVRDeviceManager : ITrackedDeviceManager, ITickable
     {
-        public ITrackedDeviceState head      => _head;
-        public ITrackedDeviceState leftHand  => _leftHand;
-        public ITrackedDeviceState rightHand => _rightHand;
-        public ITrackedDeviceState waist     => _waist;
-        public ITrackedDeviceState leftFoot  => _leftFoot;
-        public ITrackedDeviceState rightFoot => _rightFoot;
-
         public event Action<ITrackedDeviceState> deviceAdded;
         public event Action<ITrackedDeviceState> deviceRemoved;
         public event Action<ITrackedDeviceState> deviceTrackingAcquired;
@@ -58,6 +51,40 @@ namespace CustomAvatar.Tracking.OpenVR
         {
             _logger = loggerProvider.CreateLogger<OpenVRDeviceManager>();
             _openVRFacade = openVRFacade;
+        }
+
+        public bool TryGetDeviceState(DeviceUse use, out ITrackedDeviceState deviceState)
+        {
+            switch (use)
+            {
+                case DeviceUse.Head:
+                    deviceState = _head;
+                    return true;
+
+                case DeviceUse.LeftHand:
+                    deviceState = _leftHand;
+                    return true;
+
+                case DeviceUse.RightHand:
+                    deviceState = _rightHand;
+                    return true;
+
+                case DeviceUse.Waist:
+                    deviceState = _waist;
+                    return true;
+
+                case DeviceUse.LeftFoot:
+                    deviceState = _leftFoot;
+                    return true;
+
+                case DeviceUse.RightFoot:
+                    deviceState = _rightFoot;
+                    return true;
+
+                default:
+                    deviceState = null;
+                    return false;
+            }
         }
 
         public void Tick()

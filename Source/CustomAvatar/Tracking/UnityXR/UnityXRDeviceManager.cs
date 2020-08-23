@@ -26,13 +26,6 @@ namespace CustomAvatar.Tracking.UnityXR
 {
     internal class UnityXRDeviceManager : ITrackedDeviceManager, IInitializable, ITickable, IDisposable
     {
-        public ITrackedDeviceState head      => _head;
-        public ITrackedDeviceState leftHand  => _leftHand;
-        public ITrackedDeviceState rightHand => _rightHand;
-        public ITrackedDeviceState waist     => _waist;
-        public ITrackedDeviceState leftFoot  => _leftFoot;
-        public ITrackedDeviceState rightFoot => _rightFoot;
-
         // these only trigger for devices that are registered to a specific target, not all found input devices
         public event Action<ITrackedDeviceState> deviceAdded;
         public event Action<ITrackedDeviceState> deviceRemoved;
@@ -42,9 +35,6 @@ namespace CustomAvatar.Tracking.UnityXR
         private readonly UnityXRDeviceState _head      = new UnityXRDeviceState(DeviceUse.Head);
         private readonly UnityXRDeviceState _leftHand  = new UnityXRDeviceState(DeviceUse.LeftHand);
         private readonly UnityXRDeviceState _rightHand = new UnityXRDeviceState(DeviceUse.RightHand);
-        private readonly UnityXRDeviceState _waist     = new UnityXRDeviceState(DeviceUse.Waist);
-        private readonly UnityXRDeviceState _leftFoot  = new UnityXRDeviceState(DeviceUse.LeftFoot);
-        private readonly UnityXRDeviceState _rightFoot = new UnityXRDeviceState(DeviceUse.RightFoot);
 
         private readonly MainSettingsModelSO _mainSettingsModel;
         private readonly ILogger<UnityXRDeviceManager> _logger;
@@ -55,6 +45,28 @@ namespace CustomAvatar.Tracking.UnityXR
         {
             _mainSettingsModel = mainSettingsModel;
             _logger = loggerProvider.CreateLogger<UnityXRDeviceManager>();
+        }
+
+        public bool TryGetDeviceState(DeviceUse use, out ITrackedDeviceState deviceState)
+        {
+            switch (use)
+            {
+                case DeviceUse.Head:
+                    deviceState = _head;
+                    return true;
+
+                case DeviceUse.LeftHand:
+                    deviceState = _leftHand;
+                    return true;
+
+                case DeviceUse.RightHand:
+                    deviceState = _rightHand;
+                    return true;
+
+                default:
+                    deviceState = null;
+                    return false;
+            }
         }
 
         public void Initialize()
@@ -77,26 +89,17 @@ namespace CustomAvatar.Tracking.UnityXR
             InputDevice? headInputDevice      = null;
             InputDevice? leftHandInputDevice  = null;
             InputDevice? rightHandInputDevice = null;
-            InputDevice? waistInputDevice     = null;
-            InputDevice? leftFootInputDevice  = null;
-            InputDevice? rightFootInputDevice = null;
 
             foreach (InputDevice inputDevice in inputDevices)
             {
                 if (inputDevice.name == _head.name)      headInputDevice      = inputDevice;
                 if (inputDevice.name == _leftHand.name)  leftHandInputDevice  = inputDevice;
                 if (inputDevice.name == _rightHand.name) rightHandInputDevice = inputDevice;
-                if (inputDevice.name == _waist.name)     waistInputDevice     = inputDevice;
-                if (inputDevice.name == _leftFoot.name)  leftFootInputDevice  = inputDevice;
-                if (inputDevice.name == _rightFoot.name) rightFootInputDevice = inputDevice;
             }
 
             UpdateTrackedDevice(_head,      headInputDevice);
             UpdateTrackedDevice(_leftHand,  leftHandInputDevice);
             UpdateTrackedDevice(_rightHand, rightHandInputDevice);
-            UpdateTrackedDevice(_waist,     waistInputDevice);
-            UpdateTrackedDevice(_leftFoot,  leftFootInputDevice);
-            UpdateTrackedDevice(_rightFoot, rightFootInputDevice);
         }
 
         public void Dispose()
@@ -111,17 +114,12 @@ namespace CustomAvatar.Tracking.UnityXR
         private void UpdateInputDevices()
         {
             var inputDevices = new List<InputDevice>();
-            var trackers = new Queue<InputDevice>();
-            var openVRDevicesBySerialNumber = new Dictionary<string, uint>();
 
             InputDevices.GetDevices(inputDevices);
 
             InputDevice? headInputDevice      = null;
             InputDevice? leftHandInputDevice  = null;
             InputDevice? rightHandInputDevice = null;
-            InputDevice? waistInputDevice     = null;
-            InputDevice? leftFootInputDevice  = null;
-            InputDevice? rightFootInputDevice = null;
 
             foreach (InputDevice device in inputDevices)
             {
@@ -145,35 +143,11 @@ namespace CustomAvatar.Tracking.UnityXR
                 {
                     rightHandInputDevice = device;
                 }
-                else if (device.characteristics.HasFlag(InputDeviceCharacteristics.TrackedDevice) && !device.characteristics.HasFlag(InputDeviceCharacteristics.TrackingReference))
-                {
-                    trackers.Enqueue(device);
-                }
-            }
-
-            int totalTrackerCount = trackers.Count;
-
-            if (totalTrackerCount >= 2 && trackers.Count > 0)
-            {
-                leftFootInputDevice = trackers.Dequeue();
-            }
-
-            if (totalTrackerCount >= 2 && trackers.Count > 0)
-            {
-                rightFootInputDevice = trackers.Dequeue();
-            }
-
-            if (trackers.Count > 0)
-            {
-                waistInputDevice = trackers.Dequeue();
             }
 
             AssignTrackedDevice(_head,      headInputDevice,      DeviceUse.Head);
             AssignTrackedDevice(_leftHand,  leftHandInputDevice,  DeviceUse.LeftHand);
             AssignTrackedDevice(_rightHand, rightHandInputDevice, DeviceUse.RightHand);
-            AssignTrackedDevice(_waist,     waistInputDevice,     DeviceUse.Waist);
-            AssignTrackedDevice(_leftFoot,  leftFootInputDevice,  DeviceUse.LeftFoot);
-            AssignTrackedDevice(_rightFoot, rightFootInputDevice, DeviceUse.RightFoot);
 
             foreach (string deviceName in _foundDevices.ToList())
             {

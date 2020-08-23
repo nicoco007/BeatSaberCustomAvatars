@@ -68,9 +68,9 @@ namespace CustomAvatar.Tracking
             _rightHandAnimAction = new SkeletalInput("/actions/customavatars/in/righthandanim");
         }
 
-        public bool TryGetHeadPose(out Pose pose)      => TryGetPose(_deviceManager.head, out pose);
-        public bool TryGetLeftHandPose(out Pose pose)  => TryGetPose(_deviceManager.leftHand, out pose);
-        public bool TryGetRightHandPose(out Pose pose) => TryGetPose(_deviceManager.rightHand, out pose);
+        public bool TryGetHeadPose(out Pose pose)      => TryGetPose(DeviceUse.Head, out pose);
+        public bool TryGetLeftHandPose(out Pose pose)  => TryGetPose(DeviceUse.LeftHand, out pose);
+        public bool TryGetRightHandPose(out Pose pose) => TryGetPose(DeviceUse.RightHand, out pose);
 
         public bool TryGetWaistPose(out Pose pose)
         {
@@ -90,7 +90,7 @@ namespace CustomAvatar.Tracking
                 correction = _manualCalibration.waist;
             }
 
-            if (!TryGetTrackerPose(_deviceManager.waist, _previousWaistPose, correction, _settings.fullBodyMotionSmoothing.waist, out pose))
+            if (!TryGetTrackerPose(DeviceUse.Waist, _previousWaistPose, correction, _settings.fullBodyMotionSmoothing.waist, out pose))
             {
                 return false;
             }
@@ -113,7 +113,7 @@ namespace CustomAvatar.Tracking
                 correction = _manualCalibration.leftFoot;
             }
 
-            if (!TryGetTrackerPose(_deviceManager.leftFoot, _previousLeftFootPose, correction, _settings.fullBodyMotionSmoothing.feet, out pose))
+            if (!TryGetTrackerPose(DeviceUse.LeftFoot, _previousLeftFootPose, correction, _settings.fullBodyMotionSmoothing.feet, out pose))
             {
                 return false;
             }
@@ -136,7 +136,7 @@ namespace CustomAvatar.Tracking
                 correction = _manualCalibration.rightFoot;
             }
 
-            if (!TryGetTrackerPose(_deviceManager.rightFoot, _previousRightFootPose, correction, _settings.fullBodyMotionSmoothing.feet, out pose))
+            if (!TryGetTrackerPose(DeviceUse.RightFoot, _previousRightFootPose, correction, _settings.fullBodyMotionSmoothing.feet, out pose))
             {
                 return false;
             }
@@ -184,9 +184,9 @@ namespace CustomAvatar.Tracking
             _rightHandAnimAction.Dispose();
         }
 
-        private bool TryGetPose(ITrackedDeviceState device, out Pose pose)
+        private bool TryGetPose(DeviceUse use, out Pose pose)
         {
-            if (!device.isConnected || !device.isTracking)
+            if (!_deviceManager.TryGetDeviceState(use, out ITrackedDeviceState device) || !device.isConnected || !device.isTracking)
             {
                 pose = Pose.identity;
                 return false;
@@ -196,9 +196,9 @@ namespace CustomAvatar.Tracking
             return true;
         }
 
-        private bool TryGetTrackerPose(ITrackedDeviceState device, Pose previousPose, Pose correction, Settings.TrackedPointSmoothing smoothing, out Pose pose)
+        private bool TryGetTrackerPose(DeviceUse use, Pose previousPose, Pose correction, Settings.TrackedPointSmoothing smoothing, out Pose pose)
         {
-            if (!_shouldTrackFullBody || !TryGetPose(device, out Pose currentPose))
+            if (!_shouldTrackFullBody || !TryGetPose(use, out Pose currentPose))
             {
                 pose = Pose.identity;
                 return false;
