@@ -181,7 +181,7 @@ namespace CustomAvatar.Avatar
             _vrik.solver.leftArm.target    = _vrikManager.solver_leftArm_target;
             _vrik.solver.rightArm.target   = _vrikManager.solver_rightArm_target;
 
-            if (_input.TryGetLeftFootPose(out _) || _isCalibrationModeEnabled)
+            if (_input.TryGetPose(DeviceUse.LeftFoot, out _) || _isCalibrationModeEnabled)
             {
                 _vrik.solver.leftLeg.target = _vrikManager.solver_leftLeg_target;
                 _vrik.solver.leftLeg.positionWeight = _vrikManager.solver_leftLeg_positionWeight;
@@ -194,7 +194,7 @@ namespace CustomAvatar.Avatar
                 _vrik.solver.leftLeg.rotationWeight = 0;
             }
 
-            if (_input.TryGetRightFootPose(out _) || _isCalibrationModeEnabled)
+            if (_input.TryGetPose(DeviceUse.RightFoot, out _) || _isCalibrationModeEnabled)
             {
                 _vrik.solver.rightLeg.target = _vrikManager.solver_rightLeg_target;
                 _vrik.solver.rightLeg.positionWeight = _vrikManager.solver_rightLeg_positionWeight;
@@ -207,7 +207,7 @@ namespace CustomAvatar.Avatar
                 _vrik.solver.rightLeg.rotationWeight = 0;
             }
 
-            if (_input.TryGetWaistPose(out _) || _isCalibrationModeEnabled)
+            if (_input.TryGetPose(DeviceUse.Waist, out _) || _isCalibrationModeEnabled)
             {
                 _vrik.solver.spine.pelvisTarget = _vrikManager.solver_spine_pelvisTarget;
                 _vrik.solver.spine.pelvisPositionWeight = _vrikManager.solver_spine_pelvisPositionWeight;

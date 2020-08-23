@@ -68,11 +68,98 @@ namespace CustomAvatar.Tracking
             _rightHandAnimAction = new SkeletalInput("/actions/customavatars/in/righthandanim");
         }
 
-        public bool TryGetHeadPose(out Pose pose)      => TryGetPose(DeviceUse.Head, out pose);
-        public bool TryGetLeftHandPose(out Pose pose)  => TryGetPose(DeviceUse.LeftHand, out pose);
-        public bool TryGetRightHandPose(out Pose pose) => TryGetPose(DeviceUse.RightHand, out pose);
+        public bool TryGetPose(DeviceUse use, out Pose pose)
+        {
+            switch (use)
+            {
+                case DeviceUse.Head:
+                case DeviceUse.LeftHand:
+                case DeviceUse.RightHand:
+                    return TryGetRawPose(use, out pose);
 
-        public bool TryGetWaistPose(out Pose pose)
+                case DeviceUse.Waist:
+                    return TryGetWaistPose(out pose);
+
+                case DeviceUse.LeftFoot:
+                    return TryGetLeftFootPose(out pose);
+
+                case DeviceUse.RightFoot:
+                    return TryGetRightFootPose(out pose);
+
+                default:
+                    pose = Pose.identity;
+                    return false;
+            }
+        }
+
+        public bool TryGetRawPose(DeviceUse use, out Pose pose)
+        {
+            if (!_deviceManager.TryGetDeviceState(use, out ITrackedDeviceState device) || !device.isConnected || !device.isTracking)
+            {
+                pose = Pose.identity;
+                return false;
+            }
+
+            pose = new Pose(device.position, device.rotation);
+            return true;
+        }
+
+        public bool TryGetFingerCurl(DeviceUse use, out FingerCurl curl)
+        {
+            SkeletalInput handAnim;
+
+            switch (use)
+            {
+                case DeviceUse.LeftHand:
+                    handAnim = _leftHandAnimAction;
+                    break;
+
+                case DeviceUse.RightHand:
+                    handAnim = _rightHandAnimAction;
+                    break;
+
+                default:
+                    curl = null;
+                    return false;
+            }
+
+            if (!handAnim.isActive || handAnim.summaryData == null)
+            {
+                curl = null;
+                return false;
+            }
+
+            curl = new FingerCurl(handAnim.summaryData.thumbCurl, handAnim.summaryData.indexCurl, handAnim.summaryData.middleCurl, handAnim.summaryData.ringCurl, handAnim.summaryData.littleCurl);
+            return true;
+        }
+
+        public void Dispose()
+        {
+            _deviceManager.deviceAdded -= OnDevicesUpdated;
+            _deviceManager.deviceRemoved -= OnDevicesUpdated;
+            _deviceManager.deviceTrackingAcquired -= OnDevicesUpdated;
+            _deviceManager.deviceTrackingLost -= OnDevicesUpdated;
+
+            _leftHandAnimAction.Dispose();
+            _rightHandAnimAction.Dispose();
+        }
+
+        private bool TryGetTrackerPose(DeviceUse use, Pose previousPose, Pose correction, Settings.TrackedPointSmoothing smoothing, out Pose pose)
+        {
+            if (!_shouldTrackFullBody || !TryGetRawPose(use, out Pose currentPose))
+            {
+                pose = Pose.identity;
+                return false;
+            }
+
+            Quaternion correctedRotation = currentPose.rotation * correction.rotation;
+            Vector3 correctedPosition = currentPose.position + correctedRotation * correction.position; // correction is forward-facing by definition
+
+            pose = new Pose(Vector3.Lerp(previousPose.position, correctedPosition, smoothing.position), Quaternion.Slerp(previousPose.rotation, correctedRotation, smoothing.rotation));
+            return true;
+        }
+
+        private bool TryGetWaistPose(out Pose pose)
         {
             Pose correction;
 
@@ -80,7 +167,7 @@ namespace CustomAvatar.Tracking
             {
                 correction = _calibrationData.automaticCalibration.waist;
 
-                Quaternion rotationOffset = Quaternion.Euler(0, (int) _settings.automaticCalibration.waistTrackerPosition, 0);
+                Quaternion rotationOffset = Quaternion.Euler(0, (int)_settings.automaticCalibration.waistTrackerPosition, 0);
 
                 correction.position -= Quaternion.Inverse(rotationOffset) * (Vector3.forward * _settings.automaticCalibration.pelvisOffset);
                 correction.rotation *= rotationOffset;
@@ -99,7 +186,7 @@ namespace CustomAvatar.Tracking
             return true;
         }
 
-        public bool TryGetLeftFootPose(out Pose pose)
+        private bool TryGetLeftFootPose(out Pose pose)
         {
             Pose correction;
 
@@ -122,7 +209,7 @@ namespace CustomAvatar.Tracking
             return true;
         }
 
-        public bool TryGetRightFootPose(out Pose pose)
+        private bool TryGetRightFootPose(out Pose pose)
         {
             Pose correction;
 
@@ -142,72 +229,6 @@ namespace CustomAvatar.Tracking
             }
 
             _previousRightFootPose = pose;
-            return true;
-        }
-
-        public bool TryGetLeftHandFingerCurl(out FingerCurl curl)
-        {
-            SkeletalSummaryData leftHandAnim = _leftHandAnimAction.summaryData;
-
-            if (!_leftHandAnimAction.isActive || leftHandAnim == null)
-            {
-                curl = null;
-                return false;
-            }
-
-            curl = new FingerCurl(leftHandAnim.thumbCurl, leftHandAnim.indexCurl, leftHandAnim.middleCurl, leftHandAnim.ringCurl, leftHandAnim.littleCurl);
-            return true;
-        }
-
-        public bool TryGetRightHandFingerCurl(out FingerCurl curl)
-        {
-            SkeletalSummaryData rightHandAnim = _rightHandAnimAction.summaryData;
-
-            if (!_rightHandAnimAction.isActive || rightHandAnim == null)
-            {
-                curl = null;
-                return false;
-            }
-
-            curl = new FingerCurl(rightHandAnim.thumbCurl, rightHandAnim.indexCurl, rightHandAnim.middleCurl, rightHandAnim.ringCurl, rightHandAnim.littleCurl);
-            return true;
-        }
-
-        public void Dispose()
-        {
-            _deviceManager.deviceAdded -= OnDevicesUpdated;
-            _deviceManager.deviceRemoved -= OnDevicesUpdated;
-            _deviceManager.deviceTrackingAcquired -= OnDevicesUpdated;
-            _deviceManager.deviceTrackingLost -= OnDevicesUpdated;
-
-            _leftHandAnimAction.Dispose();
-            _rightHandAnimAction.Dispose();
-        }
-
-        private bool TryGetPose(DeviceUse use, out Pose pose)
-        {
-            if (!_deviceManager.TryGetDeviceState(use, out ITrackedDeviceState device) || !device.isConnected || !device.isTracking)
-            {
-                pose = Pose.identity;
-                return false;
-            }
-
-            pose = new Pose(device.position, device.rotation);
-            return true;
-        }
-
-        private bool TryGetTrackerPose(DeviceUse use, Pose previousPose, Pose correction, Settings.TrackedPointSmoothing smoothing, out Pose pose)
-        {
-            if (!_shouldTrackFullBody || !TryGetPose(use, out Pose currentPose))
-            {
-                pose = Pose.identity;
-                return false;
-            }
-
-            Quaternion correctedRotation = currentPose.rotation * correction.rotation;
-            Vector3 correctedPosition = currentPose.position + correctedRotation * correction.position; // correction is forward-facing by definition
-
-            pose = new Pose(Vector3.Lerp(previousPose.position, correctedPosition, smoothing.position), Quaternion.Slerp(previousPose.rotation, correctedRotation, smoothing.rotation));
             return true;
         }
 

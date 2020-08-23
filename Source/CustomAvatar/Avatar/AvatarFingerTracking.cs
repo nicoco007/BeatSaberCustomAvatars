@@ -51,7 +51,7 @@ namespace CustomAvatar.Avatar
 
         private void ApplyFingerTracking()
         {
-            if (_input.TryGetLeftHandFingerCurl(out FingerCurl leftFingerCurl))
+            if (_input.TryGetFingerCurl(DeviceUse.LeftHand, out FingerCurl leftFingerCurl))
             {
                 ApplyLeftHandFingerPoses(leftFingerCurl.thumb, leftFingerCurl.index, leftFingerCurl.middle, leftFingerCurl.ring, leftFingerCurl.little);
             }
@@ -60,7 +60,7 @@ namespace CustomAvatar.Avatar
                 ApplyLeftHandFingerPoses(1, 1, 1, 1, 1);
             }
 
-            if (_input.TryGetRightHandFingerCurl(out FingerCurl rightFingerCurl))
+            if (_input.TryGetFingerCurl(DeviceUse.RightHand, out FingerCurl rightFingerCurl))
             {
                 ApplyRightHandFingerPoses(rightFingerCurl.thumb, rightFingerCurl.index, rightFingerCurl.middle, rightFingerCurl.ring, rightFingerCurl.little);
             }

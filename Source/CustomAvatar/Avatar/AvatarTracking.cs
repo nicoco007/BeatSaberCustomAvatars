@@ -57,7 +57,7 @@ namespace CustomAvatar.Avatar
         {
             try
             {
-                if (_spawnedAvatar.head && _input.TryGetHeadPose(out Pose headPose))
+                if (_spawnedAvatar.head && _input.TryGetPose(DeviceUse.Head, out Pose headPose))
                 {
                     ApplyRoomConfiguration(ref headPose);
 
@@ -68,7 +68,7 @@ namespace CustomAvatar.Avatar
                 Vector3 controllerPositionOffset = _mainSettingsModel.controllerPosition;
                 Vector3 controllerRotationOffset = _mainSettingsModel.controllerRotation;
 
-                if (_spawnedAvatar.rightHand && _input.TryGetRightHandPose(out Pose rightHandPose))
+                if (_spawnedAvatar.rightHand && _input.TryGetPose(DeviceUse.RightHand, out Pose rightHandPose))
                 {
                     ApplyRoomConfiguration(ref rightHandPose);
 
@@ -82,7 +82,7 @@ namespace CustomAvatar.Avatar
                 controllerPositionOffset = new Vector3(-controllerPositionOffset.x, controllerPositionOffset.y, controllerPositionOffset.z);
                 controllerRotationOffset = new Vector3(controllerRotationOffset.x, -controllerRotationOffset.y, -controllerRotationOffset.z);
 
-                if (_spawnedAvatar.leftHand && _input.TryGetLeftHandPose(out Pose leftHandPose))
+                if (_spawnedAvatar.leftHand && _input.TryGetPose(DeviceUse.LeftHand, out Pose leftHandPose))
                 {
                     ApplyRoomConfiguration(ref leftHandPose);
 
@@ -114,7 +114,7 @@ namespace CustomAvatar.Avatar
                 }
                 else
                 {
-                    if (_spawnedAvatar.leftLeg && _input.TryGetLeftFootPose(out Pose leftFootPose))
+                    if (_spawnedAvatar.leftLeg && _input.TryGetPose(DeviceUse.LeftFoot, out Pose leftFootPose))
                     {
                         ApplyRoomConfiguration(ref leftFootPose);
 
@@ -124,7 +124,7 @@ namespace CustomAvatar.Avatar
                         _spawnedAvatar.leftLeg.rotation = leftFootPose.rotation;
                     }
 
-                    if (_spawnedAvatar.rightLeg && _input.TryGetRightFootPose(out Pose rightFootPose))
+                    if (_spawnedAvatar.rightLeg && _input.TryGetPose(DeviceUse.RightFoot, out Pose rightFootPose))
                     {
                         ApplyRoomConfiguration(ref rightFootPose);
 
@@ -134,14 +134,14 @@ namespace CustomAvatar.Avatar
                         _spawnedAvatar.rightLeg.rotation = rightFootPose.rotation;
                     }
 
-                    if (_spawnedAvatar.pelvis && _input.TryGetWaistPose(out Pose pelvisPose))
+                    if (_spawnedAvatar.pelvis && _input.TryGetPose(DeviceUse.Waist, out Pose waistPose))
                     {
-                        ApplyRoomConfiguration(ref pelvisPose);
+                        ApplyRoomConfiguration(ref waistPose);
 
-                        pelvisPose.position = _tailor.ApplyTrackedPointFloorOffset(_spawnedAvatar, pelvisPose.position);
+                        waistPose.position = _tailor.ApplyTrackedPointFloorOffset(_spawnedAvatar, waistPose.position);
 
-                        _spawnedAvatar.pelvis.position = pelvisPose.position;
-                        _spawnedAvatar.pelvis.rotation = pelvisPose.rotation;
+                        _spawnedAvatar.pelvis.position = waistPose.position;
+                        _spawnedAvatar.pelvis.rotation = waistPose.rotation;
                     }
                 }
 
