@@ -221,7 +221,7 @@ namespace CustomAvatar.Avatar
                 _avatarInfos.Add(avatarInfo.fileName, avatarInfo);
             }
 
-            currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, _container.Instantiate<VRPlayerInput>(new object[] { avatar }));
+            currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, _container.Instantiate<RoomAdjustedInput>(new object[] { _container.Instantiate<VRPlayerInput>(new object[] { avatar }) }));
             _currentAvatarSettings = _settings.GetAvatarSettings(avatar.fileName);
 
             ResizeCurrentAvatar();

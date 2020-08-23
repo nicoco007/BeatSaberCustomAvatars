@@ -59,8 +59,6 @@ namespace CustomAvatar.Avatar
             {
                 if (_spawnedAvatar.head && _input.TryGetPose(DeviceUse.Head, out Pose headPose))
                 {
-                    ApplyRoomConfiguration(ref headPose);
-
                     _spawnedAvatar.head.position = headPose.position;
                     _spawnedAvatar.head.rotation = headPose.rotation;
                 }
@@ -70,8 +68,6 @@ namespace CustomAvatar.Avatar
 
                 if (_spawnedAvatar.rightHand && _input.TryGetPose(DeviceUse.RightHand, out Pose rightHandPose))
                 {
-                    ApplyRoomConfiguration(ref rightHandPose);
-
                     _spawnedAvatar.rightHand.position = rightHandPose.position;
                     _spawnedAvatar.rightHand.rotation = rightHandPose.rotation;
                     
@@ -84,8 +80,6 @@ namespace CustomAvatar.Avatar
 
                 if (_spawnedAvatar.leftHand && _input.TryGetPose(DeviceUse.LeftHand, out Pose leftHandPose))
                 {
-                    ApplyRoomConfiguration(ref leftHandPose);
-
                     _spawnedAvatar.leftHand.position = leftHandPose.position;
                     _spawnedAvatar.leftHand.rotation = leftHandPose.rotation;
 
@@ -116,8 +110,6 @@ namespace CustomAvatar.Avatar
                 {
                     if (_spawnedAvatar.leftLeg && _input.TryGetPose(DeviceUse.LeftFoot, out Pose leftFootPose))
                     {
-                        ApplyRoomConfiguration(ref leftFootPose);
-
                         leftFootPose.position = _tailor.ApplyTrackedPointFloorOffset(_spawnedAvatar, leftFootPose.position);
 
                         _spawnedAvatar.leftLeg.position = leftFootPose.position;
@@ -126,8 +118,6 @@ namespace CustomAvatar.Avatar
 
                     if (_spawnedAvatar.rightLeg && _input.TryGetPose(DeviceUse.RightFoot, out Pose rightFootPose))
                     {
-                        ApplyRoomConfiguration(ref rightFootPose);
-
                         rightFootPose.position = _tailor.ApplyTrackedPointFloorOffset(_spawnedAvatar, rightFootPose.position);
 
                         _spawnedAvatar.rightLeg.position = rightFootPose.position;
@@ -136,8 +126,6 @@ namespace CustomAvatar.Avatar
 
                     if (_spawnedAvatar.pelvis && _input.TryGetPose(DeviceUse.Waist, out Pose waistPose))
                     {
-                        ApplyRoomConfiguration(ref waistPose);
-
                         waistPose.position = _tailor.ApplyTrackedPointFloorOffset(_spawnedAvatar, waistPose.position);
 
                         _spawnedAvatar.pelvis.position = waistPose.position;
@@ -170,14 +158,5 @@ namespace CustomAvatar.Avatar
 
         #pragma warning restore IDE0051
         #endregion
-
-        private void ApplyRoomConfiguration(ref Pose pose)
-        {
-            Vector3 origin = _mainSettingsModel.roomCenter.value;
-            Quaternion originRotation = Quaternion.Euler(0, _mainSettingsModel.roomRotation.value, 0);
-
-            pose.position = origin + originRotation * pose.position;
-            pose.rotation = originRotation * pose.rotation;
-        }
     }
 }
