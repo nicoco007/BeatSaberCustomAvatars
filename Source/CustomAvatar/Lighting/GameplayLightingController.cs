@@ -35,7 +35,7 @@ namespace CustomAvatar.Lighting
         private PlayerController _playerController;
         private TwoSidedLightingController _twoSidedLightingController;
 
-        private List<GameLight>[] _lights;
+        private List<DynamicLight>[] _lights;
         
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
@@ -69,9 +69,33 @@ namespace CustomAvatar.Lighting
             {
                 if (_lights[id] == null) continue;
 
-                foreach (GameLight gameLight in _lights[id])
+                foreach (DynamicLight gameLight in _lights[id])
                 {
-                    gameLight.light.transform.LookAt(kOrigin - gameLight.lightWithId.transform.position);
+                    if (!gameLight.tubeLight.isActiveAndEnabled) continue;
+
+                    Vector3 position = gameLight.tubeLight.transform.position;
+                    Vector3 up = (gameLight.tubeLight.transform.rotation * Vector3.up).normalized;
+
+                    Vector3 projectionOnLight = Vector3.Project(position, up);
+                    Vector3 perpendicularOriginToLight = position - projectionOnLight;
+
+                    float sqrMinimumDistance = perpendicularOriginToLight.sqrMagnitude;
+
+                    // the two ends of the light
+                    Vector3 endA = position + (1.0f - gameLight.center) * gameLight.length * up; // end at +Y
+                    Vector3 endB = position - gameLight.center * gameLight.length * up;          // end at -Y
+
+                    // parallel to up
+                    Vector3 distanceOnLineA = endA - perpendicularOriginToLight;
+                    Vector3 distanceOnLineB = endB - perpendicularOriginToLight;
+
+                    float xA = distanceOnLineA.magnitude * Mathf.Sign(Vector3.Dot(distanceOnLineA, up));
+                    float xB = distanceOnLineB.magnitude * Mathf.Sign(Vector3.Dot(distanceOnLineB, up));
+
+                    float intensity = Mathf.Abs(RelativeIntensityAlongLine(xB, sqrMinimumDistance) - RelativeIntensityAlongLine(xA, sqrMinimumDistance));
+
+                    gameLight.intensity = intensity;
+                    gameLight.rotation = Quaternion.LookRotation(kOrigin - (gameLight.tubeLight.transform.position + gameLight.offset));
                 }
             }
         }
@@ -90,7 +114,7 @@ namespace CustomAvatar.Lighting
             List<LightWithId>[] lightsWithId = _lightManager.GetPrivateField<List<LightWithId>[]>("_lights");
             int maxLightId = _lightManager.GetPrivateField<int>("kMaxLightId");
 
-            _lights = new List<GameLight>[maxLightId + 1];
+            _lights = new List<DynamicLight>[maxLightId + 1];
             
             for (int id = 0; id < lightsWithId.Length; id++)
             {
@@ -98,28 +122,31 @@ namespace CustomAvatar.Lighting
 
                 foreach (LightWithId lightWithId in lightsWithId[id])
                 {
-                    Vector3 direction = kOrigin - lightWithId.transform.position;
+                    _logger.Info($"Light '{lightWithId.name}': " + string.Join(", ", lightWithId.GetComponentsInChildren<Component>().Select(c => c.GetType().FullName)));
 
-                    var light = new GameObject("DynamicLight").AddComponent<Light>();
-
-                    light.type = LightType.Directional;
-                    light.color = Color.black;
-                    light.shadows = LightShadows.None; // shadows murder fps since there's so many lights being added
-                    light.renderMode = LightRenderMode.ForcePixel; // reduce performance toll
-                    light.intensity = 0;
-                    light.spotAngle = 45;
-                    light.cullingMask = AvatarLayers.kAllLayersMask;
-
-                    light.transform.SetParent(transform);
-                    light.transform.position = Vector3.zero;
-                    light.transform.rotation = Quaternion.identity;
-
-                    if (_lights[id] == null)
+                    foreach (TubeBloomPrePassLight tubeLight in lightWithId.GetComponentsInChildren<TubeBloomPrePassLight>())
                     {
-                        _lights[id] = new List<GameLight>(10);
-                    }
+                        Light light = new GameObject("DynamicLight").AddComponent<Light>();
 
-                    _lights[id].Add(new GameLight(lightWithId, light));
+                        light.type = LightType.Directional;
+                        light.color = Color.black;
+                        light.shadows = LightShadows.None; // shadows murder fps since there's so many lights being added
+                        light.renderMode = LightRenderMode.ForceVertex; // reduce performance toll
+                        light.intensity = 0;
+                        light.spotAngle = 45;
+                        light.cullingMask = AvatarLayers.kAllLayersMask;
+
+                        light.transform.parent = transform;
+                        light.transform.position = Vector3.zero;
+                        light.transform.rotation = Quaternion.identity;
+
+                        if (_lights[id] == null)
+                        {
+                            _lights[id] = new List<DynamicLight>(10);
+                        }
+
+                        _lights[id].Add(new DynamicLight(tubeLight, light));
+                    }
                 }
             }
 
@@ -130,11 +157,25 @@ namespace CustomAvatar.Lighting
         {
             if (_lights[id] == null) return;
 
-            foreach (GameLight light in _lights[id])
+            foreach (DynamicLight light in _lights[id])
             {
-                light.light.color = color;
-                light.light.intensity = color.a;
+                if (light.tubeLight.isActiveAndEnabled)
+                {
+                    light.color = color;
+                }
+                else
+                {
+                    light.color = Color.black;
+                    light.intensity = 0;
+                }
             }
+        }
+
+        private float RelativeIntensityAlongLine(float x, float h2)
+        {
+            // integral is ∫ 1 / (1 + h^2 + x^2) dx = atan(x / sqrt(h^2 + 1)) / sqrt(h^2 + 1)
+            float sqrt = Mathf.Sqrt(h2 + 1);
+            return Mathf.Atan(x / sqrt) / sqrt;
         }
 
         private void AddPointLight(Color color, Transform parent)
@@ -154,19 +195,80 @@ namespace CustomAvatar.Lighting
             light.transform.rotation = Quaternion.identity;
         }
 
-        private struct GameLight
+        private class DynamicLight
         {
-            public readonly LightWithId lightWithId;
-            public readonly Light light;
-            public readonly float magnitude;
-
-            public GameLight(LightWithId lightWithId, Light light)
+            public float intensity
             {
-                this.lightWithId = lightWithId;
-                this.light = light;
+                get => _intensity;
+                set
+                {
+                    _intensity = value;
+                    UpdateLight();
+                }
+            }
 
-                // this doesn't really make sense physically but it works out nicer than sqrMagnitude
-                magnitude = (kOrigin - lightWithId.transform.position).magnitude;
+            public Color color
+            {
+                get => _color;
+                set
+                {
+                    _color = value;
+                    UpdateLight();
+                }
+            }
+
+            public Quaternion rotation
+            {
+                get => _unityLight.transform.rotation;
+                set => _unityLight.transform.rotation = value;
+            }
+
+            public readonly TubeBloomPrePassLight tubeLight;
+            public readonly float width;
+            public readonly float length;
+            public readonly float center;
+            public readonly Vector3 offset;
+
+            private readonly Light _unityLight;
+            private readonly float _colorAlphaMultiplier;
+            private readonly float _bloomFogIntensityMultiplier;
+
+            private float _intensity;
+            private Color _color;
+
+            public DynamicLight(TubeBloomPrePassLight tubeLight, Light unityLight)
+            {
+                this.tubeLight = tubeLight;
+                this._unityLight = unityLight;
+
+                width = tubeLight.GetPrivateField<float>("_width");
+                length = tubeLight.GetPrivateField<float>("_length");
+                center = tubeLight.GetPrivateField<float>("_center");
+
+                _colorAlphaMultiplier = tubeLight.GetPrivateField<float>("_colorAlphaMultiplier");
+                _bloomFogIntensityMultiplier = tubeLight.GetPrivateField<float>("_bloomFogIntensityMultiplier");
+
+                offset = (0.5f - center) * length * Vector3.up;
+
+                List<string> hierarchy = new List<string>();
+
+                Transform parent = tubeLight.transform;
+
+                while (parent != null)
+                {
+                    hierarchy.Add(parent.name);
+                    parent = parent.parent;
+                }
+
+                var sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere).transform;
+                sphere.parent = tubeLight.transform;
+                sphere.localPosition = Vector3.zero;
+            }
+
+            private void UpdateLight()
+            {
+                _unityLight.color = _color;
+                _unityLight.intensity = _intensity * width * _colorAlphaMultiplier * _bloomFogIntensityMultiplier * _color.a * 3f;
             }
         }
     }
