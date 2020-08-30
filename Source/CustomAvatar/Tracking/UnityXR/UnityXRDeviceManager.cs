@@ -36,14 +36,12 @@ namespace CustomAvatar.Tracking.UnityXR
         private readonly UnityXRDeviceState _leftHand  = new UnityXRDeviceState(DeviceUse.LeftHand);
         private readonly UnityXRDeviceState _rightHand = new UnityXRDeviceState(DeviceUse.RightHand);
 
-        private readonly MainSettingsModelSO _mainSettingsModel;
         private readonly ILogger<UnityXRDeviceManager> _logger;
 
         private readonly HashSet<string> _foundDevices = new HashSet<string>();
 
-        public UnityXRDeviceManager(ILoggerProvider loggerProvider, MainSettingsModelSO mainSettingsModel)
+        public UnityXRDeviceManager(ILoggerProvider loggerProvider)
         {
-            _mainSettingsModel = mainSettingsModel;
             _logger = loggerProvider.CreateLogger<UnityXRDeviceManager>();
         }
 

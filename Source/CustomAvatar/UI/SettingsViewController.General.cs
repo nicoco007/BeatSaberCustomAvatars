@@ -90,7 +90,7 @@ namespace CustomAvatar.UI
         private void OnFloorHeightAdjustChanged(bool value)
         {
             _settings.enableFloorAdjust = value;
-            _avatarManager.ResizeCurrentAvatar();
+            _avatarManager.UpdateFloorOffsetForCurrentAvatar();
         }
 
         [UIAction("camera-clip-plane-change")]
@@ -121,6 +121,7 @@ namespace CustomAvatar.UI
         private void OnMoveFloorWithRoomAdjustChanged(bool value)
         {
             _settings.moveFloorWithRoomAdjust = value;
+            _avatarManager.ResizeCurrentAvatar();
         }
 
         #endregion
@@ -146,27 +147,22 @@ namespace CustomAvatar.UI
 
         private void ScanArmSpan()
         {
-            if (!_trackedDeviceManager.TryGetDeviceState(DeviceUse.RightHand, out ITrackedDeviceState leftHand) || !_trackedDeviceManager.TryGetDeviceState(DeviceUse.RightHand, out ITrackedDeviceState rightHand))
+            if (Time.timeSinceLevelLoad - _lastUpdateTime < 2.0f && _playerInput.TryGetPose(DeviceUse.LeftHand, out Pose leftHand) && _playerInput.TryGetPose(DeviceUse.RightHand, out Pose rightHand))
             {
-                CancelInvoke(nameof(ScanArmSpan));
-                return;
-            }
+                var armSpan = Vector3.Distance(leftHand.position, rightHand.position);
 
-            var armSpan = Vector3.Distance(leftHand.position, rightHand.position);
+                if (armSpan > _maxMeasuredArmSpan)
+                {
+                    _maxMeasuredArmSpan = armSpan;
+                    _lastUpdateTime = Time.timeSinceLevelLoad;
+                }
 
-            if (armSpan > _maxMeasuredArmSpan)
-            {
-                _maxMeasuredArmSpan = armSpan;
-                _lastUpdateTime = Time.timeSinceLevelLoad;
-            }
-
-            if (Time.timeSinceLevelLoad - _lastUpdateTime < 2.0f)
-            {
                 _armSpanLabel.SetText($"Measuring... {_maxMeasuredArmSpan:0.00} m");
             }
             else
             {
                 CancelInvoke(nameof(ScanArmSpan));
+
                 _armSpanLabel.SetText($"{_maxMeasuredArmSpan:0.00} m");
                 _settings.playerArmSpan = _maxMeasuredArmSpan;
                 _isMeasuring = false;

@@ -52,27 +52,26 @@ namespace CustomAvatar.UI
         private Material _redMaterial;
         private Material _greenMaterial;
         private Material _blueMaterial;
-        
-        private ITrackedDeviceManager _trackedDeviceManager;
+
+        private ILogger<SettingsViewController> _logger;
         private PlayerAvatarManager _avatarManager;
-        private AvatarTailor _avatarTailor;
         private Settings _settings;
         private CalibrationData _calibrationData;
         private ShaderLoader _shaderLoader;
-        private ILogger<SettingsViewController> _logger;
+        private VRPlayerInput _playerInput;
+
         private Settings.AvatarSpecificSettings _currentAvatarSettings;
         private CalibrationData.FullBodyCalibration _currentAvatarManualCalibration;
 
         [Inject]
-        private void Inject(ITrackedDeviceManager trackedDeviceManager, PlayerAvatarManager avatarManager, AvatarTailor avatarTailor, Settings settings, CalibrationData calibrationData, ShaderLoader shaderLoader, ILoggerProvider loggerProvider)
+        private void Inject(ILoggerProvider loggerProvider, PlayerAvatarManager avatarManager, Settings settings, CalibrationData calibrationData, ShaderLoader shaderLoader, VRPlayerInput playerInput)
         {
-            _trackedDeviceManager = trackedDeviceManager;
+            _logger = loggerProvider.CreateLogger<SettingsViewController>();
             _avatarManager = avatarManager;
-            _avatarTailor = avatarTailor;
             _settings = settings;
             _calibrationData = calibrationData;
             _shaderLoader = shaderLoader;
-            _logger = loggerProvider.CreateLogger<SettingsViewController>();
+            _playerInput = playerInput;
         }
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
@@ -132,11 +131,7 @@ namespace CustomAvatar.UI
             {
                 _avatarManager.avatarStartedLoading += OnAvatarStartedLoading;
                 _avatarManager.avatarChanged += OnAvatarChanged;
-
-                _trackedDeviceManager.deviceAdded += OnInputDevicesChanged;
-                _trackedDeviceManager.deviceRemoved += OnInputDevicesChanged;
-                _trackedDeviceManager.deviceTrackingAcquired += OnInputDevicesChanged;
-                _trackedDeviceManager.deviceTrackingLost += OnInputDevicesChanged;
+                _playerInput.inputChanged += OnInputChanged;
             }
         }
 
@@ -148,11 +143,7 @@ namespace CustomAvatar.UI
             {
                 _avatarManager.avatarStartedLoading -= OnAvatarStartedLoading;
                 _avatarManager.avatarChanged -= OnAvatarChanged;
-
-                _trackedDeviceManager.deviceAdded -= OnInputDevicesChanged;
-                _trackedDeviceManager.deviceRemoved -= OnInputDevicesChanged;
-                _trackedDeviceManager.deviceTrackingAcquired -= OnInputDevicesChanged;
-                _trackedDeviceManager.deviceTrackingLost -= OnInputDevicesChanged;
+                _playerInput.inputChanged -= OnInputChanged;
             }
 
             DisableCalibrationMode(false);
@@ -222,19 +213,16 @@ namespace CustomAvatar.UI
             _automaticCalibrationHoverHint.text = avatar.descriptor.supportsAutomaticCalibration ? "Use automatic calibration instead of manual calibration." : "Not supported by current avatar";
         }
 
-        private void OnInputDevicesChanged(ITrackedDeviceState state)
+        private void OnInputChanged()
         {
             UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar?.avatar);
         }
 
         private void UpdateCalibrationButtons(LoadedAvatar avatar)
         {
-            if (!_trackedDeviceManager.TryGetDeviceState(DeviceUse.Waist, out ITrackedDeviceState waist) &&
-                !_trackedDeviceManager.TryGetDeviceState(DeviceUse.LeftFoot, out ITrackedDeviceState leftFoot) &&
-                !_trackedDeviceManager.TryGetDeviceState(DeviceUse.RightFoot, out ITrackedDeviceState rightFoot) &&
-                !waist.isTracking &&
-                !leftFoot.isTracking &&
-                !rightFoot.isTracking)
+            if (!_playerInput.TryGetUncalibratedPose(DeviceUse.Waist,     out Pose _) &&
+                !_playerInput.TryGetUncalibratedPose(DeviceUse.LeftFoot,  out Pose _) &&
+                !_playerInput.TryGetUncalibratedPose(DeviceUse.RightFoot, out Pose _))
             {
                 _autoCalibrateButton.interactable = false;
                 _autoClearButton.interactable = false;

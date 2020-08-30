@@ -59,7 +59,7 @@ namespace CustomAvatar.Configuration
         [JsonConverter(typeof(StringEnumConverter))] public AvatarResizeMode resizeMode = AvatarResizeMode.Height;
         public bool enableFloorAdjust = false;
         public string previousAvatarPath = null;
-        public float playerArmSpan = AvatarTailor.kDefaultPlayerArmSpan;
+        public float playerArmSpan = VRPlayerInput.kDefaultPlayerArmSpan;
         public bool calibrateFullBodyTrackingOnStart = false;
         public bool enableLocomotion = true;
         public float cameraNearClipPlane = 0.1f;

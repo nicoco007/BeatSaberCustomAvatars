@@ -72,7 +72,7 @@ namespace CustomAvatar.UI
         [UIAction("auto-calibrate-fbt-click")]
         private void OnCalibrateAutoFullBodyTrackingClicked()
         {
-            _avatarTailor.CalibrateFullBodyTrackingAuto();
+            _playerInput.CalibrateFullBodyTrackingAuto();
             _autoClearButton.interactable = _calibrationData.automaticCalibration.isCalibrated;
 
             _automaticCalibrationSetting.Value = true;
@@ -82,7 +82,7 @@ namespace CustomAvatar.UI
         [UIAction("auto-clear-fbt-calibration-data-click")]
         private void OnClearAutoFullBodyTrackingCalibrationDataClicked()
         {
-            _avatarTailor.ClearAutomaticFullBodyTrackingData();
+            _playerInput.ClearAutomaticFullBodyTrackingData();
             _autoClearButton.interactable = false;
         }
 

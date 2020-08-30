@@ -14,10 +14,12 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
+using CustomAvatar.Logging;
+using CustomAvatar.Utilities;
 using DynamicOpenVR.IO;
+using System;
 using UnityEngine;
 using Zenject;
 
@@ -28,18 +30,24 @@ namespace CustomAvatar.Tracking
     /// </summary>
     public class VRPlayerInput : IAvatarInput
     {
+        public static readonly float kDefaultPlayerArmSpan = 1.8f;
+
         public bool allowMaintainPelvisPosition => _avatarSettings.allowMaintainPelvisPosition;
 
         public event Action inputChanged;
 
+        private readonly ILogger<VRPlayerInput> _logger;
         private readonly ITrackedDeviceManager _deviceManager;
+        private readonly PlayerAvatarManager _avatarManager;
         private readonly Settings _settings;
-        private readonly Settings.AvatarSpecificSettings _avatarSettings;
         private readonly CalibrationData _calibrationData;
-        private readonly CalibrationData.FullBodyCalibration _manualCalibration;
+        private readonly BeatSaberUtilities _beatSaberUtilities;
 
         private readonly SkeletalInput _leftHandAnimAction;
         private readonly SkeletalInput _rightHandAnimAction;
+
+        private Settings.AvatarSpecificSettings _avatarSettings;
+        private CalibrationData.FullBodyCalibration _manualCalibration;
 
         private Pose _previousWaistPose;
         private Pose _previousLeftFootPose;
@@ -51,13 +59,14 @@ namespace CustomAvatar.Tracking
             _avatarSettings.useAutomaticCalibration && _calibrationData.automaticCalibration.isCalibrated;
 
         [Inject]
-        internal VRPlayerInput(ITrackedDeviceManager trackedDeviceManager, LoadedAvatar avatar, Settings settings, CalibrationData calibrationData)
+        internal VRPlayerInput(ILoggerProvider loggerProvider, ITrackedDeviceManager trackedDeviceManager, PlayerAvatarManager avatarManager, Settings settings, CalibrationData calibrationData, BeatSaberUtilities beatSaberUtilities)
         {
+            _logger = loggerProvider.CreateLogger<VRPlayerInput>();
             _deviceManager = trackedDeviceManager;
+            _avatarManager = avatarManager;
             _settings = settings;
-            _avatarSettings = settings.GetAvatarSettings(avatar.fileName);
             _calibrationData = calibrationData;
-            _manualCalibration = calibrationData.GetAvatarManualCalibration(avatar.fileName);
+            _beatSaberUtilities = beatSaberUtilities;
 
             _deviceManager.deviceAdded += OnDevicesUpdated;
             _deviceManager.deviceRemoved += OnDevicesUpdated;
@@ -66,6 +75,8 @@ namespace CustomAvatar.Tracking
             
             _leftHandAnimAction  = new SkeletalInput("/actions/customavatars/in/lefthandanim");
             _rightHandAnimAction = new SkeletalInput("/actions/customavatars/in/righthandanim");
+
+            _avatarManager.avatarChanged += OnAvatarChanged;
         }
 
         public bool TryGetPose(DeviceUse use, out Pose pose)
@@ -73,35 +84,25 @@ namespace CustomAvatar.Tracking
             switch (use)
             {
                 case DeviceUse.Head:
+                    return TryGetUncalibratedPose(use, out pose);
+
                 case DeviceUse.LeftHand:
                 case DeviceUse.RightHand:
-                    return TryGetRawPose(use, out pose);
+                    return TryGetCalibratedHandPose(use, out pose);
 
                 case DeviceUse.Waist:
-                    return TryGetWaistPose(out pose);
+                    return TryGetCalibratedWaistPose(out pose);
 
                 case DeviceUse.LeftFoot:
-                    return TryGetLeftFootPose(out pose);
+                    return TryGetCalibratedLeftFootPose(out pose);
 
                 case DeviceUse.RightFoot:
-                    return TryGetRightFootPose(out pose);
+                    return TryGetCalibratedRightFootPose(out pose);
 
                 default:
                     pose = Pose.identity;
                     return false;
             }
-        }
-
-        public bool TryGetRawPose(DeviceUse use, out Pose pose)
-        {
-            if (!_deviceManager.TryGetDeviceState(use, out ITrackedDeviceState device) || !device.isConnected || !device.isTracking)
-            {
-                pose = Pose.identity;
-                return false;
-            }
-
-            pose = new Pose(device.position, device.rotation);
-            return true;
         }
 
         public bool TryGetFingerCurl(DeviceUse use, out FingerCurl curl)
@@ -144,22 +145,159 @@ namespace CustomAvatar.Tracking
             _rightHandAnimAction.Dispose();
         }
 
-        private bool TryGetTrackerPose(DeviceUse use, Pose previousPose, Pose correction, Settings.TrackedPointSmoothing smoothing, out Pose pose)
+        internal bool TryGetUncalibratedPose(DeviceUse use, out Pose pose)
         {
-            if (!_shouldTrackFullBody || !TryGetRawPose(use, out Pose currentPose))
+            if (!_deviceManager.TryGetDeviceState(use, out ITrackedDeviceState device) || !device.isConnected || !device.isTracking)
             {
                 pose = Pose.identity;
                 return false;
             }
 
-            Quaternion correctedRotation = currentPose.rotation * correction.rotation;
-            Vector3 correctedPosition = currentPose.position + correctedRotation * correction.position; // correction is forward-facing by definition
+            pose = new Pose(device.position, device.rotation);
+            SpawnedAvatar spawnedAvatar = _avatarManager.currentlySpawnedAvatar;
 
-            pose = new Pose(Vector3.Lerp(previousPose.position, correctedPosition, smoothing.position), Quaternion.Slerp(previousPose.rotation, correctedRotation, smoothing.rotation));
+            switch (use)
+            {
+                case DeviceUse.Head:
+                case DeviceUse.LeftHand:
+                case DeviceUse.RightHand:
+                    ApplyFloorOffset(spawnedAvatar, ref pose.position);
+                    break;
+
+                default:
+                    ApplyTrackerFloorOffset(spawnedAvatar, ref pose.position);
+                    break;
+            }
+
             return true;
         }
 
-        private bool TryGetWaistPose(out Pose pose)
+        internal void CalibrateFullBodyTrackingManual(SpawnedAvatar spawnedAvatar)
+        {
+            CalibrationData.FullBodyCalibration fullBodyCalibration = _calibrationData.GetAvatarManualCalibration(spawnedAvatar.avatar.fileName);
+
+            if (TryGetUncalibratedPose(DeviceUse.Waist, out Pose waist))
+            {
+                Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.pelvis.rotation) * spawnedAvatar.pelvis.position;
+                Quaternion rotationOffset = Quaternion.Inverse(waist.rotation) * spawnedAvatar.pelvis.rotation;
+
+                fullBodyCalibration.waist = new Pose(positionOffset, rotationOffset);
+                _logger.Info("Set waist pose correction " + fullBodyCalibration.waist);
+            }
+
+            if (TryGetUncalibratedPose(DeviceUse.LeftFoot, out Pose leftFoot))
+            {
+                Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.leftLeg.rotation) * spawnedAvatar.leftLeg.position;
+                Quaternion rotationOffset = Quaternion.Inverse(leftFoot.rotation) * spawnedAvatar.leftLeg.rotation;
+
+                fullBodyCalibration.leftFoot = new Pose(positionOffset, rotationOffset);
+                _logger.Info("Set left foot pose correction " + fullBodyCalibration.leftFoot);
+            }
+
+            if (TryGetUncalibratedPose(DeviceUse.RightFoot, out Pose rightFoot))
+            {
+                Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.rightLeg.rotation) * spawnedAvatar.rightLeg.position;
+                Quaternion rotationOffset = Quaternion.Inverse(rightFoot.rotation) * spawnedAvatar.rightLeg.rotation;
+
+                fullBodyCalibration.rightFoot = new Pose(positionOffset, rotationOffset);
+                _logger.Info("Set right foot pose correction " + fullBodyCalibration.rightFoot);
+            }
+        }
+
+        internal void CalibrateFullBodyTrackingAuto()
+        {
+            _logger.Info("Calibrating full body tracking");
+
+            CalibrationData.FullBodyCalibration fullBodyCalibration = _calibrationData.automaticCalibration;
+
+            Vector3 floorNormal = Vector3.up;
+            float floorPosition = _settings.moveFloorWithRoomAdjust ? _beatSaberUtilities.roomCenter.y : 0;
+
+            if (TryGetUncalibratedPose(DeviceUse.LeftFoot, out Pose leftFoot))
+            {
+                Vector3 leftFootForward = leftFoot.rotation * Vector3.up; // forward on feet trackers is y (up)
+                Vector3 leftFootStraightForward = Vector3.ProjectOnPlane(leftFootForward, floorNormal); // get projection of forward vector on xz plane (floor)
+                Quaternion leftRotationCorrection = Quaternion.Inverse(leftFoot.rotation) * Quaternion.LookRotation(Vector3.up, leftFootStraightForward); // get difference between world rotation and flat forward rotation
+                fullBodyCalibration.leftFoot = new Pose((leftFoot.position.y - floorPosition) * Vector3.back, leftRotationCorrection);
+                _logger.Info("Set left foot pose correction " + fullBodyCalibration.leftFoot);
+            }
+
+            if (TryGetUncalibratedPose(DeviceUse.RightFoot, out Pose rightFoot))
+            {
+                Vector3 rightFootForward = rightFoot.rotation * Vector3.up;
+                Vector3 rightFootStraightForward = Vector3.ProjectOnPlane(rightFootForward, floorNormal);
+                Quaternion rightRotationCorrection = Quaternion.Inverse(rightFoot.rotation) * Quaternion.LookRotation(Vector3.up, rightFootStraightForward);
+                fullBodyCalibration.rightFoot = new Pose((rightFoot.position.y - floorPosition) * Vector3.back, rightRotationCorrection);
+                _logger.Info("Set right foot pose correction " + fullBodyCalibration.rightFoot);
+            }
+
+            if (TryGetUncalibratedPose(DeviceUse.Head, out Pose head) && TryGetUncalibratedPose(DeviceUse.Waist, out Pose waist))
+            {
+                // using "standard" 8 head high body proportions w/ eyes at 1/2 head height
+                // reference: https://miro.medium.com/max/3200/1*cqTRyEGl26l4CImEmWz68Q.jpeg
+                float eyeHeight = head.position.y - floorPosition;
+
+                Vector3 wantedWaistPosition = new Vector3(0, eyeHeight / 22.5f * 14f, 0);
+                Vector3 waistPositionCorrection = wantedWaistPosition - Vector3.up * (waist.position.y - floorPosition);
+
+                Vector3 waistForward = waist.rotation * Vector3.forward;
+                Vector3 waistStraightForward = Vector3.ProjectOnPlane(waistForward, floorNormal);
+                Quaternion waistRotationCorrection = Quaternion.Inverse(waist.rotation) * Quaternion.LookRotation(waistStraightForward, Vector3.up);
+
+                fullBodyCalibration.waist = new Pose(waistPositionCorrection, waistRotationCorrection);
+                _logger.Info("Set waist pose correction " + fullBodyCalibration.waist);
+            }
+        }
+
+        internal void ClearManualFullBodyTrackingData(SpawnedAvatar spawnedAvatar)
+        {
+            CalibrationData.FullBodyCalibration fullBodyCalibration = _calibrationData.GetAvatarManualCalibration(spawnedAvatar.avatar.fileName);
+
+            fullBodyCalibration.leftFoot = Pose.identity;
+            fullBodyCalibration.rightFoot = Pose.identity;
+            fullBodyCalibration.waist = Pose.identity;
+        }
+
+        internal void ClearAutomaticFullBodyTrackingData()
+        {
+            CalibrationData.FullBodyCalibration fullBodyCalibration = _calibrationData.automaticCalibration;
+
+            fullBodyCalibration.leftFoot = Pose.identity;
+            fullBodyCalibration.rightFoot = Pose.identity;
+            fullBodyCalibration.waist = Pose.identity;
+        }
+
+        private void OnAvatarChanged(SpawnedAvatar spawnedAvatar)
+        {
+            if (!spawnedAvatar)
+            {
+                _avatarSettings = null;
+                _manualCalibration = null;
+
+                return;
+            }
+           
+            _avatarSettings = _settings.GetAvatarSettings(spawnedAvatar.avatar.fileName);
+            _manualCalibration = _calibrationData.GetAvatarManualCalibration(spawnedAvatar.avatar.fileName);
+        }
+
+        private bool TryGetCalibratedHandPose(DeviceUse use, out Pose pose)
+        {
+            if (!TryGetUncalibratedPose(use, out pose))
+            {
+                pose = Pose.identity;
+                return false;
+            }
+
+            Pose controllerOffset = _beatSaberUtilities.GetPlatformSpecificControllerOffset(use);
+
+            pose.position += controllerOffset.position;
+            pose.rotation *= controllerOffset.rotation;
+
+            return true;
+        }
+
+        private bool TryGetCalibratedWaistPose(out Pose pose)
         {
             Pose correction;
 
@@ -186,7 +324,7 @@ namespace CustomAvatar.Tracking
             return true;
         }
 
-        private bool TryGetLeftFootPose(out Pose pose)
+        private bool TryGetCalibratedLeftFootPose(out Pose pose)
         {
             Pose correction;
 
@@ -209,7 +347,7 @@ namespace CustomAvatar.Tracking
             return true;
         }
 
-        private bool TryGetRightFootPose(out Pose pose)
+        private bool TryGetCalibratedRightFootPose(out Pose pose)
         {
             Pose correction;
 
@@ -232,9 +370,46 @@ namespace CustomAvatar.Tracking
             return true;
         }
 
+        private bool TryGetTrackerPose(DeviceUse use, Pose previousPose, Pose correction, Settings.TrackedPointSmoothing smoothing, out Pose pose)
+        {
+            if (!_shouldTrackFullBody || !TryGetUncalibratedPose(use, out Pose currentPose))
+            {
+                pose = Pose.identity;
+                return false;
+            }
+
+            Quaternion correctedRotation = currentPose.rotation * correction.rotation;
+            Vector3 correctedPosition = currentPose.position + correctedRotation * correction.position; // correction is forward-facing by definition
+
+            pose = new Pose(Vector3.Lerp(previousPose.position, correctedPosition, smoothing.position), Quaternion.Slerp(previousPose.rotation, correctedRotation, smoothing.rotation));
+            return true;
+        }
+
         private void OnDevicesUpdated(ITrackedDeviceState state)
         {
             inputChanged?.Invoke();
+        }
+
+        /// <summary>
+        /// Move tracked point upwards based on the difference between avatar height and player height.
+        /// This essentially moves the trackers up as if the player was on stilts.
+        /// </summary>
+        private void ApplyFloorOffset(SpawnedAvatar spawnedAvatar, ref Vector3 position)
+        {
+            if (!_settings.enableFloorAdjust) return;
+
+            position.y += spawnedAvatar.scaledEyeHeight - _beatSaberUtilities.GetRoomAdjustedPlayerEyeHeight();
+        }
+
+        /// <summary>
+        /// Scales the vertical movement of a tracked point based on the quotient of avatar height and player height.
+        /// This moves the trackers as if the player was the height of the avatar, but only vertically (no horizontal scaling).
+        /// </summary>
+        private void ApplyTrackerFloorOffset(SpawnedAvatar spawnedAvatar, ref Vector3 position)
+        {
+            if (!_settings.enableFloorAdjust) return;
+
+            position.y *= spawnedAvatar.scaledEyeHeight / _beatSaberUtilities.GetRoomAdjustedPlayerEyeHeight();
         }
     }
 }

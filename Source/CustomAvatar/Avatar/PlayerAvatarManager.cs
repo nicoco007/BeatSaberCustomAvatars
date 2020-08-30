@@ -22,7 +22,7 @@ using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
-using UnityEngine.SceneManagement;
+using UnityEngine;
 using Zenject;
 using Object = UnityEngine.Object;
 
@@ -56,10 +56,10 @@ namespace CustomAvatar.Avatar
         private readonly DiContainer _container;
         private readonly ILogger<PlayerAvatarManager> _logger;
         private readonly AvatarLoader _avatarLoader;
-        private readonly AvatarTailor _avatarTailor;
         private readonly Settings _settings;
         private readonly AvatarSpawner _spawner;
-        private readonly GameScenesManager _gameScenesManager;
+        private readonly BeatSaberUtilities _beatSaberUtilities;
+        private readonly FloorController _floorController;
 
         private readonly Dictionary<string, AvatarInfo> _avatarInfos = new Dictionary<string, AvatarInfo>();
 
@@ -67,24 +67,23 @@ namespace CustomAvatar.Avatar
         private Settings.AvatarSpecificSettings _currentAvatarSettings;
 
         [Inject]
-        private PlayerAvatarManager(DiContainer container, AvatarTailor avatarTailor, ILoggerProvider loggerProvider, AvatarLoader avatarLoader, Settings settings, AvatarSpawner spawner, GameScenesManager gameScenesManager)
+        private PlayerAvatarManager(DiContainer container, ILoggerProvider loggerProvider, AvatarLoader avatarLoader, Settings settings, AvatarSpawner spawner, BeatSaberUtilities beatSaberUtilities, FloorController floorController)
         {
             _container = container;
             _logger = loggerProvider.CreateLogger<PlayerAvatarManager>();
             _avatarLoader = avatarLoader;
-            _avatarTailor = avatarTailor;
             _settings = settings;
             _spawner = spawner;
-            _gameScenesManager = gameScenesManager;
+            _beatSaberUtilities = beatSaberUtilities;
+            _floorController = floorController;
         }
 
         public void Initialize()
         {
             _settings.moveFloorWithRoomAdjustChanged += OnMoveFloorWithRoomAdjustChanged;
             _settings.firstPersonEnabledChanged += OnFirstPersonEnabledChanged;
-            BeatSaberUtilities.playerHeightChanged += OnPlayerHeightChanged;
-            _gameScenesManager.transitionDidFinishEvent += OnTransitionDidFinish;
-            SceneManager.sceneLoaded += OnSceneLoaded;
+            _floorController.floorPositionChanged += OnFloorHeightChanged;
+            BeatSaberEvents.playerHeightChanged += OnPlayerHeightChanged;
 
             LoadAvatarInfosFromFile();
             LoadAvatarFromSettingsAsync();
@@ -97,9 +96,8 @@ namespace CustomAvatar.Avatar
 
             _settings.moveFloorWithRoomAdjustChanged -= OnMoveFloorWithRoomAdjustChanged;
             _settings.firstPersonEnabledChanged -= OnFirstPersonEnabledChanged;
-            BeatSaberUtilities.playerHeightChanged -= OnPlayerHeightChanged;
-            _gameScenesManager.transitionDidFinishEvent -= OnTransitionDidFinish;
-            SceneManager.sceneLoaded -= OnSceneLoaded;
+            _floorController.floorPositionChanged -= OnFloorHeightChanged;
+            BeatSaberEvents.playerHeightChanged -= OnPlayerHeightChanged;
 
             SaveAvatarInfosToFile();
         }
@@ -221,7 +219,7 @@ namespace CustomAvatar.Avatar
                 _avatarInfos.Add(avatarInfo.fileName, avatarInfo);
             }
 
-            currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, _container.Instantiate<RoomAdjustedInput>(new object[] { _container.Instantiate<VRPlayerInput>(new object[] { avatar }) }));
+            currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, _container.Instantiate<RoomAdjustedInput>(new[] { _container.Instantiate<VRPlayerInput>() }));
             _currentAvatarSettings = _settings.GetAvatarSettings(avatar.fileName);
 
             ResizeCurrentAvatar();
@@ -257,9 +255,71 @@ namespace CustomAvatar.Avatar
 
         internal void ResizeCurrentAvatar()
         {
-            if (!currentlySpawnedAvatar) return;
+            if (!currentlySpawnedAvatar || !currentlySpawnedAvatar.avatar.descriptor.allowHeightCalibration) return;
 
-            _avatarTailor.ResizeAvatar(currentlySpawnedAvatar);
+            float scale;
+            AvatarResizeMode resizeMode = _settings.resizeMode;
+
+
+            switch (resizeMode)
+            {
+                case AvatarResizeMode.ArmSpan:
+                    float avatarArmLength = currentlySpawnedAvatar.avatar.armSpan;
+
+                    if (avatarArmLength > 0)
+                    {
+                        scale = _settings.playerArmSpan / avatarArmLength;
+                    }
+                    else
+                    {
+                        scale = 1.0f;
+                    }
+
+                    break;
+
+                case AvatarResizeMode.Height:
+                    float avatarEyeHeight = currentlySpawnedAvatar.avatar.eyeHeight;
+                    float playerEyeHeight = _beatSaberUtilities.GetRoomAdjustedPlayerEyeHeight();
+
+                    if (avatarEyeHeight > 0)
+                    {
+                        scale = playerEyeHeight / avatarEyeHeight;
+                    }
+                    else
+                    {
+                        scale = 1.0f;
+                    }
+
+                    break;
+
+                default:
+                    scale = 1.0f;
+                    break;
+            }
+
+            if (scale <= 0)
+            {
+                _logger.Warning("Calculated scale is <= 0; reverting to 1");
+                scale = 1.0f;
+            }
+
+            currentlySpawnedAvatar.scale = scale;
+
+            UpdateFloorOffsetForCurrentAvatar();
+        }
+
+        internal void UpdateFloorOffsetForCurrentAvatar()
+        {
+            if (!_settings.enableFloorAdjust)
+            {
+                _floorController.SetFloorOffset(0);
+
+                return;
+            }
+
+            float floorOffset = _beatSaberUtilities.GetRoomAdjustedPlayerEyeHeight() - currentlySpawnedAvatar.scaledEyeHeight;
+
+            _floorController.SetFloorOffset(floorOffset);
         }
 
         internal void UpdateFirstPersonVisibility()
@@ -305,17 +365,11 @@ namespace CustomAvatar.Avatar
             ResizeCurrentAvatar();
         }
 
-        private void OnTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
+        private void OnFloorHeightChanged(float offset)
         {
-            ResizeCurrentAvatar();
-        }
-
-        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-        {
-            if (scene.name == "PCInit" && _settings.calibrateFullBodyTrackingOnStart && !string.IsNullOrEmpty(_settings.previousAvatarPath) && _settings.GetAvatarSettings(_settings.previousAvatarPath).useAutomaticCalibration)
-            {
-                _avatarTailor.CalibrateFullBodyTrackingAuto();
-            }
+            Vector3 position = currentlySpawnedAvatar.transform.position;
+            position.y = offset;
+            currentlySpawnedAvatar.transform.position = position;
         }
 
         private List<string> GetAvatarFileNames()

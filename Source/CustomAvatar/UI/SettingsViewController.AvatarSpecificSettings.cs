@@ -98,7 +98,7 @@ namespace CustomAvatar.UI
             }
             else
             {
-                _avatarTailor.ClearManualFullBodyTrackingData(_avatarManager.currentlySpawnedAvatar);
+                _playerInput.ClearManualFullBodyTrackingData(_avatarManager.currentlySpawnedAvatar);
                 _clearButton.interactable = false;
             }
         }
@@ -124,7 +124,7 @@ namespace CustomAvatar.UI
             {
                 if (save)
                 {
-                    _avatarTailor.CalibrateFullBodyTrackingManual(_avatarManager.currentlySpawnedAvatar);
+                    _playerInput.CalibrateFullBodyTrackingManual(_avatarManager.currentlySpawnedAvatar);
 
                     _automaticCalibrationSetting.Value = false;
                     OnEnableAutomaticCalibrationChanged(false);
@@ -173,10 +173,10 @@ namespace CustomAvatar.UI
         {
             if (_calibrating)
             {
-                if (_trackedDeviceManager.TryGetDeviceState(DeviceUse.Waist, out ITrackedDeviceState waist) && waist.isTracking)
+                if (_playerInput.TryGetUncalibratedPose(DeviceUse.Waist, out Pose waist))
                 {
                     _waistSphere.SetActive(true);
-                    _waistSphere.transform.position = _avatarTailor.ApplyTrackedPointFloorOffset(_avatarManager.currentlySpawnedAvatar, waist.position);
+                    _waistSphere.transform.position = Vector3.zero;
                     _waistSphere.transform.rotation = waist.rotation;
                 }
                 else
@@ -184,10 +184,10 @@ namespace CustomAvatar.UI
                     _waistSphere.SetActive(false);
                 }
 
-                if (_trackedDeviceManager.TryGetDeviceState(DeviceUse.LeftFoot, out ITrackedDeviceState leftFoot) && leftFoot.isTracking)
+                if (_playerInput.TryGetUncalibratedPose(DeviceUse.LeftFoot, out Pose leftFoot))
                 {
                     _leftFootSphere.SetActive(true);
-                    _leftFootSphere.transform.position = _avatarTailor.ApplyTrackedPointFloorOffset(_avatarManager.currentlySpawnedAvatar, leftFoot.position);
+                    _leftFootSphere.transform.position = Vector3.zero;
                     _leftFootSphere.transform.rotation = leftFoot.rotation;
                 }
                 else
@@ -195,10 +195,10 @@ namespace CustomAvatar.UI
                     _leftFootSphere.SetActive(false);
                 }
 
-                if (_trackedDeviceManager.TryGetDeviceState(DeviceUse.RightFoot, out ITrackedDeviceState rightFoot) && rightFoot.isTracking)
+                if (_playerInput.TryGetUncalibratedPose(DeviceUse.RightFoot, out Pose rightFoot))
                 {
                     _rightFootSphere.SetActive(true);
-                    _rightFootSphere.transform.position = _avatarTailor.ApplyTrackedPointFloorOffset(_avatarManager.currentlySpawnedAvatar, rightFoot.position);
+                    _rightFootSphere.transform.position = Vector3.zero;
                     _rightFootSphere.transform.rotation = rightFoot.rotation;
                 }
                 else

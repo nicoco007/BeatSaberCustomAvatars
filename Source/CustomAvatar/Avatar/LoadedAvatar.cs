@@ -19,6 +19,8 @@ extern alias BeatSaberFinalIK;
 using AvatarScriptPack;
 using CustomAvatar.Exceptions;
 using CustomAvatar.Logging;
+using CustomAvatar.Tracking;
+using CustomAvatar.Utilities;
 using System;
 using System.IO;
 using System.Reflection;
@@ -181,7 +183,7 @@ namespace CustomAvatar.Avatar
             if (!head)
             {
                 _logger.Warning("Avatar does not have a head tracking reference");
-                return MainSettingsModelSO.kDefaultPlayerHeight - MainSettingsModelSO.kHeadPosToPlayerHeightOffset;
+                return BeatSaberUtilities.kDefaultPlayerEyeHeight;
             }
 
             // many avatars rely on this being global because their root position isn't at (0, 0, 0)
@@ -232,7 +234,7 @@ namespace CustomAvatar.Avatar
             // TODO using animator here probably isn't a good idea, use VRIKManager references instead?
             Animator animator = prefab.GetComponentInChildren<Animator>();
 
-            if (!animator) return AvatarTailor.kDefaultPlayerArmSpan;
+            if (!animator) return VRPlayerInput.kDefaultPlayerArmSpan;
 
             Transform leftShoulder = animator.GetBoneTransform(HumanBodyBones.LeftShoulder);
             Transform leftUpperArm = animator.GetBoneTransform(HumanBodyBones.LeftUpperArm);
@@ -245,13 +247,13 @@ namespace CustomAvatar.Avatar
             if (!leftShoulder || !leftUpperArm || !leftLowerArm || !rightShoulder || !rightUpperArm || !rightLowerArm)
             {
                 _logger.Warning("Could not calculate avatar arm span due to missing bones");
-                return AvatarTailor.kDefaultPlayerArmSpan;
+                return VRPlayerInput.kDefaultPlayerArmSpan;
             }
 
             if (!leftHand || !rightHand)
             {
                 _logger.Warning("Could not calculate avatar arm span due to missing tracking references");
-                return AvatarTailor.kDefaultPlayerArmSpan;
+                return VRPlayerInput.kDefaultPlayerArmSpan;
             }
 
             float leftArmLength = Vector3.Distance(leftShoulder.position, leftUpperArm.position) + Vector3.Distance(leftUpperArm.position, leftLowerArm.position) + Vector3.Distance(leftLowerArm.position, leftHand.position);

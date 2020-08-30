@@ -40,12 +40,6 @@ namespace CustomAvatar.Avatar
         /// </summary>
 		public IAvatarInput input { get; private set; }
 
-        public float verticalPosition
-        {
-            get => transform.localPosition.y - _initialLocalPosition.y;
-            set => transform.localPosition = new Vector3(transform.localPosition.x, _initialLocalPosition.y + value, transform.localPosition.z);
-        }
-
         /// <summary>
         /// The avatar's scale as a ratio of it's exported scale (i.e. it is initially 1 even if the avatar was exported with a different scale).
         /// </summary>
@@ -62,15 +56,17 @@ namespace CustomAvatar.Avatar
             }
         }
 
-        internal Transform head { get; private set; }
-        internal Transform body { get; private set; }
-        internal Transform leftHand { get; private set; }
-        internal Transform rightHand { get; private set; }
-        internal Transform leftLeg { get; private set; }
-        internal Transform rightLeg { get; private set; }
-        internal Transform pelvis { get; private set; }
+        public float scaledEyeHeight => avatar.eyeHeight * scale;
 
-		internal AvatarTracking tracking { get; private set; }
+        public Transform head { get; private set; }
+        public Transform body { get; private set; }
+        public Transform leftHand { get; private set; }
+        public Transform rightHand { get; private set; }
+        public Transform leftLeg { get; private set; }
+        public Transform rightLeg { get; private set; }
+        public Transform pelvis { get; private set; }
+
+        internal AvatarTracking tracking { get; private set; }
         internal AvatarIK ik { get; private set; }
         internal AvatarFingerTracking fingerTracking { get; private set; }
 
