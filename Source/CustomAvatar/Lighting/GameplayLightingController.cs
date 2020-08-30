@@ -122,8 +122,6 @@ namespace CustomAvatar.Lighting
 
                 foreach (LightWithId lightWithId in lightsWithId[id])
                 {
-                    _logger.Info($"Light '{lightWithId.name}': " + string.Join(", ", lightWithId.GetComponentsInChildren<Component>().Select(c => c.GetType().FullName)));
-
                     foreach (TubeBloomPrePassLight tubeLight in lightWithId.GetComponentsInChildren<TubeBloomPrePassLight>())
                     {
                         Light light = new GameObject("DynamicLight").AddComponent<Light>();
@@ -249,20 +247,6 @@ namespace CustomAvatar.Lighting
                 _bloomFogIntensityMultiplier = tubeLight.GetPrivateField<float>("_bloomFogIntensityMultiplier");
 
                 offset = (0.5f - center) * length * Vector3.up;
-
-                List<string> hierarchy = new List<string>();
-
-                Transform parent = tubeLight.transform;
-
-                while (parent != null)
-                {
-                    hierarchy.Add(parent.name);
-                    parent = parent.parent;
-                }
-
-                var sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere).transform;
-                sphere.parent = tubeLight.transform;
-                sphere.localPosition = Vector3.zero;
             }
 
             private void UpdateLight()
