@@ -61,7 +61,7 @@ namespace CustomAvatar.Tracking
 
                 if (!floorObject) continue;
 
-                _logger.Info($"Moving {floorObjectName} {Math.Abs(offset):0.000} m {(offset >= 0 ? "up" : "down")} to '{floorPosition}'");
+                _logger.Info($"Moving {floorObjectName} {Math.Abs(offset):0.000} m {(offset >= 0 ? "up" : "down")} to {floorPosition} m");
 
                 if (_settings.moveFloorWithRoomAdjust)
                 {

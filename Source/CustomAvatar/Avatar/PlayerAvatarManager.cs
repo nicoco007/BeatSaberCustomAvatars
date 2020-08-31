@@ -52,6 +52,7 @@ namespace CustomAvatar.Avatar
         /// Event triggered when a new avatar has finished loading and is spawned. Note that the argument may be null if no avatar was selected to replace the previous one.
         /// </summary>
         public event Action<SpawnedAvatar> avatarChanged;
+        public event Action<float> avatarScaleChanged;
 
         private readonly DiContainer _container;
         private readonly ILogger<PlayerAvatarManager> _logger;
@@ -82,7 +83,7 @@ namespace CustomAvatar.Avatar
         {
             _settings.moveFloorWithRoomAdjustChanged += OnMoveFloorWithRoomAdjustChanged;
             _settings.firstPersonEnabledChanged += OnFirstPersonEnabledChanged;
-            _floorController.floorPositionChanged += OnFloorHeightChanged;
+            _floorController.floorPositionChanged += OnFloorPositionChanged;
             BeatSaberEvents.playerHeightChanged += OnPlayerHeightChanged;
 
             LoadAvatarInfosFromFile();
@@ -219,10 +220,11 @@ namespace CustomAvatar.Avatar
                 _avatarInfos.Add(avatarInfo.fileName, avatarInfo);
             }
 
-            currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, _container.Instantiate<RoomAdjustedInput>(new[] { _container.Instantiate<VRPlayerInput>() }));
+            currentlySpawnedAvatar = _spawner.SpawnRoomAdjustedAvatar(avatar, _container.Instantiate<VRPlayerInput>());
             _currentAvatarSettings = _settings.GetAvatarSettings(avatar.fileName);
 
             ResizeCurrentAvatar();
+            SetCurrentAvatarVerticalPosition(_floorController.floorPosition);
             UpdateFirstPersonVisibility();
             UpdateLocomotionEnabled();
 
@@ -259,7 +261,6 @@ namespace CustomAvatar.Avatar
 
             float scale;
             AvatarResizeMode resizeMode = _settings.resizeMode;
-
 
             switch (resizeMode)
             {
@@ -306,11 +307,13 @@ namespace CustomAvatar.Avatar
             currentlySpawnedAvatar.scale = scale;
 
             UpdateFloorOffsetForCurrentAvatar();
+
+            avatarScaleChanged?.Invoke(scale);
         }
 
         internal void UpdateFloorOffsetForCurrentAvatar()
         {
-            if (!_settings.enableFloorAdjust)
+            if (!_settings.enableFloorAdjust || !currentlySpawnedAvatar)
             {
                 _floorController.SetFloorOffset(0);
 
@@ -365,10 +368,15 @@ namespace CustomAvatar.Avatar
             ResizeCurrentAvatar();
         }
 
-        private void OnFloorHeightChanged(float offset)
+        private void OnFloorPositionChanged(float verticalPosition)
+        {
+            SetCurrentAvatarVerticalPosition(verticalPosition);
+        }
+
+        private void SetCurrentAvatarVerticalPosition(float verticalPosition)
         {
             Vector3 position = currentlySpawnedAvatar.transform.position;
-            position.y = offset;
+            position.y = verticalPosition;
             currentlySpawnedAvatar.transform.position = position;
         }
 

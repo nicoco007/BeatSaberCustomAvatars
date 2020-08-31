@@ -65,5 +65,10 @@ namespace CustomAvatar.Avatar
             GameObject avatarInstance = subContainer.InstantiatePrefab(avatar.prefab, parent);
             return subContainer.InstantiateComponent<SpawnedAvatar>(avatarInstance);
         }
+
+        public SpawnedAvatar SpawnRoomAdjustedAvatar(LoadedAvatar avatar, IAvatarInput input, Transform parent = null)
+        {
+            return SpawnAvatar(avatar, _container.Instantiate<RoomAdjustedInput>(new[] { input }), parent);
+        }
     }
 }

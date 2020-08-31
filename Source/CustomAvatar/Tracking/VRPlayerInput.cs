@@ -28,7 +28,7 @@ namespace CustomAvatar.Tracking
     /// <summary>
     /// The player's <see cref="IAvatarInput"/> with calibration and other settings applied.
     /// </summary>
-    public class VRPlayerInput : IAvatarInput
+    public class VRPlayerInput : IDisposable, IAvatarInput
     {
         public static readonly float kDefaultPlayerArmSpan = 1.8f;
 
@@ -77,6 +77,17 @@ namespace CustomAvatar.Tracking
             _rightHandAnimAction = new SkeletalInput("/actions/customavatars/in/righthandanim");
 
             _avatarManager.avatarChanged += OnAvatarChanged;
+        }
+
+        public void Dispose()
+        {
+            _deviceManager.deviceAdded -= OnDevicesUpdated;
+            _deviceManager.deviceRemoved -= OnDevicesUpdated;
+            _deviceManager.deviceTrackingAcquired -= OnDevicesUpdated;
+            _deviceManager.deviceTrackingLost -= OnDevicesUpdated;
+
+            _leftHandAnimAction.Dispose();
+            _rightHandAnimAction.Dispose();
         }
 
         public bool TryGetPose(DeviceUse use, out Pose pose)
@@ -132,17 +143,6 @@ namespace CustomAvatar.Tracking
 
             curl = new FingerCurl(handAnim.summaryData.thumbCurl, handAnim.summaryData.indexCurl, handAnim.summaryData.middleCurl, handAnim.summaryData.ringCurl, handAnim.summaryData.littleCurl);
             return true;
-        }
-
-        public void Dispose()
-        {
-            _deviceManager.deviceAdded -= OnDevicesUpdated;
-            _deviceManager.deviceRemoved -= OnDevicesUpdated;
-            _deviceManager.deviceTrackingAcquired -= OnDevicesUpdated;
-            _deviceManager.deviceTrackingLost -= OnDevicesUpdated;
-
-            _leftHandAnimAction.Dispose();
-            _rightHandAnimAction.Dispose();
         }
 
         internal bool TryGetUncalibratedPose(DeviceUse use, out Pose pose)

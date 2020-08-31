@@ -63,11 +63,6 @@ namespace CustomAvatar.Tracking
             return _input.TryGetFingerCurl(use, out curl);
         }
 
-        public void Dispose()
-        {
-            _input.Dispose();
-        }
-
         private void OnInputChanged()
         {
             inputChanged?.Invoke();

@@ -68,7 +68,7 @@ namespace CustomAvatar.Zenject
             Container.BindInterfacesAndSelfTo<ShaderLoader>().AsSingle().NonLazy();
 
             Container.Bind<AvatarLoader>().AsSingle();
-            Container.Bind<VRPlayerInput>().AsSingle();
+            Container.BindInterfacesAndSelfTo<VRPlayerInput>().AsSingle();
             Container.Bind<FloorController>().AsSingle();
             Container.BindInterfacesAndSelfTo<LightingQualityController>().AsSingle();
 

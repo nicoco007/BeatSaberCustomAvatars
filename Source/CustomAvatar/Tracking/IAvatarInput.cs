@@ -19,7 +19,7 @@ using UnityEngine;
 
 namespace CustomAvatar.Tracking
 {
-    public interface IAvatarInput : IDisposable
+    public interface IAvatarInput
     {
         bool allowMaintainPelvisPosition { get; }
 

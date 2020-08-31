@@ -193,8 +193,6 @@ namespace CustomAvatar.Avatar
         {
             _gameScenesManager.transitionDidFinishEvent -= OnTransitionDidFinish;
 
-            input.Dispose();
-
             Destroy(gameObject);
         }
 
