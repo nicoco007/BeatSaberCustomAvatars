@@ -19,6 +19,7 @@ using CustomAvatar.Logging;
 using CustomAvatar.Utilities;
 using System;
 using UnityEngine;
+using Zenject;
 
 namespace CustomAvatar.Tracking
 {
@@ -32,16 +33,19 @@ namespace CustomAvatar.Tracking
         private readonly ILogger<FloorController> _logger;
         private readonly Settings _settings;
         private readonly BeatSaberUtilities _beatSaberUtilities;
+        private readonly GameScenesManager _gameScenesManager;
 
         private readonly string[] _floorObjectNames = { "MenuEnvironment", "Environment/PlayersPlace" };
 
-        internal FloorController(ILoggerProvider loggerProvider, Settings settings, BeatSaberUtilities beatSaberUtilities)
+        internal FloorController(ILoggerProvider loggerProvider, Settings settings, BeatSaberUtilities beatSaberUtilities, GameScenesManager gameScenesManager)
         {
             _logger = loggerProvider.CreateLogger<FloorController>();
             _settings = settings;
             _beatSaberUtilities = beatSaberUtilities;
+            _gameScenesManager = gameScenesManager;
 
             _beatSaberUtilities.roomCenterChanged += OnRoomCenterChanged;
+            _gameScenesManager.transitionDidFinishEvent += OnSceneTransitionDidFinish;
         }
 
         internal void SetFloorOffset(float offset)
@@ -57,23 +61,33 @@ namespace CustomAvatar.Tracking
                 floorPosition = offset;
             }
 
+            UpdateFloorObjects();
+
+            floorPositionChanged?.Invoke(floorPosition);
+        }
+
+        private void UpdateFloorObjects()
+        {
             foreach (var floorObjectName in _floorObjectNames)
             {
                 GameObject floorObject = GameObject.Find(floorObjectName);
 
                 if (!floorObject) continue;
 
-                _logger.Info($"Moving {floorObjectName} {Math.Abs(offset):0.000} m {(offset >= 0 ? "up" : "down")} to {floorPosition} m");
+                _logger.Info($"Moving '{floorObjectName}' to {floorPosition:0.000} m");
 
                 floorObject.transform.position = new Vector3(0, floorPosition, 0);
             }
-
-            floorPositionChanged?.Invoke(floorPosition);
         }
 
         private void OnRoomCenterChanged(Vector3 center)
         {
             SetFloorOffset(floorOffset);
+        }
+
+        private void OnSceneTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
+        {
+            UpdateFloorObjects();
         }
     }
 }
