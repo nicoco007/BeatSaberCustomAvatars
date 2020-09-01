@@ -184,7 +184,10 @@ namespace CustomAvatar.Avatar
                 fingerTracking = _container.InstantiateComponent<AvatarFingerTracking>(gameObject);
             }
 
-            DontDestroyOnLoad(this);
+            if (_initialLocalPosition.sqrMagnitude > 0)
+            {
+                _logger.Warning("Avatar root position is not at origin; resizing by height and floor adjust may not work properly.");
+            }
 
             _gameScenesManager.transitionDidFinishEvent += OnTransitionDidFinish;
         }
