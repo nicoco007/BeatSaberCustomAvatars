@@ -9,7 +9,7 @@
       <dropdown-list-setting text="Resize Mode" id="resize-mode" on-change="resize-mode-change" options="resize-mode-options" formatter="resize-mode-formatter"></dropdown-list-setting>
       <toggle-setting id="enable-locomotion" text="Enable locomotion" hover-hint="Allow feet to be moved automatically to follow your head/body when not using dedicated trackers." on-change="enable-locomotion-change"/>
       <toggle-setting text="Floor Height Adjust" hover-hint="Move the floor so the avatar is standing at full height even if it is bigger or smaller than the player." id="floor-adjust" on-change="floor-adjust-change"/>
-      <toggle-setting text="Move Floor with Room Adjust" hover-hint="Move the floor along with the game's built-in room adjust. Only works when Height is selected as the Resize Mode." id="move-floor-with-room-adjust" on-change="move-floor-with-room-adjust-change"/>
+      <toggle-setting text="Move Floor with Room Adjust" hover-hint="Move the floor along with the game's built-in vertical room adjust." id="move-floor-with-room-adjust" on-change="move-floor-with-room-adjust-change"/>
       <increment-setting id="camera-clip-plane" text="Camera Near Clip Plane" hover-hint="Distance from the eyes at which objets start being visible." min="0.01" max="0.3" increment="0.01" on-change="camera-clip-plane-change"></increment-setting>
       
       <horizontal pad-top="1">

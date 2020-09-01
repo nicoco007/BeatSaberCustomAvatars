@@ -24,7 +24,7 @@ namespace CustomAvatar.Tracking
 {
     public class FloorController
     {
-        public float floorOffset { get; set; }
+        public float floorOffset { get; private set; }
         public float floorPosition { get; private set; }
 
         public event Action<float> floorPositionChanged;
@@ -40,6 +40,8 @@ namespace CustomAvatar.Tracking
             _logger = loggerProvider.CreateLogger<FloorController>();
             _settings = settings;
             _beatSaberUtilities = beatSaberUtilities;
+
+            _beatSaberUtilities.roomCenterChanged += OnRoomCenterChanged;
         }
 
         internal void SetFloorOffset(float offset)
@@ -63,17 +65,15 @@ namespace CustomAvatar.Tracking
 
                 _logger.Info($"Moving {floorObjectName} {Math.Abs(offset):0.000} m {(offset >= 0 ? "up" : "down")} to {floorPosition} m");
 
-                if (_settings.moveFloorWithRoomAdjust)
-                {
-                    floorObject.transform.position = new Vector3(0, floorPosition, 0);
-                }
-                else
-                {
-                    floorObject.transform.position = new Vector3(0, floorPosition, 0);
-                }
+                floorObject.transform.position = new Vector3(0, floorPosition, 0);
             }
 
             floorPositionChanged?.Invoke(floorPosition);
+        }
+
+        private void OnRoomCenterChanged(Vector3 center)
+        {
+            SetFloorOffset(floorOffset);
         }
     }
 }

@@ -153,7 +153,16 @@ namespace CustomAvatar.Tracking
                 return false;
             }
 
-            pose = new Pose(device.position, device.rotation);
+            Vector3 roomCenter = _beatSaberUtilities.roomCenter;
+            Quaternion roomRotation = _beatSaberUtilities.roomRotation;
+
+            pose = new Pose(device.position + roomRotation * roomCenter, device.rotation * roomRotation);
+
+            if (_settings.moveFloorWithRoomAdjust)
+            {
+                pose.position.y -= roomCenter.y;
+            }
+
             SpawnedAvatar spawnedAvatar = _avatarManager.currentlySpawnedAvatar;
 
             switch (use)

@@ -47,26 +47,13 @@ namespace CustomAvatar.Avatar
         {
             try
             {
-                if (_spawnedAvatar.head && _input.TryGetPose(DeviceUse.Head, out Pose headPose))
-                {
-                    _spawnedAvatar.head.position = headPose.position;
-                    _spawnedAvatar.head.rotation = headPose.rotation;
-                }
-
-                if (_spawnedAvatar.leftHand && _input.TryGetPose(DeviceUse.LeftHand, out Pose leftHandPose))
-                {
-                    _spawnedAvatar.leftHand.position = leftHandPose.position;
-                    _spawnedAvatar.leftHand.rotation = leftHandPose.rotation;
-                }
-
-                if (_spawnedAvatar.rightHand && _input.TryGetPose(DeviceUse.RightHand, out Pose rightHandPose))
-                {
-                    _spawnedAvatar.rightHand.position = rightHandPose.position;
-                    _spawnedAvatar.rightHand.rotation = rightHandPose.rotation;
-                }
+                SetPose(DeviceUse.Head,      _spawnedAvatar.head);
+                SetPose(DeviceUse.LeftHand,  _spawnedAvatar.leftHand);
+                SetPose(DeviceUse.RightHand, _spawnedAvatar.rightHand);
 
                 if (isCalibrationModeEnabled)
                 {
+                    // TODO fix all of this
                     if (_spawnedAvatar.pelvis)
                     {
                         _spawnedAvatar.pelvis.position = _spawnedAvatar.avatar.pelvis.position;// * _avatar.scale + new Vector3(0, _avatar.verticalPosition, 0);
@@ -87,23 +74,9 @@ namespace CustomAvatar.Avatar
                 }
                 else
                 {
-                    if (_spawnedAvatar.leftLeg && _input.TryGetPose(DeviceUse.LeftFoot, out Pose leftFootPose))
-                    {
-                        _spawnedAvatar.leftLeg.position = leftFootPose.position;
-                        _spawnedAvatar.leftLeg.rotation = leftFootPose.rotation;
-                    }
-
-                    if (_spawnedAvatar.rightLeg && _input.TryGetPose(DeviceUse.RightFoot, out Pose rightFootPose))
-                    {
-                        _spawnedAvatar.rightLeg.position = rightFootPose.position;
-                        _spawnedAvatar.rightLeg.rotation = rightFootPose.rotation;
-                    }
-
-                    if (_spawnedAvatar.pelvis && _input.TryGetPose(DeviceUse.Waist, out Pose waistPose))
-                    {
-                        _spawnedAvatar.pelvis.position = waistPose.position;
-                        _spawnedAvatar.pelvis.rotation = waistPose.rotation;
-                    }
+                    SetPose(DeviceUse.Waist,     _spawnedAvatar.pelvis);
+                    SetPose(DeviceUse.LeftFoot,  _spawnedAvatar.leftLeg);
+                    SetPose(DeviceUse.RightFoot, _spawnedAvatar.rightLeg);
                 }
 
                 if (_spawnedAvatar.body)
@@ -131,5 +104,22 @@ namespace CustomAvatar.Avatar
 
         #pragma warning restore IDE0051
         #endregion
+
+        private void SetPose(DeviceUse use, Transform target)
+        {
+            if (!target || !_input.TryGetPose(use, out Pose pose)) return;
+
+            // if avatar transform has a parent, use that as the origin
+            if (transform.parent)
+            {
+                target.position = transform.parent.TransformPoint(pose.position);
+                target.rotation = transform.parent.rotation * pose.rotation;
+            }
+            else
+            {
+                target.position = pose.position;
+                target.rotation = pose.rotation;
+            }
+        }
     }
 }

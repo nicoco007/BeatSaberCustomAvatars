@@ -16,6 +16,7 @@
 
 using CustomAvatar.Configuration;
 using CustomAvatar.Tracking;
+using System;
 using UnityEngine;
 
 namespace CustomAvatar.Utilities
@@ -26,6 +27,9 @@ namespace CustomAvatar.Utilities
 
         public Vector3 roomCenter => _mainSettingsModel.roomCenter;
         public Quaternion roomRotation => Quaternion.Euler(0, _mainSettingsModel.roomRotation, 0);
+
+        public event Action<Vector3> roomCenterChanged;
+        public event Action<float> roomRotationChanged;
 
         private readonly MainSettingsModelSO _mainSettingsModel;
         private readonly PlayerDataModel _playerDataModel;
@@ -40,6 +44,9 @@ namespace CustomAvatar.Utilities
             _playerDataModel = playerDataModel;
             _settings = settings;
             _vrPlatformHelper = vrPlatformHelper;
+
+            _mainSettingsModel.roomCenter.didChangeEvent += OnRoomCenterChanged;
+            _mainSettingsModel.roomRotation.didChangeEvent += OnRoomRotationChanged;
 
             if (_vrPlatformHelper is OpenVRHelper openVRHelper)
             {
@@ -101,6 +108,16 @@ namespace CustomAvatar.Utilities
             }
 
             return new Pose(position, Quaternion.Euler(rotation));
+        }
+
+        private void OnRoomCenterChanged()
+        {
+            roomCenterChanged?.Invoke(_mainSettingsModel.roomCenter);
+        }
+
+        private void OnRoomRotationChanged()
+        {
+            roomRotationChanged?.Invoke(_mainSettingsModel.roomRotation);
         }
     }
 }
