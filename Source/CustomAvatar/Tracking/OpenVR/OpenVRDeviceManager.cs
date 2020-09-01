@@ -137,8 +137,6 @@ namespace CustomAvatar.Tracking.OpenVR
                 string serialNumber = _openVRFacade.GetStringTrackedDeviceProperty(deviceIndex, ETrackedDeviceProperty.Prop_SerialNumber_String);
                 string role         = _openVRFacade.GetStringTrackedDeviceProperty(deviceIndex, ETrackedDeviceProperty.Prop_ControllerType_String);
 
-                ETrackedDeviceClass deviceClass = _openVRFacade.GetTrackedDeviceClass(deviceIndex);
-
                 if (_connectedDevices[deviceIndex] != connected)
                 {
                     if (connected)
@@ -151,8 +149,6 @@ namespace CustomAvatar.Tracking.OpenVR
                     }
                 }
 
-                _logger.Trace($"Device {deviceIndex} has class '{deviceClass}' and role '{role}'");
-
                 if (_roles[deviceIndex] != null && _roles[deviceIndex] != role)
                 {
                     _logger.Info($"Device {deviceIndex} changed roles from '{_roles[deviceIndex]}' to '{role}'");
@@ -163,6 +159,10 @@ namespace CustomAvatar.Tracking.OpenVR
 
                 if (!connected) continue;
 
+                ETrackedDeviceClass deviceClass = _openVRFacade.GetTrackedDeviceClass(deviceIndex);
+
+                _logger.Trace($"Device {deviceIndex} has class '{deviceClass}' and role '{role}'");
+
                 switch (deviceClass)
                 {
                     case ETrackedDeviceClass.HMD:
@@ -170,9 +170,11 @@ namespace CustomAvatar.Tracking.OpenVR
                         break;
 
                     case ETrackedDeviceClass.Controller:
-                        ETrackedControllerRole hand = _openVRFacade.GetControllerRoleForTrackedDeviceIndex(deviceIndex);
+                        ETrackedControllerRole controllerRole = _openVRFacade.GetControllerRoleForTrackedDeviceIndex(deviceIndex);
 
-                        switch (hand)
+                        _logger.Trace($"Device {deviceIndex} has controller role '{controllerRole}'");
+
+                        switch (controllerRole)
                         {
                             case ETrackedControllerRole.LeftHand:
                                 AssignTrackedDevice(_leftHand, deviceIndex, modelName, serialNumber, role);
