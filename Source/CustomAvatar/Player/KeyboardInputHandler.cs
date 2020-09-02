@@ -20,7 +20,7 @@ using CustomAvatar.Logging;
 using UnityEngine;
 using Zenject;
 
-namespace CustomAvatar.Utilities
+namespace CustomAvatar.Player
 {
     internal class KeyboardInputHandler : ITickable
     {

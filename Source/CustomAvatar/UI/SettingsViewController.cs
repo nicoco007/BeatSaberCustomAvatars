@@ -19,6 +19,7 @@ using BeatSaberMarkupLanguage.ViewControllers;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
+using CustomAvatar.Player;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
 using Polyglot;

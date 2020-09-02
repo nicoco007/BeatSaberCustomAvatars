@@ -14,9 +14,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
-using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
 using System;
 using System.Collections.Generic;
@@ -26,7 +26,7 @@ using UnityEngine;
 using Zenject;
 using Object = UnityEngine.Object;
 
-namespace CustomAvatar.Avatar
+namespace CustomAvatar.Player
 {
     /// <summary>
     /// Manages the player's local avatar.
@@ -35,7 +35,7 @@ namespace CustomAvatar.Avatar
     {
         public static readonly string kCustomAvatarsPath = Path.GetFullPath("CustomAvatars");
         public static readonly string kAvatarInfoCacheFilePath = Path.Combine(kCustomAvatarsPath, "cache.dat");
-        public static readonly byte[] kCacheFileSignature = { 0x43, 0x41, 0x64, 0x62  }; // Custom Avatars Database (CAdb)
+        public static readonly byte[] kCacheFileSignature = { 0x43, 0x41, 0x64, 0x62 }; // Custom Avatars Database (CAdb)
         public static readonly byte kCacheFileVersion = 1;
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace CustomAvatar.Avatar
 
             _settings.moveFloorWithRoomAdjustChanged -= OnMoveFloorWithRoomAdjustChanged;
             _settings.firstPersonEnabledChanged -= OnFirstPersonEnabledChanged;
-            _floorController.floorPositionChanged -= OnFloorHeightChanged;
+            _floorController.floorPositionChanged -= OnFloorPositionChanged;
             BeatSaberEvents.playerHeightChanged -= OnPlayerHeightChanged;
 
             SaveAvatarInfosToFile();
@@ -209,7 +209,7 @@ namespace CustomAvatar.Avatar
                 _settings.previousAvatarPath = null;
                 return;
             }
-            
+
             var avatarInfo = new AvatarInfo(avatar);
 
             _settings.previousAvatarPath = avatarInfo.fileName;
@@ -250,11 +250,11 @@ namespace CustomAvatar.Avatar
         {
             List<string> files = GetAvatarFileNames();
             files.Insert(0, null);
-            
+
             int index = !string.IsNullOrEmpty(_switchingToPath) ? files.IndexOf(Path.GetFileName(_switchingToPath)) : 0;
 
             index = (index + files.Count - 1) % files.Count;
-            
+
             SwitchToAvatarAsync(files[index]);
         }
 

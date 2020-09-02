@@ -19,6 +19,7 @@ using CustomAvatar.StereoRendering;
 using UnityEngine;
 using Zenject;
 using CustomAvatar.Avatar;
+using CustomAvatar.Player;
 using BeatSaberMarkupLanguage.ViewControllers;
 using BeatSaberMarkupLanguage.Attributes;
 

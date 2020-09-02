@@ -20,7 +20,7 @@ using CustomAvatar.Configuration;
 using CustomAvatar.Lighting;
 using CustomAvatar.Logging;
 using CustomAvatar.StereoRendering;
-using CustomAvatar.Tracking;
+using CustomAvatar.Player;
 using CustomAvatar.Tracking.OpenVR;
 using CustomAvatar.Tracking.UnityXR;
 using CustomAvatar.Utilities;

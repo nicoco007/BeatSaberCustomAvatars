@@ -24,6 +24,7 @@ namespace CustomAvatar.Utilities
     internal class BeatSaberUtilities
     {
         public static readonly float kDefaultPlayerEyeHeight = MainSettingsModelSO.kDefaultPlayerHeight - MainSettingsModelSO.kHeadPosToPlayerHeightOffset;
+        public static readonly float kDefaultPlayerArmSpan = MainSettingsModelSO.kDefaultPlayerHeight;
 
         public Vector3 roomCenter => _mainSettingsModel.roomCenter;
         public Quaternion roomRotation => Quaternion.Euler(0, _mainSettingsModel.roomRotation, 0);

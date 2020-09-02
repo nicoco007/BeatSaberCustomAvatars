@@ -20,6 +20,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using CustomAvatar.Avatar;
+using CustomAvatar.Player;
 using CustomAvatar.Utilities;
 using HMUI;
 using Polyglot;

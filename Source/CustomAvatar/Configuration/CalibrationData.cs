@@ -14,8 +14,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using CustomAvatar.Avatar;
 using CustomAvatar.Logging;
+using CustomAvatar.Player;
 using CustomAvatar.Utilities;
 using System;
 using System.Collections.Generic;

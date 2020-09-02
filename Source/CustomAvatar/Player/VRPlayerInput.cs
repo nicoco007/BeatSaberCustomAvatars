@@ -17,13 +17,14 @@
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
+using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
 using DynamicOpenVR.IO;
 using System;
 using UnityEngine;
 using Zenject;
 
-namespace CustomAvatar.Tracking
+namespace CustomAvatar.Player
 {
     /// <summary>
     /// The player's <see cref="IAvatarInput"/> with calibration and other settings applied.

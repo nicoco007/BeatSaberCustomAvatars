@@ -21,7 +21,7 @@ using System;
 using UnityEngine;
 using Zenject;
 
-namespace CustomAvatar.Tracking
+namespace CustomAvatar.Player
 {
     public class FloorController
     {
