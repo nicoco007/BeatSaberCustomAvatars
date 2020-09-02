@@ -72,9 +72,9 @@ namespace CustomAvatar.Utilities
         /// <summary>
         /// Similar to the various implementations of <see cref="IVRPlatformHelper.AdjustControllerTransform(UnityEngine.XR.XRNode, Transform, Vector3, Vector3)"/> except it returns a pose instead of adjusting a transform.
         /// </summary>
-        public Pose GetPlatformSpecificControllerOffset(DeviceUse use)
+        public void AdjustPlatformSpecificControllerPose(DeviceUse use, ref Pose pose)
         {
-            if (use != DeviceUse.LeftHand && use != DeviceUse.RightHand) return Pose.identity;
+            if (use != DeviceUse.LeftHand && use != DeviceUse.RightHand) return;
 
             Vector3 position = _mainSettingsModel.controllerPosition;
             Vector3 rotation = _mainSettingsModel.controllerRotation;
@@ -101,13 +101,14 @@ namespace CustomAvatar.Utilities
             // mirror across YZ plane for left hand
             if (use == DeviceUse.LeftHand)
             {
-                position.x = -position.x;
-
                 rotation.y = -rotation.y;
                 rotation.z = -rotation.z;
+
+                position.x = -position.x;
             }
 
-            return new Pose(position, Quaternion.Euler(rotation));
+            pose.rotation *= Quaternion.Euler(rotation);
+            pose.position += pose.rotation * position;
         }
 
         private void OnRoomCenterChanged()

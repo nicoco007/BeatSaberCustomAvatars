@@ -298,10 +298,7 @@ namespace CustomAvatar.Tracking
                 return false;
             }
 
-            Pose controllerOffset = _beatSaberUtilities.GetPlatformSpecificControllerOffset(use);
-
-            pose.position += controllerOffset.position;
-            pose.rotation *= controllerOffset.rotation;
+            _beatSaberUtilities.AdjustPlatformSpecificControllerPose(use, ref pose);
 
             return true;
         }
