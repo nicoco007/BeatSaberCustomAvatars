@@ -17,6 +17,7 @@
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using UnityEngine;
+using UnityEngine.Rendering;
 using Zenject;
 
 namespace CustomAvatar.Lighting
@@ -30,6 +31,9 @@ namespace CustomAvatar.Lighting
         [Inject]
         private void Inject(Settings settings)
         {
+            RenderSettings.ambientMode = AmbientMode.Flat;
+            RenderSettings.ambientLight = new Color(0.8f, 0.9f, 1.0f);
+
             if (settings.lighting.castShadows)
             {
                 QualitySettings.shadows = ShadowQuality.All;
