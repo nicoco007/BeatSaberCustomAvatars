@@ -45,7 +45,6 @@ namespace CustomAvatar.Avatar
 
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
-        // ReSharper disable UnusedMember.Local
 
         [Inject]
         private void Inject(MainSettingsModelSO mainSettingsModel, ILoggerProvider loggerProvider, IAvatarInput input, SpawnedAvatar avatar, VRPlatformHelper vrPlatformHelper, AvatarTailor tailor)
@@ -165,7 +164,6 @@ namespace CustomAvatar.Avatar
             }
         }
 
-        // ReSharper restore UnusedMember.Local
         #pragma warning restore IDE0051
         #endregion
     }

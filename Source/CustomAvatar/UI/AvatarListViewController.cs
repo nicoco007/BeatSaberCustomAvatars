@@ -131,8 +131,6 @@ namespace CustomAvatar.UI
         }
 
         
-        // ReSharper disable once UnusedMember.Local
-        // ReSharper disable once UnusedParameter.Local
         [UIAction("avatar-click")]
         private void OnAvatarClicked(TableView table, int row)
         {

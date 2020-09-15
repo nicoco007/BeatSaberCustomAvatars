@@ -29,11 +29,6 @@ using VRIK = BeatSaberFinalIK::RootMotion.FinalIK.VRIK;
 using Zenject;
 #endif
 
-// ReSharper disable UnusedMember.Global
-// ReSharper disable NotAccessedField.Global
-// ReSharper disable UnassignedField.Global
-// ReSharper disable MemberCanBePrivate.Global
-// ReSharper disable InconsistentNaming
 namespace CustomAvatar
 {
     [Serializable]

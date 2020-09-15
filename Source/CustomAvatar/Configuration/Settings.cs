@@ -27,14 +27,6 @@ using UnityEngine;
 
 namespace CustomAvatar.Configuration
 {
-    // ReSharper disable ClassNeverInstantiated.Global
-    // ReSharper disable ClassWithVirtualMembersNeverInherited.Global
-    // ReSharper disable RedundantDefaultMemberInitializer
-    // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
-    // ReSharper disable AutoPropertyCanBeMadeGetOnly.Local
-    // ReSharper disable UnusedMember.Global
-    // ReSharper disable FieldCanBeMadeReadOnly.Global
-    // ReSharper disable InconsistentNaming
     internal class Settings
     {
         public event Action<bool> firstPersonEnabledChanged;

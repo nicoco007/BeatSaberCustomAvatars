@@ -39,7 +39,6 @@ namespace CustomAvatar.Lighting
         
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
-        // ReSharper disable UnusedMember.Local
 
         [Inject]
         private void Inject(ILoggerProvider loggerProvider, LightWithIdManager lightManager, ColorManager colorManager, PlayerController playerController, TwoSidedLightingController twoSidedLightingController)
@@ -105,7 +104,6 @@ namespace CustomAvatar.Lighting
             _twoSidedLightingController.gameObject.SetActive(true);
         }
 
-        // ReSharper disable UnusedMember.Local
         #pragma warning restore IDE0051
         #endregion
 

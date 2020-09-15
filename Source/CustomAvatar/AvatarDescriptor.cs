@@ -18,8 +18,6 @@ using UnityEngine;
 
 namespace CustomAvatar
 {
-    // ReSharper disable ConvertToAutoProperty
-    // ReSharper disable once ClassNeverInstantiated.Global
     public class AvatarDescriptor : MonoBehaviour, ISerializationCallbackReceiver
     {
         public new string name;
@@ -29,7 +27,6 @@ namespace CustomAvatar
         public Sprite cover;
 
         // Legacy stuff
-        // ReSharper disable InconsistentNaming
         #pragma warning disable 649
         [SerializeField] [HideInInspector] private string AvatarName;
         [SerializeField] [HideInInspector] private string AuthorName;
@@ -38,7 +35,6 @@ namespace CustomAvatar
         [SerializeField] [HideInInspector] private string Author;
         [SerializeField] [HideInInspector] private Sprite Cover;
         #pragma warning restore 649
-        // ReSharper restore InconsistentNaming
 
         public void OnBeforeSerialize() { }
 

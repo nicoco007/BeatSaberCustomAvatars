@@ -39,15 +39,12 @@ namespace CustomAvatar.UI
         #endregion
 
         #region Values
-        // ReSharper disable UnusedMember.Local
 
         [UIValue("resize-mode-options")] private readonly List<object> _resizeModeOptions = new List<object> { AvatarResizeMode.None, AvatarResizeMode.Height, AvatarResizeMode.ArmSpan };
         
-        // ReSharper restore UnusedMember.Local
         #endregion
 
         #region Actions
-        // ReSharper disable UnusedMember.Local
 
         [UIAction("visible-in-first-person-change")]
         private void OnVisibleInFirstPersonChanged(bool value)
@@ -117,7 +114,6 @@ namespace CustomAvatar.UI
             _settings.moveFloorWithRoomAdjust = value;
         }
         
-        // ReSharper restore UnusedMember.Local
         #endregion
 
         #region Arm Span Measurement

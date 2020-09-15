@@ -28,7 +28,6 @@ namespace CustomAvatar.Avatar
 
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
-        // ReSharper disable UnusedMember.Local
 
         [Inject]
         private void Inject(IAvatarInput input)
@@ -47,7 +46,6 @@ namespace CustomAvatar.Avatar
             ApplyFingerTracking();
         }
 
-        // ReSharper restore UnusedMember.Local
         #pragma warning restore IDE0051
         #endregion
 

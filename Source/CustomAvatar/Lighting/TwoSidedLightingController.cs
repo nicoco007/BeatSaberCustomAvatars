@@ -26,7 +26,6 @@ namespace CustomAvatar.Lighting
     {
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
-        // ReSharper disable UnusedMember.Local
 
         [Inject]
         private void Inject(Settings settings)
@@ -48,7 +47,6 @@ namespace CustomAvatar.Lighting
             AddLight(Vector3.zero, Quaternion.Euler(45, 0, 0), LightType.Directional, new Color(0.8f, 0.9f, 1.000f), 1.0f, 25); // back
         }
         
-        // ReSharper disable UnusedMember.Local
         #pragma warning disable IDE0051
         #endregion
 
