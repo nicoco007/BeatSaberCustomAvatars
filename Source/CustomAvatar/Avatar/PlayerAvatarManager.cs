@@ -44,6 +44,7 @@ namespace CustomAvatar.Avatar
         private readonly AvatarTailor _avatarTailor;
         private readonly Settings _settings;
         private readonly AvatarSpawner _spawner;
+        private readonly GameScenesManager _gameScenesManager;
 
         private readonly Dictionary<string, AvatarInfo> _avatarInfos = new Dictionary<string, AvatarInfo>();
 
@@ -51,7 +52,7 @@ namespace CustomAvatar.Avatar
         private Settings.AvatarSpecificSettings _currentAvatarSettings;
 
         [Inject]
-        private PlayerAvatarManager(DiContainer container, AvatarTailor avatarTailor, ILoggerProvider loggerProvider, AvatarLoader avatarLoader, Settings settings, AvatarSpawner spawner)
+        private PlayerAvatarManager(DiContainer container, AvatarTailor avatarTailor, ILoggerProvider loggerProvider, AvatarLoader avatarLoader, Settings settings, AvatarSpawner spawner, GameScenesManager gameScenesManager)
         {
             _container = container;
             _logger = loggerProvider.CreateLogger<PlayerAvatarManager>();
@@ -59,6 +60,7 @@ namespace CustomAvatar.Avatar
             _avatarTailor = avatarTailor;
             _settings = settings;
             _spawner = spawner;
+            _gameScenesManager = gameScenesManager;
         }
 
         public void Initialize()
@@ -66,6 +68,7 @@ namespace CustomAvatar.Avatar
             _settings.moveFloorWithRoomAdjustChanged += OnMoveFloorWithRoomAdjustChanged;
             _settings.firstPersonEnabledChanged += OnFirstPersonEnabledChanged;
             BeatSaberUtilities.playerHeightChanged += OnPlayerHeightChanged;
+            _gameScenesManager.transitionDidFinishEvent += OnTransitionDidFinish;
 
             if (_settings.calibrateFullBodyTrackingOnStart && !string.IsNullOrEmpty(_settings.previousAvatarPath) && _settings.GetAvatarSettings(_settings.previousAvatarPath).useAutomaticCalibration)
             {
@@ -257,6 +260,11 @@ namespace CustomAvatar.Avatar
         }
 
         private void OnPlayerHeightChanged(float height)
+        {
+            ResizeCurrentAvatar();
+        }
+
+        private void OnTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
         {
             ResizeCurrentAvatar();
         }
