@@ -84,7 +84,9 @@ namespace CustomAvatar.Avatar
             Object.Destroy(currentlySpawnedAvatar);
 
             _settings.moveFloorWithRoomAdjustChanged -= OnMoveFloorWithRoomAdjustChanged;
+            _settings.firstPersonEnabledChanged -= OnFirstPersonEnabledChanged;
             BeatSaberUtilities.playerHeightChanged -= OnPlayerHeightChanged;
+            _gameScenesManager.transitionDidFinishEvent -= OnTransitionDidFinish;
 
             SaveAvatarInfosToFile();
         }
