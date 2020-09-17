@@ -61,9 +61,15 @@ namespace CustomAvatar.Avatar
 
             _logger = loggerProvider.CreateLogger<LoadedAvatar>(descriptor.name);
 
-            VRIKManager vrikManager = prefab.GetComponentInChildren<VRIKManager>();
+            _head      = prefab.transform.Find("Head");
+            _leftHand  = prefab.transform.Find("LeftHand");
+            _rightHand = prefab.transform.Find("RightHand");
+            _pelvis    = prefab.transform.Find("Pelvis");
+            _leftLeg   = prefab.transform.Find("LeftLeg");
+            _rightLeg  = prefab.transform.Find("RightLeg");
 
             #pragma warning disable CS0618
+            VRIKManager vrikManager = prefab.GetComponentInChildren<VRIKManager>();
             IKManager ikManager = prefab.GetComponentInChildren<IKManager>();
             #pragma warning restore CS0618
 
@@ -76,6 +82,15 @@ namespace CustomAvatar.Avatar
 
                 ApplyIKManagerFields(vrikManager, ikManager);
                 Object.Destroy(ikManager);
+            }
+
+            if (vrikManager)
+            {
+                if (!vrikManager.areReferencesFilled)
+                {
+                    _logger.Warning($"References are not filled on '{vrikManager.name}'; detecting references automatically");
+                    vrikManager.AutoDetectReferences();
+                }
             }
 
             // remove any existing VRIK instances
@@ -92,21 +107,19 @@ namespace CustomAvatar.Avatar
                 Object.Destroy(existingVrik);
             }
 
-            _head      = prefab.transform.Find("Head");
-            _leftHand  = prefab.transform.Find("LeftHand");
-            _rightHand = prefab.transform.Find("RightHand");
-            _pelvis    = prefab.transform.Find("Pelvis");
-            _leftLeg   = prefab.transform.Find("LeftLeg");
-            _rightLeg  = prefab.transform.Find("RightLeg");
-
             if (vrikManager)
             {
-                if (!vrikManager.areReferencesFilled)
+                if (vrikManager.references_root != vrikManager.transform)
                 {
-                    vrikManager.AutoDetectReferences();
+                    _logger.Warning("VRIKManager is not on the root reference transform; this may cause unexpected issues");
                 }
 
                 FixTrackingReferences(vrikManager);
+            }
+
+            if (prefab.transform.localPosition.sqrMagnitude > 0)
+            {
+                _logger.Warning("Avatar root position is not at origin; this may cause unexpected issues");
             }
 
             var poseManager = prefab.GetComponentInChildren<PoseManager>();
