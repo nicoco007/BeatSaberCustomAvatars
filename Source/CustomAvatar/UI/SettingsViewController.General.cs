@@ -30,6 +30,7 @@ namespace CustomAvatar.UI
 
         [UIComponent("visible-in-first-person")] private CheckboxSetting _visibleInFirstPerson;
         [UIComponent("resize-mode")] private ListSetting _resizeMode;
+        [UIComponent("enable-locomotion")] private CheckboxSetting _enableLocomotion;
         [UIComponent("floor-adjust")] private CheckboxSetting _floorHeightAdjust;
         [UIComponent("move-floor-with-room-adjust")] private CheckboxSetting _moveFloorWithRoomAdjust;
         [UIComponent("camera-clip-plane")] private IncrementSetting _cameraNearClipPlane;
@@ -75,6 +76,13 @@ namespace CustomAvatar.UI
                 default:
                     return null;
             }
+        }
+
+        [UIAction("enable-locomotion-change")]
+        private void OnEnableLocomotionChanged(bool value)
+        {
+            _settings.enableLocomotion = value;
+            _avatarManager.UpdateLocomotionEnabled();
         }
 
         [UIAction("floor-adjust-change")]

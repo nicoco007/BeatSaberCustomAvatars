@@ -50,10 +50,10 @@ namespace CustomAvatar.Avatar
         private IKHelper _ikHelper;
 
         private bool _isCalibrationModeEnabled = false;
-        
+
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
-        
+
         private void Awake()
         {
             // create delegates for dynamic bones private methods (more efficient than continuously calling Invoke)
@@ -101,12 +101,15 @@ namespace CustomAvatar.Avatar
                 _logger.Warning("solver.spine.maintainPelvisPosition > 0 is not recommended because it can cause strange pelvis rotation issues. To allow maintainPelvisPosition > 0, please set allowMaintainPelvisPosition to true for your avatar in the configuration file.");
                 _vrik.solver.spine.maintainPelvisPosition = 0;
             }
+
+            _input.inputChanged += OnInputChanged;
+
+            UpdateSolverTargets();
+            SetLocomotionEnabled(_avatar.isLocomotionEnabled);
         }
 
         private void Update()
         {
-            UpdateSolverTargets();
-
             if (_fixTransforms)
             {
                 _vrik.solver.FixTransforms();
@@ -141,21 +144,41 @@ namespace CustomAvatar.Avatar
             }
         }
 
+        private void OnDestroy()
+        {
+            _input.inputChanged -= OnInputChanged;
+        }
+
         #pragma warning restore IDE0051
         #endregion
 
-        internal void EnableCalibrationMode()
+        internal void SetLocomotionEnabled(bool enabled)
         {
-            _isCalibrationModeEnabled = true;
+            if (enabled)
+            {
+                _vrik.solver.locomotion.weight = _vrikManager.solver_locomotion_weight;
+            }
+            else
+            {
+                _vrik.solver.locomotion.weight = 0;
+            }
         }
 
-        internal void DisableCalibrationMode()
+        internal void SetCalibrationModeEnabled(bool enabled)
         {
-            _isCalibrationModeEnabled = false;
+            _isCalibrationModeEnabled = enabled;
+            UpdateSolverTargets();
+        }
+
+        private void OnInputChanged()
+        {
+            UpdateSolverTargets();
         }
 
         private void UpdateSolverTargets()
         {
+            _logger.Info("Updating solver targets");
+
             _vrik.solver.spine.headTarget  = _vrikManager.solver_spine_headTarget;
             _vrik.solver.leftArm.target    = _vrikManager.solver_leftArm_target;
             _vrik.solver.rightArm.target   = _vrikManager.solver_rightArm_target;

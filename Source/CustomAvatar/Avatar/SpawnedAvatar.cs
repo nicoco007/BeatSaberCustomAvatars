@@ -61,6 +61,8 @@ namespace CustomAvatar.Avatar
         public AvatarIK ik { get; private set; }
         public AvatarFingerTracking fingerTracking { get; private set; }
 
+        internal bool isLocomotionEnabled { get; private set; }
+
         private ILogger<SpawnedAvatar> _logger;
         private DiContainer _container;
         private GameScenesHelper _gameScenesHelper;
@@ -75,6 +77,16 @@ namespace CustomAvatar.Avatar
         private Vector3 _initialLocalPosition;
         private Vector3 _initialLocalScale;
 
+        public void SetLocomotionEnabled(bool enabled)
+        {
+            isLocomotionEnabled = enabled;
+
+            if (ik)
+            {
+                ik.SetLocomotionEnabled(enabled);
+            }
+        }
+
         public void EnableCalibrationMode()
         {
             if (_isCalibrationModeEnabled || !ik) return;
@@ -82,7 +94,7 @@ namespace CustomAvatar.Avatar
             _isCalibrationModeEnabled = true;
 
             tracking.isCalibrationModeEnabled = true;
-            ik.EnableCalibrationMode();
+            ik.SetCalibrationModeEnabled(true);
         }
 
         public void DisableCalibrationMode()
@@ -90,7 +102,7 @@ namespace CustomAvatar.Avatar
             if (!_isCalibrationModeEnabled || !ik) return;
 
             tracking.isCalibrationModeEnabled = false;
-            ik.DisableCalibrationMode();
+            ik.SetCalibrationModeEnabled(false);
 
             _isCalibrationModeEnabled = false;
         }

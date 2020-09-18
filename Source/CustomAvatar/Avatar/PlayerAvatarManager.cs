@@ -195,6 +195,7 @@ namespace CustomAvatar.Avatar
 
             ResizeCurrentAvatar();
             UpdateFirstPersonVisibility();
+            UpdateLocomotionEnabled();
 
             avatarChanged?.Invoke(currentlySpawnedAvatar);
         }
@@ -249,6 +250,13 @@ namespace CustomAvatar.Avatar
             }
 
             currentlySpawnedAvatar.SetFirstPersonVisibility(visibility);
+        }
+
+        internal void UpdateLocomotionEnabled()
+        {
+            if (!currentlySpawnedAvatar) return;
+
+            currentlySpawnedAvatar.SetLocomotionEnabled(_settings.enableLocomotion);
         }
 
         private void OnMoveFloorWithRoomAdjustChanged(bool value)

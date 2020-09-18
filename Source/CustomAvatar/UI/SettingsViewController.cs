@@ -65,6 +65,7 @@ namespace CustomAvatar.UI
 
             _visibleInFirstPerson.CheckboxValue = _settings.isAvatarVisibleInFirstPerson;
             _resizeMode.Value = _settings.resizeMode;
+            _enableLocomotion.CheckboxValue = _settings.enableLocomotion;
             _floorHeightAdjust.CheckboxValue = _settings.enableFloorAdjust;
             _moveFloorWithRoomAdjust.CheckboxValue = _settings.moveFloorWithRoomAdjust;
             _calibrateFullBodyTrackingOnStart.CheckboxValue = _settings.calibrateFullBodyTrackingOnStart;
