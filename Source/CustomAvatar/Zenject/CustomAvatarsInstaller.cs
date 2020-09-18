@@ -62,6 +62,7 @@ namespace CustomAvatar.Zenject
             Container.Bind<MirrorHelper>().AsTransient();
             Container.Bind<AvatarSpawner>().AsTransient();
             Container.Bind<GameScenesHelper>().AsTransient();
+            Container.Bind<IKHelper>().AsTransient();
 
             // behaviours
             Container.Bind<TwoSidedLightingController>().FromNewComponentOnNewGameObject().NonLazy();

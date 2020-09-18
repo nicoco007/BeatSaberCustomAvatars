@@ -47,6 +47,7 @@ namespace CustomAvatar.Avatar
         private IAvatarInput _input;
         private SpawnedAvatar _avatar;
         private ILogger<AvatarIK> _logger;
+        private IKHelper _ikHelper;
 
         private bool _isCalibrationModeEnabled = false;
         
@@ -71,11 +72,12 @@ namespace CustomAvatar.Avatar
         }
 
         [Inject]
-        private void Inject(IAvatarInput input, SpawnedAvatar avatar, ILoggerProvider loggerProvider)
+        private void Inject(IAvatarInput input, SpawnedAvatar avatar, ILoggerProvider loggerProvider, IKHelper ikHelper)
         {
             _input = input;
             _avatar = avatar;
             _logger = loggerProvider.CreateLogger<AvatarIK>(_avatar.avatar.descriptor.name);
+            _ikHelper = ikHelper;
         }
 
         private void Start()
@@ -83,12 +85,10 @@ namespace CustomAvatar.Avatar
             _vrikManager = GetComponentInChildren<VRIKManager>();
             _dynamicBones = GetComponentsInChildren<BeatSaberDynamicBone::DynamicBone>();
 
-            _vrik = _vrikManager.vrik;
-            _vrik.fixTransforms = false;
+            _vrik = _ikHelper.InitializeVRIK(_vrikManager, transform);
 
             _fixTransforms = _vrikManager.fixTransforms;
-            
-            CreateTargetsIfMissing();
+            _vrik.fixTransforms = false; // FixTransforms is manually called in Update
 
             foreach (TwistRelaxer twistRelaxer in _twistRelaxers)
             {
@@ -152,31 +152,6 @@ namespace CustomAvatar.Avatar
         internal void DisableCalibrationMode()
         {
             _isCalibrationModeEnabled = false;
-        }
-
-        private void CreateTargetsIfMissing()
-        {
-            _vrikManager.solver_spine_headTarget   = CreateTargetIfMissing(_vrikManager.solver_spine_headTarget,   _vrik.references.head,                                    _avatar.head);
-            _vrikManager.solver_leftArm_target     = CreateTargetIfMissing(_vrikManager.solver_leftArm_target,     _vrik.references.leftHand,                                _avatar.leftHand);
-            _vrikManager.solver_rightArm_target    = CreateTargetIfMissing(_vrikManager.solver_rightArm_target,    _vrik.references.rightHand,                               _avatar.rightHand);
-            _vrikManager.solver_spine_pelvisTarget = CreateTargetIfMissing(_vrikManager.solver_spine_pelvisTarget, _vrik.references.pelvis,                                  _avatar.pelvis);
-            _vrikManager.solver_leftLeg_target     = CreateTargetIfMissing(_vrikManager.solver_leftLeg_target,     _vrik.references.leftToes  ?? _vrik.references.leftFoot,  _avatar.leftLeg);
-            _vrikManager.solver_rightLeg_target    = CreateTargetIfMissing(_vrikManager.solver_rightLeg_target,    _vrik.references.rightToes ?? _vrik.references.rightFoot, _avatar.rightLeg);
-        }
-
-        private Transform CreateTargetIfMissing(Transform target, Transform reference, Transform parent)
-        {
-            if (target || !parent) return target;
-
-            Transform newTarget = new GameObject().transform;
-
-            newTarget.SetParent(parent, false);
-            newTarget.position = reference.position;
-            newTarget.rotation = reference.rotation;
-
-            _logger.Info($"Created IK target for '{parent.name}'");
-
-            return newTarget;
         }
 
         private void UpdateSolverTargets()

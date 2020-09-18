@@ -16,6 +16,11 @@
 
 using UnityEngine;
 
+#if UNITY_EDITOR
+using CustomAvatar.Logging;
+using CustomAvatar.Utilities;
+#endif
+
 namespace CustomAvatar
 {
     public class AvatarDescriptor : MonoBehaviour, ISerializationCallbackReceiver
@@ -53,5 +58,13 @@ namespace CustomAvatar
             author = author ?? Author ?? AuthorName;
             cover = cover ?? Cover ?? CoverImage;
         }
+
+        #if UNITY_EDITOR
+        public void Start()
+        {
+            IKHelper ikHelper = new IKHelper(new EditorLoggerProvider());
+            ikHelper.InitializeVRIK(transform.GetComponentInChildren<VRIKManager>(), transform);
+        }
+        #endif
     }
 }

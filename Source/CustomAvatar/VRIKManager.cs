@@ -17,7 +17,6 @@
 extern alias BeatSaberFinalIK;
 
 using System;
-using System.Reflection;
 using BeatSaberFinalIK::RootMotion;
 using CustomAvatar.Logging;
 using UnityEngine;
@@ -407,8 +406,6 @@ namespace CustomAvatar
         public UnityEvent solver_locomotion_onRightFootstep = new UnityEvent();
 
         #endregion
-        
-        internal VRIK vrik;
 
         private ILogger<VRIKManager> _logger = new UnityDebugLogger<VRIKManager>();
 
@@ -443,89 +440,7 @@ namespace CustomAvatar
             AutoDetectReferences();
         }
 
-        private void Awake()
-        {
-            vrik = gameObject.AddComponent<VRIK>();
-        }
-
-        private void Start()
-        {
-            SetVrikFields();
-        }
-
         #pragma warning restore IDE0051
         #endregion
-
-        private void SetVrikFields()
-        {
-            _logger.Info($"Setting VRIK references on '{name}'");
-
-            foreach (FieldInfo sourceField in GetType().GetFields())
-            {
-                string[] parts = sourceField.Name.Split('_');
-                object target = vrik;
-
-                try
-                {
-                    for (int i = 0; i < parts.Length - 1; i++)
-                    {
-                        target = target.GetType().GetField(parts[i])?.GetValue(target);
-
-                        if (target == null)
-                        {
-                            _logger.Warning($"Target {parts[i]} is null");
-                            break;
-                        }
-                    }
-
-                    if (target == null) continue;
-
-                    FieldInfo targetField = target.GetType().GetField(parts[parts.Length - 1]);
-                    object value = sourceField.GetValue(this);
-
-                    Type sourceType = sourceField.FieldType;
-                    Type targetType = targetField.FieldType;
-
-                    _logger.Trace($"Set {string.Join(".", parts)} = {value}");
-
-                    if (value == null && targetType.IsValueType && Nullable.GetUnderlyingType(targetType) == null)
-                    {
-                        _logger.Warning($"Tried setting non-nullable type {targetType.FullName} to null");
-                        continue;
-                    }
-                
-                    if (sourceType != targetType)
-                    {
-                        _logger.Warning($"Converting value from {sourceType.FullName} to {targetType.FullName}");
-                    }
-
-                    if (sourceType.IsEnum)
-                    {
-                        Type sourceUnderlyingType = Enum.GetUnderlyingType(sourceType);
-                        _logger.Trace($"Underlying type for source {sourceType.FullName} is {sourceUnderlyingType.FullName}");
-                    }
-
-                    if (targetType.IsEnum)
-                    {
-                        Type targetUnderlyingType = Enum.GetUnderlyingType(targetType);
-                        _logger.Trace($"Underlying type for target {targetType.FullName} is {targetUnderlyingType.FullName}");
-
-                        targetType = targetUnderlyingType;
-                    }
-                
-                    targetField.SetValue(target, Convert.ChangeType(value, targetType));
-                }
-                catch (Exception ex)
-                {
-                    _logger.Error(ex);
-                }
-            }
-
-            if (!vrik.references.isFilled)
-            {
-                _logger.Warning("Some required references are missing; auto detecting references");
-                vrik.AutoDetectReferences();
-            }
-        }
     }
 }
