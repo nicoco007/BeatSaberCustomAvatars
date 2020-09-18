@@ -20,10 +20,19 @@ namespace CustomAvatar
 {
     public class AvatarDescriptor : MonoBehaviour, ISerializationCallbackReceiver
     {
+        [Tooltip("Avatar's name")]
         public new string name;
+
+        [Tooltip("Avatar creator's name")]
         public string author;
+
+        [Tooltip("Whether or not to allow height calibration for this avatar.")]
         public bool allowHeightCalibration = true;
+
+        [Tooltip("Whether or not this avatar supports automatic calibration. Note that this requires specific setup of the waist and feet trackers.")]
         public bool supportsAutomaticCalibration = false;
+
+        [Tooltip("The image shown in the in-game avatars list")]
         public Sprite cover;
 
         // Legacy stuff
