@@ -24,7 +24,9 @@ namespace CustomAvatar.Zenject
     {
         public override void InstallBindings()
         {
-            if (Container.Resolve<Settings>().lighting.enableDynamicLighting)
+            Settings settings = Container.Resolve<Settings>();
+
+            if (settings.lighting.enabled && settings.lighting.enableDynamicLighting)
             {
                 Container.Bind<GameplayLightingController>().FromNewComponentOnNewGameObject().NonLazy();
             }

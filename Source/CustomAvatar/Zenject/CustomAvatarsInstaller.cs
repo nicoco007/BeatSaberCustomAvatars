@@ -65,7 +65,10 @@ namespace CustomAvatar.Zenject
             Container.Bind<IKHelper>().AsTransient();
 
             // behaviours
-            Container.Bind<TwoSidedLightingController>().FromNewComponentOnNewGameObject().NonLazy();
+            if (Container.Resolve<Settings>().lighting.enabled)
+            {
+                Container.Bind<TwoSidedLightingController>().FromNewComponentOnNewGameObject().NonLazy();
+            }
 
             // not sure if this is a great idea but w/e
             if (!Container.HasBinding<MainSettingsModelSO>())
