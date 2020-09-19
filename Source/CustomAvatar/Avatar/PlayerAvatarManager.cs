@@ -109,7 +109,7 @@ namespace CustomAvatar.Avatar
 
                 if (_avatarInfos.ContainsKey(fileName) && _avatarInfos[fileName].IsForFile(fullPath))
                 {
-                    _logger.Info($"Using cached information for '{fileName}'");
+                    _logger.Trace($"Using cached information for '{fileName}'");
                     success(_avatarInfos[fileName]);
                 }
                 else
