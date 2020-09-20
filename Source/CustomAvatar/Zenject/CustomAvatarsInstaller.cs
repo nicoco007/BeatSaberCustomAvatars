@@ -65,7 +65,7 @@ namespace CustomAvatar.Zenject
             Container.Bind<IKHelper>().AsTransient();
 
             // behaviours
-            if (Container.Resolve<Settings>().lighting.enabled)
+            if (Container.Resolve<Settings>().lighting.quality != LightingQuality.Off)
             {
                 Container.Bind<TwoSidedLightingController>().FromNewComponentOnNewGameObject().NonLazy();
             }

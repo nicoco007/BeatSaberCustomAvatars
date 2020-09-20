@@ -20,6 +20,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using CustomAvatar.Avatar;
+using CustomAvatar.Lighting;
 using CustomAvatar.Tracking;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -94,9 +95,7 @@ namespace CustomAvatar.Configuration
 
         public class Lighting
         {
-            public bool enabled = false;
-            public bool castShadows = false;
-            [JsonConverter(typeof(StringEnumConverter))] public ShadowResolution shadowResolution = ShadowResolution.Medium;
+            [JsonConverter(typeof(StringEnumConverter))] public LightingQuality quality = LightingQuality.Off;
             public bool enableDynamicLighting = false;
         }
 

@@ -126,8 +126,6 @@ namespace CustomAvatar.Lighting
 
                         light.type = LightType.Directional;
                         light.color = Color.black;
-                        light.shadows = LightShadows.None; // shadows murder fps since there's so many lights being added
-                        light.renderMode = LightRenderMode.ForceVertex; // reduce performance toll
                         light.intensity = 0;
                         light.spotAngle = 45;
                         light.cullingMask = AvatarLayers.kAllLayersMask;
@@ -183,7 +181,6 @@ namespace CustomAvatar.Lighting
             light.intensity = 0.35f;
             light.shadows = LightShadows.Hard;
             light.range = 5;
-            light.renderMode = LightRenderMode.ForcePixel;
             light.cullingMask = AvatarLayers.kAllLayersMask;
 
             light.transform.SetParent(parent, false);

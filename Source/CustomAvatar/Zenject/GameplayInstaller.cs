@@ -26,7 +26,7 @@ namespace CustomAvatar.Zenject
         {
             Settings settings = Container.Resolve<Settings>();
 
-            if (settings.lighting.enabled && settings.lighting.enableDynamicLighting)
+            if (settings.lighting.quality != LightingQuality.Off && settings.lighting.enableDynamicLighting)
             {
                 Container.Bind<GameplayLightingController>().FromNewComponentOnNewGameObject().NonLazy();
             }
