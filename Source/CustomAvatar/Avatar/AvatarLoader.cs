@@ -133,14 +133,14 @@ namespace CustomAvatar.Avatar
 
                 foreach (LoadHandlers handler in _handlers[fullPath])
                 {
-                    handler.error?.Invoke(ex);
+                    handler.error?.Invoke(new AvatarLoadException("Failed to load avatar", ex));
                 }
             }
 
             _handlers.Remove(fullPath);
         }
 
-        private class LoadHandlers
+        private struct LoadHandlers
         {
             internal readonly Action<LoadedAvatar> success;
             internal readonly Action<Exception> error;
