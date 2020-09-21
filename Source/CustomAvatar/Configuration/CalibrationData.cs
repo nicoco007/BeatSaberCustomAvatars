@@ -107,6 +107,7 @@ namespace CustomAvatar.Configuration
                     if (!IsValidFileName(fileName))
                     {
                         _logger.Warning($"'{fileName}' is not a valid file name; skipped");
+                        continue;
                     }
 
                     string fullPath = Path.Combine(PlayerAvatarManager.kCustomAvatarsPath, fileName);
@@ -114,6 +115,7 @@ namespace CustomAvatar.Configuration
                     if (!File.Exists(fullPath))
                     {
                         _logger.Warning($"'{fullPath}' no longer exists; skipped");
+                        continue;
                     }
 
                     if (!_manualCalibration.ContainsKey(fileName))
@@ -157,7 +159,7 @@ namespace CustomAvatar.Configuration
 
         private bool IsValidFileName(string str)
         {
-            return !str.Any(c => Path.GetInvalidFileNameChars().Contains(c));
+            return !string.IsNullOrEmpty(str) && !str.Any(c => Path.GetInvalidFileNameChars().Contains(c));
         }
         
         public class FullBodyCalibration

@@ -20,6 +20,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using CustomAvatar.Avatar;
+using CustomAvatar.Lighting;
 using CustomAvatar.Tracking;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -27,14 +28,6 @@ using UnityEngine;
 
 namespace CustomAvatar.Configuration
 {
-    // ReSharper disable ClassNeverInstantiated.Global
-    // ReSharper disable ClassWithVirtualMembersNeverInherited.Global
-    // ReSharper disable RedundantDefaultMemberInitializer
-    // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
-    // ReSharper disable AutoPropertyCanBeMadeGetOnly.Local
-    // ReSharper disable UnusedMember.Global
-    // ReSharper disable FieldCanBeMadeReadOnly.Global
-    // ReSharper disable InconsistentNaming
     internal class Settings
     {
         public event Action<bool> firstPersonEnabledChanged;
@@ -68,6 +61,7 @@ namespace CustomAvatar.Configuration
         public string previousAvatarPath = null;
         public float playerArmSpan = AvatarTailor.kDefaultPlayerArmSpan;
         public bool calibrateFullBodyTrackingOnStart = false;
+        public bool enableLocomotion = true;
         public float cameraNearClipPlane = 0.1f;
         public readonly Lighting lighting = new Lighting();
         public readonly Mirror mirror = new Mirror();
@@ -101,9 +95,7 @@ namespace CustomAvatar.Configuration
 
         public class Lighting
         {
-            public bool enabled = false;
-            public bool castShadows = false;
-            [JsonConverter(typeof(StringEnumConverter))] public ShadowResolution shadowResolution = ShadowResolution.Medium;
+            [JsonConverter(typeof(StringEnumConverter))] public LightingQuality quality = LightingQuality.Off;
             public bool enableDynamicLighting = false;
         }
 
@@ -116,8 +108,8 @@ namespace CustomAvatar.Configuration
 
         public class FullBodyMotionSmoothing
         {
-            public readonly TrackedPointSmoothing waist = new TrackedPointSmoothing { position = 15, rotation = 10 };
-            public readonly TrackedPointSmoothing feet = new TrackedPointSmoothing { position = 13, rotation = 17 };
+            public readonly TrackedPointSmoothing waist = new TrackedPointSmoothing { position = 0.5f, rotation = 0.2f };
+            public readonly TrackedPointSmoothing feet = new TrackedPointSmoothing { position = 0.5f, rotation = 0.2f };
         }
 
         public class TrackedPointSmoothing

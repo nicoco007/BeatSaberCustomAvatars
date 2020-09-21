@@ -30,6 +30,7 @@ namespace CustomAvatar.UI
 
         [UIComponent("visible-in-first-person")] private CheckboxSetting _visibleInFirstPerson;
         [UIComponent("resize-mode")] private ListSetting _resizeMode;
+        [UIComponent("enable-locomotion")] private CheckboxSetting _enableLocomotion;
         [UIComponent("floor-adjust")] private CheckboxSetting _floorHeightAdjust;
         [UIComponent("move-floor-with-room-adjust")] private CheckboxSetting _moveFloorWithRoomAdjust;
         [UIComponent("camera-clip-plane")] private IncrementSetting _cameraNearClipPlane;
@@ -39,15 +40,12 @@ namespace CustomAvatar.UI
         #endregion
 
         #region Values
-        // ReSharper disable UnusedMember.Local
 
         [UIValue("resize-mode-options")] private readonly List<object> _resizeModeOptions = new List<object> { AvatarResizeMode.None, AvatarResizeMode.Height, AvatarResizeMode.ArmSpan };
         
-        // ReSharper restore UnusedMember.Local
         #endregion
 
         #region Actions
-        // ReSharper disable UnusedMember.Local
 
         [UIAction("visible-in-first-person-change")]
         private void OnVisibleInFirstPersonChanged(bool value)
@@ -78,6 +76,13 @@ namespace CustomAvatar.UI
                 default:
                     return null;
             }
+        }
+
+        [UIAction("enable-locomotion-change")]
+        private void OnEnableLocomotionChanged(bool value)
+        {
+            _settings.enableLocomotion = value;
+            _avatarManager.UpdateLocomotionEnabled();
         }
 
         [UIAction("floor-adjust-change")]
@@ -117,7 +122,6 @@ namespace CustomAvatar.UI
             _settings.moveFloorWithRoomAdjust = value;
         }
         
-        // ReSharper restore UnusedMember.Local
         #endregion
 
         #region Arm Span Measurement

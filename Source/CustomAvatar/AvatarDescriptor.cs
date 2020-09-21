@@ -16,20 +16,49 @@
 
 using UnityEngine;
 
+#if UNITY_EDITOR
+using CustomAvatar.Logging;
+using CustomAvatar.Utilities;
+#endif
+
 namespace CustomAvatar
 {
-    // ReSharper disable ConvertToAutoProperty
-    // ReSharper disable once ClassNeverInstantiated.Global
+    /// <summary>
+    /// Container for an avatar's name and other information configured before exportation.
+    /// </summary>
     public class AvatarDescriptor : MonoBehaviour, ISerializationCallbackReceiver
     {
+        /// <summary>
+        /// Avatar's name.
+        /// </summary>
+        [Tooltip("Avatar's name.")]
         public new string name;
+
+        /// <summary>
+        /// Avatar creator's name.
+        /// </summary>
+        [Tooltip("Avatar creator's name.")]
         public string author;
+
+        /// <summary>
+        /// Whether or not to allow height calibration for this avatar.
+        /// </summary>
+        [Tooltip("Whether or not to allow height calibration for this avatar.")]
         public bool allowHeightCalibration = true;
+
+        /// <summary>
+        /// Whether or not this avatar supports automatic calibration. Note that this requires specific setup of the waist and feet trackers.
+        /// </summary>
+        [Tooltip("Whether or not this avatar supports automatic calibration. Note that this requires specific setup of the waist and feet trackers.")]
         public bool supportsAutomaticCalibration = false;
+
+        /// <summary>
+        /// The image shown in the in-game avatars list.
+        /// </summary>
+        [Tooltip("The image shown in the in-game avatars list.")]
         public Sprite cover;
 
         // Legacy stuff
-        // ReSharper disable InconsistentNaming
         #pragma warning disable 649
         [SerializeField] [HideInInspector] private string AvatarName;
         [SerializeField] [HideInInspector] private string AuthorName;
@@ -38,7 +67,6 @@ namespace CustomAvatar
         [SerializeField] [HideInInspector] private string Author;
         [SerializeField] [HideInInspector] private Sprite Cover;
         #pragma warning restore 649
-        // ReSharper restore InconsistentNaming
 
         public void OnBeforeSerialize() { }
 
@@ -48,5 +76,13 @@ namespace CustomAvatar
             author = author ?? Author ?? AuthorName;
             cover = cover ?? Cover ?? CoverImage;
         }
+
+        #if UNITY_EDITOR
+        public void Start()
+        {
+            IKHelper ikHelper = new IKHelper(new EditorLoggerProvider());
+            ikHelper.InitializeVRIK(transform.GetComponentInChildren<VRIKManager>(), transform);
+        }
+        #endif
     }
 }

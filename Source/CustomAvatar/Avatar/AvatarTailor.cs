@@ -132,11 +132,9 @@ namespace CustomAvatar.Avatar
             // apply offset
 			spawnedAvatar.verticalPosition = floorOffset;
             
-            // ReSharper disable Unity.PerformanceCriticalCodeInvocation
             GameObject menuPlayersPlace = GameObject.Find("MenuPlayersPlace");
             GameObject originalFloor = GameObject.Find("Environment/PlayersPlace");
             GameObject customFloor = GameObject.Find("Platform Loader");
-            // ReSharper disable restore Unity.PerformanceCriticalCodeInvocation
 
             if (menuPlayersPlace)
             {

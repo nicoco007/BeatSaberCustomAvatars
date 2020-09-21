@@ -65,12 +65,13 @@ namespace CustomAvatar.UI
 
             _visibleInFirstPerson.CheckboxValue = _settings.isAvatarVisibleInFirstPerson;
             _resizeMode.Value = _settings.resizeMode;
+            _enableLocomotion.CheckboxValue = _settings.enableLocomotion;
             _floorHeightAdjust.CheckboxValue = _settings.enableFloorAdjust;
             _moveFloorWithRoomAdjust.CheckboxValue = _settings.moveFloorWithRoomAdjust;
             _calibrateFullBodyTrackingOnStart.CheckboxValue = _settings.calibrateFullBodyTrackingOnStart;
             _cameraNearClipPlane.Value = _settings.cameraNearClipPlane;
 
-            UpdateUI(_avatarManager.currentlySpawnedAvatar.avatar);
+            UpdateUI(_avatarManager.currentlySpawnedAvatar?.avatar);
             OnInputDevicesChanged(null, DeviceUse.Unknown);
 
             _armSpanLabel.SetText($"{_settings.playerArmSpan:0.00} m");
@@ -157,7 +158,7 @@ namespace CustomAvatar.UI
 
         private void OnInputDevicesChanged(TrackedDeviceState state, DeviceUse use)
         {
-            UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.avatar);
+            UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar?.avatar);
         }
 
         private void UpdateCalibrationButtons(LoadedAvatar avatar)

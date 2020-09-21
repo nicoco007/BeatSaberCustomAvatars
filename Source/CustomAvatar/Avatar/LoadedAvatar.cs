@@ -28,26 +28,62 @@ using VRIK = BeatSaberFinalIK::RootMotion.FinalIK.VRIK;
 
 namespace CustomAvatar.Avatar
 {
+    /// <summary>
+    /// Contains static information about an avatar. 
+    /// </summary>
     public class LoadedAvatar
     {
+        /// <summary>
+        /// The name of the file from which the avatar was loaded.
+        /// </summary>
         public readonly string fileName;
+
+        /// <summary>
+        /// The full path of the file from which the avatar was loaded.
+        /// </summary>
         public readonly string fullPath;
+
+        /// <summary>
+        /// The avatar prefab.
+        /// </summary>
         public readonly GameObject prefab;
+
+        /// <summary>
+        /// The <see cref="AvatarDescriptor"/> retrieved from the root object on the prefab.
+        /// </summary>
         public readonly AvatarDescriptor descriptor;
 
+        /// <summary>
+        /// Whether or not this avatar has IK.
+        /// </summary>
         public readonly bool isIKAvatar;
+
+        /// <summary>
+        /// Whether or not this avatar has one or more full body (pelvis/feet) tracking points
+        /// </summary>
         public readonly bool supportsFullBodyTracking;
+
+        /// <summary>
+        /// Whether or not this avatar supports finger tracking.
+        /// </summary>
         public readonly bool supportsFingerTracking;
 
+        /// <summary>
+        /// The avatar's eye height.
+        /// </summary>
         public readonly float eyeHeight;
+
+        /// <summary>
+        /// The avatar's estimated arm span.
+        /// </summary>
         public readonly float armSpan;
 
-        private readonly Transform _head;
-        private readonly Transform _leftHand;
-        private readonly Transform _rightHand;
-        private readonly Transform _leftLeg;
-        private readonly Transform _rightLeg;
-        private readonly Transform _pelvis;
+        internal readonly Transform head;
+        internal readonly Transform leftHand;
+        internal readonly Transform rightHand;
+        internal readonly Transform leftLeg;
+        internal readonly Transform rightLeg;
+        internal readonly Transform pelvis;
 
         private ILogger<LoadedAvatar> _logger;
 
@@ -61,9 +97,15 @@ namespace CustomAvatar.Avatar
 
             _logger = loggerProvider.CreateLogger<LoadedAvatar>(descriptor.name);
 
-            VRIKManager vrikManager = prefab.GetComponentInChildren<VRIKManager>();
+            head      = prefab.transform.Find("Head");
+            leftHand  = prefab.transform.Find("LeftHand");
+            rightHand = prefab.transform.Find("RightHand");
+            pelvis    = prefab.transform.Find("Pelvis");
+            leftLeg   = prefab.transform.Find("LeftLeg");
+            rightLeg  = prefab.transform.Find("RightLeg");
 
             #pragma warning disable CS0618
+            VRIKManager vrikManager = prefab.GetComponentInChildren<VRIKManager>();
             IKManager ikManager = prefab.GetComponentInChildren<IKManager>();
             #pragma warning restore CS0618
 
@@ -76,6 +118,15 @@ namespace CustomAvatar.Avatar
 
                 ApplyIKManagerFields(vrikManager, ikManager);
                 Object.Destroy(ikManager);
+            }
+
+            if (vrikManager)
+            {
+                if (!vrikManager.areReferencesFilled)
+                {
+                    _logger.Warning($"References are not filled on '{vrikManager.name}'; detecting references automatically");
+                    vrikManager.AutoDetectReferences();
+                }
             }
 
             // remove any existing VRIK instances
@@ -92,27 +143,25 @@ namespace CustomAvatar.Avatar
                 Object.Destroy(existingVrik);
             }
 
-            _head      = prefab.transform.Find("Head");
-            _leftHand  = prefab.transform.Find("LeftHand");
-            _rightHand = prefab.transform.Find("RightHand");
-            _pelvis    = prefab.transform.Find("Pelvis");
-            _leftLeg   = prefab.transform.Find("LeftLeg");
-            _rightLeg  = prefab.transform.Find("RightLeg");
-
             if (vrikManager)
             {
-                if (!vrikManager.areReferencesFilled)
+                if (vrikManager.references_root != vrikManager.transform)
                 {
-                    vrikManager.AutoDetectReferences();
+                    _logger.Warning("VRIKManager is not on the root reference transform; this may cause unexpected issues");
                 }
 
                 FixTrackingReferences(vrikManager);
             }
 
+            if (prefab.transform.localPosition.sqrMagnitude > 0)
+            {
+                _logger.Warning("Avatar root position is not at origin; this may cause unexpected issues");
+            }
+
             var poseManager = prefab.GetComponentInChildren<PoseManager>();
 
             isIKAvatar = vrikManager;
-            supportsFullBodyTracking = _pelvis || _leftLeg || _rightLeg;
+            supportsFullBodyTracking = pelvis || leftLeg || rightLeg;
             supportsFingerTracking = poseManager && poseManager.isValid;
 
             eyeHeight = GetEyeHeight();
@@ -121,24 +170,24 @@ namespace CustomAvatar.Avatar
 
         private float GetEyeHeight()
         {
-            if (!_head)
+            if (!head)
             {
                 _logger.Warning("Avatar does not have a head tracking reference");
                 return MainSettingsModelSO.kDefaultPlayerHeight - MainSettingsModelSO.kHeadPosToPlayerHeightOffset;
             }
 
             // many avatars rely on this being global because their root position isn't at (0, 0, 0)
-            return _head.position.y;
+            return head.position.y;
         }
 
         private void FixTrackingReferences(VRIKManager vrikManager)
         {
-            FixTrackingReference("Head",       _head,      vrikManager.references_head,                                          vrikManager.solver_spine_headTarget);
-            FixTrackingReference("Left Hand",  _leftHand,  vrikManager.references_leftHand,                                      vrikManager.solver_leftArm_target);
-            FixTrackingReference("Right Hand", _rightHand, vrikManager.references_rightHand,                                     vrikManager.solver_rightArm_target);
-            FixTrackingReference("Waist",      _pelvis,    vrikManager.references_pelvis,                                        vrikManager.solver_spine_pelvisTarget);
-            FixTrackingReference("Left Foot",  _leftLeg,   vrikManager.references_leftToes  ?? vrikManager.references_leftFoot,  vrikManager.solver_leftLeg_target);
-            FixTrackingReference("Right Foot", _rightLeg,  vrikManager.references_rightToes ?? vrikManager.references_rightFoot, vrikManager.solver_rightLeg_target);
+            FixTrackingReference("Head",       head,      vrikManager.references_head,                                          vrikManager.solver_spine_headTarget);
+            FixTrackingReference("Left Hand",  leftHand,  vrikManager.references_leftHand,                                      vrikManager.solver_leftArm_target);
+            FixTrackingReference("Right Hand", rightHand, vrikManager.references_rightHand,                                     vrikManager.solver_rightArm_target);
+            FixTrackingReference("Waist",      pelvis,    vrikManager.references_pelvis,                                        vrikManager.solver_spine_pelvisTarget);
+            FixTrackingReference("Left Foot",  leftLeg,   vrikManager.references_leftToes  ?? vrikManager.references_leftFoot,  vrikManager.solver_leftLeg_target);
+            FixTrackingReference("Right Foot", rightLeg,  vrikManager.references_rightToes ?? vrikManager.references_rightFoot, vrikManager.solver_rightLeg_target);
         }
 
         private void FixTrackingReference(string name, Transform tracker, Transform reference, Transform target)
@@ -191,14 +240,14 @@ namespace CustomAvatar.Avatar
                 return AvatarTailor.kDefaultPlayerArmSpan;
             }
 
-            if (!_leftHand || !_rightHand)
+            if (!leftHand || !rightHand)
             {
                 _logger.Warning("Could not calculate avatar arm span due to missing tracking references");
                 return AvatarTailor.kDefaultPlayerArmSpan;
             }
 
-            float leftArmLength = Vector3.Distance(leftShoulder.position, leftUpperArm.position) + Vector3.Distance(leftUpperArm.position, leftLowerArm.position) + Vector3.Distance(leftLowerArm.position, _leftHand.position);
-            float rightArmLength = Vector3.Distance(rightShoulder.position, rightUpperArm.position) + Vector3.Distance(rightUpperArm.position, rightLowerArm.position) + Vector3.Distance(rightLowerArm.position, _rightHand.position);
+            float leftArmLength = Vector3.Distance(leftShoulder.position, leftUpperArm.position) + Vector3.Distance(leftUpperArm.position, leftLowerArm.position) + Vector3.Distance(leftLowerArm.position, leftHand.position);
+            float rightArmLength = Vector3.Distance(rightShoulder.position, rightUpperArm.position) + Vector3.Distance(rightUpperArm.position, rightLowerArm.position) + Vector3.Distance(rightLowerArm.position, rightHand.position);
             float shoulderToShoulderDistance = Vector3.Distance(leftShoulder.position, rightShoulder.position);
 
             float totalLength = leftArmLength + shoulderToShoulderDistance + rightArmLength;

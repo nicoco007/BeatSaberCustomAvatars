@@ -25,9 +25,19 @@ using Zenject;
 
 namespace CustomAvatar.Avatar
 {
+    /// <summary>
+    /// Represents a <see cref="LoadedAvatar"/> that has been spawned into the game.
+    /// </summary>
 	public class SpawnedAvatar : MonoBehaviour
 	{
+        /// <summary>
+        /// The <see cref="LoadedAvatar"/> used as a reference.
+        /// </summary>
 		public LoadedAvatar avatar { get; private set; }
+
+        /// <summary>
+        /// The <see cref="IAvatarInput"/> used for tracking.
+        /// </summary>
 		public IAvatarInput input { get; private set; }
 
         public float verticalPosition
@@ -36,6 +46,9 @@ namespace CustomAvatar.Avatar
             set => transform.localPosition = new Vector3(transform.localPosition.x, _initialLocalPosition.y + value, transform.localPosition.z);
         }
 
+        /// <summary>
+        /// The avatar's scale as a ratio of it's exported scale (i.e. it is initially 1 even if the avatar was exported with a different scale).
+        /// </summary>
         public float scale
         {
             get => transform.localScale.y / _initialLocalScale.y;
@@ -49,17 +62,19 @@ namespace CustomAvatar.Avatar
             }
         }
 
-        public Transform head { get; private set; }
-        public Transform body { get; private set; }
-        public Transform leftHand { get; private set; }
-        public Transform rightHand { get; private set; }
-        public Transform leftLeg { get; private set; }
-        public Transform rightLeg { get; private set; }
-        public Transform pelvis { get; private set; }
+        internal Transform head { get; private set; }
+        internal Transform body { get; private set; }
+        internal Transform leftHand { get; private set; }
+        internal Transform rightHand { get; private set; }
+        internal Transform leftLeg { get; private set; }
+        internal Transform rightLeg { get; private set; }
+        internal Transform pelvis { get; private set; }
 
-		public AvatarTracking tracking { get; private set; }
-        public AvatarIK ik { get; private set; }
-        public AvatarFingerTracking fingerTracking { get; private set; }
+		internal AvatarTracking tracking { get; private set; }
+        internal AvatarIK ik { get; private set; }
+        internal AvatarFingerTracking fingerTracking { get; private set; }
+
+        internal bool isLocomotionEnabled { get; private set; }
 
         private ILogger<SpawnedAvatar> _logger;
         private DiContainer _container;
@@ -75,6 +90,16 @@ namespace CustomAvatar.Avatar
         private Vector3 _initialLocalPosition;
         private Vector3 _initialLocalScale;
 
+        public void SetLocomotionEnabled(bool enabled)
+        {
+            isLocomotionEnabled = enabled;
+
+            if (ik)
+            {
+                ik.SetLocomotionEnabled(enabled);
+            }
+        }
+
         public void EnableCalibrationMode()
         {
             if (_isCalibrationModeEnabled || !ik) return;
@@ -82,7 +107,7 @@ namespace CustomAvatar.Avatar
             _isCalibrationModeEnabled = true;
 
             tracking.isCalibrationModeEnabled = true;
-            ik.EnableCalibrationMode();
+            ik.SetCalibrationModeEnabled(true);
         }
 
         public void DisableCalibrationMode()
@@ -90,7 +115,7 @@ namespace CustomAvatar.Avatar
             if (!_isCalibrationModeEnabled || !ik) return;
 
             tracking.isCalibrationModeEnabled = false;
-            ik.DisableCalibrationMode();
+            ik.SetCalibrationModeEnabled(false);
 
             _isCalibrationModeEnabled = false;
         }
@@ -108,7 +133,7 @@ namespace CustomAvatar.Avatar
                     ApplyFirstPersonExclusions();
                     break;
 
-                case FirstPersonVisibility.None:
+                case FirstPersonVisibility.Hidden:
                     SetChildrenToLayer(AvatarLayers.kOnlyInThirdPerson);
                     break;
             }
@@ -159,11 +184,6 @@ namespace CustomAvatar.Avatar
             if (avatar.supportsFingerTracking)
             {
                 fingerTracking = _container.InstantiateComponent<AvatarFingerTracking>(gameObject);
-            }
-
-            if (_initialLocalPosition.sqrMagnitude > 0)
-            {
-                _logger.Warning("Avatar root position is not at origin; resizing by height and floor adjust may not work properly.");
             }
 
             DontDestroyOnLoad(this);

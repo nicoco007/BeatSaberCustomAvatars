@@ -62,9 +62,13 @@ namespace CustomAvatar.Zenject
             Container.Bind<MirrorHelper>().AsTransient();
             Container.Bind<AvatarSpawner>().AsTransient();
             Container.Bind<GameScenesHelper>().AsTransient();
+            Container.Bind<IKHelper>().AsTransient();
 
             // behaviours
-            Container.Bind<MenuLightingController>().FromNewComponentOnNewGameObject().NonLazy();
+            if (Container.Resolve<Settings>().lighting.quality != LightingQuality.Off)
+            {
+                Container.Bind<TwoSidedLightingController>().FromNewComponentOnNewGameObject().NonLazy();
+            }
 
             // not sure if this is a great idea but w/e
             if (!Container.HasBinding<MainSettingsModelSO>())

@@ -27,6 +27,9 @@ using Object = UnityEngine.Object;
 
 namespace CustomAvatar.Avatar
 {
+    /// <summary>
+    /// Manages the player's local avatar.
+    /// </summary>
     public class PlayerAvatarManager : IInitializable, IDisposable
     {
         public static readonly string kCustomAvatarsPath = Path.GetFullPath("CustomAvatars");
@@ -34,9 +37,20 @@ namespace CustomAvatar.Avatar
         public static readonly byte[] kCacheFileSignature = { 0x43, 0x41, 0x64, 0x62  }; // Custom Avatars Database (CAdb)
         public static readonly byte kCacheFileVersion = 1;
 
-        internal SpawnedAvatar currentlySpawnedAvatar { get; private set; }
+        /// <summary>
+        /// The player's currently spawned avatar. This can be null.
+        /// </summary>
+        public SpawnedAvatar currentlySpawnedAvatar { get; private set; }
 
-        internal event Action<SpawnedAvatar> avatarChanged;
+        /// <summary>
+        /// Event triggered when the current avatar is deleted an a new one starts loading. Note that the argument may be null if no avatar was selected to replace the previous one.
+        /// </summary>
+        public event Action<string> avatarStartedLoading;
+
+        /// <summary>
+        /// Event triggered when a new avatar has finished loading and is spawned. Note that the argument may be null if no avatar was selected to replace the previous one.
+        /// </summary>
+        public event Action<SpawnedAvatar> avatarChanged;
 
         private readonly DiContainer _container;
         private readonly ILogger<PlayerAvatarManager> _logger;
@@ -44,6 +58,7 @@ namespace CustomAvatar.Avatar
         private readonly AvatarTailor _avatarTailor;
         private readonly Settings _settings;
         private readonly AvatarSpawner _spawner;
+        private readonly GameScenesManager _gameScenesManager;
 
         private readonly Dictionary<string, AvatarInfo> _avatarInfos = new Dictionary<string, AvatarInfo>();
 
@@ -51,7 +66,7 @@ namespace CustomAvatar.Avatar
         private Settings.AvatarSpecificSettings _currentAvatarSettings;
 
         [Inject]
-        private PlayerAvatarManager(DiContainer container, AvatarTailor avatarTailor, ILoggerProvider loggerProvider, AvatarLoader avatarLoader, Settings settings, AvatarSpawner spawner)
+        private PlayerAvatarManager(DiContainer container, AvatarTailor avatarTailor, ILoggerProvider loggerProvider, AvatarLoader avatarLoader, Settings settings, AvatarSpawner spawner, GameScenesManager gameScenesManager)
         {
             _container = container;
             _logger = loggerProvider.CreateLogger<PlayerAvatarManager>();
@@ -59,6 +74,7 @@ namespace CustomAvatar.Avatar
             _avatarTailor = avatarTailor;
             _settings = settings;
             _spawner = spawner;
+            _gameScenesManager = gameScenesManager;
         }
 
         public void Initialize()
@@ -66,8 +82,9 @@ namespace CustomAvatar.Avatar
             _settings.moveFloorWithRoomAdjustChanged += OnMoveFloorWithRoomAdjustChanged;
             _settings.firstPersonEnabledChanged += OnFirstPersonEnabledChanged;
             BeatSaberUtilities.playerHeightChanged += OnPlayerHeightChanged;
+            _gameScenesManager.transitionDidFinishEvent += OnTransitionDidFinish;
 
-            if (_settings.calibrateFullBodyTrackingOnStart && _settings.GetAvatarSettings(_settings.previousAvatarPath).useAutomaticCalibration)
+            if (_settings.calibrateFullBodyTrackingOnStart && !string.IsNullOrEmpty(_settings.previousAvatarPath) && _settings.GetAvatarSettings(_settings.previousAvatarPath).useAutomaticCalibration)
             {
                 _avatarTailor.CalibrateFullBodyTrackingAuto();
             }
@@ -81,7 +98,9 @@ namespace CustomAvatar.Avatar
             Object.Destroy(currentlySpawnedAvatar);
 
             _settings.moveFloorWithRoomAdjustChanged -= OnMoveFloorWithRoomAdjustChanged;
+            _settings.firstPersonEnabledChanged -= OnFirstPersonEnabledChanged;
             BeatSaberUtilities.playerHeightChanged -= OnPlayerHeightChanged;
+            _gameScenesManager.transitionDidFinishEvent -= OnTransitionDidFinish;
 
             SaveAvatarInfosToFile();
         }
@@ -104,7 +123,7 @@ namespace CustomAvatar.Avatar
 
                 if (_avatarInfos.ContainsKey(fileName) && _avatarInfos[fileName].IsForFile(fullPath))
                 {
-                    _logger.Info($"Using cached information for '{fileName}'");
+                    _logger.Trace($"Using cached information for '{fileName}'");
                     success(_avatarInfos[fileName]);
                 }
                 else
@@ -147,6 +166,7 @@ namespace CustomAvatar.Avatar
             if (string.IsNullOrEmpty(fileName))
             {
                 _switchingToPath = null;
+                avatarStartedLoading?.Invoke(null);
                 SwitchToAvatar(null);
                 return;
             }
@@ -154,6 +174,8 @@ namespace CustomAvatar.Avatar
             string fullPath = Path.Combine(kCustomAvatarsPath, fileName);
 
             _switchingToPath = fullPath;
+
+            avatarStartedLoading?.Invoke(fullPath);
 
             SharedCoroutineStarter.instance.StartCoroutine(_avatarLoader.FromFileCoroutine(fullPath, SwitchToAvatar));
         }
@@ -190,6 +212,7 @@ namespace CustomAvatar.Avatar
 
             ResizeCurrentAvatar();
             UpdateFirstPersonVisibility();
+            UpdateLocomotionEnabled();
 
             avatarChanged?.Invoke(currentlySpawnedAvatar);
         }
@@ -229,7 +252,7 @@ namespace CustomAvatar.Avatar
         {
             if (!currentlySpawnedAvatar) return;
 
-            var visibility = FirstPersonVisibility.None;
+            var visibility = FirstPersonVisibility.Hidden;
 
             if (_settings.isAvatarVisibleInFirstPerson)
             {
@@ -246,6 +269,13 @@ namespace CustomAvatar.Avatar
             currentlySpawnedAvatar.SetFirstPersonVisibility(visibility);
         }
 
+        internal void UpdateLocomotionEnabled()
+        {
+            if (!currentlySpawnedAvatar) return;
+
+            currentlySpawnedAvatar.SetLocomotionEnabled(_settings.enableLocomotion);
+        }
+
         private void OnMoveFloorWithRoomAdjustChanged(bool value)
         {
             ResizeCurrentAvatar();
@@ -257,6 +287,11 @@ namespace CustomAvatar.Avatar
         }
 
         private void OnPlayerHeightChanged(float height)
+        {
+            ResizeCurrentAvatar();
+        }
+
+        private void OnTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
         {
             ResizeCurrentAvatar();
         }

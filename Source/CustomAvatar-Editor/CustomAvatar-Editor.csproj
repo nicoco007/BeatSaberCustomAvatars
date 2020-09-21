@@ -50,37 +50,21 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\CustomAvatar\AvatarDescriptor.cs">
-      <Link>AvatarDescriptor.cs</Link>
-    </Compile>
+    <Compile Include="..\CustomAvatar\AvatarDescriptor.cs" Link="AvatarDescriptor.cs" />
     <Compile Include="..\CustomAvatar\ComboReachedEvent.cs" Link="ComboReachedEvent.cs" />
-    <Compile Include="..\CustomAvatar\EventFilterBehaviour.cs">
-      <Link>EventFilterBehaviour.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\EventManager.cs">
-      <Link>EventManager.cs</Link>
-    </Compile>
+    <Compile Include="..\CustomAvatar\EventFilterBehaviour.cs" Link="EventFilterBehaviour.cs" />
+    <Compile Include="..\CustomAvatar\EventManager.cs" Link="EventManager.cs" />
     <Compile Include="..\CustomAvatar\EveryNthComboFilter.cs" Link="EveryNthComboFilter.cs" />
-    <Compile Include="..\CustomAvatar\FirstPersonExclusion.cs">
-      <Link>FirstPersonExclusion.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\Logging\ILogger.cs">
-      <Link>Logging\ILogger.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\Logging\ILoggerProvider.cs">
-      <Link>Logging\ILoggerProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\Logging\UnityDebugLogger.cs">
-      <Link>Logging\UnityDebugLogger.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\PoseManager.cs">
-      <Link>PoseManager.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\Properties\AssemblyInfo.cs">
-      <Link>Properties\AssemblyInfo.cs</Link>
-    </Compile>
-    <Compile Include="..\CustomAvatar\VRIKManager.cs">
-      <Link>VRIKManager.cs</Link>
-    </Compile>
+    <Compile Include="..\CustomAvatar\FirstPersonExclusion.cs" Link="FirstPersonExclusion.cs" />
+    <Compile Include="..\CustomAvatar\Logging\ILogger.cs" Link="Logging\ILogger.cs" />
+    <Compile Include="..\CustomAvatar\Logging\ILoggerProvider.cs" Link="Logging\ILoggerProvider.cs" />
+    <Compile Include="..\CustomAvatar\Logging\UnityDebugLogger.cs" Link="Logging\UnityDebugLogger.cs" />
+    <Compile Include="..\CustomAvatar\PoseManager.cs" Link="PoseManager.cs" />
+    <Compile Include="..\CustomAvatar\Properties\AssemblyInfo.cs" Link="Properties\AssemblyInfo.cs" />
+    <Compile Include="..\CustomAvatar\Utilities\IKHelper.cs" Link="Utilities\IKHelper.cs" />
+    <Compile Include="..\CustomAvatar\VRIKManager.cs" Link="VRIKManager.cs" />
   </ItemGroup>
+  <Target Name="CopyUnityProjectFiles" AfterTargets="AfterBuild" Condition="$(UnityProjectDir) != ''">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(UnityProjectDir)\Assets" />
+  </Target>
 </Project>

@@ -1,7 +1,7 @@
 pipeline {
   agent {
     node {
-      label "windows && vs-15"
+      label "windows && vs-19 && beat-saber"
     }
   }
   environment {

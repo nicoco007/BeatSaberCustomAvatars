@@ -18,8 +18,12 @@ using System;
 
 namespace CustomAvatar.Exceptions
 {
+    /// <summary>
+    /// Generic exception that occurs when loading an avatar.
+    /// </summary>
     public class AvatarLoadException : Exception
     {
         internal AvatarLoadException(string message) : base(message) { }
+        internal AvatarLoadException(string message, Exception innerException) : base(message, innerException) { }
     }
 }

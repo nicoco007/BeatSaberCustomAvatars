@@ -48,10 +48,11 @@ namespace CustomAvatar.UI
 
         public void Dispose()
         {
-            if (MenuButtons.IsSingletonAvailable && BSMLParser.IsSingletonAvailable)
+            try
             {
                 MenuButtons.instance.UnregisterButton(menuButton);
             }
+            catch (NullReferenceException) { } // this is usually expected when the game is shutting down
         }
 
         [Inject]

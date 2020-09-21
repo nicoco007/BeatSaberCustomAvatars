@@ -58,6 +58,7 @@ namespace CustomAvatar.StereoRendering
             if (!mainCamera)
             {
                 _logger.Warning("Main camera not found");
+                return;
             }
 
             _logger.Info($"Setting avatar culling mask and near clip plane on '{mainCamera.name}'");

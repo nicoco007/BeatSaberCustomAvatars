@@ -44,15 +44,12 @@ namespace CustomAvatar.UI
         #endregion
 
         #region Values
-        // ReSharper disable UnusedMember.Local
 
         [UIValue("waist-tracker-position-options")] private readonly List<object> _waistTrackerOptions = new List<object> { WaistTrackerPosition.Front, WaistTrackerPosition.Left, WaistTrackerPosition.Right, WaistTrackerPosition.Back };
         
-        // ReSharper restore UnusedMember.Local
         #endregion
 
         #region Actions
-        // ReSharper disable UnusedMember.Local
 
         [UIAction("calibrate-fbt-on-start-change")]
         private void OnCalibrateFullBodyTrackingOnStartChanged(bool value)
@@ -95,7 +92,6 @@ namespace CustomAvatar.UI
             _settings.automaticCalibration.waistTrackerPosition = waistTrackerPosition;
         }
         
-        // ReSharper restore UnusedMember.Local
         #endregion
     }
 }

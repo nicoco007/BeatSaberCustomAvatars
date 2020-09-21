@@ -19,7 +19,6 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
-// ReSharper disable InconsistentNaming
 namespace CustomAvatar
 {
     [ExecuteAlways]

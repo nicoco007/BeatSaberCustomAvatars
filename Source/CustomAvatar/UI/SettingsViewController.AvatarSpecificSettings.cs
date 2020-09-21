@@ -54,7 +54,6 @@ namespace CustomAvatar.UI
         private GameObject _rightFootSphere;
 
         #region Actions
-        // ReSharper disable UnusedMember.Local
 
         [UIAction("ignore-exclusions-change")]
         private void OnIgnoreExclusionsChanged(bool value)
@@ -103,7 +102,6 @@ namespace CustomAvatar.UI
             }
         }
         
-        // ReSharper restore UnusedMember.Local
         #endregion
 
         private void EnableCalibrationMode()

@@ -24,6 +24,9 @@ using Zenject;
 
 namespace CustomAvatar.Avatar
 {
+    /// <summary>
+    /// Allows loading <see cref="LoadedAvatar"/> from various sources.
+    /// </summary>
     public class AvatarLoader
     {
         private const string kGameObjectName = "_CustomAvatar";
@@ -40,6 +43,13 @@ namespace CustomAvatar.Avatar
         }
 
         // TODO from stream/memory
+        /// <summary>
+        /// Load an avatar from a file.
+        /// </summary>
+        /// <param name="path">Path to the .avatar file</param>
+        /// <param name="success">Action to call if the avatar is loaded successfully</param>
+        /// <param name="error">Action to call if the avatar isn't loaded successfully</param>
+        /// <returns><see cref="IEnumerator{AsyncOperation}"/></returns>
         public IEnumerator<AsyncOperation> FromFileCoroutine(string path, Action<LoadedAvatar> success = null, Action<Exception> error = null)
         {
             if (string.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
@@ -123,14 +133,14 @@ namespace CustomAvatar.Avatar
 
                 foreach (LoadHandlers handler in _handlers[fullPath])
                 {
-                    handler.error?.Invoke(ex);
+                    handler.error?.Invoke(new AvatarLoadException("Failed to load avatar", ex));
                 }
             }
 
             _handlers.Remove(fullPath);
         }
 
-        private class LoadHandlers
+        private struct LoadHandlers
         {
             internal readonly Action<LoadedAvatar> success;
             internal readonly Action<Exception> error;

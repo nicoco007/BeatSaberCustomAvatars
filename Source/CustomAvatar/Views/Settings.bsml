@@ -5,6 +5,7 @@
     <settings-container>
       <checkbox-setting text="Visible in First Person" id="visible-in-first-person" on-change="visible-in-first-person-change"/>
       <list-setting text="Resize Mode" id="resize-mode" on-change="resize-mode-change" options="resize-mode-options" formatter="resize-mode-formatter"></list-setting>
+      <checkbox-setting id="enable-locomotion" text="Enable locomotion" hover-hint="Allow feet to be moved automatically to follow your head/body when not using dedicated trackers." on-change="enable-locomotion-change"/>
       <checkbox-setting text="Floor Height Adjust" hover-hint="Move the floor so avatars' feet are flat." id="floor-adjust" on-change="floor-adjust-change"/>
       <checkbox-setting text="Move Floor with Room Adjust" hover-hint="Move the floor along with the game's built-in room adjust." id="move-floor-with-room-adjust" on-change="move-floor-with-room-adjust-change"/>
       <increment-setting id="camera-clip-plane" text="Camera Near Clip Plane" hover-hint="Distance from the eyes at which the camera starts rendering" min="0.01" max="0.3" increment="0.01" on-change="camera-clip-plane-change"></increment-setting>
