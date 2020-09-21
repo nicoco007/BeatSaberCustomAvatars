@@ -37,9 +37,20 @@ namespace CustomAvatar.Avatar
         public static readonly byte[] kCacheFileSignature = { 0x43, 0x41, 0x64, 0x62  }; // Custom Avatars Database (CAdb)
         public static readonly byte kCacheFileVersion = 1;
 
-        internal SpawnedAvatar currentlySpawnedAvatar { get; private set; }
+        /// <summary>
+        /// The player's currently spawned avatar. This can be null.
+        /// </summary>
+        public SpawnedAvatar currentlySpawnedAvatar { get; private set; }
 
-        internal event Action<SpawnedAvatar> avatarChanged;
+        /// <summary>
+        /// Event triggered when the current avatar is deleted an a new one starts loading. Note that the argument may be null if no avatar was selected to replace the previous one.
+        /// </summary>
+        public event Action<string> avatarStartedLoading;
+
+        /// <summary>
+        /// Event triggered when a new avatar has finished loading and is spawned. Note that the argument may be null if no avatar was selected to replace the previous one.
+        /// </summary>
+        public event Action<SpawnedAvatar> avatarChanged;
 
         private readonly DiContainer _container;
         private readonly ILogger<PlayerAvatarManager> _logger;
@@ -155,6 +166,7 @@ namespace CustomAvatar.Avatar
             if (string.IsNullOrEmpty(fileName))
             {
                 _switchingToPath = null;
+                avatarStartedLoading?.Invoke(null);
                 SwitchToAvatar(null);
                 return;
             }
@@ -162,6 +174,8 @@ namespace CustomAvatar.Avatar
             string fullPath = Path.Combine(kCustomAvatarsPath, fileName);
 
             _switchingToPath = fullPath;
+
+            avatarStartedLoading?.Invoke(fullPath);
 
             SharedCoroutineStarter.instance.StartCoroutine(_avatarLoader.FromFileCoroutine(fullPath, SwitchToAvatar));
         }
