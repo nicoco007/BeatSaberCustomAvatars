@@ -23,21 +23,39 @@ using CustomAvatar.Utilities;
 
 namespace CustomAvatar
 {
+    /// <summary>
+    /// Container for an avatar's name and other information configured before exportation.
+    /// </summary>
     public class AvatarDescriptor : MonoBehaviour, ISerializationCallbackReceiver
     {
-        [Tooltip("Avatar's name")]
+        /// <summary>
+        /// Avatar's name.
+        /// </summary>
+        [Tooltip("Avatar's name.")]
         public new string name;
 
-        [Tooltip("Avatar creator's name")]
+        /// <summary>
+        /// Avatar creator's name.
+        /// </summary>
+        [Tooltip("Avatar creator's name.")]
         public string author;
 
+        /// <summary>
+        /// Whether or not to allow height calibration for this avatar.
+        /// </summary>
         [Tooltip("Whether or not to allow height calibration for this avatar.")]
         public bool allowHeightCalibration = true;
 
+        /// <summary>
+        /// Whether or not this avatar supports automatic calibration. Note that this requires specific setup of the waist and feet trackers.
+        /// </summary>
         [Tooltip("Whether or not this avatar supports automatic calibration. Note that this requires specific setup of the waist and feet trackers.")]
         public bool supportsAutomaticCalibration = false;
 
-        [Tooltip("The image shown in the in-game avatars list")]
+        /// <summary>
+        /// The image shown in the in-game avatars list.
+        /// </summary>
+        [Tooltip("The image shown in the in-game avatars list.")]
         public Sprite cover;
 
         // Legacy stuff

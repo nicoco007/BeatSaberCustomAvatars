@@ -22,6 +22,9 @@ using Zenject;
 
 namespace CustomAvatar.Avatar
 {
+    /// <summary>
+    /// Allows spawning instances of <see cref="LoadedAvatar"/>.
+    /// </summary>
     public class AvatarSpawner
     {
         private readonly ILogger<AvatarSpawner> _logger;
@@ -33,6 +36,13 @@ namespace CustomAvatar.Avatar
             _container = container;
         }
 
+        /// <summary>
+        /// Spawn a <see cref="LoadedAvatar"/>.
+        /// </summary>
+        /// <param name="avatar">The <see cref="LoadedAvatar"/> to spawn</param>
+        /// <param name="input">The <see cref="IAvatarInput"/> to use</param>
+        /// <param name="parent">The container in which to spawn the avatar (optional)</param>
+        /// <returns><see cref="SpawnedAvatar"/></returns>
         public SpawnedAvatar SpawnAvatar(LoadedAvatar avatar, IAvatarInput input, Transform parent = null)
         {
             if (avatar == null) throw new ArgumentNullException(nameof(avatar));

@@ -28,18 +28,54 @@ using VRIK = BeatSaberFinalIK::RootMotion.FinalIK.VRIK;
 
 namespace CustomAvatar.Avatar
 {
+    /// <summary>
+    /// Contains static information about an avatar. 
+    /// </summary>
     public class LoadedAvatar
     {
+        /// <summary>
+        /// The name of the file from which the avatar was loaded.
+        /// </summary>
         public readonly string fileName;
+
+        /// <summary>
+        /// The full path of the file from which the avatar was loaded.
+        /// </summary>
         public readonly string fullPath;
+
+        /// <summary>
+        /// The avatar prefab.
+        /// </summary>
         public readonly GameObject prefab;
+
+        /// <summary>
+        /// The <see cref="AvatarDescriptor"/> retrieved from the root object on the prefab.
+        /// </summary>
         public readonly AvatarDescriptor descriptor;
 
+        /// <summary>
+        /// Whether or not this avatar has IK.
+        /// </summary>
         public readonly bool isIKAvatar;
+
+        /// <summary>
+        /// Whether or not this avatar has one or more full body (pelvis/feet) tracking points
+        /// </summary>
         public readonly bool supportsFullBodyTracking;
+
+        /// <summary>
+        /// Whether or not this avatar supports finger tracking.
+        /// </summary>
         public readonly bool supportsFingerTracking;
 
+        /// <summary>
+        /// The avatar's eye height.
+        /// </summary>
         public readonly float eyeHeight;
+
+        /// <summary>
+        /// The avatar's estimated arm span.
+        /// </summary>
         public readonly float armSpan;
 
         internal readonly Transform head;

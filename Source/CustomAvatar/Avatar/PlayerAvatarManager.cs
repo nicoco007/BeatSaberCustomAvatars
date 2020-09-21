@@ -27,6 +27,9 @@ using Object = UnityEngine.Object;
 
 namespace CustomAvatar.Avatar
 {
+    /// <summary>
+    /// Manages the player's local avatar.
+    /// </summary>
     public class PlayerAvatarManager : IInitializable, IDisposable
     {
         public static readonly string kCustomAvatarsPath = Path.GetFullPath("CustomAvatars");

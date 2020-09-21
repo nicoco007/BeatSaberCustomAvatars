@@ -25,9 +25,19 @@ using Zenject;
 
 namespace CustomAvatar.Avatar
 {
+    /// <summary>
+    /// Represents a <see cref="LoadedAvatar"/> that has been spawned into the game.
+    /// </summary>
 	public class SpawnedAvatar : MonoBehaviour
 	{
+        /// <summary>
+        /// The <see cref="LoadedAvatar"/> used as a reference.
+        /// </summary>
 		public LoadedAvatar avatar { get; private set; }
+
+        /// <summary>
+        /// The <see cref="IAvatarInput"/> used for tracking.
+        /// </summary>
 		public IAvatarInput input { get; private set; }
 
         public float verticalPosition
@@ -36,6 +46,9 @@ namespace CustomAvatar.Avatar
             set => transform.localPosition = new Vector3(transform.localPosition.x, _initialLocalPosition.y + value, transform.localPosition.z);
         }
 
+        /// <summary>
+        /// The avatar's scale as a ratio of it's exported scale (i.e. it is initially 1 even if the avatar was exported with a different scale).
+        /// </summary>
         public float scale
         {
             get => transform.localScale.y / _initialLocalScale.y;
