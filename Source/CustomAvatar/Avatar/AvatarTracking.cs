@@ -26,11 +26,9 @@ using Zenject;
 
 namespace CustomAvatar.Avatar
 {
-    public class AvatarTracking : MonoBehaviour
+    internal class AvatarTracking : MonoBehaviour
     {
-        private Vector3 _prevBodyLocalPosition = Vector3.zero;
-
-        public bool isCalibrationModeEnabled = false;
+        internal bool isCalibrationModeEnabled = false;
 
         private IAvatarInput _input;
         private SpawnedAvatar _spawnedAvatar;
@@ -38,6 +36,8 @@ namespace CustomAvatar.Avatar
         private VRPlatformHelper _vrPlatformHelper;
         private ILogger<AvatarTracking> _logger = new UnityDebugLogger<AvatarTracking>();
         private AvatarTailor _tailor;
+
+        private Vector3 _prevBodyLocalPosition = Vector3.zero;
 
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051

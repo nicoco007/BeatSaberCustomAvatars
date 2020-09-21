@@ -29,7 +29,7 @@ using Zenject;
 
 namespace CustomAvatar.Avatar
 {
-    public class AvatarIK : MonoBehaviour
+    internal class AvatarIK : MonoBehaviour
     {
         private VRIK _vrik;
         private VRIKManager _vrikManager;

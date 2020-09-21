@@ -62,17 +62,17 @@ namespace CustomAvatar.Avatar
             }
         }
 
-        public Transform head { get; private set; }
-        public Transform body { get; private set; }
-        public Transform leftHand { get; private set; }
-        public Transform rightHand { get; private set; }
-        public Transform leftLeg { get; private set; }
-        public Transform rightLeg { get; private set; }
-        public Transform pelvis { get; private set; }
+        internal Transform head { get; private set; }
+        internal Transform body { get; private set; }
+        internal Transform leftHand { get; private set; }
+        internal Transform rightHand { get; private set; }
+        internal Transform leftLeg { get; private set; }
+        internal Transform rightLeg { get; private set; }
+        internal Transform pelvis { get; private set; }
 
-		public AvatarTracking tracking { get; private set; }
-        public AvatarIK ik { get; private set; }
-        public AvatarFingerTracking fingerTracking { get; private set; }
+		internal AvatarTracking tracking { get; private set; }
+        internal AvatarIK ik { get; private set; }
+        internal AvatarFingerTracking fingerTracking { get; private set; }
 
         internal bool isLocomotionEnabled { get; private set; }
 
