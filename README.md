@@ -4,9 +4,7 @@
 [![License](https://img.shields.io/github/license/nicoco007/BeatSaberCustomAvatars?style=flat-square)](https://github.com/nicoco007/BeatSaberCustomAvatars/blob/master/LICENSE)
 
 ## Installing
-Install [BeatSaberMarkupLanguage](https://github.com/monkeymanboy/BeatSaberMarkupLanguage) using one of the many available mod installers for Beat Saber or download the latest version from [BeatMods](https://beatmods.com/).
-
-Install [the latest release of DynamicOpenVR](https://github.com/nicoco007/DynamicOpenVR/releases) by [following the instructions in the repository's README](https://github.com/nicoco007/DynamicOpenVR/blob/master/README.md#Installing).
+Install [BeatSaberMarkupLanguage](https://github.com/monkeymanboy/BeatSaberMarkupLanguage) and [DynamicOpenVR](https://github.com/nicoco007/DynamicOpenVR/releases) using one of the many available mod installers for Beat Saber or download the latest version from [BeatMods](https://beatmods.com/).
 
 Download [the latest release of Custom Avatars](https://github.com/nicoco007/BeatSaberCustomAvatars/releases) and extract **the entire contents** of the ZIP file into your Beat Saber folder (for Steam, this is usually `C:\Program Files (x86)\Steam\steamapps\common\Beat Saber`), **overwriting any existing files**.
 
