@@ -53,22 +53,21 @@ namespace CustomAvatar.Avatar
 
                 if (isCalibrationModeEnabled)
                 {
-                    // TODO fix all of this
                     if (_spawnedAvatar.pelvis)
                     {
-                        _spawnedAvatar.pelvis.position = _spawnedAvatar.avatar.pelvis.position;// * _avatar.scale + new Vector3(0, _avatar.verticalPosition, 0);
+                        _spawnedAvatar.pelvis.position = _spawnedAvatar.avatar.pelvis.position * _spawnedAvatar.scale;
                         _spawnedAvatar.pelvis.rotation = _spawnedAvatar.avatar.pelvis.rotation;
                     }
 
                     if (_spawnedAvatar.leftLeg)
                     {
-                        _spawnedAvatar.leftLeg.position = _spawnedAvatar.avatar.leftLeg.position;// * _avatar.scale + new Vector3(0, _avatar.verticalPosition, 0);
+                        _spawnedAvatar.leftLeg.position = _spawnedAvatar.avatar.leftLeg.position * _spawnedAvatar.scale;
                         _spawnedAvatar.leftLeg.rotation = _spawnedAvatar.avatar.leftLeg.rotation;
                     }
 
                     if (_spawnedAvatar.rightLeg)
                     {
-                        _spawnedAvatar.rightLeg.position = _spawnedAvatar.avatar.rightLeg.position;// * _avatar.scale + new Vector3(0, _avatar.verticalPosition, 0);
+                        _spawnedAvatar.rightLeg.position = _spawnedAvatar.avatar.rightLeg.position * _spawnedAvatar.scale;
                         _spawnedAvatar.rightLeg.rotation = _spawnedAvatar.avatar.rightLeg.rotation;
                     }
                 }
