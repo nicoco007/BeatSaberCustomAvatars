@@ -33,8 +33,8 @@ To resolve references and automatically copy the compiled DLL into Beat Saber's 
     <!-- Replace this with the path to your Beat Saber installation -->
     <BeatSaberDir>C:\Program Files (x86)\Steam\steamapps\common\Beat Saber</BeatSaberDir>
 
-    <!-- Replace this with the path to your Custom Avatars Unity Project (if you have one) -->
-    <BeatSaberDir>C:\Users\Me\Documents\AvatarsUnityProject</BeatSaberDir>
+    <!-- Replace this with the path to your Custom Avatars Unity Project or leave it empty if you don't have one -->
+    <UnityProjectDir>C:\Users\Me\Documents\AvatarsUnityProject</UnityProjectDir>
   </PropertyGroup>
 </Project>
 ```
