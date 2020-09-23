@@ -50,3 +50,9 @@ jobs:
       with:
         name: BeatSaberCustomAvatars-${{ env.ZIP_VERSION }}-Editor
         path: Source\CustomAvatar-Editor\bin\Release\netstandard2.0
+    
+    - name: Upload Unity Project
+      uses: actions/upload-artifact@v2.2.0
+      with:
+        name: BeatSaberCustomAvatars-${{ env.ZIP_VERSION }}-UnityProject
+        path: Unity

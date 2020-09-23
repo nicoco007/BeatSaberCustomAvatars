@@ -6,6 +6,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <DefineConstants>UNITY_EDITOR</DefineConstants>
+    <UnityProjectDir>$(ProjectDir)..\..\Unity\BeatSaberCustomAvatars</UnityProjectDir>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration) == 'Release'">
     <DebugType>none</DebugType>
@@ -70,11 +71,24 @@
     <Compile Include="..\CustomAvatar\Utilities\IKHelper.cs" Link="Utilities\IKHelper.cs" />
     <Compile Include="..\CustomAvatar\VRIKManager.cs" Link="VRIKManager.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <CopyToOutput Include="$(ProjectDir)..\..\Packaging\CustomAvatar-Editor\**\*.*" />
+  </ItemGroup>
   <Target Name="Organize" AfterTargets="AfterBuild">
     <!-- remove deps.json file since it's not used -->
     <Delete Files="$(TargetDir)$(TargetName).deps.json" />
+
+    <MakeDir Directories="$(PublishDir)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PublishDir)" />
+    
+    <!-- copy static files -->
+    <Copy SourceFiles="@(CopyToOutput)" DestinationFiles="@(CopyToOutput->'$(PublishDir)\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
   <Target Name="CopyUnityProjectFiles" AfterTargets="AfterBuild" Condition="$(UnityProjectDir) != ''">
-    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(UnityProjectDir)\Assets" />
+    <ItemGroup>
+      <CopyToUnityProjectFolder Include="$(PublishDir)**\*.*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(CopyToUnityProjectFolder)" DestinationFiles="@(CopyToUnityProjectFolder->'$(UnityProjectDir)\Assets\Libraries\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 </Project>

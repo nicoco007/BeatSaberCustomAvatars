@@ -160,8 +160,7 @@
     <EmbeddedResource Include="Resources\ban.png" />
   </ItemGroup>
   <ItemGroup>
-    <CopyToOutput Include="$(ProjectDir)..\..\Packaging\**\*.*" />
-    <CopyToBeatSaberFolder Include="$(PublishDir)**\*.*" />
+    <CopyToOutput Include="$(ProjectDir)..\..\Packaging\CustomAvatar\**\*.*" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Views\Mirror.bsml" />
@@ -179,6 +178,10 @@
     <Copy SourceFiles="@(CopyToOutput)" DestinationFiles="@(CopyToOutput->'$(PublishDir)\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
   <Target Name="CopyToBeatSaberFolder" AfterTargets="AfterBuild" Condition="$(AutomatedBuild) == 'false' and $(BeatSaberDir) != ''">
+    <ItemGroup>
+      <CopyToBeatSaberFolder Include="$(PublishDir)**\*.*" />
+    </ItemGroup>
+    
     <Copy SourceFiles="@(CopyToBeatSaberFolder)" DestinationFiles="@(CopyToBeatSaberFolder->'$(BeatSaberDir)\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 </Project>
