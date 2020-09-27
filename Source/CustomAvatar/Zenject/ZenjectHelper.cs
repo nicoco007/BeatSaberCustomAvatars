@@ -226,7 +226,7 @@ namespace CustomAvatar.Zenject
             _logger.Info("No-oping BruteForceRestart");
 
             MethodInfo methodToPatch = siraPlugin.GetMethod("BruteForceRestart", BindingFlags.NonPublic | BindingFlags.Instance);
-            MethodInfo patch = typeof(ZenjectHelper).GetMethod(nameof(HarmonyNoop), BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo patch = typeof(ZenjectHelper).GetMethod(nameof(BruteForceRestart), BindingFlags.NonPublic | BindingFlags.Static);
 
             harmony.Patch(methodToPatch, new HarmonyMethod(patch));
         }
@@ -281,7 +281,12 @@ namespace CustomAvatar.Zenject
             }
         }
 
-        private static bool HarmonyNoop() => false;
+        private static bool BruteForceRestart(ref IEnumerator __result)
+        {
+            __result = Enumerable.Empty<object>().GetEnumerator();
+
+            return false;
+        }
 
         private static IEnumerator RestartGame()
         {
