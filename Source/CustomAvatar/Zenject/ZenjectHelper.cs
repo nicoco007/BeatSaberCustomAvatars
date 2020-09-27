@@ -15,12 +15,15 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using CustomAvatar.Logging;
+using CustomAvatar.Utilities;
 using HarmonyLib;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Zenject;
 using Logger = IPA.Logging.Logger;
 
@@ -34,8 +37,12 @@ namespace CustomAvatar.Zenject
         public static readonly string kMenuViewControllersSceneName = "MenuViewControllers";
         public static readonly string kGameplaySceneName = "GameplayCore";
 
+        private static readonly string kExpectedFirstSceneLoaded = "PCInit";
+
         private static ILogger<ZenjectHelper> _logger;
-        private static Harmony _harmony;
+
+        private static bool isFirstSceneLoaded;
+        private static bool isRestarting;
 
         private static readonly Dictionary<string, List<InstallerRegistration>> _installers = new Dictionary<string, List<InstallerRegistration>>();
         private static readonly MethodInfo _installMethod = typeof(DiContainer).GetMethod("Install", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Standard, new[] { typeof(object[]) }, null);
@@ -43,12 +50,11 @@ namespace CustomAvatar.Zenject
         internal static void Init(Harmony harmony, Logger logger)
         {
             _logger = new IPALogger<ZenjectHelper>(logger);
-            _harmony = harmony;
 
-            var methodToPatch = typeof(Context).GetMethod("InstallInstallers", BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[0], null);
-            var patch = new HarmonyMethod(typeof(ZenjectHelper).GetMethod(nameof(InstallInstallers), BindingFlags.NonPublic | BindingFlags.Static));
+            PatchInstallInstallers(harmony);
+            PatchBruteForceRestart(harmony);
 
-            harmony.Patch(methodToPatch, null, patch);
+            SceneManager.sceneLoaded += OnSceneLoaded;
         }
 
         /// <summary>
@@ -202,10 +208,55 @@ namespace CustomAvatar.Zenject
             _installers[sceneName].RemoveAll(r => r.installerType == installerType && r.sceneContextName == sceneContextName);
         }
 
+        private static void PatchInstallInstallers(Harmony harmony)
+        {
+            MethodInfo methodToPatch = typeof(Context).GetMethod("InstallInstallers", BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[0], null);
+            MethodInfo patch = typeof(ZenjectHelper).GetMethod(nameof(InstallInstallers), BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(methodToPatch, null, new HarmonyMethod(patch));
+        }
+
+        // temporary nonsense
+        private static void PatchBruteForceRestart(Harmony harmony)
+        {
+            Type siraPlugin = Type.GetType("SiraUtil.Plugin, SiraUtil");
+
+            if (siraPlugin == null) return;
+
+            _logger.Info("No-oping BruteForceRestart");
+
+            MethodInfo methodToPatch = siraPlugin.GetMethod("BruteForceRestart", BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo patch = typeof(ZenjectHelper).GetMethod(nameof(HarmonyNoop), BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(methodToPatch, new HarmonyMethod(patch));
+        }
+
+        private static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            if (isFirstSceneLoaded) return;
+
+            if (scene.name != kExpectedFirstSceneLoaded)
+            {
+                _logger.Warning($"Expected first loaded scene to be '{kExpectedFirstSceneLoaded}', got '{scene.name}' instead; attempting internal restart");
+
+                SharedCoroutineStarter.instance.StartCoroutine(RestartGame());
+
+                isRestarting = true;
+            }
+
+            isFirstSceneLoaded = true;
+        }
+
         private static void InstallInstallers(Context __instance)
         {
             string sceneContextName = __instance.name;
             string sceneName = __instance.gameObject.scene.name;
+
+            if (isRestarting)
+            {
+                _logger.Warning($"Ignoring InstallInstallers call on '{sceneContextName}' (scene '{sceneName}') since game is scheduled for restart");
+                return;
+            }
 
             if (!_installers.ContainsKey(sceneName))
             {
@@ -228,6 +279,33 @@ namespace CustomAvatar.Zenject
                 _logger.Trace($"Installing '{registration.installerType.Name}'");
                 _installMethod.MakeGenericMethod(registration.installerType).Invoke(__instance.Container, new[] { registration.extraArgs });
             }
+        }
+
+        private static bool HarmonyNoop() => false;
+
+        private static IEnumerator RestartGame()
+        {
+            MenuTransitionsHelper helper = null;
+
+            // wait until GameScenesManager is done loading everything
+            yield return new WaitUntil(() =>
+            {
+                helper = helper ?? GameObject.FindObjectOfType<MenuTransitionsHelper>();
+
+                if (!helper) return false;
+
+                GameScenesManager gameScenesManager = helper.GetPrivateField<GameScenesManager>("_gameScenesManager");
+
+                if (!gameScenesManager) return false;
+
+                return !gameScenesManager.isInTransition;
+            });
+
+            _logger.Info("Running internal restart");
+
+            helper.RestartGame();
+
+            isRestarting = false;
         }
 
         private struct InstallerRegistration
