@@ -180,6 +180,8 @@ namespace CustomAvatar.Lighting
             light.color = color;
             light.intensity = 0.35f;
             light.shadows = LightShadows.Hard;
+            light.renderMode = LightRenderMode.ForcePixel; // point lights don't do much when vertex rendered
+            light.bounceIntensity = 0;
             light.range = 5;
             light.cullingMask = AvatarLayers.kAllLayersMask;
 
