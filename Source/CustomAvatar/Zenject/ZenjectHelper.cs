@@ -20,12 +20,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using CustomAvatar.Logging;
-using CustomAvatar.Utilities;
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
 using Logger = IPA.Logging.Logger;
+using Object = UnityEngine.Object;
+using static AppInitScenesTransitionSetupDataSO;
 
 namespace CustomAvatar.Zenject
 {
@@ -290,27 +291,16 @@ namespace CustomAvatar.Zenject
 
         private static IEnumerator RestartGame()
         {
-            MenuTransitionsHelper helper = null;
+            GameScenesManager gameScenesManager = Object.FindObjectOfType<GameScenesManager>();
 
-            // wait until GameScenesManager is done loading everything
-            yield return new WaitUntil(() =>
-            {
-                helper = helper ?? GameObject.FindObjectOfType<MenuTransitionsHelper>();
+            yield return new WaitWhile(() => gameScenesManager.isInTransition);
 
-                if (!helper) return false;
-
-                GameScenesManager gameScenesManager = helper.GetPrivateField<GameScenesManager>("_gameScenesManager");
-
-                if (!gameScenesManager) return false;
-
-                return !gameScenesManager.isInTransition;
-            });
-
-            _logger.Info("Running internal restart");
-
-            helper.RestartGame();
+            var setupData = ScriptableObject.CreateInstance<ForceRestartSceneSetupDataSO>();
+            setupData.Init();
 
             isRestarting = false;
+
+            gameScenesManager.ClearAndOpenScenes(setupData, 0, null, () => Object.Destroy(setupData));
         }
 
         private struct InstallerRegistration
@@ -324,6 +314,34 @@ namespace CustomAvatar.Zenject
                 this.installerType = installerType;
                 this.sceneContextName = sceneContextName;
                 this.extraArgs = extraArgs;
+            }
+        }
+
+        private class ForceRestartSceneSetupDataSO : ScenesTransitionSetupDataSO
+        {
+            public void Init()
+            {
+                SceneInfo sceneInfo = CreateInstance<ForceRestartSceneInfo>();
+                SceneSetupData setupData = new AppInitSceneSetupData(AppInitOverrideStartType.AppStart);
+
+                Init(new[] { sceneInfo }, new[] { setupData });
+            }
+
+            private void OnDestroy()
+            {
+                foreach (SceneInfo sceneInfo in scenes)
+                {
+                    Destroy(sceneInfo);
+                }
+            }
+
+            private class ForceRestartSceneInfo : SceneInfo
+            {
+                public ForceRestartSceneInfo()
+                {
+                    _sceneName = "PCInit";
+                    _disabledRootObjects = false;
+                }
             }
         }
     }
