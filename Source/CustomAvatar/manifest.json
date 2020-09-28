@@ -6,7 +6,7 @@
   "id": "CustomAvatars",
   "icon": "CustomAvatar.Resources.icon.png",
   "name": "CustomAvatars",
-  "version": "5.0.0-rc.2+dev",
+  "version": "5.0.0+dev",
   "features": [],
   "dependsOn": {
     "BSIPA": "^4.0.0",
