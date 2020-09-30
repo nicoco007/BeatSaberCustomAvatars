@@ -66,8 +66,8 @@ namespace CustomAvatar.Utilities
                     case "BeatSaber/Unlit Glow":
                         unlitShader = asset as Shader;
                         break;
-                    
-                    case "Custom/StereoRenderShader-Unlit":
+
+                    case "BeatSaberCustomAvatars/StereoRenderShader":
                         stereoMirrorShader = asset as Shader;
                         break;
                 }

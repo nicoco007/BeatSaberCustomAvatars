@@ -44,7 +44,7 @@ namespace CustomAvatar.UI
             {
                 _mirrorContainer = new GameObject();
                 Vector2 mirrorSize = _settings.mirror.size;
-                _mirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, 3f) + _settings.mirror.positionOffset, Quaternion.Euler(-90f, 0, 0), mirrorSize, _mirrorContainer.transform, new Vector3(0, mirrorSize.y / 2, 1.5f));
+                _mirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, 1.5f), Quaternion.Euler(-90f, 0, 0), mirrorSize, _mirrorContainer.transform);
             }
         }
 

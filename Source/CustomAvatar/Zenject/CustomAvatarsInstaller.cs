@@ -54,7 +54,6 @@ namespace CustomAvatar.Zenject
             Container.BindInterfacesAndSelfTo<KeyboardInputHandler>().AsSingle().NonLazy();
             Container.BindInterfacesAndSelfTo<ShaderLoader>().AsSingle().NonLazy();
 
-            Container.Bind<StereoRenderManager>().AsSingle();
             Container.Bind<AvatarLoader>().AsSingle();
 
             // helper classes
