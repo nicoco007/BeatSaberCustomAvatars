@@ -7,6 +7,10 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AutomatedBuild>false</AutomatedBuild>
   </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration) == 'Release'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
       <HintPath>..\..\Libraries\0Harmony.dll</HintPath>
@@ -135,8 +139,23 @@
     <EmbeddedResource Include="Resources\mystery-man.png" />
     <EmbeddedResource Include="Resources\ban.png" />
   </ItemGroup>
-  <Target Name="CopyBeatSaberFiles" AfterTargets="AfterBuild" Condition="$(AutomatedBuild) == 'false' and $(BeatSaberDir) != ''">
-    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(BeatSaberDir)\Plugins" />
-    <Copy SourceFiles="$(TargetDir)$(TargetName).pdb" DestinationFolder="$(BeatSaberDir)\Plugins" Condition="$(Configuration) == 'Debug'" />
+  <ItemGroup>
+    <CopyToOutput Include="$(ProjectDir)..\..\Packaging\**\*.*" />
+    <CopyToBeatSaberFolder Include="$(TargetDir)**\*.*" />
+  </ItemGroup>
+  <Target Name="Organize" AfterTargets="AfterBuild">    
+    <!-- remove deps.json file since it's not used -->
+    <Delete Files="$(TargetDir)$(TargetName).deps.json" />
+    
+    <!-- create Plugins folder and move plugin DLL/PDB inside -->
+    <MakeDir Directories="$(TargetDir)Plugins" />
+    <Move SourceFiles="$(TargetPath)" DestinationFolder="$(TargetDir)Plugins" />
+    <Move SourceFiles="$(TargetDir)$(TargetName).pdb" DestinationFolder="$(TargetDir)Plugins" Condition="$(DebugType) == 'portable'" />
+    
+    <!-- copy static files -->
+    <Copy SourceFiles="@(CopyToOutput)" DestinationFiles="@(CopyToOutput->'$(TargetDir)\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+  <Target Name="CopyToBeatSaberFolder" AfterTargets="AfterBuild" Condition="$(AutomatedBuild) == 'false' and $(BeatSaberDir) != ''">
+    <Copy SourceFiles="@(CopyToBeatSaberFolder)" DestinationFiles="@(CopyToBeatSaberFolder->'$(BeatSaberDir)\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 </Project>

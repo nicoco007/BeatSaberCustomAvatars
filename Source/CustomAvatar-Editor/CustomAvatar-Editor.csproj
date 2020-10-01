@@ -7,6 +7,10 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <DefineConstants>UNITY_EDITOR</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration) == 'Release'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="DynamicBone">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\DynamicBone.dll</HintPath>
@@ -66,6 +70,10 @@
     <Compile Include="..\CustomAvatar\Utilities\IKHelper.cs" Link="Utilities\IKHelper.cs" />
     <Compile Include="..\CustomAvatar\VRIKManager.cs" Link="VRIKManager.cs" />
   </ItemGroup>
+  <Target Name="Organize" AfterTargets="AfterBuild">
+    <!-- remove deps.json file since it's not used -->
+    <Delete Files="$(TargetDir)$(TargetName).deps.json" />
+  </Target>
   <Target Name="CopyUnityProjectFiles" AfterTargets="AfterBuild" Condition="$(UnityProjectDir) != ''">
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(UnityProjectDir)\Assets" />
   </Target>
