@@ -36,7 +36,7 @@ namespace CustomAvatar.Avatar
 
         private bool _fixTransforms;
 
-        private List<TwistRelaxer> _twistRelaxers = new List<TwistRelaxer>();
+        private List<(TwistRelaxer twistRelaxer, float weight)> _twistRelaxers = new List<(TwistRelaxer, float)>();
 
         private BeatSaberDynamicBone::DynamicBone[] _dynamicBones;
 
@@ -60,15 +60,6 @@ namespace CustomAvatar.Avatar
             _preUpdateDelegate = typeof(BeatSaberDynamicBone::DynamicBone).CreatePrivateMethodDelegate<Action<BeatSaberDynamicBone::DynamicBone>>("PreUpdate");
             _updateDynamicBonesDelegate = typeof(BeatSaberDynamicBone::DynamicBone).CreatePrivateMethodDelegate<Action<BeatSaberDynamicBone::DynamicBone, float>>("UpdateDynamicBones");
             _weightField = typeof(BeatSaberDynamicBone::DynamicBone).GetField("m_Weight", BindingFlags.Instance | BindingFlags.NonPublic);
-
-            foreach (TwistRelaxer twistRelaxer in GetComponentsInChildren<TwistRelaxer>())
-            {
-                if (twistRelaxer.enabled)
-                {
-                    twistRelaxer.enabled = false;
-                    _twistRelaxers.Add(twistRelaxer);
-                }
-            }
         }
 
         [Inject]
@@ -90,10 +81,9 @@ namespace CustomAvatar.Avatar
             _fixTransforms = _vrikManager.fixTransforms;
             _vrik.fixTransforms = false; // FixTransforms is manually called in Update
 
-            foreach (TwistRelaxer twistRelaxer in _twistRelaxers)
+            foreach (TwistRelaxer twistRelaxer in GetComponentsInChildren<TwistRelaxer>())
             {
-                twistRelaxer.ik = _vrik;
-                twistRelaxer.enabled = true;
+                _twistRelaxers.Add((twistRelaxer, twistRelaxer.weight));
             }
 
             if (_vrikManager.solver_spine_maintainPelvisPosition > 0 && !_input.allowMaintainPelvisPosition)
@@ -131,6 +121,14 @@ namespace CustomAvatar.Avatar
         {
             // VRIK must run before dynamic bones
             _vrik.UpdateSolverExternal();
+
+            // relax after VRIK update
+            foreach ((TwistRelaxer twistRelaxer, float weight) in _twistRelaxers)
+            {
+                twistRelaxer.weight = weight;
+                twistRelaxer.Relax();
+                twistRelaxer.weight = 0;
+            }
 
             // apply dynamic bones
             foreach (BeatSaberDynamicBone::DynamicBone dynamicBone in _dynamicBones)
