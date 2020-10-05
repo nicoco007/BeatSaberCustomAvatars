@@ -14,11 +14,13 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using CustomAvatar.Logging;
 using UnityEngine;
 
 #if UNITY_EDITOR
-using CustomAvatar.Logging;
 using CustomAvatar.Utilities;
+#else
+using Zenject;
 #endif
 
 namespace CustomAvatar
@@ -82,6 +84,22 @@ namespace CustomAvatar
         {
             IKHelper ikHelper = new IKHelper(new EditorLoggerProvider());
             ikHelper.InitializeVRIK(transform.GetComponentInChildren<VRIKManager>(), transform);
+        }
+        #else
+        [Inject]
+        private void Inject(ILoggerProvider loggerProvider)
+        {
+            ILogger<AvatarDescriptor> logger = loggerProvider.CreateLogger<AvatarDescriptor>(name);
+
+            if (!string.IsNullOrEmpty(AvatarName) ||
+                !string.IsNullOrEmpty(Name) ||
+                !string.IsNullOrEmpty(AuthorName) ||
+                !string.IsNullOrEmpty(Author) ||
+                CoverImage ||
+                Cover)
+            {
+                logger.Warning("Avatar is using a deprecated field; please re-export this avatar using the latest version of Custom Avatars");
+            }
         }
         #endif
     }

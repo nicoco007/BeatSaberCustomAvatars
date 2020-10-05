@@ -119,7 +119,7 @@ namespace CustomAvatar.Avatar
             {
                 var loadedAvatar = _container.Instantiate<LoadedAvatar>(new object[] { fullPath, (GameObject)assetBundleRequest.asset });
 
-                _logger.Info($"Successfully loaded avatar '{loadedAvatar.descriptor.name}' from '{fullPath}'");
+                _logger.Info($"Successfully loaded avatar '{loadedAvatar.descriptor.name}' by '{loadedAvatar.descriptor.author}' from '{fullPath}'");
 
                 foreach (LoadHandlers handler in _handlers[fullPath])
                 {
