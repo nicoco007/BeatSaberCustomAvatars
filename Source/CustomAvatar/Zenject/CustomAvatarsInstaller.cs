@@ -21,6 +21,7 @@ using CustomAvatar.Lighting;
 using CustomAvatar.Logging;
 using CustomAvatar.StereoRendering;
 using CustomAvatar.Player;
+using CustomAvatar.Tracking;
 using CustomAvatar.Tracking.OpenVR;
 using CustomAvatar.Tracking.UnityXR;
 using CustomAvatar.Utilities;
@@ -29,6 +30,7 @@ using UnityEngine.XR;
 using Valve.VR;
 using Zenject;
 using Logger = IPA.Logging.Logger;
+using System;
 
 namespace CustomAvatar.Zenject
 {
@@ -51,14 +53,16 @@ namespace CustomAvatar.Zenject
             Container.Bind<Settings>().FromMethod((context) => context.Container.Resolve<SettingsManager>().settings);
             Container.BindInterfacesAndSelfTo<CalibrationData>().AsSingle();
 
-            if (XRSettings.loadedDeviceName.Equals("openvr", System.StringComparison.InvariantCultureIgnoreCase) && OpenVR.IsRuntimeInstalled())
+            if (XRSettings.loadedDeviceName.Equals("openvr", StringComparison.InvariantCultureIgnoreCase) &&
+                OpenVR.IsRuntimeInstalled() &&
+                !Environment.GetCommandLineArgs().Contains("--force-xr"))
             {
                 Container.Bind<OpenVRFacade>().AsTransient();
-                Container.BindInterfacesTo<OpenVRDeviceManager>().AsSingle().NonLazy();
+                Container.BindInterfacesAndSelfTo<OpenVRDeviceProvider>().AsSingle();
             }
             else
             {
-                Container.BindInterfacesTo<UnityXRDeviceManager>().AsSingle().NonLazy();
+                Container.BindInterfacesTo<UnityXRDeviceProvider>().AsSingle();
             }
 
             // managers
@@ -66,6 +70,7 @@ namespace CustomAvatar.Zenject
             Container.BindInterfacesAndSelfTo<MainCameraController>().AsSingle().NonLazy();
             Container.BindInterfacesAndSelfTo<KeyboardInputHandler>().AsSingle().NonLazy();
             Container.BindInterfacesAndSelfTo<ShaderLoader>().AsSingle().NonLazy();
+            Container.BindInterfacesAndSelfTo<DeviceManager>().AsSingle().NonLazy();
 
             Container.Bind<AvatarLoader>().AsSingle();
             Container.BindInterfacesAndSelfTo<VRPlayerInput>().AsSingle();

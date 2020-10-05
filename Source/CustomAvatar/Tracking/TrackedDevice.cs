@@ -16,26 +16,23 @@
 
 using UnityEngine;
 
-namespace CustomAvatar.Tracking.OpenVR
+namespace CustomAvatar.Tracking
 {
-    internal class OpenVRDeviceState : ITrackedDeviceState
+    internal struct TrackedDevice
     {
-        public DeviceUse use { get; }
-        public uint? deviceIndex { get; set; }
-        public Vector3 position { get; set; }
-        public Quaternion rotation { get; set; }
-        public bool isConnected { get; set; }
-        public bool isTracking { get; set; }
+        public readonly string id;
+        public readonly DeviceUse deviceUse;
+        public readonly bool isTracking;
+        public readonly Vector3 position;
+        public readonly Quaternion rotation;
 
-        public OpenVRDeviceState(DeviceUse use)
+        public TrackedDevice(string id, DeviceUse deviceUse, bool isTracking, Vector3 position, Quaternion rotation)
         {
-            this.use = use;
-
-            deviceIndex = null;
-            position = Vector3.zero;
-            rotation = Quaternion.identity;
-            isConnected = false;
-            isTracking = false;
+            this.id = id;
+            this.deviceUse = deviceUse;
+            this.isTracking = isTracking;
+            this.position = position;
+            this.rotation = rotation;
         }
     }
 }

@@ -14,28 +14,15 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using UnityEngine;
+using System;
+using System.Collections.Generic;
 
-namespace CustomAvatar.Tracking.UnityXR
+namespace CustomAvatar.Tracking
 {
-    internal class UnityXRDeviceState : ITrackedDeviceState
+    internal interface IDeviceProvider
     {
-        public DeviceUse use { get; }
-        public string name { get; set; }
-        public Vector3 position { get; set; }
-        public Quaternion rotation { get; set; }
-        public bool isConnected { get; set; }
-        public bool isTracking { get; set; }
+        event Action devicesChanged;
 
-        public UnityXRDeviceState(DeviceUse use)
-        {
-            this.use = use;
-
-            name = null;
-            position = Vector3.zero;
-            rotation = Quaternion.identity;
-            isConnected = false;
-            isTracking = false;
-        }
+        void GetDevices(Dictionary<string, TrackedDevice> devices);
     }
 }

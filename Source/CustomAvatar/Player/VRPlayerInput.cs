@@ -38,7 +38,7 @@ namespace CustomAvatar.Player
         public event Action inputChanged;
 
         private readonly ILogger<VRPlayerInput> _logger;
-        private readonly ITrackedDeviceManager _deviceManager;
+        private readonly DeviceManager _deviceManager;
         private readonly PlayerAvatarManager _avatarManager;
         private readonly Settings _settings;
         private readonly CalibrationData _calibrationData;
@@ -60,7 +60,7 @@ namespace CustomAvatar.Player
             _avatarSettings.useAutomaticCalibration && _calibrationData.automaticCalibration.isCalibrated;
 
         [Inject]
-        internal VRPlayerInput(ILoggerProvider loggerProvider, ITrackedDeviceManager trackedDeviceManager, PlayerAvatarManager avatarManager, Settings settings, CalibrationData calibrationData, BeatSaberUtilities beatSaberUtilities)
+        internal VRPlayerInput(ILoggerProvider loggerProvider, DeviceManager trackedDeviceManager, PlayerAvatarManager avatarManager, Settings settings, CalibrationData calibrationData, BeatSaberUtilities beatSaberUtilities)
         {
             _logger = loggerProvider.CreateLogger<VRPlayerInput>();
             _deviceManager = trackedDeviceManager;
@@ -69,10 +69,7 @@ namespace CustomAvatar.Player
             _calibrationData = calibrationData;
             _beatSaberUtilities = beatSaberUtilities;
 
-            _deviceManager.deviceAdded += OnDevicesUpdated;
-            _deviceManager.deviceRemoved += OnDevicesUpdated;
-            _deviceManager.deviceTrackingAcquired += OnDevicesUpdated;
-            _deviceManager.deviceTrackingLost += OnDevicesUpdated;
+            _deviceManager.devicesChanged += OnDevicesUpdated;
             
             _leftHandAnimAction  = new SkeletalInput("/actions/customavatars/in/lefthandanim");
             _rightHandAnimAction = new SkeletalInput("/actions/customavatars/in/righthandanim");
@@ -82,10 +79,7 @@ namespace CustomAvatar.Player
 
         public void Dispose()
         {
-            _deviceManager.deviceAdded -= OnDevicesUpdated;
-            _deviceManager.deviceRemoved -= OnDevicesUpdated;
-            _deviceManager.deviceTrackingAcquired -= OnDevicesUpdated;
-            _deviceManager.deviceTrackingLost -= OnDevicesUpdated;
+            _deviceManager.devicesChanged -= OnDevicesUpdated;
 
             _leftHandAnimAction.Dispose();
             _rightHandAnimAction.Dispose();
@@ -148,7 +142,7 @@ namespace CustomAvatar.Player
 
         internal bool TryGetUncalibratedPose(DeviceUse use, out Pose pose)
         {
-            if (!_deviceManager.TryGetDeviceState(use, out ITrackedDeviceState device) || !device.isConnected || !device.isTracking)
+            if (!_deviceManager.TryGetDeviceState(use, out TrackedDevice device) || !device.isTracking)
             {
                 pose = Pose.identity;
                 return false;
@@ -392,7 +386,7 @@ namespace CustomAvatar.Player
             return true;
         }
 
-        private void OnDevicesUpdated(ITrackedDeviceState state)
+        private void OnDevicesUpdated()
         {
             inputChanged?.Invoke();
         }
