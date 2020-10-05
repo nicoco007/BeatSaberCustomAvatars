@@ -250,6 +250,8 @@ namespace CustomAvatar.Lighting
             {
                 _unityLight.color = _color;
                 _unityLight.intensity = _intensity * width * _colorAlphaMultiplier * _bloomFogIntensityMultiplier * _color.a * 3f;
+
+                _unityLight.enabled = _unityLight.intensity >= 0.001f;
             }
         }
     }
