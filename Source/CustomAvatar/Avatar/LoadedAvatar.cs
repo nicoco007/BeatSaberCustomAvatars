@@ -23,6 +23,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
+using Zenject;
 using Object = UnityEngine.Object;
 using VRIK = BeatSaberFinalIK::RootMotion.FinalIK.VRIK;
 
@@ -87,9 +88,9 @@ namespace CustomAvatar.Avatar
 
         private ILogger<LoadedAvatar> _logger;
 
-        internal LoadedAvatar(string fullPath, GameObject avatarGameObject, ILoggerProvider loggerProvider)
+        internal LoadedAvatar(string fullPath, GameObject avatarGameObject, ILoggerProvider loggerProvider, DiContainer container)
         {
-            this.fullPath = fullPath ?? throw new ArgumentNullException(nameof(avatarGameObject));
+            this.fullPath = fullPath ?? throw new ArgumentNullException(nameof(fullPath));
             prefab = avatarGameObject ? avatarGameObject : throw new ArgumentNullException(nameof(avatarGameObject));
             descriptor = avatarGameObject.GetComponent<AvatarDescriptor>() ?? throw new AvatarLoadException($"Avatar at '{fullPath}' does not have an AvatarDescriptor");
 
@@ -112,7 +113,7 @@ namespace CustomAvatar.Avatar
             // migrate IKManager/IKManagerAdvanced to VRIKManager
             if (ikManager)
             {
-                if (!vrikManager) vrikManager = prefab.AddComponent<VRIKManager>();
+                if (!vrikManager) vrikManager = container.InstantiateComponent<VRIKManager>(prefab);
 
                 _logger.Warning("IKManager and IKManagerAdvanced are deprecated; please migrate to VRIKManager");
 

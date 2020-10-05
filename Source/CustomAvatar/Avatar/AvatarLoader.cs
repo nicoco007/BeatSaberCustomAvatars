@@ -117,7 +117,7 @@ namespace CustomAvatar.Avatar
                 
             try
             {
-                var loadedAvatar = new LoadedAvatar(fullPath, (GameObject)assetBundleRequest.asset, _container.Resolve<ILoggerProvider>());
+                var loadedAvatar = _container.Instantiate<LoadedAvatar>(new object[] { fullPath, (GameObject)assetBundleRequest.asset });
 
                 _logger.Info($"Successfully loaded avatar '{loadedAvatar.descriptor.name}' from '{fullPath}'");
 
