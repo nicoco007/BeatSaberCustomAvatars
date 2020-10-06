@@ -397,7 +397,7 @@ namespace CustomAvatar.Player
         /// </summary>
         private void ApplyFloorOffset(SpawnedAvatar spawnedAvatar, ref Vector3 position)
         {
-            if (!_settings.enableFloorAdjust) return;
+            if (!_settings.enableFloorAdjust || !spawnedAvatar) return;
 
             position.y += spawnedAvatar.scaledEyeHeight - _beatSaberUtilities.GetRoomAdjustedPlayerEyeHeight();
         }
@@ -408,7 +408,7 @@ namespace CustomAvatar.Player
         /// </summary>
         private void ApplyTrackerFloorOffset(SpawnedAvatar spawnedAvatar, ref Vector3 position)
         {
-            if (!_settings.enableFloorAdjust) return;
+            if (!_settings.enableFloorAdjust || !spawnedAvatar) return;
 
             position.y *= spawnedAvatar.scaledEyeHeight / _beatSaberUtilities.GetRoomAdjustedPlayerEyeHeight();
         }
