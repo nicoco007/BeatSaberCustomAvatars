@@ -46,6 +46,7 @@ namespace CustomAvatar.Utilities
             _playerDataModel = playerDataModel;
             _settings = settings;
             _vrPlatformHelper = vrPlatformHelper;
+        }
 
         public void Initialize()
         {
