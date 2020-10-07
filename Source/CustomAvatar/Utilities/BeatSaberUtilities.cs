@@ -18,10 +18,11 @@ using CustomAvatar.Configuration;
 using CustomAvatar.Tracking;
 using System;
 using UnityEngine;
+using Zenject;
 
 namespace CustomAvatar.Utilities
 {
-    internal class BeatSaberUtilities
+    internal class BeatSaberUtilities : IInitializable, IDisposable
     {
         public static readonly float kDefaultPlayerEyeHeight = MainSettingsModelSO.kDefaultPlayerHeight - MainSettingsModelSO.kHeadPosToPlayerHeightOffset;
         public static readonly float kDefaultPlayerArmSpan = MainSettingsModelSO.kDefaultPlayerHeight;
@@ -46,13 +47,21 @@ namespace CustomAvatar.Utilities
             _settings = settings;
             _vrPlatformHelper = vrPlatformHelper;
 
-            _mainSettingsModel.roomCenter.didChangeEvent += OnRoomCenterChanged;
+        public void Initialize()
+        {
+            _mainSettingsModel.roomCenter.didChangeEvent   += OnRoomCenterChanged;
             _mainSettingsModel.roomRotation.didChangeEvent += OnRoomRotationChanged;
 
             if (_vrPlatformHelper is OpenVRHelper openVRHelper)
             {
                 _vrControllerManufacturerName = openVRHelper.GetPrivateField<OpenVRHelper.VRControllerManufacturerName>("_vrControllerManufacturerName");
             }
+        }
+
+        public void Dispose()
+        {
+            _mainSettingsModel.roomCenter.didChangeEvent   -= OnRoomCenterChanged;
+            _mainSettingsModel.roomRotation.didChangeEvent -= OnRoomRotationChanged;
         }
 
         /// <summary>

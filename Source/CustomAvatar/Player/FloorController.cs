@@ -23,7 +23,7 @@ using Zenject;
 
 namespace CustomAvatar.Player
 {
-    public class FloorController
+    public class FloorController : IInitializable, IDisposable
     {
         public float floorOffset { get; private set; }
         public float floorPosition { get; private set; }
@@ -43,9 +43,18 @@ namespace CustomAvatar.Player
             _settings = settings;
             _beatSaberUtilities = beatSaberUtilities;
             _gameScenesManager = gameScenesManager;
+        }
 
+        public void Initialize()
+        {
             _beatSaberUtilities.roomCenterChanged += OnRoomCenterChanged;
             _gameScenesManager.transitionDidFinishEvent += OnSceneTransitionDidFinish;
+        }
+
+        public void Dispose()
+        {
+            _beatSaberUtilities.roomCenterChanged -= OnRoomCenterChanged;
+            _gameScenesManager.transitionDidFinishEvent -= OnSceneTransitionDidFinish;
         }
 
         internal void SetFloorOffset(float offset)

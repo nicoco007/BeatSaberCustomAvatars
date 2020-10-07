@@ -29,7 +29,7 @@ namespace CustomAvatar.Player
     /// <summary>
     /// The player's <see cref="IAvatarInput"/> with calibration and other settings applied.
     /// </summary>
-    public class VRPlayerInput : IDisposable, IAvatarInput
+    public class VRPlayerInput : IInitializable, IDisposable, IAvatarInput
     {
         public static readonly float kDefaultPlayerArmSpan = 1.8f;
 
@@ -44,8 +44,8 @@ namespace CustomAvatar.Player
         private readonly CalibrationData _calibrationData;
         private readonly BeatSaberUtilities _beatSaberUtilities;
 
-        private readonly SkeletalInput _leftHandAnimAction;
-        private readonly SkeletalInput _rightHandAnimAction;
+        private SkeletalInput _leftHandAnimAction;
+        private SkeletalInput _rightHandAnimAction;
 
         private Settings.AvatarSpecificSettings _avatarSettings;
         private CalibrationData.FullBodyCalibration _manualCalibration;
@@ -68,18 +68,21 @@ namespace CustomAvatar.Player
             _settings = settings;
             _calibrationData = calibrationData;
             _beatSaberUtilities = beatSaberUtilities;
+        }
 
+        public void Initialize()
+        {
             _deviceManager.devicesChanged += OnDevicesUpdated;
-            
-            _leftHandAnimAction  = new SkeletalInput("/actions/customavatars/in/lefthandanim");
-            _rightHandAnimAction = new SkeletalInput("/actions/customavatars/in/righthandanim");
+            _avatarManager.avatarChanged  += OnAvatarChanged;
 
-            _avatarManager.avatarChanged += OnAvatarChanged;
+            _leftHandAnimAction = new SkeletalInput("/actions/customavatars/in/lefthandanim");
+            _rightHandAnimAction = new SkeletalInput("/actions/customavatars/in/righthandanim");
         }
 
         public void Dispose()
         {
             _deviceManager.devicesChanged -= OnDevicesUpdated;
+            _avatarManager.avatarChanged  -= OnAvatarChanged;
 
             _leftHandAnimAction.Dispose();
             _rightHandAnimAction.Dispose();

@@ -74,14 +74,14 @@ namespace CustomAvatar.Zenject
 
             Container.Bind<AvatarLoader>().AsSingle();
             Container.BindInterfacesAndSelfTo<VRPlayerInput>().AsSingle();
-            Container.Bind<FloorController>().AsSingle();
+            Container.BindInterfacesAndSelfTo<FloorController>().AsSingle();
             Container.BindInterfacesAndSelfTo<LightingQualityController>().AsSingle();
 
             // helper classes
             Container.Bind<MirrorHelper>().AsTransient();
             Container.Bind<AvatarSpawner>().AsTransient();
             Container.Bind<IKHelper>().AsTransient();
-            Container.Bind<BeatSaberUtilities>().AsTransient();
+            Container.BindInterfacesAndSelfTo<BeatSaberUtilities>().AsTransient();
 
             // not sure if this is a great idea but w/e
             if (!Container.HasBinding<MainSettingsModelSO>())
