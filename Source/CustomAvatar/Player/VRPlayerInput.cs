@@ -55,9 +55,10 @@ namespace CustomAvatar.Player
         private Pose _previousRightFootPose;
 
         private bool _shouldTrackFullBody =>
-            _avatarSettings.bypassCalibration ||
-            !_avatarSettings.useAutomaticCalibration && _manualCalibration.isCalibrated ||
-            _avatarSettings.useAutomaticCalibration && _calibrationData.automaticCalibration.isCalibrated;
+            _avatarSettings != null && _manualCalibration != null &&
+                (_avatarSettings.bypassCalibration ||
+                !_avatarSettings.useAutomaticCalibration && _manualCalibration.isCalibrated ||
+                _avatarSettings.useAutomaticCalibration && _calibrationData.automaticCalibration.isCalibrated);
 
         [Inject]
         internal VRPlayerInput(ILoggerProvider loggerProvider, DeviceManager trackedDeviceManager, PlayerAvatarManager avatarManager, Settings settings, CalibrationData calibrationData, BeatSaberUtilities beatSaberUtilities)
@@ -77,6 +78,9 @@ namespace CustomAvatar.Player
 
             _leftHandAnimAction = new SkeletalInput("/actions/customavatars/in/lefthandanim");
             _rightHandAnimAction = new SkeletalInput("/actions/customavatars/in/righthandanim");
+
+            OnAvatarChanged(_avatarManager.currentlySpawnedAvatar);
+            OnDevicesUpdated();
         }
 
         public void Dispose()
@@ -303,9 +307,9 @@ namespace CustomAvatar.Player
 
         private bool TryGetCalibratedWaistPose(out Pose pose)
         {
-            Pose correction;
+            Pose correction = Pose.identity;
 
-            if (_avatarSettings.useAutomaticCalibration)
+            if (_avatarSettings?.useAutomaticCalibration == true)
             {
                 correction = _calibrationData.automaticCalibration.waist;
 
@@ -314,7 +318,7 @@ namespace CustomAvatar.Player
                 correction.position -= Quaternion.Inverse(rotationOffset) * (Vector3.forward * _settings.automaticCalibration.pelvisOffset);
                 correction.rotation *= rotationOffset;
             }
-            else
+            else if (_manualCalibration != null)
             {
                 correction = _manualCalibration.waist;
             }
@@ -330,14 +334,14 @@ namespace CustomAvatar.Player
 
         private bool TryGetCalibratedLeftFootPose(out Pose pose)
         {
-            Pose correction;
+            Pose correction = Pose.identity;
 
-            if (_avatarSettings.useAutomaticCalibration)
+            if (_avatarSettings?.useAutomaticCalibration == true)
             {
                 correction = _calibrationData.automaticCalibration.leftFoot;
                 correction.position -= Vector3.up * _settings.automaticCalibration.legOffset;
             }
-            else
+            else if (_manualCalibration != null)
             {
                 correction = _manualCalibration.leftFoot;
             }
@@ -353,14 +357,14 @@ namespace CustomAvatar.Player
 
         private bool TryGetCalibratedRightFootPose(out Pose pose)
         {
-            Pose correction;
+            Pose correction = Pose.identity;
 
-            if (_avatarSettings.useAutomaticCalibration)
+            if (_avatarSettings?.useAutomaticCalibration == true)
             {
                 correction = _calibrationData.automaticCalibration.rightFoot;
                 correction.position -= Vector3.up * _settings.automaticCalibration.legOffset;
             }
-            else
+            else if (_manualCalibration != null)
             {
                 correction = _manualCalibration.rightFoot;
             }
