@@ -126,8 +126,6 @@ namespace CustomAvatar.UI
 
             _waistTrackerPosition.Value = _settings.automaticCalibration.waistTrackerPosition;
 
-            _autoClearButton.interactable = _calibrationData.automaticCalibration.isCalibrated;
-
             if (addedToHierarchy)
             {
                 _avatarManager.avatarStartedLoading += OnAvatarStartedLoading;
@@ -226,23 +224,23 @@ namespace CustomAvatar.UI
                 !_playerInput.TryGetUncalibratedPose(DeviceUse.RightFoot, out Pose _))
             {
                 _autoCalibrateButton.interactable = false;
-                _autoClearButton.interactable = false;
+                _autoClearButton.interactable = _calibrationData.automaticCalibration.isCalibrated;
                 _autoCalibrateButtonHoverHint.text = "No trackers detected";
 
                 _calibrateButton.interactable = false;
-                _clearButton.interactable = false;
+                _clearButton.interactable = _currentAvatarManualCalibration?.isCalibrated == true;
                 _calibrateButtonHoverHint.text = "No trackers detected";
 
                 return;
             }
 
-            bool isManualCalibrationPossible = avatar != null && avatar.isIKAvatar && avatar.supportsFullBodyTracking;
+            bool isManualCalibrationPossible = avatar != null && avatar.supportsFullBodyTracking;
             bool isAutomaticCalibrationPossible = isManualCalibrationPossible && avatar.descriptor.supportsAutomaticCalibration;
 
             if (isAutomaticCalibrationPossible)
             {
                 _autoCalibrateButton.interactable = true;
-                _autoClearButton.interactable = _currentAvatarManualCalibration.isCalibrated;
+                _autoClearButton.interactable = _calibrationData.automaticCalibration.isCalibrated;
                 _autoCalibrateButtonHoverHint.text = "Calibrate full body tracking automatically";
             }
             else
@@ -255,7 +253,7 @@ namespace CustomAvatar.UI
             if (isManualCalibrationPossible)
             {
                 _calibrateButton.interactable = true;
-                _clearButton.interactable = _currentAvatarManualCalibration.isCalibrated;
+                _clearButton.interactable = _currentAvatarManualCalibration?.isCalibrated == true;
                 _calibrateButtonHoverHint.text = "Start manual full body calibration";
             }
             else

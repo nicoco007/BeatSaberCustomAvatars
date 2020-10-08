@@ -128,10 +128,34 @@ namespace CustomAvatar.Configuration
 
         public class AvatarSpecificSettings
         {
-            public bool useAutomaticCalibration = false;
-            public bool allowMaintainPelvisPosition = false;
-            public bool bypassCalibration = false;
+            public event Action<bool> useAutomaticCalibrationChanged;
+            public event Action<bool> bypassCalibrationChanged;
+
+            public bool useAutomaticCalibration
+            {
+                get => _useAutomaticCalibration;
+                set
+                {
+                    _useAutomaticCalibration = value;
+                    useAutomaticCalibrationChanged?.Invoke(value);
+                }
+            }
+
+            public bool bypassCalibration
+            {
+                get => _bypassCalibration;
+                set
+                {
+                    _bypassCalibration = value;
+                    bypassCalibrationChanged?.Invoke(value);
+                }
+            }
+
             public bool ignoreExclusions = false;
+            public bool allowMaintainPelvisPosition = false;
+
+            private bool _useAutomaticCalibration = false;
+            private bool _bypassCalibration = false;
         }
 
         public AvatarSpecificSettings GetAvatarSettings(string fileName)

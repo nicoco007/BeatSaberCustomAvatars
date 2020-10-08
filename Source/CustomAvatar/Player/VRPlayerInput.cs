@@ -133,8 +133,7 @@ namespace CustomAvatar.Player
                     break;
 
                 default:
-                    curl = null;
-                    return false;
+                    throw new InvalidOperationException($"{nameof(TryGetFingerCurl)} only supports {nameof(DeviceUse.LeftHand)} and {nameof(DeviceUse.RightHand)}");
             }
 
             if (!handAnim.isActive || handAnim.summaryData == null)
@@ -185,11 +184,13 @@ namespace CustomAvatar.Player
 
         internal void CalibrateFullBodyTrackingManual(SpawnedAvatar spawnedAvatar)
         {
+            _logger.Info("Running manual full body tracking calibration");
+
             CalibrationData.FullBodyCalibration fullBodyCalibration = _calibrationData.GetAvatarManualCalibration(spawnedAvatar.avatar.fileName);
 
             if (TryGetUncalibratedPose(DeviceUse.Waist, out Pose waist))
             {
-                Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.pelvis.rotation) * spawnedAvatar.pelvis.position;
+                Vector3 positionOffset = Quaternion.Inverse(waist.rotation) * (spawnedAvatar.pelvis.position - waist.position);
                 Quaternion rotationOffset = Quaternion.Inverse(waist.rotation) * spawnedAvatar.pelvis.rotation;
 
                 fullBodyCalibration.waist = new Pose(positionOffset, rotationOffset);
@@ -198,7 +199,7 @@ namespace CustomAvatar.Player
 
             if (TryGetUncalibratedPose(DeviceUse.LeftFoot, out Pose leftFoot))
             {
-                Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.leftLeg.rotation) * spawnedAvatar.leftLeg.position;
+                Vector3 positionOffset = Quaternion.Inverse(leftFoot.rotation) * (spawnedAvatar.leftLeg.position - leftFoot.position);
                 Quaternion rotationOffset = Quaternion.Inverse(leftFoot.rotation) * spawnedAvatar.leftLeg.rotation;
 
                 fullBodyCalibration.leftFoot = new Pose(positionOffset, rotationOffset);
@@ -207,17 +208,19 @@ namespace CustomAvatar.Player
 
             if (TryGetUncalibratedPose(DeviceUse.RightFoot, out Pose rightFoot))
             {
-                Vector3 positionOffset = Quaternion.Inverse(spawnedAvatar.rightLeg.rotation) * spawnedAvatar.rightLeg.position;
+                Vector3 positionOffset = Quaternion.Inverse(rightFoot.rotation) * (spawnedAvatar.rightLeg.position - rightFoot.position);
                 Quaternion rotationOffset = Quaternion.Inverse(rightFoot.rotation) * spawnedAvatar.rightLeg.rotation;
 
                 fullBodyCalibration.rightFoot = new Pose(positionOffset, rotationOffset);
                 _logger.Info("Set right foot pose correction " + fullBodyCalibration.rightFoot);
             }
+
+            inputChanged?.Invoke();
         }
 
         internal void CalibrateFullBodyTrackingAuto()
         {
-            _logger.Info("Calibrating full body tracking");
+            _logger.Info("Running automatic full body tracking calibration");
 
             CalibrationData.FullBodyCalibration fullBodyCalibration = _calibrationData.automaticCalibration;
 
@@ -258,6 +261,8 @@ namespace CustomAvatar.Player
                 fullBodyCalibration.waist = new Pose(waistPositionCorrection, waistRotationCorrection);
                 _logger.Info("Set waist pose correction " + fullBodyCalibration.waist);
             }
+
+            inputChanged?.Invoke();
         }
 
         internal void ClearManualFullBodyTrackingData(SpawnedAvatar spawnedAvatar)
@@ -267,6 +272,8 @@ namespace CustomAvatar.Player
             fullBodyCalibration.leftFoot = Pose.identity;
             fullBodyCalibration.rightFoot = Pose.identity;
             fullBodyCalibration.waist = Pose.identity;
+
+            inputChanged?.Invoke();
         }
 
         internal void ClearAutomaticFullBodyTrackingData()
@@ -276,10 +283,18 @@ namespace CustomAvatar.Player
             fullBodyCalibration.leftFoot = Pose.identity;
             fullBodyCalibration.rightFoot = Pose.identity;
             fullBodyCalibration.waist = Pose.identity;
+
+            inputChanged?.Invoke();
         }
 
         private void OnAvatarChanged(SpawnedAvatar spawnedAvatar)
         {
+            if (_avatarSettings != null)
+            {
+                _avatarSettings.useAutomaticCalibrationChanged -= OnUseAutomaticCalibrationChanged;
+                _avatarSettings.bypassCalibrationChanged       -= OnBypassCalibrationChanged;
+            }
+
             if (!spawnedAvatar)
             {
                 _avatarSettings = null;
@@ -290,6 +305,9 @@ namespace CustomAvatar.Player
            
             _avatarSettings = _settings.GetAvatarSettings(spawnedAvatar.avatar.fileName);
             _manualCalibration = _calibrationData.GetAvatarManualCalibration(spawnedAvatar.avatar.fileName);
+
+            _avatarSettings.useAutomaticCalibrationChanged += OnUseAutomaticCalibrationChanged;
+            _avatarSettings.bypassCalibrationChanged       += OnBypassCalibrationChanged;
         }
 
         private bool TryGetCalibratedHandPose(DeviceUse use, out Pose pose)
@@ -315,7 +333,7 @@ namespace CustomAvatar.Player
 
                 Quaternion rotationOffset = Quaternion.Euler(0, (int)_settings.automaticCalibration.waistTrackerPosition, 0);
 
-                correction.position -= Quaternion.Inverse(rotationOffset) * (Vector3.forward * _settings.automaticCalibration.pelvisOffset);
+                correction.position -= (_calibrationData.automaticCalibration.waist.rotation * Vector3.forward) * _settings.automaticCalibration.pelvisOffset;
                 correction.rotation *= rotationOffset;
             }
             else if (_manualCalibration != null)
@@ -387,13 +405,23 @@ namespace CustomAvatar.Player
             }
 
             Quaternion correctedRotation = currentPose.rotation * correction.rotation;
-            Vector3 correctedPosition = currentPose.position + correctedRotation * correction.position; // correction is forward-facing by definition
+            Vector3 correctedPosition = currentPose.position + currentPose.rotation * correction.position; // correction is forward-facing by definition
 
             pose = new Pose(Vector3.Lerp(previousPose.position, correctedPosition, smoothing.position), Quaternion.Slerp(previousPose.rotation, correctedRotation, smoothing.rotation));
             return true;
         }
 
         private void OnDevicesUpdated()
+        {
+            inputChanged?.Invoke();
+        }
+
+        private void OnUseAutomaticCalibrationChanged(bool enabled)
+        {
+            inputChanged?.Invoke();
+        }
+
+        private void OnBypassCalibrationChanged(bool enabled)
         {
             inputChanged?.Invoke();
         }
