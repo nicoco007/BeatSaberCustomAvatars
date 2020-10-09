@@ -13,6 +13,9 @@
     "BeatSaberMarkupLanguage": "^1.3.0",
     "DynamicOpenVR": "0.2.0 - 0.3"
   },
+  "loadAfter": [
+    "SiraUtil"
+  ],
   "files": [
     "CustomAvatars\\Shaders\\customavatars.assetbundle",
     "DynamicOpenVR\\Actions\\customavatars.json",

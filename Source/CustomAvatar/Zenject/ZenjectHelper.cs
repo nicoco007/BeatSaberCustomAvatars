@@ -220,6 +220,8 @@ namespace CustomAvatar.Zenject
         // temporary nonsense
         private static void PatchBruteForceRestart(Harmony harmony)
         {
+            if (!AppDomain.CurrentDomain.GetAssemblies().Any(a => a.GetName().Name == "SiraUtil")) return;
+
             Type siraPlugin = Type.GetType("SiraUtil.Plugin, SiraUtil");
 
             if (siraPlugin == null) return;
