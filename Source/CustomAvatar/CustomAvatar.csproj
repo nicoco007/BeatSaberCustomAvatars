@@ -16,6 +16,10 @@
       <HintPath>..\..\Libraries\0Harmony.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="BeatmapCore">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatmapCore.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="DynamicBone">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\DynamicBone.dll</HintPath>
       <Private>false</Private>
@@ -29,6 +33,10 @@
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\FinalIK.dll</HintPath>
       <Private>false</Private>
       <Aliases>BeatSaberFinalIK</Aliases>
+    </Reference>
+    <Reference Include="GameplayCore">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\GameplayCore.dll</HintPath>
+      <Private>false</Private>
     </Reference>
     <Reference Include="HMLib">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\HMLib.dll</HintPath>

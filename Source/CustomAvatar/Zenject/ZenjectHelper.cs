@@ -36,7 +36,7 @@ namespace CustomAvatar.Zenject
         public static readonly string kInitSceneContextName = "AppCoreSceneContext";
         public static readonly string kMenuSceneName = "MenuCore";
         public static readonly string kMenuViewControllersSceneName = "MenuViewControllers";
-        public static readonly string kGameplaySceneName = "GameplayCore";
+        public static readonly string kGameplaySceneName = "GameCore";
 
         private static readonly string kExpectedFirstSceneLoaded = "PCInit";
 
@@ -302,7 +302,7 @@ namespace CustomAvatar.Zenject
 
             isRestarting = false;
 
-            gameScenesManager.ClearAndOpenScenes(setupData, 0, null, () => Object.Destroy(setupData));
+            gameScenesManager.ClearAndOpenScenes(setupData, 0, null, (container) => Object.Destroy(setupData));
         }
 
         private struct InstallerRegistration

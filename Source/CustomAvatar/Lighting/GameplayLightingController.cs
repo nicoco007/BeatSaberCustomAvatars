@@ -32,7 +32,7 @@ namespace CustomAvatar.Lighting
         private ILogger<GameplayLightingController> _logger;
         private LightWithIdManager _lightManager;
         private ColorManager _colorManager;
-        private PlayerController _playerController;
+        private SaberManager _saberManager;
         private TwoSidedLightingController _twoSidedLightingController;
 
         private List<DynamicLight>[] _lights;
@@ -41,12 +41,12 @@ namespace CustomAvatar.Lighting
         #pragma warning disable IDE0051
 
         [Inject]
-        private void Inject(ILoggerProvider loggerProvider, LightWithIdManager lightManager, ColorManager colorManager, PlayerController playerController, TwoSidedLightingController twoSidedLightingController)
+        private void Inject(ILoggerProvider loggerProvider, LightWithIdManager lightManager, ColorManager colorManager, SaberManager saberManager, TwoSidedLightingController twoSidedLightingController)
         {
             _logger = loggerProvider.CreateLogger<GameplayLightingController>();
             _lightManager = lightManager;
             _colorManager = colorManager;
-            _playerController = playerController;
+            _saberManager = saberManager;
             _twoSidedLightingController = twoSidedLightingController;
 
             _lightManager.didSetColorForIdEvent += OnSetColorForId;
@@ -58,8 +58,8 @@ namespace CustomAvatar.Lighting
 
             CreateLights();
 
-            AddPointLight(_colorManager.ColorForSaberType(SaberType.SaberA), _playerController.leftSaber.transform);
-            AddPointLight(_colorManager.ColorForSaberType(SaberType.SaberB), _playerController.rightSaber.transform);
+            AddPointLight(_colorManager.ColorForSaberType(SaberType.SaberA), _saberManager.leftSaber.transform);
+            AddPointLight(_colorManager.ColorForSaberType(SaberType.SaberB), _saberManager.rightSaber.transform);
         }
 
         private void Update()

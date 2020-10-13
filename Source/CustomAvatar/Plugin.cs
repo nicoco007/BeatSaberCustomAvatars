@@ -37,7 +37,7 @@ namespace CustomAvatar
             Harmony harmony = new Harmony("com.nicoco007.beatsabercustomavatars");
 
             ZenjectHelper.Init(harmony, ipaLogger);
-            BeatSaberUtilities.ApplyPatches(harmony);
+            BeatSaberUtilities.ApplyPatches(harmony, ipaLogger);
 
             ZenjectHelper.RegisterInitInstaller<CustomAvatarsInstaller>(ipaLogger);
             //ZenjectHelper.RegisterMenuViewControllersInstaller<UIInstaller>();

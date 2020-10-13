@@ -33,7 +33,7 @@ namespace CustomAvatar.Avatar
         private IAvatarInput _input;
         private SpawnedAvatar _spawnedAvatar;
         private MainSettingsModelSO _mainSettingsModel;
-        private VRPlatformHelper _vrPlatformHelper;
+        private IVRPlatformHelper _vrPlatformHelper;
         private ILogger<AvatarTracking> _logger = new UnityDebugLogger<AvatarTracking>();
         private AvatarTailor _tailor;
 
@@ -43,7 +43,7 @@ namespace CustomAvatar.Avatar
         #pragma warning disable IDE0051
 
         [Inject]
-        private void Inject(MainSettingsModelSO mainSettingsModel, ILoggerProvider loggerProvider, IAvatarInput input, SpawnedAvatar spawnedAvatar, VRPlatformHelper vrPlatformHelper, AvatarTailor tailor)
+        private void Inject(MainSettingsModelSO mainSettingsModel, ILoggerProvider loggerProvider, IAvatarInput input, SpawnedAvatar spawnedAvatar, IVRPlatformHelper vrPlatformHelper, AvatarTailor tailor)
         {
             _mainSettingsModel = mainSettingsModel;
             _logger = loggerProvider.CreateLogger<AvatarTracking>(spawnedAvatar.avatar.descriptor.name);
@@ -71,7 +71,7 @@ namespace CustomAvatar.Avatar
                     _spawnedAvatar.rightHand.position = rightHandPose.position;
                     _spawnedAvatar.rightHand.rotation = rightHandPose.rotation;
                     
-                    _vrPlatformHelper.AdjustPlatformSpecificControllerTransform(XRNode.RightHand, _spawnedAvatar.rightHand, controllerPositionOffset, controllerRotationOffset);
+                    _vrPlatformHelper.AdjustControllerTransform(XRNode.RightHand, _spawnedAvatar.rightHand, controllerPositionOffset, controllerRotationOffset);
                 }
 
                 // mirror across YZ plane for left hand
@@ -83,7 +83,7 @@ namespace CustomAvatar.Avatar
                     _spawnedAvatar.leftHand.position = leftHandPose.position;
                     _spawnedAvatar.leftHand.rotation = leftHandPose.rotation;
 
-                    _vrPlatformHelper.AdjustPlatformSpecificControllerTransform(XRNode.LeftHand, _spawnedAvatar.leftHand, controllerPositionOffset, controllerRotationOffset);
+                    _vrPlatformHelper.AdjustControllerTransform(XRNode.LeftHand, _spawnedAvatar.leftHand, controllerPositionOffset, controllerRotationOffset);
                 }
 
                 if (isCalibrationModeEnabled)

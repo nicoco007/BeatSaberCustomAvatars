@@ -15,6 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using CustomAvatar.Avatar;
+using CustomAvatar.Logging;
 using HarmonyLib;
 using System;
 using System.Reflection;
@@ -22,22 +23,28 @@ using UnityEngine;
 
 namespace CustomAvatar.Utilities
 {
-    internal static class BeatSaberUtilities
+    internal class BeatSaberUtilities
     {
         public static event Action<float> playerHeightChanged;
 
-        public static void ApplyPatches(Harmony harmony)
+        private static ILogger<BeatSaberUtilities> _logger;
+
+        public static void ApplyPatches(Harmony harmony, IPA.Logging.Logger logger)
         {
+            _logger = new IPALogger<BeatSaberUtilities>(logger);
+
             PatchPlayerHeightProperty(harmony);
             PatchMirrorRendererSO(harmony);
         }
 
         private static void PatchPlayerHeightProperty(Harmony harmony)
         {
-            MethodInfo playerHeightSetter = typeof(PlayerSpecificSettings).GetProperty(nameof(PlayerSpecificSettings.playerHeight), BindingFlags.Public | BindingFlags.Instance).SetMethod;
-            HarmonyMethod postfixPatch = new HarmonyMethod(typeof(BeatSaberUtilities).GetMethod(nameof(OnPlayerHeightChanged), BindingFlags.NonPublic | BindingFlags.Static));
-        
-            harmony.Patch(playerHeightSetter, null, postfixPatch);
+            foreach (ConstructorInfo constructor in typeof(PlayerSpecificSettings).GetConstructors(BindingFlags.Public))
+            {
+                HarmonyMethod postfixPatch = new HarmonyMethod(typeof(BeatSaberUtilities).GetMethod(nameof(OnPlayerHeightChanged), BindingFlags.NonPublic | BindingFlags.Static));
+
+                harmony.Patch(constructor, null, postfixPatch);
+            }
         }
 
         private static void PatchMirrorRendererSO(Harmony harmony)
@@ -48,9 +55,13 @@ namespace CustomAvatar.Utilities
             harmony.Patch(methodToPatch, null, postfixPatch);
         }
 
-        private static void OnPlayerHeightChanged(float value)
+        private static void OnPlayerHeightChanged(PlayerSpecificSettings __instance)
         {
-            playerHeightChanged?.Invoke(value);
+            float playerHeight = __instance.playerHeight;
+
+            _logger.Info("Player height changed to " + playerHeight);
+
+            playerHeightChanged?.Invoke(playerHeight);
         }
 
         private static void CreateOrUpdateMirrorCamera(MirrorRendererSO __instance)
