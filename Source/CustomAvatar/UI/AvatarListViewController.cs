@@ -14,6 +14,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+/*
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -43,7 +44,7 @@ namespace CustomAvatar.UI
         [UIComponent("up-button")] public Button upButton;
         [UIComponent("down-button")] public Button downButton;
         #pragma warning restore CS0649
-        
+
         private PlayerAvatarManager _avatarManager;
 
         private readonly List<AvatarListItem> _avatars = new List<AvatarListItem>();
@@ -61,18 +62,18 @@ namespace CustomAvatar.UI
         protected override void DidActivate(bool firstActivation, ActivationType type)
         {
             base.DidActivate(firstActivation, type);
-            
+
             if (firstActivation)
             {
                 _tableCellTemplate = Resources.FindObjectsOfTypeAll<LevelListTableCell>().First(x => x.name == "LevelListTableCell");
-            
+
                 _blankAvatarIcon = LoadTextureFromResource("CustomAvatar.Resources.mystery-man.png");
                 _noAvatarIcon = LoadTextureFromResource("CustomAvatar.Resources.ban.png");
 
                 avatarList.tableView.SetPrivateField("_pageUpButton", upButton);
                 avatarList.tableView.SetPrivateField("_pageDownButton", downButton);
                 avatarList.tableView.SetPrivateField("_hideScrollButtonsIfNotNeeded", false);
-                
+
                 TableViewScroller scroller = avatarList.tableView.GetPrivateField<TableViewScroller>("_scroller");
 
                 upButton.onClick.AddListener(() =>
@@ -86,7 +87,7 @@ namespace CustomAvatar.UI
                     scroller.PageScrollDown();
                     avatarList.tableView.RefreshScrollButtons(false);
                 });
-            
+
                 avatarList.tableView.dataSource = this;
             }
 
@@ -96,7 +97,7 @@ namespace CustomAvatar.UI
 
                 _avatars.Clear();
                 _avatars.Add(new AvatarListItem("No Avatar", _noAvatarIcon));
-            
+
                 _avatarManager.GetAvatarInfosAsync(avatar =>
                 {
                     _avatars.Add(new AvatarListItem(avatar));
@@ -113,7 +114,7 @@ namespace CustomAvatar.UI
             using (Stream textureStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
             {
                 byte[] textureBytes = new byte[textureStream.Length];
-                textureStream.Read(textureBytes, 0, (int) textureStream.Length);
+                textureStream.Read(textureBytes, 0, (int)textureStream.Length);
                 texture.LoadImage(textureBytes);
             }
 
@@ -130,7 +131,7 @@ namespace CustomAvatar.UI
             }
         }
 
-        
+
         [UIAction("avatar-click")]
         private void OnAvatarClicked(TableView table, int row)
         {
@@ -154,7 +155,7 @@ namespace CustomAvatar.UI
             });
 
             int currentRow = _avatarManager.currentlySpawnedAvatar ? _avatars.FindIndex(a => a.fileName == _avatarManager.currentlySpawnedAvatar.avatar.fileName) : 0;
-            
+
             avatarList.tableView.ReloadData();
             avatarList.tableView.ScrollToCellWithIdx(currentRow, TableViewScroller.ScrollPositionType.Center, true);
             avatarList.tableView.SelectCellWithIdx(currentRow);
@@ -199,3 +200,4 @@ namespace CustomAvatar.UI
         }
     }
 }
+*/

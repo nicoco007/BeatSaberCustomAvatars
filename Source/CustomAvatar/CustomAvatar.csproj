@@ -16,10 +16,6 @@
       <HintPath>..\..\Libraries\0Harmony.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="BSML">
-      <HintPath>..\..\Libraries\BSML.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
     <Reference Include="DynamicBone">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\DynamicBone.dll</HintPath>
       <Private>false</Private>

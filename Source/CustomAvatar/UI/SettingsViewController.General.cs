@@ -14,6 +14,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+/*
 using CustomAvatar.Avatar;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components.Settings;
@@ -42,7 +43,7 @@ namespace CustomAvatar.UI
         #region Values
 
         [UIValue("resize-mode-options")] private readonly List<object> _resizeModeOptions = new List<object> { AvatarResizeMode.None, AvatarResizeMode.Height, AvatarResizeMode.ArmSpan };
-        
+
         #endregion
 
         #region Actions
@@ -65,7 +66,7 @@ namespace CustomAvatar.UI
         {
             if (!(value is AvatarResizeMode)) return null;
 
-            switch ((AvatarResizeMode) value)
+            switch ((AvatarResizeMode)value)
             {
                 case AvatarResizeMode.Height:
                     return "Height";
@@ -121,11 +122,11 @@ namespace CustomAvatar.UI
         {
             _settings.moveFloorWithRoomAdjust = value;
         }
-        
+
         #endregion
 
         #region Arm Span Measurement
-        
+
         private const float kMinArmSpan = 0.5f;
 
         private bool _isMeasuring;
@@ -174,3 +175,4 @@ namespace CustomAvatar.UI
         #endregion
     }
 }
+*/

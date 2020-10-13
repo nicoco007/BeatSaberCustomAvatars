@@ -14,6 +14,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+/*
 using BeatSaberMarkupLanguage.ViewControllers;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
@@ -36,7 +37,7 @@ namespace CustomAvatar.UI
         private Material _redMaterial;
         private Material _greenMaterial;
         private Material _blueMaterial;
-        
+
         private TrackedDeviceManager _trackedDeviceManager;
         private PlayerAvatarManager _avatarManager;
         private AvatarTailor _avatarTailor;
@@ -207,3 +208,4 @@ namespace CustomAvatar.UI
         }
     }
 }
+*/

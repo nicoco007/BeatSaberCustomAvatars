@@ -40,7 +40,7 @@ namespace CustomAvatar
             BeatSaberUtilities.ApplyPatches(harmony);
 
             ZenjectHelper.RegisterInitInstaller<CustomAvatarsInstaller>(ipaLogger);
-            ZenjectHelper.RegisterMenuViewControllersInstaller<UIInstaller>();
+            //ZenjectHelper.RegisterMenuViewControllersInstaller<UIInstaller>();
             ZenjectHelper.RegisterGameplayInstaller<GameplayInstaller>();
         }
     }

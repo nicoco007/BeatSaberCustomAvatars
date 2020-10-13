@@ -14,6 +14,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+/*
 using System.Collections.Generic;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components.Settings;
@@ -38,7 +39,7 @@ namespace CustomAvatar.UI
         [UIComponent("auto-clear-button")] private Button _autoClearButton;
 
         [UIComponent("auto-calibrate-button")] private HoverHint _autoCalibrateButtonHoverHint;
-        
+
         #pragma warning restore 649
         #pragma warning restore IDE0044
         #endregion
@@ -46,7 +47,7 @@ namespace CustomAvatar.UI
         #region Values
 
         [UIValue("waist-tracker-position-options")] private readonly List<object> _waistTrackerOptions = new List<object> { WaistTrackerPosition.Front, WaistTrackerPosition.Left, WaistTrackerPosition.Right, WaistTrackerPosition.Back };
-        
+
         #endregion
 
         #region Actions
@@ -91,7 +92,8 @@ namespace CustomAvatar.UI
         {
             _settings.automaticCalibration.waistTrackerPosition = waistTrackerPosition;
         }
-        
+
         #endregion
     }
 }
+*/

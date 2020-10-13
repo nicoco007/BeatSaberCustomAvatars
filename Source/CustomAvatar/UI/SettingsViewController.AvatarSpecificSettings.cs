@@ -14,6 +14,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+/*
 using CustomAvatar.Avatar;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components.Settings;
@@ -101,7 +102,7 @@ namespace CustomAvatar.UI
                 _clearButton.interactable = false;
             }
         }
-        
+
         #endregion
 
         private void EnableCalibrationMode()
@@ -128,7 +129,7 @@ namespace CustomAvatar.UI
                     _automaticCalibrationSetting.CheckboxValue = false;
                     OnEnableAutomaticCalibrationChanged(false);
                 }
-                
+
                 _avatarManager.currentlySpawnedAvatar.DisableCalibrationMode();
             }
 
@@ -143,7 +144,7 @@ namespace CustomAvatar.UI
         }
 
         private GameObject CreateCalibrationSphere()
-        { 
+        {
             GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 
             sphere.layer = AvatarLayers.kAlwaysVisible;
@@ -208,3 +209,4 @@ namespace CustomAvatar.UI
         }
     }
 }
+*/
