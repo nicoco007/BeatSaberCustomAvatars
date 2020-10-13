@@ -22,6 +22,7 @@ using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
+using UnityEngine.SceneManagement;
 using Zenject;
 using Object = UnityEngine.Object;
 
@@ -83,11 +84,7 @@ namespace CustomAvatar.Avatar
             _settings.firstPersonEnabledChanged += OnFirstPersonEnabledChanged;
             BeatSaberUtilities.playerHeightChanged += OnPlayerHeightChanged;
             _gameScenesManager.transitionDidFinishEvent += OnTransitionDidFinish;
-
-            if (_settings.calibrateFullBodyTrackingOnStart && !string.IsNullOrEmpty(_settings.previousAvatarPath) && _settings.GetAvatarSettings(_settings.previousAvatarPath).useAutomaticCalibration)
-            {
-                _avatarTailor.CalibrateFullBodyTrackingAuto();
-            }
+            SceneManager.sceneLoaded += OnSceneLoaded;
 
             LoadAvatarInfosFromFile();
             LoadAvatarFromSettingsAsync();
@@ -101,6 +98,7 @@ namespace CustomAvatar.Avatar
             _settings.firstPersonEnabledChanged -= OnFirstPersonEnabledChanged;
             BeatSaberUtilities.playerHeightChanged -= OnPlayerHeightChanged;
             _gameScenesManager.transitionDidFinishEvent -= OnTransitionDidFinish;
+            SceneManager.sceneLoaded -= OnSceneLoaded;
 
             SaveAvatarInfosToFile();
         }
@@ -294,6 +292,14 @@ namespace CustomAvatar.Avatar
         private void OnTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
         {
             ResizeCurrentAvatar();
+        }
+
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            if (scene.name == "PCInit" && _settings.calibrateFullBodyTrackingOnStart && !string.IsNullOrEmpty(_settings.previousAvatarPath) && _settings.GetAvatarSettings(_settings.previousAvatarPath).useAutomaticCalibration)
+            {
+                _avatarTailor.CalibrateFullBodyTrackingAuto();
+            }
         }
 
         private List<string> GetAvatarFileNames()
