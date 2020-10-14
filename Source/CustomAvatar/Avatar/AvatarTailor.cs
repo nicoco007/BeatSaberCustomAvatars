@@ -16,10 +16,12 @@
 
 using System;
 using System.Collections;
+using System.Linq;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Zenject;
 
 namespace CustomAvatar.Avatar
@@ -131,8 +133,8 @@ namespace CustomAvatar.Avatar
 
             // apply offset
 			spawnedAvatar.verticalPosition = floorOffset;
-            
-            GameObject menuPlayersPlace = GameObject.Find("MenuPlayersPlace");
+
+            GameObject menuPlayersPlace = GameObject.Find("MenuEnvironment");
             GameObject originalFloor = GameObject.Find("Environment/PlayersPlace");
             GameObject customFloor = GameObject.Find("Platform Loader");
 
@@ -156,7 +158,7 @@ namespace CustomAvatar.Avatar
                 customFloor.transform.position = (Vector3.up * floorOffset) + _initialPlatformPosition ?? Vector3.zero;
             }
         }
-        
+
         public void CalibrateFullBodyTrackingManual(SpawnedAvatar spawnedAvatar)
         {
             CalibrationData.FullBodyCalibration fullBodyCalibration = _calibrationData.GetAvatarManualCalibration(spawnedAvatar.avatar.fileName);
