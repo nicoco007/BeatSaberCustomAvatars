@@ -57,6 +57,10 @@ namespace CustomAvatar.UI
             _calibrationData = calibrationData;
             _shaderLoader = shaderLoader;
             _logger = loggerProvider.CreateLogger<SettingsViewController>();
+
+            rectTransform.sizeDelta = new Vector2(120, 0);
+            rectTransform.offsetMin = new Vector2(-60, 0);
+            rectTransform.offsetMax = new Vector2(60, 0);
         }
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)

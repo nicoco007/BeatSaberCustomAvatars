@@ -49,6 +49,10 @@ namespace CustomAvatar.UI
         {
             _avatarManager = avatarManager;
             _container = container;
+
+            rectTransform.sizeDelta = new Vector2(120, 0);
+            rectTransform.offsetMin = new Vector2(-60, 0);
+            rectTransform.offsetMax = new Vector2(60, 0);
         }
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
