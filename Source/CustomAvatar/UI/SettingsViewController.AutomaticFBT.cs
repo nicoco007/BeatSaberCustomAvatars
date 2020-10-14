@@ -29,7 +29,7 @@ namespace CustomAvatar.UI
         #pragma warning disable 649
         #pragma warning disable IDE0044
 
-        [UIComponent("calibrate-fbt-on-start")] private BoolSetting _calibrateFullBodyTrackingOnStart;
+        [UIComponent("calibrate-fbt-on-start")] private ToggleSetting _calibrateFullBodyTrackingOnStart;
         [UIComponent("pelvis-offset")] private IncrementSetting _pelvisOffset;
         [UIComponent("foot-offset")] private IncrementSetting _footOffset;
         [UIComponent("waist-tracker-position")] private ListSetting _waistTrackerPosition;

@@ -28,11 +28,11 @@ namespace CustomAvatar.UI
         #pragma warning disable 649
         #pragma warning disable IDE0044
 
-        [UIComponent("visible-in-first-person")] private BoolSetting _visibleInFirstPerson;
+        [UIComponent("visible-in-first-person")] private ToggleSetting _visibleInFirstPerson;
         [UIComponent("resize-mode")] private ListSetting _resizeMode;
-        [UIComponent("enable-locomotion")] private BoolSetting _enableLocomotion;
-        [UIComponent("floor-adjust")] private BoolSetting _floorHeightAdjust;
-        [UIComponent("move-floor-with-room-adjust")] private BoolSetting _moveFloorWithRoomAdjust;
+        [UIComponent("enable-locomotion")] private ToggleSetting _enableLocomotion;
+        [UIComponent("floor-adjust")] private ToggleSetting _floorHeightAdjust;
+        [UIComponent("move-floor-with-room-adjust")] private ToggleSetting _moveFloorWithRoomAdjust;
         [UIComponent("camera-clip-plane")] private IncrementSetting _cameraNearClipPlane;
 
         #pragma warning restore 649

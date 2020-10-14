@@ -36,9 +36,9 @@ namespace CustomAvatar.UI
         [UIComponent("bypass-calibration")] private HoverHint _bypassCalibrationHoverHint;
         [UIComponent("automatic-calibration")] private HoverHint _automaticCalibrationHoverHint;
 
-        [UIComponent("ignore-exclusions")] private BoolSetting _ignoreExclusionsSetting;
-        [UIComponent("bypass-calibration")] private BoolSetting _bypassCalibration;
-        [UIComponent("automatic-calibration")] private BoolSetting _automaticCalibrationSetting;
+        [UIComponent("ignore-exclusions")] private ToggleSetting _ignoreExclusionsSetting;
+        [UIComponent("bypass-calibration")] private ToggleSetting _bypassCalibration;
+        [UIComponent("automatic-calibration")] private ToggleSetting _automaticCalibrationSetting;
 
         [UIComponent("calibrate-button")] private Button _calibrateButton;
         [UIComponent("clear-button")] private Button _clearButton;
