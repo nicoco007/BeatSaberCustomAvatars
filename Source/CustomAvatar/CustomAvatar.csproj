@@ -20,6 +20,9 @@
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatmapCore.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="BSML">
+      <HintPath>..\..\Libraries\BSML.dll</HintPath>
+    </Reference>
     <Reference Include="DynamicBone">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\DynamicBone.dll</HintPath>
       <Private>false</Private>
@@ -124,6 +127,10 @@
     </Reference>
     <Reference Include="UnityEngine.XRModule">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.XRModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="VRUI">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\VRUI.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="Zenject">

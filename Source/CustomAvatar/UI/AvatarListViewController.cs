@@ -14,7 +14,6 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-/*
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -59,9 +58,9 @@ namespace CustomAvatar.UI
             _avatarManager = avatarManager;
         }
 
-        protected override void DidActivate(bool firstActivation, ActivationType type)
+        protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
-            base.DidActivate(firstActivation, type);
+            base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
 
             if (firstActivation)
             {
@@ -74,24 +73,24 @@ namespace CustomAvatar.UI
                 avatarList.tableView.SetPrivateField("_pageDownButton", downButton);
                 avatarList.tableView.SetPrivateField("_hideScrollButtonsIfNotNeeded", false);
 
-                TableViewScroller scroller = avatarList.tableView.GetPrivateField<TableViewScroller>("_scroller");
+                TableViewScroller scroller = avatarList.tableView.GetPrivateField<TableViewScroller>("scroller");
 
                 upButton.onClick.AddListener(() =>
                 {
                     scroller.PageScrollUp();
-                    avatarList.tableView.RefreshScrollButtons(false);
+                    scroller.RefreshScrollBar();
                 });
 
                 downButton.onClick.AddListener(() =>
                 {
                     scroller.PageScrollDown();
-                    avatarList.tableView.RefreshScrollButtons(false);
+                    scroller.RefreshScrollBar();
                 });
 
-                avatarList.tableView.dataSource = this;
+                avatarList.tableView.SetDataSource(this, true);
             }
 
-            if (type == ActivationType.AddedToHierarchy)
+            if (addedToHierarchy)
             {
                 _avatarManager.avatarChanged += OnAvatarChanged;
 
@@ -121,11 +120,11 @@ namespace CustomAvatar.UI
             return texture;
         }
 
-        protected override void DidDeactivate(DeactivationType deactivationType)
+        protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
-            base.DidDeactivate(deactivationType);
+            base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
 
-            if (deactivationType == DeactivationType.RemovedFromHierarchy)
+            if (removedFromHierarchy)
             {
                 _avatarManager.avatarChanged -= OnAvatarChanged;
             }
@@ -179,13 +178,13 @@ namespace CustomAvatar.UI
             {
                 tableCell = Instantiate(_tableCellTemplate);
 
-                foreach (var image in tableCell.GetPrivateField<Image[]>("_beatmapCharacteristicImages"))
-                {
-                    DestroyImmediate(image);
-                }
+                tableCell.GetPrivateField<Image>("_backgroundImage").enabled = false;
+                tableCell.GetPrivateField<Image>("_favoritesBadgeImage").enabled = false;
 
-                tableCell.SetPrivateField("_beatmapCharacteristicImages", new UnityEngine.UI.Image[0]);
-                tableCell.GetPrivateField<RawImage>("_favoritesBadgeImage").enabled = false;
+                tableCell.transform.Find("BpmIcon").gameObject.SetActive(false);
+
+                tableCell.GetPrivateField<TextMeshProUGUI>("_songDurationText").enabled = false;
+                tableCell.GetPrivateField<TextMeshProUGUI>("_songBpmText").enabled = false;
 
                 tableCell.reuseIdentifier = kTableCellReuseIdentifier;
             }
@@ -193,11 +192,13 @@ namespace CustomAvatar.UI
             AvatarListItem avatar = _avatars[idx];
 
             tableCell.GetPrivateField<TextMeshProUGUI>("_songNameText").text = avatar.name;
-            tableCell.GetPrivateField<TextMeshProUGUI>("_authorText").text = avatar.author;
-            tableCell.GetPrivateField<RawImage>("_coverRawImage").texture = avatar.icon ? avatar.icon : _blankAvatarIcon;
+            tableCell.GetPrivateField<TextMeshProUGUI>("_songAuthorText").text = avatar.author;
+
+            Texture2D icon = avatar.icon ? avatar.icon : _blankAvatarIcon;
+
+            tableCell.GetPrivateField<Image>("_coverImage").sprite = Sprite.Create(icon, new Rect(0, 0, icon.width, icon.height), Vector2.zero);
 
             return tableCell;
         }
     }
 }
-*/

@@ -14,9 +14,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-/*
 using BeatSaberMarkupLanguage;
 using CustomAvatar.UI;
+using VRUIControls;
 using Zenject;
 
 namespace CustomAvatar.Zenject
@@ -35,9 +35,11 @@ namespace CustomAvatar.Zenject
             Container.BindInterfacesAndSelfTo<AvatarMenuFlowCoordinator>().FromNewComponentOnNewGameObject(nameof(AvatarMenuFlowCoordinator));
 
             Container.QueueForInject(avatarListViewController);
+            Container.QueueForInject(avatarListViewController.GetComponent<VRGraphicRaycaster>());
             Container.QueueForInject(mirrorViewController);
+            Container.QueueForInject(mirrorViewController.GetComponent<VRGraphicRaycaster>());
             Container.QueueForInject(settingsViewController);
+            Container.QueueForInject(settingsViewController.GetComponent<VRGraphicRaycaster>());
         }
     }
 }
-*/

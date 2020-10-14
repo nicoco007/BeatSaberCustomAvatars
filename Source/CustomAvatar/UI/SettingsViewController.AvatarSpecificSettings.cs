@@ -14,7 +14,6 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-/*
 using CustomAvatar.Avatar;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components.Settings;
@@ -37,9 +36,9 @@ namespace CustomAvatar.UI
         [UIComponent("bypass-calibration")] private HoverHint _bypassCalibrationHoverHint;
         [UIComponent("automatic-calibration")] private HoverHint _automaticCalibrationHoverHint;
 
-        [UIComponent("ignore-exclusions")] private CheckboxSetting _ignoreExclusionsSetting;
-        [UIComponent("bypass-calibration")] private CheckboxSetting _bypassCalibration;
-        [UIComponent("automatic-calibration")] private CheckboxSetting _automaticCalibrationSetting;
+        [UIComponent("ignore-exclusions")] private BoolSetting _ignoreExclusionsSetting;
+        [UIComponent("bypass-calibration")] private BoolSetting _bypassCalibration;
+        [UIComponent("automatic-calibration")] private BoolSetting _automaticCalibrationSetting;
 
         [UIComponent("calibrate-button")] private Button _calibrateButton;
         [UIComponent("clear-button")] private Button _clearButton;
@@ -126,7 +125,7 @@ namespace CustomAvatar.UI
                 {
                     _avatarTailor.CalibrateFullBodyTrackingManual(_avatarManager.currentlySpawnedAvatar);
 
-                    _automaticCalibrationSetting.CheckboxValue = false;
+                    _automaticCalibrationSetting.Value = false;
                     OnEnableAutomaticCalibrationChanged(false);
                 }
 
@@ -209,4 +208,3 @@ namespace CustomAvatar.UI
         }
     }
 }
-*/

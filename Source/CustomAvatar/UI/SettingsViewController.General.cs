@@ -14,7 +14,6 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-/*
 using CustomAvatar.Avatar;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components.Settings;
@@ -29,11 +28,11 @@ namespace CustomAvatar.UI
         #pragma warning disable 649
         #pragma warning disable IDE0044
 
-        [UIComponent("visible-in-first-person")] private CheckboxSetting _visibleInFirstPerson;
+        [UIComponent("visible-in-first-person")] private BoolSetting _visibleInFirstPerson;
         [UIComponent("resize-mode")] private ListSetting _resizeMode;
-        [UIComponent("enable-locomotion")] private CheckboxSetting _enableLocomotion;
-        [UIComponent("floor-adjust")] private CheckboxSetting _floorHeightAdjust;
-        [UIComponent("move-floor-with-room-adjust")] private CheckboxSetting _moveFloorWithRoomAdjust;
+        [UIComponent("enable-locomotion")] private BoolSetting _enableLocomotion;
+        [UIComponent("floor-adjust")] private BoolSetting _floorHeightAdjust;
+        [UIComponent("move-floor-with-room-adjust")] private BoolSetting _moveFloorWithRoomAdjust;
         [UIComponent("camera-clip-plane")] private IncrementSetting _cameraNearClipPlane;
 
         #pragma warning restore 649
@@ -175,4 +174,3 @@ namespace CustomAvatar.UI
         #endregion
     }
 }
-*/

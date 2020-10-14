@@ -14,7 +14,6 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-/*
 using BeatSaberMarkupLanguage.ViewControllers;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
@@ -60,16 +59,16 @@ namespace CustomAvatar.UI
             _logger = loggerProvider.CreateLogger<SettingsViewController>();
         }
 
-        protected override void DidActivate(bool firstActivation, ActivationType type)
+        protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
-            base.DidActivate(firstActivation, type);
+            base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
 
-            _visibleInFirstPerson.CheckboxValue = _settings.isAvatarVisibleInFirstPerson;
+            _visibleInFirstPerson.Value = _settings.isAvatarVisibleInFirstPerson;
             _resizeMode.Value = _settings.resizeMode;
-            _enableLocomotion.CheckboxValue = _settings.enableLocomotion;
-            _floorHeightAdjust.CheckboxValue = _settings.enableFloorAdjust;
-            _moveFloorWithRoomAdjust.CheckboxValue = _settings.moveFloorWithRoomAdjust;
-            _calibrateFullBodyTrackingOnStart.CheckboxValue = _settings.calibrateFullBodyTrackingOnStart;
+            _enableLocomotion.Value = _settings.enableLocomotion;
+            _floorHeightAdjust.Value = _settings.enableFloorAdjust;
+            _moveFloorWithRoomAdjust.Value = _settings.moveFloorWithRoomAdjust;
+            _calibrateFullBodyTrackingOnStart.Value = _settings.calibrateFullBodyTrackingOnStart;
             _cameraNearClipPlane.Value = _settings.cameraNearClipPlane;
 
             UpdateUI(_avatarManager.currentlySpawnedAvatar?.avatar);
@@ -108,9 +107,9 @@ namespace CustomAvatar.UI
             _trackedDeviceManager.deviceTrackingLost += OnInputDevicesChanged;
         }
 
-        protected override void DidDeactivate(DeactivationType deactivationType)
+        protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
-            base.DidDeactivate(deactivationType);
+            base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
 
             _avatarManager.avatarChanged -= OnAvatarChanged;
 
@@ -135,7 +134,7 @@ namespace CustomAvatar.UI
             {
                 _clearButton.interactable = false;
                 _calibrateButton.interactable = false;
-                _automaticCalibrationSetting.checkbox.interactable = false;
+                _automaticCalibrationSetting.interactable = false;
                 _automaticCalibrationHoverHint.text = "No avatar selected";
 
                 return;
@@ -146,14 +145,14 @@ namespace CustomAvatar.UI
 
             UpdateCalibrationButtons(avatar);
 
-            _ignoreExclusionsSetting.CheckboxValue = _currentAvatarSettings.ignoreExclusions;
+            _ignoreExclusionsSetting.Value = _currentAvatarSettings.ignoreExclusions;
 
-            _bypassCalibration.CheckboxValue = _currentAvatarSettings.bypassCalibration;
-            _bypassCalibration.checkbox.interactable = avatar.supportsFullBodyTracking;
+            _bypassCalibration.Value = _currentAvatarSettings.bypassCalibration;
+            _bypassCalibration.interactable = avatar.supportsFullBodyTracking;
             _bypassCalibrationHoverHint.text = avatar.supportsFullBodyTracking ? "Disable the need for calibration before full body tracking is applied." : "Not supported by current avatar";
 
-            _automaticCalibrationSetting.CheckboxValue = _currentAvatarSettings.useAutomaticCalibration;
-            _automaticCalibrationSetting.checkbox.interactable = avatar.descriptor.supportsAutomaticCalibration;
+            _automaticCalibrationSetting.Value = _currentAvatarSettings.useAutomaticCalibration;
+            _automaticCalibrationSetting.interactable = avatar.descriptor.supportsAutomaticCalibration;
             _automaticCalibrationHoverHint.text = avatar.descriptor.supportsAutomaticCalibration ? "Use automatic calibration instead of manual calibration." : "Not supported by current avatar";
         }
 
@@ -208,4 +207,3 @@ namespace CustomAvatar.UI
         }
     }
 }
-*/

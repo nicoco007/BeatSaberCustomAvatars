@@ -14,7 +14,6 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-/*
 using CustomAvatar.Configuration;
 using CustomAvatar.StereoRendering;
 using UnityEngine;
@@ -37,11 +36,11 @@ namespace CustomAvatar.UI
             _settings = settings;
         }
 
-        protected override void DidActivate(bool firstActivation, ActivationType activationType)
+        protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
-            base.DidActivate(firstActivation, activationType);
+            base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
 
-            if (activationType == ActivationType.AddedToHierarchy)
+            if (addedToHierarchy)
             {
                 _mirrorContainer = new GameObject();
                 Vector2 mirrorSize = _settings.mirror.size;
@@ -49,12 +48,11 @@ namespace CustomAvatar.UI
             }
         }
 
-        protected override void DidDeactivate(DeactivationType deactivationType)
+        protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
-            base.DidDeactivate(deactivationType);
+            base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
 
             Destroy(_mirrorContainer);
         }
     }
 }
-*/

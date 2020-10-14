@@ -14,7 +14,6 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-/*
 using System.Collections.Generic;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components.Settings;
@@ -30,7 +29,7 @@ namespace CustomAvatar.UI
         #pragma warning disable 649
         #pragma warning disable IDE0044
 
-        [UIComponent("calibrate-fbt-on-start")] private CheckboxSetting _calibrateFullBodyTrackingOnStart;
+        [UIComponent("calibrate-fbt-on-start")] private BoolSetting _calibrateFullBodyTrackingOnStart;
         [UIComponent("pelvis-offset")] private IncrementSetting _pelvisOffset;
         [UIComponent("foot-offset")] private IncrementSetting _footOffset;
         [UIComponent("waist-tracker-position")] private ListSetting _waistTrackerPosition;
@@ -76,7 +75,7 @@ namespace CustomAvatar.UI
             _avatarTailor.CalibrateFullBodyTrackingAuto();
             _autoClearButton.interactable = _calibrationData.automaticCalibration.isCalibrated;
 
-            _automaticCalibrationSetting.CheckboxValue = true;
+            _automaticCalibrationSetting.Value = true;
             OnEnableAutomaticCalibrationChanged(true);
         }
 
@@ -96,4 +95,3 @@ namespace CustomAvatar.UI
         #endregion
     }
 }
-*/
