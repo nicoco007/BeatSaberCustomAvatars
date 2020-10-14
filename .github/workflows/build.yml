@@ -1,6 +1,6 @@
 name: Build
 
-on: [ push, create ]
+on: [ push ]
 
 jobs:
   build:
