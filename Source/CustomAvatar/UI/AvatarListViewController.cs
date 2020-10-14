@@ -22,6 +22,7 @@ using System.Reflection;
 using CustomAvatar.Avatar;
 using CustomAvatar.Utilities;
 using HMUI;
+using Polyglot;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -49,10 +50,6 @@ namespace CustomAvatar.UI
         {
             _avatarManager = avatarManager;
             _container = container;
-
-            rectTransform.sizeDelta = new Vector2(120, 0);
-            rectTransform.offsetMin = new Vector2(-60, 0);
-            rectTransform.offsetMax = new Vector2(60, 0);
         }
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
@@ -67,6 +64,10 @@ namespace CustomAvatar.UI
                 _noAvatarIcon = LoadTextureFromResource("CustomAvatar.Resources.ban.png");
 
                 CreateTableView();
+
+                rectTransform.sizeDelta = new Vector2(120, 0);
+                rectTransform.offsetMin = new Vector2(-60, 0);
+                rectTransform.offsetMax = new Vector2(60, 0);
             }
 
             if (addedToHierarchy)
@@ -94,10 +95,11 @@ namespace CustomAvatar.UI
 
             tableViewContainer.gameObject.SetActive(false);
 
-            tableViewContainer.anchorMin = new Vector2(0.2f, 0.1f);
-            tableViewContainer.anchorMax = new Vector2(0.8f, 0.9f);
-            tableViewContainer.sizeDelta = new Vector2(0, 0);
-            tableViewContainer.anchoredPosition = new Vector2(0, 0);
+            tableViewContainer.anchorMin = new Vector2(0.1f, 0f);
+            tableViewContainer.anchorMax = new Vector2(0.9f, 0.85f);
+            tableViewContainer.sizeDelta = new Vector2(-10, 0);
+            tableViewContainer.offsetMin = new Vector2(0, 0);
+            tableViewContainer.offsetMax = new Vector2(-10, 0);
 
             tableView.anchorMin = Vector2.zero;
             tableView.anchorMax = Vector2.one;
@@ -115,14 +117,17 @@ namespace CustomAvatar.UI
 
             tableView.GetComponent<ScrollRect>().viewport = viewport;
 
+            Transform header = Instantiate(Resources.FindObjectsOfTypeAll<LeaderboardViewController>().First().transform.Find("HeaderPanel"), rectTransform, false);
+
+            Destroy(header.GetComponentInChildren<LocalizedTextMeshProUGUI>());
+            header.GetComponentInChildren<TextMeshProUGUI>().text = "Avatars";
+
             // buttons and indicator have images so it's easier to just copy from an existing component
-            Transform scrollBar = Instantiate(Resources.FindObjectsOfTypeAll<LevelCollectionTableView>().First().transform.Find("ScrollBar"));
+            Transform scrollBar = Instantiate(Resources.FindObjectsOfTypeAll<LevelCollectionTableView>().First().transform.Find("ScrollBar"), tableViewContainer, false);
 
             Button upButton = scrollBar.Find("UpButton").GetComponent<Button>();
             Button downButton = scrollBar.Find("DownButton").GetComponent<Button>();
-            Button verticalScrollIndicator = scrollBar.Find("VerticalScrollIndicator").GetComponent<Button>();
-
-            scrollBar.SetParent(tableViewContainer, false);
+            VerticalScrollIndicator verticalScrollIndicator = scrollBar.Find("VerticalScrollIndicator").GetComponent<VerticalScrollIndicator>();
 
             _tableView = _container.InstantiateComponent<TableView>(tableView.gameObject);
 

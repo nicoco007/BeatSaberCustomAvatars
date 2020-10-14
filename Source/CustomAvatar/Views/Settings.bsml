@@ -1,8 +1,8 @@
-<bg id="root">
-  <tab-selector tab-tag="avatar-tabs" />
+<bg>
+  <tab-selector tab-tag="avatar-tabs" size-delta-x="0" size-delta-y="7" anchor-pos-x="0" anchor-pos-y="-10" />
 
-  <tab tags="avatar-tabs" tab-name="General">
-    <settings-container>
+  <tab tags="avatar-tabs" tab-name="General" anchor-max-y="0.8">
+    <settings-container anchor-pos-y="0" size-delta-y="0">
       <bool-setting text="Visible in First Person" id="visible-in-first-person" on-change="visible-in-first-person-change"/>
       <list-setting text="Resize Mode" id="resize-mode" on-change="resize-mode-change" options="resize-mode-options" formatter="resize-mode-formatter"></list-setting>
       <bool-setting id="enable-locomotion" text="Enable locomotion" hover-hint="Allow feet to be moved automatically to follow your head/body when not using dedicated trackers." on-change="enable-locomotion-change"/>
@@ -18,8 +18,8 @@
     </settings-container>
   </tab>
 
-  <tab tags="avatar-tabs" tab-name="Avatar Specific">
-    <settings-container>
+  <tab tags="avatar-tabs" tab-name="Avatar Specific" anchor-max-y="0.8">
+    <settings-container anchor-pos-y="0" size-delta-y="0">
       <bool-setting id="ignore-exclusions" text="Ignore first person exclusions" hover-hint="Show the entire model in first person, even if some parts were configured to be hidden in first person. This may cause issues on certain avatars." on-change="ignore-exclusions-change"/>
       <bool-setting id="bypass-calibration" text="Bypass calibration" hover-hint="Disable the need for calibration before full body tracking is applied." on-change="bypass-calibration-change"/>
       <bool-setting id="automatic-calibration" text="Use automatic calibration" hover-hint="Must be supported by avatar" on-change="automatic-calibration-change"/>
@@ -31,8 +31,8 @@
     </settings-container>
   </tab>
 
-  <tab tags="avatar-tabs" tab-name="Automatic FBT">
-    <settings-container>
+  <tab tags="avatar-tabs" tab-name="Automatic FBT" anchor-max-y="0.8">
+    <settings-container anchor-pos-y="0" size-delta-y="0">
       <increment-setting id="pelvis-offset" text="Pelvis Offset" hover-hint="Horizontal distance between pelvis and tracker" min="-0.5" max="0.5" increment="0.01" on-change="pelvis-offset-change"></increment-setting>
       <increment-setting id="foot-offset" text="Foot Offset" hover-hint="Horizontal distance between heel and tracker" min="0" max="0.5" increment="0.01" on-change="foot-offset-change"></increment-setting>
 

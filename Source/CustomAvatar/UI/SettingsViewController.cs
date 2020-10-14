@@ -20,6 +20,9 @@ using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
+using Polyglot;
+using System.Linq;
+using TMPro;
 using UnityEngine;
 using Zenject;
 
@@ -57,10 +60,6 @@ namespace CustomAvatar.UI
             _calibrationData = calibrationData;
             _shaderLoader = shaderLoader;
             _logger = loggerProvider.CreateLogger<SettingsViewController>();
-
-            rectTransform.sizeDelta = new Vector2(120, 0);
-            rectTransform.offsetMin = new Vector2(-60, 0);
-            rectTransform.offsetMax = new Vector2(60, 0);
         }
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
@@ -80,20 +79,32 @@ namespace CustomAvatar.UI
 
             _armSpanLabel.SetText($"{_settings.playerArmSpan:0.00} m");
 
-            if (_shaderLoader.unlitShader)
+            if (firstActivation)
             {
-                _sphereMaterial = new Material(_shaderLoader.unlitShader);
-                _redMaterial = new Material(_shaderLoader.unlitShader);
-                _greenMaterial = new Material(_shaderLoader.unlitShader);
-                _blueMaterial = new Material(_shaderLoader.unlitShader);
+                if (_shaderLoader.unlitShader)
+                {
+                    _sphereMaterial = new Material(_shaderLoader.unlitShader);
+                    _redMaterial = new Material(_shaderLoader.unlitShader);
+                    _greenMaterial = new Material(_shaderLoader.unlitShader);
+                    _blueMaterial = new Material(_shaderLoader.unlitShader);
 
-                _redMaterial.SetColor(kColor, new Color(0.8f, 0, 0, 1));
-                _greenMaterial.SetColor(kColor, new Color(0, 0.8f, 0, 1));
-                _blueMaterial.SetColor(kColor, new Color(0, 0.5f, 1, 1));
-            }
-            else
-            {
-                _logger.Error("Unlit shader not loaded; manual calibration points may not be visible");
+                    _redMaterial.SetColor(kColor, new Color(0.8f, 0, 0, 1));
+                    _greenMaterial.SetColor(kColor, new Color(0, 0.8f, 0, 1));
+                    _blueMaterial.SetColor(kColor, new Color(0, 0.5f, 1, 1));
+                }
+                else
+                {
+                    _logger.Error("Unlit shader not loaded; manual calibration points may not be visible");
+                }
+
+                Transform header = Instantiate(Resources.FindObjectsOfTypeAll<GameplaySetupViewController>().First().transform.Find("HeaderPanel"), rectTransform, false);
+
+                Destroy(header.GetComponentInChildren<LocalizedTextMeshProUGUI>());
+                header.GetComponentInChildren<TextMeshProUGUI>().text = "Settings";
+
+                rectTransform.sizeDelta = new Vector2(120, 0);
+                rectTransform.offsetMin = new Vector2(-60, 0);
+                rectTransform.offsetMax = new Vector2(60, 0);
             }
 
             _pelvisOffset.Value = _settings.automaticCalibration.pelvisOffset;
@@ -103,24 +114,30 @@ namespace CustomAvatar.UI
 
             _autoClearButton.interactable = _calibrationData.automaticCalibration.isCalibrated;
 
-            _avatarManager.avatarChanged += OnAvatarChanged;
+            if (addedToHierarchy)
+            {
+                _avatarManager.avatarChanged += OnAvatarChanged;
 
-            _trackedDeviceManager.deviceAdded += OnInputDevicesChanged;
-            _trackedDeviceManager.deviceRemoved += OnInputDevicesChanged;
-            _trackedDeviceManager.deviceTrackingAcquired += OnInputDevicesChanged;
-            _trackedDeviceManager.deviceTrackingLost += OnInputDevicesChanged;
+                _trackedDeviceManager.deviceAdded += OnInputDevicesChanged;
+                _trackedDeviceManager.deviceRemoved += OnInputDevicesChanged;
+                _trackedDeviceManager.deviceTrackingAcquired += OnInputDevicesChanged;
+                _trackedDeviceManager.deviceTrackingLost += OnInputDevicesChanged;
+            }
         }
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
             base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
 
-            _avatarManager.avatarChanged -= OnAvatarChanged;
+            if (removedFromHierarchy)
+            {
+                _avatarManager.avatarChanged -= OnAvatarChanged;
 
-            _trackedDeviceManager.deviceAdded -= OnInputDevicesChanged;
-            _trackedDeviceManager.deviceRemoved -= OnInputDevicesChanged;
-            _trackedDeviceManager.deviceTrackingAcquired -= OnInputDevicesChanged;
-            _trackedDeviceManager.deviceTrackingLost -= OnInputDevicesChanged;
+                _trackedDeviceManager.deviceAdded -= OnInputDevicesChanged;
+                _trackedDeviceManager.deviceRemoved -= OnInputDevicesChanged;
+                _trackedDeviceManager.deviceTrackingAcquired -= OnInputDevicesChanged;
+                _trackedDeviceManager.deviceTrackingLost -= OnInputDevicesChanged;
+            }
 
             DisableCalibrationMode(false);
         }
