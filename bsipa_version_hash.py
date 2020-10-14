@@ -6,7 +6,7 @@ import sys
 manifest_path, assembly_info_path = sys.argv[1:]
 
 commit_hash = os.getenv("GIT_HASH")
-rev = os.getenv("GIT_REV")
+tag = os.getenv("GIT_TAG")
 
 with open(manifest_path, "r") as manifest_file:
     obj = json.load(manifest_file)
@@ -37,8 +37,8 @@ with open(assembly_info_path, "r") as assembly_info_file:
     else:
         print("✔ Assembly File Version")
 
-if (rev is not None and len(rev) > 0):
-    if rev != ("v" + version_with_prerelease):
+if (tag is not None and len(tag) > 0):
+    if tag != ("v" + version_with_prerelease):
         print("Git tag does not match manifest version")
         exit(-1)
     else:
