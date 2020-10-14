@@ -19,9 +19,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using BeatSaberMarkupLanguage.Attributes;
-using BeatSaberMarkupLanguage.Components;
-using BeatSaberMarkupLanguage.ViewControllers;
 using CustomAvatar.Avatar;
 using CustomAvatar.Utilities;
 using HMUI;
@@ -32,19 +29,14 @@ using Zenject;
 
 namespace CustomAvatar.UI
 {
-    internal class AvatarListViewController : BSMLResourceViewController, TableView.IDataSource
+    internal class AvatarListViewController : ViewController, TableView.IDataSource
     {
         private const string kTableCellReuseIdentifier = "CustomAvatarsTableCell";
 
-        public override string ResourceName => "CustomAvatar.Views.AvatarList.bsml";
-
-        #pragma warning disable CS0649
-        [UIComponent("avatar-list")] public CustomListTableData avatarList;
-        [UIComponent("up-button")] public Button upButton;
-        [UIComponent("down-button")] public Button downButton;
-        #pragma warning restore CS0649
-
         private PlayerAvatarManager _avatarManager;
+        private DiContainer _container;
+
+        private TableView _tableView;
 
         private readonly List<AvatarListItem> _avatars = new List<AvatarListItem>();
         private LevelListTableCell _tableCellTemplate;
@@ -53,9 +45,10 @@ namespace CustomAvatar.UI
         private Texture2D _noAvatarIcon;
 
         [Inject]
-        private void Inject(PlayerAvatarManager avatarManager)
+        private void Inject(PlayerAvatarManager avatarManager, DiContainer container)
         {
             _avatarManager = avatarManager;
+            _container = container;
         }
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
@@ -69,25 +62,7 @@ namespace CustomAvatar.UI
                 _blankAvatarIcon = LoadTextureFromResource("CustomAvatar.Resources.mystery-man.png");
                 _noAvatarIcon = LoadTextureFromResource("CustomAvatar.Resources.ban.png");
 
-                avatarList.tableView.SetPrivateField("_pageUpButton", upButton);
-                avatarList.tableView.SetPrivateField("_pageDownButton", downButton);
-                avatarList.tableView.SetPrivateField("_hideScrollButtonsIfNotNeeded", false);
-
-                TableViewScroller scroller = avatarList.tableView.GetPrivateField<TableViewScroller>("scroller");
-
-                upButton.onClick.AddListener(() =>
-                {
-                    scroller.PageScrollUp();
-                    scroller.RefreshScrollBar();
-                });
-
-                downButton.onClick.AddListener(() =>
-                {
-                    scroller.PageScrollDown();
-                    scroller.RefreshScrollBar();
-                });
-
-                avatarList.tableView.SetDataSource(this, true);
+                CreateTableView();
             }
 
             if (addedToHierarchy)
@@ -104,6 +79,62 @@ namespace CustomAvatar.UI
                     ReloadData();
                 });
             }
+        }
+
+        // temporary while BSML doesn't support the new scroll buttons & indicator
+        private void CreateTableView()
+        {
+            RectTransform tableViewContainer = new GameObject("AvatarsTableView", typeof(RectTransform)).transform as RectTransform;
+            RectTransform tableView = new GameObject("AvatarsTableView", typeof(RectTransform), typeof(ScrollRect), typeof(Touchable), typeof(EventSystemListener)).transform as RectTransform;
+            RectTransform viewport = new GameObject("Viewport", typeof(RectTransform), typeof(RectMask2D)).transform as RectTransform;
+
+            tableViewContainer.gameObject.SetActive(false);
+
+            tableViewContainer.anchorMin = new Vector2(0.2f, 0.1f);
+            tableViewContainer.anchorMax = new Vector2(0.8f, 0.9f);
+            tableViewContainer.sizeDelta = new Vector2(0, 0);
+            tableViewContainer.anchoredPosition = new Vector2(0, 0);
+
+            tableView.anchorMin = Vector2.zero;
+            tableView.anchorMax = Vector2.one;
+            tableView.sizeDelta = Vector2.zero;
+            tableView.anchoredPosition = Vector2.zero;
+
+            viewport.anchorMin = Vector2.zero;
+            viewport.anchorMax = Vector2.one;
+            viewport.sizeDelta = Vector2.zero;
+            viewport.anchoredPosition = Vector2.zero;
+
+            tableViewContainer.SetParent(rectTransform, false);
+            tableView.SetParent(tableViewContainer, false);
+            viewport.SetParent(tableView, false);
+
+            tableView.GetComponent<ScrollRect>().viewport = viewport;
+
+            // buttons and indicator have images so it's easier to just copy from an existing component
+            Transform scrollBar = Instantiate(Resources.FindObjectsOfTypeAll<LevelCollectionTableView>().First().transform.Find("ScrollBar"));
+
+            Button upButton = scrollBar.Find("UpButton").GetComponent<Button>();
+            Button downButton = scrollBar.Find("DownButton").GetComponent<Button>();
+            Button verticalScrollIndicator = scrollBar.Find("VerticalScrollIndicator").GetComponent<Button>();
+
+            scrollBar.SetParent(tableViewContainer, false);
+
+            _tableView = _container.InstantiateComponent<TableView>(tableView.gameObject);
+
+            _tableView.SetPrivateField("_preallocatedCells", new TableView.CellsGroup[0]);
+            _tableView.SetPrivateField("_isInitialized", false);
+            _tableView.SetPrivateField("_pageUpButton", upButton);
+            _tableView.SetPrivateField("_pageDownButton", downButton);
+            _tableView.SetPrivateField("_verticalScrollIndicator", verticalScrollIndicator);
+            _tableView.SetPrivateField("_hideScrollButtonsIfNotNeeded", false);
+            _tableView.SetPrivateField("_hideScrollIndicatorIfNotNeeded", false);
+
+            _tableView.SetDataSource(this, true);
+
+            _tableView.didSelectCellWithIdxEvent += OnAvatarClicked;
+
+            tableViewContainer.gameObject.SetActive(true);
         }
 
         private Texture2D LoadTextureFromResource(string resourceName)
@@ -130,12 +161,10 @@ namespace CustomAvatar.UI
             }
         }
 
-
-        [UIAction("avatar-click")]
         private void OnAvatarClicked(TableView table, int row)
         {
             _avatarManager.SwitchToAvatarAsync(_avatars[row].fileName);
-            avatarList.tableView.ScrollToCellWithIdx(row, TableViewScroller.ScrollPositionType.Center, true);
+            _tableView.ScrollToCellWithIdx(row, TableViewScroller.ScrollPositionType.Center, true);
         }
 
         private void OnAvatarChanged(SpawnedAvatar avatar)
@@ -155,9 +184,9 @@ namespace CustomAvatar.UI
 
             int currentRow = _avatarManager.currentlySpawnedAvatar ? _avatars.FindIndex(a => a.fileName == _avatarManager.currentlySpawnedAvatar.avatar.fileName) : 0;
 
-            avatarList.tableView.ReloadData();
-            avatarList.tableView.ScrollToCellWithIdx(currentRow, TableViewScroller.ScrollPositionType.Center, true);
-            avatarList.tableView.SelectCellWithIdx(currentRow);
+            _tableView.ReloadData();
+            _tableView.ScrollToCellWithIdx(currentRow, TableViewScroller.ScrollPositionType.Center, true);
+            _tableView.SelectCellWithIdx(currentRow);
         }
 
         public float CellSize()
@@ -172,7 +201,7 @@ namespace CustomAvatar.UI
 
         public TableCell CellForIdx(TableView tableView, int idx)
         {
-            LevelListTableCell tableCell = avatarList.tableView.DequeueReusableCellForIdentifier(kTableCellReuseIdentifier) as LevelListTableCell;
+            LevelListTableCell tableCell = _tableView.DequeueReusableCellForIdentifier(kTableCellReuseIdentifier) as LevelListTableCell;
 
             if (!tableCell)
             {
