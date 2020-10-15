@@ -15,7 +15,6 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using CustomAvatar.Avatar;
-using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Utilities;
 using System.Collections.Generic;
@@ -32,19 +31,18 @@ namespace CustomAvatar.Lighting
 
         private ILogger<DynamicLightingController> _logger;
         private LightWithIdManager _lightManager;
-        private Settings _settings;
 
         private List<DynamicLight>[] _lights;
+        private List<Light>[] _directionalLights;
         
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
 
         [Inject]
-        private void Inject(ILoggerProvider loggerProvider, LightWithIdManager lightManager, Settings settings)
+        private void Inject(ILoggerProvider loggerProvider, LightWithIdManager lightManager)
         {
             _logger = loggerProvider.CreateLogger<DynamicLightingController>();
             _lightManager = lightManager;
-            _settings = settings;
         }
 
         private void Start()
@@ -73,6 +71,7 @@ namespace CustomAvatar.Lighting
             int maxLightId = _lightManager.GetPrivateField<int>("kMaxLightId");
 
             _lights = new List<DynamicLight>[maxLightId + 1];
+            _directionalLights = new List<Light>[maxLightId + 1];
             
             for (int id = 0; id < lightsWithId.Length; id++)
             {
@@ -80,14 +79,36 @@ namespace CustomAvatar.Lighting
 
                 foreach (LightWithId lightWithId in lightsWithId[id])
                 {
+                    foreach (DirectionalLight directionalLight in lightWithId.GetComponentsInChildren<DirectionalLight>())
+                    {
+                        Light light = new GameObject("DynamicDirectionalLight").AddComponent<Light>();
+
+                        light.type = LightType.Directional;
+                        light.color = _lightManager.GetColorForId(id);
+                        light.intensity = 1;
+                        light.cullingMask = AvatarLayers.kAllLayersMask;
+                        light.shadows = LightShadows.Soft;
+                        light.shadowStrength = 1;
+
+                        light.transform.parent = transform;
+                        light.transform.position = Vector3.zero;
+                        light.transform.rotation = directionalLight.transform.rotation;
+
+                        if (_directionalLights[id] == null)
+                        {
+                            _directionalLights[id] = new List<Light>();
+                        }
+
+                        _directionalLights[id].Add(light);
+                    }
+
                     foreach (TubeBloomPrePassLight tubeLight in lightWithId.GetComponentsInChildren<TubeBloomPrePassLight>())
                     {
-                        Light light = new GameObject("DynamicLight").AddComponent<Light>();
+                        Light light = new GameObject("DynamicTubeBloomPrePassLight").AddComponent<Light>();
 
                         light.type = LightType.Directional;
                         light.color = _lightManager.GetColorForId(id);
                         light.intensity = 0;
-                        light.spotAngle = 45;
                         light.cullingMask = AvatarLayers.kAllLayersMask;
 
                         light.transform.parent = transform;
@@ -146,18 +167,36 @@ namespace CustomAvatar.Lighting
 
         private void OnSetColorForId(int id, Color color)
         {
-            if (_lights[id] == null) return;
-
-            foreach (DynamicLight light in _lights[id])
+            if (_directionalLights[id] != null)
             {
-                if (light.tubeLight.isActiveAndEnabled)
+                foreach (Light light in _directionalLights[id])
                 {
-                    light.color = color;
+                    if (light.isActiveAndEnabled)
+                    {
+                        light.color = color;
+                        light.intensity = color.a;
+                    }
+                    else
+                    {
+                        light.color = Color.black;
+                        light.intensity = 0;
+                    }
                 }
-                else
+            }
+
+            if (_lights[id] != null)
+            {
+                foreach (DynamicLight light in _lights[id])
                 {
-                    light.color = Color.black;
-                    light.intensity = 0;
+                    if (light.tubeLight.isActiveAndEnabled)
+                    {
+                        light.color = color;
+                    }
+                    else
+                    {
+                        light.color = Color.black;
+                        light.intensity = 0;
+                    }
                 }
             }
         }
@@ -228,7 +267,7 @@ namespace CustomAvatar.Lighting
             private void UpdateLight()
             {
                 _unityLight.color = _color;
-                _unityLight.intensity = _intensity * width * _colorAlphaMultiplier * _bloomFogIntensityMultiplier * _color.a * 3f;
+                _unityLight.intensity = _intensity * width * _colorAlphaMultiplier * _bloomFogIntensityMultiplier * _color.a * 5f;
 
                 _unityLight.enabled = _unityLight.intensity > 0.01f;
             }
