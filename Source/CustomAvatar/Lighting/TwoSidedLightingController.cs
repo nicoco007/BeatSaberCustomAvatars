@@ -38,8 +38,8 @@ namespace CustomAvatar.Lighting
         {
             SetLightingQuality(_settings.lighting.quality);
 
-            AddLight(Vector3.zero, Quaternion.Euler(135, 0, 0), LightType.Directional, new Color(0.8f, 0.9f, 1.000f), 1.0f, 25); // front
-            AddLight(Vector3.zero, Quaternion.Euler(45, 0, 0), LightType.Directional, new Color(0.8f, 0.9f, 1.000f), 1.0f, 25); // back
+            AddLight(Vector3.zero, Quaternion.Euler(135, 0, 0), LightType.Directional, new Color(1, 1, 1), 0.8f, 25); // front
+            AddLight(Vector3.zero, Quaternion.Euler(45, 0, 0), LightType.Directional, new Color(1, 1, 1), 0.8f, 25); // back
         }
         
         #pragma warning disable IDE0051

@@ -41,7 +41,11 @@ namespace CustomAvatar
 
             ZenjectHelper.RegisterInitInstaller<CustomAvatarsInstaller>(ipaLogger);
             ZenjectHelper.RegisterMenuViewControllersInstaller<UIInstaller>();
-            ZenjectHelper.RegisterGameplayInstaller<GameplayInstaller>();
+            ZenjectHelper.RegisterGameplayInstaller<GameInstaller>();
+
+            ZenjectHelper.RegisterMenuInstaller<LightingInstaller>();
+            ZenjectHelper.RegisterInstaller<LightingInstaller>("HealthWarning");
+            ZenjectHelper.RegisterGameplayInstaller<LightingInstaller>();
         }
     }
 }

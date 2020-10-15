@@ -20,15 +20,13 @@ using Zenject;
 
 namespace CustomAvatar.Zenject
 {
-    internal class GameplayInstaller : Installer
+    internal class GameInstaller : Installer
     {
         public override void InstallBindings()
         {
-            Settings settings = Container.Resolve<Settings>();
-
-            if (settings.lighting.quality != LightingQuality.Off && settings.lighting.enableDynamicLighting)
+            if (Container.Resolve<Settings>().lighting.quality != LightingQuality.Off)
             {
-                Container.Bind<GameplayLightingController>().FromNewComponentOnNewGameObject().NonLazy();
+                Container.BindInterfacesAndSelfTo<SaberLightingController>().AsSingle().NonLazy();
             }
         }
     }

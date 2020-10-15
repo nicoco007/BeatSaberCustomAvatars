@@ -50,7 +50,7 @@ namespace CustomAvatar.Zenject
             rectTransform.offsetMax = new Vector2(80, 0);
 
             Canvas canvas = viewController.GetComponent<Canvas>();
-            canvas.additionalShaderChannels = AdditionalCanvasShaderChannels.Normal | AdditionalCanvasShaderChannels.Tangent | AdditionalCanvasShaderChannels.TexCoord1 | AdditionalCanvasShaderChannels.TexCoord2;
+            canvas.additionalShaderChannels |= AdditionalCanvasShaderChannels.TexCoord2;
 
             Container.Bind<T>().FromInstance(viewController);
 

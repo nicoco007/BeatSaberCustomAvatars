@@ -17,7 +17,6 @@
 using System.Linq;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
-using CustomAvatar.Lighting;
 using CustomAvatar.Logging;
 using CustomAvatar.StereoRendering;
 using CustomAvatar.Tracking;
@@ -62,12 +61,6 @@ namespace CustomAvatar.Zenject
             Container.Bind<AvatarSpawner>().AsTransient();
             Container.Bind<GameScenesHelper>().AsTransient();
             Container.Bind<IKHelper>().AsTransient();
-
-            // behaviours
-            if (Container.Resolve<Settings>().lighting.quality != LightingQuality.Off)
-            {
-                Container.Bind<TwoSidedLightingController>().FromNewComponentOnNewGameObject().NonLazy();
-            }
 
             // not sure if this is a great idea but w/e
             if (!Container.HasBinding<MainSettingsModelSO>())

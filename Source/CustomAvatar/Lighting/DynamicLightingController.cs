@@ -15,6 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using CustomAvatar.Avatar;
+using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Utilities;
 using System.Collections.Generic;
@@ -24,16 +25,14 @@ using Zenject;
 
 namespace CustomAvatar.Lighting
 {
-    internal class GameplayLightingController : MonoBehaviour
+    internal class DynamicLightingController : MonoBehaviour
     {
         // TODO this should be adjusted according to room config
         private static readonly Vector3 kOrigin = new Vector3(0, 1, 0);
 
-        private ILogger<GameplayLightingController> _logger;
+        private ILogger<DynamicLightingController> _logger;
         private LightWithIdManager _lightManager;
-        private ColorManager _colorManager;
-        private SaberManager _saberManager;
-        private TwoSidedLightingController _twoSidedLightingController;
+        private Settings _settings;
 
         private List<DynamicLight>[] _lights;
         
@@ -41,28 +40,74 @@ namespace CustomAvatar.Lighting
         #pragma warning disable IDE0051
 
         [Inject]
-        private void Inject(ILoggerProvider loggerProvider, LightWithIdManager lightManager, ColorManager colorManager, SaberManager saberManager, TwoSidedLightingController twoSidedLightingController)
+        private void Inject(ILoggerProvider loggerProvider, LightWithIdManager lightManager, Settings settings)
         {
-            _logger = loggerProvider.CreateLogger<GameplayLightingController>();
+            _logger = loggerProvider.CreateLogger<DynamicLightingController>();
             _lightManager = lightManager;
-            _colorManager = colorManager;
-            _saberManager = saberManager;
-            _twoSidedLightingController = twoSidedLightingController;
-
-            _lightManager.didSetColorForIdEvent += OnSetColorForId;
+            _settings = settings;
         }
 
         private void Start()
         {
-            _twoSidedLightingController.gameObject.SetActive(false);
+            _lightManager.didSetColorForIdEvent += OnSetColorForId;
 
             CreateLights();
-
-            AddPointLight(_colorManager.ColorForSaberType(SaberType.SaberA), _saberManager.leftSaber.transform);
-            AddPointLight(_colorManager.ColorForSaberType(SaberType.SaberB), _saberManager.rightSaber.transform);
         }
 
         private void Update()
+        {
+            UpdateLights();
+        }
+
+        private void OnDestroy()
+        {
+            _lightManager.didSetColorForIdEvent -= OnSetColorForId;
+        }
+
+        #pragma warning restore IDE0051
+        #endregion
+
+        private void CreateLights()
+        {
+            List<LightWithId>[] lightsWithId = _lightManager.GetPrivateField<List<LightWithId>[]>("_lights");
+            int maxLightId = _lightManager.GetPrivateField<int>("kMaxLightId");
+
+            _lights = new List<DynamicLight>[maxLightId + 1];
+            
+            for (int id = 0; id < lightsWithId.Length; id++)
+            {
+                if (lightsWithId[id] == null) continue;
+
+                foreach (LightWithId lightWithId in lightsWithId[id])
+                {
+                    foreach (TubeBloomPrePassLight tubeLight in lightWithId.GetComponentsInChildren<TubeBloomPrePassLight>())
+                    {
+                        Light light = new GameObject("DynamicLight").AddComponent<Light>();
+
+                        light.type = LightType.Directional;
+                        light.color = _lightManager.GetColorForId(id);
+                        light.intensity = 0;
+                        light.spotAngle = 45;
+                        light.cullingMask = AvatarLayers.kAllLayersMask;
+
+                        light.transform.parent = transform;
+                        light.transform.position = Vector3.zero;
+                        light.transform.rotation = Quaternion.identity;
+
+                        if (_lights[id] == null)
+                        {
+                            _lights[id] = new List<DynamicLight>(10);
+                        }
+
+                        _lights[id].Add(new DynamicLight(tubeLight, light));
+                    }
+                }
+            }
+
+            _logger.Trace($"Created {_lights.Sum(l => l?.Count)} lights");
+        }
+
+        private void UpdateLights()
         {
             for (int id = 0; id < _lights.Length; id++)
             {
@@ -99,54 +144,6 @@ namespace CustomAvatar.Lighting
             }
         }
 
-        private void OnDestroy()
-        {
-            _twoSidedLightingController.gameObject.SetActive(true);
-        }
-
-        #pragma warning restore IDE0051
-        #endregion
-
-        private void CreateLights()
-        {
-            List<LightWithId>[] lightsWithId = _lightManager.GetPrivateField<List<LightWithId>[]>("_lights");
-            int maxLightId = _lightManager.GetPrivateField<int>("kMaxLightId");
-
-            _lights = new List<DynamicLight>[maxLightId + 1];
-            
-            for (int id = 0; id < lightsWithId.Length; id++)
-            {
-                if (lightsWithId[id] == null) continue;
-
-                foreach (LightWithId lightWithId in lightsWithId[id])
-                {
-                    foreach (TubeBloomPrePassLight tubeLight in lightWithId.GetComponentsInChildren<TubeBloomPrePassLight>())
-                    {
-                        Light light = new GameObject("DynamicLight").AddComponent<Light>();
-
-                        light.type = LightType.Directional;
-                        light.color = Color.black;
-                        light.intensity = 0;
-                        light.spotAngle = 45;
-                        light.cullingMask = AvatarLayers.kAllLayersMask;
-
-                        light.transform.parent = transform;
-                        light.transform.position = Vector3.zero;
-                        light.transform.rotation = Quaternion.identity;
-
-                        if (_lights[id] == null)
-                        {
-                            _lights[id] = new List<DynamicLight>(10);
-                        }
-
-                        _lights[id].Add(new DynamicLight(tubeLight, light));
-                    }
-                }
-            }
-
-            _logger.Trace($"Created {_lights.Sum(l => l?.Count)} lights");
-        }
-
         private void OnSetColorForId(int id, Color color)
         {
             if (_lights[id] == null) return;
@@ -170,24 +167,6 @@ namespace CustomAvatar.Lighting
             // integral is ∫ 1 / (1 + h^2 + x^2) dx = atan(x / sqrt(h^2 + 1)) / sqrt(h^2 + 1)
             float sqrt = Mathf.Sqrt(h2 + 1);
             return Mathf.Atan(x / sqrt) / sqrt;
-        }
-
-        private void AddPointLight(Color color, Transform parent)
-        {
-            Light light = new GameObject(parent.name + "Light").AddComponent<Light>();
-
-            light.type = LightType.Point;
-            light.color = color;
-            light.intensity = 0.35f;
-            light.shadows = LightShadows.Hard;
-            light.renderMode = LightRenderMode.ForcePixel; // point lights don't do much when vertex rendered
-            light.bounceIntensity = 0;
-            light.range = 5;
-            light.cullingMask = AvatarLayers.kAllLayersMask;
-
-            light.transform.SetParent(parent, false);
-            light.transform.localPosition = new Vector3(0, 0, 0.5f); // middle of saber
-            light.transform.rotation = Quaternion.identity;
         }
 
         private class DynamicLight
@@ -251,7 +230,7 @@ namespace CustomAvatar.Lighting
                 _unityLight.color = _color;
                 _unityLight.intensity = _intensity * width * _colorAlphaMultiplier * _bloomFogIntensityMultiplier * _color.a * 3f;
 
-                _unityLight.enabled = _unityLight.intensity >= 0.001f;
+                _unityLight.enabled = _unityLight.intensity > 0.01f;
             }
         }
     }
