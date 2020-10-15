@@ -152,6 +152,7 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="manifest.json" />
+    <EmbeddedResource Include="Views\Mirror.bsml" />
     <EmbeddedResource Include="Views\Settings.bsml" />
     <EmbeddedResource Include="Resources\icon.png" />
     <EmbeddedResource Include="Resources\mystery-man.png" />
@@ -160,6 +161,9 @@
   <ItemGroup>
     <CopyToOutput Include="$(ProjectDir)..\..\Packaging\**\*.*" />
     <CopyToBeatSaberFolder Include="$(TargetDir)**\*.*" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Views\Mirror.bsml" />
   </ItemGroup>
   <Target Name="Organize" AfterTargets="AfterBuild">    
     <!-- remove deps.json file since it's not used -->

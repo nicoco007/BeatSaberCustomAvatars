@@ -17,23 +17,32 @@
 using CustomAvatar.Configuration;
 using CustomAvatar.StereoRendering;
 using UnityEngine;
-using HMUI;
 using Zenject;
+using CustomAvatar.Avatar;
+using BeatSaberMarkupLanguage.ViewControllers;
+using BeatSaberMarkupLanguage.Attributes;
 
 namespace CustomAvatar.UI
 {
-    internal class MirrorViewController : ViewController
+    internal class MirrorViewController : BSMLResourceViewController
     {
+        public override string ResourceName => "CustomAvatar.Views.Mirror.bsml";
+
         private GameObject _mirrorContainer;
 
         private MirrorHelper _mirrorHelper;
         private Settings _settings;
+        private PlayerAvatarManager _avatarManager;
+
+        [UIComponent("loader")]
+        private Transform _loader;
 
         [Inject]
-        private void Inject(MirrorHelper mirrorHelper, Settings settings)
+        private void Inject(MirrorHelper mirrorHelper, Settings settings, PlayerAvatarManager avatarManager)
         {
             _mirrorHelper = mirrorHelper;
             _settings = settings;
+            _avatarManager = avatarManager;
         }
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
@@ -45,6 +54,11 @@ namespace CustomAvatar.UI
                 _mirrorContainer = new GameObject();
                 Vector2 mirrorSize = _settings.mirror.size;
                 _mirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, 1.5f), Quaternion.Euler(-90f, 0, 0), mirrorSize, _mirrorContainer.transform);
+
+                _avatarManager.avatarStartedLoading += OnAvatarStartedLoading;
+                _avatarManager.avatarChanged += OnAvatarChanged;
+
+                SetLoading(false);
             }
         }
 
@@ -52,7 +66,28 @@ namespace CustomAvatar.UI
         {
             base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
 
+            if (removedFromHierarchy)
+            {
+                _avatarManager.avatarStartedLoading -= OnAvatarStartedLoading;
+                _avatarManager.avatarChanged -= OnAvatarChanged;
+            }
+
             Destroy(_mirrorContainer);
+        }
+
+        private void OnAvatarStartedLoading(string fileName)
+        {
+            SetLoading(true);
+        }
+
+        private void OnAvatarChanged(SpawnedAvatar avatar)
+        {
+            SetLoading(false);
+        }
+
+        private void SetLoading(bool loading)
+        {
+            _loader.gameObject.SetActive(loading);
         }
     }
 }
