@@ -34,8 +34,17 @@ namespace CustomAvatar.UI
         private Settings _settings;
         private PlayerAvatarManager _avatarManager;
 
+        #region Components
+        #pragma warning disable CS0649
+
         [UIComponent("loader")]
-        private Transform _loader;
+        private readonly Transform _loader;
+
+        #pragma warning restore CS0649
+        #endregion
+
+        #region Behaviour Lifecycle
+        #pragma warning disable IDE0051
 
         [Inject]
         private void Inject(MirrorHelper mirrorHelper, Settings settings, PlayerAvatarManager avatarManager)
@@ -44,6 +53,9 @@ namespace CustomAvatar.UI
             _settings = settings;
             _avatarManager = avatarManager;
         }
+
+        #pragma warning restore IDE0051
+        #endregion
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
