@@ -17,6 +17,7 @@
 using System.Linq;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
+using CustomAvatar.Lighting;
 using CustomAvatar.Logging;
 using CustomAvatar.StereoRendering;
 using CustomAvatar.Tracking;
@@ -54,6 +55,7 @@ namespace CustomAvatar.Zenject
             Container.BindInterfacesAndSelfTo<ShaderLoader>().AsSingle().NonLazy();
 
             Container.Bind<AvatarLoader>().AsSingle();
+            Container.BindInterfacesAndSelfTo<LightingQualityController>().AsSingle();
 
             // helper classes
             Container.Bind<AvatarTailor>().AsTransient();
