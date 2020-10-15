@@ -77,12 +77,7 @@ namespace CustomAvatar.UI
                 _avatars.Clear();
                 _avatars.Add(new AvatarListItem("No Avatar", _noAvatarIcon));
 
-                _avatarManager.GetAvatarInfosAsync(avatar =>
-                {
-                    _avatars.Add(new AvatarListItem(avatar));
-
-                    ReloadData();
-                });
+                _avatarManager.GetAvatarInfosAsync(avatar => _avatars.Add(new AvatarListItem(avatar)), null, ReloadData);
             }
         }
 
@@ -178,7 +173,7 @@ namespace CustomAvatar.UI
 
         private void OnAvatarChanged(SpawnedAvatar avatar)
         {
-            ReloadData();
+            UpdateSelectedRow();
         }
 
         private void ReloadData()
@@ -191,6 +186,11 @@ namespace CustomAvatar.UI
                 return string.Compare(a.name, b.name, StringComparison.CurrentCulture);
             });
 
+            UpdateSelectedRow();
+        }
+
+        private void UpdateSelectedRow()
+        {
             int currentRow = _avatarManager.currentlySpawnedAvatar ? _avatars.FindIndex(a => a.fileName == _avatarManager.currentlySpawnedAvatar.avatar.fileName) : 0;
 
             _tableView.ReloadData();

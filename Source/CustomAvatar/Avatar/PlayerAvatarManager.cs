@@ -103,9 +103,10 @@ namespace CustomAvatar.Avatar
             SaveAvatarInfosToFile();
         }
 
-        internal void GetAvatarInfosAsync(Action<AvatarInfo> success = null, Action<Exception> error = null)
+        internal void GetAvatarInfosAsync(Action<AvatarInfo> success = null, Action<Exception> error = null, Action complete = null)
         {
             List<string> fileNames = GetAvatarFileNames();
+            int loadedCount = 0;
 
             foreach (string existingFile in _avatarInfos.Keys.ToList())
             {
@@ -122,7 +123,9 @@ namespace CustomAvatar.Avatar
                 if (_avatarInfos.ContainsKey(fileName) && _avatarInfos[fileName].IsForFile(fullPath))
                 {
                     _logger.Trace($"Using cached information for '{fileName}'");
-                    success(_avatarInfos[fileName]);
+                    success?.Invoke(_avatarInfos[fileName]);
+
+                    if (++loadedCount == fileNames.Count) complete?.Invoke();
                 }
                 else
                 {
@@ -132,7 +135,15 @@ namespace CustomAvatar.Avatar
                             var info = new AvatarInfo(avatar);
                             _avatarInfos.Add(fileName, info);
                             success?.Invoke(info);
-                        }, error));
+                        },
+                        (exception) =>
+                        {
+                            error?.Invoke(exception);
+                        },
+                        () =>
+                        {
+                            if (++loadedCount == fileNames.Count) complete?.Invoke();
+                        }));
                 }
             }
         }
