@@ -19,8 +19,8 @@ extern alias BeatSaberFinalIK;
 using System;
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
-using CustomAvatar.Utilities;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Zenject;
 
 namespace CustomAvatar.Avatar
@@ -78,7 +78,7 @@ namespace CustomAvatar.Avatar
 
         private ILogger<SpawnedAvatar> _logger;
         private DiContainer _container;
-        private GameScenesHelper _gameScenesHelper;
+        private GameScenesManager _gameScenesManager;
 
         private FirstPersonExclusion[] _firstPersonExclusions;
         private Renderer[] _renderers;
@@ -160,14 +160,14 @@ namespace CustomAvatar.Avatar
         }
         
         [Inject]
-        private void Inject(DiContainer container, ILoggerProvider loggerProvider, LoadedAvatar loadedAvatar, IAvatarInput avatarInput, GameScenesHelper gameScenesHelper)
+        private void Inject(DiContainer container, ILoggerProvider loggerProvider, LoadedAvatar loadedAvatar, IAvatarInput avatarInput, GameScenesManager gameScenesManager)
         {
             avatar = loadedAvatar ?? throw new ArgumentNullException(nameof(loadedAvatar));
             input = avatarInput ?? throw new ArgumentNullException(nameof(avatarInput));
 
             _logger = loggerProvider.CreateLogger<SpawnedAvatar>(loadedAvatar.descriptor.name);
             _container = new DiContainer(container);
-            _gameScenesHelper = gameScenesHelper;
+            _gameScenesManager = gameScenesManager;
 
             _container.Bind<SpawnedAvatar>().FromInstance(this);
         }
@@ -188,12 +188,12 @@ namespace CustomAvatar.Avatar
 
             DontDestroyOnLoad(this);
 
-            _gameScenesHelper.transitionDidFinish += OnTransitionDidFinish;
+            _gameScenesManager.transitionDidFinishEvent += OnTransitionDidFinish;
         }
 
         private void OnDestroy()
         {
-            _gameScenesHelper.transitionDidFinish -= OnTransitionDidFinish;
+            _gameScenesManager.transitionDidFinishEvent -= OnTransitionDidFinish;
 
             input.Dispose();
 
@@ -202,28 +202,21 @@ namespace CustomAvatar.Avatar
 
         #endregion
 
-        private void OnTransitionDidFinish(BeatSaberScene scene, DiContainer container)
+        private void OnTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
         {
-            if (scene == BeatSaberScene.Game)
+            if (!_eventManager) return;
+
+            switch (SceneManager.GetActiveScene().name)
             {
-                if (_eventManager && !_gameplayEventsPlayer)
-                {
+                case "GameCore":
                     _logger.Info($"Adding {nameof(AvatarGameplayEventsPlayer)}");
                     _gameplayEventsPlayer = container.InstantiateComponent<AvatarGameplayEventsPlayer>(gameObject, new object[] { avatar });
-                }
-            }
-            else
-            {
-                if (_gameplayEventsPlayer)
-                {
-                    _logger.Info($"Removing {nameof(AvatarGameplayEventsPlayer)}");
-                    Destroy(_gameplayEventsPlayer);
-                }
 
-                if (_eventManager && scene == BeatSaberScene.MainMenu)
-                {
+                    break;
+
+                case "MenuViewControllers":
                     _eventManager.OnMenuEnter?.Invoke();
-                }
+                    break;
             }
         }
 

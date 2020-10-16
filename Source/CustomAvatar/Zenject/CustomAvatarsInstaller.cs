@@ -61,7 +61,6 @@ namespace CustomAvatar.Zenject
             Container.Bind<AvatarTailor>().AsTransient();
             Container.Bind<MirrorHelper>().AsTransient();
             Container.Bind<AvatarSpawner>().AsTransient();
-            Container.Bind<GameScenesHelper>().AsTransient();
             Container.Bind<IKHelper>().AsTransient();
 
             // not sure if this is a great idea but w/e
