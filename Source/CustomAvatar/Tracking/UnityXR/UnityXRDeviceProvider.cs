@@ -14,6 +14,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using CustomAvatar.Logging;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -26,57 +27,104 @@ namespace CustomAvatar.Tracking.UnityXR
     {
         public event Action devicesChanged;
 
-        private List<InputDevice> _devices = new List<InputDevice>();
+        private readonly ILogger<UnityXRDeviceProvider> _logger;
+
+        private readonly Dictionary<string, InputDevice> _inputDevices = new Dictionary<string, InputDevice>();
+
+        private UnityXRDeviceProvider(ILoggerProvider loggerProvider)
+        {
+            _logger = loggerProvider.CreateLogger<UnityXRDeviceProvider>();
+        }
 
         public void Initialize()
         {
-            InputDevices.deviceConnected     += OnDeviceChanged;
-            InputDevices.deviceDisconnected  += OnDeviceChanged;
-            InputDevices.deviceConfigChanged += OnDeviceChanged;
+            InputDevices.deviceDisconnected  += OnDeviceDisconnected;
         }
 
         public void GetDevices(Dictionary<string, TrackedDevice> devices)
         {
             devices.Clear();
 
-            InputDevices.GetDevices(_devices);
+            var inputDevices = new List<InputDevice>();
+            bool changeDetected = false;
 
-            foreach (InputDevice device in _devices)
+            InputDevices.GetDevices(inputDevices);
+
+            foreach (InputDevice inputDevice in inputDevices)
             {
-                if (!device.isValid) return;
+                if (!inputDevice.isValid) return;
 
                 DeviceUse use = DeviceUse.Unknown;
 
-                if (device.characteristics.HasFlag(InputDeviceCharacteristics.HeadMounted))
+                if (inputDevice.characteristics.HasFlag(InputDeviceCharacteristics.HeadMounted))
                 {
                     use = DeviceUse.Head;
                 }
-                else if (device.characteristics.HasFlag(InputDeviceCharacteristics.HeldInHand | InputDeviceCharacteristics.Left))
+                else if (inputDevice.characteristics.HasFlag(InputDeviceCharacteristics.HeldInHand | InputDeviceCharacteristics.Left))
                 {
                     use = DeviceUse.LeftHand;
                 }
-                else if (device.characteristics.HasFlag(InputDeviceCharacteristics.HeldInHand | InputDeviceCharacteristics.Right))
+                else if (inputDevice.characteristics.HasFlag(InputDeviceCharacteristics.HeldInHand | InputDeviceCharacteristics.Right))
                 {
                     use = DeviceUse.RightHand;
                 }
 
-                device.TryGetFeatureValue(CommonUsages.isTracked, out bool isTracked);
-                device.TryGetFeatureValue(CommonUsages.devicePosition, out Vector3 position);
-                device.TryGetFeatureValue(CommonUsages.deviceRotation, out Quaternion rotation);
+                inputDevice.TryGetFeatureValue(CommonUsages.isTracked, out bool isTracked);
+                inputDevice.TryGetFeatureValue(CommonUsages.devicePosition, out Vector3 position);
+                inputDevice.TryGetFeatureValue(CommonUsages.deviceRotation, out Quaternion rotation);
 
-                devices.Add(device.name, new TrackedDevice(device.name, use, isTracked, position, rotation));
+                if (_inputDevices.ContainsKey(inputDevice.name))
+                {
+                    if (inputDevice.characteristics != _inputDevices[inputDevice.name].characteristics)
+                    {
+                        _logger.Info($"Characteristics of device '{inputDevice.name}' changed from {_inputDevices[inputDevice.name].characteristics} to {inputDevice.characteristics}");
+                        changeDetected = true;
+                    }
+
+                    if (isTracked && (!_inputDevices[inputDevice.name].TryGetFeatureValue(CommonUsages.isTracked, out bool previouslyTracked) || isTracked != previouslyTracked))
+                    {
+                        if (isTracked)
+                        {
+                            _logger.Info($"Acquired tracking of device '{inputDevice.name}'");
+                        }
+                        else
+                        {
+                            _logger.Info($"Lost tracking of device '{inputDevice.name}'");
+                        }
+
+                        changeDetected = true;
+                    }
+
+                    _inputDevices[inputDevice.name] = inputDevice;
+                }
+                else
+                {
+                    _logger.Info($"Device '{inputDevice.name}' connected with characteristics {inputDevice.characteristics}");
+
+                    _inputDevices.Add(inputDevice.name, inputDevice);
+
+                    changeDetected = true;
+                }
+
+                devices.Add(inputDevice.name, new TrackedDevice(inputDevice.name, use, isTracked, position, rotation));
             }
+
+            if (changeDetected) devicesChanged?.Invoke();
         }
 
         public void Dispose()
         {
-            InputDevices.deviceConnected     -= OnDeviceChanged;
-            InputDevices.deviceDisconnected  -= OnDeviceChanged;
-            InputDevices.deviceConfigChanged -= OnDeviceChanged;
+            InputDevices.deviceDisconnected  -= OnDeviceDisconnected;
         }
 
-        private void OnDeviceChanged(InputDevice device)
+        private void OnDeviceDisconnected(InputDevice device)
         {
+            if (_inputDevices.ContainsKey(device.name))
+            {
+                _logger.Info($"Device '{device.name}' disconnected");
+                _inputDevices.Remove(device.name);
+            }
+
             devicesChanged?.Invoke();
         }
     }

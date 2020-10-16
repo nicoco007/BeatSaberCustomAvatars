@@ -95,15 +95,7 @@ namespace CustomAvatar.Tracking
         private TrackedDevice GetDevice(ref string id)
         {
             if (string.IsNullOrEmpty(id)) return default;
-
-            if (!_devices.ContainsKey(id))
-            {
-                _logger.Error($"Device with ID '{id}' not found");
-
-                id = null;
-
-                return default;
-            }
+            if (!_devices.ContainsKey(id)) return default;
 
             return _devices[id];
         }
