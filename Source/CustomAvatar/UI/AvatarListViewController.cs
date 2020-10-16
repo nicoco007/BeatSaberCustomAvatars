@@ -38,6 +38,7 @@ namespace CustomAvatar.UI
         private DiContainer _container;
 
         private TableView _tableView;
+        private GameObject _loadingIndicator;
 
         private readonly List<AvatarListItem> _avatars = new List<AvatarListItem>();
         private LevelListTableCell _tableCellTemplate;
@@ -77,6 +78,7 @@ namespace CustomAvatar.UI
                 _avatars.Clear();
                 _avatars.Add(new AvatarListItem("No Avatar", _noAvatarIcon));
 
+                SetLoading(true);
                 _avatarManager.GetAvatarInfosAsync(avatar => _avatars.Add(new AvatarListItem(avatar)), null, ReloadData);
             }
         }
@@ -116,6 +118,8 @@ namespace CustomAvatar.UI
 
             Destroy(header.GetComponentInChildren<LocalizedTextMeshProUGUI>());
             header.GetComponentInChildren<TextMeshProUGUI>().text = "Avatars";
+
+            _loadingIndicator = Instantiate(Resources.FindObjectsOfTypeAll<LoadingControl>().First().transform.Find("LoadingContainer/LoadingIndicator").gameObject, rectTransform, false);
 
             // buttons and indicator have images so it's easier to just copy from an existing component
             Transform scrollBar = Instantiate(Resources.FindObjectsOfTypeAll<LevelCollectionTableView>().First().transform.Find("ScrollBar"), tableViewContainer, false);
@@ -186,6 +190,8 @@ namespace CustomAvatar.UI
                 return string.Compare(a.name, b.name, StringComparison.CurrentCulture);
             });
 
+            SetLoading(false);
+
             UpdateSelectedRow();
         }
 
@@ -196,6 +202,11 @@ namespace CustomAvatar.UI
             _tableView.ReloadData();
             _tableView.ScrollToCellWithIdx(currentRow, TableViewScroller.ScrollPositionType.Center, true);
             _tableView.SelectCellWithIdx(currentRow);
+        }
+
+        private void SetLoading(bool loading)
+        {
+            _loadingIndicator.SetActive(loading);
         }
 
         public float CellSize()
