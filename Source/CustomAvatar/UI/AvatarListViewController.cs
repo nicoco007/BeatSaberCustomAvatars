@@ -172,7 +172,6 @@ namespace CustomAvatar.UI
         private void OnAvatarClicked(TableView table, int row)
         {
             _avatarManager.SwitchToAvatarAsync(_avatars[row].fileName);
-            _tableView.ScrollToCellWithIdx(row, TableViewScroller.ScrollPositionType.Center, true);
         }
 
         private void OnAvatarChanged(SpawnedAvatar avatar)
@@ -190,17 +189,19 @@ namespace CustomAvatar.UI
                 return string.Compare(a.name, b.name, StringComparison.CurrentCulture);
             });
 
+            _tableView.ReloadData();
+
             SetLoading(false);
 
-            UpdateSelectedRow();
+            UpdateSelectedRow(true);
         }
 
-        private void UpdateSelectedRow()
+        private void UpdateSelectedRow(bool scroll = false)
         {
             int currentRow = _avatarManager.currentlySpawnedAvatar ? _avatars.FindIndex(a => a.fileName == _avatarManager.currentlySpawnedAvatar.avatar.fileName) : 0;
 
-            _tableView.ReloadData();
-            _tableView.ScrollToCellWithIdx(currentRow, TableViewScroller.ScrollPositionType.Center, true);
+            if (scroll) _tableView.ScrollToCellWithIdx(currentRow, TableViewScroller.ScrollPositionType.Center, true);
+
             _tableView.SelectCellWithIdx(currentRow);
         }
 
