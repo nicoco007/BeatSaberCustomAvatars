@@ -174,6 +174,8 @@ namespace CustomAvatar.Avatar
 
         private void Start()
         {
+            name = $"SpawnedAvatar({avatar.descriptor.name})";
+
             tracking = _container.InstantiateComponent<AvatarTracking>(gameObject);
 
             if (avatar.isIKAvatar)

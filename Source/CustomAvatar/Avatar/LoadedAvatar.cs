@@ -32,7 +32,7 @@ namespace CustomAvatar.Avatar
     /// <summary>
     /// Contains static information about an avatar. 
     /// </summary>
-    public class LoadedAvatar
+    public class LoadedAvatar : IDisposable
     {
         /// <summary>
         /// The name of the file from which the avatar was loaded.
@@ -86,7 +86,7 @@ namespace CustomAvatar.Avatar
         internal readonly Transform rightLeg;
         internal readonly Transform pelvis;
 
-        private ILogger<LoadedAvatar> _logger;
+        private readonly ILogger<LoadedAvatar> _logger;
 
         internal LoadedAvatar(string fullPath, GameObject avatarGameObject, ILoggerProvider loggerProvider, DiContainer container)
         {
@@ -95,6 +95,8 @@ namespace CustomAvatar.Avatar
             descriptor = avatarGameObject.GetComponent<AvatarDescriptor>() ?? throw new AvatarLoadException($"Avatar at '{fullPath}' does not have an AvatarDescriptor");
 
             fileName = Path.GetFileName(fullPath);
+
+            prefab.name = $"LoadedAvatar({descriptor.name})";
 
             _logger = loggerProvider.CreateLogger<LoadedAvatar>(descriptor.name);
 
@@ -167,6 +169,11 @@ namespace CustomAvatar.Avatar
 
             eyeHeight = GetEyeHeight();
             armSpan = GetArmSpan();
+        }
+
+        public void Dispose()
+        {
+            Object.Destroy(prefab);
         }
 
         private float GetEyeHeight()

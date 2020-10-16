@@ -92,6 +92,7 @@ namespace CustomAvatar.Avatar
 
         public void Dispose()
         {
+            currentlySpawnedAvatar?.avatar.Dispose();
             Object.Destroy(currentlySpawnedAvatar);
 
             _settings.moveFloorWithRoomAdjustChanged -= OnMoveFloorWithRoomAdjustChanged;
@@ -168,6 +169,7 @@ namespace CustomAvatar.Avatar
 
         public void SwitchToAvatarAsync(string fileName)
         {
+            currentlySpawnedAvatar?.avatar.Dispose();
             Object.Destroy(currentlySpawnedAvatar);
             currentlySpawnedAvatar = null;
             _currentAvatarSettings = null;
@@ -191,8 +193,11 @@ namespace CustomAvatar.Avatar
 
         private void SwitchToAvatar(LoadedAvatar avatar)
         {
-            if (currentlySpawnedAvatar && currentlySpawnedAvatar.avatar == avatar) return;
-            if (avatar?.fullPath != _switchingToPath) return;
+            if ((currentlySpawnedAvatar && currentlySpawnedAvatar.avatar == avatar) || avatar?.fullPath != _switchingToPath)
+            {
+                avatar?.Dispose();
+                return;
+            }
 
             if (avatar == null)
             {

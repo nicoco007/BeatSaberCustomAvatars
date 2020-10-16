@@ -30,7 +30,7 @@ namespace CustomAvatar.Zenject
 {
     internal class CustomAvatarsInstaller : Installer
     {
-        private Logger _logger;
+        private readonly Logger _logger;
 
         public CustomAvatarsInstaller(Logger logger)
         {
