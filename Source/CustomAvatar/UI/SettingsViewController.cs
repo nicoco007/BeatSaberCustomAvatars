@@ -14,6 +14,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
@@ -21,9 +22,11 @@ using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
 using Polyglot;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using Zenject;
 
 namespace CustomAvatar.UI
@@ -33,6 +36,17 @@ namespace CustomAvatar.UI
         public override string ResourceName => "CustomAvatar.Views.Settings.bsml";
 
         private static readonly int kColor = Shader.PropertyToID("_Color");
+
+        #region Components
+        #pragma warning disable CS0649
+        #pragma warning disable IDE0051
+
+        [UIComponent("loader")]
+        private readonly Transform _loader;
+
+        #pragma warning restore IDE0051
+        #pragma warning restore CS0649
+        #endregion
 
         private bool _calibrating;
         private Material _sphereMaterial;
@@ -74,6 +88,7 @@ namespace CustomAvatar.UI
             _calibrateFullBodyTrackingOnStart.Value = _settings.calibrateFullBodyTrackingOnStart;
             _cameraNearClipPlane.Value = _settings.cameraNearClipPlane;
 
+            SetLoading(false);
             UpdateUI(_avatarManager.currentlySpawnedAvatar?.avatar);
             OnInputDevicesChanged(null, DeviceUse.Unknown);
 
@@ -116,6 +131,7 @@ namespace CustomAvatar.UI
 
             if (addedToHierarchy)
             {
+                _avatarManager.avatarStartedLoading += OnAvatarStartedLoading;
                 _avatarManager.avatarChanged += OnAvatarChanged;
 
                 _trackedDeviceManager.deviceAdded += OnInputDevicesChanged;
@@ -131,6 +147,7 @@ namespace CustomAvatar.UI
 
             if (removedFromHierarchy)
             {
+                _avatarManager.avatarStartedLoading -= OnAvatarStartedLoading;
                 _avatarManager.avatarChanged -= OnAvatarChanged;
 
                 _trackedDeviceManager.deviceAdded -= OnInputDevicesChanged;
@@ -142,9 +159,38 @@ namespace CustomAvatar.UI
             DisableCalibrationMode(false);
         }
 
+        private void OnAvatarStartedLoading(string fileName)
+        {
+            SetLoading(true);
+        }
+
         private void OnAvatarChanged(SpawnedAvatar spawnedAvatar)
         {
+            SetLoading(false);
             UpdateUI(spawnedAvatar?.avatar);
+        }
+
+        private void SetLoading(bool loading)
+        {
+            _loader.gameObject.SetActive(loading);
+            SetInteractableRecursively(!loading);
+            SetTextAlphaRecursively(loading ? 0.5f : 1);
+        }
+
+        private void SetInteractableRecursively(bool interactable)
+        {
+            foreach (Selectable selectable in rectTransform.GetComponentsInChildren<Selectable>())
+            {
+                selectable.interactable = interactable;
+            }
+        }
+
+        private void SetTextAlphaRecursively(float alpha)
+        {
+            foreach (TextMeshProUGUI textMesh in rectTransform.GetComponentsInChildren<TextMeshProUGUI>())
+            {
+                textMesh.alpha = alpha;
+            }
         }
 
         private void UpdateUI(LoadedAvatar avatar)
