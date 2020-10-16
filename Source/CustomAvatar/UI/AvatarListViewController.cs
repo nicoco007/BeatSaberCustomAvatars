@@ -200,7 +200,7 @@ namespace CustomAvatar.UI
         {
             int currentRow = _avatarManager.currentlySpawnedAvatar ? _avatars.FindIndex(a => a.fileName == _avatarManager.currentlySpawnedAvatar.avatar.fileName) : 0;
 
-            if (scroll) _tableView.ScrollToCellWithIdx(currentRow, TableViewScroller.ScrollPositionType.Center, true);
+            if (scroll) _tableView.ScrollToCellWithIdx(currentRow, TableViewScroller.ScrollPositionType.Center, false);
 
             _tableView.SelectCellWithIdx(currentRow);
         }
