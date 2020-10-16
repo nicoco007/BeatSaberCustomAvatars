@@ -29,7 +29,7 @@ namespace CustomAvatar.UI
         #pragma warning disable IDE0044
 
         [UIComponent("visible-in-first-person")] private ToggleSetting _visibleInFirstPerson;
-        [UIComponent("resize-mode")] private ListSetting _resizeMode;
+        [UIComponent("resize-mode")] private DropDownListSetting _resizeMode;
         [UIComponent("enable-locomotion")] private ToggleSetting _enableLocomotion;
         [UIComponent("floor-adjust")] private ToggleSetting _floorHeightAdjust;
         [UIComponent("move-floor-with-room-adjust")] private ToggleSetting _moveFloorWithRoomAdjust;

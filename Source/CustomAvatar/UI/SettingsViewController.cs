@@ -22,7 +22,6 @@ using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
 using Polyglot;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using TMPro;
 using UnityEngine;

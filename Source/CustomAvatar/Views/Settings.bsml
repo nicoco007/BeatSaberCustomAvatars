@@ -6,7 +6,7 @@
   <tab tags="avatar-tabs" tab-name="General" anchor-max-y="0.8">
     <settings-container anchor-pos-y="0" size-delta-y="0">
       <toggle-setting text="Visible in First Person" id="visible-in-first-person" on-change="visible-in-first-person-change"/>
-      <list-setting text="Resize Mode" id="resize-mode" on-change="resize-mode-change" options="resize-mode-options" formatter="resize-mode-formatter"></list-setting>
+      <dropdown-list-setting text="Resize Mode" id="resize-mode" on-change="resize-mode-change" options="resize-mode-options" formatter="resize-mode-formatter"></dropdown-list-setting>
       <toggle-setting id="enable-locomotion" text="Enable locomotion" hover-hint="Allow feet to be moved automatically to follow your head/body when not using dedicated trackers." on-change="enable-locomotion-change"/>
       <toggle-setting text="Floor Height Adjust" hover-hint="Move the floor so the avatar is standing at full height even if it is bigger or smaller than the player." id="floor-adjust" on-change="floor-adjust-change"/>
       <toggle-setting text="Move Floor with Room Adjust" hover-hint="Move the floor along with the game's built-in vertical room adjust." id="move-floor-with-room-adjust" on-change="move-floor-with-room-adjust-change"/>
@@ -38,7 +38,7 @@
       <increment-setting id="pelvis-offset" text="Pelvis Offset" hover-hint="Horizontal distance between pelvis and tracker" min="-0.5" max="0.5" increment="0.01" on-change="pelvis-offset-change"></increment-setting>
       <increment-setting id="foot-offset" text="Foot Offset" hover-hint="Horizontal distance between heel and tracker" min="0" max="0.5" increment="0.01" on-change="foot-offset-change"></increment-setting>
 
-      <list-setting text="Waist Tracker Position" id="waist-tracker-position" on-change="waist-tracker-position-change" options="waist-tracker-position-options"></list-setting>
+      <dropdown-list-setting text="Waist Tracker Position" id="waist-tracker-position" on-change="waist-tracker-position-change" options="waist-tracker-position-options"></dropdown-list-setting>
 
       <horizontal child-align="MiddleLeft" child-expand-width="true" child-control-width="true" pad-top="1" pad-bottom="1">
         <button id="auto-calibrate-button" text="Calibrate" hover-hint="Automatically calibrate full body tracking." on-click="auto-calibrate-fbt-click"></button>

@@ -32,7 +32,7 @@ namespace CustomAvatar.UI
         [UIComponent("calibrate-fbt-on-start")] private ToggleSetting _calibrateFullBodyTrackingOnStart;
         [UIComponent("pelvis-offset")] private IncrementSetting _pelvisOffset;
         [UIComponent("foot-offset")] private IncrementSetting _footOffset;
-        [UIComponent("waist-tracker-position")] private ListSetting _waistTrackerPosition;
+        [UIComponent("waist-tracker-position")] private DropDownListSetting _waistTrackerPosition;
 
         [UIComponent("auto-calibrate-button")] private Button _autoCalibrateButton;
         [UIComponent("auto-clear-button")] private Button _autoClearButton;
