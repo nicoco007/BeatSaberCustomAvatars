@@ -24,34 +24,36 @@ namespace CustomAvatar.UI
 {
     internal class AvatarMenuFlowCoordinator : FlowCoordinator, IInitializable, IDisposable
     {
+        private MainFlowCoordinator _mainFlowCoordinator;
         private AvatarListViewController _avatarListViewController;
         private MirrorViewController _mirrorViewController;
         private SettingsViewController _settingsViewController;
 
-        private MenuButton menuButton;
+        private MenuButton _menuButton;
 
         public void Initialize()
         {
-            menuButton = new MenuButton("Avatars", () =>
+            _menuButton = new MenuButton("Avatars", () =>
             {
-                BeatSaberUI.MainFlowCoordinator.PresentFlowCoordinator(this);
+                _mainFlowCoordinator.PresentFlowCoordinator(this);
             });
 
-            MenuButtons.instance.RegisterButton(menuButton);
+            MenuButtons.instance.RegisterButton(_menuButton);
         }
 
         public void Dispose()
         {
             try
             {
-                MenuButtons.instance.UnregisterButton(menuButton);
+                MenuButtons.instance.UnregisterButton(_menuButton);
             }
             catch (NullReferenceException) { } // this is usually expected when the game is shutting down
         }
 
         [Inject]
-        private void Inject(AvatarListViewController avatarListViewController, MirrorViewController mirrorViewController, SettingsViewController settingsViewController)
+        private void Inject(MainFlowCoordinator mainFlowCoordinator, AvatarListViewController avatarListViewController, MirrorViewController mirrorViewController, SettingsViewController settingsViewController)
         {
+            _mainFlowCoordinator = mainFlowCoordinator;
             _avatarListViewController = avatarListViewController;
             _mirrorViewController = mirrorViewController;
             _settingsViewController = settingsViewController;
