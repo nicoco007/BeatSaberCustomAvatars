@@ -65,7 +65,7 @@ namespace CustomAvatar.UI
             {
                 _mirrorContainer = new GameObject();
                 Vector2 mirrorSize = _settings.mirror.size;
-                _mirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, 1.5f), Quaternion.Euler(-90f, 0, 0), mirrorSize, _mirrorContainer.transform);
+                _mirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, 2), Quaternion.Euler(-90f, 0, 0), mirrorSize, _mirrorContainer.transform);
 
                 _avatarManager.avatarStartedLoading += OnAvatarStartedLoading;
                 _avatarManager.avatarChanged += OnAvatarChanged;
