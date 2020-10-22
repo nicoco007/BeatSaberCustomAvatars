@@ -10,7 +10,7 @@
   "features": [],
   "dependsOn": {
     "BSIPA": "^4.0.0",
-    "DynamicOpenVR": "0.2.0 - 0.3"
+    "DynamicOpenVR": "^0.3.2"
   },
   "loadAfter": [
     "SiraUtil"
