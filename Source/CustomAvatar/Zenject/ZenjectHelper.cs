@@ -35,8 +35,11 @@ namespace CustomAvatar.Zenject
         public static readonly string kInitSceneName = "PCInit";
         public static readonly string kInitSceneContextName = "AppCoreSceneContext";
         public static readonly string kMenuSceneName = "MenuCore";
+        public static readonly string kMenuSceneContextName = "SceneContext";
         public static readonly string kMenuViewControllersSceneName = "MenuViewControllers";
+        public static readonly string kMenuViewControllersSceneContextName = "SceneDecoratorContext";
         public static readonly string kGameplaySceneName = "GameCore";
+        public static readonly string kGameplaySceneContextName = "SceneContext";
 
         private static readonly string kExpectedFirstSceneLoaded = "PCInit";
 
@@ -70,21 +73,21 @@ namespace CustomAvatar.Zenject
         /// </summary>
         /// <typeparam name="TInstaller">Installer to register</typeparam>
         /// <param name="extraArgs">Extra values to be injected into <typeparamref name="TInstaller"/></param>
-        public static void RegisterMenuInstaller<TInstaller>(params object[] extraArgs) where TInstaller : Installer => RegisterInstaller<TInstaller>(kMenuSceneName, null, extraArgs);
+        public static void RegisterMenuInstaller<TInstaller>(params object[] extraArgs) where TInstaller : Installer => RegisterInstaller<TInstaller>(kMenuSceneName, kMenuSceneContextName, extraArgs);
 
         /// <summary>
         /// Registers an installer in the MenuViewControllers scene. This is usually used for UI-specific classes; for anything else, use <see cref="RegisterMenuInstaller{TInstaller}(object[])"/>.
         /// </summary>
         /// <typeparam name="TInstaller">Installer to register</typeparam>
         /// <param name="extraArgs">Extra values to be injected into <typeparamref name="TInstaller"/></param>
-        public static void RegisterMenuViewControllersInstaller<TInstaller>(params object[] extraArgs) where TInstaller : Installer => RegisterInstaller<TInstaller>(kMenuViewControllersSceneName, null, extraArgs);
-        
+        public static void RegisterMenuViewControllersInstaller<TInstaller>(params object[] extraArgs) where TInstaller : Installer => RegisterInstaller<TInstaller>(kMenuViewControllersSceneName, kMenuViewControllersSceneContextName, extraArgs);
+
         /// <summary>
         /// Registers an installer in the GameplayCore scene.
         /// </summary>
         /// <typeparam name="TInstaller">Installer to register</typeparam>
         /// <param name="extraArgs">Extra values to be injected into <typeparamref name="TInstaller"/></param>
-        public static void RegisterGameplayInstaller<TInstaller>(params object[] extraArgs) where TInstaller : Installer => RegisterInstaller<TInstaller>(kGameplaySceneName, null, extraArgs);
+        public static void RegisterGameplayInstaller<TInstaller>(params object[] extraArgs) where TInstaller : Installer => RegisterInstaller<TInstaller>(kGameplaySceneName, kGameplaySceneContextName, extraArgs);
 
         /// <summary>
         /// Registers an installer in the specified scene. If there is more than one scene context in a scene (e.g. in PCInit), use <paramref name="sceneContextName"/> to specify the name of the Scene Context.
@@ -93,7 +96,7 @@ namespace CustomAvatar.Zenject
         /// <param name="sceneName">Name of the Scene Context's scene</param>
         /// <param name="sceneContextName">Name of the Scene Context (optional)</param>
         /// <param name="extraArgs">Extra values to be injected into <typeparamref name="TInstaller"/></param>
-        public static void RegisterInstaller<TInstaller>(string sceneName, string sceneContextName = null, params object[] extraArgs) where TInstaller : Installer
+        public static void RegisterInstaller<TInstaller>(string sceneName, string sceneContextName, params object[] extraArgs) where TInstaller : Installer
         {
             if (string.IsNullOrEmpty(sceneName)) throw new ArgumentNullException(nameof(sceneName));
             if (extraArgs == null) throw new ArgumentNullException(nameof(extraArgs));
@@ -263,7 +266,7 @@ namespace CustomAvatar.Zenject
 
             if (!_installers.ContainsKey(sceneName))
             {
-                _logger.Trace($"Nothing to do in scene '{sceneName}'");
+                _logger.Info($"Nothing to do on Scene Context '{sceneContextName}' (scene '{sceneName}')");
                 return;
             }
 
@@ -271,7 +274,7 @@ namespace CustomAvatar.Zenject
 
             if (installersForSceneContext.Count == 0)
             {
-                _logger.Trace($"Nothing to do on Scene Context '{sceneContextName}' (scene '{sceneName}')");
+                _logger.Info($"Nothing to do on Scene Context '{sceneContextName}' (scene '{sceneName}')");
                 return;
             }
 
