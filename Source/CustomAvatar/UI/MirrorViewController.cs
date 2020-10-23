@@ -64,7 +64,7 @@ namespace CustomAvatar.UI
 
             if (addedToHierarchy)
             {
-                _mirrorContainer = new GameObject();
+                _mirrorContainer = new GameObject("Mirror Container");
                 Vector2 mirrorSize = _settings.mirror.size;
                 _mirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, 2), Quaternion.Euler(-90f, 0, 0), mirrorSize, _mirrorContainer.transform);
 

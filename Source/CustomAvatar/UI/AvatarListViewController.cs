@@ -117,13 +117,19 @@ namespace CustomAvatar.UI
 
             Transform header = Instantiate(Resources.FindObjectsOfTypeAll<LeaderboardViewController>().First().transform.Find("HeaderPanel"), rectTransform, false);
 
+            header.name = "HeaderPanel";
+
             Destroy(header.GetComponentInChildren<LocalizedTextMeshProUGUI>());
             header.GetComponentInChildren<TextMeshProUGUI>().text = "Avatars";
 
             _loadingIndicator = Instantiate(Resources.FindObjectsOfTypeAll<LoadingControl>().First().transform.Find("LoadingContainer/LoadingIndicator").gameObject, rectTransform, false);
 
+            _loadingIndicator.name = "LoadingIndicator";
+
             // buttons and indicator have images so it's easier to just copy from an existing component
             Transform scrollBar = Instantiate(Resources.FindObjectsOfTypeAll<LevelCollectionTableView>().First().transform.Find("ScrollBar"), tableViewContainer, false);
+
+            scrollBar.name = "ScrollBar";
 
             Button upButton = scrollBar.Find("UpButton").GetComponent<Button>();
             Button downButton = scrollBar.Find("DownButton").GetComponent<Button>();
@@ -228,6 +234,8 @@ namespace CustomAvatar.UI
             if (!tableCell)
             {
                 tableCell = Instantiate(_tableCellTemplate);
+
+                tableCell.name = "AvatarsTableViewCell";
 
                 tableCell.GetPrivateField<Image>("_backgroundImage").enabled = false;
                 tableCell.GetPrivateField<Image>("_favoritesBadgeImage").enabled = false;

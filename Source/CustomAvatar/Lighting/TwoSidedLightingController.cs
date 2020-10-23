@@ -26,6 +26,8 @@ namespace CustomAvatar.Lighting
 
         private void Start()
         {
+            name = nameof(TwoSidedLightingController);
+
             AddLight(Vector3.zero, Quaternion.Euler(135, 0, 0), LightType.Directional, new Color(1, 1, 1), 0.8f, 25); // front
             AddLight(Vector3.zero, Quaternion.Euler(45, 0, 0), LightType.Directional, new Color(1, 1, 1), 0.8f, 25); // back
         }
@@ -35,7 +37,7 @@ namespace CustomAvatar.Lighting
 
         private void AddLight(Vector3 position, Quaternion rotation, LightType type, Color color, float intensity, float range)
         {
-            var container = new GameObject();
+            var container = new GameObject("Light");
             var light = container.AddComponent<Light>();
 
             light.type = type;

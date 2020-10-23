@@ -41,6 +41,8 @@ namespace CustomAvatar.Lighting
         [Inject]
         private void Inject(ILoggerProvider loggerProvider, LightWithIdManager lightManager)
         {
+            name = nameof(DynamicLightingController);
+
             _logger = loggerProvider.CreateLogger<DynamicLightingController>();
             _lightManager = lightManager;
         }

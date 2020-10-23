@@ -113,6 +113,8 @@ namespace CustomAvatar.UI
 
                 Transform header = Instantiate(Resources.FindObjectsOfTypeAll<GameplaySetupViewController>().First().transform.Find("HeaderPanel"), rectTransform, false);
 
+                header.name = "HeaderPanel";
+
                 Destroy(header.GetComponentInChildren<LocalizedTextMeshProUGUI>());
                 header.GetComponentInChildren<TextMeshProUGUI>().text = "Settings";
 
