@@ -68,7 +68,6 @@ namespace CustomAvatar.Zenject
             // managers
             Container.BindInterfacesAndSelfTo<PlayerAvatarManager>().AsSingle().NonLazy();
             Container.BindInterfacesAndSelfTo<MainCameraController>().AsSingle().NonLazy();
-            Container.BindInterfacesAndSelfTo<KeyboardInputHandler>().AsSingle().NonLazy();
             Container.BindInterfacesAndSelfTo<ShaderLoader>().AsSingle().NonLazy();
             Container.BindInterfacesAndSelfTo<DeviceManager>().AsSingle().NonLazy();
 

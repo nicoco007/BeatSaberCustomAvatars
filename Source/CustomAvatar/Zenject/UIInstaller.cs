@@ -14,6 +14,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using CustomAvatar.Player;
 using CustomAvatar.UI;
 using HMUI;
 using UnityEngine;
@@ -26,6 +27,8 @@ namespace CustomAvatar.Zenject
     {
         public override void InstallBindings()
         {
+            Container.BindInterfacesAndSelfTo<KeyboardInputHandler>().AsSingle().NonLazy();
+
             CreateViewController<AvatarListViewController>();
             CreateViewController<MirrorViewController>();
             CreateViewController<SettingsViewController>();
