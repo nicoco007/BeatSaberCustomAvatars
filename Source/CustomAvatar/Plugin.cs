@@ -17,6 +17,7 @@
 using CustomAvatar.Logging;
 using CustomAvatar.Utilities;
 using CustomAvatar.Zenject;
+using CustomAvatar.Zenject.Internal;
 using HarmonyLib;
 using IPA;
 using Logger = IPA.Logging.Logger;
@@ -36,17 +37,16 @@ namespace CustomAvatar
 
             Harmony harmony = new Harmony("com.nicoco007.beatsabercustomavatars");
 
-            ZenjectHelper.Init(harmony, ipaLogger);
+            ZenjectHelper.Init(harmony);
             BeatSaberEvents.ApplyPatches(harmony, ipaLogger);
 
-            ZenjectHelper.RegisterInitInstaller<CustomAvatarsInstaller>(ipaLogger);
-            ZenjectHelper.RegisterMenuViewControllersInstaller<UIInstaller>();
+            ZenjectHelper.Register<CustomAvatarsInstaller>().WithArguments(ipaLogger).OnMonoInstaller<PCAppInit>();
+            ZenjectHelper.Register<UIInstaller>().OnMonoInstaller<MenuViewControllersInstaller>();
 
-            ZenjectHelper.RegisterMenuInstaller<LightingInstaller>();
-            ZenjectHelper.RegisterInstaller<LightingInstaller>("HealthWarning", "SceneContext");
+            ZenjectHelper.Register<LightingInstaller>().OnContext("MenuEnvironment", "SceneDecoratorContext");
+            ZenjectHelper.Register<LightingInstaller>().OnContext("GameCore", "SceneContext");
 
-            ZenjectHelper.RegisterInstaller<GameInstaller>("StandardGameplay", "DecoratorContext");
-            ZenjectHelper.RegisterInstaller<GameInstaller>("GameCore", "MultiplayerLocalActivePlayerController(Clone)");
+            ZenjectHelper.Register<GameInstaller>().OnMonoInstaller<GameplayCoreInstaller>();
         }
     }
 }
