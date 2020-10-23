@@ -59,6 +59,8 @@ namespace CustomAvatar.UI
         [UIAction("ignore-exclusions-change")]
         private void OnIgnoreExclusionsChanged(bool value)
         {
+            if (_currentAvatarSettings == null) return;
+
             _currentAvatarSettings.ignoreExclusions = value;
             _avatarManager.UpdateFirstPersonVisibility();
         }
@@ -66,6 +68,8 @@ namespace CustomAvatar.UI
         [UIAction("bypass-calibration-change")]
         private void OnEnableBypassCalibrationChanged(bool value)
         {
+            if (_currentAvatarSettings == null) return;
+
             _currentAvatarSettings.bypassCalibration = value;
         }
 
@@ -73,6 +77,9 @@ namespace CustomAvatar.UI
         private void OnEnableAutomaticCalibrationChanged(bool value)
         {
             DisableCalibrationMode(false);
+
+            if (_currentAvatarSettings == null) return;
+
             _currentAvatarSettings.useAutomaticCalibration = value;
         }
 

@@ -22,6 +22,7 @@ using CustomAvatar.Logging;
 using CustomAvatar.Player;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
+using HMUI;
 using Polyglot;
 using System.Linq;
 using TMPro;
@@ -41,8 +42,8 @@ namespace CustomAvatar.UI
         #pragma warning disable CS0649
         #pragma warning disable IDE0051
 
-        [UIComponent("loader")]
-        private readonly Transform _loader;
+        [UIComponent("container")] private readonly RectTransform _container;
+        [UIComponent("loader")] private readonly Transform _loader;
 
         #pragma warning restore IDE0051
         #pragma warning restore CS0649
@@ -89,7 +90,6 @@ namespace CustomAvatar.UI
 
             SetLoading(false);
             UpdateUI(_avatarManager.currentlySpawnedAvatar?.avatar);
-            UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar?.avatar);
 
             _armSpanLabel.SetText($"{_settings.playerArmSpan:0.00} m");
 
@@ -158,6 +158,7 @@ namespace CustomAvatar.UI
         private void OnAvatarChanged(SpawnedAvatar spawnedAvatar)
         {
             SetLoading(false);
+            DisableCalibrationMode(false);
             UpdateUI(spawnedAvatar?.avatar);
         }
 
@@ -165,20 +166,25 @@ namespace CustomAvatar.UI
         {
             _loader.gameObject.SetActive(loading);
             SetInteractableRecursively(!loading);
-            SetTextAlphaRecursively(loading ? 0.5f : 1);
         }
 
-        private void SetInteractableRecursively(bool interactable)
+        private void SetInteractableRecursively(bool enable)
         {
-            foreach (Selectable selectable in rectTransform.GetComponentsInChildren<Selectable>())
+            foreach (Selectable selectable in _container.GetComponentsInChildren<Selectable>(true))
             {
-                selectable.interactable = interactable;
+                selectable.interactable = enable;
+                selectable.enabled = enable;
             }
-        }
 
-        private void SetTextAlphaRecursively(float alpha)
-        {
-            foreach (TextMeshProUGUI textMesh in rectTransform.GetComponentsInChildren<TextMeshProUGUI>())
+            foreach (Interactable interactable in _container.GetComponentsInChildren<Interactable>(true))
+            {
+                interactable.interactable = enable;
+                interactable.enabled = enable;
+            }
+
+            float alpha = enable ? 1 : 0.5f;
+
+            foreach (TextMeshProUGUI textMesh in _container.GetComponentsInChildren<TextMeshProUGUI>(true))
             {
                 textMesh.alpha = alpha;
             }
@@ -186,7 +192,8 @@ namespace CustomAvatar.UI
 
         private void UpdateUI(LoadedAvatar avatar)
         {
-            DisableCalibrationMode(false);
+            SetInteractableRecursively(avatar != null);
+            UpdateCalibrationButtons(avatar);
 
             if (avatar == null)
             {
@@ -200,8 +207,6 @@ namespace CustomAvatar.UI
 
             _currentAvatarSettings = _settings.GetAvatarSettings(avatar.fileName);
             _currentAvatarManualCalibration = _calibrationData.GetAvatarManualCalibration(avatar.fileName);
-
-            UpdateCalibrationButtons(avatar);
 
             _ignoreExclusionsSetting.Value = _currentAvatarSettings.ignoreExclusions;
 
