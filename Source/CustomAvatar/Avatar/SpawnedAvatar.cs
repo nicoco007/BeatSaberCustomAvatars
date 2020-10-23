@@ -19,8 +19,8 @@ extern alias BeatSaberFinalIK;
 using System;
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
+using CustomAvatar.Utilities;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using Zenject;
 
 namespace CustomAvatar.Avatar
@@ -203,19 +203,18 @@ namespace CustomAvatar.Avatar
 
         private void OnTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
         {
-            if (!_eventManager) return;
-
-            switch (SceneManager.GetActiveScene().name)
+            // currently does not work in multiplayer, need to figure out how to
+            // get a reference to the GameObjectContext for the local player
+            // or just rework this so it's created in an installer
+            if (_gameScenesManager.IsSceneInStackAndActive("StandardGameplay"))
             {
-                case "GameCore":
-                    _logger.Info($"Adding {nameof(AvatarGameplayEventsPlayer)}");
-                    _gameplayEventsPlayer = container.InstantiateComponent<AvatarGameplayEventsPlayer>(gameObject, new object[] { avatar });
+                _logger.Info($"Adding {nameof(AvatarGameplayEventsPlayer)}");
+                _gameplayEventsPlayer = container.InstantiateComponent<AvatarGameplayEventsPlayer>(gameObject, new object[] { avatar });
+            }
 
-                    break;
-
-                case "MenuViewControllers":
-                    _eventManager.OnMenuEnter?.Invoke();
-                    break;
+            if (_gameScenesManager.IsSceneInStackAndActive("MenuCore"))
+            {
+                _eventManager?.OnMenuEnter?.Invoke();
             }
         }
 
