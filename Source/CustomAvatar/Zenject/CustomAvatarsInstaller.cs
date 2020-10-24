@@ -46,7 +46,7 @@ namespace CustomAvatar.Zenject
         public override void InstallBindings()
         {
             // logging
-            Container.Bind<ILoggerProvider>().FromMethod((context) => context.Container.Instantiate<IPALoggerProvider>(new object[] { _logger })).AsTransient();
+            Container.Bind<ILoggerProvider>().To<IPALoggerProvider>().AsTransient().WithArguments(new object[] { _logger });
 
             // settings
             Container.BindInterfacesAndSelfTo<SettingsManager>().AsSingle();
