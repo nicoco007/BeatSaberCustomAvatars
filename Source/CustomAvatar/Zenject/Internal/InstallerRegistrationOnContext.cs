@@ -1,4 +1,5 @@
-﻿using Zenject;
+﻿using ModestTree;
+using Zenject;
 
 namespace CustomAvatar.Zenject.Internal
 {
@@ -9,6 +10,9 @@ namespace CustomAvatar.Zenject.Internal
 
         internal InstallerRegistrationOnContext(string sceneName, string contextName)
         {
+            Assert.IsNotEmpty(sceneName);
+            Assert.IsNotEmpty(contextName);
+
             _sceneName = sceneName;
             _contextName = contextName;
         }

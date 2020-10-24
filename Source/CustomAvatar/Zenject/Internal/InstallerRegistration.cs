@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ModestTree;
+using System;
 using System.Reflection;
 using Zenject;
 
@@ -15,6 +16,8 @@ namespace CustomAvatar.Zenject.Internal
 
         public InstallerRegistration(Type installer)
         {
+            Assert.DerivesFrom(installer, typeof(Installer));
+
             this.installer = installer;
 
             _extraArgs = new object[0];

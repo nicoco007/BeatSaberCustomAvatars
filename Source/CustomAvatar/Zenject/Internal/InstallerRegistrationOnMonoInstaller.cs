@@ -4,7 +4,7 @@ using Zenject;
 
 namespace CustomAvatar.Zenject.Internal
 {
-    internal class InstallerRegistrationOnMonoInstaller<T> : InstallerRegistrationOnTarget
+    internal class InstallerRegistrationOnMonoInstaller<T> : InstallerRegistrationOnTarget where T : MonoInstaller
     {
         private Type _targetType;
 
