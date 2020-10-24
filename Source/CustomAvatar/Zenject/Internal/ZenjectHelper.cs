@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using CustomAvatar.Logging;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -10,8 +11,12 @@ namespace CustomAvatar.Zenject.Internal
     {
         private static readonly List<InstallerRegistration> _installerRegistrations = new List<InstallerRegistration>();
 
-        internal static void Init(Harmony harmony)
+        private static ILogger<ZenjectHelper> _logger;
+
+        internal static void Init(Harmony harmony, IPA.Logging.Logger logger)
         {
+            _logger = new IPALogger<ZenjectHelper>(logger);
+
             PatchInstallInstallers(harmony);
         }
 
@@ -34,9 +39,14 @@ namespace CustomAvatar.Zenject.Internal
 
         private static void InstallInstallers(Context __instance)
         {
+            _logger.Trace($"Handling {__instance.GetType().Name} '{__instance.name}' (scene '{__instance.gameObject.scene.name}')");
+
             foreach (InstallerRegistration installerRegistration in _installerRegistrations)
             {
-                installerRegistration.InstallInto(__instance);
+                if (installerRegistration.TryInstallInto(__instance))
+                {
+                    _logger.Trace($"Installed {installerRegistration.installer.FullName}");
+                }
             }
         }
     }

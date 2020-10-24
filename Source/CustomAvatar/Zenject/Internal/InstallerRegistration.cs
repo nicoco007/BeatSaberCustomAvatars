@@ -8,14 +8,15 @@ namespace CustomAvatar.Zenject.Internal
     {
         private static readonly MethodInfo _installMethod = typeof(DiContainer).GetMethod("Install", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Standard, new[] { typeof(object[]) }, null);
 
-        private readonly Type _installer;
+        public readonly Type installer;
 
         private object[] _extraArgs;
         private InstallerRegistrationOnTarget _target;
 
         public InstallerRegistration(Type installer)
         {
-            _installer = installer;
+            this.installer = installer;
+
             _extraArgs = new object[0];
         }
 
@@ -43,11 +44,13 @@ namespace CustomAvatar.Zenject.Internal
             return target;
         }
 
-        internal void InstallInto(Context context)
+        internal bool TryInstallInto(Context context)
         {
-            if (!_target.ShouldInstall(context)) return;
+            if (!_target.ShouldInstall(context)) return false;
 
-            _installMethod.MakeGenericMethod(_installer).Invoke(context.Container, new[] { _extraArgs });
+            _installMethod.MakeGenericMethod(installer).Invoke(context.Container, new[] { _extraArgs });
+
+            return true;
         }
     }
 }
