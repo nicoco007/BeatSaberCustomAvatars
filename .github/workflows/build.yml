@@ -31,7 +31,7 @@ jobs:
       uses: actions/upload-artifact@v2.2.0
       with:
         name: BeatSaberCustomAvatars-${{ env.ZIP_VERSION }}-DEBUG
-        path: Source\CustomAvatar\bin\Debug\netstandard2.0
+        path: Source\CustomAvatar\bin\Debug\netstandard2.0\publish
 
     - name: Build Release
       run: dotnet build Source\CustomAvatar\CustomAvatar.csproj -c Release -p:BeatSaberDir=..\..\BeatSaberBindings
@@ -40,7 +40,7 @@ jobs:
       uses: actions/upload-artifact@v2.2.0
       with:
         name: BeatSaberCustomAvatars-${{ env.ZIP_VERSION }}-RELEASE
-        path: Source\CustomAvatar\bin\Release\netstandard2.0
+        path: Source\CustomAvatar\bin\Release\netstandard2.0\publish
 
     - name: Build Editor
       run: dotnet build Source\CustomAvatar-Editor\CustomAvatar-Editor.csproj -c Release -p:BeatSaberDir=..\..\BeatSaberBindings
