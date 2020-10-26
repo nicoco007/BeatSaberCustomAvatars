@@ -3,11 +3,10 @@
   "author": "Custom Avatars Contributors",
   "description": "A plugin to let you use custom avatars in Beat Saber.",
   "gameVersion": "1.12.2",
-  "id": "CustomAvatars",
+  "id": "CustomAvatar",
   "icon": "CustomAvatar.Resources.icon.png",
-  "name": "CustomAvatars",
+  "name": "Custom Avatars",
   "version": "5.0.0+dev",
-  "features": [],
   "dependsOn": {
     "BSIPA": "^4.0.0",
     "BeatSaberMarkupLanguage": "^1.4.0",
