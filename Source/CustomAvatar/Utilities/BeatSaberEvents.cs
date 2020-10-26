@@ -39,10 +39,10 @@ namespace CustomAvatar.Utilities
 
         private static void PatchPlayerHeightProperty(Harmony harmony)
         {
-            foreach (ConstructorInfo constructor in typeof(PlayerSpecificSettings).GetConstructors(BindingFlags.Public))
-            {
-                HarmonyMethod postfixPatch = new HarmonyMethod(typeof(BeatSaberEvents).GetMethod(nameof(OnPlayerHeightChanged), BindingFlags.NonPublic | BindingFlags.Static));
+            HarmonyMethod postfixPatch = new HarmonyMethod(typeof(BeatSaberEvents).GetMethod(nameof(OnPlayerHeightChanged), BindingFlags.NonPublic | BindingFlags.Static));
 
+            foreach (ConstructorInfo constructor in typeof(PlayerSpecificSettings).GetConstructors(BindingFlags.Public | BindingFlags.Instance))
+            {
                 harmony.Patch(constructor, null, postfixPatch);
             }
         }
