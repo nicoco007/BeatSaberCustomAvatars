@@ -27,24 +27,22 @@ namespace CustomAvatar.Utilities
     {
         public static event Action<float> playerHeightChanged;
 
-        private static ILogger<BeatSaberUtilities> _logger;
+        private static ILogger<BeatSaberEvents> _logger;
 
         public static void ApplyPatches(Harmony harmony, IPA.Logging.Logger logger)
         {
-            _logger = new IPALogger<BeatSaberUtilities>(logger);
+            _logger = new IPALogger<BeatSaberEvents>(logger);
 
-            PatchPlayerHeightProperty(harmony);
+            PatchPlayerSpecificSettingsSetter(harmony);
             PatchMirrorRendererSO(harmony);
         }
 
-        private static void PatchPlayerHeightProperty(Harmony harmony)
+        private static void PatchPlayerSpecificSettingsSetter(Harmony harmony)
         {
+            MethodInfo methodToPatch = typeof(PlayerData).GetProperty("playerSpecificSettings", BindingFlags.Public | BindingFlags.Instance).SetMethod;
             HarmonyMethod postfixPatch = new HarmonyMethod(typeof(BeatSaberEvents).GetMethod(nameof(OnPlayerHeightChanged), BindingFlags.NonPublic | BindingFlags.Static));
 
-            foreach (ConstructorInfo constructor in typeof(PlayerSpecificSettings).GetConstructors(BindingFlags.Public | BindingFlags.Instance))
-            {
-                harmony.Patch(constructor, null, postfixPatch);
-            }
+            harmony.Patch(methodToPatch, null, postfixPatch);
         }
 
         private static void PatchMirrorRendererSO(Harmony harmony)
