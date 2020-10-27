@@ -185,6 +185,11 @@ namespace CustomAvatar.Avatar
                 return BeatSaberUtilities.kDefaultPlayerEyeHeight;
             }
 
+            if (head.position.y <= 0)
+            {
+                return BeatSaberUtilities.kDefaultPlayerEyeHeight;
+            }
+
             // many avatars rely on this being global because their root position isn't at (0, 0, 0)
             return head.position.y;
         }
