@@ -49,7 +49,7 @@ jobs:
       uses: actions/upload-artifact@v2.2.0
       with:
         name: BeatSaberCustomAvatars-${{ env.ZIP_VERSION }}-Editor
-        path: Source\CustomAvatar-Editor\bin\Release\netstandard2.0
+        path: Source\CustomAvatar-Editor\bin\Release\netstandard2.0\publish\CustomAvatar.dll
     
     - name: Upload Unity Project
       uses: actions/upload-artifact@v2.2.0
