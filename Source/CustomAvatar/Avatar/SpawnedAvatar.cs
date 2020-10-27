@@ -165,7 +165,7 @@ namespace CustomAvatar.Avatar
             _container = new DiContainer(container);
             _gameScenesManager = gameScenesManager;
 
-            _container.Bind<SpawnedAvatar>().FromInstance(this);
+            _container.Bind<SpawnedAvatar>().FromInstance(this); 
         }
 
         private void Start()
@@ -203,6 +203,8 @@ namespace CustomAvatar.Avatar
 
         private void OnTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
         {
+            if (!_eventManager) return;
+
             // currently does not work in multiplayer, need to figure out how to
             // get a reference to the GameObjectContext for the local player
             // or just rework this so it's created in an installer
@@ -214,7 +216,7 @@ namespace CustomAvatar.Avatar
 
             if (_gameScenesManager.IsSceneInStackAndActive("MenuCore"))
             {
-                _eventManager?.OnMenuEnter?.Invoke();
+                _eventManager.OnMenuEnter?.Invoke();
             }
         }
 
