@@ -14,149 +14,85 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-extern alias BeatSaberFinalIK;
-extern alias BeatSaberDynamicBone;
-
 using CustomAvatar.Tracking;
 using System;
 using CustomAvatar.Logging;
 using UnityEngine;
-using UnityEngine.XR;
 using Zenject;
 
 namespace CustomAvatar.Avatar
 {
-    public class AvatarTracking : MonoBehaviour
+    internal class AvatarTracking : MonoBehaviour
     {
-        private Pose _initialPelvisPose;
-        private Pose _initialLeftFootPose;
-        private Pose _initialRightFootPose;
+        internal bool isCalibrationModeEnabled = false;
+
+        private IAvatarInput _input;
+        private SpawnedAvatar _spawnedAvatar;
+        private ILogger<AvatarTracking> _logger = new UnityDebugLogger<AvatarTracking>();
 
         private Vector3 _prevBodyLocalPosition = Vector3.zero;
 
-        public bool isCalibrationModeEnabled = false;
-
-        private IAvatarInput _input;
-        private SpawnedAvatar _avatar;
-        private MainSettingsModelSO _mainSettingsModel;
-        private VRPlatformHelper _vrPlatformHelper;
-        private ILogger<AvatarTracking> _logger = new UnityDebugLogger<AvatarTracking>();
-        private AvatarTailor _tailor;
-
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
-        // ReSharper disable UnusedMember.Local
 
         [Inject]
-        private void Inject(MainSettingsModelSO mainSettingsModel, ILoggerProvider loggerProvider, IAvatarInput input, SpawnedAvatar avatar, VRPlatformHelper vrPlatformHelper, AvatarTailor tailor)
+        private void Inject(ILoggerProvider loggerProvider, IAvatarInput input, SpawnedAvatar spawnedAvatar)
         {
-            _mainSettingsModel = mainSettingsModel;
-            _logger = loggerProvider.CreateLogger<AvatarTracking>(avatar.avatar.descriptor.name);
+            _logger = loggerProvider.CreateLogger<AvatarTracking>(spawnedAvatar.avatar.descriptor.name);
             _input = input;
-            _avatar = avatar;
-            _vrPlatformHelper = vrPlatformHelper;
-            _tailor = tailor;
-
-            if (_avatar.pelvis) _initialPelvisPose = new Pose(_avatar.pelvis.position, _avatar.pelvis.rotation);
-            if (_avatar.leftLeg) _initialLeftFootPose = new Pose(_avatar.leftLeg.position, _avatar.leftLeg.rotation);
-            if (_avatar.rightLeg) _initialRightFootPose = new Pose(_avatar.rightLeg.position, _avatar.rightLeg.rotation);
+            _spawnedAvatar = spawnedAvatar;
         }
 
         private void LateUpdate()
         {
             try
             {
-                if (_avatar.head && _input.TryGetHeadPose(out Pose headPose))
-                {
-                    _avatar.head.position = headPose.position;
-                    _avatar.head.rotation = headPose.rotation;
-                }
-                
-                Vector3 controllerPositionOffset = _mainSettingsModel.controllerPosition;
-                Vector3 controllerRotationOffset = _mainSettingsModel.controllerRotation;
-
-                if (_avatar.rightHand && _input.TryGetRightHandPose(out Pose rightHandPose))
-                {
-                    _avatar.rightHand.position = rightHandPose.position;
-                    _avatar.rightHand.rotation = rightHandPose.rotation;
-                    
-                    _vrPlatformHelper.AdjustPlatformSpecificControllerTransform(XRNode.RightHand, _avatar.rightHand, controllerPositionOffset, controllerRotationOffset);
-                }
-
-                // mirror across YZ plane for left hand
-                controllerPositionOffset = new Vector3(-controllerPositionOffset.x, controllerPositionOffset.y, controllerPositionOffset.z);
-                controllerRotationOffset = new Vector3(controllerRotationOffset.x, -controllerRotationOffset.y, -controllerRotationOffset.z);
-
-                if (_avatar.leftHand && _input.TryGetLeftHandPose(out Pose leftHandPose))
-                {
-                    _avatar.leftHand.position = leftHandPose.position;
-                    _avatar.leftHand.rotation = leftHandPose.rotation;
-
-                    _vrPlatformHelper.AdjustPlatformSpecificControllerTransform(XRNode.LeftHand, _avatar.leftHand, controllerPositionOffset, controllerRotationOffset);
-                }
+                SetPose(DeviceUse.Head,      _spawnedAvatar.head);
+                SetPose(DeviceUse.LeftHand,  _spawnedAvatar.leftHand);
+                SetPose(DeviceUse.RightHand, _spawnedAvatar.rightHand);
 
                 if (isCalibrationModeEnabled)
                 {
-                    if (_avatar.pelvis)
+                    if (_spawnedAvatar.pelvis)
                     {
-                        _avatar.pelvis.position = _initialPelvisPose.position * _avatar.scale + new Vector3(0, _avatar.verticalPosition, 0);
-                        _avatar.pelvis.rotation = _initialPelvisPose.rotation;
+                        _spawnedAvatar.pelvis.position = _spawnedAvatar.avatar.pelvis.position * _spawnedAvatar.scale;
+                        _spawnedAvatar.pelvis.rotation = _spawnedAvatar.avatar.pelvis.rotation;
                     }
 
-                    if (_avatar.leftLeg)
+                    if (_spawnedAvatar.leftLeg)
                     {
-                        _avatar.leftLeg.position = _initialLeftFootPose.position * _avatar.scale + new Vector3(0, _avatar.verticalPosition, 0);
-                        _avatar.leftLeg.rotation = _initialLeftFootPose.rotation;
+                        _spawnedAvatar.leftLeg.position = _spawnedAvatar.avatar.leftLeg.position * _spawnedAvatar.scale;
+                        _spawnedAvatar.leftLeg.rotation = _spawnedAvatar.avatar.leftLeg.rotation;
                     }
 
-                    if (_avatar.rightLeg)
+                    if (_spawnedAvatar.rightLeg)
                     {
-                        _avatar.rightLeg.position = _initialRightFootPose.position * _avatar.scale + new Vector3(0, _avatar.verticalPosition, 0);
-                        _avatar.rightLeg.rotation = _initialRightFootPose.rotation;
+                        _spawnedAvatar.rightLeg.position = _spawnedAvatar.avatar.rightLeg.position * _spawnedAvatar.scale;
+                        _spawnedAvatar.rightLeg.rotation = _spawnedAvatar.avatar.rightLeg.rotation;
                     }
                 }
                 else
                 {
-                    if (_avatar.leftLeg && _input.TryGetLeftFootPose(out Pose leftFootPose))
-                    {
-                        leftFootPose.position = _tailor.ApplyTrackedPointFloorOffset(_avatar, leftFootPose.position);
-
-                        _avatar.leftLeg.position = leftFootPose.position;
-                        _avatar.leftLeg.rotation = leftFootPose.rotation;
-                    }
-
-                    if (_avatar.rightLeg && _input.TryGetRightFootPose(out Pose rightFootPose))
-                    {
-                        rightFootPose.position = _tailor.ApplyTrackedPointFloorOffset(_avatar, rightFootPose.position);
-
-                        _avatar.rightLeg.position = rightFootPose.position;
-                        _avatar.rightLeg.rotation = rightFootPose.rotation;
-                    }
-
-                    if (_avatar.pelvis && _input.TryGetWaistPose(out Pose pelvisPose))
-                    {
-                        pelvisPose.position = _tailor.ApplyTrackedPointFloorOffset(_avatar, pelvisPose.position);
-
-                        _avatar.pelvis.position = pelvisPose.position;
-                        _avatar.pelvis.rotation = pelvisPose.rotation;
-                    }
+                    SetPose(DeviceUse.Waist,     _spawnedAvatar.pelvis);
+                    SetPose(DeviceUse.LeftFoot,  _spawnedAvatar.leftLeg);
+                    SetPose(DeviceUse.RightFoot, _spawnedAvatar.rightLeg);
                 }
 
-                if (_avatar.body)
+                if (_spawnedAvatar.body)
                 {
-                    _avatar.body.position = _avatar.head.position - (_avatar.head.up * 0.1f);
+                    _spawnedAvatar.body.position = _spawnedAvatar.head.position - (_spawnedAvatar.head.up * 0.1f);
 
-                    var vel = new Vector3(_avatar.body.localPosition.x - _prevBodyLocalPosition.x, 0.0f,
-                        _avatar.body.localPosition.z - _prevBodyLocalPosition.z);
+                    var vel = new Vector3(_spawnedAvatar.body.localPosition.x - _prevBodyLocalPosition.x, 0.0f,
+                        _spawnedAvatar.body.localPosition.z - _prevBodyLocalPosition.z);
 
-                    var rot = Quaternion.Euler(0.0f, _avatar.head.localEulerAngles.y, 0.0f);
+                    var rot = Quaternion.Euler(0.0f, _spawnedAvatar.head.localEulerAngles.y, 0.0f);
                     var tiltAxis = Vector3.Cross(transform.up, vel);
 
-                    _avatar.body.localRotation = Quaternion.Lerp(_avatar.body.localRotation,
+                    _spawnedAvatar.body.localRotation = Quaternion.Lerp(_spawnedAvatar.body.localRotation,
                         Quaternion.AngleAxis(vel.magnitude * 1250.0f, tiltAxis) * rot,
                         Time.deltaTime * 10.0f);
 
-                    _prevBodyLocalPosition = _avatar.body.localPosition;
+                    _prevBodyLocalPosition = _spawnedAvatar.body.localPosition;
                 }
             }
             catch (Exception e)
@@ -165,8 +101,24 @@ namespace CustomAvatar.Avatar
             }
         }
 
-        // ReSharper restore UnusedMember.Local
         #pragma warning restore IDE0051
         #endregion
+
+        private void SetPose(DeviceUse use, Transform target)
+        {
+            if (!target || !_input.TryGetPose(use, out Pose pose)) return;
+
+            // if avatar transform has a parent, use that as the origin
+            if (transform.parent)
+            {
+                target.position = transform.parent.TransformPoint(pose.position);
+                target.rotation = transform.parent.rotation * pose.rotation;
+            }
+            else
+            {
+                target.position = pose.position;
+                target.rotation = pose.rotation;
+            }
+        }
     }
 }

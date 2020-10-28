@@ -20,6 +20,6 @@ namespace CustomAvatar.Avatar
     {
         Visible,
         VisibleWithExclusionsApplied,
-        None
+        Hidden
     }
 }

@@ -24,6 +24,9 @@ using Zenject;
 
 namespace CustomAvatar.Avatar
 {
+    /// <summary>
+    /// Allows loading <see cref="LoadedAvatar"/> from various sources.
+    /// </summary>
     public class AvatarLoader
     {
         private const string kGameObjectName = "_CustomAvatar";
@@ -40,7 +43,14 @@ namespace CustomAvatar.Avatar
         }
 
         // TODO from stream/memory
-        public IEnumerator<AsyncOperation> FromFileCoroutine(string path, Action<LoadedAvatar> success = null, Action<Exception> error = null)
+        /// <summary>
+        /// Load an avatar from a file.
+        /// </summary>
+        /// <param name="path">Path to the .avatar file</param>
+        /// <param name="success">Action to call if the avatar is loaded successfully</param>
+        /// <param name="error">Action to call if the avatar isn't loaded successfully</param>
+        /// <returns><see cref="IEnumerator{AsyncOperation}"/></returns>
+        public IEnumerator<AsyncOperation> FromFileCoroutine(string path, Action<LoadedAvatar> success = null, Action<Exception> error = null, Action complete = null)
         {
             if (string.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
 
@@ -51,12 +61,12 @@ namespace CustomAvatar.Avatar
             // already loading, just add handlers
             if (_handlers.ContainsKey(fullPath))
             {
-                _handlers[fullPath].Add(new LoadHandlers(success, error));
+                _handlers[fullPath].Add(new LoadHandlers(success, error, complete));
 
                 yield break;
             }
 
-            _handlers.Add(fullPath, new List<LoadHandlers> { new LoadHandlers(success, error) });
+            _handlers.Add(fullPath, new List<LoadHandlers> { new LoadHandlers(success, error, complete) });
 
             _logger.Info($"Loading avatar from '{fullPath}'");
 
@@ -73,7 +83,7 @@ namespace CustomAvatar.Avatar
 
                 foreach (LoadHandlers handler in _handlers[fullPath])
                 {
-                    handler.error?.Invoke(exception);
+                    handler.InvokeError(exception);
                 }
 
                 _handlers.Remove(fullPath);
@@ -95,7 +105,7 @@ namespace CustomAvatar.Avatar
 
                 foreach (LoadHandlers handler in _handlers[fullPath])
                 {
-                    handler.error?.Invoke(exception);
+                    handler.InvokeError(exception);
                 }
 
                 _handlers.Remove(fullPath);
@@ -107,13 +117,13 @@ namespace CustomAvatar.Avatar
                 
             try
             {
-                var loadedAvatar = new LoadedAvatar(fullPath, (GameObject)assetBundleRequest.asset, _container.Resolve<ILoggerProvider>());
+                var loadedAvatar = _container.Instantiate<LoadedAvatar>(new object[] { fullPath, (GameObject)assetBundleRequest.asset });
 
-                _logger.Info($"Successfully loaded avatar '{loadedAvatar.descriptor.name}' from '{fullPath}'");
+                _logger.Info($"Successfully loaded avatar '{loadedAvatar.descriptor.name}' by '{loadedAvatar.descriptor.author}' from '{fullPath}'");
 
                 foreach (LoadHandlers handler in _handlers[fullPath])
                 {
-                    handler.success?.Invoke(loadedAvatar);
+                    handler.InvokeSuccess(loadedAvatar);
                 }
             }
             catch (Exception ex)
@@ -123,22 +133,36 @@ namespace CustomAvatar.Avatar
 
                 foreach (LoadHandlers handler in _handlers[fullPath])
                 {
-                    handler.error?.Invoke(ex);
+                    handler.InvokeError(new AvatarLoadException("Failed to load avatar", ex));
                 }
             }
 
             _handlers.Remove(fullPath);
         }
 
-        private class LoadHandlers
+        private struct LoadHandlers
         {
-            internal readonly Action<LoadedAvatar> success;
-            internal readonly Action<Exception> error;
+            private readonly Action<LoadedAvatar> success;
+            private readonly Action<Exception> error;
+            private readonly Action complete;
 
-            internal LoadHandlers(Action<LoadedAvatar> success, Action<Exception> error)
+            internal LoadHandlers(Action<LoadedAvatar> success, Action<Exception> error, Action complete)
             {
                 this.success = success;
                 this.error = error;
+                this.complete = complete;
+            }
+
+            public void InvokeSuccess(LoadedAvatar value)
+            {
+                success?.Invoke(value);
+                complete?.Invoke();
+            }
+
+            public void InvokeError(Exception exception)
+            {
+                error?.Invoke(exception);
+                complete?.Invoke();
             }
         }
     }

@@ -26,12 +26,12 @@ namespace CustomAvatar.Avatar
         private ScoreController _scoreController;
         private ILevelEndActions _levelEndActions;
         private BeatmapObjectCallbackController _beatmapObjectCallbackController;
+        private ObstacleSaberSparkleEffectManager _sparkleEffectManager;
 
         private EventManager _eventManager;
 
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
-        // ReSharper disable UnusedMember.Local
 
         [Inject]
         public void Inject(ILoggerProvider loggerProvider, LoadedAvatar avatar, ScoreController scoreController, BeatmapObjectCallbackController beatmapObjectCallbackController, ILevelEndActions levelEndActions)
@@ -40,6 +40,9 @@ namespace CustomAvatar.Avatar
             _scoreController = scoreController;
             _levelEndActions = levelEndActions;
             _beatmapObjectCallbackController = beatmapObjectCallbackController;
+
+            // unfortunately this is not bound through Zenject
+            _sparkleEffectManager = FindObjectOfType<ObstacleSaberSparkleEffectManager>();
         }
 
         private void Start()
@@ -50,6 +53,7 @@ namespace CustomAvatar.Avatar
             {
                 _logger.Error("No EventManager found!");
                 Destroy(this);
+                return;
             }
 
             _eventManager.OnLevelStart?.Invoke();
@@ -58,6 +62,9 @@ namespace CustomAvatar.Avatar
             _scoreController.multiplierDidChangeEvent += OnMultiplierDidChange;
             _scoreController.comboDidChangeEvent += OnComboDidChange;
             _scoreController.comboBreakingEventHappenedEvent += OnComboBreakingEventHappened;
+
+            _sparkleEffectManager.sparkleEffectDidStartEvent += OnSparkleEffectDidStart;
+            _sparkleEffectManager.sparkleEffectDidEndEvent += OnSparkleEffectDidEnd;
 
             _levelEndActions.levelFinishedEvent += OnLevelFinished;
             _levelEndActions.levelFailedEvent += OnLevelFailed;
@@ -72,14 +79,15 @@ namespace CustomAvatar.Avatar
             _scoreController.comboDidChangeEvent -= OnComboDidChange;
             _scoreController.comboBreakingEventHappenedEvent -= OnComboBreakingEventHappened;
 
+            _sparkleEffectManager.sparkleEffectDidStartEvent -= OnSparkleEffectDidStart;
+            _sparkleEffectManager.sparkleEffectDidEndEvent -= OnSparkleEffectDidEnd;
+
             _levelEndActions.levelFinishedEvent -= OnLevelFinished;
             _levelEndActions.levelFailedEvent -= OnLevelFailed;
 
             _beatmapObjectCallbackController.beatmapEventDidTriggerEvent -= BeatmapEventDidTrigger;
         }
         
-
-        // ReSharper restore UnusedMember.Local
         #pragma warning restore IDE0051
         #endregion
 
@@ -113,7 +121,7 @@ namespace CustomAvatar.Avatar
             _eventManager.OnComboBreak?.Invoke();
         }
 
-        private void OnSparkleEventDidStart(SaberType saberType)
+        private void OnSparkleEffectDidStart(SaberType saberType)
         {
             _logger.Trace("Invoke SaberStartColliding");
             _eventManager.SaberStartColliding?.Invoke();
@@ -142,14 +150,13 @@ namespace CustomAvatar.Avatar
             // event 4 triggers lighting changes for the beat lines and general center of scene
             if (eventData == null || eventData.type != BeatmapEventType.Event4) return;
 
-            // events 1 through 3 are blue (based on information in LightSwitchEventEffect)
+            // event values 1 through 3 are blue and 5 through 7 are red based on information in LightSwitchEventEffect
             if (eventData.value >= 1 && eventData.value <= 3)
             {
                 _logger.Trace("Invoke OnBlueLightOn");
                 _eventManager.OnBlueLightOn?.Invoke();
             }
 
-            // events 5 through 7 are red
             if (eventData.value >= 5 && eventData.value <= 7)
             {
                 _logger.Trace("Invoke OnRedLightOn");

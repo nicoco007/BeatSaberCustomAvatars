@@ -14,13 +14,20 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
+using CustomAvatar.Player;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
+using HMUI;
+using Polyglot;
+using System.Linq;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using Zenject;
 
 namespace CustomAvatar.UI
@@ -31,64 +38,89 @@ namespace CustomAvatar.UI
 
         private static readonly int kColor = Shader.PropertyToID("_Color");
 
+        #region Components
+        #pragma warning disable CS0649
+        #pragma warning disable IDE0051
+
+        [UIComponent("container")] private readonly RectTransform _container;
+        [UIComponent("loader")] private readonly Transform _loader;
+
+        #pragma warning restore IDE0051
+        #pragma warning restore CS0649
+        #endregion
+
         private bool _calibrating;
         private Material _sphereMaterial;
         private Material _redMaterial;
         private Material _greenMaterial;
         private Material _blueMaterial;
-        
-        private TrackedDeviceManager _trackedDeviceManager;
+
+        private ILogger<SettingsViewController> _logger;
         private PlayerAvatarManager _avatarManager;
-        private AvatarTailor _avatarTailor;
         private Settings _settings;
         private CalibrationData _calibrationData;
         private ShaderLoader _shaderLoader;
-        private ILogger<SettingsViewController> _logger;
+        private VRPlayerInput _playerInput;
+
         private Settings.AvatarSpecificSettings _currentAvatarSettings;
         private CalibrationData.FullBodyCalibration _currentAvatarManualCalibration;
 
         [Inject]
-        private void Inject(TrackedDeviceManager trackedDeviceManager, PlayerAvatarManager avatarManager, AvatarTailor avatarTailor, Settings settings, CalibrationData calibrationData, ShaderLoader shaderLoader, ILoggerProvider loggerProvider)
+        private void Inject(ILoggerProvider loggerProvider, PlayerAvatarManager avatarManager, Settings settings, CalibrationData calibrationData, ShaderLoader shaderLoader, VRPlayerInput playerInput)
         {
-            _trackedDeviceManager = trackedDeviceManager;
+            _logger = loggerProvider.CreateLogger<SettingsViewController>();
             _avatarManager = avatarManager;
-            _avatarTailor = avatarTailor;
             _settings = settings;
             _calibrationData = calibrationData;
             _shaderLoader = shaderLoader;
-            _logger = loggerProvider.CreateLogger<SettingsViewController>();
+            _playerInput = playerInput;
         }
 
-        protected override void DidActivate(bool firstActivation, ActivationType type)
+        protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
-            base.DidActivate(firstActivation, type);
+            base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
 
-            _visibleInFirstPerson.CheckboxValue = _settings.isAvatarVisibleInFirstPerson;
+            _visibleInFirstPerson.Value = _settings.isAvatarVisibleInFirstPerson;
             _resizeMode.Value = _settings.resizeMode;
-            _floorHeightAdjust.CheckboxValue = _settings.enableFloorAdjust;
-            _moveFloorWithRoomAdjust.CheckboxValue = _settings.moveFloorWithRoomAdjust;
-            _calibrateFullBodyTrackingOnStart.CheckboxValue = _settings.calibrateFullBodyTrackingOnStart;
+            _enableLocomotion.Value = _settings.enableLocomotion;
+            _floorHeightAdjust.Value = _settings.enableFloorAdjust;
+            _moveFloorWithRoomAdjust.Value = _settings.moveFloorWithRoomAdjust;
+            _calibrateFullBodyTrackingOnStart.Value = _settings.calibrateFullBodyTrackingOnStart;
             _cameraNearClipPlane.Value = _settings.cameraNearClipPlane;
 
-            UpdateUI(_avatarManager.currentlySpawnedAvatar.avatar);
-            OnInputDevicesChanged(null, DeviceUse.Unknown);
+            SetLoading(false);
+            UpdateUI(_avatarManager.currentlySpawnedAvatar?.avatar);
 
             _armSpanLabel.SetText($"{_settings.playerArmSpan:0.00} m");
 
-            if (_shaderLoader.unlitShader)
+            if (firstActivation)
             {
-                _sphereMaterial = new Material(_shaderLoader.unlitShader);
-                _redMaterial = new Material(_shaderLoader.unlitShader);
-                _greenMaterial = new Material(_shaderLoader.unlitShader);
-                _blueMaterial = new Material(_shaderLoader.unlitShader);
+                if (_shaderLoader.unlitShader)
+                {
+                    _sphereMaterial = new Material(_shaderLoader.unlitShader);
+                    _redMaterial = new Material(_shaderLoader.unlitShader);
+                    _greenMaterial = new Material(_shaderLoader.unlitShader);
+                    _blueMaterial = new Material(_shaderLoader.unlitShader);
 
-                _redMaterial.SetColor(kColor, new Color(0.8f, 0, 0, 1));
-                _greenMaterial.SetColor(kColor, new Color(0, 0.8f, 0, 1));
-                _blueMaterial.SetColor(kColor, new Color(0, 0.5f, 1, 1));
-            }
-            else
-            {
-                _logger.Error("Unlit shader not loaded; manual calibration points may not be visible");
+                    _redMaterial.SetColor(kColor, new Color(0.8f, 0, 0, 1));
+                    _greenMaterial.SetColor(kColor, new Color(0, 0.8f, 0, 1));
+                    _blueMaterial.SetColor(kColor, new Color(0, 0.5f, 1, 1));
+                }
+                else
+                {
+                    _logger.Error("Unlit shader not loaded; manual calibration points may not be visible");
+                }
+
+                Transform header = Instantiate(Resources.FindObjectsOfTypeAll<GameplaySetupViewController>().First().transform.Find("HeaderPanel"), rectTransform, false);
+
+                header.name = "HeaderPanel";
+
+                Destroy(header.GetComponentInChildren<LocalizedTextMeshProUGUI>());
+                header.GetComponentInChildren<TextMeshProUGUI>().text = "Settings";
+
+                rectTransform.sizeDelta = new Vector2(120, 0);
+                rectTransform.offsetMin = new Vector2(-60, 0);
+                rectTransform.offsetMax = new Vector2(60, 0);
             }
 
             _pelvisOffset.Value = _settings.automaticCalibration.pelvisOffset;
@@ -96,44 +128,78 @@ namespace CustomAvatar.UI
 
             _waistTrackerPosition.Value = _settings.automaticCalibration.waistTrackerPosition;
 
-            _autoClearButton.interactable = _calibrationData.automaticCalibration.isCalibrated;
-
-            _avatarManager.avatarChanged += OnAvatarChanged;
-
-            _trackedDeviceManager.deviceAdded += OnInputDevicesChanged;
-            _trackedDeviceManager.deviceRemoved += OnInputDevicesChanged;
-            _trackedDeviceManager.deviceTrackingAcquired += OnInputDevicesChanged;
-            _trackedDeviceManager.deviceTrackingLost += OnInputDevicesChanged;
+            if (addedToHierarchy)
+            {
+                _avatarManager.avatarStartedLoading += OnAvatarStartedLoading;
+                _avatarManager.avatarChanged += OnAvatarChanged;
+                _playerInput.inputChanged += OnInputChanged;
+            }
         }
 
-        protected override void DidDeactivate(DeactivationType deactivationType)
+        protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
-            base.DidDeactivate(deactivationType);
+            base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
 
-            _avatarManager.avatarChanged -= OnAvatarChanged;
-
-            _trackedDeviceManager.deviceAdded -= OnInputDevicesChanged;
-            _trackedDeviceManager.deviceRemoved -= OnInputDevicesChanged;
-            _trackedDeviceManager.deviceTrackingAcquired -= OnInputDevicesChanged;
-            _trackedDeviceManager.deviceTrackingLost -= OnInputDevicesChanged;
+            if (removedFromHierarchy)
+            {
+                _avatarManager.avatarStartedLoading -= OnAvatarStartedLoading;
+                _avatarManager.avatarChanged -= OnAvatarChanged;
+                _playerInput.inputChanged -= OnInputChanged;
+            }
 
             DisableCalibrationMode(false);
+        }
+
+        private void OnAvatarStartedLoading(string fileName)
+        {
+            SetLoading(true);
         }
 
         private void OnAvatarChanged(SpawnedAvatar spawnedAvatar)
         {
+            SetLoading(false);
+            DisableCalibrationMode(false);
             UpdateUI(spawnedAvatar?.avatar);
+        }
+
+        private void SetLoading(bool loading)
+        {
+            _loader.gameObject.SetActive(loading);
+            SetInteractableRecursively(!loading);
+        }
+
+        private void SetInteractableRecursively(bool enable)
+        {
+            foreach (Selectable selectable in _container.GetComponentsInChildren<Selectable>(true))
+            {
+                selectable.interactable = enable;
+                selectable.enabled = enable;
+            }
+
+            foreach (Interactable interactable in _container.GetComponentsInChildren<Interactable>(true))
+            {
+                interactable.interactable = enable;
+                interactable.enabled = enable;
+            }
+
+            float alpha = enable ? 1 : 0.5f;
+
+            foreach (TextMeshProUGUI textMesh in _container.GetComponentsInChildren<TextMeshProUGUI>(true))
+            {
+                textMesh.alpha = alpha;
+            }
         }
 
         private void UpdateUI(LoadedAvatar avatar)
         {
-            DisableCalibrationMode(false);
+            SetInteractableRecursively(avatar != null);
+            UpdateCalibrationButtons(avatar);
 
             if (avatar == null)
             {
                 _clearButton.interactable = false;
                 _calibrateButton.interactable = false;
-                _automaticCalibrationSetting.checkbox.interactable = false;
+                _automaticCalibrationSetting.interactable = false;
                 _automaticCalibrationHoverHint.text = "No avatar selected";
 
                 return;
@@ -142,46 +208,46 @@ namespace CustomAvatar.UI
             _currentAvatarSettings = _settings.GetAvatarSettings(avatar.fileName);
             _currentAvatarManualCalibration = _calibrationData.GetAvatarManualCalibration(avatar.fileName);
 
-            UpdateCalibrationButtons(avatar);
+            _ignoreExclusionsSetting.Value = _currentAvatarSettings.ignoreExclusions;
 
-            _ignoreExclusionsSetting.CheckboxValue = _currentAvatarSettings.ignoreExclusions;
-
-            _bypassCalibration.CheckboxValue = _currentAvatarSettings.bypassCalibration;
-            _bypassCalibration.checkbox.interactable = avatar.supportsFullBodyTracking;
+            _bypassCalibration.Value = _currentAvatarSettings.bypassCalibration;
+            _bypassCalibration.interactable = avatar.supportsFullBodyTracking;
             _bypassCalibrationHoverHint.text = avatar.supportsFullBodyTracking ? "Disable the need for calibration before full body tracking is applied." : "Not supported by current avatar";
 
-            _automaticCalibrationSetting.CheckboxValue = _currentAvatarSettings.useAutomaticCalibration;
-            _automaticCalibrationSetting.checkbox.interactable = avatar.descriptor.supportsAutomaticCalibration;
+            _automaticCalibrationSetting.Value = _currentAvatarSettings.useAutomaticCalibration;
+            _automaticCalibrationSetting.interactable = avatar.descriptor.supportsAutomaticCalibration;
             _automaticCalibrationHoverHint.text = avatar.descriptor.supportsAutomaticCalibration ? "Use automatic calibration instead of manual calibration." : "Not supported by current avatar";
         }
 
-        private void OnInputDevicesChanged(TrackedDeviceState state, DeviceUse use)
+        private void OnInputChanged()
         {
-            UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.avatar);
+            UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar?.avatar);
         }
 
         private void UpdateCalibrationButtons(LoadedAvatar avatar)
         {
-            if (!_trackedDeviceManager.waist.tracked && !_trackedDeviceManager.leftFoot.tracked && !_trackedDeviceManager.rightFoot.tracked)
+            if (!_playerInput.TryGetUncalibratedPose(DeviceUse.Waist,     out Pose _) &&
+                !_playerInput.TryGetUncalibratedPose(DeviceUse.LeftFoot,  out Pose _) &&
+                !_playerInput.TryGetUncalibratedPose(DeviceUse.RightFoot, out Pose _))
             {
                 _autoCalibrateButton.interactable = false;
-                _autoClearButton.interactable = false;
+                _autoClearButton.interactable = _calibrationData.automaticCalibration.isCalibrated;
                 _autoCalibrateButtonHoverHint.text = "No trackers detected";
 
                 _calibrateButton.interactable = false;
-                _clearButton.interactable = false;
+                _clearButton.interactable = _currentAvatarManualCalibration?.isCalibrated == true;
                 _calibrateButtonHoverHint.text = "No trackers detected";
 
                 return;
             }
 
-            bool isManualCalibrationPossible = avatar != null && avatar.isIKAvatar && avatar.supportsFullBodyTracking;
+            bool isManualCalibrationPossible = avatar != null && avatar.supportsFullBodyTracking;
             bool isAutomaticCalibrationPossible = isManualCalibrationPossible && avatar.descriptor.supportsAutomaticCalibration;
 
             if (isAutomaticCalibrationPossible)
             {
                 _autoCalibrateButton.interactable = true;
-                _autoClearButton.interactable = _currentAvatarManualCalibration.isCalibrated;
+                _autoClearButton.interactable = _calibrationData.automaticCalibration.isCalibrated;
                 _autoCalibrateButtonHoverHint.text = "Calibrate full body tracking automatically";
             }
             else
@@ -194,7 +260,7 @@ namespace CustomAvatar.UI
             if (isManualCalibrationPossible)
             {
                 _calibrateButton.interactable = true;
-                _clearButton.interactable = _currentAvatarManualCalibration.isCalibrated;
+                _clearButton.interactable = _currentAvatarManualCalibration?.isCalibrated == true;
                 _calibrateButtonHoverHint.text = "Start manual full body calibration";
             }
             else

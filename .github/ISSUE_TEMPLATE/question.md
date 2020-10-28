@@ -1,9 +1,9 @@
 ---
 name: Question
-about: Have a question? Ask away!
+about: General-order question. If you have a problem, please use "Bug report" instead.
 title: ''
 labels: question
-assignees: ''
+assignees: nicoco007
 
 ---
 

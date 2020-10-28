@@ -12,7 +12,7 @@ using CustomAvatar.Configuration;
 
 namespace CustomAvatar.Avatar
 {
-    public class AvatarSRTracking : MonoBehaviour
+    internal class AvatarSRTracking : MonoBehaviour
     {
         private Animator _animator;
         private EyeTrackingManager _eyeMgr;
