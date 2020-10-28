@@ -21,14 +21,15 @@ using HMUI;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using CustomAvatar.Tracking;
 
 namespace CustomAvatar.UI
 {
     internal partial class SettingsViewController
     {
         #region Components
-        #pragma warning disable 649
-        #pragma warning disable IDE0044
+#pragma warning disable 649
+#pragma warning disable IDE0044
 
         [UIComponent("arm-span")] private TextMeshProUGUI _armSpanLabel;
         [UIComponent("calibrate-button")] private TextMeshProUGUI _calibrateButtonText;
@@ -36,17 +37,17 @@ namespace CustomAvatar.UI
         [UIComponent("bypass-calibration")] private HoverHint _bypassCalibrationHoverHint;
         [UIComponent("automatic-calibration")] private HoverHint _automaticCalibrationHoverHint;
 
-        [UIComponent("ignore-exclusions")] private CheckboxSetting _ignoreExclusionsSetting;
-        [UIComponent("bypass-calibration")] private CheckboxSetting _bypassCalibration;
-        [UIComponent("automatic-calibration")] private CheckboxSetting _automaticCalibrationSetting;
+        [UIComponent("ignore-exclusions")] private ToggleSetting _ignoreExclusionsSetting;
+        [UIComponent("bypass-calibration")] private ToggleSetting _bypassCalibration;
+        [UIComponent("automatic-calibration")] private ToggleSetting _automaticCalibrationSetting;
 
         [UIComponent("calibrate-button")] private Button _calibrateButton;
         [UIComponent("clear-button")] private Button _clearButton;
 
         [UIComponent("calibrate-button")] private HoverHint _calibrateButtonHoverHint;
 
-        #pragma warning restore IDE0044
-        #pragma warning restore 649
+#pragma warning restore IDE0044
+#pragma warning restore 649
         #endregion
 
         private GameObject _waistSphere;
@@ -54,11 +55,12 @@ namespace CustomAvatar.UI
         private GameObject _rightFootSphere;
 
         #region Actions
-        // ReSharper disable UnusedMember.Local
 
         [UIAction("ignore-exclusions-change")]
         private void OnIgnoreExclusionsChanged(bool value)
         {
+            if (_currentAvatarSettings == null) return;
+
             _currentAvatarSettings.ignoreExclusions = value;
             _avatarManager.UpdateFirstPersonVisibility();
         }
@@ -66,6 +68,8 @@ namespace CustomAvatar.UI
         [UIAction("bypass-calibration-change")]
         private void OnEnableBypassCalibrationChanged(bool value)
         {
+            if (_currentAvatarSettings == null) return;
+
             _currentAvatarSettings.bypassCalibration = value;
         }
 
@@ -73,6 +77,9 @@ namespace CustomAvatar.UI
         private void OnEnableAutomaticCalibrationChanged(bool value)
         {
             DisableCalibrationMode(false);
+
+            if (_currentAvatarSettings == null) return;
+
             _currentAvatarSettings.useAutomaticCalibration = value;
         }
 
@@ -98,12 +105,11 @@ namespace CustomAvatar.UI
             }
             else
             {
-                _avatarTailor.ClearManualFullBodyTrackingData(_avatarManager.currentlySpawnedAvatar);
+                _playerInput.ClearManualFullBodyTrackingData(_avatarManager.currentlySpawnedAvatar);
                 _clearButton.interactable = false;
             }
         }
-        
-        // ReSharper restore UnusedMember.Local
+
         #endregion
 
         private void EnableCalibrationMode()
@@ -125,12 +131,12 @@ namespace CustomAvatar.UI
             {
                 if (save)
                 {
-                    _avatarTailor.CalibrateFullBodyTrackingManual(_avatarManager.currentlySpawnedAvatar);
+                    _playerInput.CalibrateFullBodyTrackingManual(_avatarManager.currentlySpawnedAvatar);
 
-                    _automaticCalibrationSetting.CheckboxValue = false;
+                    _automaticCalibrationSetting.Value = false;
                     OnEnableAutomaticCalibrationChanged(false);
                 }
-                
+
                 _avatarManager.currentlySpawnedAvatar.DisableCalibrationMode();
             }
 
@@ -145,7 +151,7 @@ namespace CustomAvatar.UI
         }
 
         private GameObject CreateCalibrationSphere()
-        { 
+        {
             GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 
             sphere.layer = AvatarLayers.kAlwaysVisible;
@@ -174,33 +180,33 @@ namespace CustomAvatar.UI
         {
             if (_calibrating)
             {
-                if (_trackedDeviceManager.waist.tracked)
+                if (_playerInput.TryGetUncalibratedPose(DeviceUse.Waist, out Pose waist))
                 {
                     _waistSphere.SetActive(true);
-                    _waistSphere.transform.position = _avatarTailor.ApplyTrackedPointFloorOffset(_avatarManager.currentlySpawnedAvatar, _trackedDeviceManager.waist.position);
-                    _waistSphere.transform.rotation = _trackedDeviceManager.waist.rotation;
+                    _waistSphere.transform.position = waist.position;
+                    _waistSphere.transform.rotation = waist.rotation;
                 }
                 else
                 {
                     _waistSphere.SetActive(false);
                 }
 
-                if (_trackedDeviceManager.leftFoot.tracked)
+                if (_playerInput.TryGetUncalibratedPose(DeviceUse.LeftFoot, out Pose leftFoot))
                 {
                     _leftFootSphere.SetActive(true);
-                    _leftFootSphere.transform.position = _avatarTailor.ApplyTrackedPointFloorOffset(_avatarManager.currentlySpawnedAvatar, _trackedDeviceManager.leftFoot.position);
-                    _leftFootSphere.transform.rotation = _trackedDeviceManager.leftFoot.rotation;
+                    _leftFootSphere.transform.position = leftFoot.position;
+                    _leftFootSphere.transform.rotation = leftFoot.rotation;
                 }
                 else
                 {
                     _leftFootSphere.SetActive(false);
                 }
 
-                if (_trackedDeviceManager.rightFoot.tracked)
+                if (_playerInput.TryGetUncalibratedPose(DeviceUse.RightFoot, out Pose rightFoot))
                 {
                     _rightFootSphere.SetActive(true);
-                    _rightFootSphere.transform.position = _avatarTailor.ApplyTrackedPointFloorOffset(_avatarManager.currentlySpawnedAvatar, _trackedDeviceManager.rightFoot.position);
-                    _rightFootSphere.transform.rotation = _trackedDeviceManager.rightFoot.rotation;
+                    _rightFootSphere.transform.position = rightFoot.position;
+                    _rightFootSphere.transform.rotation = rightFoot.rotation;
                 }
                 else
                 {

@@ -20,6 +20,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using CustomAvatar.Avatar;
+using CustomAvatar.Player;
+using CustomAvatar.Lighting;
 using CustomAvatar.Tracking;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -27,14 +29,6 @@ using UnityEngine;
 
 namespace CustomAvatar.Configuration
 {
-    // ReSharper disable ClassNeverInstantiated.Global
-    // ReSharper disable ClassWithVirtualMembersNeverInherited.Global
-    // ReSharper disable RedundantDefaultMemberInitializer
-    // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
-    // ReSharper disable AutoPropertyCanBeMadeGetOnly.Local
-    // ReSharper disable UnusedMember.Global
-    // ReSharper disable FieldCanBeMadeReadOnly.Global
-    // ReSharper disable InconsistentNaming
     internal class Settings
     {
         public event Action<bool> firstPersonEnabledChanged;
@@ -66,8 +60,9 @@ namespace CustomAvatar.Configuration
         [JsonConverter(typeof(StringEnumConverter))] public AvatarResizeMode resizeMode = AvatarResizeMode.Height;
         public bool enableFloorAdjust = false;
         public string previousAvatarPath = null;
-        public float playerArmSpan = AvatarTailor.kDefaultPlayerArmSpan;
+        public float playerArmSpan = VRPlayerInput.kDefaultPlayerArmSpan;
         public bool calibrateFullBodyTrackingOnStart = false;
+        public bool enableLocomotion = true;
         public float cameraNearClipPlane = 0.1f;
         public float eyeTrackingScale = 1.0f;
         public readonly Lighting lighting = new Lighting();
@@ -102,23 +97,20 @@ namespace CustomAvatar.Configuration
 
         public class Lighting
         {
-            public bool enabled = false;
-            public bool castShadows = false;
-            [JsonConverter(typeof(StringEnumConverter))] public ShadowResolution shadowResolution = ShadowResolution.Medium;
+            [JsonConverter(typeof(StringEnumConverter))] public LightingQuality quality = LightingQuality.Off;
             public bool enableDynamicLighting = false;
         }
 
         public class Mirror
         {
-            public Vector3 positionOffset = new Vector3(0, -1f, 0);
-            public Vector2 size = new Vector2(5f, 4f);
+            public Vector2 size = new Vector2(5f, 2.5f);
             public float renderScale = 1.0f;
         }
 
         public class FullBodyMotionSmoothing
         {
-            public readonly TrackedPointSmoothing waist = new TrackedPointSmoothing { position = 15, rotation = 10 };
-            public readonly TrackedPointSmoothing feet = new TrackedPointSmoothing { position = 13, rotation = 17 };
+            public readonly TrackedPointSmoothing waist = new TrackedPointSmoothing { position = 0.5f, rotation = 0.2f };
+            public readonly TrackedPointSmoothing feet = new TrackedPointSmoothing { position = 0.5f, rotation = 0.2f };
         }
 
         public class TrackedPointSmoothing
@@ -137,10 +129,34 @@ namespace CustomAvatar.Configuration
 
         public class AvatarSpecificSettings
         {
-            public bool useAutomaticCalibration = false;
-            public bool allowMaintainPelvisPosition = false;
-            public bool bypassCalibration = false;
+            public event Action<bool> useAutomaticCalibrationChanged;
+            public event Action<bool> bypassCalibrationChanged;
+
+            public bool useAutomaticCalibration
+            {
+                get => _useAutomaticCalibration;
+                set
+                {
+                    _useAutomaticCalibration = value;
+                    useAutomaticCalibrationChanged?.Invoke(value);
+                }
+            }
+
+            public bool bypassCalibration
+            {
+                get => _bypassCalibration;
+                set
+                {
+                    _bypassCalibration = value;
+                    bypassCalibrationChanged?.Invoke(value);
+                }
+            }
+
             public bool ignoreExclusions = false;
+            public bool allowMaintainPelvisPosition = false;
+
+            private bool _useAutomaticCalibration = false;
+            private bool _bypassCalibration = false;
         }
 
         public AvatarSpecificSettings GetAvatarSettings(string fileName)

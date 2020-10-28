@@ -287,4 +287,4 @@ __pycache__/
 *.odx.cs
 *.xsd.cs
 
-CustomAvatar/Dynamic Bones/
+!*.dll.meta

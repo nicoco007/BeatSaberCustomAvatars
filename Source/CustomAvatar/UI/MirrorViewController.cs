@@ -17,42 +17,90 @@
 using CustomAvatar.Configuration;
 using CustomAvatar.StereoRendering;
 using UnityEngine;
-using HMUI;
 using Zenject;
+using CustomAvatar.Avatar;
+using CustomAvatar.Player;
+using BeatSaberMarkupLanguage.ViewControllers;
+using BeatSaberMarkupLanguage.Attributes;
 
 namespace CustomAvatar.UI
 {
-    internal class MirrorViewController : ViewController
+    internal class MirrorViewController : BSMLResourceViewController
     {
+        public override string ResourceName => "CustomAvatar.Views.Mirror.bsml";
+
         private GameObject _mirrorContainer;
 
         private MirrorHelper _mirrorHelper;
         private Settings _settings;
+        private PlayerAvatarManager _avatarManager;
+
+        #region Components
+        #pragma warning disable CS0649
+
+        [UIComponent("loader")]
+        private readonly Transform _loader;
+
+        #pragma warning restore CS0649
+        #endregion
+
+        #region Behaviour Lifecycle
+        #pragma warning disable IDE0051
 
         [Inject]
-        private void Inject(MirrorHelper mirrorHelper, Settings settings)
+        private void Inject(MirrorHelper mirrorHelper, Settings settings, PlayerAvatarManager avatarManager)
         {
             _mirrorHelper = mirrorHelper;
             _settings = settings;
+            _avatarManager = avatarManager;
         }
 
-        protected override void DidActivate(bool firstActivation, ActivationType activationType)
-        {
-            base.DidActivate(firstActivation, activationType);
+        #pragma warning restore IDE0051
+        #endregion
 
-            if (activationType == ActivationType.AddedToHierarchy)
+        protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
+        {
+            base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
+
+            if (addedToHierarchy)
             {
-                _mirrorContainer = new GameObject();
+                _mirrorContainer = new GameObject("Mirror Container");
                 Vector2 mirrorSize = _settings.mirror.size;
-                _mirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, 3f) + _settings.mirror.positionOffset, Quaternion.Euler(-90f, 0, 0), mirrorSize, _mirrorContainer.transform, new Vector3(0, mirrorSize.y / 2, 1.5f));
+                _mirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, 2), Quaternion.Euler(-90f, 0, 0), mirrorSize, _mirrorContainer.transform);
+
+                _avatarManager.avatarStartedLoading += OnAvatarStartedLoading;
+                _avatarManager.avatarChanged += OnAvatarChanged;
+
+                SetLoading(false);
             }
         }
 
-        protected override void DidDeactivate(DeactivationType deactivationType)
+        protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
-            base.DidDeactivate(deactivationType);
+            base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
+
+            if (removedFromHierarchy)
+            {
+                _avatarManager.avatarStartedLoading -= OnAvatarStartedLoading;
+                _avatarManager.avatarChanged -= OnAvatarChanged;
+            }
 
             Destroy(_mirrorContainer);
+        }
+
+        private void OnAvatarStartedLoading(string fileName)
+        {
+            SetLoading(true);
+        }
+
+        private void OnAvatarChanged(SpawnedAvatar avatar)
+        {
+            SetLoading(false);
+        }
+
+        private void SetLoading(bool loading)
+        {
+            _loader.gameObject.SetActive(loading);
         }
     }
 }

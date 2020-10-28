@@ -20,7 +20,7 @@ using Zenject;
 
 namespace CustomAvatar.Avatar
 {
-    public class AvatarFingerTracking : MonoBehaviour
+    internal class AvatarFingerTracking : MonoBehaviour
     {
         private Animator _animator;
         private PoseManager _poseManager;
@@ -28,7 +28,6 @@ namespace CustomAvatar.Avatar
 
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
-        // ReSharper disable UnusedMember.Local
 
         [Inject]
         private void Inject(IAvatarInput input)
@@ -47,13 +46,12 @@ namespace CustomAvatar.Avatar
             ApplyFingerTracking();
         }
 
-        // ReSharper restore UnusedMember.Local
         #pragma warning restore IDE0051
         #endregion
 
         private void ApplyFingerTracking()
         {
-            if (_input.TryGetLeftHandFingerCurl(out FingerCurl leftFingerCurl))
+            if (_input.TryGetFingerCurl(DeviceUse.LeftHand, out FingerCurl leftFingerCurl))
             {
                 ApplyLeftHandFingerPoses(leftFingerCurl.thumb, leftFingerCurl.index, leftFingerCurl.middle, leftFingerCurl.ring, leftFingerCurl.little);
             }
@@ -62,7 +60,7 @@ namespace CustomAvatar.Avatar
                 ApplyLeftHandFingerPoses(1, 1, 1, 1, 1);
             }
 
-            if (_input.TryGetRightHandFingerCurl(out FingerCurl rightFingerCurl))
+            if (_input.TryGetFingerCurl(DeviceUse.RightHand, out FingerCurl rightFingerCurl))
             {
                 ApplyRightHandFingerPoses(rightFingerCurl.thumb, rightFingerCurl.index, rightFingerCurl.middle, rightFingerCurl.ring, rightFingerCurl.little);
             }

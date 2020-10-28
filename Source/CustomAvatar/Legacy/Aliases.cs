@@ -18,7 +18,6 @@ extern alias BeatSaberFinalIK;
 extern alias BeatSaberDynamicBone;
 using System;
 
-// ReSharper disable UnusedMember.Global
 namespace AvatarScriptPack
 {
     [Obsolete("Use BeatSaberFinalIK::RootMotion.FinalIK.VRIK")] internal class VRIK : BeatSaberFinalIK::RootMotion.FinalIK.VRIK { }

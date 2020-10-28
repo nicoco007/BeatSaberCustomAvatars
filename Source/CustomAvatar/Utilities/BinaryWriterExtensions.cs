@@ -63,7 +63,12 @@ namespace CustomAvatar.Utilities
             // create readable texture by rendering onto a RenderTexture
             if (!texture.isReadable)
             {
-                RenderTexture renderTexture = RenderTexture.GetTemporary(texture.width, texture.height, 0, RenderTextureFormat.ARGB32);
+                float maxSize = 256;
+                float scale = Mathf.Min(1, maxSize / texture.width, maxSize / texture.height);
+                int width = Mathf.RoundToInt(texture.width * scale);
+                int height = Mathf.RoundToInt(texture.height * scale);
+
+                RenderTexture renderTexture = RenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.ARGB32);
                 RenderTexture.active = renderTexture;
                 Graphics.Blit(texture, renderTexture);
                 texture = renderTexture.GetTexture2D();

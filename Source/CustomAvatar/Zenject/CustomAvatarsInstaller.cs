@@ -20,17 +20,23 @@ using CustomAvatar.Configuration;
 using CustomAvatar.Lighting;
 using CustomAvatar.Logging;
 using CustomAvatar.StereoRendering;
+using CustomAvatar.Player;
 using CustomAvatar.Tracking;
+using CustomAvatar.Tracking.OpenVR;
+using CustomAvatar.Tracking.UnityXR;
 using CustomAvatar.Utilities;
 using UnityEngine;
+using UnityEngine.XR;
+using Valve.VR;
 using Zenject;
 using Logger = IPA.Logging.Logger;
+using System;
 
 namespace CustomAvatar.Zenject
 {
     internal class CustomAvatarsInstaller : Installer
     {
-        private Logger _logger;
+        private readonly Logger _logger;
 
         public CustomAvatarsInstaller(Logger logger)
         {
@@ -40,31 +46,41 @@ namespace CustomAvatar.Zenject
         public override void InstallBindings()
         {
             // logging
-            Container.Bind<ILoggerProvider>().FromMethod((context) => context.Container.Instantiate<IPALoggerProvider>(new object[] { _logger })).AsTransient();
+            Container.Bind<ILoggerProvider>().To<IPALoggerProvider>().AsTransient().WithArguments(new object[] { _logger });
 
             // settings
             Container.BindInterfacesAndSelfTo<SettingsManager>().AsSingle();
             Container.Bind<Settings>().FromMethod((context) => context.Container.Resolve<SettingsManager>().settings);
             Container.BindInterfacesAndSelfTo<CalibrationData>().AsSingle();
-            
+
+            if (XRSettings.loadedDeviceName.Equals("openvr", StringComparison.InvariantCultureIgnoreCase) &&
+                OpenVR.IsRuntimeInstalled() &&
+                !Environment.GetCommandLineArgs().Contains("--force-xr"))
+            {
+                Container.Bind<OpenVRFacade>().AsTransient();
+                Container.BindInterfacesAndSelfTo<OpenVRDeviceProvider>().AsSingle();
+            }
+            else
+            {
+                Container.BindInterfacesTo<UnityXRDeviceProvider>().AsSingle();
+            }
+
             // managers
             Container.BindInterfacesAndSelfTo<PlayerAvatarManager>().AsSingle().NonLazy();
-            Container.BindInterfacesAndSelfTo<TrackedDeviceManager>().AsSingle().NonLazy();
             Container.BindInterfacesAndSelfTo<MainCameraController>().AsSingle().NonLazy();
-            Container.BindInterfacesAndSelfTo<KeyboardInputHandler>().AsSingle().NonLazy();
             Container.BindInterfacesAndSelfTo<ShaderLoader>().AsSingle().NonLazy();
+            Container.BindInterfacesAndSelfTo<DeviceManager>().AsSingle().NonLazy();
 
-            Container.Bind<StereoRenderManager>().AsSingle();
             Container.Bind<AvatarLoader>().AsSingle();
+            Container.BindInterfacesAndSelfTo<VRPlayerInput>().AsSingle();
+            Container.BindInterfacesAndSelfTo<FloorController>().AsSingle();
+            Container.BindInterfacesAndSelfTo<LightingQualityController>().AsSingle();
 
             // helper classes
-            Container.Bind<AvatarTailor>().AsTransient();
             Container.Bind<MirrorHelper>().AsTransient();
             Container.Bind<AvatarSpawner>().AsTransient();
-            Container.Bind<GameScenesHelper>().AsTransient();
-
-            // behaviours
-            Container.Bind<MenuLightingController>().FromNewComponentOnNewGameObject().NonLazy();
+            Container.Bind<IKHelper>().AsTransient();
+            Container.BindInterfacesAndSelfTo<BeatSaberUtilities>().AsTransient();
 
             // not sure if this is a great idea but w/e
             if (!Container.HasBinding<MainSettingsModelSO>())

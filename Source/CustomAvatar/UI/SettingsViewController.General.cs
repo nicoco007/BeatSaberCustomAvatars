@@ -15,6 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using CustomAvatar.Avatar;
+using CustomAvatar.Tracking;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components.Settings;
 using System.Collections.Generic;
@@ -28,10 +29,11 @@ namespace CustomAvatar.UI
         #pragma warning disable 649
         #pragma warning disable IDE0044
 
-        [UIComponent("visible-in-first-person")] private CheckboxSetting _visibleInFirstPerson;
-        [UIComponent("resize-mode")] private ListSetting _resizeMode;
-        [UIComponent("floor-adjust")] private CheckboxSetting _floorHeightAdjust;
-        [UIComponent("move-floor-with-room-adjust")] private CheckboxSetting _moveFloorWithRoomAdjust;
+        [UIComponent("visible-in-first-person")] private ToggleSetting _visibleInFirstPerson;
+        [UIComponent("resize-mode")] private DropDownListSetting _resizeMode;
+        [UIComponent("enable-locomotion")] private ToggleSetting _enableLocomotion;
+        [UIComponent("floor-adjust")] private ToggleSetting _floorHeightAdjust;
+        [UIComponent("move-floor-with-room-adjust")] private ToggleSetting _moveFloorWithRoomAdjust;
         [UIComponent("camera-clip-plane")] private IncrementSetting _cameraNearClipPlane;
 
         #pragma warning restore 649
@@ -39,15 +41,12 @@ namespace CustomAvatar.UI
         #endregion
 
         #region Values
-        // ReSharper disable UnusedMember.Local
 
         [UIValue("resize-mode-options")] private readonly List<object> _resizeModeOptions = new List<object> { AvatarResizeMode.None, AvatarResizeMode.Height, AvatarResizeMode.ArmSpan };
-        
-        // ReSharper restore UnusedMember.Local
+
         #endregion
 
         #region Actions
-        // ReSharper disable UnusedMember.Local
 
         [UIAction("visible-in-first-person-change")]
         private void OnVisibleInFirstPersonChanged(bool value)
@@ -67,7 +66,7 @@ namespace CustomAvatar.UI
         {
             if (!(value is AvatarResizeMode)) return null;
 
-            switch ((AvatarResizeMode) value)
+            switch ((AvatarResizeMode)value)
             {
                 case AvatarResizeMode.Height:
                     return "Height";
@@ -80,11 +79,18 @@ namespace CustomAvatar.UI
             }
         }
 
+        [UIAction("enable-locomotion-change")]
+        private void OnEnableLocomotionChanged(bool value)
+        {
+            _settings.enableLocomotion = value;
+            _avatarManager.UpdateLocomotionEnabled();
+        }
+
         [UIAction("floor-adjust-change")]
         private void OnFloorHeightAdjustChanged(bool value)
         {
             _settings.enableFloorAdjust = value;
-            _avatarManager.ResizeCurrentAvatar();
+            _avatarManager.UpdateFloorOffsetForCurrentAvatar();
         }
 
         [UIAction("camera-clip-plane-change")]
@@ -115,13 +121,13 @@ namespace CustomAvatar.UI
         private void OnMoveFloorWithRoomAdjustChanged(bool value)
         {
             _settings.moveFloorWithRoomAdjust = value;
+            _avatarManager.ResizeCurrentAvatar();
         }
-        
-        // ReSharper restore UnusedMember.Local
+
         #endregion
 
         #region Arm Span Measurement
-        
+
         private const float kMinArmSpan = 0.5f;
 
         private bool _isMeasuring;
@@ -141,21 +147,22 @@ namespace CustomAvatar.UI
 
         private void ScanArmSpan()
         {
-            var armSpan = Vector3.Distance(_trackedDeviceManager.leftHand.position, _trackedDeviceManager.rightHand.position);
-
-            if (armSpan > _maxMeasuredArmSpan)
+            if (Time.timeSinceLevelLoad - _lastUpdateTime < 2.0f && _playerInput.TryGetPose(DeviceUse.LeftHand, out Pose leftHand) && _playerInput.TryGetPose(DeviceUse.RightHand, out Pose rightHand))
             {
-                _maxMeasuredArmSpan = armSpan;
-                _lastUpdateTime = Time.timeSinceLevelLoad;
-            }
+                var armSpan = Vector3.Distance(leftHand.position, rightHand.position);
 
-            if (Time.timeSinceLevelLoad - _lastUpdateTime < 2.0f)
-            {
+                if (armSpan > _maxMeasuredArmSpan)
+                {
+                    _maxMeasuredArmSpan = armSpan;
+                    _lastUpdateTime = Time.timeSinceLevelLoad;
+                }
+
                 _armSpanLabel.SetText($"Measuring... {_maxMeasuredArmSpan:0.00} m");
             }
             else
             {
                 CancelInvoke(nameof(ScanArmSpan));
+
                 _armSpanLabel.SetText($"{_maxMeasuredArmSpan:0.00} m");
                 _settings.playerArmSpan = _maxMeasuredArmSpan;
                 _isMeasuring = false;

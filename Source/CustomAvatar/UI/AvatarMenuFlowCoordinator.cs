@@ -15,84 +15,68 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Linq;
 using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.MenuButtons;
-using CustomAvatar.Utilities;
 using HMUI;
-using UnityEngine;
 using Zenject;
 
 namespace CustomAvatar.UI
 {
     internal class AvatarMenuFlowCoordinator : FlowCoordinator, IInitializable, IDisposable
     {
-        private AvatarListViewController _avatarListViewController; 
+        private MainFlowCoordinator _mainFlowCoordinator;
+        private AvatarListViewController _avatarListViewController;
         private MirrorViewController _mirrorViewController;
         private SettingsViewController _settingsViewController;
 
-        private GameObject _mainScreen;
-        private Vector3 _mainScreenScale;
-
-        private MenuButton menuButton;
+        private MenuButton _menuButton;
 
         public void Initialize()
         {
-            menuButton = new MenuButton("Avatars", () =>
+            _menuButton = new MenuButton("Avatars", () =>
             {
-                BeatSaberUI.MainFlowCoordinator.PresentFlowCoordinator(this, null, true);
+                _mainFlowCoordinator.PresentFlowCoordinator(this);
             });
 
-            MenuButtons.instance.RegisterButton(menuButton);
+            MenuButtons.instance.RegisterButton(_menuButton);
         }
 
         public void Dispose()
         {
-            if (MenuButtons.IsSingletonAvailable && BSMLParser.IsSingletonAvailable)
+            try
             {
-                MenuButtons.instance.UnregisterButton(menuButton);
+                MenuButtons.instance.UnregisterButton(_menuButton);
             }
+            catch (NullReferenceException) { } // this is usually expected when the game is shutting down
         }
 
         [Inject]
-        private void Inject(AvatarListViewController avatarListViewController, MirrorViewController mirrorViewController, SettingsViewController settingsViewController)
+        private void Inject(MainFlowCoordinator mainFlowCoordinator, AvatarListViewController avatarListViewController, MirrorViewController mirrorViewController, SettingsViewController settingsViewController)
         {
+            _mainFlowCoordinator = mainFlowCoordinator;
             _avatarListViewController = avatarListViewController;
             _mirrorViewController = mirrorViewController;
             _settingsViewController = settingsViewController;
         }
 
-        protected override void DidActivate(bool firstActivation, ActivationType activationType)
+        protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
-            _mainScreen = GameObject.Find("MainScreen");
-
             showBackButton = true;
 
             if (firstActivation)
             {
-                title = "Custom Avatars";
-                _mainScreenScale = _mainScreen.transform.localScale;
+                SetTitle("Custom Avatars");
             }
 
-            if (activationType == ActivationType.AddedToHierarchy)
+            if (addedToHierarchy)
             {
                 ProvideInitialViewControllers(_mirrorViewController, _settingsViewController, _avatarListViewController);
-                _mainScreen.transform.localScale = Vector3.zero;
-            }
-        }
-
-        protected override void DidDeactivate(DeactivationType deactivationType)
-        {
-            if (deactivationType == DeactivationType.RemovedFromHierarchy)
-            {
-                _mainScreen.transform.localScale = _mainScreenScale;
             }
         }
 
         protected override void BackButtonWasPressed(ViewController topViewController)
         {
-            var mainFlowCoordinator = Resources.FindObjectsOfTypeAll<MainFlowCoordinator>().First();
-            mainFlowCoordinator.InvokePrivateMethod("DismissFlowCoordinator", this, null, false);
+            BeatSaberUI.MainFlowCoordinator.DismissFlowCoordinator(this);
         }
     }
 }

@@ -25,17 +25,24 @@ using Zenject;
 
 namespace CustomAvatar.Avatar
 {
+    /// <summary>
+    /// Represents a <see cref="LoadedAvatar"/> that has been spawned into the game.
+    /// </summary>
 	public class SpawnedAvatar : MonoBehaviour
 	{
+        /// <summary>
+        /// The <see cref="LoadedAvatar"/> used as a reference.
+        /// </summary>
 		public LoadedAvatar avatar { get; private set; }
+
+        /// <summary>
+        /// The <see cref="IAvatarInput"/> used for tracking.
+        /// </summary>
 		public IAvatarInput input { get; private set; }
 
-        public float verticalPosition
-        {
-            get => transform.localPosition.y - _initialLocalPosition.y;
-            set => transform.localPosition = new Vector3(transform.localPosition.x, _initialLocalPosition.y + value, transform.localPosition.z);
-        }
-
+        /// <summary>
+        /// The avatar's scale as a ratio of it's exported scale (i.e. it is initially 1 even if the avatar was exported with a different scale).
+        /// </summary>
         public float scale
         {
             get => transform.localScale.y / _initialLocalScale.y;
@@ -49,6 +56,8 @@ namespace CustomAvatar.Avatar
             }
         }
 
+        public float scaledEyeHeight => avatar.eyeHeight * scale;
+
         public Transform head { get; private set; }
         public Transform body { get; private set; }
         public Transform leftHand { get; private set; }
@@ -57,14 +66,16 @@ namespace CustomAvatar.Avatar
         public Transform rightLeg { get; private set; }
         public Transform pelvis { get; private set; }
 
-		public AvatarTracking tracking { get; private set; }
-        public AvatarIK ik { get; private set; }
-        public AvatarSRTracking sr { get; private set; }
-        public AvatarFingerTracking fingerTracking { get; private set; }
+        internal AvatarTracking tracking { get; private set; }
+        internal AvatarIK ik { get; private set; }
+        internal AvatarSRTracking sr { get; private set; }
+        internal AvatarFingerTracking fingerTracking { get; private set; }
+
+        internal bool isLocomotionEnabled { get; private set; }
 
         private ILogger<SpawnedAvatar> _logger;
         private DiContainer _container;
-        private GameScenesHelper _gameScenesHelper;
+        private GameScenesManager _gameScenesManager;
 
         private FirstPersonExclusion[] _firstPersonExclusions;
         private Renderer[] _renderers;
@@ -76,6 +87,16 @@ namespace CustomAvatar.Avatar
         private Vector3 _initialLocalPosition;
         private Vector3 _initialLocalScale;
 
+        public void SetLocomotionEnabled(bool enabled)
+        {
+            isLocomotionEnabled = enabled;
+
+            if (ik)
+            {
+                ik.SetLocomotionEnabled(enabled);
+            }
+        }
+
         public void EnableCalibrationMode()
         {
             if (_isCalibrationModeEnabled || !ik) return;
@@ -83,7 +104,7 @@ namespace CustomAvatar.Avatar
             _isCalibrationModeEnabled = true;
 
             tracking.isCalibrationModeEnabled = true;
-            ik.EnableCalibrationMode();
+            ik.SetCalibrationModeEnabled(true);
         }
 
         public void DisableCalibrationMode()
@@ -91,7 +112,7 @@ namespace CustomAvatar.Avatar
             if (!_isCalibrationModeEnabled || !ik) return;
 
             tracking.isCalibrationModeEnabled = false;
-            ik.DisableCalibrationMode();
+            ik.SetCalibrationModeEnabled(false);
 
             _isCalibrationModeEnabled = false;
         }
@@ -109,7 +130,7 @@ namespace CustomAvatar.Avatar
                     ApplyFirstPersonExclusions();
                     break;
 
-                case FirstPersonVisibility.None:
+                case FirstPersonVisibility.Hidden:
                     SetChildrenToLayer(AvatarLayers.kOnlyInThirdPerson);
                     break;
             }
@@ -136,20 +157,22 @@ namespace CustomAvatar.Avatar
         }
         
         [Inject]
-        private void Inject(DiContainer container, ILoggerProvider loggerProvider, LoadedAvatar loadedAvatar, IAvatarInput avatarInput, GameScenesHelper gameScenesHelper)
+        private void Inject(DiContainer container, ILoggerProvider loggerProvider, LoadedAvatar loadedAvatar, IAvatarInput avatarInput, GameScenesManager gameScenesManager)
         {
             avatar = loadedAvatar ?? throw new ArgumentNullException(nameof(loadedAvatar));
             input = avatarInput ?? throw new ArgumentNullException(nameof(avatarInput));
 
             _logger = loggerProvider.CreateLogger<SpawnedAvatar>(loadedAvatar.descriptor.name);
             _container = new DiContainer(container);
-            _gameScenesHelper = gameScenesHelper;
+            _gameScenesManager = gameScenesManager;
 
-            _container.Bind<SpawnedAvatar>().FromInstance(this);
+            _container.Bind<SpawnedAvatar>().FromInstance(this); 
         }
 
         private void Start()
         {
+            name = $"SpawnedAvatar({avatar.descriptor.name})";
+
             tracking = _container.InstantiateComponent<AvatarTracking>(gameObject);
 
             if (avatar.isIKAvatar)
@@ -168,44 +191,34 @@ namespace CustomAvatar.Avatar
                 _logger.Warning("Avatar root position is not at origin; resizing by height and floor adjust may not work properly.");
             }
 
-            DontDestroyOnLoad(this);
-
-            _gameScenesHelper.transitionDidFinish += OnTransitionDidFinish;
+            _gameScenesManager.transitionDidFinishEvent += OnTransitionDidFinish;
         }
 
         private void OnDestroy()
         {
-            _gameScenesHelper.transitionDidFinish -= OnTransitionDidFinish;
-
-            input.Dispose();
+            _gameScenesManager.transitionDidFinishEvent -= OnTransitionDidFinish;
 
             Destroy(gameObject);
         }
 
         #endregion
 
-        private void OnTransitionDidFinish(BeatSaberScene scene, DiContainer container)
+        private void OnTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
         {
-            if (scene == BeatSaberScene.Game)
-            {
-                if (_eventManager && !_gameplayEventsPlayer)
-                {
-                    _logger.Info($"Adding {nameof(AvatarGameplayEventsPlayer)}");
-                    _gameplayEventsPlayer = container.InstantiateComponent<AvatarGameplayEventsPlayer>(gameObject, new object[] { avatar });
-                }
-            }
-            else
-            {
-                if (_gameplayEventsPlayer)
-                {
-                    _logger.Info($"Removing {nameof(AvatarGameplayEventsPlayer)}");
-                    Destroy(_gameplayEventsPlayer);
-                }
+            if (!_eventManager) return;
 
-                if (_eventManager && scene == BeatSaberScene.MainMenu)
-                {
-                    _eventManager.OnMenuEnter?.Invoke();
-                }
+            // currently does not work in multiplayer, need to figure out how to
+            // get a reference to the GameObjectContext for the local player
+            // or just rework this so it's created in an installer
+            if (_gameScenesManager.IsSceneInStackAndActive("StandardGameplay"))
+            {
+                _logger.Info($"Adding {nameof(AvatarGameplayEventsPlayer)}");
+                _gameplayEventsPlayer = container.InstantiateComponent<AvatarGameplayEventsPlayer>(gameObject, new object[] { avatar });
+            }
+
+            if (_gameScenesManager.IsSceneInStackAndActive("MenuCore"))
+            {
+                _eventManager.OnMenuEnter?.Invoke();
             }
         }
 

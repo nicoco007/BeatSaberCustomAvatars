@@ -98,9 +98,16 @@ namespace CustomAvatar.Editor
             BuildTargetGroup selectedBuildTargetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
             BuildTarget activeBuildTarget = EditorUserBuildSettings.activeBuildTarget;
 
-            BuildPipeline.BuildAssetBundles(tempFolder, new[] { assetBundleBuild }, 0, EditorUserBuildSettings.activeBuildTarget);
+            AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(tempFolder, new[] { assetBundleBuild }, BuildAssetBundleOptions.None, EditorUserBuildSettings.activeBuildTarget);
 
+            // switch back to what it was before creating the asset bundle
             EditorUserBuildSettings.SwitchActiveBuildTarget(selectedBuildTargetGroup, activeBuildTarget);
+
+            if (manifest == null)
+            {
+                EditorUtility.DisplayDialog("Export Failed", "Failed to create asset bundle! Please check the Unity console for more information.", "OK");
+                return;
+            }
 
             File.Copy(tempAssetBundlePath, destinationPath, true);
             

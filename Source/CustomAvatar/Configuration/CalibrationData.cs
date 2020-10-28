@@ -14,8 +14,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using CustomAvatar.Avatar;
 using CustomAvatar.Logging;
+using CustomAvatar.Player;
 using CustomAvatar.Utilities;
 using System;
 using System.Collections.Generic;
@@ -35,7 +35,7 @@ namespace CustomAvatar.Configuration
 
         private readonly Dictionary<string, FullBodyCalibration> _manualCalibration = new Dictionary<string, FullBodyCalibration>();
 
-        private ILogger<CalibrationData> _logger;
+        private readonly ILogger<CalibrationData> _logger;
 
         public CalibrationData(ILoggerProvider loggerProvider)
         {
@@ -100,6 +100,8 @@ namespace CustomAvatar.Configuration
 
                 int count = reader.ReadInt32();
 
+                _logger.Trace($"Reading {count} calibrations");
+
                 for (int i = 0; i < count; i++)
                 {
                     string fileName = reader.ReadString();
@@ -107,6 +109,7 @@ namespace CustomAvatar.Configuration
                     if (!IsValidFileName(fileName))
                     {
                         _logger.Warning($"'{fileName}' is not a valid file name; skipped");
+                        continue;
                     }
 
                     string fullPath = Path.Combine(PlayerAvatarManager.kCustomAvatarsPath, fileName);
@@ -114,7 +117,10 @@ namespace CustomAvatar.Configuration
                     if (!File.Exists(fullPath))
                     {
                         _logger.Warning($"'{fullPath}' no longer exists; skipped");
+                        continue;
                     }
+
+                    _logger.Trace($"Got calibration data for '{fileName}'");
 
                     if (!_manualCalibration.ContainsKey(fileName))
                     {
@@ -157,7 +163,7 @@ namespace CustomAvatar.Configuration
 
         private bool IsValidFileName(string str)
         {
-            return !str.Any(c => Path.GetInvalidFileNameChars().Contains(c));
+            return !string.IsNullOrEmpty(str) && !str.Any(c => Path.GetInvalidFileNameChars().Contains(c));
         }
         
         public class FullBodyCalibration

@@ -14,8 +14,11 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using BeatSaberMarkupLanguage;
+using CustomAvatar.Player;
 using CustomAvatar.UI;
+using HMUI;
+using UnityEngine;
+using VRUIControls;
 using Zenject;
 
 namespace CustomAvatar.Zenject
@@ -24,18 +27,37 @@ namespace CustomAvatar.Zenject
     {
         public override void InstallBindings()
         {
-            var avatarListViewController = BeatSaberUI.CreateViewController<AvatarListViewController>();
-            var mirrorViewController = BeatSaberUI.CreateViewController<MirrorViewController>();
-            var settingsViewController = BeatSaberUI.CreateViewController<SettingsViewController>();
+            Container.BindInterfacesAndSelfTo<KeyboardInputHandler>().AsSingle().NonLazy();
 
-            Container.Bind<AvatarListViewController>().FromInstance(avatarListViewController);
-            Container.Bind<MirrorViewController>().FromInstance(mirrorViewController);
-            Container.Bind<SettingsViewController>().FromInstance(settingsViewController);
+            CreateViewController<AvatarListViewController>();
+            CreateViewController<MirrorViewController>();
+            CreateViewController<SettingsViewController>();
+
             Container.BindInterfacesAndSelfTo<AvatarMenuFlowCoordinator>().FromNewComponentOnNewGameObject(nameof(AvatarMenuFlowCoordinator));
+        }
 
-            Container.QueueForInject(avatarListViewController);
-            Container.QueueForInject(mirrorViewController);
-            Container.QueueForInject(settingsViewController);
+        private T CreateViewController<T>() where T : ViewController
+        {
+            GameObject gameObject = new GameObject(typeof(T).Name, typeof(RectTransform), typeof(Touchable), typeof(Canvas), typeof(CanvasGroup));
+
+            Container.InstantiateComponent<VRGraphicRaycaster>(gameObject);
+
+            T viewController = Container.InstantiateComponent<T>(gameObject);
+
+            RectTransform rectTransform = viewController.rectTransform;
+            rectTransform.anchorMin = new Vector2(0.5f, 0);
+            rectTransform.anchorMax = new Vector2(0.5f, 1);
+            rectTransform.anchoredPosition = Vector2.zero;
+            rectTransform.sizeDelta = new Vector2(160, 0);
+            rectTransform.offsetMin = new Vector2(-80, 0);
+            rectTransform.offsetMax = new Vector2(80, 0);
+
+            Canvas canvas = viewController.GetComponent<Canvas>();
+            canvas.additionalShaderChannels |= AdditionalCanvasShaderChannels.TexCoord2;
+
+            Container.Bind<T>().FromInstance(viewController);
+
+            return viewController;
         }
     }
 }
