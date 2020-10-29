@@ -169,7 +169,7 @@ namespace CustomAvatar.Avatar
             supportsFingerTracking = poseManager && poseManager.isValid;
 
             eyeHeight = GetEyeHeight();
-            armSpan = GetArmSpan();
+            armSpan = GetArmSpan(vrikManager);
         }
 
         public void Dispose()
@@ -233,20 +233,17 @@ namespace CustomAvatar.Avatar
         /// Measure avatar arm span. Since the player's measured arm span is actually from palm to palm
         /// (approximately) due to the way the controllers are held, this isn't "true" arm span.
         /// </summary>
-        private float GetArmSpan()
+        private float GetArmSpan(VRIKManager vrikManager)
         {
-            // TODO using animator here probably isn't a good idea, use VRIKManager references instead?
-            Animator animator = prefab.GetComponentInChildren<Animator>();
+            if (!vrikManager) return BeatSaberUtilities.kDefaultPlayerArmSpan;
 
-            if (!animator) return BeatSaberUtilities.kDefaultPlayerArmSpan;
+            Transform leftShoulder = vrikManager.references_leftShoulder;
+            Transform leftUpperArm = vrikManager.references_leftUpperArm;
+            Transform leftLowerArm = vrikManager.references_leftForearm;
 
-            Transform leftShoulder = animator.GetBoneTransform(HumanBodyBones.LeftShoulder);
-            Transform leftUpperArm = animator.GetBoneTransform(HumanBodyBones.LeftUpperArm);
-            Transform leftLowerArm = animator.GetBoneTransform(HumanBodyBones.LeftLowerArm);
-
-            Transform rightShoulder = animator.GetBoneTransform(HumanBodyBones.RightShoulder);
-            Transform rightUpperArm = animator.GetBoneTransform(HumanBodyBones.RightUpperArm);
-            Transform rightLowerArm = animator.GetBoneTransform(HumanBodyBones.RightLowerArm);
+            Transform rightShoulder = vrikManager.references_rightShoulder;
+            Transform rightUpperArm = vrikManager.references_rightUpperArm;
+            Transform rightLowerArm = vrikManager.references_rightForearm;
 
             if (!leftShoulder || !leftUpperArm || !leftLowerArm || !rightShoulder || !rightUpperArm || !rightLowerArm)
             {
