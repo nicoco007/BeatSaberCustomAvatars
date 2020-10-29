@@ -157,7 +157,7 @@ namespace CustomAvatar.Player
             Vector3 roomCenter = _beatSaberUtilities.roomCenter;
             Quaternion roomRotation = _beatSaberUtilities.roomRotation;
 
-            pose = new Pose(device.position + roomRotation * roomCenter, device.rotation * roomRotation);
+            pose = new Pose(roomRotation * device.position + roomCenter, device.rotation * roomRotation);
 
             if (_settings.moveFloorWithRoomAdjust)
             {
