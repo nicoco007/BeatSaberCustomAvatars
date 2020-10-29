@@ -154,15 +154,9 @@ namespace CustomAvatar.Player
                 return false;
             }
 
-            Vector3 roomCenter = _beatSaberUtilities.roomCenter;
-            Quaternion roomRotation = _beatSaberUtilities.roomRotation;
+            pose = new Pose(device.position, device.rotation);
 
-            pose = new Pose(roomRotation * device.position + roomCenter, device.rotation * roomRotation);
-
-            if (_settings.moveFloorWithRoomAdjust)
-            {
-                pose.position.y -= roomCenter.y;
-            }
+            ApplyRoomAdjust(ref pose.position, ref pose.rotation);
 
             SpawnedAvatar spawnedAvatar = _avatarManager.currentlySpawnedAvatar;
 
@@ -398,16 +392,20 @@ namespace CustomAvatar.Player
 
         private bool TryGetTrackerPose(DeviceUse use, Pose previousPose, Pose correction, Settings.TrackedPointSmoothing smoothing, out Pose pose)
         {
-            if (!_shouldTrackFullBody || !TryGetUncalibratedPose(use, out Pose currentPose))
+            if (!_shouldTrackFullBody || !_deviceManager.TryGetDeviceState(use, out TrackedDevice device) || !device.isTracking)
             {
                 pose = Pose.identity;
                 return false;
             }
 
-            Quaternion correctedRotation = currentPose.rotation * correction.rotation;
-            Vector3 correctedPosition = currentPose.position + currentPose.rotation * correction.position; // correction is forward-facing by definition
+            Vector3 position    = device.position + device.rotation * correction.position; // correction is forward-facing by definition
+            Quaternion rotation = device.rotation * correction.rotation;
 
-            pose = new Pose(Vector3.Lerp(previousPose.position, correctedPosition, smoothing.position), Quaternion.Slerp(previousPose.rotation, correctedRotation, smoothing.rotation));
+            ApplyRoomAdjust(ref position, ref rotation);
+            ApplyTrackerFloorOffset(_avatarManager.currentlySpawnedAvatar, ref position);
+
+            pose = new Pose(Vector3.Lerp(previousPose.position, position, smoothing.position), Quaternion.Slerp(previousPose.rotation, rotation, smoothing.rotation));
+
             return true;
         }
 
@@ -424,6 +422,20 @@ namespace CustomAvatar.Player
         private void OnBypassCalibrationChanged(bool enabled)
         {
             inputChanged?.Invoke();
+        }
+
+        private void ApplyRoomAdjust(ref Vector3 position, ref Quaternion rotation)
+        {
+            Vector3 roomCenter = _beatSaberUtilities.roomCenter;
+            Quaternion roomRotation = _beatSaberUtilities.roomRotation;
+
+            position = roomCenter + roomRotation * position;
+            rotation = roomRotation * rotation;
+
+            if (_settings.moveFloorWithRoomAdjust)
+            {
+                position.y -= roomCenter.y;
+            }
         }
 
         /// <summary>
