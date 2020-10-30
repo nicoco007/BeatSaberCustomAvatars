@@ -180,7 +180,7 @@ namespace CustomAvatar.UI
         {
             if (_calibrating)
             {
-                if (_playerInput.TryGetUncalibratedPose(DeviceUse.Waist, out Pose waist))
+                if (_playerInput.TryGetUncalibratedPoseForAvatar(DeviceUse.Waist, _avatarManager.currentlySpawnedAvatar, out Pose waist))
                 {
                     _waistSphere.SetActive(true);
                     _waistSphere.transform.position = waist.position;
@@ -191,7 +191,7 @@ namespace CustomAvatar.UI
                     _waistSphere.SetActive(false);
                 }
 
-                if (_playerInput.TryGetUncalibratedPose(DeviceUse.LeftFoot, out Pose leftFoot))
+                if (_playerInput.TryGetUncalibratedPoseForAvatar(DeviceUse.LeftFoot, _avatarManager.currentlySpawnedAvatar, out Pose leftFoot))
                 {
                     _leftFootSphere.SetActive(true);
                     _leftFootSphere.transform.position = leftFoot.position;
@@ -202,7 +202,7 @@ namespace CustomAvatar.UI
                     _leftFootSphere.SetActive(false);
                 }
 
-                if (_playerInput.TryGetUncalibratedPose(DeviceUse.RightFoot, out Pose rightFoot))
+                if (_playerInput.TryGetUncalibratedPoseForAvatar(DeviceUse.RightFoot, _avatarManager.currentlySpawnedAvatar, out Pose rightFoot))
                 {
                     _rightFootSphere.SetActive(true);
                     _rightFootSphere.transform.position = rightFoot.position;
