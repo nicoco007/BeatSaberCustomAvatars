@@ -114,11 +114,12 @@ namespace CustomAvatar.UI
 
         private void EnableCalibrationMode()
         {
+            if (!_avatarManager.currentlySpawnedAvatar) return;
+
             _avatarManager.currentlySpawnedAvatar.EnableCalibrationMode();
             _calibrating = true;
-            _calibrateButtonText.text = "Save";
-            _clearButtonText.text = "Cancel";
-            _clearButton.interactable = true;
+
+            UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.avatar);
 
             _waistSphere = CreateCalibrationSphere();
             _leftFootSphere = CreateCalibrationSphere();
@@ -145,9 +146,8 @@ namespace CustomAvatar.UI
             Destroy(_rightFootSphere);
 
             _calibrating = false;
-            _calibrateButtonText.text = "Calibrate";
-            _clearButtonText.text = "Clear";
-            _clearButton.interactable = _currentAvatarManualCalibration?.isCalibrated ?? false;
+
+            UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.avatar);
         }
 
         private GameObject CreateCalibrationSphere()

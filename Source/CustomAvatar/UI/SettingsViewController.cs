@@ -237,6 +237,8 @@ namespace CustomAvatar.UI
                 _calibrateButton.interactable = false;
                 _clearButton.interactable = _currentAvatarManualCalibration?.isCalibrated == true;
                 _calibrateButtonHoverHint.text = "No trackers detected";
+                _calibrateButtonText.text = "Calibrate";
+                _clearButtonText.text = "Clear";
 
                 return;
             }
@@ -260,14 +262,18 @@ namespace CustomAvatar.UI
             if (isManualCalibrationPossible)
             {
                 _calibrateButton.interactable = true;
-                _clearButton.interactable = _currentAvatarManualCalibration?.isCalibrated == true;
+                _clearButton.interactable = _calibrating || _currentAvatarManualCalibration?.isCalibrated == true;
                 _calibrateButtonHoverHint.text = "Start manual full body calibration";
+                _calibrateButtonText.text = _calibrating ? "Save" : "Calibrate";
+                _clearButtonText.text = _calibrating ? "Cancel" : "Clear";
             }
             else
             {
                 _calibrateButton.interactable = false;
                 _clearButton.interactable = false;
                 _calibrateButtonHoverHint.text = "Not supported by current avatar";
+                _calibrateButtonText.text = "Calibrate";
+                _clearButtonText.text = "Clear";
             }
         }
     }
