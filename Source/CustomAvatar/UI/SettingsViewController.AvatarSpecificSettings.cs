@@ -128,24 +128,23 @@ namespace CustomAvatar.UI
 
         private void DisableCalibrationMode(bool save)
         {
-            if (_avatarManager.currentlySpawnedAvatar != null)
-            {
-                if (save)
-                {
-                    _playerInput.CalibrateFullBodyTrackingManual(_avatarManager.currentlySpawnedAvatar);
-
-                    _automaticCalibrationSetting.Value = false;
-                    OnEnableAutomaticCalibrationChanged(false);
-                }
-
-                _avatarManager.currentlySpawnedAvatar.DisableCalibrationMode();
-            }
+            _calibrating = false;
 
             Destroy(_waistSphere);
             Destroy(_leftFootSphere);
             Destroy(_rightFootSphere);
 
-            _calibrating = false;
+            if (!_avatarManager.currentlySpawnedAvatar) return;
+
+            if (save)
+            {
+                _playerInput.CalibrateFullBodyTrackingManual(_avatarManager.currentlySpawnedAvatar);
+
+                _automaticCalibrationSetting.Value = false;
+                OnEnableAutomaticCalibrationChanged(false);
+            }
+
+            _avatarManager.currentlySpawnedAvatar.DisableCalibrationMode();
 
             UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.avatar);
         }

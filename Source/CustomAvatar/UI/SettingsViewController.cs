@@ -221,7 +221,7 @@ namespace CustomAvatar.UI
 
         private void OnInputChanged()
         {
-            UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar?.avatar);
+            if (_avatarManager.currentlySpawnedAvatar) UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.avatar);
         }
 
         private void UpdateCalibrationButtons(LoadedAvatar avatar)
