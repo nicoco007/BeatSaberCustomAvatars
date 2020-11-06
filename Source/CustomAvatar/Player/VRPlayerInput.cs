@@ -270,6 +270,8 @@ namespace CustomAvatar.Player
 
                 fullBodyCalibration.waist = new Pose(waistPositionCorrection, waistRotationCorrection);
                 _logger.Info("Set waist pose correction " + fullBodyCalibration.waist);
+
+                _beatSaberUtilities.SetPlayerHeight(eyeHeight + MainSettingsModelSO.kHeadPosToPlayerHeightOffset);
             }
 
             inputChanged?.Invoke();
