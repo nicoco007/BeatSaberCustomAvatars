@@ -9,6 +9,10 @@ namespace CustomAvatar.Zenject.Internal
 {
     internal class ZenjectHelper
     {
+        private static readonly string kExpectedFirstSceneContextName = "AppCoreSceneContext";
+
+        private static bool _shouldInstall;
+
         private static readonly List<InstallerRegistration> _installerRegistrations = new List<InstallerRegistration>();
 
         private static ILogger<ZenjectHelper> _logger;
@@ -39,6 +43,23 @@ namespace CustomAvatar.Zenject.Internal
 
         private static void InstallInstallers(Context __instance)
         {
+            if (!_shouldInstall)
+            {
+                if (__instance.name == kExpectedFirstSceneContextName)
+                {
+                    _shouldInstall = true;
+                }
+                else
+                {
+                    if (!(__instance is ProjectContext))
+                    {
+                        _logger.Warning($"Ignoring {__instance.GetType().Name} '{__instance.name}' since SceneContext '{kExpectedFirstSceneContextName}' hasn't loaded yet");
+                    }
+
+                    return;
+                }
+            }
+
             _logger.Trace($"Handling {__instance.GetType().Name} '{__instance.name}' (scene '{__instance.gameObject.scene.name}')");
 
             foreach (InstallerRegistration installerRegistration in _installerRegistrations)
