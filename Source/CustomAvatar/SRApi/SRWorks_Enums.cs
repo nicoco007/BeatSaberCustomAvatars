@@ -47,5 +47,9 @@ namespace ViveSR
 		CALLBACK_IN_PROGRESS= 1032,
         SERVICE_NOT_FOUND   = 1033,
         DISABLED_BY_USER    = 1034,
+        EULA_NOT_ACCEPT     = 1035,
+        RUNTIME_NO_RESPONSE = 1036,
+        OPENCL_NOT_SUPPORT  = 1037,
+        NOT_SUPPORT_EYE_TRACKING = 1038,
     };
 }

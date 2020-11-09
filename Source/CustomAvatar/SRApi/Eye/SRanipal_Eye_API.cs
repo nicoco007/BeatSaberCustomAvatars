@@ -17,6 +17,7 @@ namespace ViveSR
                 [DllImport("SRanipal")]
                 public static extern bool IsViveProEye();
 
+
                 /// <summary>
                 /// Gets data from anipal's Eye module.
                 /// </summary>
@@ -92,6 +93,20 @@ namespace ViveSR
                 */
                 [DllImport("SRanipal")]
                 public static extern int UnregisterEyeDataCallback_v2(IntPtr callback);
+
+                /* Synchronization the clock on the device and the clock on the system.
+				* @param[in] Trigger for Synchronization function.
+				* @return error code. please refer Error in ViveSR_Enums.h
+				*/
+                [DllImport("SRanipal")]
+                public static extern Error SRanipal_UpdateTimeSync();
+
+                /* Get the system timestamp.
+				* @param[out] the value of system timestamp.
+				* @return error code. please refer Error in ViveSR_Enums.h
+				*/
+                [DllImport("SRanipal")]
+                public static extern Error SRanipal_GetSystemTime(ref Int64 time);
             }
         }
     }

@@ -9,34 +9,6 @@ namespace ViveSR
     {
         namespace Eye
         {
-            #region EyeShape
-            public enum EyeShape
-            {
-                None = -1,
-                Eye_Left_Blink = 0,
-                Eye_Left_Wide,
-                Eye_Left_Right,
-                Eye_Left_Left,
-                Eye_Left_Up,
-                Eye_Left_Down,
-                Eye_Right_Blink = 6,
-                Eye_Right_Wide,
-                Eye_Right_Right,
-                Eye_Right_Left,
-                Eye_Right_Up,
-                Eye_Right_Down,
-                Eye_Frown = 12,
-                Max = 13,
-            }
-
-            [Serializable]
-            public class EyeShapeTable
-            {
-                public SkinnedMeshRenderer skinnedMeshRenderer;
-                public EyeShape[] eyeShapes;
-            }
-            #endregion
-
             #region VerboseData
             public enum EyeIndex { LEFT, RIGHT, }
             public enum GazeIndex { LEFT, RIGHT, COMBINE }
@@ -84,11 +56,11 @@ namespace ViveSR
             {
                 /** The bits containing all validity for this frame.*/
                 public System.UInt64 eye_data_validata_bit_mask;
-                /** The point in the eye from which the gaze ray originates in meter miles.(right-handed coordinate system)*/
+                /** The point in the eye from which the gaze ray originates in millimeter.(right-handed coordinate system)*/
                 public Vector3 gaze_origin_mm;
                 /** The normalized gaze direction of the eye in [0,1].(right-handed coordinate system)*/
                 public Vector3 gaze_direction_normalized;
-                /** The diameter of the pupil in meter miles*/
+                /** The diameter of the pupil in millimeter*/
                 public float pupil_diameter_mm;
                 /** A value representing how open the eye is.*/
                 public float eye_openness;

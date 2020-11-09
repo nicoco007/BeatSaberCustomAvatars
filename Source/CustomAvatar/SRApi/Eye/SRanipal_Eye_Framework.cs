@@ -66,26 +66,29 @@ namespace ViveSR
                 public void StartFramework()
                 {
                     if (!EnableEye) return;
-                    if (Status == FrameworkStatus.WORKING) return;
-                    if (!SRanipal_Eye_API.IsViveProEye())
-                    {
-                        Status = FrameworkStatus.NOT_SUPPORT;
-                        return;
-                    }
+                    if (Status == FrameworkStatus.WORKING || Status == FrameworkStatus.NOT_SUPPORT) return;
 
-                    Status = FrameworkStatus.START;
                     if (EnableEyeVersion == SupportedEyeVersion.version1)
                     {
                         Error result = SRanipal_API.Initial(SRanipal_Eye.ANIPAL_TYPE_EYE, IntPtr.Zero);
                         if (result == Error.WORK)
                         {
-                            Debug.Log("[SRanipal] Initial Eye : " + result);
                             Status = FrameworkStatus.WORKING;
+                            Debug.Log("[SRanipal] Initial Eye success!");
                         }
                         else
                         {
-                            Debug.LogError("[SRanipal] Initial Eye : " + result);
-                            Status = FrameworkStatus.ERROR;
+                            if (result == Error.NOT_SUPPORT_EYE_TRACKING)
+                            {
+                                Status = FrameworkStatus.NOT_SUPPORT;
+                                EnableEyeDataCallback = false;
+                                Debug.Log("[SRanipal] Current HMD do not support eye tracking!");
+                            }
+                            else
+                            {
+                                Status = FrameworkStatus.ERROR;
+                                Debug.LogError("[SRanipal] Initial Eye : " + result);
+                            }
                         }
                     }
                     else
@@ -93,20 +96,29 @@ namespace ViveSR
                         Error result = SRanipal_API.Initial(SRanipal_Eye_v2.ANIPAL_TYPE_EYE_V2, IntPtr.Zero);
                         if (result == Error.WORK)
                         {
-                            Debug.Log("[SRanipal] Initial Eye v2: " + result);
                             Status = FrameworkStatus.WORKING;
+                            Debug.Log("[SRanipal] Initial Eye v2 success!");
                         }
                         else
                         {
-                            Debug.LogError("[SRanipal] Initial Eye v2: " + result);
-                            Status = FrameworkStatus.ERROR;
+                            if (result == Error.NOT_SUPPORT_EYE_TRACKING)
+                            {
+                                Status = FrameworkStatus.NOT_SUPPORT;
+                                EnableEyeDataCallback = false;
+                                Debug.Log("[SRanipal] Current HMD do not support eye tracking!");
+                            }
+                            else
+                            {
+                                Status = FrameworkStatus.ERROR;
+                                Debug.LogError("[SRanipal] Initial Eye v2: " + result);
+                            }
                         }
                     }
                 }
 
                 public void StopFramework()
                 {
-                    if (SRanipal_Eye_API.IsViveProEye())
+                    if (Status != FrameworkStatus.NOT_SUPPORT)
                     {
                         if (Status != FrameworkStatus.STOP)
                         {

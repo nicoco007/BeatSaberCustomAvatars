@@ -14,12 +14,21 @@ namespace ViveSR
                 public const int ANIPAL_TYPE_EYE = 0;
                 public delegate void CallbackBasic(ref EyeData data);
 
-
+                /// <summary>
+                /// Register a callback function to receive eye camera related data when the module has new outputs.
+                /// </summary>
+                /// <param name="callback">function pointer of callback</param>
+                /// <returns>error code. please refer Error in ViveSR_Enums.h.</returns>
                 public static int WrapperRegisterEyeDataCallback(System.IntPtr callback)
                 {
                     return SRanipal_Eye_API.RegisterEyeDataCallback(callback);
                 }
 
+                /// <summary>
+                /// Unregister a callback function to receive eye camera related data when the module has new outputs.
+                /// </summary>
+                /// <param name="callback">function pointer of callback</param>
+                /// <returns>error code. please refer Error in ViveSR_Enums.h.</returns>
                 public static int WrapperUnRegisterEyeDataCallback(System.IntPtr callback)
                 {
                     return SRanipal_Eye_API.UnregisterEyeDataCallback(callback);
@@ -118,7 +127,7 @@ namespace ViveSR
                     foreach (EyeIndex index in (EyeIndex[])Enum.GetValues(typeof(EyeIndex)))
                     {
                         GetEyeOpenness(index, out openness[(int)index], eye_data);
-                        valid[(int)index] = GetPupilPosition(index, out pupilPosition[(int)index], eye_data);
+                        valid[(int)index] = GetPupilPosition(index, out pupilPosition[(int)index]);
                     }
 
                     float[] weighting_up = new float[3] { Mathf.Max(pupilPosition[(int)GazeIndex.LEFT].y, 0f), Mathf.Max(pupilPosition[(int)GazeIndex.RIGHT].y, 0f), 0 };
@@ -195,6 +204,12 @@ namespace ViveSR
                     return true;
 
                 }
+                /// <summary>
+                /// Gets weighting values from anipal's Eye module.
+                /// </summary>
+                /// <param name="shapes">Weighting values obtained from anipal's Eye module.</param>
+                /// <returns>Indicates whether the values received are new.</returns>\
+                /// 
 
                 public static bool GetEyeWeightings(out Dictionary<EyeShape, float> shapes)
                 {
