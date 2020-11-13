@@ -69,7 +69,7 @@ namespace CustomAvatar.Lighting
 
         private void CreateLights()
         {
-            List<LightWithId>[] lightsWithId = _lightManager.GetPrivateField<List<LightWithId>[]>("_lights");
+            List<ILightWithId>[] lightsWithId = _lightManager.GetPrivateField<List<ILightWithId>[]>("_lights");
             int maxLightId = _lightManager.GetPrivateField<int>("kMaxLightId");
 
             _lights = new List<DynamicLight>[maxLightId + 1];
@@ -79,10 +79,12 @@ namespace CustomAvatar.Lighting
             {
                 if (lightsWithId[id] == null) continue;
 
-                foreach (LightWithId lightWithId in lightsWithId[id])
+                foreach (ILightWithId lightWithId in lightsWithId[id])
                 {
-                    foreach (DirectionalLight directionalLight in lightWithId.GetComponentsInChildren<DirectionalLight>())
+                    if (lightWithId is DirectionalLightWithId directionalLightWithId)
                     {
+                        DirectionalLight directionalLight = directionalLightWithId.GetPrivateField<DirectionalLight>("_light");
+
                         Light light = new GameObject("DynamicDirectionalLight").AddComponent<Light>();
 
                         light.type = LightType.Directional;
@@ -104,8 +106,10 @@ namespace CustomAvatar.Lighting
                         _directionalLights[id].Add(light);
                     }
 
-                    foreach (TubeBloomPrePassLight tubeLight in lightWithId.GetComponentsInChildren<TubeBloomPrePassLight>())
+                    if (lightWithId is TubeBloomPrePassLightWithId tubeLightWithId)
                     {
+                        TubeBloomPrePassLight tubeLight = tubeLightWithId.GetPrivateField<TubeBloomPrePassLight>("_tubeBloomPrePassLight");
+
                         Light light = new GameObject("DynamicTubeBloomPrePassLight").AddComponent<Light>();
 
                         light.type = LightType.Directional;
@@ -246,6 +250,7 @@ namespace CustomAvatar.Lighting
 
             private readonly Light _unityLight;
             private readonly float _colorAlphaMultiplier;
+            private readonly float _lightWidthMultiplier;
             private readonly float _bloomFogIntensityMultiplier;
 
             private float _intensity;
@@ -256,12 +261,13 @@ namespace CustomAvatar.Lighting
                 this.tubeLight = tubeLight;
                 this._unityLight = unityLight;
 
-                width = tubeLight.GetPrivateField<float>("_width");
-                length = tubeLight.GetPrivateField<float>("_length");
+                width  = tubeLight.width;
+                length = tubeLight.length;
                 center = tubeLight.GetPrivateField<float>("_center");
 
                 _colorAlphaMultiplier = tubeLight.GetPrivateField<float>("_colorAlphaMultiplier");
-                _bloomFogIntensityMultiplier = tubeLight.GetPrivateField<float>("_bloomFogIntensityMultiplier");
+                _lightWidthMultiplier = tubeLight.lightWidthMultiplier;
+                _bloomFogIntensityMultiplier = tubeLight.bloomFogIntensityMultiplier;
 
                 offset = (0.5f - center) * length * Vector3.up;
             }
@@ -269,9 +275,9 @@ namespace CustomAvatar.Lighting
             private void UpdateLight()
             {
                 _unityLight.color = _color;
-                _unityLight.intensity = _intensity * width * _colorAlphaMultiplier * _bloomFogIntensityMultiplier * _color.a * 5f;
+                _unityLight.intensity = _intensity * width * _colorAlphaMultiplier  * _lightWidthMultiplier * _bloomFogIntensityMultiplier * _color.a * 5f;
 
-                _unityLight.enabled = _unityLight.intensity > 0.01f;
+                _unityLight.enabled = _unityLight.intensity > 0.001f;
             }
         }
     }
