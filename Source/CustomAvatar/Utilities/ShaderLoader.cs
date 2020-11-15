@@ -24,6 +24,8 @@ namespace CustomAvatar.Utilities
 {
     internal class ShaderLoader : IInitializable
     {
+        public bool hasErrors { get; private set; }
+
         public Shader stereoMirrorShader;
         public Shader unlitShader;
 
@@ -46,6 +48,7 @@ namespace CustomAvatar.Utilities
 
             if (!shadersBundleCreateRequest.isDone || !shadersBundleCreateRequest.assetBundle)
             {
+                hasErrors = true;
                 _logger.Error("Failed to load shaders");
                 yield break;
             }
@@ -55,6 +58,7 @@ namespace CustomAvatar.Utilities
 
             if (!assetBundleRequest.isDone || assetBundleRequest.allAssets.Length == 0)
             {
+                hasErrors = true;
                 _logger.Error("Failed to load shaders");
                 yield break;
             }
@@ -88,6 +92,7 @@ namespace CustomAvatar.Utilities
             else
             {
                 _logger.Error($"{name} shader not found");
+                hasErrors = true;
             }
         }
     }
