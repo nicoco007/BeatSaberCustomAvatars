@@ -207,6 +207,7 @@ namespace CustomAvatar.Player
                 _logger.Info("No avatar selected");
                 avatarChanged?.Invoke(null);
                 _settings.previousAvatarPath = null;
+                UpdateFloorOffsetForCurrentAvatar();
                 return;
             }
 
