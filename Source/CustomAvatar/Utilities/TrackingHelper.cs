@@ -21,6 +21,7 @@
 
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
+using CustomAvatar.Player;
 using UnityEngine;
 
 namespace CustomAvatar.Utilities
@@ -75,7 +76,7 @@ namespace CustomAvatar.Utilities
         /// </summary>
         public void ApplyFloorOffset(SpawnedAvatar spawnedAvatar, ref Vector3 position)
         {
-            if (!_settings.enableFloorAdjust || !spawnedAvatar) return;
+            if (_settings.floorHeightAdjust == FloorHeightAdjust.Off || !spawnedAvatar) return;
 
             position.y += spawnedAvatar.scaledEyeHeight - _beatSaberUtilities.GetRoomAdjustedPlayerEyeHeight();
         }
@@ -86,7 +87,7 @@ namespace CustomAvatar.Utilities
         /// </summary>
         public void ApplyTrackerFloorOffset(SpawnedAvatar spawnedAvatar, ref Vector3 position)
         {
-            if (!_settings.enableFloorAdjust || !spawnedAvatar) return;
+            if (_settings.floorHeightAdjust == FloorHeightAdjust.Off || !spawnedAvatar) return;
 
             position.y *= spawnedAvatar.scaledEyeHeight / _beatSaberUtilities.GetRoomAdjustedPlayerEyeHeight();
         }

@@ -15,6 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using CustomAvatar.Avatar;
+using CustomAvatar.Player;
 using CustomAvatar.Tracking;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components.Settings;
@@ -32,7 +33,7 @@ namespace CustomAvatar.UI
         [UIComponent("visible-in-first-person")] private ToggleSetting _visibleInFirstPerson;
         [UIComponent("resize-mode")] private DropDownListSetting _resizeMode;
         [UIComponent("enable-locomotion")] private ToggleSetting _enableLocomotion;
-        [UIComponent("floor-adjust")] private ToggleSetting _floorHeightAdjust;
+        [UIComponent("floor-height-adjust")] private DropDownListSetting _floorHeightAdjust;
         [UIComponent("move-floor-with-room-adjust")] private ToggleSetting _moveFloorWithRoomAdjust;
         [UIComponent("camera-clip-plane")] private IncrementSetting _cameraNearClipPlane;
 
@@ -43,7 +44,7 @@ namespace CustomAvatar.UI
         #region Values
 
         [UIValue("resize-mode-options")] private readonly List<object> _resizeModeOptions = new List<object> { AvatarResizeMode.None, AvatarResizeMode.Height, AvatarResizeMode.ArmSpan };
-
+        [UIValue("floor-height-adjust-options")] private readonly List<object> _floorHeightAdjustOptions = new List<object> { FloorHeightAdjust.Off, FloorHeightAdjust.PlayersPlaceOnly, FloorHeightAdjust.EntireEnvironment };
         #endregion
 
         #region Actions
@@ -86,10 +87,28 @@ namespace CustomAvatar.UI
             _avatarManager.UpdateLocomotionEnabled();
         }
 
-        [UIAction("floor-adjust-change")]
-        private void OnFloorHeightAdjustChanged(bool value)
+        [UIAction("floor-height-adjust-formatter")]
+        private string FloorHeightAdjustFormatter(object value)
         {
-            _settings.enableFloorAdjust = value;
+            if (!(value is FloorHeightAdjust)) return null;
+
+            switch ((FloorHeightAdjust)value)
+            {
+                case FloorHeightAdjust.Off:
+                    return "Off";
+                case FloorHeightAdjust.PlayersPlaceOnly:
+                    return "Player's Place Only";
+                case FloorHeightAdjust.EntireEnvironment:
+                    return "Entire Environment";
+                default:
+                    return null;
+            }
+        }
+
+        [UIAction("floor-height-adjust-change")]
+        private void OnFloorHeightAdjustChanged(FloorHeightAdjust value)
+        {
+            _settings.floorHeightAdjust = value;
             _avatarManager.UpdateFloorOffsetForCurrentAvatar();
         }
 

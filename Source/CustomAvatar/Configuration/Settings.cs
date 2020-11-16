@@ -58,7 +58,7 @@ namespace CustomAvatar.Configuration
         }
 
         [JsonConverter(typeof(StringEnumConverter))] public AvatarResizeMode resizeMode = AvatarResizeMode.Height;
-        public bool enableFloorAdjust = false;
+        [JsonConverter(typeof(StringEnumConverter))] public FloorHeightAdjust floorHeightAdjust = FloorHeightAdjust.Off;
         public string previousAvatarPath = null;
         public float playerArmSpan = VRPlayerInput.kDefaultPlayerArmSpan;
         public bool calibrateFullBodyTrackingOnStart = false;

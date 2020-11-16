@@ -317,7 +317,7 @@ namespace CustomAvatar.Player
 
         internal void UpdateFloorOffsetForCurrentAvatar()
         {
-            if (!_settings.enableFloorAdjust || !currentlySpawnedAvatar)
+            if (_settings.floorHeightAdjust == FloorHeightAdjust.Off || !currentlySpawnedAvatar)
             {
                 _floorController.SetFloorOffset(0);
 

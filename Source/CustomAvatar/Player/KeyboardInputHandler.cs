@@ -17,6 +17,7 @@
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
+using System;
 using UnityEngine;
 using Zenject;
 
@@ -58,8 +59,8 @@ namespace CustomAvatar.Player
             }
             else if (Input.GetKeyDown(KeyCode.Insert))
             {
-                _settings.enableFloorAdjust = !_settings.enableFloorAdjust;
-                _logger.Info($"{(_settings.enableFloorAdjust ? "Enabled" : "Disabled")} floor adjust");
+                _settings.floorHeightAdjust = (FloorHeightAdjust)(((int)_settings.floorHeightAdjust + 1) % Enum.GetValues(typeof(FloorHeightAdjust)).Length);
+                _logger.Info($"Set floor height adjust to {_settings.floorHeightAdjust}");
                 _avatarManager.ResizeCurrentAvatar();
             }
         }

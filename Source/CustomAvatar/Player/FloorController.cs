@@ -37,7 +37,9 @@ namespace CustomAvatar.Player
         private readonly BeatSaberUtilities _beatSaberUtilities;
         private readonly GameScenesManager _gameScenesManager;
 
-        private readonly string[] _floorObjectNames = { "MenuEnvironment", "Environment/PlayersPlace", "Environment/PlayersPlaceShadow" };
+        private readonly string[] _playersPlaceObjectNames = { "MenuEnvironment", "Environment/PlayersPlace", "Environment/PlayersPlaceShadow" };
+        private readonly string[] _environmentObjectNames = { "MenuEnvironment", "Environment" };
+
         private readonly Dictionary<Transform, Vector3> _originalPositions = new Dictionary<Transform, Vector3>();
         private readonly Dictionary<MirrorRendererSO, MirrorRendererReplacer> _mirrorRenderers = new Dictionary<MirrorRendererSO, MirrorRendererReplacer>();
 
@@ -84,7 +86,24 @@ namespace CustomAvatar.Player
             RemoveDestroyedMirrorRenderers();
             RemoveDestroyedTransforms();
 
-            foreach (var floorObjectName in _floorObjectNames)
+            string[] floorObjectNames;
+
+            switch (_settings.floorHeightAdjust)
+            {
+                case FloorHeightAdjust.PlayersPlaceOnly:
+                    floorObjectNames = _playersPlaceObjectNames;
+                    break;
+
+                case FloorHeightAdjust.EntireEnvironment:
+                    floorObjectNames = _environmentObjectNames;
+                    break;
+
+                default:
+                    ResetFloorObjects();
+                    return;
+            }
+
+            foreach (var floorObjectName in floorObjectNames)
             {
                 GameObject floorObject = GameObject.Find(floorObjectName);
 
@@ -111,6 +130,18 @@ namespace CustomAvatar.Player
                     _mirrorRenderers[mirrorRenderer].AddMirror(mirror);
                 }
             }
+        }
+
+        private void ResetFloorObjects()
+        {
+            foreach (KeyValuePair<Transform, Vector3> kvp in _originalPositions)
+            {
+                if (!kvp.Key) continue;
+
+                kvp.Key.position = kvp.Value;
+            }
+
+            _originalPositions.Clear();
         }
 
         private void RemoveDestroyedMirrorRenderers()
