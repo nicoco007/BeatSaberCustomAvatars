@@ -168,6 +168,11 @@ namespace CustomAvatar.Avatar
             UpdateSolverTargets();
         }
 
+        internal void ResetSolver()
+        {
+            _vrik.solver.Reset();
+        }
+
         private void OnInputChanged()
         {
             UpdateSolverTargets();
