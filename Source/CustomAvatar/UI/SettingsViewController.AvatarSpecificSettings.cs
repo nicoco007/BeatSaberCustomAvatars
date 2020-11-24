@@ -28,13 +28,12 @@ namespace CustomAvatar.UI
     internal partial class SettingsViewController
     {
         #region Components
-#pragma warning disable 649
-#pragma warning disable IDE0044
+        #pragma warning disable 649
+        #pragma warning disable IDE0044
 
         [UIComponent("arm-span")] private TextMeshProUGUI _armSpanLabel;
         [UIComponent("calibrate-button")] private TextMeshProUGUI _calibrateButtonText;
         [UIComponent("clear-button")] private TextMeshProUGUI _clearButtonText;
-        [UIComponent("bypass-calibration")] private HoverHint _bypassCalibrationHoverHint;
         [UIComponent("automatic-calibration")] private HoverHint _automaticCalibrationHoverHint;
 
         [UIComponent("ignore-exclusions")] private ToggleSetting _ignoreExclusionsSetting;
@@ -46,8 +45,8 @@ namespace CustomAvatar.UI
 
         [UIComponent("calibrate-button")] private HoverHint _calibrateButtonHoverHint;
 
-#pragma warning restore IDE0044
-#pragma warning restore 649
+        #pragma warning restore IDE0044
+        #pragma warning restore 649
         #endregion
 
         private GameObject _waistSphere;

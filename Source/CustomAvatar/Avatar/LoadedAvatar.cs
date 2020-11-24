@@ -22,7 +22,6 @@ using CustomAvatar.Logging;
 using CustomAvatar.Utilities;
 using System;
 using System.IO;
-using System.Reflection;
 using UnityEngine;
 using Zenject;
 using Object = UnityEngine.Object;
@@ -63,7 +62,8 @@ namespace CustomAvatar.Avatar
         /// <summary>
         /// Whether or not this avatar has one or more full body (pelvis/feet) tracking points
         /// </summary>
-        public readonly bool supportsFullBodyTracking;
+        [Obsolete("This will always be true")]
+        public readonly bool supportsFullBodyTracking = true;
 
         /// <summary>
         /// Whether or not this avatar supports finger tracking.
@@ -89,7 +89,7 @@ namespace CustomAvatar.Avatar
 
         private readonly ILogger<LoadedAvatar> _logger;
 
-        internal LoadedAvatar(string fullPath, GameObject avatarGameObject, ILoggerProvider loggerProvider, DiContainer container)
+        internal LoadedAvatar(string fullPath, GameObject avatarGameObject, ILoggerProvider loggerProvider, IKHelper ikHelper, DiContainer container)
         {
             this.fullPath = fullPath ?? throw new ArgumentNullException(nameof(fullPath));
             prefab = avatarGameObject ? avatarGameObject : throw new ArgumentNullException(nameof(avatarGameObject));
@@ -100,13 +100,6 @@ namespace CustomAvatar.Avatar
             prefab.name = $"LoadedAvatar({descriptor.name})";
 
             _logger = loggerProvider.CreateLogger<LoadedAvatar>(descriptor.name);
-
-            head      = prefab.transform.Find("Head");
-            leftHand  = prefab.transform.Find("LeftHand");
-            rightHand = prefab.transform.Find("RightHand");
-            pelvis    = prefab.transform.Find("Pelvis");
-            leftLeg   = prefab.transform.Find("LeftLeg");
-            rightLeg  = prefab.transform.Find("RightLeg");
 
             #pragma warning disable CS0618
             VRIKManager vrikManager = prefab.GetComponentInChildren<VRIKManager>();
@@ -149,6 +142,18 @@ namespace CustomAvatar.Avatar
 
             if (vrikManager)
             {
+                ikHelper.CreateOffsetTargetsIfMissing(vrikManager, prefab.transform);
+            }
+
+            head      = prefab.transform.Find("Head");
+            leftHand  = prefab.transform.Find("LeftHand");
+            rightHand = prefab.transform.Find("RightHand");
+            pelvis    = prefab.transform.Find("Pelvis");
+            leftLeg   = prefab.transform.Find("LeftLeg");
+            rightLeg  = prefab.transform.Find("RightLeg");
+
+            if (vrikManager)
+            {
                 if (vrikManager.references_root != vrikManager.transform)
                 {
                     _logger.Warning("VRIKManager is not on the root reference transform; this may cause unexpected issues");
@@ -165,7 +170,6 @@ namespace CustomAvatar.Avatar
             var poseManager = prefab.GetComponentInChildren<PoseManager>();
 
             isIKAvatar = vrikManager;
-            supportsFullBodyTracking = pelvis || leftLeg || rightLeg;
             supportsFingerTracking = poseManager && poseManager.isValid;
 
             eyeHeight = GetEyeHeight();

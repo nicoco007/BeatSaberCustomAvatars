@@ -211,8 +211,6 @@ namespace CustomAvatar.UI
             _ignoreExclusionsSetting.Value = _currentAvatarSettings.ignoreExclusions;
 
             _bypassCalibration.Value = _currentAvatarSettings.bypassCalibration;
-            _bypassCalibration.interactable = avatar.supportsFullBodyTracking;
-            _bypassCalibrationHoverHint.text = avatar.supportsFullBodyTracking ? "Disable the need for calibration before full body tracking is applied." : "Not supported by current avatar";
 
             _automaticCalibrationSetting.Value = _currentAvatarSettings.useAutomaticCalibration;
             _automaticCalibrationSetting.interactable = avatar.descriptor.supportsAutomaticCalibration;
@@ -226,6 +224,19 @@ namespace CustomAvatar.UI
 
         private void UpdateCalibrationButtons(LoadedAvatar avatar)
         {
+            if (avatar == null)
+            {
+                _calibrateButton.interactable = false;
+                _clearButton.interactable = false;
+                _calibrateButtonHoverHint.text = "No avatar selected";
+                _calibrateButtonText.text = "Calibrate";
+                _clearButtonText.text = "Clear";
+
+                _autoCalibrateButton.interactable = false;
+                _autoClearButton.interactable = false;
+                _autoCalibrateButtonHoverHint.text = "No avatar selected";
+            }
+
             if (!_playerInput.TryGetUncalibratedPose(DeviceUse.Waist,     out Pose _) &&
                 !_playerInput.TryGetUncalibratedPose(DeviceUse.LeftFoot,  out Pose _) &&
                 !_playerInput.TryGetUncalibratedPose(DeviceUse.RightFoot, out Pose _))
@@ -243,10 +254,13 @@ namespace CustomAvatar.UI
                 return;
             }
 
-            bool isManualCalibrationPossible = avatar != null && avatar.supportsFullBodyTracking;
-            bool isAutomaticCalibrationPossible = isManualCalibrationPossible && avatar.descriptor.supportsAutomaticCalibration;
+            _calibrateButton.interactable = true;
+            _clearButton.interactable = _calibrating || _currentAvatarManualCalibration?.isCalibrated == true;
+            _calibrateButtonHoverHint.text = "Start manual full body calibration";
+            _calibrateButtonText.text = _calibrating ? "Save" : "Calibrate";
+            _clearButtonText.text = _calibrating ? "Cancel" : "Clear";
 
-            if (isAutomaticCalibrationPossible)
+            if (avatar.descriptor.supportsAutomaticCalibration)
             {
                 _autoCalibrateButton.interactable = true;
                 _autoClearButton.interactable = _calibrationData.automaticCalibration.isCalibrated;
@@ -257,23 +271,6 @@ namespace CustomAvatar.UI
                 _autoCalibrateButton.interactable = false;
                 _autoClearButton.interactable = false;
                 _autoCalibrateButtonHoverHint.text = "Not supported by current avatar";
-            }
-
-            if (isManualCalibrationPossible)
-            {
-                _calibrateButton.interactable = true;
-                _clearButton.interactable = _calibrating || _currentAvatarManualCalibration?.isCalibrated == true;
-                _calibrateButtonHoverHint.text = "Start manual full body calibration";
-                _calibrateButtonText.text = _calibrating ? "Save" : "Calibrate";
-                _clearButtonText.text = _calibrating ? "Cancel" : "Clear";
-            }
-            else
-            {
-                _calibrateButton.interactable = false;
-                _clearButton.interactable = false;
-                _calibrateButtonHoverHint.text = "Not supported by current avatar";
-                _calibrateButtonText.text = "Calibrate";
-                _clearButtonText.text = "Clear";
             }
         }
     }
