@@ -357,6 +357,13 @@ namespace CustomAvatar.Player
             currentlySpawnedAvatar.SetLocomotionEnabled(_settings.enableLocomotion);
         }
 
+        internal void Move(Vector3 position, Quaternion rotation)
+        {
+            _avatarContainer.transform.SetPositionAndRotation(position, rotation);
+
+            if (currentlySpawnedAvatar && currentlySpawnedAvatar.ik) currentlySpawnedAvatar.ik.ResetSolver();
+        }
+
         private void OnMoveFloorWithRoomAdjustChanged(bool value)
         {
             ResizeCurrentAvatar();

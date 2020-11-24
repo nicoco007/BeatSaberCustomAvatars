@@ -48,6 +48,8 @@ namespace CustomAvatar
             ZenjectHelper.Register<LightingInstaller>().OnContext("GameCore", "SceneContext");
 
             ZenjectHelper.Register<GameInstaller>().OnMonoInstaller<GameplayCoreInstaller>();
+
+            ZenjectHelper.Register<CustomAvatarsLocalInactivePlayerInstaller>().OnMonoInstaller<MultiplayerLocalInactivePlayerInstaller>();
         }
     }
 }
