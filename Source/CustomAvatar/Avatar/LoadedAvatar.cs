@@ -195,7 +195,11 @@ namespace CustomAvatar.Avatar
             }
 
             // many avatars rely on this being global because their root position isn't at (0, 0, 0)
-            return head.position.y;
+            float eyeHeight = head.position.y;
+
+            _logger.Trace($"Measured eye height: {eyeHeight} m");
+
+            return eyeHeight;
         }
 
         private void FixTrackingReferences(VRIKManager vrikManager)
@@ -244,12 +248,14 @@ namespace CustomAvatar.Avatar
             Transform leftShoulder = vrikManager.references_leftShoulder;
             Transform leftUpperArm = vrikManager.references_leftUpperArm;
             Transform leftLowerArm = vrikManager.references_leftForearm;
+            Transform leftWrist    = vrikManager.references_leftHand;
 
             Transform rightShoulder = vrikManager.references_rightShoulder;
             Transform rightUpperArm = vrikManager.references_rightUpperArm;
             Transform rightLowerArm = vrikManager.references_rightForearm;
+            Transform rightWrist    = vrikManager.references_rightHand;
 
-            if (!leftShoulder || !leftUpperArm || !leftLowerArm || !rightShoulder || !rightUpperArm || !rightLowerArm)
+            if (!leftShoulder || !leftUpperArm || !leftLowerArm || !leftWrist || !rightShoulder || !rightUpperArm || !rightLowerArm || !rightWrist)
             {
                 _logger.Warning("Could not calculate avatar arm span due to missing bones");
                 return BeatSaberUtilities.kDefaultPlayerArmSpan;
@@ -261,11 +267,13 @@ namespace CustomAvatar.Avatar
                 return BeatSaberUtilities.kDefaultPlayerArmSpan;
             }
 
-            float leftArmLength = Vector3.Distance(leftShoulder.position, leftUpperArm.position) + Vector3.Distance(leftUpperArm.position, leftLowerArm.position) + Vector3.Distance(leftLowerArm.position, leftHand.position);
-            float rightArmLength = Vector3.Distance(rightShoulder.position, rightUpperArm.position) + Vector3.Distance(rightUpperArm.position, rightLowerArm.position) + Vector3.Distance(rightLowerArm.position, rightHand.position);
+            float leftArmLength = Vector3.Distance(leftShoulder.position, leftUpperArm.position) + Vector3.Distance(leftUpperArm.position, leftLowerArm.position) + Vector3.Distance(leftLowerArm.position, leftWrist.position) + Vector3.Distance(leftWrist.position, leftHand.position);
+            float rightArmLength = Vector3.Distance(rightShoulder.position, rightUpperArm.position) + Vector3.Distance(rightUpperArm.position, rightLowerArm.position) + Vector3.Distance(rightLowerArm.position, rightWrist.position) + Vector3.Distance(rightWrist.position, rightHand.position);
             float shoulderToShoulderDistance = Vector3.Distance(leftShoulder.position, rightShoulder.position);
 
             float totalLength = leftArmLength + shoulderToShoulderDistance + rightArmLength;
+
+            _logger.Trace($"Measured arm span: {totalLength} m");
 
             return totalLength;
         }
