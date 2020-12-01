@@ -235,6 +235,8 @@ namespace CustomAvatar.UI
                 _autoCalibrateButton.interactable = false;
                 _autoClearButton.interactable = false;
                 _autoCalibrateButtonHoverHint.text = "No avatar selected";
+
+                return;
             }
 
             if (!_playerInput.TryGetUncalibratedPose(DeviceUse.Waist,     out Pose _) &&
