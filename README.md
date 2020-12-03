@@ -8,6 +8,12 @@ Install [BeatSaberMarkupLanguage](https://github.com/monkeymanboy/BeatSaberMarku
 
 Download [the latest release of Custom Avatars](https://github.com/nicoco007/BeatSaberCustomAvatars/releases) and extract **the entire contents** of the ZIP file into your Beat Saber folder (for Steam, this is usually `C:\Program Files (x86)\Steam\steamapps\common\Beat Saber`), **overwriting any existing files**.
 
+## Usage
+### Full-Body Tracking
+The way full-body tracking works has changed as of version 5.0.0. You must now do the following for full-body tracking to work:
+- Set up your trackers' roles in SteamVR. This makes it so you no longer need to turn on your trackers in a specific order.
+- Calibrate your avatar in-game or use the "Bypass Calibration" option. Both are in the Avatars menu, under "Avatar Specific" in the settings (left-hand) pane.
+
 ## Contributing
 To resolve references and automatically copy the compiled DLL into Beat Saber's installation directory, first create files called `CustomAvatar.csproj.user` and `CustomAvatar-Editor.csproj.user` next to `Source\CustomAvatar\CustomAvatar.csproj` and `Source\CustomAvatar-Editor\CustomAvatar-Editor.csproj` respectively. Then paste in the following contents:
 

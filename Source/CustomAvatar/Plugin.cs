@@ -43,10 +43,13 @@ namespace CustomAvatar
             ZenjectHelper.Register<CustomAvatarsInstaller>().WithArguments(ipaLogger).OnMonoInstaller<PCAppInit>();
             ZenjectHelper.Register<UIInstaller>().OnMonoInstaller<MenuViewControllersInstaller>();
 
+            ZenjectHelper.Register<LightingInstaller>().OnContext("HealthWarning", "SceneContext");
             ZenjectHelper.Register<LightingInstaller>().OnContext("MenuEnvironment", "SceneDecoratorContext");
             ZenjectHelper.Register<LightingInstaller>().OnContext("GameCore", "SceneContext");
 
             ZenjectHelper.Register<GameInstaller>().OnMonoInstaller<GameplayCoreInstaller>();
+
+            ZenjectHelper.Register<CustomAvatarsLocalInactivePlayerInstaller>().OnMonoInstaller<MultiplayerLocalInactivePlayerInstaller>();
         }
     }
 }

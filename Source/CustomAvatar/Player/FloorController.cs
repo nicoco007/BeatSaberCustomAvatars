@@ -18,8 +18,10 @@ using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Utilities;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
+using Object = UnityEngine.Object;
 
 namespace CustomAvatar.Player
 {
@@ -35,7 +37,11 @@ namespace CustomAvatar.Player
         private readonly BeatSaberUtilities _beatSaberUtilities;
         private readonly GameScenesManager _gameScenesManager;
 
-        private readonly string[] _floorObjectNames = { "MenuEnvironment", "Environment/PlayersPlace" };
+        private readonly string[] _playersPlaceObjectNames = { "MenuEnvironment", "Environment/PlayersPlace", "Environment/PlayersPlaceShadow" };
+        private readonly string[] _environmentObjectNames = { "MenuEnvironment", "Environment" };
+
+        private readonly Dictionary<Transform, Vector3> _originalPositions = new Dictionary<Transform, Vector3>();
+        private readonly Dictionary<MirrorRendererSO, MirrorRendererReplacer> _mirrorRenderers = new Dictionary<MirrorRendererSO, MirrorRendererReplacer>();
 
         internal FloorController(ILoggerProvider loggerProvider, Settings settings, BeatSaberUtilities beatSaberUtilities, GameScenesManager gameScenesManager)
         {
@@ -77,7 +83,27 @@ namespace CustomAvatar.Player
 
         private void UpdateFloorObjects()
         {
-            foreach (var floorObjectName in _floorObjectNames)
+            RemoveDestroyedMirrorRenderers();
+            RemoveDestroyedTransforms();
+
+            string[] floorObjectNames;
+
+            switch (_settings.floorHeightAdjust)
+            {
+                case FloorHeightAdjust.PlayersPlaceOnly:
+                    floorObjectNames = _playersPlaceObjectNames;
+                    break;
+
+                case FloorHeightAdjust.EntireEnvironment:
+                    floorObjectNames = _environmentObjectNames;
+                    break;
+
+                default:
+                    ResetFloorObjects();
+                    return;
+            }
+
+            foreach (var floorObjectName in floorObjectNames)
             {
                 GameObject floorObject = GameObject.Find(floorObjectName);
 
@@ -85,7 +111,73 @@ namespace CustomAvatar.Player
 
                 _logger.Info($"Moving '{floorObjectName}' to {floorPosition:0.000} m");
 
-                floorObject.transform.position = new Vector3(0, floorPosition, 0);
+                if (!_originalPositions.ContainsKey(floorObject.transform))
+                {
+                    _originalPositions.Add(floorObject.transform, floorObject.transform.position);
+                }
+
+                floorObject.transform.position = _originalPositions[floorObject.transform] + new Vector3(0, floorPosition, 0);
+
+                foreach (Mirror mirror in floorObject.GetComponentsInChildren<Mirror>())
+                {
+                    MirrorRendererSO mirrorRenderer = mirror.GetPrivateField<MirrorRendererSO>("_mirrorRenderer");
+
+                    if (!_mirrorRenderers.ContainsKey(mirrorRenderer))
+                    {
+                        _mirrorRenderers.Add(mirrorRenderer, new MirrorRendererReplacer(mirrorRenderer));
+                    }
+
+                    _mirrorRenderers[mirrorRenderer].AddMirror(mirror);
+                }
+            }
+        }
+
+        private void ResetFloorObjects()
+        {
+            foreach (KeyValuePair<Transform, Vector3> kvp in _originalPositions)
+            {
+                if (!kvp.Key) continue;
+
+                kvp.Key.position = kvp.Value;
+            }
+
+            _originalPositions.Clear();
+        }
+
+        private void RemoveDestroyedMirrorRenderers()
+        {
+            var renderersToDestroy = new List<KeyValuePair<MirrorRendererSO, MirrorRendererReplacer>>();
+
+            foreach (KeyValuePair<MirrorRendererSO, MirrorRendererReplacer> kvp in _mirrorRenderers)
+            {
+                if (kvp.Value.AreAllMirrorsDestroyed())
+                {
+                    renderersToDestroy.Add(kvp);
+                }
+            }
+
+            foreach (KeyValuePair<MirrorRendererSO, MirrorRendererReplacer> kvp in renderersToDestroy)
+            {
+                kvp.Value.Dispose();
+                _mirrorRenderers.Remove(kvp.Key);
+            }
+        }
+
+        private void RemoveDestroyedTransforms()
+        {
+            var transformsToRemove = new List<Transform>();
+
+            foreach (KeyValuePair<Transform, Vector3> kvp in _originalPositions)
+            {
+                if (!kvp.Key)
+                {
+                    transformsToRemove.Add(kvp.Key);
+                }
+            }
+
+            foreach (Transform transform in transformsToRemove)
+            {
+                _originalPositions.Remove(transform);
             }
         }
 
@@ -97,6 +189,37 @@ namespace CustomAvatar.Player
         private void OnSceneTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
         {
             UpdateFloorObjects();
+        }
+
+        private readonly struct MirrorRendererReplacer : IDisposable
+        {
+            public readonly MirrorRendererSO renderer;
+            private readonly List<Mirror> mirrors;
+
+            public MirrorRendererReplacer(MirrorRendererSO original)
+            {
+                renderer = Object.Instantiate(original);
+                renderer.name = original.name + " (Floor Instance)";
+
+                mirrors = new List<Mirror>();
+            }
+
+            public void AddMirror(Mirror mirror)
+            {
+                mirrors.Add(mirror);
+                mirror.SetPrivateField("_mirrorRenderer", renderer);
+            }
+
+            public bool AreAllMirrorsDestroyed()
+            {
+                return mirrors.TrueForAll(m => !m);
+            }
+
+            public void Dispose()
+            {
+                Object.Destroy(renderer);
+                mirrors.Clear();
+            }
         }
     }
 }

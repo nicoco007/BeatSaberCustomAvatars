@@ -207,6 +207,7 @@ namespace CustomAvatar.Player
                 _logger.Info("No avatar selected");
                 avatarChanged?.Invoke(null);
                 _settings.previousAvatarPath = null;
+                UpdateFloorOffsetForCurrentAvatar();
                 return;
             }
 
@@ -316,7 +317,7 @@ namespace CustomAvatar.Player
 
         internal void UpdateFloorOffsetForCurrentAvatar()
         {
-            if (!_settings.enableFloorAdjust || !currentlySpawnedAvatar)
+            if (_settings.floorHeightAdjust == FloorHeightAdjust.Off || !currentlySpawnedAvatar)
             {
                 _floorController.SetFloorOffset(0);
 
@@ -354,6 +355,13 @@ namespace CustomAvatar.Player
             if (!currentlySpawnedAvatar) return;
 
             currentlySpawnedAvatar.SetLocomotionEnabled(_settings.enableLocomotion);
+        }
+
+        internal void Move(Vector3 position, Quaternion rotation)
+        {
+            _avatarContainer.transform.SetPositionAndRotation(position, rotation);
+
+            if (currentlySpawnedAvatar && currentlySpawnedAvatar.ik) currentlySpawnedAvatar.ik.ResetSolver();
         }
 
         private void OnMoveFloorWithRoomAdjustChanged(bool value)

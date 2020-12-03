@@ -29,7 +29,10 @@ namespace CustomAvatar.Editor
         {
 		    GetWindow(typeof(AvatarExporterWindow), false, "Avatar Exporter");
         }
-        
+
+        #region Behaviour Lifecycle
+        #pragma warning disable IDE0051
+
         private void OnFocus()
         {
 		    avatars = FindObjectsOfType<AvatarDescriptor>();
@@ -38,11 +41,15 @@ namespace CustomAvatar.Editor
 
         void OnGUI()
         {
-            GUIStyle titleLabelStyle = new GUIStyle(EditorStyles.largeLabel);
-            titleLabelStyle.fontSize = 16;
+            GUIStyle titleLabelStyle = new GUIStyle(EditorStyles.largeLabel)
+            {
+                fontSize = 16
+            };
 
-            GUIStyle textureStyle = new GUIStyle(EditorStyles.label);
-            textureStyle.alignment = TextAnchor.UpperRight;
+            GUIStyle textureStyle = new GUIStyle(EditorStyles.label)
+            {
+                alignment = TextAnchor.UpperRight
+            };
         
 		    foreach (AvatarDescriptor avatar in avatars)
             {
@@ -73,6 +80,9 @@ namespace CustomAvatar.Editor
 			    GUILayout.Space(20);
 		    }
         }
+
+        #pragma warning restore IDE0051
+        #endregion
 
         private void SaveAvatar(AvatarDescriptor avatar)
         {

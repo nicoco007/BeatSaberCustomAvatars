@@ -81,6 +81,7 @@ namespace CustomAvatar.Zenject
             Container.Bind<AvatarSpawner>().AsTransient();
             Container.Bind<IKHelper>().AsTransient();
             Container.BindInterfacesAndSelfTo<BeatSaberUtilities>().AsTransient();
+            Container.Bind<TrackingHelper>().AsTransient();
 
             // not sure if this is a great idea but w/e
             if (!Container.HasBinding<MainSettingsModelSO>())

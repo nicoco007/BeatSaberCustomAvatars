@@ -73,17 +73,19 @@ namespace CustomAvatar.UI
         private void OnCalibrateAutoFullBodyTrackingClicked()
         {
             _playerInput.CalibrateFullBodyTrackingAuto();
-            _autoClearButton.interactable = _calibrationData.automaticCalibration.isCalibrated;
 
             _automaticCalibrationSetting.Value = true;
             OnEnableAutomaticCalibrationChanged(true);
+
+            if (_avatarManager.currentlySpawnedAvatar) UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.avatar);
         }
 
         [UIAction("auto-clear-fbt-calibration-data-click")]
         private void OnClearAutoFullBodyTrackingCalibrationDataClicked()
         {
             _playerInput.ClearAutomaticFullBodyTrackingData();
-            _autoClearButton.interactable = false;
+
+            if (_avatarManager.currentlySpawnedAvatar) UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.avatar);
         }
 
         [UIAction("waist-tracker-position-change")]

@@ -28,13 +28,12 @@ namespace CustomAvatar.UI
     internal partial class SettingsViewController
     {
         #region Components
-#pragma warning disable 649
-#pragma warning disable IDE0044
+        #pragma warning disable 649
+        #pragma warning disable IDE0044
 
         [UIComponent("arm-span")] private TextMeshProUGUI _armSpanLabel;
         [UIComponent("calibrate-button")] private TextMeshProUGUI _calibrateButtonText;
         [UIComponent("clear-button")] private TextMeshProUGUI _clearButtonText;
-        [UIComponent("bypass-calibration")] private HoverHint _bypassCalibrationHoverHint;
         [UIComponent("automatic-calibration")] private HoverHint _automaticCalibrationHoverHint;
 
         [UIComponent("ignore-exclusions")] private ToggleSetting _ignoreExclusionsSetting;
@@ -46,8 +45,8 @@ namespace CustomAvatar.UI
 
         [UIComponent("calibrate-button")] private HoverHint _calibrateButtonHoverHint;
 
-#pragma warning restore IDE0044
-#pragma warning restore 649
+        #pragma warning restore IDE0044
+        #pragma warning restore 649
         #endregion
 
         private GameObject _waistSphere;
@@ -114,11 +113,12 @@ namespace CustomAvatar.UI
 
         private void EnableCalibrationMode()
         {
+            if (!_avatarManager.currentlySpawnedAvatar) return;
+
             _avatarManager.currentlySpawnedAvatar.EnableCalibrationMode();
             _calibrating = true;
-            _calibrateButtonText.text = "Save";
-            _clearButtonText.text = "Cancel";
-            _clearButton.interactable = true;
+
+            UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.avatar);
 
             _waistSphere = CreateCalibrationSphere();
             _leftFootSphere = CreateCalibrationSphere();
@@ -127,27 +127,25 @@ namespace CustomAvatar.UI
 
         private void DisableCalibrationMode(bool save)
         {
-            if (_avatarManager.currentlySpawnedAvatar != null)
-            {
-                if (save)
-                {
-                    _playerInput.CalibrateFullBodyTrackingManual(_avatarManager.currentlySpawnedAvatar);
-
-                    _automaticCalibrationSetting.Value = false;
-                    OnEnableAutomaticCalibrationChanged(false);
-                }
-
-                _avatarManager.currentlySpawnedAvatar.DisableCalibrationMode();
-            }
+            _calibrating = false;
 
             Destroy(_waistSphere);
             Destroy(_leftFootSphere);
             Destroy(_rightFootSphere);
 
-            _calibrating = false;
-            _calibrateButtonText.text = "Calibrate";
-            _clearButtonText.text = "Clear";
-            _clearButton.interactable = _currentAvatarManualCalibration?.isCalibrated ?? false;
+            if (!_avatarManager.currentlySpawnedAvatar) return;
+
+            if (save)
+            {
+                _playerInput.CalibrateFullBodyTrackingManual(_avatarManager.currentlySpawnedAvatar);
+
+                _automaticCalibrationSetting.Value = false;
+                OnEnableAutomaticCalibrationChanged(false);
+            }
+
+            _avatarManager.currentlySpawnedAvatar.DisableCalibrationMode();
+
+            UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.avatar);
         }
 
         private GameObject CreateCalibrationSphere()
@@ -180,7 +178,7 @@ namespace CustomAvatar.UI
         {
             if (_calibrating)
             {
-                if (_playerInput.TryGetUncalibratedPose(DeviceUse.Waist, out Pose waist))
+                if (_playerInput.TryGetUncalibratedPoseForAvatar(DeviceUse.Waist, _avatarManager.currentlySpawnedAvatar, out Pose waist))
                 {
                     _waistSphere.SetActive(true);
                     _waistSphere.transform.position = waist.position;
@@ -191,7 +189,7 @@ namespace CustomAvatar.UI
                     _waistSphere.SetActive(false);
                 }
 
-                if (_playerInput.TryGetUncalibratedPose(DeviceUse.LeftFoot, out Pose leftFoot))
+                if (_playerInput.TryGetUncalibratedPoseForAvatar(DeviceUse.LeftFoot, _avatarManager.currentlySpawnedAvatar, out Pose leftFoot))
                 {
                     _leftFootSphere.SetActive(true);
                     _leftFootSphere.transform.position = leftFoot.position;
@@ -202,7 +200,7 @@ namespace CustomAvatar.UI
                     _leftFootSphere.SetActive(false);
                 }
 
-                if (_playerInput.TryGetUncalibratedPose(DeviceUse.RightFoot, out Pose rightFoot))
+                if (_playerInput.TryGetUncalibratedPoseForAvatar(DeviceUse.RightFoot, _avatarManager.currentlySpawnedAvatar, out Pose rightFoot))
                 {
                     _rightFootSphere.SetActive(true);
                     _rightFootSphere.transform.position = rightFoot.position;

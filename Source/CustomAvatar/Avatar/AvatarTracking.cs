@@ -19,6 +19,7 @@ using System;
 using CustomAvatar.Logging;
 using UnityEngine;
 using Zenject;
+using CustomAvatar.Utilities;
 
 namespace CustomAvatar.Avatar
 {
@@ -29,6 +30,7 @@ namespace CustomAvatar.Avatar
         private IAvatarInput _input;
         private SpawnedAvatar _spawnedAvatar;
         private ILogger<AvatarTracking> _logger = new UnityDebugLogger<AvatarTracking>();
+        private TrackingHelper _trackingHelper;
 
         private Vector3 _prevBodyLocalPosition = Vector3.zero;
 
@@ -36,11 +38,12 @@ namespace CustomAvatar.Avatar
         #pragma warning disable IDE0051
 
         [Inject]
-        private void Inject(ILoggerProvider loggerProvider, IAvatarInput input, SpawnedAvatar spawnedAvatar)
+        private void Inject(ILoggerProvider loggerProvider, IAvatarInput input, SpawnedAvatar spawnedAvatar, TrackingHelper trackingHelper)
         {
             _logger = loggerProvider.CreateLogger<AvatarTracking>(spawnedAvatar.avatar.descriptor.name);
             _input = input;
             _spawnedAvatar = spawnedAvatar;
+            _trackingHelper = trackingHelper;
         }
 
         private void LateUpdate()
@@ -55,20 +58,17 @@ namespace CustomAvatar.Avatar
                 {
                     if (_spawnedAvatar.pelvis)
                     {
-                        _spawnedAvatar.pelvis.position = _spawnedAvatar.avatar.pelvis.position * _spawnedAvatar.scale;
-                        _spawnedAvatar.pelvis.rotation = _spawnedAvatar.avatar.pelvis.rotation;
+                        _trackingHelper.SetLocalPose(_spawnedAvatar.avatar.pelvis.position * _spawnedAvatar.scale, _spawnedAvatar.avatar.pelvis.rotation, _spawnedAvatar.pelvis, transform.parent);
                     }
 
                     if (_spawnedAvatar.leftLeg)
                     {
-                        _spawnedAvatar.leftLeg.position = _spawnedAvatar.avatar.leftLeg.position * _spawnedAvatar.scale;
-                        _spawnedAvatar.leftLeg.rotation = _spawnedAvatar.avatar.leftLeg.rotation;
+                        _trackingHelper.SetLocalPose(_spawnedAvatar.avatar.leftLeg.position * _spawnedAvatar.scale, _spawnedAvatar.avatar.leftLeg.rotation, _spawnedAvatar.leftLeg, transform.parent);
                     }
 
                     if (_spawnedAvatar.rightLeg)
                     {
-                        _spawnedAvatar.rightLeg.position = _spawnedAvatar.avatar.rightLeg.position * _spawnedAvatar.scale;
-                        _spawnedAvatar.rightLeg.rotation = _spawnedAvatar.avatar.rightLeg.rotation;
+                        _trackingHelper.SetLocalPose(_spawnedAvatar.avatar.rightLeg.position * _spawnedAvatar.scale, _spawnedAvatar.avatar.rightLeg.rotation, _spawnedAvatar.rightLeg, transform.parent);
                     }
                 }
                 else
@@ -108,17 +108,7 @@ namespace CustomAvatar.Avatar
         {
             if (!target || !_input.TryGetPose(use, out Pose pose)) return;
 
-            // if avatar transform has a parent, use that as the origin
-            if (transform.parent)
-            {
-                target.position = transform.parent.TransformPoint(pose.position);
-                target.rotation = transform.parent.rotation * pose.rotation;
-            }
-            else
-            {
-                target.position = pose.position;
-                target.rotation = pose.rotation;
-            }
+            _trackingHelper.SetLocalPose(pose.position, pose.rotation, target, transform.parent);
         }
     }
 }

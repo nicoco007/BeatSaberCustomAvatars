@@ -22,7 +22,6 @@ using CustomAvatar.Logging;
 using CustomAvatar.Utilities;
 using System;
 using System.IO;
-using System.Reflection;
 using UnityEngine;
 using Zenject;
 using Object = UnityEngine.Object;
@@ -63,7 +62,8 @@ namespace CustomAvatar.Avatar
         /// <summary>
         /// Whether or not this avatar has one or more full body (pelvis/feet) tracking points
         /// </summary>
-        public readonly bool supportsFullBodyTracking;
+        [Obsolete("This will always be true")]
+        public readonly bool supportsFullBodyTracking = true;
 
         /// <summary>
         /// Whether or not this avatar supports finger tracking.
@@ -89,7 +89,7 @@ namespace CustomAvatar.Avatar
 
         private readonly ILogger<LoadedAvatar> _logger;
 
-        internal LoadedAvatar(string fullPath, GameObject avatarGameObject, ILoggerProvider loggerProvider, DiContainer container)
+        internal LoadedAvatar(string fullPath, GameObject avatarGameObject, ILoggerProvider loggerProvider, IKHelper ikHelper, DiContainer container)
         {
             this.fullPath = fullPath ?? throw new ArgumentNullException(nameof(fullPath));
             prefab = avatarGameObject ? avatarGameObject : throw new ArgumentNullException(nameof(avatarGameObject));
@@ -100,13 +100,6 @@ namespace CustomAvatar.Avatar
             prefab.name = $"LoadedAvatar({descriptor.name})";
 
             _logger = loggerProvider.CreateLogger<LoadedAvatar>(descriptor.name);
-
-            head      = prefab.transform.Find("Head");
-            leftHand  = prefab.transform.Find("LeftHand");
-            rightHand = prefab.transform.Find("RightHand");
-            pelvis    = prefab.transform.Find("Pelvis");
-            leftLeg   = prefab.transform.Find("LeftLeg");
-            rightLeg  = prefab.transform.Find("RightLeg");
 
             #pragma warning disable CS0618
             VRIKManager vrikManager = prefab.GetComponentInChildren<VRIKManager>();
@@ -149,6 +142,18 @@ namespace CustomAvatar.Avatar
 
             if (vrikManager)
             {
+                ikHelper.CreateOffsetTargetsIfMissing(vrikManager, prefab.transform);
+            }
+
+            head      = prefab.transform.Find("Head");
+            leftHand  = prefab.transform.Find("LeftHand");
+            rightHand = prefab.transform.Find("RightHand");
+            pelvis    = prefab.transform.Find("Pelvis");
+            leftLeg   = prefab.transform.Find("LeftLeg");
+            rightLeg  = prefab.transform.Find("RightLeg");
+
+            if (vrikManager)
+            {
                 if (vrikManager.references_root != vrikManager.transform)
                 {
                     _logger.Warning("VRIKManager is not on the root reference transform; this may cause unexpected issues");
@@ -165,11 +170,10 @@ namespace CustomAvatar.Avatar
             var poseManager = prefab.GetComponentInChildren<PoseManager>();
 
             isIKAvatar = vrikManager;
-            supportsFullBodyTracking = pelvis || leftLeg || rightLeg;
             supportsFingerTracking = poseManager && poseManager.isValid;
 
             eyeHeight = GetEyeHeight();
-            armSpan = GetArmSpan();
+            armSpan = GetArmSpan(vrikManager);
         }
 
         public void Dispose()
@@ -191,7 +195,11 @@ namespace CustomAvatar.Avatar
             }
 
             // many avatars rely on this being global because their root position isn't at (0, 0, 0)
-            return head.position.y;
+            float eyeHeight = head.position.y;
+
+            _logger.Trace($"Measured eye height: {eyeHeight} m");
+
+            return eyeHeight;
         }
 
         private void FixTrackingReferences(VRIKManager vrikManager)
@@ -233,22 +241,21 @@ namespace CustomAvatar.Avatar
         /// Measure avatar arm span. Since the player's measured arm span is actually from palm to palm
         /// (approximately) due to the way the controllers are held, this isn't "true" arm span.
         /// </summary>
-        private float GetArmSpan()
+        private float GetArmSpan(VRIKManager vrikManager)
         {
-            // TODO using animator here probably isn't a good idea, use VRIKManager references instead?
-            Animator animator = prefab.GetComponentInChildren<Animator>();
+            if (!vrikManager) return BeatSaberUtilities.kDefaultPlayerArmSpan;
 
-            if (!animator) return BeatSaberUtilities.kDefaultPlayerArmSpan;
+            Transform leftShoulder = vrikManager.references_leftShoulder;
+            Transform leftUpperArm = vrikManager.references_leftUpperArm;
+            Transform leftLowerArm = vrikManager.references_leftForearm;
+            Transform leftWrist    = vrikManager.references_leftHand;
 
-            Transform leftShoulder = animator.GetBoneTransform(HumanBodyBones.LeftShoulder);
-            Transform leftUpperArm = animator.GetBoneTransform(HumanBodyBones.LeftUpperArm);
-            Transform leftLowerArm = animator.GetBoneTransform(HumanBodyBones.LeftLowerArm);
+            Transform rightShoulder = vrikManager.references_rightShoulder;
+            Transform rightUpperArm = vrikManager.references_rightUpperArm;
+            Transform rightLowerArm = vrikManager.references_rightForearm;
+            Transform rightWrist    = vrikManager.references_rightHand;
 
-            Transform rightShoulder = animator.GetBoneTransform(HumanBodyBones.RightShoulder);
-            Transform rightUpperArm = animator.GetBoneTransform(HumanBodyBones.RightUpperArm);
-            Transform rightLowerArm = animator.GetBoneTransform(HumanBodyBones.RightLowerArm);
-
-            if (!leftShoulder || !leftUpperArm || !leftLowerArm || !rightShoulder || !rightUpperArm || !rightLowerArm)
+            if (!leftShoulder || !leftUpperArm || !leftLowerArm || !leftWrist || !rightShoulder || !rightUpperArm || !rightLowerArm || !rightWrist)
             {
                 _logger.Warning("Could not calculate avatar arm span due to missing bones");
                 return BeatSaberUtilities.kDefaultPlayerArmSpan;
@@ -260,11 +267,13 @@ namespace CustomAvatar.Avatar
                 return BeatSaberUtilities.kDefaultPlayerArmSpan;
             }
 
-            float leftArmLength = Vector3.Distance(leftShoulder.position, leftUpperArm.position) + Vector3.Distance(leftUpperArm.position, leftLowerArm.position) + Vector3.Distance(leftLowerArm.position, leftHand.position);
-            float rightArmLength = Vector3.Distance(rightShoulder.position, rightUpperArm.position) + Vector3.Distance(rightUpperArm.position, rightLowerArm.position) + Vector3.Distance(rightLowerArm.position, rightHand.position);
+            float leftArmLength = Vector3.Distance(leftShoulder.position, leftUpperArm.position) + Vector3.Distance(leftUpperArm.position, leftLowerArm.position) + Vector3.Distance(leftLowerArm.position, leftWrist.position) + Vector3.Distance(leftWrist.position, leftHand.position);
+            float rightArmLength = Vector3.Distance(rightShoulder.position, rightUpperArm.position) + Vector3.Distance(rightUpperArm.position, rightLowerArm.position) + Vector3.Distance(rightLowerArm.position, rightWrist.position) + Vector3.Distance(rightWrist.position, rightHand.position);
             float shoulderToShoulderDistance = Vector3.Distance(leftShoulder.position, rightShoulder.position);
 
             float totalLength = leftArmLength + shoulderToShoulderDistance + rightArmLength;
+
+            _logger.Trace($"Measured arm span: {totalLength} m");
 
             return totalLength;
         }
@@ -304,98 +313,75 @@ namespace CustomAvatar.Avatar
 
             if (!(ikManager is IKManagerAdvanced ikManagerAdvanced)) return;
 
-            FieldInfo[] fieldInfos = typeof(IKManagerAdvanced).GetFields(BindingFlags.Instance | BindingFlags.Public);
-            foreach (FieldInfo fieldInfo in fieldInfos)
-            {
-                string[] propertyName = fieldInfo.Name.Split('_');
-                var value = fieldInfo.GetValue(ikManagerAdvanced);
+            vrikManager.solver_spine_pelvisTarget           = ikManagerAdvanced.Spine_pelvisTarget;
+            vrikManager.solver_spine_pelvisPositionWeight   = ikManagerAdvanced.Spine_pelvisPositionWeight;
+            vrikManager.solver_spine_pelvisRotationWeight   = ikManagerAdvanced.Spine_pelvisRotationWeight;
+            vrikManager.solver_spine_positionWeight         = ikManagerAdvanced.Head_positionWeight;
+            vrikManager.solver_spine_rotationWeight         = ikManagerAdvanced.Head_rotationWeight;
+            vrikManager.solver_spine_chestGoal              = ikManagerAdvanced.Spine_chestGoal;
+            vrikManager.solver_spine_chestGoalWeight        = ikManagerAdvanced.Spine_chestGoalWeight;
+            vrikManager.solver_spine_minHeadHeight          = ikManagerAdvanced.Spine_minHeadHeight;
+            vrikManager.solver_spine_bodyPosStiffness       = ikManagerAdvanced.Spine_bodyPosStiffness;
+            vrikManager.solver_spine_bodyRotStiffness       = ikManagerAdvanced.Spine_bodyRotStiffness;
+            vrikManager.solver_spine_neckStiffness          = ikManagerAdvanced.Spine_neckStiffness;
+            vrikManager.solver_spine_chestClampWeight       = ikManagerAdvanced.Spine_chestClampWeight;
+            vrikManager.solver_spine_headClampWeight        = ikManagerAdvanced.Spine_headClampWeight;
+            vrikManager.solver_spine_maintainPelvisPosition = ikManagerAdvanced.Spine_maintainPelvisPosition;
+            vrikManager.solver_spine_maxRootAngle           = ikManagerAdvanced.Spine_maxRootAngle;
 
-                if (propertyName.Length > 1)
-                {
-                    if ("Spine" == propertyName[0])
-                    {
-                        SetField(vrikManager, "solver_spine_" + propertyName[1], value);
-                    }
-                    else if ("LeftArm" == propertyName[0])
-                    {
-                        SetField(vrikManager, "solver_leftArm_" + propertyName[1], value);
-                    }
-                    else if ("RightArm" == propertyName[0])
-                    {
-                        SetField(vrikManager, "solver_rightArm_" + propertyName[1], value);
-                    }
-                    else if ("LeftLeg" == propertyName[0])
-                    {
-                        SetField(vrikManager, "solver_leftLeg_" + propertyName[1], value);
-                    }
-                    else if ("RightLeg" == propertyName[0])
-                    {
-                        SetField(vrikManager, "solver_rightLeg_" + propertyName[1], value);
-                    }
-                    else if ("Locomotion" == propertyName[0])
-                    {
-                        SetField(vrikManager, "solver_locomotion_" + propertyName[1], value);
-                    }
-                }
-            }
+            vrikManager.solver_leftArm_bendGoal               = ikManagerAdvanced.LeftArm_bendGoal;
+            vrikManager.solver_leftArm_positionWeight         = ikManagerAdvanced.LeftArm_positionWeight;
+            vrikManager.solver_leftArm_rotationWeight         = ikManagerAdvanced.LeftArm_rotationWeight;
+            vrikManager.solver_leftArm_shoulderRotationMode   = ikManagerAdvanced.LeftArm_shoulderRotationMode;
+            vrikManager.solver_leftArm_shoulderRotationWeight = ikManagerAdvanced.LeftArm_shoulderRotationWeight;
+            vrikManager.solver_leftArm_bendGoalWeight         = ikManagerAdvanced.LeftArm_bendGoalWeight;
+            vrikManager.solver_leftArm_swivelOffset           = ikManagerAdvanced.LeftArm_swivelOffset;
+            vrikManager.solver_leftArm_wristToPalmAxis        = ikManagerAdvanced.LeftArm_wristToPalmAxis;
+            vrikManager.solver_leftArm_palmToThumbAxis        = ikManagerAdvanced.LeftArm_palmToThumbAxis;
+
+            vrikManager.solver_rightArm_bendGoal               = ikManagerAdvanced.RightArm_bendGoal;
+            vrikManager.solver_rightArm_positionWeight         = ikManagerAdvanced.RightArm_positionWeight;
+            vrikManager.solver_rightArm_rotationWeight         = ikManagerAdvanced.RightArm_rotationWeight;
+            vrikManager.solver_rightArm_shoulderRotationMode   = ikManagerAdvanced.RightArm_shoulderRotationMode;
+            vrikManager.solver_rightArm_shoulderRotationWeight = ikManagerAdvanced.RightArm_shoulderRotationWeight;
+            vrikManager.solver_rightArm_bendGoalWeight         = ikManagerAdvanced.RightArm_bendGoalWeight;
+            vrikManager.solver_rightArm_swivelOffset           = ikManagerAdvanced.RightArm_swivelOffset;
+            vrikManager.solver_rightArm_wristToPalmAxis        = ikManagerAdvanced.RightArm_wristToPalmAxis;
+            vrikManager.solver_rightArm_palmToThumbAxis        = ikManagerAdvanced.RightArm_palmToThumbAxis;
+
+            vrikManager.solver_leftLeg_target         = ikManagerAdvanced.LeftLeg_target;
+            vrikManager.solver_leftLeg_positionWeight = ikManagerAdvanced.LeftLeg_positionWeight;
+            vrikManager.solver_leftLeg_rotationWeight = ikManagerAdvanced.LeftLeg_rotationWeight;
+            vrikManager.solver_leftLeg_bendGoal       = ikManagerAdvanced.LeftLeg_bendGoal;
+            vrikManager.solver_leftLeg_bendGoalWeight = ikManagerAdvanced.LeftLeg_bendGoalWeight;
+            vrikManager.solver_leftLeg_swivelOffset = ikManagerAdvanced.LeftLeg_swivelOffset;
+
+            vrikManager.solver_rightLeg_target         = ikManagerAdvanced.RightLeg_target;
+            vrikManager.solver_rightLeg_positionWeight = ikManagerAdvanced.RightLeg_positionWeight;
+            vrikManager.solver_rightLeg_rotationWeight = ikManagerAdvanced.RightLeg_rotationWeight;
+            vrikManager.solver_rightLeg_bendGoal       = ikManagerAdvanced.RightLeg_bendGoal;
+            vrikManager.solver_rightLeg_bendGoalWeight = ikManagerAdvanced.RightLeg_bendGoalWeight;
+            vrikManager.solver_rightLeg_swivelOffset   = ikManagerAdvanced.RightLeg_swivelOffset;
+
+            vrikManager.solver_locomotion_weight                = ikManagerAdvanced.Locomotion_weight;
+            vrikManager.solver_locomotion_footDistance          = ikManagerAdvanced.Locomotion_footDistance;
+            vrikManager.solver_locomotion_stepThreshold         = ikManagerAdvanced.Locomotion_stepThreshold;
+            vrikManager.solver_locomotion_angleThreshold        = ikManagerAdvanced.Locomotion_angleThreshold;
+            vrikManager.solver_locomotion_comAngleMlp           = ikManagerAdvanced.Locomotion_comAngleMlp;
+            vrikManager.solver_locomotion_maxVelocity           = ikManagerAdvanced.Locomotion_maxVelocity;
+            vrikManager.solver_locomotion_velocityFactor        = ikManagerAdvanced.Locomotion_velocityFactor;
+            vrikManager.solver_locomotion_maxLegStretch         = ikManagerAdvanced.Locomotion_maxLegStretch;
+            vrikManager.solver_locomotion_rootSpeed             = ikManagerAdvanced.Locomotion_rootSpeed;
+            vrikManager.solver_locomotion_stepSpeed             = ikManagerAdvanced.Locomotion_stepSpeed;
+            vrikManager.solver_locomotion_stepHeight            = ikManagerAdvanced.Locomotion_stepHeight;
+            vrikManager.solver_locomotion_heelHeight            = ikManagerAdvanced.Locomotion_heelHeight;
+            vrikManager.solver_locomotion_relaxLegTwistMinAngle = ikManagerAdvanced.Locomotion_relaxLegTwistMinAngle;
+            vrikManager.solver_locomotion_relaxLegTwistSpeed    = ikManagerAdvanced.Locomotion_relaxLegTwistSpeed;
+            vrikManager.solver_locomotion_stepInterpolation     = ikManagerAdvanced.Locomotion_stepInterpolation;
+            vrikManager.solver_locomotion_offset                = ikManagerAdvanced.Locomotion_offset;
+            vrikManager.solver_locomotion_onLeftFootstep        = ikManagerAdvanced.Locomotion_onLeftFootstep;
+            vrikManager.solver_locomotion_onRightFootstep       = ikManagerAdvanced.Locomotion_onRightFootstep;
         }
         #pragma warning restore CS0618
-
-        private void SetField(object target, string fieldName, object value)
-        {
-            if (target == null) throw new NullReferenceException(nameof(target));
-            if (fieldName == null) throw new NullReferenceException(nameof(fieldName));
-
-            try
-            {
-                _logger.Trace($"Set {fieldName} = {value}");
-
-                Type targetObjectType = target.GetType();
-                FieldInfo field = targetObjectType.GetField(fieldName);
-
-                if (field == null)
-                {
-                    _logger.Warning($"{fieldName} does not exist on {targetObjectType.FullName}");
-                    return;
-                }
-
-                Type sourceType = value?.GetType();
-                Type targetType = field.FieldType;
-
-                if (value == null && targetType.IsValueType && Nullable.GetUnderlyingType(targetType) == null)
-                {
-                    _logger.Warning($"Tried setting non-nullable type {targetType.FullName} to null");
-                    return;
-                }
-
-                if (sourceType != null)
-                {
-                    if (sourceType != targetType)
-                    {
-                        _logger.Warning($"Converting value from {sourceType.FullName} to {targetType.FullName}");
-                    }
-
-                    if (sourceType.IsEnum)
-                    {
-                        Type sourceUnderlyingType = Enum.GetUnderlyingType(sourceType);
-                        _logger.Trace($"Underlying type for source {sourceType.FullName} is {sourceUnderlyingType.FullName}");
-                    }
-                }
-
-                if (targetType.IsEnum)
-                {
-                    Type targetUnderlyingType = Enum.GetUnderlyingType(targetType);
-                    _logger.Trace($"Underlying type for target {targetType.FullName} is {targetUnderlyingType.FullName}");
-
-                    targetType = targetUnderlyingType;
-                }
-
-                field.SetValue(target, Convert.ChangeType(value, targetType));
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex);
-            }
-        }
     }
 }

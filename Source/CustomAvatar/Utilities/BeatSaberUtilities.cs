@@ -122,6 +122,16 @@ namespace CustomAvatar.Utilities
             pose.position += pose.rotation * position;
         }
 
+        /// <summary>
+        /// Set the local player's height.
+        /// </summary>
+        /// <param name="height">The player's height, in meters</param>
+        public void SetPlayerHeight(float height)
+        {
+            PlayerSpecificSettings currentSettings = _playerDataModel.playerData.playerSpecificSettings;
+            _playerDataModel.playerData.SetPlayerSpecificSettings(currentSettings.CopyWith(null, null, height, false));
+        }
+
         private void OnRoomCenterChanged()
         {
             roomCenterChanged?.Invoke(_mainSettingsModel.roomCenter);
