@@ -21,6 +21,8 @@ namespace CustomAvatar.Utilities
 {
     internal static class ReflectionExtensions
     {
+        private static readonly BindingFlags kAllBindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
+
         internal static TResult GetPrivateField<TResult>(this object obj, string fieldName)
         {
             if (obj == null)
@@ -28,11 +30,11 @@ namespace CustomAvatar.Utilities
                 throw new ArgumentNullException(nameof(obj));
             }
 
-            FieldInfo field = obj.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Static);
+            FieldInfo field = obj.GetType().GetField(fieldName, kAllBindingFlags);
 
             if (field == null)
             {
-                throw new InvalidOperationException($"Private instance field '{fieldName}' does not exist on {obj.GetType().FullName}");
+                throw new InvalidOperationException($"Field '{fieldName}' not found on {obj.GetType().FullName}");
             }
 
             return (TResult) field.GetValue(obj);
@@ -45,31 +47,33 @@ namespace CustomAvatar.Utilities
                 throw new ArgumentNullException(nameof(obj));
             }
 
-            FieldInfo field = typeof(TSubject).GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Static);
+            FieldInfo field = typeof(TSubject).GetField(fieldName, kAllBindingFlags);
 
             if (field == null)
             {
-                throw new InvalidOperationException($"Private instance field '{fieldName}' does not exist on {typeof(TSubject).FullName}");
+                throw new InvalidOperationException($"Field '{fieldName}' not found on {typeof(TSubject).FullName}");
             }
 
             field.SetValue(obj, value);
         }
 
-        internal static void InvokePrivateMethod<TSubject>(this TSubject obj, string methodName, params object[] args)
+        internal static Func<TSubject, TResult> CreatePrivatePropertyGetter<TSubject, TResult>(string propertyName)
         {
-            if (obj == null)
+            PropertyInfo property = typeof(TSubject).GetProperty(propertyName, kAllBindingFlags);
+
+            if (property == null)
             {
-                throw new ArgumentNullException(nameof(obj));
+                throw new InvalidOperationException($"Property '{propertyName}' does not exist on '{typeof(TSubject).FullName}'");
             }
 
-            MethodInfo method = typeof(TSubject).GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo method = property.GetMethod;
 
             if (method == null)
             {
-                throw new InvalidOperationException($"Private instance method '{methodName}' does not exist on {typeof(TSubject).FullName}");
+                throw new InvalidOperationException($"Property '{propertyName}' does not have a getter");
             }
 
-            method.Invoke(obj, args);
+            return CreateDelegate<Func<TSubject, TResult>>(method);
         }
 
         internal static TDelegate CreatePrivateMethodDelegate<TDelegate>(this Type type, string methodName) where TDelegate : Delegate
@@ -79,14 +83,24 @@ namespace CustomAvatar.Utilities
                 throw new ArgumentNullException(nameof(type));
             }
 
-            MethodInfo method = type.GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic);
+            MethodInfo method = type.GetMethod(methodName, kAllBindingFlags);
 
             if (method == null)
             {
-                throw new InvalidOperationException($"Method '{methodName}' does not exist on {type.FullName}");
+                throw new InvalidOperationException($"Method '{methodName}' does not exist on '{type.FullName}'");
             }
 
-            return (TDelegate) Delegate.CreateDelegate(typeof(TDelegate), method);
+            return CreateDelegate<TDelegate>(method);
+        }
+
+        private static TDelegate CreateDelegate<TDelegate>(MethodInfo method) where TDelegate : Delegate
+        {
+            if (method == null)
+            {
+                throw new ArgumentNullException(nameof(method));
+            }
+
+            return (TDelegate)Delegate.CreateDelegate(typeof(TDelegate), method);
         }
     }
 }

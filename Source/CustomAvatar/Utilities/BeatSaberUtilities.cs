@@ -38,7 +38,7 @@ namespace CustomAvatar.Utilities
         private readonly Settings _settings;
         private readonly IVRPlatformHelper _vrPlatformHelper;
 
-        private OpenVRHelper.VRControllerManufacturerName _vrControllerManufacturerName;
+        private Func<OpenVRHelper, OpenVRHelper.VRControllerManufacturerName> _vrControllerManufacturerNameGetter;
 
         internal BeatSaberUtilities(MainSettingsModelSO mainSettingsModel, PlayerDataModel playerDataModel, Settings settings, IVRPlatformHelper vrPlatformHelper)
         {
@@ -53,10 +53,7 @@ namespace CustomAvatar.Utilities
             _mainSettingsModel.roomCenter.didChangeEvent   += OnRoomCenterChanged;
             _mainSettingsModel.roomRotation.didChangeEvent += OnRoomRotationChanged;
 
-            if (_vrPlatformHelper is OpenVRHelper openVRHelper)
-            {
-                _vrControllerManufacturerName = openVRHelper.GetPrivateField<OpenVRHelper.VRControllerManufacturerName>("_vrControllerManufacturerName");
-            }
+            _vrControllerManufacturerNameGetter = ReflectionExtensions.CreatePrivatePropertyGetter<OpenVRHelper, OpenVRHelper.VRControllerManufacturerName>("vrControllerManufacturerName");
         }
 
         public void Dispose()
@@ -81,7 +78,7 @@ namespace CustomAvatar.Utilities
         }
 
         /// <summary>
-        /// Similar to the various implementations of <see cref="IVRPlatformHelper.AdjustControllerTransform(UnityEngine.XR.XRNode, Transform, Vector3, Vector3)"/> except it returns a pose instead of adjusting a transform.
+        /// Similar to the various implementations of <see cref="IVRPlatformHelper.AdjustControllerTransform(UnityEngine.XR.XRNode, Transform, Vector3, Vector3)"/> except it updates a pose instead of adjusting a transform.
         /// </summary>
         public void AdjustPlatformSpecificControllerPose(DeviceUse use, ref Pose pose)
         {
@@ -97,7 +94,7 @@ namespace CustomAvatar.Utilities
             }
             else if (_vrPlatformHelper.vrPlatformSDK == VRPlatformSDK.OpenVR)
             {
-                if (_vrControllerManufacturerName == OpenVRHelper.VRControllerManufacturerName.Valve)
+                if (_vrControllerManufacturerNameGetter((OpenVRHelper)_vrPlatformHelper) == OpenVRHelper.VRControllerManufacturerName.Valve)
                 {
                     rotation += new Vector3(-16.3f, 0f, 0f);
                     position += new Vector3(0f, 0.022f, -0.01f);
