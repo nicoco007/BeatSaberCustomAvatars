@@ -7,7 +7,7 @@ namespace CustomAvatar.Utilities
     {
         public static bool IsSceneInStackAndActive(this GameScenesManager gameScenesManager, string sceneName)
         {
-            if (!gameScenesManager.IsSceneInStack(sceneName)) return false;
+            if (!gameScenesManager.GetCurrentlyLoadedSceneNames().Contains(sceneName)) return false;
 
             Scene scene = SceneManager.GetSceneByName(sceneName);
 
