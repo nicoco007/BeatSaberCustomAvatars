@@ -3,6 +3,7 @@ using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using UnityEngine;
 using Zenject;
 
 namespace CustomAvatar.Zenject.Internal
@@ -14,6 +15,7 @@ namespace CustomAvatar.Zenject.Internal
         private static bool _shouldInstall;
 
         private static readonly List<InstallerRegistration> _installerRegistrations = new List<InstallerRegistration>();
+        private static readonly List<Type> _typesToExpose = new List<Type>();
 
         private static ILogger<ZenjectHelper> _logger;
 
@@ -22,6 +24,7 @@ namespace CustomAvatar.Zenject.Internal
             _logger = new IPALogger<ZenjectHelper>(logger);
 
             PatchInstallInstallers(harmony);
+            PatchInstallBindings(harmony);
         }
 
         public static InstallerRegistration Register<TInstaller>() where TInstaller : Installer
@@ -33,12 +36,25 @@ namespace CustomAvatar.Zenject.Internal
             return registration;
         }
 
+        public static void ExposeSceneBinding<T>() where T : MonoBehaviour
+        {
+            _typesToExpose.Add(typeof(T));
+        }
+
         private static void PatchInstallInstallers(Harmony harmony)
         {
             MethodInfo methodToPatch = typeof(Context).GetMethod("InstallInstallers", BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[0], null);
             MethodInfo patch = typeof(ZenjectHelper).GetMethod(nameof(InstallInstallers), BindingFlags.NonPublic | BindingFlags.Static);
 
             harmony.Patch(methodToPatch, null, new HarmonyMethod(patch));
+        }
+
+        private static void PatchInstallBindings(Harmony harmony)
+        {
+            MethodInfo methodToPatch = typeof(Context).GetMethod("InstallSceneBindings", BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(List<MonoBehaviour>) }, null);
+            MethodInfo patch = typeof(ZenjectHelper).GetMethod(nameof(InstallSceneBindings), BindingFlags.NonPublic | BindingFlags.Static);
+
+            harmony.Patch(methodToPatch, new HarmonyMethod(patch));
         }
 
         private static void InstallInstallers(Context __instance)
@@ -67,6 +83,27 @@ namespace CustomAvatar.Zenject.Internal
                 if (installerRegistration.TryInstallInto(__instance))
                 {
                     _logger.Trace($"Installed {installerRegistration.installer.FullName}");
+                }
+            }
+        }
+
+        private static void InstallSceneBindings(Context __instance, List<MonoBehaviour> injectableMonoBehaviours)
+        {
+            foreach (MonoBehaviour monoBehaviour in injectableMonoBehaviours)
+            {
+                Type type = monoBehaviour.GetType();
+
+                if (_typesToExpose.Contains(type))
+                {
+                    if (!__instance.Container.HasBinding(type))
+                    {
+                        __instance.Container.Bind(type).FromInstance(monoBehaviour).AsSingle();
+                        _logger.Trace($"Exposed MonoBehaviour '{type.FullName}' in context '{__instance.name}'");
+                    }
+                    else
+                    {
+                        _logger.Warning($"Not exposing MonoBehaviour '{type.FullName}' in context '{__instance.name}' since a binding already exists");
+                    }
                 }
             }
         }
