@@ -20,7 +20,7 @@ using UnityEngine;
 
 namespace CustomAvatar.Avatar
 {
-    internal class AvatarInfo
+    internal readonly struct AvatarInfo
     {
         /// <summary>
         /// Name of the avatar.
@@ -87,21 +87,7 @@ namespace CustomAvatar.Avatar
             created = fileInfo.CreationTimeUtc;
             lastModified = fileInfo.LastWriteTimeUtc;
 
-            timestamp = DateTime.Now;
-        }
-
-        public static bool operator ==(AvatarInfo left, AvatarInfo right)
-        {
-            if (ReferenceEquals(left, null)) return false;
-
-            return left.Equals(right);
-        }
-
-        public static bool operator !=(AvatarInfo left, AvatarInfo right)
-        {
-            if (ReferenceEquals(left, null)) return false;
-
-            return !left.Equals(right);
+            timestamp = DateTime.UtcNow;
         }
 
         public bool IsForFile(string filePath)
@@ -122,21 +108,7 @@ namespace CustomAvatar.Avatar
 
         public override int GetHashCode()
         {
-            int hash = 23;
-
-            var fields = new object[] { name, author, icon, fileName, fileSize, created, lastModified, timestamp };
-
-            unchecked
-            {
-                foreach (object field in fields)
-                {
-                    if (field == null) continue;
-
-                    hash = hash * 17 + field.GetHashCode();
-                }
-            }
-
-            return hash;
+            return (name, author, icon, fileName, fileSize, created, lastModified, timestamp).GetHashCode();
         }
     }
 }

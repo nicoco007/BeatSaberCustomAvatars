@@ -19,7 +19,7 @@ using UnityEngine;
 
 namespace CustomAvatar.UI
 {
-    internal class AvatarListItem
+    internal readonly struct AvatarListItem
     {
         public readonly string name;
         public readonly string author;
@@ -37,7 +37,9 @@ namespace CustomAvatar.UI
         internal AvatarListItem(string name, Texture2D icon)
         {
             this.name = name;
+            this.author = null;
             this.icon = icon;
+            this.fileName = null;
         }
     }
 }
