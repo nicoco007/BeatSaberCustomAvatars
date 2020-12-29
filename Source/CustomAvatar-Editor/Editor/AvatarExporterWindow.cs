@@ -92,7 +92,6 @@ namespace CustomAvatar.Editor
 
             string destinationFileName = Path.GetFileName(destinationPath);
             string tempFolder = Application.temporaryCachePath;
-            string tempAssetBundlePath = Path.Combine(Application.temporaryCachePath, destinationFileName);
             string prefabPath = Path.Combine("Assets", "_CustomAvatar.prefab");
 
             PrefabUtility.SaveAsPrefabAsset(avatar.gameObject, prefabPath);
@@ -108,23 +107,41 @@ namespace CustomAvatar.Editor
             BuildTargetGroup selectedBuildTargetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
             BuildTarget activeBuildTarget = EditorUserBuildSettings.activeBuildTarget;
 
-            AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(tempFolder, new[] { assetBundleBuild }, BuildAssetBundleOptions.None, EditorUserBuildSettings.activeBuildTarget);
-
+            AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(tempFolder, new[] { assetBundleBuild }, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
+            
             // switch back to what it was before creating the asset bundle
             EditorUserBuildSettings.SwitchActiveBuildTarget(selectedBuildTargetGroup, activeBuildTarget);
 
-            if (manifest == null)
+            if (manifest != null)
+            {
+                string tempAssetBundlePath = Path.Combine(tempFolder, destinationFileName);
+
+                if (!File.Exists(tempAssetBundlePath))
+                {
+                    // Unity on Linux saves to a lowercase file name for some reason
+                    tempAssetBundlePath = Path.Combine(tempFolder, destinationFileName.ToLower());
+                }
+
+                try
+                {
+                    File.Copy(tempAssetBundlePath, destinationPath, true);
+
+                    EditorUtility.DisplayDialog("Export Successful!", $"{avatar.name} was exported successfully!", "OK");
+                }
+                catch (IOException ex)
+                {
+                    Debug.LogError(ex);
+
+                    EditorUtility.DisplayDialog("Export Failed", $"Could not copy avatar to selected folder. Please check the Unity console for more information.", "OK");
+                }
+            }
+            else
             {
                 EditorUtility.DisplayDialog("Export Failed", "Failed to create asset bundle! Please check the Unity console for more information.", "OK");
-                return;
             }
-
-            File.Copy(tempAssetBundlePath, destinationPath, true);
             
             AssetDatabase.DeleteAsset(prefabPath);
             AssetDatabase.Refresh();
-
-            EditorUtility.DisplayDialog("Export Successful!", $"{avatar.name} was exported successfully!", "OK");
         }
     }
 }
