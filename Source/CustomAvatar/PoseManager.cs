@@ -201,9 +201,11 @@ namespace CustomAvatar
                 Pose openPose = (Pose)field.GetValue(this);
                 Pose closedPose = (Pose)closed.GetValue(this);
 
+                Transform boneTransform = animator.GetBoneTransform(bone);
+		
+                if (!boneTransform) continue;
                 if (openPose.Equals(Pose.identity) || closedPose.Equals(Pose.identity)) return;
 
-                Transform boneTransform = animator.GetBoneTransform(bone);
                 boneTransform.localPosition = Vector3.Lerp(openPose.position, closedPose.position, t);
                 boneTransform.localRotation = Quaternion.Slerp(openPose.rotation, closedPose.rotation, t);
             }
