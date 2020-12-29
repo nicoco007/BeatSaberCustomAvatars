@@ -62,11 +62,9 @@ namespace CustomAvatar.Utilities
             playerHeightChanged?.Invoke(playerHeight);
         }
 
-        private static void CreateOrUpdateMirrorCamera(MirrorRendererSO __instance)
+        private static void CreateOrUpdateMirrorCamera(Camera ____mirrorCamera)
         {
-            Camera mirrorCamera = new Traverse(__instance).Field<Camera>("_mirrorCamera").Value;
-
-            mirrorCamera.cullingMask |= AvatarLayers.kAllLayersMask;
+            ____mirrorCamera.cullingMask |= AvatarLayers.kAllLayersMask;
         }
     }
 }
