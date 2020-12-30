@@ -21,6 +21,8 @@ namespace CustomAvatar.Lighting
 {
     internal class TwoSidedLightingController : MonoBehaviour
     {
+        private static readonly Color kAmbientColor = new Color(0.8f, 0.8f, 1);
+
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
 
@@ -28,31 +30,27 @@ namespace CustomAvatar.Lighting
         {
             name = nameof(TwoSidedLightingController);
 
-            AddLight(Vector3.zero, Quaternion.Euler(135, 0, 0), LightType.Directional, new Color(1, 1, 1), 0.8f, 25); // front
-            AddLight(Vector3.zero, Quaternion.Euler(45, 0, 0), LightType.Directional, new Color(1, 1, 1), 0.8f, 25); // back
+            AddLight(Quaternion.Euler(135, 0, 0), kAmbientColor, 0.9f); // front
+            AddLight(Quaternion.Euler(45, 0, 0), kAmbientColor, 0.9f); // back
         }
         
         #pragma warning disable IDE0051
         #endregion
 
-        private void AddLight(Vector3 position, Quaternion rotation, LightType type, Color color, float intensity, float range)
+        private void AddLight(Quaternion rotation, Color color, float intensity)
         {
             var container = new GameObject("Light");
             var light = container.AddComponent<Light>();
 
-            light.type = type;
+            light.type = LightType.Directional;
             light.color = color;
             light.shadows = LightShadows.Soft;
             light.intensity = intensity;
-            light.range = range;
             light.cullingMask = AvatarLayers.kAllLayersMask;
             light.shadowStrength = 1;
-            light.shadowBias = 0.05f;
-            light.shadowNormalBias = 0.4f;
-            light.shadowNearPlane = 0.2f;
 
             container.transform.SetParent(transform, false);
-            container.transform.position = position;
+            container.transform.position = Vector3.zero;
             container.transform.rotation = rotation;
         }
     }
