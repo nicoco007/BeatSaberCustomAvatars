@@ -98,7 +98,7 @@ namespace CustomAvatar.Lighting
 
             _directionalLights = new List<(DirectionalLight, Light)>();
 
-            foreach (var directionalLight in DirectionalLight.lights)
+            foreach (var directionalLight in DirectionalLight.lights.OrderBy(l => l.transform.position.sqrMagnitude))
             {
                 Light light = new GameObject($"DynamicDirectionalLight({directionalLight.name})").AddComponent<Light>();
 
@@ -108,6 +108,7 @@ namespace CustomAvatar.Lighting
                 light.cullingMask = AvatarLayers.kAllLayersMask;
                 light.shadows = LightShadows.Soft;
                 light.shadowStrength = 1;
+                light.renderMode = LightRenderMode.Auto;
 
                 light.transform.parent = transform;
                 light.transform.position = Vector3.zero;
@@ -117,6 +118,7 @@ namespace CustomAvatar.Lighting
             }
 
             _logger.Trace($"Created {_lights.Sum(l => l?.Count)} DynamicTubeBloomPrePassLights");
+            _logger.Trace($"Created {_directionalLights.Count} DynamicDirectionalLight");
         }
 
         private void OnSetColorForId(int id, Color color)

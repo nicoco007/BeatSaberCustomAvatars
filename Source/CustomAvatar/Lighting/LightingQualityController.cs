@@ -31,36 +31,31 @@ namespace CustomAvatar.Lighting
                 case LightingQuality.VeryLow:
                     QualitySettings.shadows = ShadowQuality.Disable;
                     QualitySettings.shadowResolution = ShadowResolution.Low;
-                    QualitySettings.shadowCascades = 0;
                     QualitySettings.pixelLightCount = 0;
                     break;
 
                 case LightingQuality.Low:
                     QualitySettings.shadows = ShadowQuality.HardOnly;
                     QualitySettings.shadowResolution = ShadowResolution.Low;
-                    QualitySettings.shadowCascades = 0;
-                    QualitySettings.pixelLightCount = 1;
+                    QualitySettings.pixelLightCount = 2;
                     break;
 
                 case LightingQuality.Medium:
-                    QualitySettings.shadows = ShadowQuality.All;
+                    QualitySettings.shadows = ShadowQuality.HardOnly;
                     QualitySettings.shadowResolution = ShadowResolution.Medium;
-                    QualitySettings.shadowCascades = 2;
-                    QualitySettings.pixelLightCount = 2;
+                    QualitySettings.pixelLightCount = 4;
                     break;
 
                 case LightingQuality.High:
                     QualitySettings.shadows = ShadowQuality.All;
                     QualitySettings.shadowResolution = ShadowResolution.High;
-                    QualitySettings.shadowCascades = 2;
-                    QualitySettings.pixelLightCount = 3;
+                    QualitySettings.pixelLightCount = 6;
                     break;
 
                 case LightingQuality.VeryHigh:
                     QualitySettings.shadows = ShadowQuality.All;
                     QualitySettings.shadowResolution = ShadowResolution.VeryHigh;
-                    QualitySettings.shadowCascades = 4;
-                    QualitySettings.pixelLightCount = 4;
+                    QualitySettings.pixelLightCount = 12;
                     break;
             }
         }

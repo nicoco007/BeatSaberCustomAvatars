@@ -71,8 +71,7 @@ namespace CustomAvatar.Lighting
 
             _light.type = LightType.Directional;
             _light.cullingMask = AvatarLayers.kAllLayersMask;
-            _light.shadows = LightShadows.Hard;
-            _light.shadowStrength = 1;
+            _light.renderMode = LightRenderMode.ForceVertex;
 
             UpdateIntensity();
         }
