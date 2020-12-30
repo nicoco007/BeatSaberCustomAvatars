@@ -131,7 +131,7 @@ namespace CustomAvatar.Lighting
             foreach ((DirectionalLight directionalLight, Light light) in _directionalLights)
             {
                 light.color = directionalLight.color;
-                light.intensity = directionalLight.intensity * 0.1f;
+                light.intensity = directionalLight.intensity * 0.5f;
             }
         }
     }

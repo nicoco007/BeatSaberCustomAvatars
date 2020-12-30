@@ -71,6 +71,9 @@ namespace CustomAvatar.Lighting
 
             _light.type = LightType.Directional;
             _light.cullingMask = AvatarLayers.kAllLayersMask;
+            _light.shadows = LightShadows.Hard;
+            _light.shadowStrength = 1;
+
             _light.transform.position = Vector3.zero;
             _light.transform.rotation = Quaternion.identity;
 
@@ -117,7 +120,7 @@ namespace CustomAvatar.Lighting
         private void UpdateUnityLight()
         {
             _light.color = _color;
-            _light.intensity = _distanceIntensity * _reference.width * _reference.lightWidthMultiplier * _reference.bloomFogIntensityMultiplier * GetActualAlpha(_color.a) * 5f;
+            _light.intensity = _distanceIntensity * _reference.width * _reference.lightWidthMultiplier * _reference.bloomFogIntensityMultiplier * GetActualAlpha(_color.a) * 8f;
 
             _light.enabled = _light.intensity > 0.001f;
         }
