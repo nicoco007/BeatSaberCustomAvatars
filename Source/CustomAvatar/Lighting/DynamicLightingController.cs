@@ -88,6 +88,10 @@ namespace CustomAvatar.Lighting
                         }
 
                         _lights[id].Add(light);
+
+                        light.transform.parent = transform;
+                        light.transform.position = Vector3.zero;
+                        light.transform.rotation = Quaternion.identity;
                     }
                 }
             }

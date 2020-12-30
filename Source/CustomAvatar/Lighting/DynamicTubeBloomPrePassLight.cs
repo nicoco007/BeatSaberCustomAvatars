@@ -74,9 +74,6 @@ namespace CustomAvatar.Lighting
             _light.shadows = LightShadows.Hard;
             _light.shadowStrength = 1;
 
-            _light.transform.position = Vector3.zero;
-            _light.transform.rotation = Quaternion.identity;
-
             UpdateIntensity();
         }
 
