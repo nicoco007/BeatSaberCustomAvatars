@@ -53,5 +53,8 @@ namespace CustomAvatar
 
             ZenjectHelper.Register<CustomAvatarsLocalInactivePlayerInstaller>().OnMonoInstaller<MultiplayerLocalInactivePlayerInstaller>();
         }
+
+        [OnStart, OnExit]
+        public void NoOp() { }
     }
 }
