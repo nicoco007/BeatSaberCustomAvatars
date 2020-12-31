@@ -15,7 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using CustomAvatar.Avatar;
-using CustomAvatar.Utilities;
+using IPA.Utilities;
 using UnityEngine;
 using Zenject;
 
@@ -24,6 +24,12 @@ namespace CustomAvatar.Lighting
     internal class DynamicTubeBloomPrePassLight : MonoBehaviour
     {
         private static readonly Vector3 kOrigin = new Vector3(0, 1, 0);
+
+        private static readonly FieldAccessor<TubeBloomPrePassLight, float>.Accessor _centerAccessor = FieldAccessor<TubeBloomPrePassLight, float>.GetAccessor("_center");
+        private static readonly FieldAccessor<TubeBloomPrePassLight, float>.Accessor _colorAlphaMultiplierAccessor = FieldAccessor<TubeBloomPrePassLight, float>.GetAccessor("_colorAlphaMultiplier");
+        private static readonly FieldAccessor<TubeBloomPrePassLight, bool>.Accessor _limitAlphaAccessor = FieldAccessor<TubeBloomPrePassLight, bool>.GetAccessor("_limitAlpha");
+        private static readonly FieldAccessor<TubeBloomPrePassLight, float>.Accessor _minAlphaAccessor = FieldAccessor<TubeBloomPrePassLight, float>.GetAccessor("_minAlpha");
+        private static readonly FieldAccessor<TubeBloomPrePassLight, float>.Accessor _maxAlphaAccessor = FieldAccessor<TubeBloomPrePassLight, float>.GetAccessor("_maxAlpha");
 
         public Color color
         {
@@ -56,11 +62,11 @@ namespace CustomAvatar.Lighting
         {
             _reference = reference;
 
-            _center = reference.GetPrivateField<float>("_center");
-            _colorAlphaMultiplier = reference.GetPrivateField<float>("_colorAlphaMultiplier");
-            _limitAlpha = reference.GetPrivateField<bool>("_limitAlpha");
-            _minAlpha = reference.GetPrivateField<float>("_minAlpha");
-            _maxAlpha = reference.GetPrivateField<float>("_maxAlpha");
+            _center               = _centerAccessor(ref _reference);
+            _colorAlphaMultiplier = _colorAlphaMultiplierAccessor(ref _reference);
+            _limitAlpha           = _limitAlphaAccessor(ref _reference);
+            _minAlpha             = _minAlphaAccessor(ref _reference);
+            _maxAlpha             = _maxAlphaAccessor(ref _reference);
 
             _offsetToMiddle = (0.5f - _center) * _reference.length;
         }
