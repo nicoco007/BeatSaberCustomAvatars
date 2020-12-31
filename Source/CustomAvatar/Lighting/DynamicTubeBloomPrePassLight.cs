@@ -115,8 +115,10 @@ namespace CustomAvatar.Lighting
 
         private void UpdateUnityLight()
         {
+            if (!_light) return;
+
             _light.color = _color;
-            _light.intensity = _distanceIntensity * _reference.width * _reference.lightWidthMultiplier * _reference.bloomFogIntensityMultiplier * GetActualAlpha(_color.a) * 8f;
+            _light.intensity = _distanceIntensity * _reference.width * _reference.lightWidthMultiplier * _reference.bloomFogIntensityMultiplier * GetActualAlpha(_color.a) * 10f;
 
             _light.enabled = _light.intensity > 0.001f;
         }
