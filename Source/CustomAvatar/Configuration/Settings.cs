@@ -64,6 +64,7 @@ namespace CustomAvatar.Configuration
         public bool calibrateFullBodyTrackingOnStart = false;
         public bool enableLocomotion = true;
         public float cameraNearClipPlane = 0.1f;
+        public bool showAvatarInSmoothCamera = true;
         public readonly Lighting lighting = new Lighting();
         public readonly Mirror mirror = new Mirror();
         public readonly AutomaticFullBodyCalibration automaticCalibration = new AutomaticFullBodyCalibration();

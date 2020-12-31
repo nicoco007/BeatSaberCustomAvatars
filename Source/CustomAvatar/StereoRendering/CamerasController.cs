@@ -26,6 +26,8 @@ namespace CustomAvatar.StereoRendering
 {
     internal class CamerasController : IInitializable, IDisposable
     {
+        private const float kCameraDefaultNearClipMask = 0.1f;
+
         private readonly ILogger<CamerasController> _logger;
         private readonly Settings _settings;
         private readonly GameScenesManager _gameScenesManager;
@@ -97,10 +99,15 @@ namespace CustomAvatar.StereoRendering
 
             _logger.Info($"Setting avatar culling mask and near clip plane on '{camera.name}'");
 
-            if (thirdPersonEnabled)
+            if (!_settings.showAvatarInSmoothCamera)
+            {
+                camera.cullingMask = camera.cullingMask & ~AvatarLayers.kAllLayersMask;
+                camera.nearClipPlane = kCameraDefaultNearClipMask;
+            }
+            else if (thirdPersonEnabled)
             {
                 camera.cullingMask = camera.cullingMask | AvatarLayers.kOnlyInThirdPersonMask | AvatarLayers.kAlwaysVisibleMask;
-                camera.nearClipPlane = 0.1f;
+                camera.nearClipPlane = kCameraDefaultNearClipMask;
             }
             else
             {
