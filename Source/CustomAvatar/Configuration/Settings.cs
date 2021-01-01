@@ -57,8 +57,8 @@ namespace CustomAvatar.Configuration
             }
         }
 
-        [JsonConverter(typeof(StringEnumConverter))] public AvatarResizeMode resizeMode = AvatarResizeMode.Height;
-        [JsonConverter(typeof(StringEnumConverter))] public FloorHeightAdjust floorHeightAdjust = FloorHeightAdjust.Off;
+        public AvatarResizeMode resizeMode = AvatarResizeMode.Height;
+        public FloorHeightAdjust floorHeightAdjust = FloorHeightAdjust.Off;
         public string previousAvatarPath = null;
         public float playerArmSpan = VRPlayerInput.kDefaultPlayerArmSpan;
         public bool calibrateFullBodyTrackingOnStart = false;
@@ -97,8 +97,11 @@ namespace CustomAvatar.Configuration
 
         public class Lighting
         {
-            [JsonConverter(typeof(StringEnumConverter))] public LightingQuality quality = LightingQuality.Off;
-            public bool enableDynamicLighting = false;
+            public LightingLevel level = LightingLevel.Off;
+            public ShadowQuality shadowQuality = ShadowQuality.Disable;
+            public ShadowLevel shadowLevel = ShadowLevel.Directional;
+            public ShadowResolution shadowResolution = ShadowResolution.Low;
+            public int pixelLightCount = 2;
         }
 
         public class Mirror

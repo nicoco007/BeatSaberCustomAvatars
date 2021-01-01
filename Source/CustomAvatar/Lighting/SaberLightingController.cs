@@ -1,4 +1,5 @@
 ﻿using CustomAvatar.Avatar;
+using CustomAvatar.Configuration;
 using UnityEngine;
 using Zenject;
 
@@ -8,12 +9,14 @@ namespace CustomAvatar.Lighting
     {
         private SaberManager _saberManager;
         private ColorManager _colorManager;
+        private Settings _settings;
 
         [Inject]
-        private void Inject(SaberManager saberManager, ColorManager colorManager)
+        private void Inject(SaberManager saberManager, ColorManager colorManager, Settings settings)
         {
             _saberManager = saberManager;
             _colorManager = colorManager;
+            _settings = settings;
         }
 
         public void Initialize()
@@ -29,7 +32,8 @@ namespace CustomAvatar.Lighting
             light.type = LightType.Point;
             light.color = color;
             light.intensity = 0.5f;
-            light.shadows = LightShadows.Hard;
+            light.shadows = _settings.lighting.shadowLevel == ShadowLevel.Directional ? LightShadows.None : LightShadows.Soft;
+            light.shadowStrength = 1;
             light.renderMode = LightRenderMode.ForcePixel; // point lights don't do much when vertex rendered
             light.bounceIntensity = 0;
             light.range = 5;

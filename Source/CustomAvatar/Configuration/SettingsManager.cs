@@ -19,6 +19,7 @@ using System.IO;
 using CustomAvatar.Logging;
 using Newtonsoft.Json;
 using CustomAvatar.Utilities.Converters;
+using Newtonsoft.Json.Converters;
 
 namespace CustomAvatar.Configuration
 {
@@ -92,7 +93,7 @@ namespace CustomAvatar.Configuration
             {
                 Formatting = Formatting.Indented,
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                Converters = { new Vector2JsonConverter(), new Vector3JsonConverter(), new QuaternionJsonConverter(), new PoseJsonConverter(), new FloatJsonConverter(), new ColorJsonConverter() }
+                Converters = { new StringEnumConverter(), new Vector2JsonConverter(), new Vector3JsonConverter(), new QuaternionJsonConverter(), new PoseJsonConverter(), new FloatJsonConverter(), new ColorJsonConverter() }
             };
         }
     }

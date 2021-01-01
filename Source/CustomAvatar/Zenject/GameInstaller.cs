@@ -24,7 +24,9 @@ namespace CustomAvatar.Zenject
     {
         public override void InstallBindings()
         {
-            if (Container.Resolve<Settings>().lighting.quality != LightingQuality.Off)
+            Settings.Lighting lightingSettings = Container.Resolve<Settings>().lighting;
+
+            if (lightingSettings.level == LightingLevel.FullDynamic)
             {
                 Container.BindInterfacesAndSelfTo<SaberLightingController>().AsSingle().NonLazy();
             }

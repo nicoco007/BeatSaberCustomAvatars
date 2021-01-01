@@ -15,16 +15,19 @@ namespace CustomAvatar.Zenject
 
         public override void InstallBindings()
         {
-            if (_settings.lighting.quality != LightingQuality.Off)
+            switch (_settings.lighting.level)
             {
-                if (_settings.lighting.enableDynamicLighting)
-                {
-                    Container.Bind<DynamicLightingController>().FromNewComponentOnNewGameObject().NonLazy();
-                }
-                else
-                {
+                case LightingLevel.TwoSided:
                     Container.Bind<TwoSidedLightingController>().FromNewComponentOnNewGameObject().NonLazy();
-                }
+                    break;
+
+                case LightingLevel.SimpleDynamic:
+                    Container.Bind<DynamicDirectionalLightingController>().FromNewComponentOnNewGameObject().NonLazy();
+                    break;
+
+                case LightingLevel.FullDynamic:
+                    Container.Bind<DynamicTubeBloomPrePassLightingController>().FromNewComponentOnNewGameObject().NonLazy();
+                    goto case LightingLevel.SimpleDynamic;
             }
         }
     }

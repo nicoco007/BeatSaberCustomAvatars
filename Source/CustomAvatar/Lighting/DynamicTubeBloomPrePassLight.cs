@@ -15,6 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using CustomAvatar.Avatar;
+using CustomAvatar.Configuration;
 using IPA.Utilities;
 using UnityEngine;
 using Zenject;
@@ -42,6 +43,7 @@ namespace CustomAvatar.Lighting
         }
 
         private TubeBloomPrePassLight _reference;
+        private Settings _settings;
 
         private Light _light;
         private Vector3 _previousPosition;
@@ -58,9 +60,10 @@ namespace CustomAvatar.Lighting
         #pragma warning disable IDE0051
 
         [Inject]
-        public void Construct(TubeBloomPrePassLight reference)
+        public void Construct(TubeBloomPrePassLight reference, Settings settings)
         {
             _reference = reference;
+            _settings = settings;
 
             _center               = _centerAccessor(ref _reference);
             _colorAlphaMultiplier = _colorAlphaMultiplierAccessor(ref _reference);
@@ -78,6 +81,8 @@ namespace CustomAvatar.Lighting
             _light.type = LightType.Directional;
             _light.cullingMask = AvatarLayers.kAllLayersMask;
             _light.renderMode = LightRenderMode.ForceVertex;
+            _light.shadows = _settings.lighting.shadowLevel == ShadowLevel.All ? LightShadows.Soft : LightShadows.None;
+            _light.shadowStrength = 1;
 
             UpdateIntensity();
         }

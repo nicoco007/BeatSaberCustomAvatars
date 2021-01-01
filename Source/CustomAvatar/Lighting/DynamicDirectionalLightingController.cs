@@ -16,7 +16,6 @@
 
 using CustomAvatar.Avatar;
 using CustomAvatar.Logging;
-using CustomAvatar.Utilities;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -24,31 +23,26 @@ using Zenject;
 
 namespace CustomAvatar.Lighting
 {
-    internal class DynamicLightingController : MonoBehaviour
+    internal class DynamicDirectionalLightingController : MonoBehaviour
     {
-        private ILogger<DynamicLightingController> _logger;
+        private ILogger<DynamicDirectionalLightingController> _logger;
         private LightWithIdManager _lightManager;
-        private DiContainer _container;
 
-        private List<DynamicTubeBloomPrePassLight>[] _lights;
         private List<(DirectionalLight, Light)> _directionalLights;
         
         #region Behaviour Lifecycle
-        #pragma warning disable IDE0051
 
         [Inject]
-        private void Inject(ILoggerProvider loggerProvider, LightWithIdManager lightManager, DiContainer container)
+        private void Inject(ILoggerProvider loggerProvider, LightWithIdManager lightManager)
         {
-            name = nameof(DynamicLightingController);
+            name = nameof(DynamicDirectionalLightingController);
 
-            _logger = loggerProvider.CreateLogger<DynamicLightingController>();
+            _logger = loggerProvider.CreateLogger<DynamicDirectionalLightingController>();
             _lightManager = lightManager;
-            _container = container;
         }
 
         private void Start()
         {
-            _lightManager.didSetColorForIdEvent += OnSetColorForId;
             _lightManager.didChangeSomeColorsThisFrameEvent += OnChangedSomeColorsThisFrame;
 
             CreateLights();
@@ -56,46 +50,13 @@ namespace CustomAvatar.Lighting
 
         private void OnDestroy()
         {
-            _lightManager.didSetColorForIdEvent -= OnSetColorForId;
             _lightManager.didChangeSomeColorsThisFrameEvent -= OnChangedSomeColorsThisFrame;
         }
 
-        #pragma warning restore IDE0051
         #endregion
 
         private void CreateLights()
         {
-            List<ILightWithId>[] lightsWithId = _lightManager.GetPrivateField<List<ILightWithId>[]>("_lights");
-            int maxLightId = _lightManager.GetPrivateField<int>("kMaxLightId");
-
-            _lights = new List<DynamicTubeBloomPrePassLight>[maxLightId + 1];
-            
-            for (int id = 0; id < lightsWithId.Length; id++)
-            {
-                if (lightsWithId[id] == null) continue;
-
-                foreach (ILightWithId lightWithId in lightsWithId[id])
-                {
-                    if (lightWithId is TubeBloomPrePassLightWithId tubeLightWithId)
-                    {
-                        TubeBloomPrePassLight tubeLight = tubeLightWithId.GetPrivateField<TubeBloomPrePassLight>("_tubeBloomPrePassLight");
-
-                        DynamicTubeBloomPrePassLight light = _container.InstantiateComponent<DynamicTubeBloomPrePassLight>(new GameObject($"DynamicTubeBloomPrePassLight({tubeLight.name})"), new[] { tubeLight });
-
-                        if (_lights[id] == null)
-                        {
-                            _lights[id] = new List<DynamicTubeBloomPrePassLight>(10);
-                        }
-
-                        _lights[id].Add(light);
-
-                        light.transform.parent = transform;
-                        light.transform.position = Vector3.zero;
-                        light.transform.rotation = Quaternion.identity;
-                    }
-                }
-            }
-
             _directionalLights = new List<(DirectionalLight, Light)>();
 
             foreach (var directionalLight in DirectionalLight.lights.OrderBy(l => l.transform.position.sqrMagnitude))
@@ -117,19 +78,7 @@ namespace CustomAvatar.Lighting
                 _directionalLights.Add((directionalLight, light));
             }
 
-            _logger.Trace($"Created {_lights.Sum(l => l?.Count)} DynamicTubeBloomPrePassLights");
-            _logger.Trace($"Created {_directionalLights.Count} DynamicDirectionalLight");
-        }
-
-        private void OnSetColorForId(int id, Color color)
-        {
-            if (_lights[id] != null)
-            {
-                foreach (DynamicTubeBloomPrePassLight light in _lights[id])
-                {
-                    light.color = color;
-                }
-            }
+            _logger.Trace($"Created {_directionalLights.Count} DynamicDirectionalLights");
         }
 
         private void OnChangedSomeColorsThisFrame()
