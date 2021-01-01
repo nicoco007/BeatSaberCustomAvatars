@@ -39,6 +39,12 @@ namespace CustomAvatar.Editor
         {
             PoseManager poseManager = (PoseManager)target;
 
+            if (!poseManager.animator.isHuman)
+            {
+                GUILayout.Label($"{nameof(PoseManager)} is only compatible with human animators.");
+                return;
+            }
+
             GUILayout.BeginHorizontal();
             GUILayout.BeginVertical();
 
