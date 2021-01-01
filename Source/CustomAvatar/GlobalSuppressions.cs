@@ -19,4 +19,4 @@
 // Project-level suppressions either have no target or are given
 // a specific target and scoped to a namespace, type, member, etc.
 
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006", Justification = "Unity naming convention", Scope = "namespaceanddescendants", Target = "CustomAvatar")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006", Justification = "Unity naming convention", Scope = "namespaceanddescendants", Target = "~N:CustomAvatar")]

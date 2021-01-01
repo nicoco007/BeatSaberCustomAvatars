@@ -63,6 +63,7 @@
     <Compile Include="..\CustomAvatar\EventManager.cs" Link="EventManager.cs" />
     <Compile Include="..\CustomAvatar\EveryNthComboFilter.cs" Link="EveryNthComboFilter.cs" />
     <Compile Include="..\CustomAvatar\FirstPersonExclusion.cs" Link="FirstPersonExclusion.cs" />
+    <Compile Include="..\CustomAvatar\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
     <Compile Include="..\CustomAvatar\Logging\ILogger.cs" Link="Logging\ILogger.cs" />
     <Compile Include="..\CustomAvatar\Logging\ILoggerProvider.cs" Link="Logging\ILoggerProvider.cs" />
     <Compile Include="..\CustomAvatar\Logging\UnityDebugLogger.cs" Link="Logging\UnityDebugLogger.cs" />
