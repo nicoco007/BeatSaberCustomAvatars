@@ -17,6 +17,9 @@
 using CustomAvatar.Logging;
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.XR;
 using Zenject;
@@ -27,9 +30,11 @@ namespace CustomAvatar.Tracking.UnityXR
     {
         public event Action devicesChanged;
 
+        private static readonly Regex kSerialNumberRegex = new Regex(@"(.*)S/N ([^ ]+)(.*)");
+
         private readonly ILogger<UnityXRDeviceProvider> _logger;
 
-        private readonly Dictionary<string, InputDevice> _inputDevices = new Dictionary<string, InputDevice>();
+        private readonly Dictionary<string, UnityXRDevice> _devices = new Dictionary<string, UnityXRDevice>();
 
         private UnityXRDeviceProvider(ILoggerProvider loggerProvider)
         {
@@ -73,40 +78,52 @@ namespace CustomAvatar.Tracking.UnityXR
                 inputDevice.TryGetFeatureValue(CommonUsages.devicePosition, out Vector3 position);
                 inputDevice.TryGetFeatureValue(CommonUsages.deviceRotation, out Quaternion rotation);
 
-                if (_inputDevices.ContainsKey(inputDevice.name))
+                if (_devices.TryGetValue(inputDevice.name, out UnityXRDevice existingDevice))
                 {
-                    if (inputDevice.characteristics != _inputDevices[inputDevice.name].characteristics)
+                    if (inputDevice.characteristics != existingDevice.characteristics)
                     {
-                        _logger.Info($"Characteristics of device '{inputDevice.name}' changed from {_inputDevices[inputDevice.name].characteristics} to {inputDevice.characteristics}");
+                        _logger.Info($"Characteristics of device '{existingDevice.id}' changed from {existingDevice.characteristics} to {inputDevice.characteristics}");
                         changeDetected = true;
                     }
 
-                    if (isTracked && (!_inputDevices[inputDevice.name].TryGetFeatureValue(CommonUsages.isTracked, out bool previouslyTracked) || isTracked != previouslyTracked))
+                    if (existingDevice.isTracked != isTracked)
                     {
                         if (isTracked)
                         {
-                            _logger.Info($"Acquired tracking of device '{inputDevice.name}'");
+                            _logger.Info($"Acquired tracking of device '{existingDevice.id}'");
                         }
                         else
                         {
-                            _logger.Info($"Lost tracking of device '{inputDevice.name}'");
+                            _logger.Info($"Lost tracking of device '{existingDevice.id}'");
                         }
 
                         changeDetected = true;
                     }
 
-                    _inputDevices[inputDevice.name] = inputDevice;
+                    _devices[inputDevice.name] = new UnityXRDevice(existingDevice.id, true, isTracked, inputDevice.characteristics);
                 }
                 else
                 {
-                    _logger.Info($"Device '{inputDevice.name}' connected with characteristics {inputDevice.characteristics}");
+                    string id;
+                    Match match = kSerialNumberRegex.Match(inputDevice.name);
 
-                    _inputDevices.Add(inputDevice.name, inputDevice);
+                    if (match.Success)
+                    {
+                        id = match.Groups[1].Value + (uint)match.Groups[2].Value.GetHashCode() + match.Groups[3].Value;
+                    }
+                    else
+                    {
+                        id = inputDevice.name;
+                    }
+
+                    _logger.Info($"Device '{id}' connected with characteristics {inputDevice.characteristics}");
+
+                    _devices.Add(inputDevice.name, new UnityXRDevice(id, true, isTracked, inputDevice.characteristics));
 
                     changeDetected = true;
                 }
 
-                devices.Add(inputDevice.name, new TrackedDevice(inputDevice.name, use, isTracked, position, rotation));
+                devices.Add(inputDevice.name, new TrackedDevice(existingDevice.id, use, isTracked, position, rotation));
             }
 
             if (changeDetected) devicesChanged?.Invoke();
@@ -119,13 +136,29 @@ namespace CustomAvatar.Tracking.UnityXR
 
         private void OnDeviceDisconnected(InputDevice device)
         {
-            if (_inputDevices.ContainsKey(device.name))
+            if (_devices.ContainsKey(device.name))
             {
                 _logger.Info($"Device '{device.name}' disconnected");
-                _inputDevices.Remove(device.name);
+                _devices.Remove(device.name);
             }
 
             devicesChanged?.Invoke();
+        }
+
+        private readonly struct UnityXRDevice
+        {
+            public readonly string id;
+            public readonly bool isConnected;
+            public readonly bool isTracked;
+            public readonly InputDeviceCharacteristics characteristics;
+
+            public UnityXRDevice(string id, bool isConnected, bool isTracked, InputDeviceCharacteristics characteristics)
+            {
+                this.id = id;
+                this.isConnected = isConnected;
+                this.isTracked = isTracked;
+                this.characteristics = characteristics;
+            }
         }
     }
 }

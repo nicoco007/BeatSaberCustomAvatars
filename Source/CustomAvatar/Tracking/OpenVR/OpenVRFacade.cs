@@ -85,13 +85,10 @@ namespace CustomAvatar.Tracking.OpenVR
             OpenVR.System.GetDeviceToAbsoluteTrackingPose(universeOrigin, GetPredictedSecondsToPhotons(), poses);
         }
 
-        public Vector3 GetPosition(HmdMatrix34_t rawMatrix)
+        public void GetPositionAndRotation(HmdMatrix34_t rawMatrix, out Vector3 position, out Quaternion rotation)
         {
-            return new Vector3(rawMatrix.m3, rawMatrix.m7, -rawMatrix.m11);
-        }
+            position = new Vector3(rawMatrix.m3, rawMatrix.m7, -rawMatrix.m11);
 
-        public Quaternion GetRotation(HmdMatrix34_t rawMatrix)
-        {
             if (IsRotationValid(rawMatrix))
             {
                 float w = Mathf.Sqrt(Mathf.Max(0, 1 + rawMatrix.m0 + rawMatrix.m5 + rawMatrix.m10)) / 2;
@@ -103,10 +100,12 @@ namespace CustomAvatar.Tracking.OpenVR
                 CopySign(ref y, rawMatrix.m8 - rawMatrix.m2);
                 CopySign(ref z, rawMatrix.m4 - rawMatrix.m1);
 
-                return new Quaternion(x, y, z, w);
+                rotation = new Quaternion(x, y, z, w);
             }
-
-            return Quaternion.identity;
+            else
+            {
+                rotation = Quaternion.identity;
+            }
         }
 
         /// <summary>

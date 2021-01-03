@@ -18,7 +18,7 @@ using UnityEngine;
 
 namespace CustomAvatar.Tracking
 {
-    internal struct TrackedDevice
+    internal readonly struct TrackedDevice
     {
         public readonly string id;
         public readonly DeviceUse deviceUse;
