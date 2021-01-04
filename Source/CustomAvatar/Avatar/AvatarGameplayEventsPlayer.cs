@@ -34,15 +34,13 @@ namespace CustomAvatar.Avatar
         #pragma warning disable IDE0051
 
         [Inject]
-        public void Inject(ILoggerProvider loggerProvider, LoadedAvatar avatar, ScoreController scoreController, BeatmapObjectCallbackController beatmapObjectCallbackController, ILevelEndActions levelEndActions)
+        public void Inject(ILoggerProvider loggerProvider, LoadedAvatar avatar, ScoreController scoreController, BeatmapObjectCallbackController beatmapObjectCallbackController, ObstacleSaberSparkleEffectManager sparkleEffectManager, ILevelEndActions levelEndActions)
         {
             _logger = loggerProvider.CreateLogger<AvatarGameplayEventsPlayer>(avatar.descriptor.name);
             _scoreController = scoreController;
             _levelEndActions = levelEndActions;
             _beatmapObjectCallbackController = beatmapObjectCallbackController;
-
-            // unfortunately this is not bound through Zenject
-            _sparkleEffectManager = FindObjectOfType<ObstacleSaberSparkleEffectManager>();
+            _sparkleEffectManager = sparkleEffectManager;
         }
 
         private void Start()

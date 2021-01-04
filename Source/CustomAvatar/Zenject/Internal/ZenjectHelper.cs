@@ -1,7 +1,9 @@
 ﻿using CustomAvatar.Logging;
 using HarmonyLib;
+using IPA.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using Zenject;
@@ -10,7 +12,12 @@ namespace CustomAvatar.Zenject.Internal
 {
     internal class ZenjectHelper
     {
-        private static readonly string kExpectedFirstSceneContextName = "AppCoreSceneContext";
+        private const string kExpectedFirstSceneContextName = "AppCoreSceneContext";
+
+        private static readonly Type[] kContextTypesWithSceneBindings = new[] { typeof(ProjectContext), typeof(SceneContext), typeof(GameObjectContext) };
+
+        private static readonly FieldAccessor<SceneContext, List<SceneDecoratorContext>>.Accessor _decoratorContextsAccessor = FieldAccessor<SceneContext, List<SceneDecoratorContext>>.GetAccessor("_decoratorContexts");
+        private static readonly FieldAccessor<SceneDecoratorContext, List<MonoBehaviour>>.Accessor _injectableMonoBehavioursAccessor = FieldAccessor<SceneDecoratorContext, List<MonoBehaviour>>.GetAccessor("_injectableMonoBehaviours");
 
         private static bool _shouldInstall;
 
@@ -51,10 +58,15 @@ namespace CustomAvatar.Zenject.Internal
 
         private static void PatchInstallBindings(Harmony harmony)
         {
-            MethodInfo methodToPatch = typeof(Context).GetMethod("InstallSceneBindings", BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(List<MonoBehaviour>) }, null);
-            MethodInfo patch = typeof(ZenjectHelper).GetMethod(nameof(InstallSceneBindings), BindingFlags.NonPublic | BindingFlags.Static);
+            foreach (Type type in kContextTypesWithSceneBindings)
+            {
+                _logger.Trace($"Applying patch to '{type.FullName}'");
 
-            harmony.Patch(methodToPatch, new HarmonyMethod(patch));
+                MethodInfo methodToPatch = type.GetMethod("InstallBindings", BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(List<MonoBehaviour>) }, null);
+                MethodInfo patch = typeof(ZenjectHelper).GetMethod(nameof(InstallBindings), BindingFlags.NonPublic | BindingFlags.Static);
+
+                harmony.Patch(methodToPatch, null, new HarmonyMethod(patch));
+            }
         }
 
         private static void InstallInstallers(Context __instance)
@@ -87,23 +99,27 @@ namespace CustomAvatar.Zenject.Internal
             }
         }
 
-        private static void InstallSceneBindings(Context __instance, List<MonoBehaviour> injectableMonoBehaviours)
+        private static void InstallBindings(Context __instance, List<MonoBehaviour> injectableMonoBehaviours)
         {
+            if (__instance is SceneContext sceneContext)
+            {
+                injectableMonoBehaviours.AddRange(_decoratorContextsAccessor(ref sceneContext).SelectMany(dc => _injectableMonoBehavioursAccessor(ref dc)));
+            }
+
             foreach (MonoBehaviour monoBehaviour in injectableMonoBehaviours)
             {
                 Type type = monoBehaviour.GetType();
 
-                if (_typesToExpose.Contains(type))
+                if (!_typesToExpose.Contains(type)) continue;
+
+                if (!__instance.Container.HasBinding(type))
                 {
-                    if (!__instance.Container.HasBinding(type))
-                    {
-                        __instance.Container.Bind(type).FromInstance(monoBehaviour).AsSingle();
-                        _logger.Trace($"Exposed MonoBehaviour '{type.FullName}' in context '{__instance.name}'");
-                    }
-                    else
-                    {
-                        _logger.Warning($"Not exposing MonoBehaviour '{type.FullName}' in context '{__instance.name}' since a binding already exists");
-                    }
+                    _logger.Trace($"Exposing MonoBehaviour '{type.FullName}' in context '{__instance.name}'");
+                    __instance.Container.Bind(type).FromInstance(monoBehaviour).AsSingle();
+                }
+                else
+                {
+                    _logger.Trace($"Not exposing MonoBehaviour '{type.FullName}' in context '{__instance.name}' since a binding already exists");
                 }
             }
         }

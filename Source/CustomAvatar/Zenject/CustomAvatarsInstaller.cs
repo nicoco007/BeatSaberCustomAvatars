@@ -84,10 +84,7 @@ namespace CustomAvatar.Zenject
             Container.Bind<TrackingHelper>().AsTransient();
 
             // not sure if this is a great idea but w/e
-            if (!Container.HasBinding<MainSettingsModelSO>())
-            {
-                Container.Bind<MainSettingsModelSO>().FromInstance(Resources.FindObjectsOfTypeAll<MainSettingsModelSO>().First());
-            }
+            Container.Bind<MainSettingsModelSO>().FromInstance(Resources.FindObjectsOfTypeAll<MainSettingsModelSO>().First()).IfNotBound();
         }
     }
 }
