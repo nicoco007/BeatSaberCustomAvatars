@@ -79,6 +79,9 @@
     <!-- remove deps.json file since it's not used -->
     <Delete Files="$(TargetDir)$(TargetName).deps.json" />
 
+    <!-- make sure we have a clean slate -->
+    <RemoveDir Directories="$(PublishDir)" />
+    
     <MakeDir Directories="$(PublishDir)" />
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PublishDir)" />
     

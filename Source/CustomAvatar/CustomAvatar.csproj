@@ -163,9 +163,12 @@
     <None Remove="Resources\shaders.assets" />
     <None Remove="Views\Mirror.bsml" />
   </ItemGroup>
-  <Target Name="Organize" AfterTargets="AfterBuild">    
+  <Target Name="Organize" AfterTargets="AfterBuild">
     <!-- remove deps.json file since it's not used -->
     <Delete Files="$(TargetDir)$(TargetName).deps.json" />
+
+    <!-- make sure we have a clean slate -->
+    <RemoveDir Directories="$(PublishDir)" />
     
     <!-- create Plugins folder and move plugin DLL/PDB inside -->
     <MakeDir Directories="$(PublishDir)Plugins" />
