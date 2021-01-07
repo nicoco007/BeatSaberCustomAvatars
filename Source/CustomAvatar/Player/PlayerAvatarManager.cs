@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 using Zenject;
 using Object = UnityEngine.Object;
@@ -403,7 +404,7 @@ namespace CustomAvatar.Player
                 _logger.Info($"Loading cached avatar info from '{kAvatarInfoCacheFilePath}'");
 
                 using (var stream = new FileStream(kAvatarInfoCacheFilePath, FileMode.Open, FileAccess.Read))
-                using (var reader = new BinaryReader(stream))
+                using (var reader = new BinaryReader(stream, Encoding.UTF8))
                 {
                     if (!reader.ReadBytes(kCacheFileSignature.Length).SequenceEqual(kCacheFileSignature))
                     {
@@ -490,25 +491,31 @@ namespace CustomAvatar.Player
             {
                 _logger.Info($"Saving avatar info cache to '{kAvatarInfoCacheFilePath}'");
 
-                using (var stream = new FileStream(kAvatarInfoCacheFilePath, FileMode.Create, FileAccess.Write))
-                using (var writer = new BinaryWriter(stream))
+                using (var stream = new FileStream(kAvatarInfoCacheFilePath, FileMode.OpenOrCreate, FileAccess.Write))
                 {
-                    writer.Write(kCacheFileSignature);
-                    writer.Write(kCacheFileVersion);
-                    writer.Write(_avatarInfos.Count);
-
-                    foreach (AvatarInfo avatarInfo in _avatarInfos.Values)
+                    using (var writer = new BinaryWriter(stream, Encoding.UTF8, true))
                     {
-                        writer.Write(avatarInfo.name);
-                        writer.Write(avatarInfo.author);
-                        writer.Write(avatarInfo.icon, true);
-                        writer.Write(avatarInfo.fileName);
-                        writer.Write(avatarInfo.fileSize);
-                        writer.Write(avatarInfo.created);
-                        writer.Write(avatarInfo.lastModified);
-                        writer.Write(avatarInfo.timestamp);
+                        writer.Write(kCacheFileSignature);
+                        writer.Write(kCacheFileVersion);
+                        writer.Write(_avatarInfos.Count);
+
+                        foreach (AvatarInfo avatarInfo in _avatarInfos.Values)
+                        {
+                            writer.Write(avatarInfo.name);
+                            writer.Write(avatarInfo.author);
+                            writer.Write(avatarInfo.icon, true);
+                            writer.Write(avatarInfo.fileName);
+                            writer.Write(avatarInfo.fileSize);
+                            writer.Write(avatarInfo.created);
+                            writer.Write(avatarInfo.lastModified);
+                            writer.Write(avatarInfo.timestamp);
+                        }
                     }
+
+                    stream.SetLength(stream.Position);
                 }
+
+                File.SetAttributes(kAvatarInfoCacheFilePath, FileAttributes.Hidden);
             }
             catch (Exception ex)
             {

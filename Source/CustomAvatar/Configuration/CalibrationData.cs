@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 
 namespace CustomAvatar.Configuration
@@ -84,7 +85,7 @@ namespace CustomAvatar.Configuration
             _logger.Info($"Reading calibration data from '{kCalibrationDataFilePath}'");
 
             using (var fileStream = new FileStream(kCalibrationDataFilePath, FileMode.Open, FileAccess.Read))
-            using (var reader = new BinaryReader(fileStream))
+            using (var reader = new BinaryReader(fileStream, Encoding.UTF8))
             {
                 if (!reader.ReadBytes(kCalibrationDataFileSignature.Length).SequenceEqual(kCalibrationDataFileSignature)) throw new IOException("Invalid file signature");
 
@@ -138,27 +139,33 @@ namespace CustomAvatar.Configuration
         {
             _logger.Info($"Saving calibration data to '{kCalibrationDataFilePath}'");
 
-            using (var fileStream = new FileStream(kCalibrationDataFilePath, FileMode.Create, FileAccess.Write))
-            using (var writer = new BinaryWriter(fileStream))
+            using (var fileStream = new FileStream(kCalibrationDataFilePath, FileMode.OpenOrCreate, FileAccess.Write))
             {
-                writer.Write(kCalibrationDataFileSignature);
-                writer.Write(kCalibrationDataFileVersion);
-                
-                writer.Write(automaticCalibration.waist);
-                writer.Write(automaticCalibration.leftFoot);
-                writer.Write(automaticCalibration.rightFoot);
-
-                writer.Write(_manualCalibration.Count);
-
-                foreach (KeyValuePair<string, FullBodyCalibration> kvp in _manualCalibration)
+                using (var writer = new BinaryWriter(fileStream, Encoding.UTF8, true))
                 {
-                    writer.Write(kvp.Key); // file name
+                    writer.Write(kCalibrationDataFileSignature);
+                    writer.Write(kCalibrationDataFileVersion);
 
-                    writer.Write(kvp.Value.waist);
-                    writer.Write(kvp.Value.leftFoot);
-                    writer.Write(kvp.Value.rightFoot);
+                    writer.Write(automaticCalibration.waist);
+                    writer.Write(automaticCalibration.leftFoot);
+                    writer.Write(automaticCalibration.rightFoot);
+
+                    writer.Write(_manualCalibration.Count);
+
+                    foreach (KeyValuePair<string, FullBodyCalibration> kvp in _manualCalibration)
+                    {
+                        writer.Write(kvp.Key); // file name
+
+                        writer.Write(kvp.Value.waist);
+                        writer.Write(kvp.Value.leftFoot);
+                        writer.Write(kvp.Value.rightFoot);
+                    }
                 }
+
+                fileStream.SetLength(fileStream.Position);
             }
+
+            File.SetAttributes(kCalibrationDataFilePath, FileAttributes.Hidden);
         }
 
         private bool IsValidFileName(string str)
