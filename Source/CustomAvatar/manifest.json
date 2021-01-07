@@ -16,7 +16,6 @@
     "SiraUtil"
   ],
   "files": [
-    "CustomAvatars\\Shaders\\customavatars.assetbundle",
     "DynamicOpenVR\\Actions\\customavatars.json",
     "DynamicOpenVR\\Bindings\\customavatars_knuckles.json"
   ]
