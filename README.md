@@ -24,6 +24,9 @@ To resolve references and automatically copy the compiled DLL into Beat Saber's 
   <PropertyGroup>
     <!-- Replace this with the path to your Beat Saber installation -->
     <BeatSaberDir>C:\Program Files (x86)\Steam\steamapps\common\Beat Saber</BeatSaberDir>
+
+    <!-- To use the included Steam launch profiles and your Steam installation isn't in the default folder, change this -->
+    <SteamExecutable>C:\Program Files (x86)\Steam\steam.exe</SteamExecutable>
   </PropertyGroup>
 </Project>
 ```
