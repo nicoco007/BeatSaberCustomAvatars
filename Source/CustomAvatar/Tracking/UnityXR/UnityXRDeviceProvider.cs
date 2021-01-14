@@ -17,8 +17,6 @@
 using CustomAvatar.Logging;
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.XR;
@@ -136,9 +134,9 @@ namespace CustomAvatar.Tracking.UnityXR
 
         private void OnDeviceDisconnected(InputDevice device)
         {
-            if (_devices.ContainsKey(device.name))
+            if (_devices.TryGetValue(device.name, out UnityXRDevice existingDevice))
             {
-                _logger.Info($"Device '{device.name}' disconnected");
+                _logger.Info($"Device '{existingDevice.id}' disconnected");
                 _devices.Remove(device.name);
             }
 
