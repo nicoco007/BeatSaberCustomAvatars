@@ -32,7 +32,7 @@ namespace CustomAvatar.Tracking.UnityXR
 
         private readonly Dictionary<string, UnityXRDevice> _devices = new Dictionary<string, UnityXRDevice>();
 
-        private bool deviceRemovedSinceLastCall;
+        private bool _deviceRemovedSinceLastCall;
 
         private UnityXRDeviceProvider(ILoggerProvider loggerProvider)
         {
@@ -49,7 +49,7 @@ namespace CustomAvatar.Tracking.UnityXR
             devices.Clear();
 
             var inputDevices = new List<InputDevice>();
-            bool changeDetected = deviceRemovedSinceLastCall;
+            bool changeDetected = _deviceRemovedSinceLastCall;
 
             InputDevices.GetDevices(inputDevices);
 
@@ -127,7 +127,7 @@ namespace CustomAvatar.Tracking.UnityXR
                 devices.Add(inputDevice.name, new TrackedDevice(id, use, isTracked, position, rotation));
             }
 
-            deviceRemovedSinceLastCall = false;
+            _deviceRemovedSinceLastCall = false;
 
             return changeDetected;
         }
@@ -144,7 +144,7 @@ namespace CustomAvatar.Tracking.UnityXR
                 _logger.Info($"Device '{existingDevice.id}' disconnected");
                 _devices.Remove(device.name);
 
-                deviceRemovedSinceLastCall = true;
+                _deviceRemovedSinceLastCall = true;
             }
         }
 
