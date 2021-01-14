@@ -26,13 +26,13 @@ namespace CustomAvatar.Tracking.UnityXR
 {
     internal class UnityXRDeviceProvider : IInitializable, IDeviceProvider, IDisposable
     {
-        public event Action devicesChanged;
-
         private static readonly Regex kSerialNumberRegex = new Regex(@"(.*)S/N ([^ ]+)(.*)");
 
         private readonly ILogger<UnityXRDeviceProvider> _logger;
 
         private readonly Dictionary<string, UnityXRDevice> _devices = new Dictionary<string, UnityXRDevice>();
+
+        private bool deviceRemovedSinceLastCall;
 
         private UnityXRDeviceProvider(ILoggerProvider loggerProvider)
         {
@@ -44,18 +44,18 @@ namespace CustomAvatar.Tracking.UnityXR
             InputDevices.deviceDisconnected  += OnDeviceDisconnected;
         }
 
-        public void GetDevices(Dictionary<string, TrackedDevice> devices)
+        public bool GetDevices(Dictionary<string, TrackedDevice> devices)
         {
             devices.Clear();
 
             var inputDevices = new List<InputDevice>();
-            bool changeDetected = false;
+            bool changeDetected = deviceRemovedSinceLastCall;
 
             InputDevices.GetDevices(inputDevices);
 
             foreach (InputDevice inputDevice in inputDevices)
             {
-                if (!inputDevice.isValid) return;
+                if (!inputDevice.isValid) continue;
 
                 DeviceUse use = DeviceUse.Unknown;
 
@@ -76,8 +76,12 @@ namespace CustomAvatar.Tracking.UnityXR
                 inputDevice.TryGetFeatureValue(CommonUsages.devicePosition, out Vector3 position);
                 inputDevice.TryGetFeatureValue(CommonUsages.deviceRotation, out Quaternion rotation);
 
+                string id;
+
                 if (_devices.TryGetValue(inputDevice.name, out UnityXRDevice existingDevice))
                 {
+                    id = existingDevice.id;
+
                     if (inputDevice.characteristics != existingDevice.characteristics)
                     {
                         _logger.Info($"Characteristics of device '{existingDevice.id}' changed from {existingDevice.characteristics} to {inputDevice.characteristics}");
@@ -102,7 +106,6 @@ namespace CustomAvatar.Tracking.UnityXR
                 }
                 else
                 {
-                    string id;
                     Match match = kSerialNumberRegex.Match(inputDevice.name);
 
                     if (match.Success)
@@ -121,10 +124,12 @@ namespace CustomAvatar.Tracking.UnityXR
                     changeDetected = true;
                 }
 
-                devices.Add(inputDevice.name, new TrackedDevice(existingDevice.id, use, isTracked, position, rotation));
+                devices.Add(inputDevice.name, new TrackedDevice(id, use, isTracked, position, rotation));
             }
 
-            if (changeDetected) devicesChanged?.Invoke();
+            deviceRemovedSinceLastCall = false;
+
+            return changeDetected;
         }
 
         public void Dispose()
@@ -138,9 +143,9 @@ namespace CustomAvatar.Tracking.UnityXR
             {
                 _logger.Info($"Device '{existingDevice.id}' disconnected");
                 _devices.Remove(device.name);
-            }
 
-            devicesChanged?.Invoke();
+                deviceRemovedSinceLastCall = true;
+            }
         }
 
         private readonly struct UnityXRDevice

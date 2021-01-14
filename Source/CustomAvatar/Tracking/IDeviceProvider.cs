@@ -14,15 +14,12 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Collections.Generic;
 
 namespace CustomAvatar.Tracking
 {
     internal interface IDeviceProvider
     {
-        event Action devicesChanged;
-
-        void GetDevices(Dictionary<string, TrackedDevice> devices);
+        bool GetDevices(Dictionary<string, TrackedDevice> devices);
     }
 }

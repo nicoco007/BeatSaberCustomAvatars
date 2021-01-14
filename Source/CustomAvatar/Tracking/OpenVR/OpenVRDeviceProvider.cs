@@ -15,7 +15,6 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using CustomAvatar.Logging;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -25,8 +24,6 @@ namespace CustomAvatar.Tracking.OpenVR
 {
     internal class OpenVRDeviceProvider : IDeviceProvider
     {
-        public event Action devicesChanged;
-
         private static readonly ETrackingResult[] kValidTrackingResults = { ETrackingResult.Running_OK, ETrackingResult.Running_OutOfRange, ETrackingResult.Calibrating_OutOfRange };
 
         private readonly ILogger<OpenVRDeviceProvider> _logger;
@@ -41,7 +38,7 @@ namespace CustomAvatar.Tracking.OpenVR
             _openVRFacade = openVRFacade;
         }
 
-        public void GetDevices(Dictionary<string, TrackedDevice> devices)
+        public bool GetDevices(Dictionary<string, TrackedDevice> devices)
         {
             devices.Clear();
             bool changeDetected = false;
@@ -210,7 +207,7 @@ namespace CustomAvatar.Tracking.OpenVR
                 }
             }
 
-            if (changeDetected) devicesChanged?.Invoke();
+            return changeDetected;
         }
 
         private readonly struct OpenVRDevice

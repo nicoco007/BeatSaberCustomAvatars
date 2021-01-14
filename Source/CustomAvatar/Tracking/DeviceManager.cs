@@ -21,7 +21,7 @@ using Zenject;
 
 namespace CustomAvatar.Tracking
 {
-    internal class DeviceManager : IInitializable, ITickable, IDisposable
+    internal class DeviceManager : ITickable
     {
         public event Action devicesChanged;
 
@@ -77,19 +77,13 @@ namespace CustomAvatar.Tracking
             }
         }
 
-        public void Initialize()
-        {
-            _deviceProvider.devicesChanged += OnDevicesChanged;
-        }
-
         public void Tick()
         {
-            _deviceProvider.GetDevices(_devices);
-        }
-
-        public void Dispose()
-        {
-            _deviceProvider.devicesChanged -= OnDevicesChanged;
+            if (_deviceProvider.GetDevices(_devices))
+            {
+                AssignDevices();
+                devicesChanged?.Invoke();
+            }
         }
 
         private TrackedDevice GetDevice(ref string id)
@@ -100,14 +94,10 @@ namespace CustomAvatar.Tracking
             return _devices[id];
         }
 
-        private void OnDevicesChanged()
-        {
-            AssignDevices();
-            devicesChanged?.Invoke();
-        }
-
         private void AssignDevices()
         {
+            _logger.Info("Device change detected, updating device assignments");
+
             string head = null;
             string leftHand = null;
             string rightHand = null;
@@ -117,6 +107,8 @@ namespace CustomAvatar.Tracking
 
             foreach (TrackedDevice device in _devices.Values)
             {
+                _logger.Trace($"Got device '{device.id}'");
+
                 switch (device.deviceUse)
                 {
                     case DeviceUse.Head:
@@ -176,7 +168,6 @@ namespace CustomAvatar.Tracking
 
                 current = potential;
             }
-
         }
     }
 }
