@@ -35,13 +35,11 @@ namespace CustomAvatar.UI
         private MirrorHelper _mirrorHelper;
         private Settings _settings;
         private PlayerAvatarManager _avatarManager;
-        private ShaderLoader _shaderLoader;
 
         #region Components
         #pragma warning disable CS0649
 
         [UIComponent("loader")] private readonly Transform _loader;
-        [UIComponent("shader-error-text")] private readonly Transform _shaderErrorText;
 
         #pragma warning restore CS0649
         #endregion
@@ -50,12 +48,11 @@ namespace CustomAvatar.UI
         #pragma warning disable IDE0051
 
         [Inject]
-        private void Inject(MirrorHelper mirrorHelper, Settings settings, PlayerAvatarManager avatarManager, ShaderLoader shaderLoader)
+        private void Inject(MirrorHelper mirrorHelper, Settings settings, PlayerAvatarManager avatarManager)
         {
             _mirrorHelper = mirrorHelper;
             _settings = settings;
             _avatarManager = avatarManager;
-            _shaderLoader = shaderLoader;
         }
 
         #pragma warning restore IDE0051
@@ -67,8 +64,6 @@ namespace CustomAvatar.UI
 
             if (addedToHierarchy)
             {
-                _shaderErrorText.gameObject.SetActive(_shaderLoader.hasErrors);
-
                 _mirrorContainer = new GameObject("Mirror Container");
                 Vector2 mirrorSize = _settings.mirror.size;
                 _mirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, 2), Quaternion.Euler(-90f, 0, 0), mirrorSize, _mirrorContainer.transform);
