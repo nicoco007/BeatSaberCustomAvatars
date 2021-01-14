@@ -88,9 +88,6 @@ namespace CustomAvatar.UI
             _calibrateFullBodyTrackingOnStart.Value = _settings.calibrateFullBodyTrackingOnStart;
             _cameraNearClipPlane.Value = _settings.cameraNearClipPlane;
 
-            SetLoading(false);
-            UpdateUI(_avatarManager.currentlySpawnedAvatar?.avatar);
-
             _armSpanLabel.SetText($"{_settings.playerArmSpan:0.00} m");
 
             if (firstActivation)
@@ -134,6 +131,8 @@ namespace CustomAvatar.UI
                 _avatarManager.avatarChanged += OnAvatarChanged;
                 _playerInput.inputChanged += OnInputChanged;
             }
+
+            OnAvatarChanged(_avatarManager.currentlySpawnedAvatar);
         }
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
@@ -224,6 +223,17 @@ namespace CustomAvatar.UI
 
         private void UpdateCalibrationButtons(LoadedAvatar avatar)
         {
+            if (_playerInput.TryGetUncalibratedPose(DeviceUse.LeftHand, out Pose _) && _playerInput.TryGetUncalibratedPose(DeviceUse.RightHand, out Pose _))
+            {
+                _measureButton.interactable = true;
+                _measureButtonHoverHint.text = "For optimal results, hold your arms out to either side of your body and point the ends of the controllers outwards as far as possible (turn your hands if necessary).";
+            }
+            else
+            {
+                _measureButton.interactable = false;
+                _measureButtonHoverHint.text = "Controllers not detected";
+            }
+
             if (avatar == null)
             {
                 _calibrateButton.interactable = false;

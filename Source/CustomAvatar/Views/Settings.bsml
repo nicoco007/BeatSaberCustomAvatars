@@ -15,7 +15,7 @@
       <horizontal pad-top="1">
         <text text="Arm Span" font-size="5" align="Left"></text>
         <text id="arm-span" font-size="5" align="Left"></text>
-        <button text="Measure" on-click="measure-arm-span-click" hover-hint="For optimal results, hold your arms out to either side of your body and point the ends of the controllers outwards as far as possible (turn your hands if necessary)."></button>
+        <button id="measure-button" text="Measure" on-click="measure-arm-span-click" hover-hint="For optimal results, hold your arms out to either side of your body and point the ends of the controllers outwards as far as possible (turn your hands if necessary)."></button>
       </horizontal>
     </settings-container>
   </tab>

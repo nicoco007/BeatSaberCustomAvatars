@@ -21,6 +21,8 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components.Settings;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using HMUI;
 
 namespace CustomAvatar.UI
 {
@@ -36,9 +38,11 @@ namespace CustomAvatar.UI
         [UIComponent("floor-height-adjust")] private DropDownListSetting _floorHeightAdjust;
         [UIComponent("move-floor-with-room-adjust")] private ToggleSetting _moveFloorWithRoomAdjust;
         [UIComponent("camera-clip-plane")] private IncrementSetting _cameraNearClipPlane;
+        [UIComponent("measure-button")] private Button _measureButton;
+        [UIComponent("measure-button")] private HoverHint _measureButtonHoverHint;
 
-        #pragma warning restore 649
-        #pragma warning restore IDE0044
+#pragma warning restore 649
+#pragma warning restore IDE0044
         #endregion
 
         #region Values
@@ -148,6 +152,8 @@ namespace CustomAvatar.UI
         #region Arm Span Measurement
 
         private const float kMinArmSpan = 0.5f;
+        private const float kStableMeasurementTimeout = 3f;
+        private const float kMinDifferenceToReset = 0.02f;
 
         private bool _isMeasuring;
         private float _lastUpdateTime;
@@ -156,6 +162,7 @@ namespace CustomAvatar.UI
         private void MeasureArmSpan()
         {
             if (_isMeasuring) return;
+            if (!_playerInput.TryGetPose(DeviceUse.LeftHand, out Pose _) || !_playerInput.TryGetPose(DeviceUse.RightHand, out Pose _)) return;
 
             _isMeasuring = true;
             _lastMeasuredArmSpan = kMinArmSpan;
@@ -166,16 +173,16 @@ namespace CustomAvatar.UI
 
         private void ScanArmSpan()
         {
-            if (Time.timeSinceLevelLoad - _lastUpdateTime < 3 && _playerInput.TryGetPose(DeviceUse.LeftHand, out Pose leftHand) && _playerInput.TryGetPose(DeviceUse.RightHand, out Pose rightHand))
+            if (Time.timeSinceLevelLoad - _lastUpdateTime < kStableMeasurementTimeout && _playerInput.TryGetPose(DeviceUse.LeftHand, out Pose leftHand) && _playerInput.TryGetPose(DeviceUse.RightHand, out Pose rightHand))
             {
                 float armSpan = Vector3.Distance(leftHand.position, rightHand.position);
 
-                if (Mathf.Abs(armSpan - _lastMeasuredArmSpan) > 0.02f)
+                if (Mathf.Abs(armSpan - _lastMeasuredArmSpan) >= kMinDifferenceToReset)
                 {
                     _lastUpdateTime = Time.timeSinceLevelLoad;
                 }
 
-                _lastMeasuredArmSpan = (_lastMeasuredArmSpan + armSpan) / 2;
+                _lastMeasuredArmSpan = Mathf.Max(kMinArmSpan, (_lastMeasuredArmSpan + armSpan) / 2);
                 _armSpanLabel.SetText($"Measuring... {_lastMeasuredArmSpan:0.00} m");
             }
             else
