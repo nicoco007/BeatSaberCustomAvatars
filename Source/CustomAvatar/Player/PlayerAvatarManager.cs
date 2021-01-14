@@ -138,7 +138,16 @@ namespace CustomAvatar.Player
                         (avatar) =>
                         {
                             var info = new AvatarInfo(avatar);
-                            _avatarInfos.Add(fileName, info);
+
+                            if (_avatarInfos.ContainsKey(fileName))
+                            {
+                                _avatarInfos[fileName] = info;
+                            }
+                            else
+                            {
+                                _avatarInfos.Add(fileName, info);
+                            }
+
                             success?.Invoke(info);
                         },
                         (exception) =>
