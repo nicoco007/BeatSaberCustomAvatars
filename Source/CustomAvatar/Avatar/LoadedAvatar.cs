@@ -159,6 +159,12 @@ namespace CustomAvatar.Avatar
                     _logger.Warning("VRIKManager is not on the root reference transform; this may cause unexpected issues");
                 }
 
+                CheckTargetWeight("Left Arm",  leftHand,  vrikManager.solver_leftArm_positionWeight,     vrikManager.solver_leftArm_rotationWeight);
+                CheckTargetWeight("Right Arm", rightHand, vrikManager.solver_rightArm_positionWeight,    vrikManager.solver_rightArm_rotationWeight);
+                CheckTargetWeight("Pelvis",    pelvis,    vrikManager.solver_spine_pelvisPositionWeight, vrikManager.solver_spine_pelvisRotationWeight);
+                CheckTargetWeight("Left Leg",  leftLeg,   vrikManager.solver_leftLeg_positionWeight,     vrikManager.solver_leftLeg_rotationWeight);
+                CheckTargetWeight("Right Leg", rightLeg,  vrikManager.solver_rightLeg_positionWeight,    vrikManager.solver_rightLeg_rotationWeight);
+
                 FixTrackingReferences(vrikManager);
             }
 
@@ -179,6 +185,14 @@ namespace CustomAvatar.Avatar
         public void Dispose()
         {
             Object.Destroy(prefab);
+        }
+
+        private void CheckTargetWeight(string name, Transform target, float positionWeight, float rotationWeight)
+        {
+            if (!target) return;
+
+            if (positionWeight <= 0.1f) _logger.Warning($"{name} position weight is very small ({positionWeight:0.00}); is that on purpose?");
+            if (rotationWeight <= 0.1f) _logger.Warning($"{name} rotation weight is very small ({rotationWeight:0.00}); is that on purpose?");
         }
 
         private float GetEyeHeight()
