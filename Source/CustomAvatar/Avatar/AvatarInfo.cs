@@ -64,6 +64,11 @@ namespace CustomAvatar.Avatar
 
         internal AvatarInfo(string name, string author, Texture2D icon, string fileName, long fileSize, DateTime created, DateTime lastModified, DateTime timestamp)
         {
+            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentNullException(nameof(name));
+            if (string.IsNullOrWhiteSpace(author)) throw new ArgumentNullException(nameof(author));
+            if (!icon) throw new ArgumentNullException(nameof(icon));
+            if (string.IsNullOrWhiteSpace(fileName)) throw new ArgumentNullException(nameof(fileName));
+
             this.name = name;
             this.author = author;
             this.icon = icon;
@@ -76,9 +81,9 @@ namespace CustomAvatar.Avatar
 
         public AvatarInfo(LoadedAvatar avatar)
         {
-            name = avatar.descriptor.name;
-            author = avatar.descriptor.author;
-            icon = avatar.descriptor.cover ? avatar.descriptor.cover.texture : null;
+            name = avatar.descriptor.name ?? "Unknown";
+            author = avatar.descriptor.author ?? "Unknown";
+            icon = avatar.descriptor.cover ? avatar.descriptor.cover.texture : new Texture2D(0, 0);
 
             var fileInfo = new FileInfo(avatar.fullPath);
 
