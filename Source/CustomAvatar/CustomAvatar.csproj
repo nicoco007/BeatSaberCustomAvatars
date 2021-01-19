@@ -185,4 +185,5 @@
     
     <Copy SourceFiles="@(CopyToBeatSaberFolder)" DestinationFiles="@(CopyToBeatSaberFolder->'$(BeatSaberDir)\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
+  <ProjectExtensions><VisualStudio><UserProperties manifest_1json__JsonSchema="https://json-schema.org/draft-04/schema" /></VisualStudio></ProjectExtensions>
 </Project>
