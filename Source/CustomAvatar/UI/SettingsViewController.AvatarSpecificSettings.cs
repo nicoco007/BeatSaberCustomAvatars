@@ -69,7 +69,7 @@ namespace CustomAvatar.UI
         {
             if (_currentAvatarSettings == null) return;
 
-            _currentAvatarSettings.bypassCalibration = value;
+            _currentAvatarSettings.bypassCalibration.value = value;
         }
 
         [UIAction("automatic-calibration-change")]
@@ -79,7 +79,7 @@ namespace CustomAvatar.UI
 
             if (_currentAvatarSettings == null) return;
 
-            _currentAvatarSettings.useAutomaticCalibration = value;
+            _currentAvatarSettings.useAutomaticCalibration.value = value;
         }
 
         [UIAction("calibrate-fbt-click")]

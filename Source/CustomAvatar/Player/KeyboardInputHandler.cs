@@ -48,8 +48,8 @@ namespace CustomAvatar.Player
             }
             else if (Input.GetKeyDown(KeyCode.Home))
             {
-                _settings.isAvatarVisibleInFirstPerson = !_settings.isAvatarVisibleInFirstPerson;
-                _logger.Info($"{(_settings.isAvatarVisibleInFirstPerson ? "Enabled" : "Disabled")} first person visibility");
+                _settings.isAvatarVisibleInFirstPerson.value = !_settings.isAvatarVisibleInFirstPerson;
+                _logger.Info($"{(_settings.isAvatarVisibleInFirstPerson.value ? "Enabled" : "Disabled")} first person visibility");
             }
             else if (Input.GetKeyDown(KeyCode.End))
             {

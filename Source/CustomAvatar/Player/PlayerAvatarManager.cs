@@ -83,8 +83,8 @@ namespace CustomAvatar.Player
 
         public void Initialize()
         {
-            _settings.moveFloorWithRoomAdjustChanged += OnMoveFloorWithRoomAdjustChanged;
-            _settings.firstPersonEnabledChanged += OnFirstPersonEnabledChanged;
+            _settings.moveFloorWithRoomAdjust.changed += OnMoveFloorWithRoomAdjustChanged;
+            _settings.isAvatarVisibleInFirstPerson.changed += OnFirstPersonEnabledChanged;
             _floorController.floorPositionChanged += OnFloorPositionChanged;
             BeatSaberEvents.playerHeightChanged += OnPlayerHeightChanged;
 
@@ -100,8 +100,8 @@ namespace CustomAvatar.Player
             currentlySpawnedAvatar?.avatar.Dispose();
             Object.Destroy(_avatarContainer);
 
-            _settings.moveFloorWithRoomAdjustChanged -= OnMoveFloorWithRoomAdjustChanged;
-            _settings.firstPersonEnabledChanged -= OnFirstPersonEnabledChanged;
+            _settings.moveFloorWithRoomAdjust.changed -= OnMoveFloorWithRoomAdjustChanged;
+            _settings.isAvatarVisibleInFirstPerson.changed -= OnFirstPersonEnabledChanged;
             _floorController.floorPositionChanged -= OnFloorPositionChanged;
             BeatSaberEvents.playerHeightChanged -= OnPlayerHeightChanged;
 

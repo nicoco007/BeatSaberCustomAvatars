@@ -14,7 +14,6 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -24,39 +23,14 @@ using CustomAvatar.Player;
 using CustomAvatar.Lighting;
 using CustomAvatar.Tracking;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using UnityEngine;
 
 namespace CustomAvatar.Configuration
 {
     internal class Settings
     {
-        public event Action<bool> firstPersonEnabledChanged;
-        public event Action<bool> moveFloorWithRoomAdjustChanged;
-
-        private bool _isAvatarVisibleInFirstPerson;
-        public bool isAvatarVisibleInFirstPerson
-        {
-            get => _isAvatarVisibleInFirstPerson;
-            set
-            {
-                _isAvatarVisibleInFirstPerson = value;
-                firstPersonEnabledChanged?.Invoke(value);
-            }
-        }
-
-        private bool _moveFloorWithRoomAdjust = false;
-
-        public bool moveFloorWithRoomAdjust
-        {
-            get => _moveFloorWithRoomAdjust;
-            set
-            {
-                _moveFloorWithRoomAdjust = value;
-                moveFloorWithRoomAdjustChanged?.Invoke(value);
-            }
-        }
-
+        public readonly ObservableValue<bool> isAvatarVisibleInFirstPerson = new ObservableValue<bool>();
+        public readonly ObservableValue<bool> moveFloorWithRoomAdjust = new ObservableValue<bool>();
         public AvatarResizeMode resizeMode = AvatarResizeMode.Height;
         public FloorHeightAdjust floorHeightAdjust = FloorHeightAdjust.Off;
         public string previousAvatarPath = null;
@@ -132,34 +106,10 @@ namespace CustomAvatar.Configuration
 
         public class AvatarSpecificSettings
         {
-            public event Action<bool> useAutomaticCalibrationChanged;
-            public event Action<bool> bypassCalibrationChanged;
-
-            public bool useAutomaticCalibration
-            {
-                get => _useAutomaticCalibration;
-                set
-                {
-                    _useAutomaticCalibration = value;
-                    useAutomaticCalibrationChanged?.Invoke(value);
-                }
-            }
-
-            public bool bypassCalibration
-            {
-                get => _bypassCalibration;
-                set
-                {
-                    _bypassCalibration = value;
-                    bypassCalibrationChanged?.Invoke(value);
-                }
-            }
-
+            public readonly ObservableValue<bool> useAutomaticCalibration = new ObservableValue<bool>();
+            public readonly ObservableValue<bool> bypassCalibration = new ObservableValue<bool>();
             public bool ignoreExclusions = false;
             public bool allowMaintainPelvisPosition = false;
-
-            private bool _useAutomaticCalibration = false;
-            private bool _bypassCalibration = false;
         }
 
         public AvatarSpecificSettings GetAvatarSettings(string fileName)

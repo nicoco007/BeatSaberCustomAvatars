@@ -93,7 +93,7 @@ namespace CustomAvatar.Configuration
             {
                 Formatting = Formatting.Indented,
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                Converters = { new StringEnumConverter(), new Vector2JsonConverter(), new Vector3JsonConverter(), new QuaternionJsonConverter(), new PoseJsonConverter(), new FloatJsonConverter(), new ColorJsonConverter() }
+                Converters = { new StringEnumConverter(), new Vector2JsonConverter(), new Vector3JsonConverter(), new QuaternionJsonConverter(), new PoseJsonConverter(), new FloatJsonConverter(), new ColorJsonConverter(), new ObservableValueJsonConverter<bool>() }
             };
         }
     }

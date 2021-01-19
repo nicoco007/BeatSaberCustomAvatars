@@ -303,8 +303,8 @@ namespace CustomAvatar.Player
         {
             if (_avatarSettings != null)
             {
-                _avatarSettings.useAutomaticCalibrationChanged -= OnUseAutomaticCalibrationChanged;
-                _avatarSettings.bypassCalibrationChanged       -= OnBypassCalibrationChanged;
+                _avatarSettings.useAutomaticCalibration.changed -= OnUseAutomaticCalibrationChanged;
+                _avatarSettings.bypassCalibration.changed       -= OnBypassCalibrationChanged;
             }
 
             if (!spawnedAvatar)
@@ -318,8 +318,8 @@ namespace CustomAvatar.Player
             _avatarSettings = _settings.GetAvatarSettings(spawnedAvatar.avatar.fileName);
             _manualCalibration = _calibrationData.GetAvatarManualCalibration(spawnedAvatar.avatar.fileName);
 
-            _avatarSettings.useAutomaticCalibrationChanged += OnUseAutomaticCalibrationChanged;
-            _avatarSettings.bypassCalibrationChanged       += OnBypassCalibrationChanged;
+            _avatarSettings.useAutomaticCalibration.changed += OnUseAutomaticCalibrationChanged;
+            _avatarSettings.bypassCalibration.changed       += OnBypassCalibrationChanged;
         }
 
         private bool TryGetCalibratedHandPose(DeviceUse use, out Pose pose)

@@ -56,7 +56,7 @@ namespace CustomAvatar.UI
         [UIAction("visible-in-first-person-change")]
         private void OnVisibleInFirstPersonChanged(bool value)
         {
-            _settings.isAvatarVisibleInFirstPerson = value;
+            _settings.isAvatarVisibleInFirstPerson.value = value;
         }
 
         [UIAction("resize-mode-change")]
@@ -143,7 +143,7 @@ namespace CustomAvatar.UI
         [UIAction("move-floor-with-room-adjust-change")]
         private void OnMoveFloorWithRoomAdjustChanged(bool value)
         {
-            _settings.moveFloorWithRoomAdjust = value;
+            _settings.moveFloorWithRoomAdjust.value = value;
             _avatarManager.ResizeCurrentAvatar();
         }
 
