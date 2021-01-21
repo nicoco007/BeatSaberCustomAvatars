@@ -56,8 +56,6 @@ namespace CustomAvatar.Avatar
 
             string fullPath = Path.GetFullPath(path);
 
-            if (!File.Exists(fullPath)) throw new IOException($"File '{fullPath}' does not exist");
-
             // already loading, just add handlers
             if (_handlers.ContainsKey(fullPath))
             {
@@ -68,6 +66,12 @@ namespace CustomAvatar.Avatar
 
             _handlers.Add(fullPath, new List<LoadHandlers> { new LoadHandlers(success, error, complete) });
 
+            if (!File.Exists(fullPath))
+            {
+                HandleException(fullPath, new IOException($"File '{fullPath}' does not exist"));
+                yield break;
+            }
+
             _logger.Info($"Loading avatar from '{fullPath}'");
 
             AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(fullPath);
@@ -76,18 +80,7 @@ namespace CustomAvatar.Avatar
 
             if (!assetBundleCreateRequest.isDone || !assetBundleCreateRequest.assetBundle)
             {
-                var exception = new AvatarLoadException("Could not load asset bundle");
-
-                _logger.Error($"Failed to load avatar at '{fullPath}'");
-                _logger.Error(exception);
-
-                foreach (LoadHandlers handler in _handlers[fullPath])
-                {
-                    handler.InvokeError(exception);
-                }
-
-                _handlers.Remove(fullPath);
-
+                HandleException(fullPath, new AvatarLoadException("Could not load asset bundle"));
                 yield break;
             }
 
@@ -98,17 +91,7 @@ namespace CustomAvatar.Avatar
             {
                 assetBundleCreateRequest.assetBundle.Unload(true);
 
-                var exception = new AvatarLoadException("Could not load asset from asset bundle");
-
-                _logger.Error($"Failed to load avatar at '{fullPath}'");
-                _logger.Error(exception);
-
-                foreach (LoadHandlers handler in _handlers[fullPath])
-                {
-                    handler.InvokeError(exception);
-                }
-
-                _handlers.Remove(fullPath);
+                HandleException(fullPath, new AvatarLoadException("Could not load asset from asset bundle"));
 
                 yield break;
             }
@@ -119,22 +102,34 @@ namespace CustomAvatar.Avatar
             {
                 var loadedAvatar = _container.Instantiate<LoadedAvatar>(new object[] { fullPath, (GameObject)assetBundleRequest.asset });
 
-                _logger.Info($"Successfully loaded avatar '{loadedAvatar.descriptor.name}' by '{loadedAvatar.descriptor.author}' from '{fullPath}'");
-
-                foreach (LoadHandlers handler in _handlers[fullPath])
-                {
-                    handler.InvokeSuccess(loadedAvatar);
-                }
+                HandleSuccess(fullPath, loadedAvatar);
             }
             catch (Exception ex)
             {
-                _logger.Error($"Failed to load avatar at '{fullPath}'");
-                _logger.Error(ex);
+                HandleException(fullPath, ex);
+            }
+        }
 
-                foreach (LoadHandlers handler in _handlers[fullPath])
-                {
-                    handler.InvokeError(new AvatarLoadException("Failed to load avatar", ex));
-                }
+        private void HandleSuccess(string fullPath, LoadedAvatar loadedAvatar)
+        {
+            _logger.Info($"Successfully loaded avatar '{loadedAvatar.descriptor.name}' by '{loadedAvatar.descriptor.author}' from '{fullPath}'");
+
+            foreach (LoadHandlers handler in _handlers[fullPath])
+            {
+                handler.InvokeSuccess(loadedAvatar);
+            }
+
+            _handlers.Remove(fullPath);
+        }
+
+        private void HandleException(string fullPath, Exception exception)
+        {
+            _logger.Error($"Failed to load avatar at '{fullPath}'");
+            _logger.Error(exception);
+
+            foreach (LoadHandlers handler in _handlers[fullPath])
+            {
+                handler.InvokeError(exception);
             }
 
             _handlers.Remove(fullPath);
