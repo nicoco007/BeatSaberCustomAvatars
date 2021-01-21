@@ -222,7 +222,7 @@ namespace CustomAvatar.Player
 
             avatarStartedLoading?.Invoke(fullPath);
 
-            SharedCoroutineStarter.instance.StartCoroutine(_avatarLoader.FromFileCoroutine(fullPath, SwitchToAvatar));
+            SharedCoroutineStarter.instance.StartCoroutine(_avatarLoader.FromFileCoroutine(fullPath, SwitchToAvatar, OnAvatarLoadFailed));
         }
 
         private void SwitchToAvatar(LoadedAvatar avatar)
@@ -264,6 +264,13 @@ namespace CustomAvatar.Player
             UpdateLocomotionEnabled();
 
             avatarChanged?.Invoke(currentlySpawnedAvatar);
+        }
+
+        private void OnAvatarLoadFailed(Exception error)
+        {
+            avatarChanged?.Invoke(null);
+            _settings.previousAvatarPath = null;
+            UpdateFloorOffsetForCurrentAvatar();
         }
 
         public void SwitchToNextAvatar()
