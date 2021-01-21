@@ -15,9 +15,9 @@
       <toggle-setting id="enable-locomotion" text="Enable locomotion" hover-hint="Allow feet and waist to be moved automatically to follow your head/body when not using dedicated trackers." on-change="enable-locomotion-change"/>
       <increment-setting id="camera-clip-plane" text="Camera Near Clip Plane" hover-hint="Distance from the eyes at which objets start being visible." min="0.01" max="0.3" increment="0.01" on-change="camera-clip-plane-change"></increment-setting>
       
-      <horizontal pad-top="1">
-        <text text="Arm Span" font-size="5" align="Left"></text>
-        <text id="arm-span" font-size="5" align="Left"></text>
+      <horizontal pref-height="7">
+        <text text="Arm Span" font-size="4" align="Left" italics="true"></text>
+        <text id="arm-span" font-size="4" align="Left" italics="true"></text>
         <button id="measure-button" text="Measure" on-click="measure-arm-span-click" hover-hint="For optimal results, hold your arms out to either side of your body and point the ends of the controllers outwards as far as possible (turn your hands if necessary)."></button>
       </horizontal>
     </settings-container>
