@@ -24,6 +24,7 @@ using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
 using HMUI;
 using Polyglot;
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -134,6 +135,7 @@ namespace CustomAvatar.UI
             {
                 _avatarManager.avatarStartedLoading += OnAvatarStartedLoading;
                 _avatarManager.avatarChanged += OnAvatarChanged;
+                _avatarManager.avatarLoadFailed += OnAvatarLoadFailed;
                 _playerInput.inputChanged += OnInputChanged;
                 _settings.resizeMode.changed += OnSettingsResizeModeChanged;
             }
@@ -150,6 +152,7 @@ namespace CustomAvatar.UI
             {
                 _avatarManager.avatarStartedLoading -= OnAvatarStartedLoading;
                 _avatarManager.avatarChanged -= OnAvatarChanged;
+                _avatarManager.avatarLoadFailed -= OnAvatarLoadFailed;
                 _playerInput.inputChanged -= OnInputChanged;
                 _settings.resizeMode.changed -= OnSettingsResizeModeChanged;
             }
@@ -167,6 +170,13 @@ namespace CustomAvatar.UI
             SetLoading(false);
             DisableCalibrationMode(false);
             UpdateUI(spawnedAvatar?.avatar);
+        }
+
+        private void OnAvatarLoadFailed(Exception exception)
+        {
+            SetLoading(false);
+            DisableCalibrationMode(false);
+            UpdateUI(null);
         }
 
         private void SetLoading(bool loading)

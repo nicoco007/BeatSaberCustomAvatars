@@ -22,6 +22,8 @@ using CustomAvatar.Avatar;
 using CustomAvatar.Player;
 using BeatSaberMarkupLanguage.ViewControllers;
 using BeatSaberMarkupLanguage.Attributes;
+using System;
+using HMUI;
 
 namespace CustomAvatar.UI
 {
@@ -39,6 +41,7 @@ namespace CustomAvatar.UI
         #pragma warning disable CS0649
 
         [UIComponent("loader")] private readonly Transform _loader;
+        [UIComponent("error-text")] private readonly CurvedTextMeshPro _errorText;
 
         #pragma warning restore CS0649
         #endregion
@@ -71,6 +74,7 @@ namespace CustomAvatar.UI
 
                 _avatarManager.avatarStartedLoading += OnAvatarStartedLoading;
                 _avatarManager.avatarChanged += OnAvatarChanged;
+                _avatarManager.avatarLoadFailed += OnAvatarLoadFailed;
 
                 SetLoading(false);
             }
@@ -84,6 +88,7 @@ namespace CustomAvatar.UI
             {
                 _avatarManager.avatarStartedLoading -= OnAvatarStartedLoading;
                 _avatarManager.avatarChanged -= OnAvatarChanged;
+                _avatarManager.avatarLoadFailed -= OnAvatarLoadFailed;
             }
 
             Destroy(_mirrorContainer);
@@ -99,9 +104,19 @@ namespace CustomAvatar.UI
             SetLoading(false);
         }
 
+        private void OnAvatarLoadFailed(Exception exception)
+        {
+            SetLoading(false);
+
+            _errorText.color = new Color(0.85f, 0.85f, 0.85f, 0.8f);
+            _errorText.text = $"Failed to load selected avatar\n<size=3>{exception.Message}</size>";
+            _errorText.gameObject.SetActive(true);
+        }
+
         private void SetLoading(bool loading)
         {
             _loader.gameObject.SetActive(loading);
+            _errorText.gameObject.SetActive(false);
         }
     }
 }

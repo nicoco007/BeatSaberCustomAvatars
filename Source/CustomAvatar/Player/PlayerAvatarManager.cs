@@ -53,6 +53,7 @@ namespace CustomAvatar.Player
         /// Event triggered when a new avatar has finished loading and is spawned. Note that the argument may be null if no avatar was selected to replace the previous one.
         /// </summary>
         public event Action<SpawnedAvatar> avatarChanged;
+        public event Action<Exception> avatarLoadFailed;
         public event Action<float> avatarScaleChanged;
 
         private readonly DiContainer _container;
@@ -268,9 +269,7 @@ namespace CustomAvatar.Player
 
         private void OnAvatarLoadFailed(Exception error)
         {
-            avatarChanged?.Invoke(null);
-            _settings.previousAvatarPath = null;
-            UpdateFloorOffsetForCurrentAvatar();
+            avatarLoadFailed?.Invoke(error);
         }
 
         public void SwitchToNextAvatar()
