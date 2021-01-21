@@ -62,12 +62,12 @@ namespace CustomAvatar
 
         // Legacy stuff
         #pragma warning disable 649
-        [SerializeField] [HideInInspector] private readonly string AvatarName;
-        [SerializeField] [HideInInspector] private readonly string AuthorName;
-        [SerializeField] [HideInInspector] private readonly Sprite CoverImage;
-        [SerializeField] [HideInInspector] private readonly string Name;
-        [SerializeField] [HideInInspector] private readonly string Author;
-        [SerializeField] [HideInInspector] private readonly Sprite Cover;
+        [SerializeField] [HideInInspector] private string AvatarName;
+        [SerializeField] [HideInInspector] private string AuthorName;
+        [SerializeField] [HideInInspector] private Sprite CoverImage;
+        [SerializeField] [HideInInspector] private string Name;
+        [SerializeField] [HideInInspector] private string Author;
+        [SerializeField] [HideInInspector] private Sprite Cover;
         #pragma warning restore 649
 
         public void OnBeforeSerialize() { }
