@@ -85,6 +85,10 @@ namespace CustomAvatar.Player
         {
             _settings.moveFloorWithRoomAdjust.changed += OnMoveFloorWithRoomAdjustChanged;
             _settings.isAvatarVisibleInFirstPerson.changed += OnFirstPersonEnabledChanged;
+            _settings.resizeMode.changed += OnResizeModeChanged;
+            _settings.floorHeightAdjust.changed += OnFloorHeightAdjustChanged;
+            _settings.isAvatarVisibleInFirstPerson.changed += OnAvatarVisibleInFirstPersonChanged;
+
             _floorController.floorPositionChanged += OnFloorPositionChanged;
             BeatSaberEvents.playerHeightChanged += OnPlayerHeightChanged;
 
@@ -102,6 +106,10 @@ namespace CustomAvatar.Player
 
             _settings.moveFloorWithRoomAdjust.changed -= OnMoveFloorWithRoomAdjustChanged;
             _settings.isAvatarVisibleInFirstPerson.changed -= OnFirstPersonEnabledChanged;
+            _settings.resizeMode.changed -= OnResizeModeChanged;
+            _settings.floorHeightAdjust.changed -= OnFloorHeightAdjustChanged;
+            _settings.isAvatarVisibleInFirstPerson.changed -= OnAvatarVisibleInFirstPersonChanged;
+
             _floorController.floorPositionChanged -= OnFloorPositionChanged;
             BeatSaberEvents.playerHeightChanged -= OnPlayerHeightChanged;
 
@@ -269,7 +277,29 @@ namespace CustomAvatar.Player
             SwitchToAvatarAsync(files[index]);
         }
 
-        internal void ResizeCurrentAvatar()
+        internal void Move(Vector3 position, Quaternion rotation)
+        {
+            _avatarContainer.transform.SetPositionAndRotation(position, rotation);
+
+            if (currentlySpawnedAvatar && currentlySpawnedAvatar.ik) currentlySpawnedAvatar.ik.ResetSolver();
+        }
+
+        private void OnResizeModeChanged(AvatarResizeMode resizeMode)
+        {
+            ResizeCurrentAvatar();
+        }
+
+        private void OnFloorHeightAdjustChanged(FloorHeightAdjust floorHeightAdjust)
+        {
+            ResizeCurrentAvatar();
+        }
+
+        private void OnAvatarVisibleInFirstPersonChanged(bool visible)
+        {
+            UpdateFirstPersonVisibility();
+        }
+
+        private void ResizeCurrentAvatar()
         {
             if (!currentlySpawnedAvatar || !currentlySpawnedAvatar.avatar.descriptor.allowHeightCalibration) return;
 
@@ -325,7 +355,7 @@ namespace CustomAvatar.Player
             avatarScaleChanged?.Invoke(scale);
         }
 
-        internal void UpdateFloorOffsetForCurrentAvatar()
+        private void UpdateFloorOffsetForCurrentAvatar()
         {
             if (_settings.floorHeightAdjust == FloorHeightAdjust.Off || !currentlySpawnedAvatar)
             {
@@ -339,7 +369,7 @@ namespace CustomAvatar.Player
             _floorController.SetFloorOffset(floorOffset);
         }
 
-        internal void UpdateFirstPersonVisibility()
+        private void UpdateFirstPersonVisibility()
         {
             if (!currentlySpawnedAvatar) return;
 
@@ -360,18 +390,11 @@ namespace CustomAvatar.Player
             currentlySpawnedAvatar.SetFirstPersonVisibility(visibility);
         }
 
-        internal void UpdateLocomotionEnabled()
+        private void UpdateLocomotionEnabled()
         {
             if (!currentlySpawnedAvatar) return;
 
             currentlySpawnedAvatar.SetLocomotionEnabled(_settings.enableLocomotion);
-        }
-
-        internal void Move(Vector3 position, Quaternion rotation)
-        {
-            _avatarContainer.transform.SetPositionAndRotation(position, rotation);
-
-            if (currentlySpawnedAvatar && currentlySpawnedAvatar.ik) currentlySpawnedAvatar.ik.ResetSolver();
         }
 
         private void OnMoveFloorWithRoomAdjustChanged(bool value)

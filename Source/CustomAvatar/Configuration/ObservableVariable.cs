@@ -45,5 +45,10 @@ namespace CustomAvatar.Configuration
         {
             return ov.value;
         }
+
+        public override string ToString()
+        {
+            return _value?.ToString();
+        }
     }
 }

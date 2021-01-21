@@ -60,8 +60,7 @@ namespace CustomAvatar.UI
         {
             if (_currentAvatarSettings == null) return;
 
-            _currentAvatarSettings.ignoreExclusions = value;
-            _avatarManager.UpdateFirstPersonVisibility();
+            _currentAvatarSettings.ignoreExclusions.value = value;
         }
 
         [UIAction("bypass-calibration-change")]

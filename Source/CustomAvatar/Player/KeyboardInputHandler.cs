@@ -53,15 +53,13 @@ namespace CustomAvatar.Player
             }
             else if (Input.GetKeyDown(KeyCode.End))
             {
-                _settings.resizeMode = (AvatarResizeMode)(((int)_settings.resizeMode + 1) % 3);
+                _settings.resizeMode.value = (AvatarResizeMode)(((int)_settings.resizeMode.value + 1) % 3);
                 _logger.Info($"Set resize mode to {_settings.resizeMode}");
-                _avatarManager.ResizeCurrentAvatar();
             }
             else if (Input.GetKeyDown(KeyCode.Insert))
             {
-                _settings.floorHeightAdjust = (FloorHeightAdjust)(((int)_settings.floorHeightAdjust + 1) % Enum.GetValues(typeof(FloorHeightAdjust)).Length);
+                _settings.floorHeightAdjust.value = (FloorHeightAdjust)(((int)_settings.floorHeightAdjust.value + 1) % Enum.GetValues(typeof(FloorHeightAdjust)).Length);
                 _logger.Info($"Set floor height adjust to {_settings.floorHeightAdjust}");
-                _avatarManager.ResizeCurrentAvatar();
             }
         }
     }

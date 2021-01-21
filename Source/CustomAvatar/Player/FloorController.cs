@@ -88,7 +88,7 @@ namespace CustomAvatar.Player
 
             string[] floorObjectNames;
 
-            switch (_settings.floorHeightAdjust)
+            switch (_settings.floorHeightAdjust.value)
             {
                 case FloorHeightAdjust.PlayersPlaceOnly:
                     floorObjectNames = _playersPlaceObjectNames;

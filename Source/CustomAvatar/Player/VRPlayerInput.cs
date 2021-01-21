@@ -80,7 +80,7 @@ namespace CustomAvatar.Player
 
             _leftHandAnimAction = new SkeletalInput("/actions/customavatars/in/lefthandanim");
             _rightHandAnimAction = new SkeletalInput("/actions/customavatars/in/righthandanim");
-
+            
             OnAvatarChanged(_avatarManager.currentlySpawnedAvatar);
             OnDevicesUpdated();
         }

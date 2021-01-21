@@ -62,8 +62,7 @@ namespace CustomAvatar.UI
         [UIAction("resize-mode-change")]
         private void OnResizeModeChanged(AvatarResizeMode value)
         {
-            _settings.resizeMode = value;
-            _avatarManager.ResizeCurrentAvatar();
+            _settings.resizeMode.value = value;
         }
 
         [UIAction("resize-mode-formatter")]
@@ -87,8 +86,7 @@ namespace CustomAvatar.UI
         [UIAction("enable-locomotion-change")]
         private void OnEnableLocomotionChanged(bool value)
         {
-            _settings.enableLocomotion = value;
-            _avatarManager.UpdateLocomotionEnabled();
+            _settings.enableLocomotion.value = value;
         }
 
         [UIAction("floor-height-adjust-formatter")]
@@ -112,8 +110,7 @@ namespace CustomAvatar.UI
         [UIAction("floor-height-adjust-change")]
         private void OnFloorHeightAdjustChanged(FloorHeightAdjust value)
         {
-            _settings.floorHeightAdjust = value;
-            _avatarManager.UpdateFloorOffsetForCurrentAvatar();
+            _settings.floorHeightAdjust.value = value;
         }
 
         [UIAction("camera-clip-plane-change")]
@@ -144,7 +141,6 @@ namespace CustomAvatar.UI
         private void OnMoveFloorWithRoomAdjustChanged(bool value)
         {
             _settings.moveFloorWithRoomAdjust.value = value;
-            _avatarManager.ResizeCurrentAvatar();
         }
 
         #endregion
@@ -190,13 +186,8 @@ namespace CustomAvatar.UI
                 CancelInvoke(nameof(ScanArmSpan));
 
                 _armSpanLabel.SetText($"{_lastMeasuredArmSpan:0.00} m");
-                _settings.playerArmSpan = _lastMeasuredArmSpan;
+                _settings.playerArmSpan.value = _lastMeasuredArmSpan;
                 _isMeasuring = false;
-
-                if (_settings.resizeMode == AvatarResizeMode.ArmSpan)
-                {
-                    _avatarManager.ResizeCurrentAvatar();
-                }
             }
         }
 

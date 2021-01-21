@@ -31,12 +31,12 @@ namespace CustomAvatar.Configuration
     {
         public readonly ObservableValue<bool> isAvatarVisibleInFirstPerson = new ObservableValue<bool>();
         public readonly ObservableValue<bool> moveFloorWithRoomAdjust = new ObservableValue<bool>();
-        public AvatarResizeMode resizeMode = AvatarResizeMode.Height;
-        public FloorHeightAdjust floorHeightAdjust = FloorHeightAdjust.Off;
+        public readonly ObservableValue<AvatarResizeMode> resizeMode = new ObservableValue<AvatarResizeMode>(AvatarResizeMode.Height);
+        public readonly ObservableValue<FloorHeightAdjust> floorHeightAdjust = new ObservableValue<FloorHeightAdjust>(FloorHeightAdjust.Off);
         public string previousAvatarPath = null;
-        public float playerArmSpan = VRPlayerInput.kDefaultPlayerArmSpan;
+        public readonly ObservableValue<float> playerArmSpan = new ObservableValue<float>(VRPlayerInput.kDefaultPlayerArmSpan);
         public bool calibrateFullBodyTrackingOnStart = false;
-        public bool enableLocomotion = true;
+        public readonly ObservableValue<bool> enableLocomotion = new ObservableValue<bool>();
         public float cameraNearClipPlane = 0.1f;
         public bool showAvatarInSmoothCamera = true;
         public readonly Lighting lighting = new Lighting();
@@ -108,7 +108,7 @@ namespace CustomAvatar.Configuration
         {
             public readonly ObservableValue<bool> useAutomaticCalibration = new ObservableValue<bool>();
             public readonly ObservableValue<bool> bypassCalibration = new ObservableValue<bool>();
-            public bool ignoreExclusions = false;
+            public readonly ObservableValue<bool> ignoreExclusions = new ObservableValue<bool>(false);
             public bool allowMaintainPelvisPosition = false;
         }
 
