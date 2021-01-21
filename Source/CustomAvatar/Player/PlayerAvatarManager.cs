@@ -56,6 +56,9 @@ namespace CustomAvatar.Player
         public event Action<Exception> avatarLoadFailed;
         public event Action<float> avatarScaleChanged;
 
+        internal event Action<AvatarInfo> avatarAdded;
+        internal event Action<AvatarInfo> avatarRemoved;
+
         private readonly DiContainer _container;
         private readonly ILogger<PlayerAvatarManager> _logger;
         private readonly AvatarLoader _avatarLoader;
@@ -64,6 +67,7 @@ namespace CustomAvatar.Player
         private readonly BeatSaberUtilities _beatSaberUtilities;
         private readonly FloorController _floorController;
 
+        private readonly FileSystemWatcher _fileSystemWatcher;
         private readonly Dictionary<string, AvatarInfo> _avatarInfos = new Dictionary<string, AvatarInfo>();
 
         private string _switchingToPath;
@@ -80,6 +84,9 @@ namespace CustomAvatar.Player
             _spawner = spawner;
             _beatSaberUtilities = beatSaberUtilities;
             _floorController = floorController;
+
+            _fileSystemWatcher = new FileSystemWatcher(kCustomAvatarsPath, "*.avatar");
+            _fileSystemWatcher.NotifyFilter = NotifyFilters.CreationTime | NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size;
         }
 
         public void Initialize()
@@ -95,6 +102,14 @@ namespace CustomAvatar.Player
 
             _avatarContainer = new GameObject("Avatar Container");
             Object.DontDestroyOnLoad(_avatarContainer);
+
+            _fileSystemWatcher.Changed += OnAvatarFileChanged;
+            _fileSystemWatcher.Created += OnAvatarFileCreated;
+            _fileSystemWatcher.Deleted += OnAvatarFileDeleted;
+
+            _fileSystemWatcher.EnableRaisingEvents = true;
+
+            _logger.Trace($"Watching files in '{_fileSystemWatcher.Path}' ('{_fileSystemWatcher.Filter}')");
 
             LoadAvatarInfosFromFile();
             LoadAvatarFromSettingsAsync();
@@ -113,6 +128,12 @@ namespace CustomAvatar.Player
 
             _floorController.floorPositionChanged -= OnFloorPositionChanged;
             BeatSaberEvents.playerHeightChanged -= OnPlayerHeightChanged;
+
+            _fileSystemWatcher.Changed -= OnAvatarFileChanged;
+            _fileSystemWatcher.Created -= OnAvatarFileCreated;
+            _fileSystemWatcher.Deleted -= OnAvatarFileDeleted;
+
+            _fileSystemWatcher.Dispose();
 
             SaveAvatarInfosToFile();
         }
@@ -135,7 +156,6 @@ namespace CustomAvatar.Player
                 string fullPath = currentlySpawnedAvatar ? currentlySpawnedAvatar.avatar.fullPath : null;
                 SwitchToAvatarAsync(null);
                 _switchingToPath = fullPath;
-                _logger.Notice("_switchingToPath =" + _switchingToPath);
             }
 
             foreach (string fileName in fileNames)
@@ -224,6 +244,64 @@ namespace CustomAvatar.Player
             avatarStartedLoading?.Invoke(fullPath);
 
             SharedCoroutineStarter.instance.StartCoroutine(_avatarLoader.FromFileCoroutine(fullPath, SwitchToAvatar, OnAvatarLoadFailed));
+        }
+
+        private void LoadAvatar(string fullPath, Action<LoadedAvatar> success = null, Action<Exception> error = null, Action complete = null)
+        {
+            SharedCoroutineStarter.instance.StartCoroutine(_avatarLoader.FromFileCoroutine(fullPath,
+                (avatar) =>
+                {
+                    var info = new AvatarInfo(avatar);
+                    string fileName = info.fileName;
+
+                    if (_avatarInfos.ContainsKey(fileName))
+                    {
+                        _avatarInfos[fileName] = info;
+                    }
+                    else
+                    {
+                        _avatarInfos.Add(fileName, info);
+                    }
+
+                    success?.Invoke(avatar);
+                    avatarAdded?.Invoke(info);
+                }, error, complete));
+        }
+
+        private void OnAvatarFileChanged(object sender, FileSystemEventArgs e)
+        {
+            _logger.Trace($"File change detected: '{e.FullPath}'");
+
+            if (e.FullPath == currentlySpawnedAvatar?.avatar.fullPath)
+            {
+                _logger.Info("Reloading spawned avatar");
+                SwitchToAvatarAsync(e.Name);
+            }
+            else
+            {
+                _logger.Info($"Reloading avatar info for '{e.FullPath}'");
+                LoadAvatar(e.FullPath);
+            }
+        }
+
+        private void OnAvatarFileCreated(object sender, FileSystemEventArgs e)
+        {
+            _logger.Info($"Loading avatar info for '{e.FullPath}'");
+            LoadAvatar(e.FullPath, (avatar) => avatar.Dispose());
+        }
+
+        private void OnAvatarFileDeleted(object sender, FileSystemEventArgs e)
+        {
+            _logger.Trace($"File deleted: '{e.FullPath}'");
+
+            string fileName = Path.GetFileName(e.FullPath);
+
+            if (_avatarInfos.TryGetValue(fileName, out AvatarInfo info))
+            {
+                _logger.Info($"Removing '{fileName}'");
+                _avatarInfos.Remove(fileName);
+                avatarRemoved?.Invoke(info);
+            }
         }
 
         private void SwitchToAvatar(LoadedAvatar avatar)

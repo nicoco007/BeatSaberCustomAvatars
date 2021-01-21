@@ -80,6 +80,8 @@ namespace CustomAvatar.UI
             if (addedToHierarchy)
             {
                 _avatarManager.avatarChanged += OnAvatarChanged;
+                _avatarManager.avatarAdded   += OnAvatarAdded;
+                _avatarManager.avatarRemoved += OnAvatarRemoved;
 
                 ReloadAvatars();
             }
@@ -201,6 +203,8 @@ namespace CustomAvatar.UI
             if (removedFromHierarchy)
             {
                 _avatarManager.avatarChanged -= OnAvatarChanged;
+                _avatarManager.avatarAdded   -= OnAvatarAdded;
+                _avatarManager.avatarRemoved -= OnAvatarRemoved;
             }
         }
 
@@ -212,6 +216,18 @@ namespace CustomAvatar.UI
         private void OnAvatarChanged(SpawnedAvatar avatar)
         {
             UpdateSelectedRow();
+        }
+
+        private void OnAvatarAdded(AvatarInfo avatarInfo)
+        {
+            _avatars.Add(new AvatarListItem(avatarInfo));
+            ReloadData();
+        }
+
+        private void OnAvatarRemoved(AvatarInfo avatarInfo)
+        {
+            _avatars.RemoveAll(a => a.fileName == avatarInfo.fileName);
+            ReloadData();
         }
 
         private void OnRefreshButtonPressed()
