@@ -60,6 +60,8 @@ namespace CustomAvatar.UI
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
 
+            name = nameof(AvatarListViewController);
+
             if (firstActivation)
             {
                 _tableCellTemplate = Resources.FindObjectsOfTypeAll<LevelListTableCell>().First(x => x.name == "LevelListTableCell");

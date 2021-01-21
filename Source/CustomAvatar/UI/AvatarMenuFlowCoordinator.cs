@@ -33,6 +33,8 @@ namespace CustomAvatar.UI
 
         public void Initialize()
         {
+            name = nameof(AvatarMenuFlowCoordinator);
+
             _menuButton = new MenuButton("Avatars", () =>
             {
                 _mainFlowCoordinator.PresentFlowCoordinator(this);

@@ -24,7 +24,6 @@ using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
 using HMUI;
 using Polyglot;
-using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -62,12 +61,13 @@ namespace CustomAvatar.UI
         private ShaderLoader _shaderLoader;
         private VRPlayerInput _playerInput;
         private PlayerDataModel _playerDataModel;
+        private GameplaySetupViewController _gameplaySetupViewController;
 
         private Settings.AvatarSpecificSettings _currentAvatarSettings;
         private CalibrationData.FullBodyCalibration _currentAvatarManualCalibration;
 
         [Inject]
-        private void Inject(ILoggerProvider loggerProvider, PlayerAvatarManager avatarManager, Settings settings, CalibrationData calibrationData, ShaderLoader shaderLoader, VRPlayerInput playerInput, PlayerDataModel playerDataModel)
+        private void Inject(ILoggerProvider loggerProvider, PlayerAvatarManager avatarManager, Settings settings, CalibrationData calibrationData, ShaderLoader shaderLoader, VRPlayerInput playerInput, PlayerDataModel playerDataModel, GameplaySetupViewController gameplaySetupViewController)
         {
             _logger = loggerProvider.CreateLogger<SettingsViewController>();
             _avatarManager = avatarManager;
@@ -76,11 +76,14 @@ namespace CustomAvatar.UI
             _shaderLoader = shaderLoader;
             _playerInput = playerInput;
             _playerDataModel = playerDataModel;
+            _gameplaySetupViewController = gameplaySetupViewController;
         }
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
+
+            name = nameof(SettingsViewController);
 
             _visibleInFirstPerson.Value = _settings.isAvatarVisibleInFirstPerson;
             _resizeMode.Value = _settings.resizeMode.value;
@@ -110,7 +113,7 @@ namespace CustomAvatar.UI
                     _logger.Error("Unlit shader not loaded; manual calibration points may not be visible");
                 }
 
-                Transform header = Instantiate(Resources.FindObjectsOfTypeAll<GameplaySetupViewController>().First().transform.Find("HeaderPanel"), rectTransform, false);
+                Transform header = Instantiate(_gameplaySetupViewController.transform.Find("HeaderPanel"), rectTransform, false);
 
                 header.name = "HeaderPanel";
 

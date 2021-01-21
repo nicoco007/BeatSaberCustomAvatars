@@ -22,7 +22,6 @@ using CustomAvatar.Avatar;
 using CustomAvatar.Player;
 using BeatSaberMarkupLanguage.ViewControllers;
 using BeatSaberMarkupLanguage.Attributes;
-using CustomAvatar.Utilities;
 
 namespace CustomAvatar.UI
 {
@@ -61,6 +60,8 @@ namespace CustomAvatar.UI
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
+
+            name = nameof(MirrorViewController);
 
             if (addedToHierarchy)
             {
