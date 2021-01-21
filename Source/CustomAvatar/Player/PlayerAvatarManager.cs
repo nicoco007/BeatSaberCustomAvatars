@@ -116,7 +116,7 @@ namespace CustomAvatar.Player
             SaveAvatarInfosToFile();
         }
 
-        internal void GetAvatarInfosAsync(Action<AvatarInfo> success = null, Action<Exception> error = null, Action complete = null)
+        internal void GetAvatarInfosAsync(Action<AvatarInfo> success = null, Action<Exception> error = null, Action complete = null, bool forceReload = false)
         {
             List<string> fileNames = GetAvatarFileNames();
             int loadedCount = 0;
@@ -129,11 +129,19 @@ namespace CustomAvatar.Player
                 }
             }
 
+            if (forceReload)
+            {
+                string fullPath = currentlySpawnedAvatar ? currentlySpawnedAvatar.avatar.fullPath : null;
+                SwitchToAvatarAsync(null);
+                _switchingToPath = fullPath;
+                _logger.Notice("_switchingToPath =" + _switchingToPath);
+            }
+
             foreach (string fileName in fileNames)
             {
                 string fullPath = Path.Combine(kCustomAvatarsPath, fileName);
 
-                if (_avatarInfos.ContainsKey(fileName) && _avatarInfos[fileName].IsForFile(fullPath))
+                if (!forceReload && _avatarInfos.ContainsKey(fileName) && _avatarInfos[fileName].IsForFile(fullPath))
                 {
                     _logger.Trace($"Using cached information for '{fileName}'");
                     success?.Invoke(_avatarInfos[fileName]);
@@ -157,6 +165,11 @@ namespace CustomAvatar.Player
                             }
 
                             success?.Invoke(info);
+
+                            if (avatar.fullPath == _switchingToPath)
+                            {
+                                SwitchToAvatar(avatar);
+                            }
                         },
                         (exception) =>
                         {
