@@ -40,6 +40,7 @@ namespace CustomAvatar.UI
         [UIComponent("camera-clip-plane")] private IncrementSetting _cameraNearClipPlane;
         [UIComponent("measure-button")] private Button _measureButton;
         [UIComponent("measure-button")] private HoverHint _measureButtonHoverHint;
+        [UIComponent("height-adjust-warning-text")] private RectTransform _heightAdjustWarningText;
 
 #pragma warning restore 649
 #pragma warning restore IDE0044

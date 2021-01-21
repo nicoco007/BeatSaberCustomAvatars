@@ -61,12 +61,13 @@ namespace CustomAvatar.UI
         private CalibrationData _calibrationData;
         private ShaderLoader _shaderLoader;
         private VRPlayerInput _playerInput;
+        private PlayerDataModel _playerDataModel;
 
         private Settings.AvatarSpecificSettings _currentAvatarSettings;
         private CalibrationData.FullBodyCalibration _currentAvatarManualCalibration;
 
         [Inject]
-        private void Inject(ILoggerProvider loggerProvider, PlayerAvatarManager avatarManager, Settings settings, CalibrationData calibrationData, ShaderLoader shaderLoader, VRPlayerInput playerInput)
+        private void Inject(ILoggerProvider loggerProvider, PlayerAvatarManager avatarManager, Settings settings, CalibrationData calibrationData, ShaderLoader shaderLoader, VRPlayerInput playerInput, PlayerDataModel playerDataModel)
         {
             _logger = loggerProvider.CreateLogger<SettingsViewController>();
             _avatarManager = avatarManager;
@@ -74,6 +75,7 @@ namespace CustomAvatar.UI
             _calibrationData = calibrationData;
             _shaderLoader = shaderLoader;
             _playerInput = playerInput;
+            _playerDataModel = playerDataModel;
         }
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
@@ -81,9 +83,9 @@ namespace CustomAvatar.UI
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
 
             _visibleInFirstPerson.Value = _settings.isAvatarVisibleInFirstPerson;
-            _resizeMode.Value = _settings.resizeMode;
+            _resizeMode.Value = _settings.resizeMode.value;
             _enableLocomotion.Value = _settings.enableLocomotion;
-            _floorHeightAdjust.Value = _settings.floorHeightAdjust;
+            _floorHeightAdjust.Value = _settings.floorHeightAdjust.value;
             _moveFloorWithRoomAdjust.Value = _settings.moveFloorWithRoomAdjust;
             _calibrateFullBodyTrackingOnStart.Value = _settings.calibrateFullBodyTrackingOnStart;
             _cameraNearClipPlane.Value = _settings.cameraNearClipPlane;
@@ -130,9 +132,11 @@ namespace CustomAvatar.UI
                 _avatarManager.avatarStartedLoading += OnAvatarStartedLoading;
                 _avatarManager.avatarChanged += OnAvatarChanged;
                 _playerInput.inputChanged += OnInputChanged;
+                _settings.resizeMode.changed += OnSettingsResizeModeChanged;
             }
 
             OnAvatarChanged(_avatarManager.currentlySpawnedAvatar);
+            OnSettingsResizeModeChanged(_settings.resizeMode);
         }
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
@@ -144,6 +148,7 @@ namespace CustomAvatar.UI
                 _avatarManager.avatarStartedLoading -= OnAvatarStartedLoading;
                 _avatarManager.avatarChanged -= OnAvatarChanged;
                 _playerInput.inputChanged -= OnInputChanged;
+                _settings.resizeMode.changed -= OnSettingsResizeModeChanged;
             }
 
             DisableCalibrationMode(false);
@@ -187,6 +192,11 @@ namespace CustomAvatar.UI
             {
                 textMesh.alpha = alpha;
             }
+        }
+
+        private void OnSettingsResizeModeChanged(AvatarResizeMode resizeMode)
+        {
+            _heightAdjustWarningText.gameObject.SetActive(resizeMode != AvatarResizeMode.None && _playerDataModel.playerData.playerSpecificSettings.automaticPlayerHeight);
         }
 
         private void UpdateUI(LoadedAvatar avatar)
