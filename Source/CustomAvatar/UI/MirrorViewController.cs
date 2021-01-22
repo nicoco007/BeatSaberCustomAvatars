@@ -68,9 +68,14 @@ namespace CustomAvatar.UI
 
             if (addedToHierarchy)
             {
+                Transform screenSystem = GameObject.Find("Wrapper/ScreenSystem").transform;
+
                 _mirrorContainer = new GameObject("Mirror Container");
+                _mirrorContainer.transform.SetParent(screenSystem, false);
+                _mirrorContainer.transform.localScale = new Vector3(1f / screenSystem.localScale.x, 1f / screenSystem.localScale.y, 1f / screenSystem.localScale.z);
+
                 Vector2 mirrorSize = _settings.mirror.size;
-                _mirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, 2), Quaternion.Euler(-90f, 0, 0), mirrorSize, _mirrorContainer.transform);
+                _mirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, 3.9f), Quaternion.Euler(-90f, 0, 0), mirrorSize, _mirrorContainer.transform);
 
                 _avatarManager.avatarStartedLoading += OnAvatarStartedLoading;
                 _avatarManager.avatarChanged += OnAvatarChanged;

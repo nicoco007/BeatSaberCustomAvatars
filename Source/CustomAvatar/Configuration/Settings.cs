@@ -80,7 +80,7 @@ namespace CustomAvatar.Configuration
 
         public class Mirror
         {
-            public Vector2 size = new Vector2(5f, 2.5f);
+            public Vector2 size = new Vector2(8f, 2.5f);
             public float renderScale = 1.0f;
         }
 
