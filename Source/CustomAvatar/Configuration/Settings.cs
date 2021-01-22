@@ -80,8 +80,9 @@ namespace CustomAvatar.Configuration
 
         public class Mirror
         {
-            public Vector2 size = new Vector2(8f, 2.5f);
+            public Vector2 size = new Vector2(6f, 3f);
             public float renderScale = 1.0f;
+            public int antiAliasing = 4;
         }
 
         public class FullBodyMotionSmoothing

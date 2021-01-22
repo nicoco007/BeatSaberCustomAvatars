@@ -18,6 +18,7 @@ using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Utilities;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Zenject;
 
@@ -28,7 +29,7 @@ namespace CustomAvatar.StereoRendering
     internal class StereoMirrorRenderer : MonoBehaviour
     {
         private static readonly int kTexturePropertyId = Shader.PropertyToID("_ReflectionTex");
-        private static readonly int kCutoutPropertyId = Shader.PropertyToID("_Cutout");
+        private static readonly int[] kValidAntiAliasingValues = { 1, 2, 4, 8 };
 
         private static readonly Rect kLeftRect = new Rect(0f, 0f, 0.5f, 1f);
         private static readonly Rect kRightRect = new Rect(0.5f, 0f, 0.5f, 1f);
@@ -55,7 +56,6 @@ namespace CustomAvatar.StereoRendering
         {
             _renderer = GetComponent<Renderer>();
             _renderer.sharedMaterial = new Material(_shaderLoader.stereoMirrorShader);
-            _renderer.sharedMaterial.SetFloat(kCutoutPropertyId, 0f);
         }
 
         private void Update()
@@ -124,7 +124,8 @@ namespace CustomAvatar.StereoRendering
             // render to double-wide texture
             if (stereoEnabled) renderWidth *= 2;
 
-            renderTexture = RenderTexture.GetTemporary(renderWidth, renderHeight, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default, 1);
+            int antiAliasing = kValidAntiAliasingValues.Contains(_settings.mirror.antiAliasing) ? _settings.mirror.antiAliasing : 1;
+            renderTexture = RenderTexture.GetTemporary(renderWidth, renderHeight, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default, antiAliasing);
 
             _renderTextures[camera] = renderTexture;
 
@@ -185,7 +186,15 @@ namespace CustomAvatar.StereoRendering
         {
             if (!_mirrorCamera)
             {
-                _mirrorCamera = new GameObject("MirrorCamera" + GetInstanceID(), new[] { typeof(Camera) }).GetComponent<Camera>();
+                GameObject cameraGameObject = Instantiate(Camera.main.gameObject);
+                cameraGameObject.name = "MirrorCamera" + GetInstanceID();
+
+                DestroyImmediate(cameraGameObject.GetComponent<MainCamera>());
+                DestroyImmediate(cameraGameObject.GetComponent<AudioListener>());
+                DestroyImmediate(cameraGameObject.GetComponent<VisualEffectsController>());
+                DestroyImmediate(cameraGameObject.GetComponent("LIV.SDK.Unity.LIV"));
+
+                _mirrorCamera = cameraGameObject.GetComponent<Camera>();
 
                 _mirrorCamera.hideFlags = HideFlags.HideAndDontSave;
                 _mirrorCamera.enabled = false;
@@ -195,12 +204,7 @@ namespace CustomAvatar.StereoRendering
             _mirrorCamera.targetTexture = renderTexture;
             _mirrorCamera.depthTextureMode = DepthTextureMode.None;
             _mirrorCamera.clearFlags = CameraClearFlags.Color;
-            _mirrorCamera.cullingMask = AvatarLayers.kAllLayersMask;
-
-            // kind of hacky but setting the color to pure black or white causes the camera to
-            // to give nothing to the render texture when there are no objects to render,
-            // resulting in a black rectangle instead of a transparent mirror
-            _mirrorCamera.backgroundColor = new Color(0, 1, 0, 1);
+            _mirrorCamera.cullingMask = (_mirrorCamera.cullingMask | AvatarLayers.kAllLayersMask) & ~(1 << 5);
         }
 
         private Vector4 Plane(Vector3 pos, Vector3 normal)

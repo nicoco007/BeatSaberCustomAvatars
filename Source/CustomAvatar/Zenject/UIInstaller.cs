@@ -44,6 +44,8 @@ namespace CustomAvatar.Zenject
 
             T viewController = Container.InstantiateComponent<T>(gameObject);
 
+            viewController.gameObject.layer = 5;
+
             RectTransform rectTransform = viewController.rectTransform;
             rectTransform.anchorMin = new Vector2(0.5f, 0);
             rectTransform.anchorMax = new Vector2(0.5f, 1);
