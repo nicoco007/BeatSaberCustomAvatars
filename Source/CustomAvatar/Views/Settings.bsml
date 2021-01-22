@@ -8,7 +8,7 @@
       <toggle-setting text="Visible in First Person" id="visible-in-first-person" on-change="visible-in-first-person-change"/>
       <dropdown-list-setting text="Resize Mode" id="resize-mode" on-change="resize-mode-change" options="resize-mode-options" formatter="resize-mode-formatter"></dropdown-list-setting>
       <horizontal pref-width="90" id="height-adjust-warning-text">
-        <text color="yellow" text="You are using automatic height adjustment; please set your height manually for best results." font-size="2.5" />
+        <text color="#FFFF88FF" text="You are using Automatic Player Height; please disable it in Player Settings and set your height manually." font-size="2.5" italics="true" />
       </horizontal>
       <dropdown-list-setting text="Floor Height Adjust" hover-hint="Move the floor/environment so the avatar is standing at full height even if it is taller or shorter than the player." id="floor-height-adjust" on-change="floor-height-adjust-change" options="floor-height-adjust-options" formatter="floor-height-adjust-formatter"/>
       <toggle-setting text="Move Floor with Room Adjust" hover-hint="Move the floor/environment along with the game's built-in vertical room adjust." id="move-floor-with-room-adjust" on-change="move-floor-with-room-adjust-change"/>
