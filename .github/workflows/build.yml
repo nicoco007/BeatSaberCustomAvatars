@@ -1,6 +1,13 @@
 name: build
 
-on: [ push ]
+on:
+  push:
+    branches:
+    - main
+    - develop
+    tags:
+    - '*'
+  pull_request:
 
 jobs:
   build:
