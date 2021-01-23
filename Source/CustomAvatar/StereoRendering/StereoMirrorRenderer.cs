@@ -28,6 +28,9 @@ namespace CustomAvatar.StereoRendering
     [RequireComponent(typeof(Renderer))]
     internal class StereoMirrorRenderer : MonoBehaviour
     {
+        private const int kUserInterfaceLayer = 5;
+        private const int kNonReflectedParticlesLayer = 19;
+
         private static readonly int kTexturePropertyId = Shader.PropertyToID("_ReflectionTex");
         private static readonly int[] kValidAntiAliasingValues = { 1, 2, 4, 8 };
 
@@ -204,7 +207,7 @@ namespace CustomAvatar.StereoRendering
             _mirrorCamera.targetTexture = renderTexture;
             _mirrorCamera.depthTextureMode = DepthTextureMode.None;
             _mirrorCamera.clearFlags = CameraClearFlags.Color;
-            _mirrorCamera.cullingMask = (_mirrorCamera.cullingMask | AvatarLayers.kAllLayersMask) & ~(1 << 5) & ~(1 << 19); // exclude UI and NonReflectedParticles layers
+            _mirrorCamera.cullingMask = (_mirrorCamera.cullingMask | AvatarLayers.kAllLayersMask) & ~(1 << kUserInterfaceLayer) & ~(1 << kNonReflectedParticlesLayer);
         }
 
         private Vector4 Plane(Vector3 pos, Vector3 normal)
