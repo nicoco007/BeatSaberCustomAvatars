@@ -56,10 +56,6 @@ namespace CustomAvatar.Tracking.OpenVR
                 bool isConnected = device.isConnected;
                 string modelName = device.modelName;
 
-                ETrackedDeviceClass deviceClass = _openVRFacade.GetTrackedDeviceClass(i);
-                ETrackedControllerRole controllerRole = _openVRFacade.GetControllerRoleForTrackedDeviceIndex(i);
-                string role = _openVRFacade.GetStringTrackedDeviceProperty(i, ETrackedDeviceProperty.Prop_ControllerType_String);
-
                 if (pose.bDeviceIsConnected != isConnected)
                 {
                     isConnected = pose.bDeviceIsConnected;
@@ -71,11 +67,11 @@ namespace CustomAvatar.Tracking.OpenVR
                         modelName = _openVRFacade.GetStringTrackedDeviceProperty(i, ETrackedDeviceProperty.Prop_ModelNumber_String);
                         id = string.Concat(modelName ?? "Unknown", " ", (uint)serialNumber?.GetHashCode(), "@", i);
 
-                        _logger.Info($"Device '{id}' (class '{deviceClass}') connected");
+                        _logger.Info($"Device '{id}' connected");
                     }
                     else
                     {
-                        _logger.Info($"Device '{id}' (class '{deviceClass}') disconnected");
+                        _logger.Info($"Device '{id}' disconnected");
 
                         id = null;
                         modelName = null;
@@ -83,6 +79,16 @@ namespace CustomAvatar.Tracking.OpenVR
 
                     changeDetected = true;
                 }
+
+                if (!isConnected)
+                {
+                    _devices[i] = default;
+                    continue;
+                }
+
+                ETrackedDeviceClass deviceClass = _openVRFacade.GetTrackedDeviceClass(i);
+                ETrackedControllerRole controllerRole = _openVRFacade.GetControllerRoleForTrackedDeviceIndex(i);
+                string role = _openVRFacade.GetStringTrackedDeviceProperty(i, ETrackedDeviceProperty.Prop_ControllerType_String);
 
                 if (deviceClass != device.deviceClass)
                 {
@@ -200,11 +206,7 @@ namespace CustomAvatar.Tracking.OpenVR
                 }
 
                 _devices[i] = new OpenVRDevice(id, isConnected, isTracking, controllerRole, deviceClass, modelName, role);
-
-                if (isConnected)
-                {
-                    devices.Add(id, new TrackedDevice(id, use, isTracking, position, rotation));
-                }
+                devices.Add(id, new TrackedDevice(id, use, isTracking, position, rotation));
             }
 
             return changeDetected;
