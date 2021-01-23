@@ -36,7 +36,7 @@ namespace CustomAvatar.Configuration
         public string previousAvatarPath = null;
         public readonly ObservableValue<float> playerArmSpan = new ObservableValue<float>(VRPlayerInput.kDefaultPlayerArmSpan);
         public bool calibrateFullBodyTrackingOnStart = false;
-        public readonly ObservableValue<bool> enableLocomotion = new ObservableValue<bool>();
+        public readonly ObservableValue<bool> enableLocomotion = new ObservableValue<bool>(true);
         public float cameraNearClipPlane = 0.1f;
         public bool showAvatarInSmoothCamera = true;
         public readonly Lighting lighting = new Lighting();
