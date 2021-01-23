@@ -22,7 +22,7 @@ namespace CustomAvatar.Zenject.Internal
         private static bool _shouldInstall;
 
         private static readonly List<InstallerRegistration> _installerRegistrations = new List<InstallerRegistration>();
-        private static readonly List<Type> _typesToExpose = new List<Type>();
+        private static readonly List<Type> _componentsToBind = new List<Type>();
 
         private static ILogger<ZenjectHelper> _logger;
 
@@ -43,9 +43,9 @@ namespace CustomAvatar.Zenject.Internal
             return registration;
         }
 
-        public static void ExposeSceneBinding<T>() where T : MonoBehaviour
+        public static void BindSceneComponent<T>() where T : MonoBehaviour
         {
-            _typesToExpose.Add(typeof(T));
+            _componentsToBind.Add(typeof(T));
         }
 
         private static void PatchInstallInstallers(Harmony harmony)
@@ -92,7 +92,7 @@ namespace CustomAvatar.Zenject.Internal
 
             foreach (MonoInstaller installer in __instance.Installers)
             {
-                TryExpose(__instance, installer);
+                BindIfNeeded(__instance, installer);
             }
 
             foreach (InstallerRegistration installerRegistration in _installerRegistrations)
@@ -113,17 +113,26 @@ namespace CustomAvatar.Zenject.Internal
 
             foreach (MonoBehaviour monoBehaviour in injectableMonoBehaviours)
             {
-                TryExpose(__instance, monoBehaviour);
+                BindIfNeeded(__instance, monoBehaviour);
             }
         }
 
-        private static void TryExpose(Context context, MonoBehaviour monoBehaviour)
+        private static void BindIfNeeded(Context context, MonoBehaviour monoBehaviour)
         {
             Type type = monoBehaviour.GetType();
 
-            if (!_typesToExpose.Contains(type)) return;
+            if (!_componentsToBind.Contains(type)) return;
 
-            context.Container.Bind(type).FromInstance(monoBehaviour).AsSingle().IfNotBound();
+            if (!context.Container.HasBinding(type))
+            {
+                _logger.Info($"Binding '{type.FullName}' from {context.GetType().Name} '{context.name}' (scene '{context.gameObject.scene.name}')");
+
+                context.Container.Bind(type).FromInstance(monoBehaviour).AsSingle().IfNotBound();
+            }
+            else
+            {
+                _logger.Warning($"'{type.FullName}' is already bound on {context.GetType().Name} '{context.name}' (scene '{context.gameObject.scene.name}')");
+            }
         }
     }
 }

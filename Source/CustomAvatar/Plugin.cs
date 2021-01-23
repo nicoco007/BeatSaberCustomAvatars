@@ -40,9 +40,9 @@ namespace CustomAvatar
             ZenjectHelper.Init(harmony, ipaLogger);
             BeatSaberEvents.ApplyPatches(harmony, ipaLogger);
 
-            ZenjectHelper.ExposeSceneBinding<PCAppInit>();
-            ZenjectHelper.ExposeSceneBinding<SmoothCamera>();
-            ZenjectHelper.ExposeSceneBinding<ObstacleSaberSparkleEffectManager>();
+            ZenjectHelper.BindSceneComponent<PCAppInit>();
+            ZenjectHelper.BindSceneComponent<SmoothCamera>();
+            ZenjectHelper.BindSceneComponent<ObstacleSaberSparkleEffectManager>();
 
             ZenjectHelper.Register<CustomAvatarsInstaller>().WithArguments(ipaLogger).OnMonoInstaller<PCAppInit>();
             ZenjectHelper.Register<UIInstaller>().OnMonoInstaller<MenuViewControllersInstaller>();
