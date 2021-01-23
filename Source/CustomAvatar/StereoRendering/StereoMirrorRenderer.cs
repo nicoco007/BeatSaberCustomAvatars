@@ -204,7 +204,7 @@ namespace CustomAvatar.StereoRendering
             _mirrorCamera.targetTexture = renderTexture;
             _mirrorCamera.depthTextureMode = DepthTextureMode.None;
             _mirrorCamera.clearFlags = CameraClearFlags.Color;
-            _mirrorCamera.cullingMask = (_mirrorCamera.cullingMask | AvatarLayers.kAllLayersMask) & ~(1 << 5);
+            _mirrorCamera.cullingMask = (_mirrorCamera.cullingMask | AvatarLayers.kAllLayersMask) & ~(1 << 5) & ~(1 << 19); // exclude UI and NonReflectedParticles layers
         }
 
         private Vector4 Plane(Vector3 pos, Vector3 normal)
