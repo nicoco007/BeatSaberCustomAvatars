@@ -25,22 +25,24 @@ using CustomAvatar.Tracking;
 using CustomAvatar.Tracking.OpenVR;
 using CustomAvatar.Tracking.UnityXR;
 using CustomAvatar.Utilities;
-using UnityEngine;
 using UnityEngine.XR;
 using Valve.VR;
 using Zenject;
 using Logger = IPA.Logging.Logger;
 using System;
+using IPA.Utilities;
 
 namespace CustomAvatar.Zenject
 {
     internal class CustomAvatarsInstaller : Installer
     {
         private readonly Logger _logger;
+        private readonly PCAppInit _pcAppInit;
 
-        public CustomAvatarsInstaller(Logger logger)
+        public CustomAvatarsInstaller(Logger logger, PCAppInit pcAppInit)
         {
             _logger = logger;
+            _pcAppInit = pcAppInit;
         }
 
         public override void InstallBindings()
@@ -82,9 +84,8 @@ namespace CustomAvatar.Zenject
             Container.Bind<AvatarSpawner>().AsTransient();
             Container.Bind<IKHelper>().AsTransient();
             Container.Bind<TrackingHelper>().AsTransient();
-
-            // not sure if this is a great idea but w/e
-            Container.Bind<MainSettingsModelSO>().FromInstance(Resources.FindObjectsOfTypeAll<MainSettingsModelSO>().First()).IfNotBound();
+            
+            Container.Bind<MainSettingsModelSO>().FromInstance(_pcAppInit.GetField<MainSettingsModelSO, PCAppInit>("_mainSettingsModel")).IfNotBound();
         }
     }
 }

@@ -90,6 +90,11 @@ namespace CustomAvatar.Zenject.Internal
 
             _logger.Trace($"Handling {__instance.GetType().Name} '{__instance.name}' (scene '{__instance.gameObject.scene.name}')");
 
+            foreach (MonoInstaller installer in __instance.Installers)
+            {
+                TryExpose(__instance, installer);
+            }
+
             foreach (InstallerRegistration installerRegistration in _installerRegistrations)
             {
                 if (installerRegistration.TryInstallInto(__instance))
@@ -108,20 +113,17 @@ namespace CustomAvatar.Zenject.Internal
 
             foreach (MonoBehaviour monoBehaviour in injectableMonoBehaviours)
             {
-                Type type = monoBehaviour.GetType();
-
-                if (!_typesToExpose.Contains(type)) continue;
-
-                if (!__instance.Container.HasBinding(type))
-                {
-                    _logger.Trace($"Exposing MonoBehaviour '{type.FullName}' in context '{__instance.name}'");
-                    __instance.Container.Bind(type).FromInstance(monoBehaviour).AsSingle();
-                }
-                else
-                {
-                    _logger.Trace($"Not exposing MonoBehaviour '{type.FullName}' in context '{__instance.name}' since a binding already exists");
-                }
+                TryExpose(__instance, monoBehaviour);
             }
+        }
+
+        private static void TryExpose(Context context, MonoBehaviour monoBehaviour)
+        {
+            Type type = monoBehaviour.GetType();
+
+            if (!_typesToExpose.Contains(type)) return;
+
+            context.Container.Bind(type).FromInstance(monoBehaviour).AsSingle().IfNotBound();
         }
     }
 }
