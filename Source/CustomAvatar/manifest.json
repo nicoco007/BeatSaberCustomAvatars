@@ -3,7 +3,7 @@
   "author": "Custom Avatars Contributors",
   "description": "Allows the use of custom player models for body presence.",
   "gameVersion": "1.13.2",
-  "id": "Custom Avatars",
+  "id": "CustomAvatar",
   "icon": "CustomAvatar.Resources.icon.png",
   "name": "Custom Avatars",
   "version": "5.1.2+dev",
@@ -12,9 +12,6 @@
     "BeatSaberMarkupLanguage": "^1.4.0",
     "DynamicOpenVR": "0.3.2 - 0.4"
   },
-  "loadAfter": [
-    "SiraUtil"
-  ],
   "files": [
     "DynamicOpenVR\\Actions\\customavatars.json",
     "DynamicOpenVR\\Bindings\\customavatars_knuckles.json"
