@@ -19,7 +19,7 @@ using CustomAvatar.Utilities;
 using UnityEngine;
 using Zenject;
 
-namespace CustomAvatar.StereoRendering
+namespace CustomAvatar.Rendering
 {
     internal class MirrorHelper
     {

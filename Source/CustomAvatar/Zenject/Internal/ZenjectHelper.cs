@@ -23,6 +23,7 @@ namespace CustomAvatar.Zenject.Internal
 
         private static readonly List<InstallerRegistration> _installerRegistrations = new List<InstallerRegistration>();
         private static readonly List<Type> _componentsToBind = new List<Type>();
+        private static readonly Dictionary<Type, List<Type>> _componentsToAdd = new Dictionary<Type, List<Type>>();
 
         private static ILogger<ZenjectHelper> _logger;
 
@@ -46,6 +47,18 @@ namespace CustomAvatar.Zenject.Internal
         public static void BindSceneComponent<T>() where T : MonoBehaviour
         {
             _componentsToBind.Add(typeof(T));
+        }
+
+        public static void AddComponentAlongsideExisting<TExisting, TAdd>() where TExisting : MonoBehaviour where TAdd : MonoBehaviour
+        {
+            if (_componentsToAdd.TryGetValue(typeof(TExisting), out List<Type> types))
+            {
+                types.Add(typeof(TAdd));
+            }
+            else
+            {
+                _componentsToAdd.Add(typeof(TExisting), new List<Type> { typeof(TAdd) });
+            }
         }
 
         private static void PatchInstallInstallers(Harmony harmony)
@@ -114,6 +127,7 @@ namespace CustomAvatar.Zenject.Internal
             foreach (MonoBehaviour monoBehaviour in injectableMonoBehaviours)
             {
                 BindIfNeeded(__instance, monoBehaviour);
+                AddComponents(__instance, monoBehaviour);
             }
         }
 
@@ -131,7 +145,22 @@ namespace CustomAvatar.Zenject.Internal
             }
             else
             {
-                _logger.Warning($"'{type.FullName}' is already bound on {context.GetType().Name} '{context.name}' (scene '{context.gameObject.scene.name}')");
+                _logger.Notice($"'{type.FullName}' is already bound on {context.GetType().Name} '{context.name}' (scene '{context.gameObject.scene.name}')");
+            }
+        }
+
+        private static void AddComponents(Context context, MonoBehaviour monoBehaviour)
+        {
+            Type monoBehaviourType = monoBehaviour.GetType();
+
+            if (!_componentsToAdd.TryGetValue(monoBehaviourType, out List<Type> componentsToAdd)) return;
+
+            GameObject gameObject = monoBehaviour.gameObject;
+
+            foreach (Type type in componentsToAdd)
+            {
+                _logger.Info($"Adding '{type.FullName}' to GameObject '{gameObject.name}' (for '{monoBehaviourType.FullName}')");
+                context.Container.InstantiateComponent(type, gameObject);
             }
         }
     }

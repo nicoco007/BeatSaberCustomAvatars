@@ -15,7 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using CustomAvatar.Configuration;
-using CustomAvatar.StereoRendering;
+using CustomAvatar.Rendering;
 using UnityEngine;
 using Zenject;
 using CustomAvatar.Avatar;

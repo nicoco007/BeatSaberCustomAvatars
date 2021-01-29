@@ -22,7 +22,7 @@ using System.Linq;
 using UnityEngine;
 using Zenject;
 
-namespace CustomAvatar.StereoRendering
+namespace CustomAvatar.Rendering
 {
     // this class is based on the code available at http://wiki.unity3d.com/index.php/MirrorReflection4 and adapted for stereo rendering
     [RequireComponent(typeof(Renderer))]

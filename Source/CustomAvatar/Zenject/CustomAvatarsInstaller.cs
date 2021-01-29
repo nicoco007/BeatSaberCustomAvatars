@@ -19,7 +19,7 @@ using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Lighting;
 using CustomAvatar.Logging;
-using CustomAvatar.StereoRendering;
+using CustomAvatar.Rendering;
 using CustomAvatar.Player;
 using CustomAvatar.Tracking;
 using CustomAvatar.Tracking.OpenVR;
@@ -69,7 +69,6 @@ namespace CustomAvatar.Zenject
 
             // managers
             Container.BindInterfacesAndSelfTo<PlayerAvatarManager>().AsSingle().NonLazy();
-            Container.BindInterfacesAndSelfTo<CamerasController>().AsSingle().NonLazy();
             Container.BindInterfacesAndSelfTo<ShaderLoader>().AsSingle().NonLazy();
             Container.BindInterfacesAndSelfTo<DeviceManager>().AsSingle().NonLazy();
 

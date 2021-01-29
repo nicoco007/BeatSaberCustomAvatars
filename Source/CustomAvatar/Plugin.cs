@@ -15,6 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using CustomAvatar.Logging;
+using CustomAvatar.Rendering;
 using CustomAvatar.Utilities;
 using CustomAvatar.Zenject;
 using CustomAvatar.Zenject.Internal;
@@ -41,8 +42,10 @@ namespace CustomAvatar
             BeatSaberEvents.ApplyPatches(harmony, ipaLogger);
 
             ZenjectHelper.BindSceneComponent<PCAppInit>();
-            ZenjectHelper.BindSceneComponent<SmoothCamera>();
             ZenjectHelper.BindSceneComponent<ObstacleSaberSparkleEffectManager>();
+
+            ZenjectHelper.AddComponentAlongsideExisting<MainCamera, CustomAvatarsMainCameraController>();
+            ZenjectHelper.AddComponentAlongsideExisting<SmoothCamera, CustomAvatarsSmoothCameraController>();
 
             ZenjectHelper.Register<CustomAvatarsInstaller>().WithArguments(ipaLogger).OnMonoInstaller<PCAppInit>();
             ZenjectHelper.Register<UIInstaller>().OnMonoInstaller<MenuViewControllersInstaller>();
