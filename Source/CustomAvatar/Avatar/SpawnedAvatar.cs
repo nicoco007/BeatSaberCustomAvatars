@@ -79,7 +79,6 @@ namespace CustomAvatar.Avatar
         private FirstPersonExclusion[] _firstPersonExclusions;
         private Renderer[] _renderers;
         private EventManager _eventManager;
-        private AvatarGameplayEventsPlayer _gameplayEventsPlayer;
 
         private bool _isCalibrationModeEnabled;
 
@@ -136,6 +135,7 @@ namespace CustomAvatar.Avatar
         }
 
         #region Behaviour Lifecycle
+        #pragma warning disable IDE0051
 
         private void Awake()
         {
@@ -199,20 +199,12 @@ namespace CustomAvatar.Avatar
             Destroy(gameObject);
         }
 
+        #pragma warning restore IDE0051
         #endregion
 
         private void OnTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
         {
             if (!_eventManager) return;
-
-            // currently does not work in multiplayer, need to figure out how to
-            // get a reference to the GameObjectContext for the local player
-            // or just rework this so it's created in an installer
-            if (_gameScenesManager.IsSceneInStackAndActive("StandardGameplay"))
-            {
-                _logger.Info($"Adding {nameof(AvatarGameplayEventsPlayer)}");
-                _gameplayEventsPlayer = container.InstantiateComponent<AvatarGameplayEventsPlayer>(gameObject, new object[] { avatar });
-            }
 
             if (_gameScenesManager.IsSceneInStackAndActive("MenuCore"))
             {

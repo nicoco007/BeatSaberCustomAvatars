@@ -14,6 +14,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Lighting;
 using Zenject;
@@ -30,6 +31,8 @@ namespace CustomAvatar.Zenject
             {
                 Container.BindInterfacesAndSelfTo<SaberLightingController>().AsSingle().NonLazy();
             }
+
+            Container.BindInterfacesAndSelfTo<AvatarGameplayEventsPlayer>().AsSingle().NonLazy();
         }
     }
 }

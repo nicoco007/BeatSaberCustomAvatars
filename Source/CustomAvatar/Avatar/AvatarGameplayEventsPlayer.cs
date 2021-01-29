@@ -15,42 +15,47 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using CustomAvatar.Logging;
+using CustomAvatar.Player;
+using IPA.Utilities;
+using System;
 using UnityEngine;
 using Zenject;
 
 namespace CustomAvatar.Avatar
 {
-    internal class AvatarGameplayEventsPlayer : MonoBehaviour
+    internal class AvatarGameplayEventsPlayer : IInitializable, IDisposable
     {
         private ILogger<AvatarGameplayEventsPlayer> _logger;
+        private PlayerAvatarManager _avatarManager;
         private ScoreController _scoreController;
         private ILevelEndActions _levelEndActions;
+        private IMultiplayerLevelEndActionsPublisher _multiplayerLevelEndActions;
         private BeatmapObjectCallbackController _beatmapObjectCallbackController;
         private ObstacleSaberSparkleEffectManager _sparkleEffectManager;
 
         private EventManager _eventManager;
+        private ColorType _lastColor = ColorType.None;
 
         #region Behaviour Lifecycle
-        #pragma warning disable IDE0051
 
-        [Inject]
-        public void Inject(ILoggerProvider loggerProvider, LoadedAvatar avatar, ScoreController scoreController, BeatmapObjectCallbackController beatmapObjectCallbackController, ObstacleSaberSparkleEffectManager sparkleEffectManager, ILevelEndActions levelEndActions)
+        public AvatarGameplayEventsPlayer(ILoggerProvider loggerProvider, PlayerAvatarManager avatarManager, ScoreController scoreController, [InjectOptional] ILevelEndActions levelEndActions, [InjectOptional] IMultiplayerLevelEndActionsPublisher multiplayerLevelEndActions, BeatmapObjectCallbackController beatmapObjectCallbackController, ObstacleSaberSparkleEffectManager sparkleEffectManager)
         {
-            _logger = loggerProvider.CreateLogger<AvatarGameplayEventsPlayer>(avatar.descriptor.name);
+            _logger = loggerProvider.CreateLogger<AvatarGameplayEventsPlayer>();
+            _avatarManager = avatarManager;
             _scoreController = scoreController;
             _levelEndActions = levelEndActions;
+            _multiplayerLevelEndActions = multiplayerLevelEndActions;
             _beatmapObjectCallbackController = beatmapObjectCallbackController;
             _sparkleEffectManager = sparkleEffectManager;
         }
 
-        private void Start()
+        public void Initialize()
         {
-            _eventManager = GetComponent<EventManager>();
+            _eventManager = _avatarManager.currentlySpawnedAvatar ? _avatarManager.currentlySpawnedAvatar.GetComponent<EventManager>() : null;
 
             if (!_eventManager)
             {
-                _logger.Error("No EventManager found!");
-                Destroy(this);
+                _logger.Info("No EventManager found on current avatar; events will not be triggered");
                 return;
             }
 
@@ -59,34 +64,47 @@ namespace CustomAvatar.Avatar
             _scoreController.noteWasCutEvent += OnNoteWasCut;
             _scoreController.multiplierDidChangeEvent += OnMultiplierDidChange;
             _scoreController.comboDidChangeEvent += OnComboDidChange;
-            _scoreController.comboBreakingEventHappenedEvent += OnComboBreakingEventHappened;
 
             _sparkleEffectManager.sparkleEffectDidStartEvent += OnSparkleEffectDidStart;
             _sparkleEffectManager.sparkleEffectDidEndEvent += OnSparkleEffectDidEnd;
 
-            _levelEndActions.levelFinishedEvent += OnLevelFinished;
-            _levelEndActions.levelFailedEvent += OnLevelFailed;
+            if (_levelEndActions != null)
+            {
+                _levelEndActions.levelFinishedEvent += OnLevelFinished;
+                _levelEndActions.levelFailedEvent += OnLevelFailed;
+            }
+
+            if (_multiplayerLevelEndActions != null)
+            {
+                _multiplayerLevelEndActions.playerDidFinishEvent += OnPlayerDidFinish;
+            }
 
             _beatmapObjectCallbackController.beatmapEventDidTriggerEvent += BeatmapEventDidTrigger;
         }
 
-        private void OnDestroy()
+        public void Dispose()
         {
             _scoreController.noteWasCutEvent -= OnNoteWasCut;
             _scoreController.multiplierDidChangeEvent -= OnMultiplierDidChange;
             _scoreController.comboDidChangeEvent -= OnComboDidChange;
-            _scoreController.comboBreakingEventHappenedEvent -= OnComboBreakingEventHappened;
 
             _sparkleEffectManager.sparkleEffectDidStartEvent -= OnSparkleEffectDidStart;
             _sparkleEffectManager.sparkleEffectDidEndEvent -= OnSparkleEffectDidEnd;
 
-            _levelEndActions.levelFinishedEvent -= OnLevelFinished;
-            _levelEndActions.levelFailedEvent -= OnLevelFailed;
+            if (_levelEndActions != null)
+            {
+                _levelEndActions.levelFinishedEvent -= OnLevelFinished;
+                _levelEndActions.levelFailedEvent -= OnLevelFailed;
+            }
+
+            if (_multiplayerLevelEndActions != null)
+            {
+                _multiplayerLevelEndActions.playerDidFinishEvent -= OnPlayerDidFinish;
+            }
 
             _beatmapObjectCallbackController.beatmapEventDidTriggerEvent -= BeatmapEventDidTrigger;
         }
         
-        #pragma warning restore IDE0051
         #endregion
 
         private void OnNoteWasCut(NoteData data, NoteCutInfo cutInfo, int multiplier)
@@ -109,14 +127,16 @@ namespace CustomAvatar.Avatar
 
         private void OnComboDidChange(int combo)
         {
-            _logger.Trace("Invoke OnComboChanged");
-            _eventManager.OnComboChanged?.Invoke(combo);
-        }
-
-        private void OnComboBreakingEventHappened()
-        {
-            _logger.Trace("Invoke OnComboBreak");
-            _eventManager.OnComboBreak?.Invoke();
+            if (combo > 0)
+            {
+                _logger.Trace("Invoke OnComboChanged");
+                _eventManager.OnComboChanged?.Invoke(combo);
+            }
+            else
+            {
+                _logger.Trace("Invoke OnComboBreak");
+                _eventManager.OnComboBreak?.Invoke();
+            }
         }
 
         private void OnSparkleEffectDidStart(SaberType saberType)
@@ -143,22 +163,42 @@ namespace CustomAvatar.Avatar
             _eventManager.OnLevelFail?.Invoke();
         }
 
+        private void OnPlayerDidFinish(LevelCompletionResults results)
+        {
+            switch (results.levelEndStateType)
+            {
+                case LevelCompletionResults.LevelEndStateType.Cleared:
+                    _logger.Trace("Invoke OnLevelFinish");
+                    _eventManager.OnLevelFinish?.Invoke();
+                    break;
+
+                case LevelCompletionResults.LevelEndStateType.Failed:
+                    _logger.Trace("Invoke OnLevelFail");
+                    _eventManager.OnLevelFail?.Invoke();
+                    break;
+            }
+        }
+
         private void BeatmapEventDidTrigger(BeatmapEventData eventData)
         {
-            // event 4 triggers lighting changes for the beat lines and general center of scene
-            if (eventData == null || eventData.type != BeatmapEventType.Event4) return;
+            // lighting events seem to be 0 through 4
+            if (eventData == null || eventData.type < BeatmapEventType.Event0 || eventData.type > BeatmapEventType.Event4) return;
 
-            // event values 1 through 3 are blue and 5 through 7 are red based on information in LightSwitchEventEffect
-            if (eventData.value >= 1 && eventData.value <= 3)
+            // event values 1 through 3 are "color b" (default blue) and 5 through 7 are "color a" (default red) based on information in LightSwitchEventEffect
+            if (eventData.value >= 1 && eventData.value <= 3 && _lastColor != ColorType.ColorB)
             {
                 _logger.Trace("Invoke OnBlueLightOn");
                 _eventManager.OnBlueLightOn?.Invoke();
+
+                _lastColor = ColorType.ColorB;
             }
 
-            if (eventData.value >= 5 && eventData.value <= 7)
+            if (eventData.value >= 5 && eventData.value <= 7 && _lastColor != ColorType.ColorA)
             {
                 _logger.Trace("Invoke OnRedLightOn");
                 _eventManager.OnRedLightOn?.Invoke();
+
+                _lastColor = ColorType.ColorA;
             }
         }
     }
