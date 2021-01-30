@@ -76,23 +76,6 @@ namespace CustomAvatar.Utilities
             return CreateDelegate<Func<TSubject, TResult>>(method);
         }
 
-        internal static TDelegate CreatePrivateMethodDelegate<TDelegate>(this Type type, string methodName) where TDelegate : Delegate
-        {
-            if (type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
-
-            MethodInfo method = type.GetMethod(methodName, kAllBindingFlags);
-
-            if (method == null)
-            {
-                throw new InvalidOperationException($"Method '{methodName}' does not exist on '{type.FullName}'");
-            }
-
-            return CreateDelegate<TDelegate>(method);
-        }
-
         private static TDelegate CreateDelegate<TDelegate>(MethodInfo method) where TDelegate : Delegate
         {
             if (method == null)

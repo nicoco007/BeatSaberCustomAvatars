@@ -19,11 +19,11 @@ extern alias BeatSaberDynamicBone;
 
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using BeatSaberFinalIK::RootMotion.FinalIK;
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
+using IPA.Utilities;
 using UnityEngine;
 using Zenject;
 
@@ -56,14 +56,16 @@ namespace CustomAvatar.Avatar
 
         private bool _fixTransforms;
 
-        private List<(TwistRelaxer twistRelaxer, float weight)> _twistRelaxers = new List<(TwistRelaxer, float)>();
+        private List<BeatSaberDynamicBone::DynamicBone> _dynamicBones = new List<BeatSaberDynamicBone::DynamicBone>();
+        private List<TwistRelaxer> _twistRelaxers = new List<TwistRelaxer>();
 
-        private BeatSaberDynamicBone::DynamicBone[] _dynamicBones;
+        private Action<BeatSaberDynamicBone::DynamicBone> _dynamicBoneOnEnableDelegate;
+        private Action<BeatSaberDynamicBone::DynamicBone> _dynamicBoneStartDelegate;
+        private Action<BeatSaberDynamicBone::DynamicBone> _dynamicBonePreUpdateDelegate;
+        private Action<BeatSaberDynamicBone::DynamicBone> _dynamicBoneLateUpdateDelegate;
 
-        private Action<BeatSaberDynamicBone::DynamicBone> _preUpdateDelegate;
-        private Action<BeatSaberDynamicBone::DynamicBone, float> _updateDynamicBonesDelegate;
-        private FieldInfo _weightField;
-        
+        private Action<TwistRelaxer> _twistRelaxerStartDelegate;
+
         private IAvatarInput _input;
         private SpawnedAvatar _avatar;
         private ILogger<AvatarIK> _logger;
@@ -78,9 +80,30 @@ namespace CustomAvatar.Avatar
         private void Awake()
         {
             // create delegates for dynamic bones private methods (more efficient than continuously calling Invoke)
-            _preUpdateDelegate = typeof(BeatSaberDynamicBone::DynamicBone).CreatePrivateMethodDelegate<Action<BeatSaberDynamicBone::DynamicBone>>("PreUpdate");
-            _updateDynamicBonesDelegate = typeof(BeatSaberDynamicBone::DynamicBone).CreatePrivateMethodDelegate<Action<BeatSaberDynamicBone::DynamicBone, float>>("UpdateDynamicBones");
-            _weightField = typeof(BeatSaberDynamicBone::DynamicBone).GetField("m_Weight", BindingFlags.Instance | BindingFlags.NonPublic);
+            _dynamicBoneOnEnableDelegate = MethodAccessor<BeatSaberDynamicBone::DynamicBone, Action<BeatSaberDynamicBone::DynamicBone>>.GetDelegate("OnEnable");
+            _dynamicBoneStartDelegate = MethodAccessor<BeatSaberDynamicBone::DynamicBone, Action<BeatSaberDynamicBone::DynamicBone>>.GetDelegate("Start");
+            _dynamicBonePreUpdateDelegate = MethodAccessor<BeatSaberDynamicBone::DynamicBone, Action<BeatSaberDynamicBone::DynamicBone>>.GetDelegate("PreUpdate");
+            _dynamicBoneLateUpdateDelegate = MethodAccessor<BeatSaberDynamicBone::DynamicBone, Action<BeatSaberDynamicBone::DynamicBone>>.GetDelegate("LateUpdate");
+
+            _twistRelaxerStartDelegate = MethodAccessor<TwistRelaxer, Action<TwistRelaxer>>.GetDelegate("Start");
+
+            foreach (TwistRelaxer twistRelaxer in GetComponentsInChildren<TwistRelaxer>())
+            {
+                if (!twistRelaxer.enabled) continue;
+
+                twistRelaxer.enabled = false;
+
+                _twistRelaxers.Add(twistRelaxer);
+            }
+
+            foreach (BeatSaberDynamicBone::DynamicBone dynamicBone in GetComponentsInChildren<BeatSaberDynamicBone::DynamicBone>())
+            {
+                if (!dynamicBone.enabled) continue;
+
+                dynamicBone.enabled = false;
+
+                _dynamicBones.Add(dynamicBone);
+            }
         }
 
         [Inject]
@@ -95,17 +118,11 @@ namespace CustomAvatar.Avatar
         private void Start()
         {
             _vrikManager = GetComponentInChildren<VRIKManager>();
-            _dynamicBones = GetComponentsInChildren<BeatSaberDynamicBone::DynamicBone>();
 
             _vrik = _ikHelper.InitializeVRIK(_vrikManager, transform);
 
             _fixTransforms = _vrikManager.fixTransforms;
             _vrik.fixTransforms = false; // FixTransforms is manually called in Update
-
-            foreach (TwistRelaxer twistRelaxer in GetComponentsInChildren<TwistRelaxer>())
-            {
-                _twistRelaxers.Add((twistRelaxer, twistRelaxer.weight));
-            }
 
             if (_vrikManager.solver_spine_maintainPelvisPosition > 0 && !_input.allowMaintainPelvisPosition)
             {
@@ -114,9 +131,17 @@ namespace CustomAvatar.Avatar
             }
 
             _input.inputChanged += OnInputChanged;
-
+            
             UpdateLocomotion();
             UpdateSolverTargets();
+
+            foreach (TwistRelaxer twistRelaxer in _twistRelaxers) _twistRelaxerStartDelegate(twistRelaxer);
+
+            foreach (BeatSaberDynamicBone::DynamicBone dynamicBone in _dynamicBones)
+            {
+                _dynamicBoneOnEnableDelegate(dynamicBone);
+                _dynamicBoneStartDelegate(dynamicBone);
+            }
         }
 
         private void Update()
@@ -129,12 +154,7 @@ namespace CustomAvatar.Avatar
             // DynamicBones PreUpdate
             foreach (BeatSaberDynamicBone::DynamicBone dynamicBone in _dynamicBones)
             {
-                if (!dynamicBone.enabled) continue;
-
-                // setting m_Weight prevents the integrated calls to PreUpdate and UpdateDynamicBones from taking effect
-                _weightField.SetValue(dynamicBone, 1);
-                _preUpdateDelegate(dynamicBone);
-                _weightField.SetValue(dynamicBone, 0);
+                _dynamicBonePreUpdateDelegate(dynamicBone);
             }
         }
 
@@ -144,22 +164,15 @@ namespace CustomAvatar.Avatar
             _vrik.UpdateSolverExternal();
 
             // relax after VRIK update
-            foreach ((TwistRelaxer twistRelaxer, float weight) in _twistRelaxers)
+            foreach (TwistRelaxer twistRelaxer in _twistRelaxers)
             {
-                twistRelaxer.weight = weight;
                 twistRelaxer.Relax();
-                twistRelaxer.weight = 0;
             }
 
-            // apply dynamic bones
+            // update dynamic bones
             foreach (BeatSaberDynamicBone::DynamicBone dynamicBone in _dynamicBones)
             {
-                if (!dynamicBone.enabled) continue;
-
-                // setting m_Weight prevents the integrated calls to PreUpdate and UpdateDynamicBones from taking effect
-                _weightField.SetValue(dynamicBone, 1);
-                _updateDynamicBonesDelegate(dynamicBone, Time.deltaTime);
-                _weightField.SetValue(dynamicBone, 0);
+                _dynamicBoneLateUpdateDelegate(dynamicBone);
             }
         }
 
