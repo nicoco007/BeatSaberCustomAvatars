@@ -66,11 +66,12 @@ namespace CustomAvatar.Avatar
         public Transform rightLeg { get; private set; }
         public Transform pelvis { get; private set; }
 
-        internal AvatarTracking tracking { get; private set; }
-        internal AvatarIK ik { get; private set; }
-        internal AvatarFingerTracking fingerTracking { get; private set; }
+        [Obsolete("Use GetComponent<AvatarTracking>() instead")] internal AvatarTracking tracking { get; private set; }
+        [Obsolete("Use GetComponent<AvatarIK>() instead")] internal AvatarIK ik { get; private set; }
+        [Obsolete("Use GetComponent<AvatarFingerTracking>() instead")] internal AvatarFingerTracking fingerTracking { get; private set; }
 
-        internal bool isLocomotionEnabled { get; private set; }
+
+        [Obsolete("Get isLocomotionEnabled on the AvatarIK component instead")] internal bool isLocomotionEnabled { get; private set; }
 
         private ILogger<SpawnedAvatar> _logger;
         private DiContainer _container;
@@ -80,39 +81,34 @@ namespace CustomAvatar.Avatar
         private Renderer[] _renderers;
         private EventManager _eventManager;
 
-        private bool _isCalibrationModeEnabled;
-
         private Vector3 _initialLocalPosition;
         private Vector3 _initialLocalScale;
 
+        [Obsolete("Get isLocomotionEnabled on the AvatarIK component instead")]
         public void SetLocomotionEnabled(bool enabled)
         {
-            isLocomotionEnabled = enabled;
-
-            if (ik)
+            if (TryGetComponent(out AvatarIK ik))
             {
-                ik.SetLocomotionEnabled(enabled);
+                ik.isLocomotionEnabled = enabled;
             }
         }
 
+        [Obsolete]
         public void EnableCalibrationMode()
         {
-            if (_isCalibrationModeEnabled || !ik) return;
-
-            _isCalibrationModeEnabled = true;
+            if (!ik) return;
 
             tracking.isCalibrationModeEnabled = true;
-            ik.SetCalibrationModeEnabled(true);
+            ik.isCalibrationModeEnabled = true;
         }
 
+        [Obsolete]
         public void DisableCalibrationMode()
         {
-            if (!_isCalibrationModeEnabled || !ik) return;
+            if (!ik) return;
 
             tracking.isCalibrationModeEnabled = false;
-            ik.SetCalibrationModeEnabled(false);
-
-            _isCalibrationModeEnabled = false;
+            ik.isCalibrationModeEnabled = false;
         }
 
         public void SetFirstPersonVisibility(FirstPersonVisibility visibility)
@@ -171,18 +167,6 @@ namespace CustomAvatar.Avatar
         private void Start()
         {
             name = $"SpawnedAvatar({avatar.descriptor.name})";
-
-            tracking = _container.InstantiateComponent<AvatarTracking>(gameObject);
-
-            if (avatar.isIKAvatar)
-            {
-                ik = _container.InstantiateComponent<AvatarIK>(gameObject);
-            }
-
-            if (avatar.supportsFingerTracking)
-            {
-                fingerTracking = _container.InstantiateComponent<AvatarFingerTracking>(gameObject);
-            }
 
             if (_initialLocalPosition.sqrMagnitude > 0)
             {

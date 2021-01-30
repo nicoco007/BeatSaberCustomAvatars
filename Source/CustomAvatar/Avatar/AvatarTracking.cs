@@ -23,9 +23,9 @@ using CustomAvatar.Utilities;
 
 namespace CustomAvatar.Avatar
 {
-    internal class AvatarTracking : MonoBehaviour
+    public class AvatarTracking : MonoBehaviour
     {
-        internal bool isCalibrationModeEnabled = false;
+        public bool isCalibrationModeEnabled { get; set; }
 
         private IAvatarInput _input;
         private SpawnedAvatar _spawnedAvatar;

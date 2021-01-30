@@ -36,6 +36,8 @@ namespace CustomAvatar.Zenject
 {
     internal class CustomAvatarsInstaller : Installer
     {
+        public static readonly int kPlayerAvatarManagerExecutionOrder = 1000;
+
         private readonly Logger _logger;
         private readonly PCAppInit _pcAppInit;
 
@@ -72,7 +74,11 @@ namespace CustomAvatar.Zenject
             Container.BindInterfacesAndSelfTo<ShaderLoader>().AsSingle().NonLazy();
             Container.BindInterfacesAndSelfTo<DeviceManager>().AsSingle().NonLazy();
 
+            // this prevents a race condition when registering components in AvatarSpawner
+            Container.BindExecutionOrder<PlayerAvatarManager>(kPlayerAvatarManagerExecutionOrder);
+
             Container.Bind<AvatarLoader>().AsSingle();
+            Container.Bind<AvatarSpawner>().AsSingle();
             Container.BindInterfacesAndSelfTo<VRPlayerInput>().AsSingle();
             Container.BindInterfacesAndSelfTo<FloorController>().AsSingle();
             Container.BindInterfacesAndSelfTo<LightingQualityController>().AsSingle();
@@ -80,7 +86,6 @@ namespace CustomAvatar.Zenject
 
             // helper classes
             Container.Bind<MirrorHelper>().AsTransient();
-            Container.Bind<AvatarSpawner>().AsTransient();
             Container.Bind<IKHelper>().AsTransient();
             Container.Bind<TrackingHelper>().AsTransient();
             

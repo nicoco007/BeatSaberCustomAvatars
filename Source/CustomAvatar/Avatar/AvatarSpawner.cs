@@ -15,6 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using UnityEngine;
@@ -30,10 +31,34 @@ namespace CustomAvatar.Avatar
         private readonly DiContainer _container;
         private readonly ILogger<AvatarSpawner> _logger;
 
+        private readonly List<(Type, Func<LoadedAvatar, bool>)> _componentsToAdd = new List<(Type, Func<LoadedAvatar, bool>)>();
+
         internal AvatarSpawner(DiContainer container, ILoggerProvider loggerProvider)
         {
             _container = container;
             _logger = loggerProvider.CreateLogger<AvatarSpawner>();
+
+            RegisterComponent<AvatarTracking>();
+            RegisterComponent<AvatarIK>(ShouldAddIK);
+            RegisterComponent<AvatarFingerTracking>(ShouldAddFingerTracking);
+        }
+
+        public void RegisterComponent<T>(Func<LoadedAvatar, bool> condition = null) where T : MonoBehaviour
+        {
+            _componentsToAdd.Add((typeof(T), condition));
+        }
+
+        public void DeregisterComponent<T>(Func<LoadedAvatar, bool> condition = null) where T : MonoBehaviour
+        {
+            _componentsToAdd.Remove((typeof(T), condition));
+        }
+
+        internal void PrintTypes()
+        {
+            foreach ((Type type, _) in _componentsToAdd)
+            {
+                _logger.Notice(type);
+            }
         }
 
         /// <summary>
@@ -63,7 +88,30 @@ namespace CustomAvatar.Avatar
             subContainer.Bind<IAvatarInput>().FromInstance(input);
 
             GameObject avatarInstance = subContainer.InstantiatePrefab(avatar.prefab, parent);
-            return subContainer.InstantiateComponent<SpawnedAvatar>(avatarInstance);
+            SpawnedAvatar spawnedAvatar = subContainer.InstantiateComponent<SpawnedAvatar>(avatarInstance);
+
+            subContainer.Bind<SpawnedAvatar>().FromInstance(spawnedAvatar);
+
+            foreach ((Type type, Func<LoadedAvatar, bool> condition) in _componentsToAdd)
+            {
+                if (condition == null || condition(avatar))
+                {
+                    _logger.Info($"Adding component '{type.FullName}'");
+                    subContainer.InstantiateComponent(type, avatarInstance);
+                }
+            }
+
+            return spawnedAvatar;
+        }
+
+        private bool ShouldAddIK(LoadedAvatar avatar)
+        {
+            return avatar.isIKAvatar;
+        }
+
+        private bool ShouldAddFingerTracking(LoadedAvatar avatar)
+        {
+            return avatar.supportsFingerTracking;
         }
     }
 }

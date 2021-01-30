@@ -29,8 +29,28 @@ using Zenject;
 
 namespace CustomAvatar.Avatar
 {
-    internal class AvatarIK : MonoBehaviour
+    public class AvatarIK : MonoBehaviour
     {
+        public bool isLocomotionEnabled
+        {
+            get => _isLocomotionEnabled;
+            set
+            {
+                _isLocomotionEnabled = true;
+                UpdateLocomotion();
+            }
+        }
+
+        public bool isCalibrationModeEnabled
+        {
+            get => _isCalibrationModeEnabled;
+            set
+            {
+                _isCalibrationModeEnabled = value;
+                UpdateSolverTargets();
+            }
+        }
+
         private VRIK _vrik;
         private VRIKManager _vrikManager;
 
@@ -50,6 +70,7 @@ namespace CustomAvatar.Avatar
         private IKHelper _ikHelper;
 
         private bool _isCalibrationModeEnabled = false;
+        private bool _isLocomotionEnabled = false;
 
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
@@ -94,8 +115,8 @@ namespace CustomAvatar.Avatar
 
             _input.inputChanged += OnInputChanged;
 
+            UpdateLocomotion();
             UpdateSolverTargets();
-            SetLocomotionEnabled(_avatar.isLocomotionEnabled);
         }
 
         private void Update()
@@ -150,27 +171,16 @@ namespace CustomAvatar.Avatar
         #pragma warning restore IDE0051
         #endregion
 
-        internal void SetLocomotionEnabled(bool enabled)
-        {
-            if (enabled)
-            {
-                _vrik.solver.locomotion.weight = _vrikManager.solver_locomotion_weight;
-            }
-            else
-            {
-                _vrik.solver.locomotion.weight = 0;
-            }
-        }
-
-        internal void SetCalibrationModeEnabled(bool enabled)
-        {
-            _isCalibrationModeEnabled = enabled;
-            UpdateSolverTargets();
-        }
-
         internal void ResetSolver()
         {
             _vrik.solver.Reset();
+        }
+
+        private void UpdateLocomotion()
+        {
+            if (!_vrik || !_vrikManager) return;
+
+            _vrik.solver.locomotion.weight = _isLocomotionEnabled ? _vrikManager.solver_locomotion_weight : 0;
         }
 
         private void OnInputChanged()
@@ -180,6 +190,8 @@ namespace CustomAvatar.Avatar
 
         private void UpdateSolverTargets()
         {
+            if (!_vrik || !_vrikManager) return;
+
             _logger.Info("Updating solver targets");
 
             _vrik.solver.spine.headTarget  = _vrikManager.solver_spine_headTarget;

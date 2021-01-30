@@ -114,9 +114,7 @@ namespace CustomAvatar.UI
         {
             if (!_avatarManager.currentlySpawnedAvatar) return;
 
-            _avatarManager.currentlySpawnedAvatar.EnableCalibrationMode();
-            _calibrating = true;
-
+            SetCalibrationMode(true);
             UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.avatar);
 
             _waistSphere = CreateCalibrationSphere();
@@ -126,14 +124,14 @@ namespace CustomAvatar.UI
 
         private void DisableCalibrationMode(bool save)
         {
-            _calibrating = false;
+            SetCalibrationMode(false);
 
             Destroy(_waistSphere);
             Destroy(_leftFootSphere);
             Destroy(_rightFootSphere);
 
             if (!_avatarManager.currentlySpawnedAvatar) return;
-
+            
             if (save)
             {
                 _playerInput.CalibrateFullBodyTrackingManual(_avatarManager.currentlySpawnedAvatar);
@@ -142,9 +140,17 @@ namespace CustomAvatar.UI
                 OnEnableAutomaticCalibrationChanged(false);
             }
 
-            _avatarManager.currentlySpawnedAvatar.DisableCalibrationMode();
-
             UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.avatar);
+        }
+
+        private void SetCalibrationMode(bool enabled)
+        {
+            _calibrating = enabled;
+
+            if (!_avatarManager.currentlySpawnedAvatar) return;
+
+            if (_avatarManager.currentlySpawnedAvatar.TryGetComponent(out AvatarIK ik)) ik.isCalibrationModeEnabled = enabled;
+            if (_avatarManager.currentlySpawnedAvatar.TryGetComponent(out AvatarTracking tracking)) tracking.isCalibrationModeEnabled = enabled;
         }
 
         private GameObject CreateCalibrationSphere()

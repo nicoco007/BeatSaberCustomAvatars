@@ -91,6 +91,8 @@ namespace CustomAvatar.Player
 
         public void Initialize()
         {
+            _spawner.PrintTypes();
+
             _settings.moveFloorWithRoomAdjust.changed += OnMoveFloorWithRoomAdjustChanged;
             _settings.isAvatarVisibleInFirstPerson.changed += OnFirstPersonEnabledChanged;
             _settings.resizeMode.changed += OnResizeModeChanged;
@@ -378,7 +380,10 @@ namespace CustomAvatar.Player
         {
             _avatarContainer.transform.SetPositionAndRotation(position, rotation);
 
-            if (currentlySpawnedAvatar && currentlySpawnedAvatar.ik) currentlySpawnedAvatar.ik.ResetSolver();
+            if (currentlySpawnedAvatar && currentlySpawnedAvatar.TryGetComponent(out AvatarIK ik))
+            {
+                ik.ResetSolver();
+            }
         }
 
         private void OnResizeModeChanged(AvatarResizeMode resizeMode)
@@ -489,9 +494,10 @@ namespace CustomAvatar.Player
 
         private void UpdateLocomotionEnabled()
         {
-            if (!currentlySpawnedAvatar) return;
-
-            currentlySpawnedAvatar.SetLocomotionEnabled(_settings.enableLocomotion);
+            if (currentlySpawnedAvatar && currentlySpawnedAvatar.TryGetComponent(out AvatarIK ik))
+            {
+                ik.isLocomotionEnabled = _settings.enableLocomotion;
+            }
         }
 
         private void OnMoveFloorWithRoomAdjustChanged(bool value)
