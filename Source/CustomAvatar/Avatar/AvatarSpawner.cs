@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using UnityEngine;
@@ -31,7 +32,7 @@ namespace CustomAvatar.Avatar
         private readonly DiContainer _container;
         private readonly ILogger<AvatarSpawner> _logger;
 
-        private readonly List<(Type, Func<LoadedAvatar, bool>)> _componentsToAdd = new List<(Type, Func<LoadedAvatar, bool>)>();
+        private readonly List<(Type type, Func<LoadedAvatar, bool> condition)> _componentsToAdd = new List<(Type, Func<LoadedAvatar, bool>)>();
 
         internal AvatarSpawner(DiContainer container, ILoggerProvider loggerProvider)
         {
@@ -45,12 +46,19 @@ namespace CustomAvatar.Avatar
 
         public void RegisterComponent<T>(Func<LoadedAvatar, bool> condition = null) where T : MonoBehaviour
         {
+            if (IsComponentRegistered<T>()) throw new InvalidOperationException("Registering the same component more than once is not supported");
+
             _componentsToAdd.Add((typeof(T), condition));
         }
 
-        public void DeregisterComponent<T>(Func<LoadedAvatar, bool> condition = null) where T : MonoBehaviour
+        public bool IsComponentRegistered<T>()
         {
-            _componentsToAdd.Remove((typeof(T), condition));
+            return _componentsToAdd.Any(vt => vt.type == typeof(T));
+        }
+
+        public void DeregisterComponent<T>() where T : MonoBehaviour
+        {
+            _componentsToAdd.RemoveAll(vt => vt.type == typeof(T));
         }
 
         internal void PrintTypes()
