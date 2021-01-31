@@ -94,6 +94,6 @@
       <CopyToUnityProjectFolder Include="$(PublishDir)**\*.*" />
     </ItemGroup>
 
-    <Copy SourceFiles="@(CopyToUnityProjectFolder)" DestinationFiles="@(CopyToUnityProjectFolder->'$(UnityProjectDir)\Assets\Libraries\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(CopyToUnityProjectFolder)" DestinationFiles="@(CopyToUnityProjectFolder->'$(UnityProjectDir)\Assets\Libraries\%(RecursiveDir)%(Filename)%(Extension)')" Condition="!Exists('$(UnityProjectDir)\Assets\Libraries\%(RecursiveDir)%(Filename)%(Extension)') OR '%(Extension)' != '.meta'" />
   </Target>
 </Project>
