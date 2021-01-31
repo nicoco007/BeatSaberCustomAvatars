@@ -91,8 +91,6 @@ namespace CustomAvatar.Player
 
         public void Initialize()
         {
-            _spawner.PrintTypes();
-
             _settings.moveFloorWithRoomAdjust.changed += OnMoveFloorWithRoomAdjustChanged;
             _settings.isAvatarVisibleInFirstPerson.changed += OnFirstPersonEnabledChanged;
             _settings.resizeMode.changed += OnResizeModeChanged;

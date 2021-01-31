@@ -61,14 +61,6 @@ namespace CustomAvatar.Avatar
             _componentsToAdd.RemoveAll(vt => vt.type == typeof(T));
         }
 
-        internal void PrintTypes()
-        {
-            foreach ((Type type, _) in _componentsToAdd)
-            {
-                _logger.Notice(type);
-            }
-        }
-
         /// <summary>
         /// Spawn a <see cref="LoadedAvatar"/>.
         /// </summary>
