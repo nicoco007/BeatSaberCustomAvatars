@@ -191,6 +191,10 @@ namespace CustomAvatar.Player
                             {
                                 SwitchToAvatar(avatar);
                             }
+                            else
+                            {
+                                avatar.Dispose();
+                            }
                         },
                         (exception) =>
                         {
@@ -280,7 +284,7 @@ namespace CustomAvatar.Player
             else
             {
                 _logger.Info($"Reloading avatar info for '{e.FullPath}'");
-                LoadAvatar(e.FullPath);
+                LoadAvatar(e.FullPath, (avatar) => avatar.Dispose());
             }
         }
 
