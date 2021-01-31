@@ -76,7 +76,7 @@ namespace CustomAvatar.Avatar
             this.timestamp = timestamp;
         }
 
-        public AvatarInfo(LoadedAvatar avatar)
+        public AvatarInfo(AvatarPrefab avatar)
         {
             name = avatar.descriptor.name ?? "Unknown";
             author = avatar.descriptor.author ?? "Unknown";

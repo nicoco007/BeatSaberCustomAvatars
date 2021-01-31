@@ -62,7 +62,7 @@ namespace CustomAvatar.Avatar
             }
         }
 
-        public float scaledEyeHeight => avatar.eyeHeight * scale;
+        public float scaledEyeHeight => prefab.eyeHeight * scale;
 
         public Transform head { get; private set; }
         public Transform body { get; private set; }
@@ -172,7 +172,7 @@ namespace CustomAvatar.Avatar
 
         private void Start()
         {
-            name = $"SpawnedAvatar({avatar.descriptor.name})";
+            name = $"SpawnedAvatar({prefab.descriptor.name})";
 
             if (_initialLocalPosition.sqrMagnitude > 0)
             {

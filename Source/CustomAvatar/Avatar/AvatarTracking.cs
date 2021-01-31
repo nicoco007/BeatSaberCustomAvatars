@@ -40,7 +40,7 @@ namespace CustomAvatar.Avatar
         [Inject]
         private void Inject(ILoggerProvider loggerProvider, IAvatarInput input, SpawnedAvatar spawnedAvatar, TrackingHelper trackingHelper)
         {
-            _logger = loggerProvider.CreateLogger<AvatarTracking>(spawnedAvatar.avatar.descriptor.name);
+            _logger = loggerProvider.CreateLogger<AvatarTracking>(spawnedAvatar.prefab.descriptor.name);
             _input = input;
             _spawnedAvatar = spawnedAvatar;
             _trackingHelper = trackingHelper;

@@ -117,7 +117,7 @@ namespace CustomAvatar.Player
 
         public void Dispose()
         {
-            currentlySpawnedAvatar?.avatar.Dispose();
+            if (currentlySpawnedAvatar) Object.Destroy(currentlySpawnedAvatar.prefab.gameObject);
             Object.Destroy(_avatarContainer);
 
             _settings.moveFloorWithRoomAdjust.changed -= OnMoveFloorWithRoomAdjustChanged;
@@ -153,7 +153,7 @@ namespace CustomAvatar.Player
 
             if (forceReload)
             {
-                string fullPath = currentlySpawnedAvatar ? currentlySpawnedAvatar.avatar.fullPath : null;
+                string fullPath = currentlySpawnedAvatar ? currentlySpawnedAvatar.prefab.fullPath : null;
                 SwitchToAvatarAsync(null);
                 _switchingToPath = fullPath;
             }
@@ -171,7 +171,7 @@ namespace CustomAvatar.Player
                 }
                 else
                 {
-                    SharedCoroutineStarter.instance.StartCoroutine(_avatarLoader.FromFileCoroutine(fullPath,
+                    SharedCoroutineStarter.instance.StartCoroutine(_avatarLoader.LoadFromFileAsync(fullPath,
                         (avatar) =>
                         {
                             var info = new AvatarInfo(avatar);
@@ -193,7 +193,7 @@ namespace CustomAvatar.Player
                             }
                             else
                             {
-                                avatar.Dispose();
+                                Object.Destroy(avatar.gameObject);
                             }
                         },
                         (exception) =>
@@ -228,7 +228,7 @@ namespace CustomAvatar.Player
 
         public void SwitchToAvatarAsync(string fileName)
         {
-            if (currentlySpawnedAvatar) currentlySpawnedAvatar.avatar.Dispose();
+            if (currentlySpawnedAvatar) Object.Destroy(currentlySpawnedAvatar.prefab.gameObject);
             Object.Destroy(currentlySpawnedAvatar);
             currentlySpawnedAvatar = null;
             _currentAvatarSettings = null;
@@ -247,12 +247,12 @@ namespace CustomAvatar.Player
 
             avatarStartedLoading?.Invoke(fullPath);
 
-            SharedCoroutineStarter.instance.StartCoroutine(_avatarLoader.FromFileCoroutine(fullPath, SwitchToAvatar, OnAvatarLoadFailed));
+            SharedCoroutineStarter.instance.StartCoroutine(_avatarLoader.LoadFromFileAsync(fullPath, SwitchToAvatar, OnAvatarLoadFailed));
         }
 
-        private void LoadAvatar(string fullPath, Action<LoadedAvatar> success = null, Action<Exception> error = null, Action complete = null)
+        private void LoadAvatar(string fullPath, Action<AvatarPrefab> success = null, Action<Exception> error = null, Action complete = null)
         {
-            SharedCoroutineStarter.instance.StartCoroutine(_avatarLoader.FromFileCoroutine(fullPath,
+            SharedCoroutineStarter.instance.StartCoroutine(_avatarLoader.LoadFromFileAsync(fullPath,
                 (avatar) =>
                 {
                     var info = new AvatarInfo(avatar);
@@ -276,7 +276,7 @@ namespace CustomAvatar.Player
         {
             _logger.Trace($"File change detected: '{e.FullPath}'");
 
-            if (e.FullPath == currentlySpawnedAvatar?.avatar.fullPath)
+            if (currentlySpawnedAvatar && e.FullPath == currentlySpawnedAvatar.prefab.fullPath)
             {
                 _logger.Info("Reloading spawned avatar");
                 SwitchToAvatarAsync(e.Name);
@@ -284,14 +284,14 @@ namespace CustomAvatar.Player
             else
             {
                 _logger.Info($"Reloading avatar info for '{e.FullPath}'");
-                LoadAvatar(e.FullPath, (avatar) => avatar.Dispose());
+                LoadAvatar(e.FullPath, (avatar) => Object.Destroy(avatar.gameObject));
             }
         }
 
         private void OnAvatarFileCreated(object sender, FileSystemEventArgs e)
         {
             _logger.Info($"Loading avatar info for '{e.FullPath}'");
-            LoadAvatar(e.FullPath, (avatar) => avatar.Dispose());
+            LoadAvatar(e.FullPath, (avatar) => Object.Destroy(avatar.gameObject));
         }
 
         private void OnAvatarFileDeleted(object sender, FileSystemEventArgs e)
@@ -308,11 +308,11 @@ namespace CustomAvatar.Player
             }
         }
 
-        private void SwitchToAvatar(LoadedAvatar avatar)
+        private void SwitchToAvatar(AvatarPrefab avatar)
         {
-            if ((currentlySpawnedAvatar && currentlySpawnedAvatar.avatar == avatar) || avatar?.fullPath != _switchingToPath)
+            if ((currentlySpawnedAvatar && currentlySpawnedAvatar.prefab == avatar) || avatar?.fullPath != _switchingToPath)
             {
-                avatar?.Dispose();
+                Object.Destroy(avatar.gameObject);
                 return;
             }
 
@@ -405,7 +405,7 @@ namespace CustomAvatar.Player
 
         private void ResizeCurrentAvatar()
         {
-            if (!currentlySpawnedAvatar || !currentlySpawnedAvatar.avatar.descriptor.allowHeightCalibration) return;
+            if (!currentlySpawnedAvatar || !currentlySpawnedAvatar.prefab.descriptor.allowHeightCalibration) return;
 
             float scale;
             AvatarResizeMode resizeMode = _settings.resizeMode;
@@ -413,7 +413,7 @@ namespace CustomAvatar.Player
             switch (resizeMode)
             {
                 case AvatarResizeMode.ArmSpan:
-                    float avatarArmLength = currentlySpawnedAvatar.avatar.armSpan;
+                    float avatarArmLength = currentlySpawnedAvatar.prefab.armSpan;
 
                     if (avatarArmLength > 0)
                     {
@@ -427,7 +427,7 @@ namespace CustomAvatar.Player
                     break;
 
                 case AvatarResizeMode.Height:
-                    float avatarEyeHeight = currentlySpawnedAvatar.avatar.eyeHeight;
+                    float avatarEyeHeight = currentlySpawnedAvatar.prefab.eyeHeight;
                     float playerEyeHeight = _beatSaberUtilities.GetRoomAdjustedPlayerEyeHeight();
 
                     if (avatarEyeHeight > 0)

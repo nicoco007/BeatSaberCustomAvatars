@@ -115,7 +115,7 @@ namespace CustomAvatar.UI
             if (!_avatarManager.currentlySpawnedAvatar) return;
 
             SetCalibrationMode(true);
-            UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.avatar);
+            UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.prefab);
 
             _waistSphere = CreateCalibrationSphere();
             _leftFootSphere = CreateCalibrationSphere();
@@ -140,7 +140,7 @@ namespace CustomAvatar.UI
                 OnEnableAutomaticCalibrationChanged(false);
             }
 
-            UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.avatar);
+            UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.prefab);
         }
 
         private void SetCalibrationMode(bool enabled)

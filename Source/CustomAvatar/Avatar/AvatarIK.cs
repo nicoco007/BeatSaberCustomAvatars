@@ -111,7 +111,7 @@ namespace CustomAvatar.Avatar
         {
             _input = input;
             _avatar = avatar;
-            _logger = loggerProvider.CreateLogger<AvatarIK>(_avatar.avatar.descriptor.name);
+            _logger = loggerProvider.CreateLogger<AvatarIK>(_avatar.prefab.descriptor.name);
             _ikHelper = ikHelper;
         }
 

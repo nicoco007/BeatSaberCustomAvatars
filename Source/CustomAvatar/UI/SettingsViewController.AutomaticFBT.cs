@@ -77,7 +77,7 @@ namespace CustomAvatar.UI
             _automaticCalibrationSetting.Value = true;
             OnEnableAutomaticCalibrationChanged(true);
 
-            if (_avatarManager.currentlySpawnedAvatar) UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.avatar);
+            if (_avatarManager.currentlySpawnedAvatar) UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.prefab);
         }
 
         [UIAction("auto-clear-fbt-calibration-data-click")]
@@ -85,7 +85,7 @@ namespace CustomAvatar.UI
         {
             _playerInput.ClearAutomaticFullBodyTrackingData();
 
-            if (_avatarManager.currentlySpawnedAvatar) UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.avatar);
+            if (_avatarManager.currentlySpawnedAvatar) UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.prefab);
         }
 
         [UIAction("waist-tracker-position-change")]

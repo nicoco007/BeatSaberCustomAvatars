@@ -169,7 +169,7 @@ namespace CustomAvatar.UI
         {
             SetLoading(false);
             DisableCalibrationMode(false);
-            UpdateUI(spawnedAvatar?.avatar);
+            if (spawnedAvatar) UpdateUI(spawnedAvatar.prefab);
         }
 
         private void OnAvatarLoadFailed(Exception exception)
@@ -212,7 +212,7 @@ namespace CustomAvatar.UI
             _heightAdjustWarningText.gameObject.SetActive(resizeMode != AvatarResizeMode.None && _playerDataModel.playerData.playerSpecificSettings.automaticPlayerHeight);
         }
 
-        private void UpdateUI(LoadedAvatar avatar)
+        private void UpdateUI(AvatarPrefab avatar)
         {
             SetInteractableRecursively(avatar != null);
             UpdateCalibrationButtons(avatar);
@@ -241,10 +241,10 @@ namespace CustomAvatar.UI
 
         private void OnInputChanged()
         {
-            if (_avatarManager.currentlySpawnedAvatar) UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.avatar);
+            if (_avatarManager.currentlySpawnedAvatar) UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.prefab);
         }
 
-        private void UpdateCalibrationButtons(LoadedAvatar avatar)
+        private void UpdateCalibrationButtons(AvatarPrefab avatar)
         {
             if (_playerInput.TryGetUncalibratedPose(DeviceUse.LeftHand, out Pose _) && _playerInput.TryGetUncalibratedPose(DeviceUse.RightHand, out Pose _))
             {

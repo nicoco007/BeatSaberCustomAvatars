@@ -197,7 +197,7 @@ namespace CustomAvatar.Player
         {
             _logger.Info("Running manual full body tracking calibration");
 
-            CalibrationData.FullBodyCalibration fullBodyCalibration = _calibrationData.GetAvatarManualCalibration(spawnedAvatar.avatar.fileName);
+            CalibrationData.FullBodyCalibration fullBodyCalibration = _calibrationData.GetAvatarManualCalibration(spawnedAvatar.prefab.fileName);
 
             if (TryGetUncalibratedPoseForAvatar(DeviceUse.Waist, spawnedAvatar, out Pose waist))
             {
@@ -279,7 +279,7 @@ namespace CustomAvatar.Player
 
         internal void ClearManualFullBodyTrackingData(SpawnedAvatar spawnedAvatar)
         {
-            CalibrationData.FullBodyCalibration fullBodyCalibration = _calibrationData.GetAvatarManualCalibration(spawnedAvatar.avatar.fileName);
+            CalibrationData.FullBodyCalibration fullBodyCalibration = _calibrationData.GetAvatarManualCalibration(spawnedAvatar.prefab.fileName);
 
             fullBodyCalibration.leftFoot = Pose.identity;
             fullBodyCalibration.rightFoot = Pose.identity;
@@ -315,8 +315,8 @@ namespace CustomAvatar.Player
                 return;
             }
            
-            _avatarSettings = _settings.GetAvatarSettings(spawnedAvatar.avatar.fileName);
-            _manualCalibration = _calibrationData.GetAvatarManualCalibration(spawnedAvatar.avatar.fileName);
+            _avatarSettings = _settings.GetAvatarSettings(spawnedAvatar.prefab.fileName);
+            _manualCalibration = _calibrationData.GetAvatarManualCalibration(spawnedAvatar.prefab.fileName);
 
             _avatarSettings.useAutomaticCalibration.changed += OnUseAutomaticCalibrationChanged;
             _avatarSettings.bypassCalibration.changed       += OnBypassCalibrationChanged;
