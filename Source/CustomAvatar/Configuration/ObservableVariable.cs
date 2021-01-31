@@ -43,7 +43,7 @@ namespace CustomAvatar.Configuration
 
         public static implicit operator T(ObservableValue<T> ov)
         {
-            return ov.value;
+            return ov != null ? ov.value : default;
         }
 
         public override string ToString()
