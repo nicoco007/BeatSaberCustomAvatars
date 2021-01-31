@@ -33,7 +33,13 @@ namespace CustomAvatar.Avatar
         /// <summary>
         /// The <see cref="LoadedAvatar"/> used as a reference.
         /// </summary>
-		public LoadedAvatar avatar { get; private set; }
+        [Obsolete("Use prefab instead")]
+        public LoadedAvatar avatar { get; private set; }
+
+        /// <summary>
+        /// The <see cref="AvatarPrefab"/> used to spawn this avatar.
+        /// </summary>
+        public AvatarPrefab prefab { get; private set; }
 
         /// <summary>
         /// The <see cref="IAvatarInput"/> used for tracking.
@@ -151,12 +157,16 @@ namespace CustomAvatar.Avatar
         }
         
         [Inject]
-        private void Construct(ILoggerProvider loggerProvider, LoadedAvatar loadedAvatar, IAvatarInput avatarInput, GameScenesManager gameScenesManager)
+        private void Construct(ILoggerProvider loggerProvider, AvatarPrefab avatarPrefab, IAvatarInput avatarInput, GameScenesManager gameScenesManager)
         {
-            avatar = loadedAvatar ?? throw new ArgumentNullException(nameof(loadedAvatar));
+            prefab = avatarPrefab ?? throw new ArgumentNullException(nameof(avatarPrefab));
             input = avatarInput ?? throw new ArgumentNullException(nameof(avatarInput));
 
-            _logger = loggerProvider.CreateLogger<SpawnedAvatar>(loadedAvatar.descriptor.name);
+#pragma warning disable CS0612, CS0618
+            avatar = avatarPrefab.loadedAvatar;
+#pragma warning restore CS0612, CS0618
+
+            _logger = loggerProvider.CreateLogger<SpawnedAvatar>(avatarPrefab.descriptor.name);
             _gameScenesManager = gameScenesManager;
         }
 

@@ -42,6 +42,12 @@ namespace CustomAvatar.Avatar
             _container = container;
         }
 
+        [Obsolete("Use LoadFromFileAsync instead")]
+        public IEnumerator<AsyncOperation> FromFileCoroutine(string path, Action<LoadedAvatar> success = null, Action<Exception> error = null, Action complete = null)
+        {
+            return LoadFromFileAsync(path, (avatarPrefab) => success?.Invoke(avatarPrefab.loadedAvatar), error, complete);
+        }
+
         // TODO from stream/memory
         /// <summary>
         /// Load an avatar from a file.
@@ -50,7 +56,7 @@ namespace CustomAvatar.Avatar
         /// <param name="success">Action to call if the avatar is loaded successfully</param>
         /// <param name="error">Action to call if the avatar isn't loaded successfully</param>
         /// <returns><see cref="IEnumerator{AsyncOperation}"/></returns>
-        public IEnumerator<AsyncOperation> FromFileCoroutine(string path, Action<LoadedAvatar> success = null, Action<Exception> error = null, Action complete = null)
+        public IEnumerator<AsyncOperation> LoadFromFileAsync(string path, Action<AvatarPrefab> success = null, Action<Exception> error = null, Action complete = null)
         {
             if (string.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
 
@@ -100,9 +106,11 @@ namespace CustomAvatar.Avatar
                 
             try
             {
-                var loadedAvatar = _container.Instantiate<LoadedAvatar>(new object[] { fullPath, (GameObject)assetBundleRequest.asset });
+                GameObject prefabObject = (GameObject)assetBundleRequest.asset;
+                AvatarPrefab avatarPrefab = _container.InstantiateComponent<AvatarPrefab>(prefabObject, new object[] { fullPath });
+                avatarPrefab.name = $"LoadedAvatar({avatarPrefab.descriptor.name})";
 
-                HandleSuccess(fullPath, loadedAvatar);
+                HandleSuccess(fullPath, avatarPrefab);
             }
             catch (Exception ex)
             {
@@ -110,13 +118,13 @@ namespace CustomAvatar.Avatar
             }
         }
 
-        private void HandleSuccess(string fullPath, LoadedAvatar loadedAvatar)
+        private void HandleSuccess(string fullPath, AvatarPrefab avatarPrefab)
         {
-            _logger.Info($"Successfully loaded avatar '{loadedAvatar.descriptor.name}' by '{loadedAvatar.descriptor.author}' from '{fullPath}'");
+            _logger.Info($"Successfully loaded avatar '{avatarPrefab.descriptor.name}' by '{avatarPrefab.descriptor.author}' from '{fullPath}'");
 
             foreach (LoadHandlers handler in _handlers[fullPath])
             {
-                handler.InvokeSuccess(loadedAvatar);
+                handler.InvokeSuccess(avatarPrefab);
             }
 
             _handlers.Remove(fullPath);
@@ -137,18 +145,18 @@ namespace CustomAvatar.Avatar
 
         private struct LoadHandlers
         {
-            private readonly Action<LoadedAvatar> success;
+            private readonly Action<AvatarPrefab> success;
             private readonly Action<Exception> error;
             private readonly Action complete;
 
-            internal LoadHandlers(Action<LoadedAvatar> success, Action<Exception> error, Action complete)
+            public LoadHandlers(Action<AvatarPrefab> success, Action<Exception> error, Action complete)
             {
                 this.success = success;
                 this.error = error;
                 this.complete = complete;
             }
 
-            public void InvokeSuccess(LoadedAvatar value)
+            public void InvokeSuccess(AvatarPrefab value)
             {
                 success?.Invoke(value);
                 complete?.Invoke();

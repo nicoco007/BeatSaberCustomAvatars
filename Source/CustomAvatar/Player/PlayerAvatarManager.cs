@@ -228,7 +228,7 @@ namespace CustomAvatar.Player
 
         public void SwitchToAvatarAsync(string fileName)
         {
-            currentlySpawnedAvatar?.avatar.Dispose();
+            if (currentlySpawnedAvatar) currentlySpawnedAvatar.avatar.Dispose();
             Object.Destroy(currentlySpawnedAvatar);
             currentlySpawnedAvatar = null;
             _currentAvatarSettings = null;

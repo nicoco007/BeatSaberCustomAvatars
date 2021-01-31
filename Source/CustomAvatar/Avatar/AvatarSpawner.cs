@@ -21,6 +21,7 @@ using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using UnityEngine;
 using Zenject;
+using Object = UnityEngine.Object;
 
 namespace CustomAvatar.Avatar
 {
@@ -32,7 +33,7 @@ namespace CustomAvatar.Avatar
         private readonly DiContainer _container;
         private readonly ILogger<AvatarSpawner> _logger;
 
-        private readonly List<(Type type, Func<LoadedAvatar, bool> condition)> _componentsToAdd = new List<(Type, Func<LoadedAvatar, bool>)>();
+        private readonly List<(Type type, Func<AvatarPrefab, bool> condition)> _componentsToAdd = new List<(Type, Func<AvatarPrefab, bool>)>();
 
         internal AvatarSpawner(DiContainer container, ILoggerProvider loggerProvider)
         {
@@ -44,7 +45,7 @@ namespace CustomAvatar.Avatar
             RegisterComponent<AvatarFingerTracking>(ShouldAddFingerTracking);
         }
 
-        public void RegisterComponent<T>(Func<LoadedAvatar, bool> condition = null) where T : MonoBehaviour
+        public void RegisterComponent<T>(Func<AvatarPrefab, bool> condition = null) where T : MonoBehaviour
         {
             if (IsComponentRegistered<T>()) throw new InvalidOperationException("Registering the same component more than once is not supported");
 
@@ -61,6 +62,12 @@ namespace CustomAvatar.Avatar
             _componentsToAdd.RemoveAll(vt => vt.type == typeof(T));
         }
 
+        [Obsolete]
+        public SpawnedAvatar SpawnAvatar(LoadedAvatar avatar, IAvatarInput input, Transform parent = null)
+        {
+            return SpawnAvatar(avatar.prefab.GetComponent<AvatarPrefab>(), input, parent);
+        }
+
         /// <summary>
         /// Spawn a <see cref="LoadedAvatar"/>.
         /// </summary>
@@ -68,7 +75,7 @@ namespace CustomAvatar.Avatar
         /// <param name="input">The <see cref="IAvatarInput"/> to use</param>
         /// <param name="parent">The container in which to spawn the avatar (optional)</param>
         /// <returns><see cref="SpawnedAvatar"/></returns>
-        public SpawnedAvatar SpawnAvatar(LoadedAvatar avatar, IAvatarInput input, Transform parent = null)
+        public SpawnedAvatar SpawnAvatar(AvatarPrefab avatar, IAvatarInput input, Transform parent = null)
         {
             if (avatar == null) throw new ArgumentNullException(nameof(avatar));
             if (input == null) throw new ArgumentNullException(nameof(input));
@@ -84,15 +91,18 @@ namespace CustomAvatar.Avatar
 
             DiContainer subContainer = new DiContainer(_container);
 
-            subContainer.Bind<LoadedAvatar>().FromInstance(avatar);
+            GameObject avatarInstance = Object.Instantiate(avatar, parent, false).gameObject;
+            Object.Destroy(avatarInstance.GetComponent<AvatarPrefab>());
+            subContainer.QueueForInject(avatarInstance);
+
+            subContainer.Bind<AvatarPrefab>().FromInstance(avatar);
             subContainer.Bind<IAvatarInput>().FromInstance(input);
 
-            GameObject avatarInstance = subContainer.InstantiatePrefab(avatar.prefab, parent);
             SpawnedAvatar spawnedAvatar = subContainer.InstantiateComponent<SpawnedAvatar>(avatarInstance);
 
             subContainer.Bind<SpawnedAvatar>().FromInstance(spawnedAvatar);
 
-            foreach ((Type type, Func<LoadedAvatar, bool> condition) in _componentsToAdd)
+            foreach ((Type type, Func<AvatarPrefab, bool> condition) in _componentsToAdd)
             {
                 if (condition == null || condition(avatar))
                 {
@@ -101,15 +111,17 @@ namespace CustomAvatar.Avatar
                 }
             }
 
+            spawnedAvatar.name = "ASDTKEYTAYK";
+
             return spawnedAvatar;
         }
 
-        private bool ShouldAddIK(LoadedAvatar avatar)
+        private bool ShouldAddIK(AvatarPrefab avatar)
         {
             return avatar.isIKAvatar;
         }
 
-        private bool ShouldAddFingerTracking(LoadedAvatar avatar)
+        private bool ShouldAddFingerTracking(AvatarPrefab avatar)
         {
             return avatar.supportsFingerTracking;
         }

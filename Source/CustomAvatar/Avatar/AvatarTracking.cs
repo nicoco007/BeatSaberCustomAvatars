@@ -58,17 +58,17 @@ namespace CustomAvatar.Avatar
                 {
                     if (_spawnedAvatar.pelvis)
                     {
-                        _trackingHelper.SetLocalPose(_spawnedAvatar.avatar.pelvis.position * _spawnedAvatar.scale, _spawnedAvatar.avatar.pelvis.rotation, _spawnedAvatar.pelvis, transform.parent);
+                        _trackingHelper.SetLocalPose(_spawnedAvatar.prefab.pelvis.position * _spawnedAvatar.scale, _spawnedAvatar.prefab.pelvis.rotation, _spawnedAvatar.pelvis, transform.parent);
                     }
 
                     if (_spawnedAvatar.leftLeg)
                     {
-                        _trackingHelper.SetLocalPose(_spawnedAvatar.avatar.leftLeg.position * _spawnedAvatar.scale, _spawnedAvatar.avatar.leftLeg.rotation, _spawnedAvatar.leftLeg, transform.parent);
+                        _trackingHelper.SetLocalPose(_spawnedAvatar.prefab.leftLeg.position * _spawnedAvatar.scale, _spawnedAvatar.prefab.leftLeg.rotation, _spawnedAvatar.leftLeg, transform.parent);
                     }
 
                     if (_spawnedAvatar.rightLeg)
                     {
-                        _trackingHelper.SetLocalPose(_spawnedAvatar.avatar.rightLeg.position * _spawnedAvatar.scale, _spawnedAvatar.avatar.rightLeg.rotation, _spawnedAvatar.rightLeg, transform.parent);
+                        _trackingHelper.SetLocalPose(_spawnedAvatar.prefab.rightLeg.position * _spawnedAvatar.scale, _spawnedAvatar.prefab.rightLeg.rotation, _spawnedAvatar.rightLeg, transform.parent);
                     }
                 }
                 else
