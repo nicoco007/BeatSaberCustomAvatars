@@ -429,9 +429,9 @@ namespace CustomAvatar
 
         #if !UNITY_EDITOR
         [Inject]
-        private void Inject(ILoggerProvider loggerProvider)
+        private void Construct(ILogger<VRIKManager> logger)
         {
-            _logger = loggerProvider.CreateLogger<VRIKManager>();
+            _logger = logger;
         }
         #endif
 

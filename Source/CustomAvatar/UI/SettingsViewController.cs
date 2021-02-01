@@ -68,9 +68,9 @@ namespace CustomAvatar.UI
         private CalibrationData.FullBodyCalibration _currentAvatarManualCalibration;
 
         [Inject]
-        private void Inject(ILoggerProvider loggerProvider, PlayerAvatarManager avatarManager, Settings settings, CalibrationData calibrationData, ShaderLoader shaderLoader, VRPlayerInput playerInput, PlayerDataModel playerDataModel, GameplaySetupViewController gameplaySetupViewController)
+        private void Construct(ILogger<SettingsViewController> logger, PlayerAvatarManager avatarManager, Settings settings, CalibrationData calibrationData, ShaderLoader shaderLoader, VRPlayerInput playerInput, PlayerDataModel playerDataModel, GameplaySetupViewController gameplaySetupViewController)
         {
-            _logger = loggerProvider.CreateLogger<SettingsViewController>();
+            _logger = logger;
             _avatarManager = avatarManager;
             _settings = settings;
             _calibrationData = calibrationData;

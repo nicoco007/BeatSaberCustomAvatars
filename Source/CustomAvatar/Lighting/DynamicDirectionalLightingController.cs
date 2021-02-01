@@ -33,11 +33,11 @@ namespace CustomAvatar.Lighting
         #region Behaviour Lifecycle
 
         [Inject]
-        private void Inject(ILoggerProvider loggerProvider, LightWithIdManager lightManager)
+        private void Construct(ILogger<DynamicDirectionalLightingController> logger, LightWithIdManager lightManager)
         {
             name = nameof(DynamicDirectionalLightingController);
 
-            _logger = loggerProvider.CreateLogger<DynamicDirectionalLightingController>();
+            _logger = logger;
             _lightManager = lightManager;
         }
 

@@ -50,8 +50,8 @@ namespace CustomAvatar.Zenject
         public override void InstallBindings()
         {
             // logging
-            Container.Bind<ILoggerProvider>().To<IPALoggerProvider>().AsTransient().WithArguments(new object[] { _logger });
-
+            Container.Bind(typeof(ILogger<>)).FromMethodUntyped(CreateLogger).AsTransient().When(ShouldCreateLogger);
+            
             // settings
             Container.BindInterfacesAndSelfTo<SettingsManager>().AsSingle();
             Container.Bind<Settings>().FromMethod((context) => context.Container.Resolve<SettingsManager>().settings);
@@ -88,8 +88,18 @@ namespace CustomAvatar.Zenject
             Container.Bind<MirrorHelper>().AsTransient();
             Container.Bind<IKHelper>().AsTransient();
             Container.Bind<TrackingHelper>().AsTransient();
-            
+
             Container.Bind<MainSettingsModelSO>().FromInstance(_pcAppInit.GetField<MainSettingsModelSO, PCAppInit>("_mainSettingsModel")).IfNotBound();
+        }
+
+        private object CreateLogger(InjectContext context)
+        {
+            return Activator.CreateInstance(typeof(IPALogger<>).MakeGenericType(context.MemberType.GenericTypeArguments[0]), _logger);
+        }
+
+        private bool ShouldCreateLogger(InjectContext context)
+        {
+            return context.ObjectType == context.MemberType.GenericTypeArguments[0];
         }
     }
 }

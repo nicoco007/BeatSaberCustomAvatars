@@ -10,9 +10,9 @@ namespace CustomAvatar.Utilities
     {
         private ILogger<IKHelper> _logger;
 
-        public IKHelper(ILoggerProvider loggerProvider)
+        public IKHelper(ILogger<IKHelper> logger)
         {
-            _logger = loggerProvider.CreateLogger<IKHelper>();
+            _logger = logger;
         }
 
         public void CreateOffsetTargetsIfMissing(VRIKManager vrikManager, Transform root)

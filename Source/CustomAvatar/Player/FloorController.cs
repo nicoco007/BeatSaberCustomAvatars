@@ -43,9 +43,9 @@ namespace CustomAvatar.Player
         private readonly Dictionary<Transform, Vector3> _originalPositions = new Dictionary<Transform, Vector3>();
         private readonly Dictionary<MirrorRendererSO, MirrorRendererReplacer> _mirrorRenderers = new Dictionary<MirrorRendererSO, MirrorRendererReplacer>();
 
-        internal FloorController(ILoggerProvider loggerProvider, Settings settings, BeatSaberUtilities beatSaberUtilities, GameScenesManager gameScenesManager)
+        internal FloorController(ILogger<FloorController> logger, Settings settings, BeatSaberUtilities beatSaberUtilities, GameScenesManager gameScenesManager)
         {
-            _logger = loggerProvider.CreateLogger<FloorController>();
+            _logger = logger;
             _settings = settings;
             _beatSaberUtilities = beatSaberUtilities;
             _gameScenesManager = gameScenesManager;

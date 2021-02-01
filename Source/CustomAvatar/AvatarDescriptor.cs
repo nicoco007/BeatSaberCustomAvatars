@@ -82,14 +82,14 @@ namespace CustomAvatar
         #if UNITY_EDITOR
         public void Start()
         {
-            IKHelper ikHelper = new IKHelper(new EditorLoggerProvider());
+            IKHelper ikHelper = new IKHelper(new UnityDebugLogger<IKHelper>());
             ikHelper.InitializeVRIK(transform.GetComponentInChildren<VRIKManager>(), transform);
         }
         #else
         [Inject]
-        private void Inject(ILoggerProvider loggerProvider)
+        private void Construct(ILogger<AvatarDescriptor> logger)
         {
-            ILogger<AvatarDescriptor> logger = loggerProvider.CreateLogger<AvatarDescriptor>(name);
+            logger.name = name;
 
             if (!string.IsNullOrEmpty(AvatarName) ||
                 !string.IsNullOrEmpty(Name) ||

@@ -107,12 +107,14 @@ namespace CustomAvatar.Avatar
         }
 
         [Inject]
-        private void Inject(IAvatarInput input, SpawnedAvatar avatar, ILoggerProvider loggerProvider, IKHelper ikHelper)
+        private void Construct(IAvatarInput input, SpawnedAvatar avatar, ILogger<AvatarIK> logger, IKHelper ikHelper)
         {
             _input = input;
             _avatar = avatar;
-            _logger = loggerProvider.CreateLogger<AvatarIK>(_avatar.prefab.descriptor.name);
+            _logger = logger;
             _ikHelper = ikHelper;
+
+            _logger.name = _avatar.prefab.descriptor.name;
         }
 
         private void Start()

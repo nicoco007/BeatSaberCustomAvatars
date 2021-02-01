@@ -33,9 +33,9 @@ namespace CustomAvatar.Configuration
 
         private ILogger<SettingsManager> _logger;
 
-        private SettingsManager(ILoggerProvider loggerProvider)
+        private SettingsManager(ILogger<SettingsManager> logger)
         {
-            _logger = loggerProvider.CreateLogger<SettingsManager>();
+            _logger = logger;
 
             Load();
         }

@@ -66,7 +66,6 @@
     <Compile Include="..\CustomAvatar\FirstPersonExclusion.cs" Link="FirstPersonExclusion.cs" />
     <Compile Include="..\CustomAvatar\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
     <Compile Include="..\CustomAvatar\Logging\ILogger.cs" Link="Logging\ILogger.cs" />
-    <Compile Include="..\CustomAvatar\Logging\ILoggerProvider.cs" Link="Logging\ILoggerProvider.cs" />
     <Compile Include="..\CustomAvatar\Logging\UnityDebugLogger.cs" Link="Logging\UnityDebugLogger.cs" />
     <Compile Include="..\CustomAvatar\PoseManager.cs" Link="PoseManager.cs" />
     <Compile Include="..\CustomAvatar\Properties\AssemblyInfo.cs" Link="Properties\AssemblyInfo.cs" />

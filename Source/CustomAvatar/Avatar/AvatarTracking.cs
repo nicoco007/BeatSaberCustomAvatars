@@ -38,12 +38,14 @@ namespace CustomAvatar.Avatar
         #pragma warning disable IDE0051
 
         [Inject]
-        private void Inject(ILoggerProvider loggerProvider, IAvatarInput input, SpawnedAvatar spawnedAvatar, TrackingHelper trackingHelper)
+        private void Construct(ILogger<AvatarTracking> logger, IAvatarInput input, SpawnedAvatar spawnedAvatar, TrackingHelper trackingHelper)
         {
-            _logger = loggerProvider.CreateLogger<AvatarTracking>(spawnedAvatar.prefab.descriptor.name);
+            _logger = logger;
             _input = input;
             _spawnedAvatar = spawnedAvatar;
             _trackingHelper = trackingHelper;
+
+            _logger.name = spawnedAvatar.prefab.descriptor.name;
         }
 
         private void LateUpdate()

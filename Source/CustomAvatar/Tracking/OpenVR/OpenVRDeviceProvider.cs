@@ -32,9 +32,9 @@ namespace CustomAvatar.Tracking.OpenVR
         private readonly TrackedDevicePose_t[] _poses = new TrackedDevicePose_t[OpenVRFacade.kMaxTrackedDeviceCount];
         private readonly OpenVRDevice[] _devices = new OpenVRDevice[OpenVRFacade.kMaxTrackedDeviceCount];
 
-        public OpenVRDeviceProvider(ILoggerProvider loggerProvider, OpenVRFacade openVRFacade)
+        public OpenVRDeviceProvider(ILogger<OpenVRDeviceProvider> logger, OpenVRFacade openVRFacade)
         {
-            _logger = loggerProvider.CreateLogger<OpenVRDeviceProvider>();
+            _logger = logger;
             _openVRFacade = openVRFacade;
         }
 

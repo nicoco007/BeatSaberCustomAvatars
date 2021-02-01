@@ -61,10 +61,9 @@ namespace CustomAvatar.Player
                 !_avatarSettings.useAutomaticCalibration && _manualCalibration.isCalibrated ||
                 _avatarSettings.useAutomaticCalibration && _calibrationData.automaticCalibration.isCalibrated);
 
-        [Inject]
-        internal VRPlayerInput(ILoggerProvider loggerProvider, DeviceManager trackedDeviceManager, PlayerAvatarManager avatarManager, Settings settings, CalibrationData calibrationData, BeatSaberUtilities beatSaberUtilities, TrackingHelper trackingHelper)
+        internal VRPlayerInput(ILogger<VRPlayerInput> logger, DeviceManager trackedDeviceManager, PlayerAvatarManager avatarManager, Settings settings, CalibrationData calibrationData, BeatSaberUtilities beatSaberUtilities, TrackingHelper trackingHelper)
         {
-            _logger = loggerProvider.CreateLogger<VRPlayerInput>();
+            _logger = logger;
             _deviceManager = trackedDeviceManager;
             _avatarManager = avatarManager;
             _settings = settings;

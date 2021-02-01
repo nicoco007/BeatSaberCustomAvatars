@@ -31,9 +31,9 @@ namespace CustomAvatar.Utilities
 
         private readonly ILogger<ShaderLoader> _logger;
 
-        public ShaderLoader(ILoggerProvider loggerProvider)
+        public ShaderLoader(ILogger<ShaderLoader> logger)
         {
-            _logger = loggerProvider.CreateLogger<ShaderLoader>();
+            _logger = logger;
         }
 
         public void Initialize()

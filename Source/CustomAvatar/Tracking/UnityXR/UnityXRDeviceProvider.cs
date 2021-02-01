@@ -34,9 +34,9 @@ namespace CustomAvatar.Tracking.UnityXR
 
         private bool _deviceRemovedSinceLastCall;
 
-        private UnityXRDeviceProvider(ILoggerProvider loggerProvider)
+        private UnityXRDeviceProvider(ILogger<UnityXRDeviceProvider> logger)
         {
-            _logger = loggerProvider.CreateLogger<UnityXRDeviceProvider>();
+            _logger = logger;
         }
 
         public void Initialize()

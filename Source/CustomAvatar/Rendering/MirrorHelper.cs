@@ -27,9 +27,9 @@ namespace CustomAvatar.Rendering
         private readonly DiContainer _container;
         private readonly ShaderLoader _shaderLoader;
 
-        public MirrorHelper(ILoggerProvider loggerProvider, DiContainer container, ShaderLoader shaderLoader)
+        public MirrorHelper(ILogger<MirrorHelper> logger, DiContainer container, ShaderLoader shaderLoader)
         {
-            _logger = loggerProvider.CreateLogger<MirrorHelper>();
+            _logger = logger;
             _container = container;
             _shaderLoader = shaderLoader;
         }

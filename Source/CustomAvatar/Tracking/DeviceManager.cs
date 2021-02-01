@@ -37,9 +37,9 @@ namespace CustomAvatar.Tracking
 
         private readonly Dictionary<string, TrackedDevice> _devices = new Dictionary<string, TrackedDevice>();
 
-        public DeviceManager(ILoggerProvider loggerProvider, IDeviceProvider deviceProvider)
+        public DeviceManager(ILogger<DeviceManager> logger, IDeviceProvider deviceProvider)
         {
-            _logger = loggerProvider.CreateLogger<DeviceManager>();
+            _logger = logger;
             _deviceProvider = deviceProvider;
         }
 

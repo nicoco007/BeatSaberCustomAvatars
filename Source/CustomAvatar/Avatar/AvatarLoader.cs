@@ -36,9 +36,9 @@ namespace CustomAvatar.Avatar
 
         private readonly Dictionary<string, List<LoadHandlers>> _handlers = new Dictionary<string, List<LoadHandlers>>();
 
-        internal AvatarLoader(ILoggerProvider loggerProvider, DiContainer container)
+        internal AvatarLoader(ILogger<AvatarLoader> logger, DiContainer container)
         {
-            _logger = loggerProvider.CreateLogger<AvatarLoader>();
+            _logger = logger;
             _container = container;
         }
 

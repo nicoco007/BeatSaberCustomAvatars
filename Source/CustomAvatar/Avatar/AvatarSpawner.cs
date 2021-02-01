@@ -35,10 +35,10 @@ namespace CustomAvatar.Avatar
 
         private readonly List<(Type type, Func<AvatarPrefab, bool> condition)> _componentsToAdd = new List<(Type, Func<AvatarPrefab, bool>)>();
 
-        internal AvatarSpawner(DiContainer container, ILoggerProvider loggerProvider)
+        internal AvatarSpawner(DiContainer container, ILogger<AvatarSpawner> logger)
         {
             _container = container;
-            _logger = loggerProvider.CreateLogger<AvatarSpawner>();
+            _logger = logger;
 
             RegisterComponent<AvatarTracking>();
             RegisterComponent<AvatarIK>(ShouldAddIK);

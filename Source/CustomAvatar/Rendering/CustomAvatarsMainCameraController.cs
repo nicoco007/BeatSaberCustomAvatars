@@ -35,9 +35,9 @@ namespace CustomAvatar.Rendering
         }
 
         [Inject]
-        public void Construct(ILoggerProvider loggerProvider, Settings settings)
+        public void Construct(ILogger<CustomAvatarsMainCameraController> logger, Settings settings)
         {
-            _logger = loggerProvider.CreateLogger<CustomAvatarsMainCameraController>();
+            _logger = logger;
             _settings = settings;
         }
 

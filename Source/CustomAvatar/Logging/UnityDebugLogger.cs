@@ -18,11 +18,11 @@ namespace CustomAvatar.Logging
 {
     internal class UnityDebugLogger<T> : ILogger<T>
     {
-        private readonly string _name;
+        public string name { get; set; }
 
         public UnityDebugLogger(string name = null)
         {
-            _name = name;
+            this.name = name;
         }
 
         public void Trace(object message) { }
@@ -59,12 +59,12 @@ namespace CustomAvatar.Logging
 
         private string FormatMessage(string level, object message)
         {
-            if (string.IsNullOrEmpty(_name))
+            if (string.IsNullOrEmpty(name))
             {
                 return $"{level} | [{typeof(T).Name}] {message}";
             }
 
-            return $"{level} | [{typeof(T).Name}({_name})] {message}";
+            return $"{level} | [{typeof(T).Name}({name})] {message}";
         }
     }
 }

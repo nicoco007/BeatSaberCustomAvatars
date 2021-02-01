@@ -78,14 +78,15 @@ namespace CustomAvatar.Avatar
         private ILogger<AvatarPrefab> _logger;
 
         [Inject]
-        internal void Construct(string fullPath, ILoggerProvider loggerProvider, IKHelper ikHelper, DiContainer container)
+        internal void Construct(string fullPath, ILogger<AvatarPrefab> logger, IKHelper ikHelper, DiContainer container)
         {
             this.fullPath = fullPath ?? throw new ArgumentNullException(nameof(fullPath));
             descriptor = GetComponent<AvatarDescriptor>() ?? throw new AvatarLoadException($"Avatar at '{fullPath}' does not have an AvatarDescriptor");
 
             fileName = Path.GetFileName(fullPath);
 
-            _logger = loggerProvider.CreateLogger<AvatarPrefab>(descriptor.name);
+            _logger = logger;
+            _logger.name = descriptor.name;
 
 #pragma warning disable CS0618
             VRIKManager vrikManager = GetComponentInChildren<VRIKManager>();

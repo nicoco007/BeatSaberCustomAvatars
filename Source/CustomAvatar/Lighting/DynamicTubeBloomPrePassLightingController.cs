@@ -34,11 +34,11 @@ namespace CustomAvatar.Lighting
         #region Behaviour Lifecycle
 
         [Inject]
-        private void Inject(ILoggerProvider loggerProvider, LightWithIdManager lightManager, DiContainer container)
+        private void Construct(ILogger<DynamicTubeBloomPrePassLightingController> logger, LightWithIdManager lightManager, DiContainer container)
         {
             name = nameof(DynamicTubeBloomPrePassLightingController);
 
-            _logger = loggerProvider.CreateLogger<DynamicTubeBloomPrePassLightingController>();
+            _logger = logger;
             _lightManager = lightManager;
             _container = container;
         }

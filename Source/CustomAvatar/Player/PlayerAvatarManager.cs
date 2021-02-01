@@ -74,11 +74,10 @@ namespace CustomAvatar.Player
         private Settings.AvatarSpecificSettings _currentAvatarSettings;
         private GameObject _avatarContainer;
 
-        [Inject]
-        private PlayerAvatarManager(DiContainer container, ILoggerProvider loggerProvider, AvatarLoader avatarLoader, Settings settings, AvatarSpawner spawner, BeatSaberUtilities beatSaberUtilities, FloorController floorController)
+        private PlayerAvatarManager(DiContainer container, ILogger<PlayerAvatarManager> logger, AvatarLoader avatarLoader, Settings settings, AvatarSpawner spawner, BeatSaberUtilities beatSaberUtilities, FloorController floorController)
         {
             _container = container;
-            _logger = loggerProvider.CreateLogger<PlayerAvatarManager>();
+            _logger = logger;
             _avatarLoader = avatarLoader;
             _settings = settings;
             _spawner = spawner;

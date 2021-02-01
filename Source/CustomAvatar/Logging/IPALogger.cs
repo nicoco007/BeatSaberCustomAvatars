@@ -20,13 +20,13 @@ namespace CustomAvatar.Logging
 {
     internal class IPALogger<T> : ILogger<T>
     {
-        private readonly string _name;
+        public string name { get; set; }
+
         private readonly Logger _logger;
 
-        public IPALogger(Logger logger, string name = null)
+        public IPALogger(Logger logger)
         {
             _logger = logger;
-            _name = name;
         }
 
         public void Trace(object message)
@@ -66,12 +66,12 @@ namespace CustomAvatar.Logging
 
         private string FormatMessage(object message)
         {
-            if (string.IsNullOrEmpty(_name))
+            if (string.IsNullOrEmpty(name))
             {
                 return $"[{typeof(T).Name}] {message}";
             }
 
-            return $"[{typeof(T).Name}({_name})] {message}";
+            return $"[{typeof(T).Name}({name})] {message}";
         }
     }
 }

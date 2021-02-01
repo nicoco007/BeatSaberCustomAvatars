@@ -29,11 +29,11 @@ namespace CustomAvatar.Player
         private readonly PlayerAvatarManager _avatarManager;
         private readonly ILogger<KeyboardInputHandler> _logger;
 
-        public KeyboardInputHandler(Settings settings, PlayerAvatarManager avatarManager, ILoggerProvider loggerProvider)
+        public KeyboardInputHandler(Settings settings, PlayerAvatarManager avatarManager, ILogger<KeyboardInputHandler> logger)
         {
             _settings = settings;
             _avatarManager = avatarManager;
-            _logger = loggerProvider.CreateLogger<KeyboardInputHandler>();
+            _logger = logger;
         }
 
         public void Tick()

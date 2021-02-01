@@ -37,9 +37,9 @@ namespace CustomAvatar.Rendering
         private Camera _camera;
 
         [Inject]
-        public void Construct(ILoggerProvider loggerProvider, Settings settings, MainSettingsModelSO mainSettingsModel)
+        public void Construct(ILogger<CustomAvatarsSmoothCameraController> logger, Settings settings, MainSettingsModelSO mainSettingsModel)
         {
-            _logger = loggerProvider.CreateLogger<CustomAvatarsSmoothCameraController>();
+            _logger = logger;
             _settings = settings;
             _mainSettingsModel = mainSettingsModel;
 

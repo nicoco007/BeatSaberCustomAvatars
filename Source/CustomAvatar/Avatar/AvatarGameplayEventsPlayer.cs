@@ -16,9 +16,7 @@
 
 using CustomAvatar.Logging;
 using CustomAvatar.Player;
-using IPA.Utilities;
 using System;
-using UnityEngine;
 using Zenject;
 
 namespace CustomAvatar.Avatar
@@ -38,9 +36,9 @@ namespace CustomAvatar.Avatar
 
         #region Behaviour Lifecycle
 
-        public AvatarGameplayEventsPlayer(ILoggerProvider loggerProvider, PlayerAvatarManager avatarManager, ScoreController scoreController, [InjectOptional] ILevelEndActions levelEndActions, [InjectOptional] IMultiplayerLevelEndActionsPublisher multiplayerLevelEndActions, BeatmapObjectCallbackController beatmapObjectCallbackController, ObstacleSaberSparkleEffectManager sparkleEffectManager)
+        public AvatarGameplayEventsPlayer(ILogger<AvatarGameplayEventsPlayer> logger, PlayerAvatarManager avatarManager, ScoreController scoreController, [InjectOptional] ILevelEndActions levelEndActions, [InjectOptional] IMultiplayerLevelEndActionsPublisher multiplayerLevelEndActions, BeatmapObjectCallbackController beatmapObjectCallbackController, ObstacleSaberSparkleEffectManager sparkleEffectManager)
         {
-            _logger = loggerProvider.CreateLogger<AvatarGameplayEventsPlayer>();
+            _logger = logger;
             _avatarManager = avatarManager;
             _scoreController = scoreController;
             _levelEndActions = levelEndActions;

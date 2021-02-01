@@ -38,9 +38,9 @@ namespace CustomAvatar.Configuration
 
         private readonly ILogger<CalibrationData> _logger;
 
-        public CalibrationData(ILoggerProvider loggerProvider)
+        public CalibrationData(ILogger<CalibrationData> logger)
         {
-            _logger = loggerProvider.CreateLogger<CalibrationData>();
+            _logger = logger;
 
             try
             {
