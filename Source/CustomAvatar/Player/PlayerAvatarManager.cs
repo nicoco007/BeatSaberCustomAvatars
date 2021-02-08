@@ -67,9 +67,9 @@ namespace CustomAvatar.Player
         private readonly BeatSaberUtilities _beatSaberUtilities;
         private readonly FloorController _floorController;
 
-        private readonly FileSystemWatcher _fileSystemWatcher;
         private readonly Dictionary<string, AvatarInfo> _avatarInfos = new Dictionary<string, AvatarInfo>();
 
+        private FileSystemWatcher _fileSystemWatcher;
         private string _switchingToPath;
         private Settings.AvatarSpecificSettings _currentAvatarSettings;
         private GameObject _avatarContainer;
@@ -83,13 +83,31 @@ namespace CustomAvatar.Player
             _spawner = spawner;
             _beatSaberUtilities = beatSaberUtilities;
             _floorController = floorController;
-
-            _fileSystemWatcher = new FileSystemWatcher(kCustomAvatarsPath, "*.avatar");
-            _fileSystemWatcher.NotifyFilter = NotifyFilters.CreationTime | NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size;
         }
 
         public void Initialize()
         {
+            try
+            {
+                _fileSystemWatcher = new FileSystemWatcher(kCustomAvatarsPath, "*.avatar")
+                {
+                    NotifyFilter = NotifyFilters.CreationTime | NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size
+                };
+
+                _fileSystemWatcher.Changed += OnAvatarFileChanged;
+                _fileSystemWatcher.Created += OnAvatarFileCreated;
+                _fileSystemWatcher.Deleted += OnAvatarFileDeleted;
+
+                _fileSystemWatcher.EnableRaisingEvents = true;
+
+                _logger.Trace($"Watching files in '{_fileSystemWatcher.Path}' ('{_fileSystemWatcher.Filter}')");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Failed to create FileSystemWatcher");
+                _logger.Error(ex);
+            }
+
             _settings.moveFloorWithRoomAdjust.changed += OnMoveFloorWithRoomAdjustChanged;
             _settings.isAvatarVisibleInFirstPerson.changed += OnFirstPersonEnabledChanged;
             _settings.resizeMode.changed += OnResizeModeChanged;
@@ -101,14 +119,6 @@ namespace CustomAvatar.Player
 
             _avatarContainer = new GameObject("Avatar Container");
             Object.DontDestroyOnLoad(_avatarContainer);
-
-            _fileSystemWatcher.Changed += OnAvatarFileChanged;
-            _fileSystemWatcher.Created += OnAvatarFileCreated;
-            _fileSystemWatcher.Deleted += OnAvatarFileDeleted;
-
-            _fileSystemWatcher.EnableRaisingEvents = true;
-
-            _logger.Trace($"Watching files in '{_fileSystemWatcher.Path}' ('{_fileSystemWatcher.Filter}')");
 
             LoadAvatarInfosFromFile();
             LoadAvatarFromSettingsAsync();
@@ -128,11 +138,14 @@ namespace CustomAvatar.Player
             _floorController.floorPositionChanged -= OnFloorPositionChanged;
             BeatSaberEvents.playerHeightChanged -= OnPlayerHeightChanged;
 
-            _fileSystemWatcher.Changed -= OnAvatarFileChanged;
-            _fileSystemWatcher.Created -= OnAvatarFileCreated;
-            _fileSystemWatcher.Deleted -= OnAvatarFileDeleted;
+            if (_fileSystemWatcher != null)
+            {
+                _fileSystemWatcher.Changed -= OnAvatarFileChanged;
+                _fileSystemWatcher.Created -= OnAvatarFileCreated;
+                _fileSystemWatcher.Deleted -= OnAvatarFileDeleted;
 
-            _fileSystemWatcher.Dispose();
+                _fileSystemWatcher.Dispose();
+            }
 
             SaveAvatarInfosToFile();
         }
@@ -140,6 +153,13 @@ namespace CustomAvatar.Player
         internal void GetAvatarInfosAsync(Action<AvatarInfo> success = null, Action<Exception> error = null, Action complete = null, bool forceReload = false)
         {
             List<string> fileNames = GetAvatarFileNames();
+
+            if (fileNames.Count == 0)
+            {
+                complete?.Invoke();
+                return;
+            }
+
             int loadedCount = 0;
 
             foreach (string existingFile in _avatarInfos.Keys.ToList())
@@ -528,6 +548,8 @@ namespace CustomAvatar.Player
 
         private List<string> GetAvatarFileNames()
         {
+            if (!Directory.Exists(kCustomAvatarsPath)) return new List<string>();
+
             return Directory.GetFiles(kCustomAvatarsPath, "*.avatar", SearchOption.TopDirectoryOnly).Select(f => Path.GetFileName(f)).OrderBy(f => f).ToList();
         }
 
