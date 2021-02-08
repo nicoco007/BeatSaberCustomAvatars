@@ -89,6 +89,19 @@ namespace CustomAvatar.Player
         {
             try
             {
+                if (!Directory.Exists(kCustomAvatarsPath))
+                {
+                    Directory.CreateDirectory(kCustomAvatarsPath);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Failed to create folder '{kCustomAvatarsPath}'");
+                _logger.Error(ex);
+            }
+
+            try
+            {
                 _fileSystemWatcher = new FileSystemWatcher(kCustomAvatarsPath, "*.avatar")
                 {
                     NotifyFilter = NotifyFilters.CreationTime | NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size
