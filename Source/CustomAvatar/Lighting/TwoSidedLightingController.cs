@@ -28,8 +28,6 @@ namespace CustomAvatar.Lighting
 
         private void Start()
         {
-            name = nameof(TwoSidedLightingController);
-
             AddLight(Quaternion.Euler(135, 0, 0), kAmbientColor, 0.9f); // front
             AddLight(Quaternion.Euler(45, 0, 0), kAmbientColor, 0.9f); // back
         }

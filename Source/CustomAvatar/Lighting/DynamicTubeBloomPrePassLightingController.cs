@@ -30,14 +30,13 @@ namespace CustomAvatar.Lighting
         private DiContainer _container;
 
         private List<DynamicTubeBloomPrePassLight>[] _lights;
-        
+
         #region Behaviour Lifecycle
+#pragma warning disable IDE0051
 
         [Inject]
         private void Construct(ILogger<DynamicTubeBloomPrePassLightingController> logger, LightWithIdManager lightManager, DiContainer container)
         {
-            name = nameof(DynamicTubeBloomPrePassLightingController);
-
             _logger = logger;
             _lightManager = lightManager;
             _container = container;
@@ -55,6 +54,7 @@ namespace CustomAvatar.Lighting
             _lightManager.didSetColorForIdEvent -= OnSetColorForId;
         }
 
+#pragma warning restore IDE0051
         #endregion
 
         private void CreateLights()

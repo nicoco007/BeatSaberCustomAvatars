@@ -15,9 +15,9 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using CustomAvatar.Avatar;
+using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using Zenject;
 
@@ -27,18 +27,19 @@ namespace CustomAvatar.Lighting
     {
         private ILogger<DynamicDirectionalLightingController> _logger;
         private LightWithIdManager _lightManager;
+        private Settings _settings;
 
         private List<(DirectionalLight, Light)> _directionalLights;
-        
+
         #region Behaviour Lifecycle
+#pragma warning disable IDE0051
 
         [Inject]
-        private void Construct(ILogger<DynamicDirectionalLightingController> logger, LightWithIdManager lightManager)
+        internal void Construct(ILogger<DynamicDirectionalLightingController> logger, LightWithIdManager lightManager, Settings settings)
         {
-            name = nameof(DynamicDirectionalLightingController);
-
             _logger = logger;
             _lightManager = lightManager;
+            _settings = settings;
         }
 
         private void Start()
@@ -53,13 +54,15 @@ namespace CustomAvatar.Lighting
             _lightManager.didChangeSomeColorsThisFrameEvent -= OnChangedSomeColorsThisFrame;
         }
 
+#pragma warning restore IDE0051
         #endregion
 
         private void CreateLights()
         {
+            int count = 0;
             _directionalLights = new List<(DirectionalLight, Light)>();
 
-            foreach (var directionalLight in DirectionalLight.lights.OrderBy(l => l.transform.position.sqrMagnitude))
+            foreach (var directionalLight in DirectionalLight.lights)
             {
                 Light light = new GameObject($"DynamicDirectionalLight({directionalLight.name})").AddComponent<Light>();
 
@@ -69,13 +72,15 @@ namespace CustomAvatar.Lighting
                 light.cullingMask = AvatarLayers.kAllLayersMask;
                 light.shadows = LightShadows.Soft;
                 light.shadowStrength = 1;
-                light.renderMode = LightRenderMode.Auto;
+                light.renderMode = count < _settings.lighting.pixelLightCount ? LightRenderMode.ForcePixel : LightRenderMode.ForceVertex;
 
                 light.transform.parent = transform;
                 light.transform.position = Vector3.zero;
                 light.transform.rotation = directionalLight.transform.rotation;
 
                 _directionalLights.Add((directionalLight, light));
+
+                count++;
             }
 
             _logger.Trace($"Created {_directionalLights.Count} DynamicDirectionalLights");
