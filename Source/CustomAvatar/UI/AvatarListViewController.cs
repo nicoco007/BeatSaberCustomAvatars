@@ -33,27 +33,31 @@ namespace CustomAvatar.UI
 {
     internal class AvatarListViewController : ViewController, TableView.IDataSource
     {
-        private const string kTableCellReuseIdentifier = "CustomAvatarsTableCell";
+        private const string kTableCellReuseIdentifier = "AvatarListTableCell";
 
         private PlayerAvatarManager _avatarManager;
         private DiContainer _container;
         private PlayerOptionsViewController _playerOptionsViewController;
+        private LevelCollectionViewController _levelCollectionViewController;
+        private PlatformLeaderboardViewController _leaderboardViewController;
 
         private TableView _tableView;
         private GameObject _loadingIndicator;
 
         private readonly List<AvatarListItem> _avatars = new List<AvatarListItem>();
-        private LevelListTableCell _tableCellTemplate;
+        private AvatarListTableCell _tableCellPrefab;
 
         private Texture2D _blankAvatarIcon;
         private Texture2D _noAvatarIcon;
 
         [Inject]
-        private void Inject(PlayerAvatarManager avatarManager, DiContainer container, PlayerOptionsViewController playerOptionsViewController)
+        internal void Construct(PlayerAvatarManager avatarManager, DiContainer container, PlayerOptionsViewController playerOptionsViewController, LevelCollectionViewController levelCollectionViewController, PlatformLeaderboardViewController leaderboardViewController)
         {
             _avatarManager = avatarManager;
             _container = container;
             _playerOptionsViewController = playerOptionsViewController;
+            _levelCollectionViewController = levelCollectionViewController;
+            _leaderboardViewController = leaderboardViewController;
         }
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
@@ -62,7 +66,7 @@ namespace CustomAvatar.UI
 
             if (firstActivation)
             {
-                _tableCellTemplate = Resources.FindObjectsOfTypeAll<LevelListTableCell>().First(x => x.name == "LevelListTableCell");
+                _tableCellPrefab = CreateTableCellPrefab();
 
                 _blankAvatarIcon = LoadTextureFromResource("CustomAvatar.Resources.mystery-man.png");
                 _noAvatarIcon = LoadTextureFromResource("CustomAvatar.Resources.ban.png");
@@ -79,6 +83,25 @@ namespace CustomAvatar.UI
 
                 ReloadAvatars();
             }
+        }
+
+        private AvatarListTableCell CreateTableCellPrefab()
+        {
+            GameObject gameObject = Instantiate(_levelCollectionViewController.transform.Find("LevelsTableView/TableView/Viewport/Content/LevelListTableCell").gameObject);
+            gameObject.name = "AvatarListTableCell";
+
+            LevelListTableCell originalTableCell = gameObject.GetComponent<LevelListTableCell>();
+
+            AvatarListTableCell tableCell = gameObject.AddComponent<AvatarListTableCell>();
+            tableCell.Init(originalTableCell);
+
+            DestroyImmediate(originalTableCell);
+            DestroyImmediate(gameObject.transform.Find("FavoritesIcon").gameObject);
+            DestroyImmediate(gameObject.transform.Find("SongTime").gameObject);
+            DestroyImmediate(gameObject.transform.Find("SongBpm").gameObject);
+            DestroyImmediate(gameObject.transform.Find("BpmIcon").gameObject);
+
+            return tableCell;
         }
 
         // temporary while BSML doesn't support the new scroll buttons & indicator
@@ -112,19 +135,19 @@ namespace CustomAvatar.UI
 
             tableView.GetComponent<ScrollRect>().viewport = viewport;
 
-            Transform header = Instantiate(Resources.FindObjectsOfTypeAll<LeaderboardViewController>().First().transform.Find("HeaderPanel"), rectTransform, false);
+            Transform header = Instantiate(_leaderboardViewController.transform.Find("HeaderPanel"), rectTransform, false);
 
             header.name = "HeaderPanel";
 
             Destroy(header.GetComponentInChildren<LocalizedTextMeshProUGUI>());
             header.GetComponentInChildren<TextMeshProUGUI>().text = "Avatars";
 
-            _loadingIndicator = Instantiate(Resources.FindObjectsOfTypeAll<LoadingControl>().First().transform.Find("LoadingContainer/LoadingIndicator").gameObject, rectTransform, false);
+            _loadingIndicator = Instantiate(_leaderboardViewController.transform.Find("Container/LeaderboardTableView/LoadingControl/LoadingContainer/LoadingIndicator").gameObject, rectTransform, false);
 
             _loadingIndicator.name = "LoadingIndicator";
 
             // buttons and indicator have images so it's easier to just copy from an existing component
-            Transform scrollBar = Instantiate(Resources.FindObjectsOfTypeAll<LevelCollectionTableView>().First().transform.Find("ScrollBar"), tableViewContainer, false);
+            Transform scrollBar = Instantiate(_levelCollectionViewController.transform.Find("LevelsTableView/ScrollBar"), tableViewContainer, false);
 
             scrollBar.name = "ScrollBar";
 
@@ -283,33 +306,20 @@ namespace CustomAvatar.UI
 
         public TableCell CellForIdx(TableView tableView, int idx)
         {
-            LevelListTableCell tableCell = _tableView.DequeueReusableCellForIdentifier(kTableCellReuseIdentifier) as LevelListTableCell;
+            AvatarListTableCell tableCell = _tableView.DequeueReusableCellForIdentifier(kTableCellReuseIdentifier) as AvatarListTableCell;
 
             if (!tableCell)
             {
-                tableCell = Instantiate(_tableCellTemplate);
-
-                tableCell.name = "AvatarsTableViewCell";
-
-                tableCell.GetPrivateField<Image>("_backgroundImage").enabled = false;
-                tableCell.GetPrivateField<Image>("_favoritesBadgeImage").enabled = false;
-
-                tableCell.transform.Find("BpmIcon").gameObject.SetActive(false);
-
-                tableCell.GetPrivateField<TextMeshProUGUI>("_songDurationText").enabled = false;
-                tableCell.GetPrivateField<TextMeshProUGUI>("_songBpmText").enabled = false;
-
+                tableCell = Instantiate(_tableCellPrefab);
                 tableCell.reuseIdentifier = kTableCellReuseIdentifier;
             }
 
             AvatarListItem avatar = _avatars[idx];
-
-            tableCell.GetPrivateField<TextMeshProUGUI>("_songNameText").text = avatar.name;
-            tableCell.GetPrivateField<TextMeshProUGUI>("_songAuthorText").text = avatar.author;
-
             Texture2D icon = avatar.icon ? avatar.icon : _blankAvatarIcon;
 
-            tableCell.GetPrivateField<Image>("_coverImage").sprite = Sprite.Create(icon, new Rect(0, 0, icon.width, icon.height), Vector2.zero);
+            tableCell.nameText.text = avatar.name;
+            tableCell.authorText.text = avatar.author;
+            tableCell.cover.sprite = Sprite.Create(icon, new Rect(0, 0, icon.width, icon.height), Vector2.zero);
 
             return tableCell;
         }
