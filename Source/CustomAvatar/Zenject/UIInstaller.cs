@@ -25,18 +25,21 @@ namespace CustomAvatar.Zenject
 {
     internal class UIInstaller : Installer
     {
+        private const float kCenterViewControllerWidth = 160;
+        private const float kSideViewControllerWidth = 120;
+
         public override void InstallBindings()
         {
             Container.BindInterfacesAndSelfTo<KeyboardInputHandler>().AsSingle().NonLazy();
 
-            CreateViewController<AvatarListViewController>();
-            CreateViewController<MirrorViewController>();
-            CreateViewController<SettingsViewController>();
+            CreateViewController<AvatarListViewController>(kSideViewControllerWidth);
+            CreateViewController<MirrorViewController>(kCenterViewControllerWidth);
+            CreateViewController<SettingsViewController>(kSideViewControllerWidth);
 
             Container.BindInterfacesAndSelfTo<AvatarMenuFlowCoordinator>().FromNewComponentOnNewGameObject(nameof(AvatarMenuFlowCoordinator));
         }
 
-        private T CreateViewController<T>() where T : ViewController
+        private T CreateViewController<T>(float width) where T : ViewController
         {
             GameObject gameObject = new GameObject(typeof(T).Name, typeof(RectTransform), typeof(Touchable), typeof(Canvas), typeof(CanvasGroup));
 
@@ -50,9 +53,9 @@ namespace CustomAvatar.Zenject
             rectTransform.anchorMin = new Vector2(0.5f, 0);
             rectTransform.anchorMax = new Vector2(0.5f, 1);
             rectTransform.anchoredPosition = Vector2.zero;
-            rectTransform.sizeDelta = new Vector2(160, 0);
-            rectTransform.offsetMin = new Vector2(-80, 0);
-            rectTransform.offsetMax = new Vector2(80, 0);
+            rectTransform.sizeDelta = new Vector2(width, 0);
+            rectTransform.offsetMin = new Vector2(-width / 2f, 0);
+            rectTransform.offsetMax = new Vector2(width / 2f, 0);
 
             Canvas canvas = viewController.GetComponent<Canvas>();
             canvas.additionalShaderChannels |= AdditionalCanvasShaderChannels.TexCoord2;

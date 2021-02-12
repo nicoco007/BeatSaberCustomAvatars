@@ -84,8 +84,6 @@ namespace CustomAvatar.UI
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
 
-            name = nameof(SettingsViewController);
-
             _visibleInFirstPerson.Value = _settings.isAvatarVisibleInFirstPerson;
             _resizeMode.Value = _settings.resizeMode.value;
             _enableLocomotion.Value = _settings.enableLocomotion;
@@ -120,10 +118,6 @@ namespace CustomAvatar.UI
 
                 Destroy(header.GetComponentInChildren<LocalizedTextMeshProUGUI>());
                 header.GetComponentInChildren<TextMeshProUGUI>().text = "Settings";
-
-                rectTransform.sizeDelta = new Vector2(120, 0);
-                rectTransform.offsetMin = new Vector2(-60, 0);
-                rectTransform.offsetMax = new Vector2(60, 0);
             }
 
             _pelvisOffset.Value = _settings.automaticCalibration.pelvisOffset;

@@ -62,8 +62,6 @@ namespace CustomAvatar.UI
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
 
-            name = nameof(MirrorViewController);
-
             if (addedToHierarchy)
             {
                 Transform screenSystem = GameObject.Find("Wrapper/ScreenSystem").transform;

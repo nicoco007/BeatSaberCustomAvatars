@@ -60,8 +60,6 @@ namespace CustomAvatar.UI
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
 
-            name = nameof(AvatarListViewController);
-
             if (firstActivation)
             {
                 _tableCellTemplate = Resources.FindObjectsOfTypeAll<LevelListTableCell>().First(x => x.name == "LevelListTableCell");
@@ -71,10 +69,6 @@ namespace CustomAvatar.UI
 
                 CreateTableView();
                 CreateRefreshButton();
-
-                rectTransform.sizeDelta = new Vector2(120, 0);
-                rectTransform.offsetMin = new Vector2(-60, 0);
-                rectTransform.offsetMax = new Vector2(60, 0);
             }
 
             if (addedToHierarchy)
