@@ -19,6 +19,8 @@ using UnityEngine;
 
 #if UNITY_EDITOR
 using CustomAvatar.Utilities;
+using System.IO;
+using System.Reflection;
 #else
 using Zenject;
 #endif
@@ -79,13 +81,103 @@ namespace CustomAvatar
             cover = cover ?? Cover ?? CoverImage;
         }
 
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
+        private Mesh _saberMesh;
+
         public void Start()
         {
             IKHelper ikHelper = new IKHelper(new UnityDebugLogger<IKHelper>());
             ikHelper.InitializeVRIK(transform.GetComponentInChildren<VRIKManager>(), transform);
         }
-        #else
+
+        private void OnDrawGizmos()
+        {
+            if (!isActiveAndEnabled) return;
+            if (!_saberMesh) _saberMesh = LoadMesh(Assembly.GetExecutingAssembly().GetManifestResourceStream("CustomAvatar.Resources.saber.dat"));
+
+            DrawSaber(transform.Find("LeftHand"), _saberMesh, new Color(0.78f, 0.08f, 0.08f));
+            DrawSaber(transform.Find("RightHand"), _saberMesh, new Color(0, 0.46f, 0.82f));
+        }
+
+        private Mesh LoadMesh(Stream stream)
+        {
+            var mesh = new Mesh();
+
+            using (var reader = new BinaryReader(stream))
+            {
+                int length = reader.ReadInt32();
+                var vertices = new Vector3[length];
+
+                for (int i = 0; i < length; i++)
+                {
+                    vertices[i] = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+                }
+
+                length = reader.ReadInt32();
+                var normals = new Vector3[length];
+
+                for (int i = 0; i < length; i++)
+                {
+                    normals[i] = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+                }
+
+                length = reader.ReadInt32();
+                var triangles = new int[length];
+
+                for (int i = 0; i < length; i++)
+                {
+                    triangles[i] = reader.ReadInt32();
+                }
+
+                mesh.SetVertices(vertices);
+                mesh.SetNormals(normals);
+                mesh.SetTriangles(triangles, 0);
+            }
+
+            return mesh;
+        }
+
+        private void SaveMesh(Mesh mesh)
+        {
+            using (BinaryWriter writer = new BinaryWriter(File.OpenWrite("mesh.dat")))
+            {
+                writer.Write(mesh.vertices.Length);
+
+                foreach (var vertex in mesh.vertices)
+                {
+                    writer.Write(vertex.x);
+                    writer.Write(vertex.y);
+                    writer.Write(vertex.z);
+                }
+
+                writer.Write(mesh.normals.Length);
+
+                foreach (var normal in mesh.normals)
+                {
+                    writer.Write(normal.x);
+                    writer.Write(normal.y);
+                    writer.Write(normal.z);
+                }
+
+                writer.Write(mesh.triangles.Length);
+
+                foreach (var triangle in mesh.triangles)
+                {
+                    writer.Write(triangle);
+                }
+            }
+        }
+
+        private void DrawSaber(Transform transform, Mesh mesh, Color color)
+        {
+            if (!transform) return;
+
+            Color prev = Gizmos.color;
+            Gizmos.color = color;
+            Gizmos.DrawMesh(mesh, transform.position, transform.rotation, Vector3.one);
+            Gizmos.color = prev;
+        }
+#else
         [Inject]
         private void Construct(ILogger<AvatarDescriptor> logger)
         {
@@ -101,6 +193,6 @@ namespace CustomAvatar
                 logger.Warning("Avatar is using a deprecated field; please re-export this avatar using the latest version of Custom Avatars");
             }
         }
-        #endif
+#endif
     }
 }

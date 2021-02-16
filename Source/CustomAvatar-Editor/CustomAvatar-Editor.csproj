@@ -75,6 +75,9 @@
   <ItemGroup>
     <CopyToOutput Include="$(ProjectDir)..\..\Packaging\CustomAvatar-Editor\**\*.*" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\**\*.*" />
+  </ItemGroup>
   <Target Name="Organize" AfterTargets="AfterBuild">
     <!-- remove deps.json file since it's not used -->
     <Delete Files="$(TargetDir)$(TargetName).deps.json" />
