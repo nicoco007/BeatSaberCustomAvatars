@@ -100,7 +100,7 @@ namespace CustomAvatar.Lighting
             if (!_reference.isActiveAndEnabled || _reference.transform.position == _previousPosition) return;
 
             Vector3 position = _reference.transform.position;
-            Vector3 up = (_reference.transform.rotation * Vector3.up).normalized;
+            Vector3 up = _reference.transform.rotation * Vector3.up;
 
             Vector3 projectionOnLight = Vector3.Project(position, up);
             Vector3 perpendicularOriginToLight = position - projectionOnLight;
@@ -129,7 +129,7 @@ namespace CustomAvatar.Lighting
             if (!_light) return;
 
             _light.color = _color;
-            _light.intensity = _distanceIntensity * _reference.width * _reference.lightWidthMultiplier * _reference.bloomFogIntensityMultiplier * GetActualAlpha(_color.a) * 10f;
+            _light.intensity = _distanceIntensity * _reference.width * _reference.lightWidthMultiplier * _reference.bloomFogIntensityMultiplier * GetActualAlpha(_color.a) * 15f;
 
             _light.enabled = _light.intensity > 0.001f;
         }

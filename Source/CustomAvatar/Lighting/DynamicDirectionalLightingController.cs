@@ -68,7 +68,7 @@ namespace CustomAvatar.Lighting
 
                 light.type = LightType.Directional;
                 light.color = directionalLight.color;
-                light.intensity = 1;
+                light.intensity = Mathf.Clamp01(directionalLight.intensity);
                 light.cullingMask = AvatarLayers.kAllLayersMask;
                 light.shadows = LightShadows.Soft;
                 light.shadowStrength = 1;
