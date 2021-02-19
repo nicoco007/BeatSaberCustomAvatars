@@ -32,21 +32,25 @@ namespace CustomAvatar.Zenject
         {
             Container.BindInterfacesAndSelfTo<KeyboardInputHandler>().AsSingle().NonLazy();
 
-            CreateViewController<AvatarListViewController>(kSideViewControllerWidth);
-            CreateViewController<MirrorViewController>(kCenterViewControllerWidth);
-            CreateViewController<SettingsViewController>(kSideViewControllerWidth);
+            CreateAndBindViewController<AvatarListViewController>(kSideViewControllerWidth);
+            CreateAndBindViewController<MirrorViewController>(kCenterViewControllerWidth);
+            SettingsViewController settingsViewController = CreateAndBindViewController<SettingsViewController>(kSideViewControllerWidth);
 
-            Container.BindInterfacesAndSelfTo<AvatarMenuFlowCoordinator>().FromNewComponentOnNewGameObject(nameof(AvatarMenuFlowCoordinator));
+            Container.Bind<GeneralSettingsHost>().AsSingle();
+            Container.Bind<AvatarSpecificSettingsHost>().AsSingle();
+            Container.Bind<AutomaticFbtCalibrationHost>().AsSingle();
+
+            Container.Bind<ArmSpanMeasurer>().FromNewComponentOn(settingsViewController.gameObject).AsSingle();
+            Container.Bind<ManualCalibrationHelper>().FromNewComponentOn(settingsViewController.gameObject).AsSingle();
+
+            Container.BindInterfacesAndSelfTo<AvatarMenuFlowCoordinator>().FromNewComponentOnNewGameObject();
         }
 
-        private T CreateViewController<T>(float width) where T : ViewController
+        private T CreateAndBindViewController<T>(float width) where T : ViewController
         {
-            GameObject gameObject = new GameObject(typeof(T).Name, typeof(RectTransform), typeof(Touchable), typeof(Canvas), typeof(CanvasGroup));
+            GameObject gameObject = new GameObject(typeof(T).Name, typeof(RectTransform), typeof(Touchable), typeof(Canvas), typeof(CanvasGroup), typeof(VRGraphicRaycaster), typeof(T));
 
-            Container.InstantiateComponent<VRGraphicRaycaster>(gameObject);
-
-            T viewController = Container.InstantiateComponent<T>(gameObject);
-
+            T viewController = gameObject.GetComponent<T>();
             viewController.gameObject.layer = 5;
 
             RectTransform rectTransform = viewController.rectTransform;
@@ -59,6 +63,9 @@ namespace CustomAvatar.Zenject
 
             Canvas canvas = viewController.GetComponent<Canvas>();
             canvas.additionalShaderChannels |= AdditionalCanvasShaderChannels.TexCoord2;
+
+            Container.QueueForInject(gameObject.GetComponent<VRGraphicRaycaster>());
+            Container.QueueForInject(viewController);
 
             Container.Bind<T>().FromInstance(viewController);
 

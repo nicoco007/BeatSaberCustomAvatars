@@ -16,22 +16,23 @@
 
 using CustomAvatar.Avatar;
 using CustomAvatar.Player;
-using CustomAvatar.Tracking;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components.Settings;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using HMUI;
+using CustomAvatar.Configuration;
+using CustomAvatar.Tracking;
 
 namespace CustomAvatar.UI
 {
-    internal partial class SettingsViewController
+    internal class GeneralSettingsHost : IViewControllerHost
     {
         #region Components
-        #pragma warning disable 649
-        #pragma warning disable IDE0044
+        #pragma warning disable CS0649, IDE0044
 
+        [UIComponent("arm-span")] private CurvedTextMeshPro _armSpanLabel;
         [UIComponent("visible-in-first-person")] private ToggleSetting _visibleInFirstPerson;
         [UIComponent("resize-mode")] private DropDownListSetting _resizeMode;
         [UIComponent("enable-locomotion")] private ToggleSetting _enableLocomotion;
@@ -42,17 +43,98 @@ namespace CustomAvatar.UI
         [UIComponent("measure-button")] private HoverHint _measureButtonHoverHint;
         [UIComponent("height-adjust-warning-text")] private RectTransform _heightAdjustWarningText;
 
-#pragma warning restore 649
-#pragma warning restore IDE0044
+        #pragma warning restore CS0649, IDE0044
         #endregion
 
         #region Values
+        #pragma warning disable IDE0052
 
         [UIValue("resize-mode-options")] private readonly List<object> _resizeModeOptions = new List<object> { AvatarResizeMode.None, AvatarResizeMode.Height, AvatarResizeMode.ArmSpan };
         [UIValue("floor-height-adjust-options")] private readonly List<object> _floorHeightAdjustOptions = new List<object> { FloorHeightAdjust.Off, FloorHeightAdjust.PlayersPlaceOnly, FloorHeightAdjust.EntireEnvironment };
+        
+        #pragma warning restore IDE0052
         #endregion
 
+        private readonly PlayerAvatarManager _avatarManager;
+        private readonly VRPlayerInput _playerInput;
+        private readonly Settings _settings;
+        private readonly PlayerDataModel _playerDataModel;
+        private readonly ArmSpanMeasurer _armSpanMeasurer;
+
+        internal GeneralSettingsHost(PlayerAvatarManager avatarManager, VRPlayerInput playerInput, Settings settings, PlayerDataModel playerDataModel, ArmSpanMeasurer armSpanMeasurer)
+        {
+            _avatarManager = avatarManager;
+            _playerInput = playerInput;
+            _settings = settings;
+            _playerDataModel = playerDataModel;
+            _armSpanMeasurer = armSpanMeasurer;
+        }
+
+        public void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
+        {
+            _visibleInFirstPerson.Value = _settings.isAvatarVisibleInFirstPerson;
+            _resizeMode.Value = _settings.resizeMode.value;
+            _enableLocomotion.Value = _settings.enableLocomotion;
+            _floorHeightAdjust.Value = _settings.floorHeightAdjust.value;
+            _moveFloorWithRoomAdjust.Value = _settings.moveFloorWithRoomAdjust;
+            _cameraNearClipPlane.Value = _settings.cameraNearClipPlane;
+
+            _armSpanLabel.SetText($"{_settings.playerArmSpan:0.00} m");
+
+            _playerInput.inputChanged += OnInputChanged;
+            _settings.resizeMode.changed += OnSettingsResizeModeChanged;
+            _armSpanMeasurer.updated += OnArmSpanMeasurementChanged;
+            _armSpanMeasurer.completed += OnArmSpanMeasurementCompleted;
+
+            OnInputChanged();
+            OnSettingsResizeModeChanged(_settings.resizeMode);
+        }
+
+        public void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
+        {
+            _playerInput.inputChanged -= OnInputChanged;
+            _settings.resizeMode.changed -= OnSettingsResizeModeChanged;
+            _armSpanMeasurer.updated += OnArmSpanMeasurementChanged;
+            _armSpanMeasurer.completed += OnArmSpanMeasurementCompleted;
+        }
+
+        private void OnSettingsResizeModeChanged(AvatarResizeMode resizeMode)
+        {
+            _heightAdjustWarningText.gameObject.SetActive(resizeMode != AvatarResizeMode.None && _playerDataModel.playerData.playerSpecificSettings.automaticPlayerHeight);
+        }
+
+        private void OnInputChanged()
+        {
+            if (_avatarManager.currentlySpawnedAvatar) UpdateMeasureButton();
+        }
+
+        private void UpdateMeasureButton()
+        {
+            if (_playerInput.TryGetUncalibratedPose(DeviceUse.LeftHand, out Pose _) && _playerInput.TryGetUncalibratedPose(DeviceUse.RightHand, out Pose _))
+            {
+                _measureButton.interactable = true;
+                _measureButtonHoverHint.text = "For optimal results, hold your arms out to either side of your body and point the ends of the controllers outwards as far as possible (turn your hands if necessary).";
+            }
+            else
+            {
+                _measureButton.interactable = false;
+                _measureButtonHoverHint.text = "Controllers not detected";
+            }
+        }
+
+        private void OnArmSpanMeasurementChanged(float armSpan)
+        {
+            _armSpanLabel.SetText($"Measuring... {armSpan:0.00} m");
+        }
+
+        private void OnArmSpanMeasurementCompleted(float armSpan)
+        {
+            _armSpanLabel.SetText($"{armSpan:0.00} m");
+            _settings.playerArmSpan.value = armSpan;
+        }
+
         #region Actions
+        #pragma warning disable IDE0051
 
         [UIAction("visible-in-first-person-change")]
         private void OnVisibleInFirstPersonChanged(bool value)
@@ -117,25 +199,13 @@ namespace CustomAvatar.UI
         [UIAction("camera-clip-plane-change")]
         private void OnCameraClipPlaneChanged(float value)
         {
-            _settings.cameraNearClipPlane = value;
-
-            // TODO logic in view controller is not ideal
-            Camera mainCamera = Camera.main;
-
-            if (mainCamera)
-            {
-                mainCamera.nearClipPlane = value;
-            }
-            else
-            {
-                _logger.Error("Could not find main camera!");
-            }
+            _settings.cameraNearClipPlane.value = value;
         }
 
         [UIAction("measure-arm-span-click")]
         private void OnMeasureArmSpanButtonClicked()
         {
-            MeasureArmSpan();
+            _armSpanMeasurer.MeasureArmSpan();
         }
 
         [UIAction("move-floor-with-room-adjust-change")]
@@ -144,54 +214,7 @@ namespace CustomAvatar.UI
             _settings.moveFloorWithRoomAdjust.value = value;
         }
 
-        #endregion
-
-        #region Arm Span Measurement
-
-        private const float kMinArmSpan = 0.5f;
-        private const float kStableMeasurementTimeout = 3f;
-        private const float kMinDifferenceToReset = 0.02f;
-
-        private bool _isMeasuring;
-        private float _lastUpdateTime;
-        private float _lastMeasuredArmSpan;
-
-        private void MeasureArmSpan()
-        {
-            if (_isMeasuring) return;
-            if (!_playerInput.TryGetPose(DeviceUse.LeftHand, out Pose _) || !_playerInput.TryGetPose(DeviceUse.RightHand, out Pose _)) return;
-
-            _isMeasuring = true;
-            _lastMeasuredArmSpan = kMinArmSpan;
-            _lastUpdateTime = Time.timeSinceLevelLoad;
-
-            InvokeRepeating(nameof(ScanArmSpan), 0.0f, 0.1f);
-        }
-
-        private void ScanArmSpan()
-        {
-            if (Time.timeSinceLevelLoad - _lastUpdateTime < kStableMeasurementTimeout && _playerInput.TryGetPose(DeviceUse.LeftHand, out Pose leftHand) && _playerInput.TryGetPose(DeviceUse.RightHand, out Pose rightHand))
-            {
-                float armSpan = Vector3.Distance(leftHand.position, rightHand.position);
-
-                if (Mathf.Abs(armSpan - _lastMeasuredArmSpan) >= kMinDifferenceToReset)
-                {
-                    _lastUpdateTime = Time.timeSinceLevelLoad;
-                }
-
-                _lastMeasuredArmSpan = Mathf.Max(kMinArmSpan, (_lastMeasuredArmSpan + armSpan) / 2);
-                _armSpanLabel.SetText($"Measuring... {_lastMeasuredArmSpan:0.00} m");
-            }
-            else
-            {
-                CancelInvoke(nameof(ScanArmSpan));
-
-                _armSpanLabel.SetText($"{_lastMeasuredArmSpan:0.00} m");
-                _settings.playerArmSpan.value = _lastMeasuredArmSpan;
-                _isMeasuring = false;
-            }
-        }
-
+        #pragma warning restore IDE0051
         #endregion
     }
 }

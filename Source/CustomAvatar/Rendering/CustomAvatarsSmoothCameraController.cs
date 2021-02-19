@@ -56,6 +56,7 @@ namespace CustomAvatar.Rendering
                 return;
             }
 
+            _settings.cameraNearClipPlane.changed += OnCameraNearClipPlaneChanged;
             _mainSettingsModel.smoothCameraThirdPersonEnabled.didChangeEvent += OnSmoothCameraThirdPersonEnabled;
 
             UpdateSmoothCamera();
@@ -63,7 +64,13 @@ namespace CustomAvatar.Rendering
 
         public void OnDestroy()
         {
-            _mainSettingsModel.smoothCameraThirdPersonEnabled.didChangeEvent -= OnSmoothCameraThirdPersonEnabled;
+            if (_settings != null) _settings.cameraNearClipPlane.changed -= OnCameraNearClipPlaneChanged;
+            if (_mainSettingsModel) _mainSettingsModel.smoothCameraThirdPersonEnabled.didChangeEvent -= OnSmoothCameraThirdPersonEnabled;
+        }
+
+        private void OnCameraNearClipPlaneChanged(float value)
+        {
+            UpdateSmoothCamera();
         }
 
         private void OnSmoothCameraThirdPersonEnabled()

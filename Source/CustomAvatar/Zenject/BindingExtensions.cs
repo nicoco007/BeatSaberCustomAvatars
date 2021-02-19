@@ -14,6 +14,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Linq;
 using UnityEngine;
 using Zenject;
 
@@ -26,9 +27,9 @@ namespace CustomAvatar.Zenject
             return binder.FromNewComponentOn(new GameObject(typeof(TContract).Name)).AsCached();
         }
 
-        public static ConcreteIdArgConditionCopyNonLazyBinder FromNewComponentOnNewGameObject(this FromBinderNonGeneric binder, string name)
+        public static ConcreteIdArgConditionCopyNonLazyBinder FromNewComponentOnNewGameObject(this FromBinderNonGeneric binder, string name = null)
         {
-            return binder.FromNewComponentOn(new GameObject(name)).AsCached();
+            return binder.FromNewComponentOn(new GameObject(name ?? binder.BindInfo.ContractTypes.FirstOrDefault().Name ?? nameof(GameObject))).AsCached();
         }
     }
 }

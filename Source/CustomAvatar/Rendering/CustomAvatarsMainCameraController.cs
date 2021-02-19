@@ -50,6 +50,18 @@ namespace CustomAvatar.Rendering
                 return;
             }
 
+            _settings.cameraNearClipPlane.changed += OnCameraNearClipPlaneChanged;
+
+            UpdateCameraMask();
+        }
+
+        public void OnDestroy()
+        {
+            if (_settings != null) _settings.cameraNearClipPlane.changed -= OnCameraNearClipPlaneChanged;
+        }
+
+        private void OnCameraNearClipPlaneChanged(float value)
+        {
             UpdateCameraMask();
         }
 
