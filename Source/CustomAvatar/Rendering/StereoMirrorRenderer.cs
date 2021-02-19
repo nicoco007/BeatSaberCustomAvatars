@@ -191,6 +191,7 @@ namespace CustomAvatar.Rendering
             {
                 GameObject cameraGameObject = Instantiate(Camera.main.gameObject);
                 cameraGameObject.name = "MirrorCamera" + GetInstanceID();
+                cameraGameObject.transform.parent = transform;
 
                 DestroyImmediate(cameraGameObject.GetComponent<MainCamera>());
                 DestroyImmediate(cameraGameObject.GetComponent<AudioListener>());
