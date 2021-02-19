@@ -122,7 +122,6 @@ namespace CustomAvatar.Player
             }
 
             _settings.moveFloorWithRoomAdjust.changed += OnMoveFloorWithRoomAdjustChanged;
-            _settings.isAvatarVisibleInFirstPerson.changed += OnFirstPersonEnabledChanged;
             _settings.resizeMode.changed += OnResizeModeChanged;
             _settings.floorHeightAdjust.changed += OnFloorHeightAdjustChanged;
             _settings.isAvatarVisibleInFirstPerson.changed += OnAvatarVisibleInFirstPersonChanged;
@@ -143,7 +142,6 @@ namespace CustomAvatar.Player
             Object.Destroy(_avatarContainer);
 
             _settings.moveFloorWithRoomAdjust.changed -= OnMoveFloorWithRoomAdjustChanged;
-            _settings.isAvatarVisibleInFirstPerson.changed -= OnFirstPersonEnabledChanged;
             _settings.resizeMode.changed -= OnResizeModeChanged;
             _settings.floorHeightAdjust.changed -= OnFloorHeightAdjustChanged;
             _settings.isAvatarVisibleInFirstPerson.changed -= OnAvatarVisibleInFirstPersonChanged;
@@ -351,6 +349,8 @@ namespace CustomAvatar.Player
             if (avatar == null)
             {
                 _logger.Info("No avatar selected");
+                if (_currentAvatarSettings != null) _currentAvatarSettings.ignoreExclusions.changed -= OnIgnoreFirstPersonExclusionsChanged;
+                _currentAvatarSettings = null;
                 avatarChanged?.Invoke(null);
                 _settings.previousAvatarPath = null;
                 UpdateFloorOffsetForCurrentAvatar();
@@ -371,8 +371,10 @@ namespace CustomAvatar.Player
                 _avatarInfos.Add(avatarInfo.fileName, avatarInfo);
             }
 
+            if (_currentAvatarSettings != null) _currentAvatarSettings.ignoreExclusions.changed -= OnIgnoreFirstPersonExclusionsChanged;
             currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, _container.Resolve<VRPlayerInput>(), _avatarContainer.transform);
             _currentAvatarSettings = _settings.GetAvatarSettings(avatar.fileName);
+            _currentAvatarSettings.ignoreExclusions.changed += OnIgnoreFirstPersonExclusionsChanged;
 
             ResizeCurrentAvatar();
             UpdateFirstPersonVisibility();
@@ -431,6 +433,11 @@ namespace CustomAvatar.Player
         }
 
         private void OnAvatarVisibleInFirstPersonChanged(bool visible)
+        {
+            UpdateFirstPersonVisibility();
+        }
+
+        private void OnIgnoreFirstPersonExclusionsChanged(bool ignore)
         {
             UpdateFirstPersonVisibility();
         }
@@ -537,11 +544,6 @@ namespace CustomAvatar.Player
         private void OnMoveFloorWithRoomAdjustChanged(bool value)
         {
             ResizeCurrentAvatar();
-        }
-
-        private void OnFirstPersonEnabledChanged(bool enable)
-        {
-            UpdateFirstPersonVisibility();
         }
 
         private void OnPlayerHeightChanged(float height)
