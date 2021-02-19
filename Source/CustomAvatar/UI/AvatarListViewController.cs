@@ -17,7 +17,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using CustomAvatar.Avatar;
 using CustomAvatar.Player;
@@ -47,8 +46,8 @@ namespace CustomAvatar.UI
         private readonly List<AvatarListItem> _avatars = new List<AvatarListItem>();
         private AvatarListTableCell _tableCellPrefab;
 
-        private Texture2D _blankAvatarIcon;
-        private Texture2D _noAvatarIcon;
+        private Sprite _blankAvatarIcon;
+        private Sprite _noAvatarIcon;
 
         [Inject]
         internal void Construct(PlayerAvatarManager avatarManager, DiContainer container, PlayerOptionsViewController playerOptionsViewController, LevelCollectionViewController levelCollectionViewController, PlatformLeaderboardViewController leaderboardViewController)
@@ -68,8 +67,8 @@ namespace CustomAvatar.UI
             {
                 _tableCellPrefab = CreateTableCellPrefab();
 
-                _blankAvatarIcon = LoadTextureFromResource("CustomAvatar.Resources.mystery-man.png");
-                _noAvatarIcon = LoadTextureFromResource("CustomAvatar.Resources.ban.png");
+                _blankAvatarIcon = LoadSpriteFromResource("CustomAvatar.Resources.mystery-man.png");
+                _noAvatarIcon = LoadSpriteFromResource("CustomAvatar.Resources.ban.png");
 
                 CreateTableView();
                 CreateRefreshButton();
@@ -188,10 +187,9 @@ namespace CustomAvatar.UI
             Button button = gameObject.GetComponent<Button>();
             button.onClick.AddListener(OnRefreshButtonPressed);
             button.transform.SetParent(transform);
-
+            
             ImageView image = iconObject.GetComponent<ImageView>();
-            Texture2D icon = LoadTextureFromResource("CustomAvatar.Resources.arrows-rotate.png");
-            image.sprite = Sprite.Create(icon, new Rect(0, 0, icon.width, icon.height), new Vector2(0.5f, 0.5f));
+            image.sprite = LoadSpriteFromResource("CustomAvatar.Resources.arrows-rotate.png");
 
             HoverHint hoverHint = _container.InstantiateComponent<HoverHint>(gameObject);
             hoverHint.text = "Force reload all avatars, including the one currently spawned. This will most likely lag your game for a few seconds if you have many avatars loaded.";
@@ -199,7 +197,7 @@ namespace CustomAvatar.UI
             Destroy(gameObject.GetComponent<LocalizedHoverHint>());
         }
 
-        private Texture2D LoadTextureFromResource(string resourceName)
+        private Sprite LoadSpriteFromResource(string resourceName)
         {
             Texture2D texture = new Texture2D(0, 0);
 
@@ -210,7 +208,7 @@ namespace CustomAvatar.UI
                 texture.LoadImage(textureBytes);
             }
 
-            return texture;
+            return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
         }
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
@@ -315,11 +313,11 @@ namespace CustomAvatar.UI
             }
 
             AvatarListItem avatar = _avatars[idx];
-            Texture2D icon = avatar.icon ? avatar.icon : _blankAvatarIcon;
+            Sprite icon = avatar.icon ? avatar.icon : _blankAvatarIcon;
 
             tableCell.nameText.text = avatar.name;
             tableCell.authorText.text = avatar.author;
-            tableCell.cover.sprite = Sprite.Create(icon, new Rect(0, 0, icon.width, icon.height), Vector2.zero);
+            tableCell.cover.sprite = icon;
 
             return tableCell;
         }

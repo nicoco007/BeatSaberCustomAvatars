@@ -23,23 +23,30 @@ namespace CustomAvatar.UI
     {
         public readonly string name;
         public readonly string author;
-        public readonly Texture2D icon;
+        public readonly Sprite icon;
         public readonly string fileName;
 
         internal AvatarListItem(AvatarInfo avatar)
         {
             name = avatar.name;
             author = avatar.author;
-            icon = avatar.icon;
+            icon = CreateSprite(avatar.icon);
             fileName = avatar.fileName;
         }
 
-        internal AvatarListItem(string name, Texture2D icon)
+        internal AvatarListItem(string name, Sprite icon)
         {
             this.name = name;
             this.author = null;
             this.icon = icon;
             this.fileName = null;
+        }
+
+        private static Sprite CreateSprite(Texture2D texture)
+        {
+            if (!texture) return null;
+
+            return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
         }
     }
 }
