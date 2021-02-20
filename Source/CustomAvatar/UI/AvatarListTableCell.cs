@@ -29,6 +29,9 @@ namespace CustomAvatar.UI
             _authorText = transform.Find("SongAuthor").GetComponent<CurvedTextMeshPro>();
             _cover = transform.Find("CoverImage").GetComponent<ImageView>();
 
+            _nameText.richText = false;
+            _authorText.richText = false;
+
             _nameText.name = "AvatarName";
             _authorText.name = "AvatarAuthor";
 
