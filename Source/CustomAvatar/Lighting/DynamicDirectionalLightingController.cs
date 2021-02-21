@@ -68,7 +68,7 @@ namespace CustomAvatar.Lighting
 
                 light.type = LightType.Directional;
                 light.color = directionalLight.color;
-                light.intensity = Mathf.Clamp01(directionalLight.intensity);
+                light.intensity = Mathf.Clamp01(directionalLight.intensity) * 0.8f;
                 light.cullingMask = AvatarLayers.kAllLayersMask;
                 light.shadows = LightShadows.Soft;
                 light.shadowStrength = 1;
@@ -91,7 +91,7 @@ namespace CustomAvatar.Lighting
             foreach ((DirectionalLight directionalLight, Light light) in _directionalLights)
             {
                 light.color = directionalLight.color;
-                light.intensity = Mathf.Clamp01(directionalLight.intensity);
+                light.intensity = Mathf.Clamp01(directionalLight.intensity) * 0.8f;
             }
         }
     }
