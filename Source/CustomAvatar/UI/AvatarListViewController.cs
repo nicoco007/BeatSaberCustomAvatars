@@ -20,8 +20,8 @@ using System.IO;
 using System.Reflection;
 using CustomAvatar.Avatar;
 using CustomAvatar.Player;
-using CustomAvatar.Utilities;
 using HMUI;
+using IPA.Utilities;
 using Polyglot;
 using TMPro;
 using UnityEngine;
@@ -156,13 +156,13 @@ namespace CustomAvatar.UI
 
             _tableView = _container.InstantiateComponent<TableView>(tableView.gameObject);
 
-            _tableView.SetPrivateField("_preallocatedCells", new TableView.CellsGroup[0]);
-            _tableView.SetPrivateField("_isInitialized", false);
-            _tableView.SetPrivateField("_pageUpButton", upButton);
-            _tableView.SetPrivateField("_pageDownButton", downButton);
-            _tableView.SetPrivateField("_verticalScrollIndicator", verticalScrollIndicator);
-            _tableView.SetPrivateField("_hideScrollButtonsIfNotNeeded", false);
-            _tableView.SetPrivateField("_hideScrollIndicatorIfNotNeeded", false);
+            _tableView.SetField("_preallocatedCells", new TableView.CellsGroup[0]);
+            _tableView.SetField("_isInitialized", false);
+            _tableView.SetField("_pageUpButton", upButton);
+            _tableView.SetField("_pageDownButton", downButton);
+            _tableView.SetField("_verticalScrollIndicator", verticalScrollIndicator);
+            _tableView.SetField("_hideScrollButtonsIfNotNeeded", false);
+            _tableView.SetField("_hideScrollIndicatorIfNotNeeded", false);
 
             _tableView.SetDataSource(this, true);
 

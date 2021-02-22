@@ -17,6 +17,7 @@
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Utilities;
+using IPA.Utilities;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -120,7 +121,7 @@ namespace CustomAvatar.Player
 
                 foreach (Mirror mirror in floorObject.GetComponentsInChildren<Mirror>())
                 {
-                    MirrorRendererSO mirrorRenderer = mirror.GetPrivateField<MirrorRendererSO>("_mirrorRenderer");
+                    MirrorRendererSO mirrorRenderer = mirror.GetField<MirrorRendererSO, Mirror>("_mirrorRenderer");
 
                     if (!_mirrorRenderers.ContainsKey(mirrorRenderer))
                     {
@@ -191,34 +192,35 @@ namespace CustomAvatar.Player
             UpdateFloorObjects();
         }
 
-        private readonly struct MirrorRendererReplacer : IDisposable
+        private class MirrorRendererReplacer : IDisposable
         {
-            public readonly MirrorRendererSO renderer;
-            private readonly List<Mirror> mirrors;
+            public MirrorRendererSO renderer { get; private set; }
+
+            private readonly List<Mirror> _mirrors;
 
             public MirrorRendererReplacer(MirrorRendererSO original)
             {
                 renderer = Object.Instantiate(original);
                 renderer.name = original.name + " (Floor Instance)";
 
-                mirrors = new List<Mirror>();
+                _mirrors = new List<Mirror>();
             }
 
             public void AddMirror(Mirror mirror)
             {
-                mirrors.Add(mirror);
-                mirror.SetPrivateField("_mirrorRenderer", renderer);
+                _mirrors.Add(mirror);
+                mirror.SetField("_mirrorRenderer", renderer);
             }
 
             public bool AreAllMirrorsDestroyed()
             {
-                return mirrors.TrueForAll(m => !m);
+                return _mirrors.TrueForAll(m => !m);
             }
 
             public void Dispose()
             {
                 Object.Destroy(renderer);
-                mirrors.Clear();
+                _mirrors.Clear();
             }
         }
     }

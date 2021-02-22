@@ -21,45 +21,26 @@ namespace CustomAvatar.Utilities
 {
     internal static class ReflectionExtensions
     {
-        private static readonly BindingFlags kAllBindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
-
-        internal static TResult GetPrivateField<TResult>(this object obj, string fieldName)
+        internal static TResult GetStaticField<TResult, TObject>(this TObject obj, string fieldName)
         {
             if (obj == null)
             {
                 throw new ArgumentNullException(nameof(obj));
             }
 
-            FieldInfo field = obj.GetType().GetField(fieldName, kAllBindingFlags);
+            FieldInfo field = typeof(TObject).GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
 
             if (field == null)
             {
-                throw new InvalidOperationException($"Field '{fieldName}' not found on {obj.GetType().FullName}");
+                throw new InvalidOperationException($"Field '{fieldName}' not found on '{typeof(TObject).FullName}'");
             }
 
-            return (TResult) field.GetValue(obj);
-        }
-
-        internal static void SetPrivateField<TSubject>(this TSubject obj, string fieldName, object value)
-        {
-            if (obj == null)
-            {
-                throw new ArgumentNullException(nameof(obj));
-            }
-
-            FieldInfo field = typeof(TSubject).GetField(fieldName, kAllBindingFlags);
-
-            if (field == null)
-            {
-                throw new InvalidOperationException($"Field '{fieldName}' not found on {typeof(TSubject).FullName}");
-            }
-
-            field.SetValue(obj, value);
+            return (TResult)field.GetValue(obj);
         }
 
         internal static Func<TSubject, TResult> CreatePrivatePropertyGetter<TSubject, TResult>(string propertyName)
         {
-            PropertyInfo property = typeof(TSubject).GetProperty(propertyName, kAllBindingFlags);
+            PropertyInfo property = typeof(TSubject).GetProperty(propertyName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
 
             if (property == null)
             {

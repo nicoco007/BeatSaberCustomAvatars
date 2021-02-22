@@ -16,6 +16,7 @@
 
 using CustomAvatar.Logging;
 using CustomAvatar.Utilities;
+using IPA.Utilities;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -59,8 +60,8 @@ namespace CustomAvatar.Lighting
 
         private void CreateLights()
         {
-            List<ILightWithId>[] lightsWithId = _lightManager.GetPrivateField<List<ILightWithId>[]>("_lights");
-            int maxLightId = _lightManager.GetPrivateField<int>("kMaxLightId");
+            List<ILightWithId>[] lightsWithId = _lightManager.GetField<List<ILightWithId>[], LightWithIdManager>("_lights");
+            int maxLightId = _lightManager.GetStaticField<int, LightWithIdManager>("kMaxLightId");
 
             _lights = new List<DynamicTubeBloomPrePassLight>[maxLightId + 1];
             
@@ -72,7 +73,7 @@ namespace CustomAvatar.Lighting
                 {
                     if (lightWithId is TubeBloomPrePassLightWithId tubeLightWithId)
                     {
-                        TubeBloomPrePassLight tubeLight = tubeLightWithId.GetPrivateField<TubeBloomPrePassLight>("_tubeBloomPrePassLight");
+                        TubeBloomPrePassLight tubeLight = tubeLightWithId.GetField<TubeBloomPrePassLight, TubeBloomPrePassLightWithId>("_tubeBloomPrePassLight");
 
                         DynamicTubeBloomPrePassLight light = _container.InstantiateComponent<DynamicTubeBloomPrePassLight>(new GameObject($"DynamicTubeBloomPrePassLight({tubeLight.name})"), new[] { tubeLight });
 
