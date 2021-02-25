@@ -676,7 +676,7 @@ namespace CustomAvatar.Player
                         {
                             writer.Write(avatarInfo.name);
                             writer.Write(avatarInfo.author);
-                            writer.Write(avatarInfo.icon, true);
+                            writer.Write(avatarInfo.icon ? avatarInfo.icon.texture : null, true);
                             writer.Write(avatarInfo.fileName);
                             writer.Write(avatarInfo.fileSize);
                             writer.Write(avatarInfo.created);

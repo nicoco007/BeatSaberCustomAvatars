@@ -30,7 +30,7 @@ namespace CustomAvatar.UI
         {
             name = avatar.name;
             author = avatar.author;
-            icon = CreateSprite(avatar.icon);
+            icon = avatar.icon;
             fileName = avatar.fileName;
         }
 
@@ -40,13 +40,6 @@ namespace CustomAvatar.UI
             this.author = null;
             this.icon = icon;
             this.fileName = null;
-        }
-
-        private static Sprite CreateSprite(Texture2D texture)
-        {
-            if (!texture) return null;
-
-            return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
         }
     }
 }

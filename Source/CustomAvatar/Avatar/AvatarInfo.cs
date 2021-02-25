@@ -35,7 +35,7 @@ namespace CustomAvatar.Avatar
         /// <summary>
         /// Avatar icon.
         /// </summary>
-        public readonly Texture2D icon;
+        public readonly Sprite icon;
 
         /// <summary>
         /// File name of the avatar.
@@ -68,7 +68,7 @@ namespace CustomAvatar.Avatar
 
             this.name = name;
             this.author = author;
-            this.icon = icon;
+            this.icon = CreateSprite(icon);
             this.fileName = fileName;
             this.fileSize = fileSize;
             this.created = created;
@@ -80,7 +80,7 @@ namespace CustomAvatar.Avatar
         {
             name = avatar.descriptor.name ?? "Unknown";
             author = avatar.descriptor.author ?? "Unknown";
-            icon = avatar.descriptor.cover ? avatar.descriptor.cover.texture : null;
+            icon = avatar.descriptor.cover ? avatar.descriptor.cover : null;
 
             var fileInfo = new FileInfo(avatar.fullPath);
 
@@ -111,6 +111,13 @@ namespace CustomAvatar.Avatar
         public override int GetHashCode()
         {
             return (name, author, icon, fileName, fileSize, created, lastModified, timestamp).GetHashCode();
+        }
+
+        private static Sprite CreateSprite(Texture2D texture)
+        {
+            if (!texture) return null;
+
+            return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
         }
     }
 }
