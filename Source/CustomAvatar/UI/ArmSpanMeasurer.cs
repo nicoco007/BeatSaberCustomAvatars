@@ -8,7 +8,6 @@ namespace CustomAvatar.UI
 {
     internal class ArmSpanMeasurer : MonoBehaviour
     {
-        private const float kMinArmSpan = 0.5f;
         private const float kStableMeasurementTimeout = 3f;
         private const float kMinDifferenceToReset = 0.02f;
 
@@ -33,7 +32,7 @@ namespace CustomAvatar.UI
             if (!_playerInput.TryGetPose(DeviceUse.LeftHand, out Pose _) || !_playerInput.TryGetPose(DeviceUse.RightHand, out Pose _)) return;
 
             _isMeasuring = true;
-            _lastMeasuredArmSpan = kMinArmSpan;
+            _lastMeasuredArmSpan = 0;
             _lastUpdateTime = Time.timeSinceLevelLoad;
 
             InvokeRepeating(nameof(ScanArmSpan), 0.0f, 0.1f);
@@ -50,7 +49,7 @@ namespace CustomAvatar.UI
                     _lastUpdateTime = Time.timeSinceLevelLoad;
                 }
 
-                _lastMeasuredArmSpan = Mathf.Max(kMinArmSpan, (_lastMeasuredArmSpan + armSpan) / 2);
+                _lastMeasuredArmSpan = (_lastMeasuredArmSpan + armSpan) / 2;
 
                 updated?.Invoke(_lastMeasuredArmSpan);
             }
