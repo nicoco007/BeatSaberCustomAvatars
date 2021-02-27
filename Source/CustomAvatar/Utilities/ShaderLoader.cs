@@ -67,11 +67,11 @@ namespace CustomAvatar.Utilities
             {
                 switch (asset.name)
                 {
-                    case "BeatSaber/Unlit Glow":
+                    case "Beat Saber Custom Avatars/Glow Overlay":
                         unlitShader = asset as Shader;
                         break;
 
-                    case "BeatSaberCustomAvatars/StereoRenderShader":
+                    case "Beat Saber Custom Avatars/Stereo Render":
                         stereoMirrorShader = asset as Shader;
                         break;
                 }
