@@ -1,6 +1,6 @@
 ﻿<bg>
   <loading-indicator id="loader" />
   <vertical pref-width="140" anchor-min-y="0.5" anchor-max-y="0.5">
-    <text id="error-text" color="FF808020" align="Center" />
+    <text id="error-text" color="#FF808020" align="Center" />
   </vertical>
 </bg>
