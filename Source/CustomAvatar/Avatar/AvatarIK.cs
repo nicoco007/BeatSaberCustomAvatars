@@ -36,7 +36,7 @@ namespace CustomAvatar.Avatar
             get => _isLocomotionEnabled;
             set
             {
-                _isLocomotionEnabled = true;
+                _isLocomotionEnabled = value;
                 UpdateLocomotion();
             }
         }

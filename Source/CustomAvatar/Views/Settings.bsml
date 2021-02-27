@@ -13,7 +13,7 @@
         </horizontal>
         <dropdown-list-setting text="Floor Height Adjust" hover-hint="Move the floor/environment so the avatar is standing at full height even if it is taller or shorter than the player." id="floor-height-adjust" on-change="floor-height-adjust-change" options="floor-height-adjust-options" formatter="floor-height-adjust-formatter"/>
         <toggle-setting text="Move Floor with Room Adjust" hover-hint="Move the floor/environment along with the game's built-in vertical room adjust." id="move-floor-with-room-adjust" on-change="move-floor-with-room-adjust-change"/>
-        <toggle-setting id="enable-locomotion" text="Enable locomotion" hover-hint="Allow feet and waist to be moved automatically to follow your head/body when not using dedicated trackers." on-change="enable-locomotion-change"/>
+        <toggle-setting id="enable-locomotion" text="Enable locomotion" hover-hint="Allow feet and waist to be moved automatically to follow your head/body when not using dedicated trackers. Only affects full body avatars." on-change="enable-locomotion-change"/>
         <increment-setting id="camera-clip-plane" text="Camera Near Clip Plane" hover-hint="Distance from the eyes at which objets start being visible." min="0.01" max="0.3" increment="0.01" on-change="camera-clip-plane-change"></increment-setting>
 
         <horizontal pref-height="7">

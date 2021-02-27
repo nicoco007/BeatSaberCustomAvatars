@@ -125,6 +125,8 @@ namespace CustomAvatar.Player
             _settings.resizeMode.changed += OnResizeModeChanged;
             _settings.floorHeightAdjust.changed += OnFloorHeightAdjustChanged;
             _settings.isAvatarVisibleInFirstPerson.changed += OnAvatarVisibleInFirstPersonChanged;
+            _settings.playerArmSpan.changed += OnPlayerArmSpanChanged;
+            _settings.enableLocomotion.changed += OnEnableLocomotionChanged;
 
             _floorController.floorPositionChanged += OnFloorPositionChanged;
             BeatSaberEvents.playerHeightChanged += OnPlayerHeightChanged;
@@ -145,6 +147,8 @@ namespace CustomAvatar.Player
             _settings.resizeMode.changed -= OnResizeModeChanged;
             _settings.floorHeightAdjust.changed -= OnFloorHeightAdjustChanged;
             _settings.isAvatarVisibleInFirstPerson.changed -= OnAvatarVisibleInFirstPersonChanged;
+            _settings.playerArmSpan.changed -= OnPlayerArmSpanChanged;
+            _settings.enableLocomotion.changed += OnEnableLocomotionChanged;
 
             _floorController.floorPositionChanged -= OnFloorPositionChanged;
             BeatSaberEvents.playerHeightChanged -= OnPlayerHeightChanged;
@@ -533,6 +537,11 @@ namespace CustomAvatar.Player
             currentlySpawnedAvatar.SetFirstPersonVisibility(visibility);
         }
 
+        private void OnEnableLocomotionChanged(bool enable)
+        {
+            UpdateLocomotionEnabled();
+        }
+
         private void UpdateLocomotionEnabled()
         {
             if (currentlySpawnedAvatar && currentlySpawnedAvatar.TryGetComponent(out AvatarIK ik))
@@ -549,6 +558,14 @@ namespace CustomAvatar.Player
         private void OnPlayerHeightChanged(float height)
         {
             ResizeCurrentAvatar();
+        }
+
+        private void OnPlayerArmSpanChanged(float armSpan)
+        {
+            if (_settings.resizeMode == AvatarResizeMode.ArmSpan)
+            {
+                ResizeCurrentAvatar();
+            }
         }
 
         private void OnFloorPositionChanged(float verticalPosition)

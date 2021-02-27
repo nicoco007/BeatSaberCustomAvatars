@@ -79,7 +79,7 @@ namespace CustomAvatar.UI
             _moveFloorWithRoomAdjust.Value = _settings.moveFloorWithRoomAdjust;
             _cameraNearClipPlane.Value = _settings.cameraNearClipPlane;
 
-            _armSpanLabel.SetText($"{_settings.playerArmSpan:0.00} m");
+            _armSpanLabel.SetText($"{_settings.playerArmSpan.value:0.00} m");
 
             _playerInput.inputChanged += OnInputChanged;
             _settings.resizeMode.changed += OnSettingsResizeModeChanged;
