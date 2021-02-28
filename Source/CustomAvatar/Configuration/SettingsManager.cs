@@ -97,6 +97,7 @@ namespace CustomAvatar.Configuration
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                 Converters = {
                     new StringEnumConverter(),
+                    new FloatJsonConverter(),
                     new Vector2JsonConverter(),
                     new ObservableValueJsonConverter<bool>(),
                     new ObservableValueJsonConverter<float>(),
