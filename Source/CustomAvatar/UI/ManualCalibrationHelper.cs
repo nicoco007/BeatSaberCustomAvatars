@@ -16,7 +16,7 @@ namespace CustomAvatar.UI
 
         private ILogger<ManualCalibrationHelper> _logger;
         private ShaderLoader _shaderLoader;
-        private VRPlayerInput _playerInput;
+        private VRPlayerInputInternal _playerInput;
         private PlayerAvatarManager _avatarManager;
 
         private Material _sphereMaterial;
@@ -36,7 +36,7 @@ namespace CustomAvatar.UI
         }
 
         [Inject]
-        internal void Construct(ILogger<ManualCalibrationHelper> logger, ShaderLoader shaderLoader, VRPlayerInput playerInput, PlayerAvatarManager avatarManager)
+        internal void Construct(ILogger<ManualCalibrationHelper> logger, ShaderLoader shaderLoader, VRPlayerInputInternal playerInput, PlayerAvatarManager avatarManager)
         {
             _logger = logger;
             _shaderLoader = shaderLoader;

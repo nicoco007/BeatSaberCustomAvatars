@@ -56,12 +56,12 @@ namespace CustomAvatar.UI
         #endregion
 
         private readonly PlayerAvatarManager _avatarManager;
-        private readonly VRPlayerInput _playerInput;
+        private readonly VRPlayerInputInternal _playerInput;
         private readonly Settings _settings;
         private readonly PlayerDataModel _playerDataModel;
         private readonly ArmSpanMeasurer _armSpanMeasurer;
 
-        internal GeneralSettingsHost(PlayerAvatarManager avatarManager, VRPlayerInput playerInput, Settings settings, PlayerDataModel playerDataModel, ArmSpanMeasurer armSpanMeasurer)
+        internal GeneralSettingsHost(PlayerAvatarManager avatarManager, VRPlayerInputInternal playerInput, Settings settings, PlayerDataModel playerDataModel, ArmSpanMeasurer armSpanMeasurer)
         {
             _avatarManager = avatarManager;
             _playerInput = playerInput;

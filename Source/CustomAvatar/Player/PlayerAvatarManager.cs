@@ -376,7 +376,7 @@ namespace CustomAvatar.Player
             }
 
             if (_currentAvatarSettings != null) _currentAvatarSettings.ignoreExclusions.changed -= OnIgnoreFirstPersonExclusionsChanged;
-            currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, _container.Resolve<VRPlayerInput>(), _avatarContainer.transform);
+            currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, _container.Resolve<VRPlayerInputInternal>(), _avatarContainer.transform);
             _currentAvatarSettings = _settings.GetAvatarSettings(avatar.fileName);
             _currentAvatarSettings.ignoreExclusions.changed += OnIgnoreFirstPersonExclusionsChanged;
 
@@ -416,14 +416,12 @@ namespace CustomAvatar.Player
             SwitchToAvatarAsync(files[index]);
         }
 
-        internal void Move(Vector3 position, Quaternion rotation)
+        internal void SetParent(Transform transform)
         {
-            _avatarContainer.transform.SetPositionAndRotation(position, rotation);
+            _avatarContainer.transform.SetParent(transform, false);
 
-            if (currentlySpawnedAvatar && currentlySpawnedAvatar.TryGetComponent(out AvatarIK ik))
-            {
-                ik.ResetSolver();
-            }
+            // transform is moved to parent's scene so we need to mark it as non-destructible again
+            if (!transform) Object.DontDestroyOnLoad(_avatarContainer);
         }
 
         private void OnResizeModeChanged(AvatarResizeMode resizeMode)
@@ -575,7 +573,7 @@ namespace CustomAvatar.Player
 
         private void SetAvatarVerticalPosition(float verticalPosition)
         {
-            _avatarContainer.transform.position = new Vector3(0, verticalPosition, 0);
+            _avatarContainer.transform.localPosition = new Vector3(0, verticalPosition, 0);
         }
 
         private List<string> GetAvatarFileNames()

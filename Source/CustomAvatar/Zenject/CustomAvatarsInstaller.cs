@@ -80,6 +80,7 @@ namespace CustomAvatar.Zenject
             Container.Bind<AvatarLoader>().AsSingle();
             Container.Bind<AvatarSpawner>().AsSingle();
             Container.BindInterfacesAndSelfTo<VRPlayerInput>().AsSingle();
+            Container.Bind(typeof(VRPlayerInputInternal), typeof(IInitializable), typeof(IDisposable)).To<VRPlayerInputInternal>().AsSingle();
             Container.BindInterfacesAndSelfTo<FloorController>().AsSingle();
             Container.BindInterfacesAndSelfTo<LightingQualityController>().AsSingle();
             Container.BindInterfacesAndSelfTo<BeatSaberUtilities>().AsSingle();

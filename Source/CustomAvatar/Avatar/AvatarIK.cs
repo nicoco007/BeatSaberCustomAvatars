@@ -73,6 +73,7 @@ namespace CustomAvatar.Avatar
 
         private bool _isCalibrationModeEnabled = false;
         private bool _isLocomotionEnabled = false;
+        private Pose _previousParentPose;
 
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
@@ -148,6 +149,8 @@ namespace CustomAvatar.Avatar
 
         private void Update()
         {
+            ApplyPlatformMotion();
+
             if (_fixTransforms)
             {
                 _vrik.solver.FixTransforms();
@@ -186,9 +189,22 @@ namespace CustomAvatar.Avatar
         #pragma warning restore IDE0051
         #endregion
 
-        internal void ResetSolver()
+        internal void AddPlatformMotion(Vector3 deltaPosition, Quaternion deltaRotation, Vector3 platformPivot)
         {
-            _vrik.solver.Reset();
+            _vrik.solver.AddPlatformMotion(deltaPosition, deltaRotation, platformPivot);
+        }
+
+        private void ApplyPlatformMotion()
+        {
+            Transform parent = transform.parent;
+
+            if (!parent) return;
+
+            Vector3 deltaPosition = parent.position - _previousParentPose.position;
+            Quaternion deltaRotation = parent.rotation * Quaternion.Inverse(_previousParentPose.rotation);
+
+            _vrik.solver.AddPlatformMotion(deltaPosition, deltaRotation, parent.position);
+            _previousParentPose = new Pose(parent.position, parent.rotation);
         }
 
         private void UpdateLocomotion()

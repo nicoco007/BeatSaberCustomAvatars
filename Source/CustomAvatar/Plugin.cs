@@ -14,6 +14,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using CustomAvatar.Avatar;
 using CustomAvatar.Logging;
 using CustomAvatar.Rendering;
 using CustomAvatar.Utilities;
@@ -46,6 +47,7 @@ namespace CustomAvatar
 
             ZenjectHelper.AddComponentAlongsideExisting<MainCamera, CustomAvatarsMainCameraController>();
             ZenjectHelper.AddComponentAlongsideExisting<SmoothCamera, CustomAvatarsSmoothCameraController>();
+            ZenjectHelper.AddComponentAlongsideExisting<VRCenterAdjust, AvatarCenterAdjust>();
 
             ZenjectHelper.Register<CustomAvatarsInstaller>().WithArguments(ipaLogger).OnMonoInstaller<PCAppInit>();
             ZenjectHelper.Register<UIInstaller>().OnMonoInstaller<MenuViewControllersInstaller>();
@@ -55,8 +57,6 @@ namespace CustomAvatar
             ZenjectHelper.Register<LightingInstaller>().OnContext("GameCore", "SceneContext");
 
             ZenjectHelper.Register<GameInstaller>().OnMonoInstaller<GameplayCoreInstaller>();
-
-            ZenjectHelper.Register<CustomAvatarsLocalInactivePlayerInstaller>().OnMonoInstaller<MultiplayerLocalInactivePlayerInstaller>();
         }
 
         [OnStart, OnExit]

@@ -50,7 +50,7 @@ namespace CustomAvatar.UI
         #endregion
 
         private readonly PlayerAvatarManager _avatarManager;
-        private readonly VRPlayerInput _playerInput;
+        private readonly VRPlayerInputInternal _playerInput;
         private readonly Settings _settings;
         private readonly CalibrationData _calibrationData;
         private readonly ManualCalibrationHelper _manualCalibrationHelper;
@@ -59,7 +59,7 @@ namespace CustomAvatar.UI
         private Settings.AvatarSpecificSettings _currentAvatarSettings;
         private CalibrationData.FullBodyCalibration _currentAvatarManualCalibration;
 
-        internal AvatarSpecificSettingsHost(PlayerAvatarManager avatarManager, VRPlayerInput playerInput, Settings settings, CalibrationData calibrationData, ManualCalibrationHelper manualCalibrationHelper)
+        internal AvatarSpecificSettingsHost(PlayerAvatarManager avatarManager, VRPlayerInputInternal playerInput, Settings settings, CalibrationData calibrationData, ManualCalibrationHelper manualCalibrationHelper)
         {
             _avatarManager = avatarManager;
             _playerInput = playerInput;

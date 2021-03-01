@@ -54,11 +54,11 @@ namespace CustomAvatar.UI
         #endregion
 
         private readonly PlayerAvatarManager _avatarManager;
-        private readonly VRPlayerInput _playerInput;
+        private readonly VRPlayerInputInternal _playerInput;
         private readonly Settings _settings;
         private readonly CalibrationData _calibrationData;
 
-        internal AutomaticFbtCalibrationHost(PlayerAvatarManager avatarManager, VRPlayerInput playerInput, Settings settings, CalibrationData calibrationData)
+        internal AutomaticFbtCalibrationHost(PlayerAvatarManager avatarManager, VRPlayerInputInternal playerInput, Settings settings, CalibrationData calibrationData)
         {
             _avatarManager = avatarManager;
             _playerInput = playerInput;
