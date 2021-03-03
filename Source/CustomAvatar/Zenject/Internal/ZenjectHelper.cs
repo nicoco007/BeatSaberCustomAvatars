@@ -49,9 +49,9 @@ namespace CustomAvatar.Zenject.Internal
             _componentsToBind.Add(typeof(T));
         }
 
-        public static void AddComponentAlongsideExisting<TExisting, TAdd>(string childTransformName = null, params object[] extraArgs) where TExisting : MonoBehaviour where TAdd : MonoBehaviour
+        public static void AddComponentAlongsideExisting<TExisting, TAdd>(string childTransformName = null, Func<GameObject, bool> condition = null, params object[] extraArgs) where TExisting : MonoBehaviour where TAdd : MonoBehaviour
         {
-            var componentRegistration = new ComponentRegistration(typeof(TAdd), childTransformName, extraArgs);
+            var componentRegistration = new ComponentRegistration(typeof(TAdd), childTransformName, condition, extraArgs);
 
             if (_componentsToAdd.TryGetValue(typeof(TExisting), out List<ComponentRegistration> types))
             {
@@ -174,6 +174,12 @@ namespace CustomAvatar.Zenject.Internal
                     target = transform.gameObject;
                 }
 
+                if (componentRegistration.condition != null && !componentRegistration.condition(target))
+                {
+                    _logger.Trace($"Condition not met for putting '{componentRegistration.childTransformName}' onto '{target.name}'");
+                    continue;
+                }
+
                 _logger.Info($"Adding '{componentRegistration.type.FullName}' to GameObject '{target.name}' (for '{monoBehaviourType.FullName}')");
                 context.Container.InstantiateComponent(componentRegistration.type, target, componentRegistration.extraArgs);
             }
@@ -183,12 +189,14 @@ namespace CustomAvatar.Zenject.Internal
         {
             public Type type { get; }
             public string childTransformName { get; }
+            public Func<GameObject, bool> condition { get; }
             public object[] extraArgs { get; }
 
-            public ComponentRegistration(Type type, string childTransformName, object[] extraArgs)
+            public ComponentRegistration(Type type, string childTransformName, Func<GameObject, bool> condition, object[] extraArgs)
             {
                 this.type = type;
                 this.childTransformName = childTransformName;
+                this.condition = condition;
                 this.extraArgs = extraArgs;
             }
         }

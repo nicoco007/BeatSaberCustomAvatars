@@ -48,7 +48,7 @@ namespace CustomAvatar
 
             ZenjectHelper.AddComponentAlongsideExisting<MainCamera, CustomAvatarsMainCameraController>();
             ZenjectHelper.AddComponentAlongsideExisting<SmoothCamera, CustomAvatarsSmoothCameraController>();
-            ZenjectHelper.AddComponentAlongsideExisting<VRCenterAdjust, AvatarCenterAdjust>();
+            ZenjectHelper.AddComponentAlongsideExisting<VRCenterAdjust, AvatarCenterAdjust>(null, go => go.name == "Origin");
 
             // TODO there might be a better way to deal with this
             ZenjectHelper.AddComponentAlongsideExisting<MenuEnvironmentManager, EnvironmentObject>();
