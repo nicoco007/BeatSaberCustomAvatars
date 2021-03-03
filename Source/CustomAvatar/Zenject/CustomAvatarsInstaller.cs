@@ -84,6 +84,10 @@ namespace CustomAvatar.Zenject
             Container.BindInterfacesAndSelfTo<LightingQualityController>().AsSingle();
             Container.BindInterfacesAndSelfTo<BeatSaberUtilities>().AsSingle();
 
+            #pragma warning disable CS0612
+            Container.BindInterfacesAndSelfTo<FloorController>().AsSingle();
+            #pragma warning restore CS0612
+
             // helper classes
             Container.Bind<MirrorHelper>().AsTransient();
             Container.Bind<IKHelper>().AsTransient();

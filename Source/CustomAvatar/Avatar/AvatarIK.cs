@@ -214,7 +214,10 @@ namespace CustomAvatar.Avatar
 
             _vrik.solver.locomotion.weight = _isLocomotionEnabled ? _vrikManager.solver_locomotion_weight : 0;
 
-            if (_vrik.references.root) _vrik.references.root.transform.localPosition = Vector3.zero;
+            if (_vrik.references.root)
+            {
+                _vrik.references.root.transform.localPosition = Vector3.zero;
+            }
         }
 
         private void OnInputChanged()

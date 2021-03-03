@@ -63,9 +63,9 @@ namespace CustomAvatar.Player
         private Pose _previousRightFootPose;
 
         private bool _shouldTrackFullBody =>
-            _avatarSettings != null && _manualCalibration != null &&
+            _avatarSettings != null &&
                 (_avatarSettings.bypassCalibration ||
-                !_avatarSettings.useAutomaticCalibration && _manualCalibration.isCalibrated ||
+                !_avatarSettings.useAutomaticCalibration && _manualCalibration?.isCalibrated == true ||
                 _avatarSettings.useAutomaticCalibration && _calibrationData.automaticCalibration.isCalibrated);
 
         internal VRPlayerInputInternal(ILogger<VRPlayerInputInternal> logger, DeviceManager trackedDeviceManager, PlayerAvatarManager avatarManager, Settings settings, CalibrationData calibrationData, BeatSaberUtilities beatSaberUtilities, TrackingHelper trackingHelper)
@@ -502,6 +502,11 @@ namespace CustomAvatar.Player
             pose = new Pose(transform.position * avatar.scale, transform.rotation);
 
             _trackingHelper.ApplyInverseRoomAdjust(ref pose.position, ref pose.rotation);
+
+            if (_settings.moveFloorWithRoomAdjust)
+            {
+                pose.position.y += _beatSaberUtilities.roomCenter.y;
+            }
 
             return true;
         }

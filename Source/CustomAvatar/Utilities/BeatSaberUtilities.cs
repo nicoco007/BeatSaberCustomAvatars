@@ -30,8 +30,7 @@ namespace CustomAvatar.Utilities
         public Vector3 roomCenter => _mainSettingsModel.roomCenter;
         public Quaternion roomRotation => Quaternion.Euler(0, _mainSettingsModel.roomRotation, 0);
 
-        public event Action<Vector3> roomCenterChanged;
-        public event Action<float> roomRotationChanged;
+        public event Action<Vector3, Quaternion> roomAdjustChanged;
 
         private readonly MainSettingsModelSO _mainSettingsModel;
         private readonly PlayerDataModel _playerDataModel;
@@ -134,12 +133,12 @@ namespace CustomAvatar.Utilities
 
         private void OnRoomCenterChanged()
         {
-            roomCenterChanged?.Invoke(_mainSettingsModel.roomCenter);
+            roomAdjustChanged?.Invoke(roomCenter, roomRotation);
         }
 
         private void OnRoomRotationChanged()
         {
-            roomRotationChanged?.Invoke(_mainSettingsModel.roomRotation);
+            roomAdjustChanged?.Invoke(roomCenter, roomRotation);
         }
     }
 }

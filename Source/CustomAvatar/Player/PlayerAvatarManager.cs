@@ -126,6 +126,8 @@ namespace CustomAvatar.Player
             _settings.playerArmSpan.changed += OnPlayerArmSpanChanged;
             _settings.enableLocomotion.changed += OnEnableLocomotionChanged;
 
+            _beatSaberUtilities.roomAdjustChanged += OnRoomAdjustChanged;
+
             BeatSaberEvents.playerHeightChanged += OnPlayerHeightChanged;
 
             _avatarContainer = new GameObject("Avatar Container");
@@ -145,7 +147,9 @@ namespace CustomAvatar.Player
             _settings.floorHeightAdjust.changed -= OnFloorHeightAdjustChanged;
             _settings.isAvatarVisibleInFirstPerson.changed -= OnAvatarVisibleInFirstPersonChanged;
             _settings.playerArmSpan.changed -= OnPlayerArmSpanChanged;
-            _settings.enableLocomotion.changed += OnEnableLocomotionChanged;
+            _settings.enableLocomotion.changed -= OnEnableLocomotionChanged;
+
+            _beatSaberUtilities.roomAdjustChanged -= OnRoomAdjustChanged;
 
             BeatSaberEvents.playerHeightChanged -= OnPlayerHeightChanged;
 
@@ -422,12 +426,14 @@ namespace CustomAvatar.Player
 
         internal float GetFloorOffset()
         {
-            if (_settings.floorHeightAdjust == FloorHeightAdjust.Off || !currentlySpawnedAvatar)
+            float floorOffset = 0;
+
+            if (_settings.floorHeightAdjust != FloorHeightAdjust.Off && currentlySpawnedAvatar)
             {
-                return 0;
+                floorOffset += _beatSaberUtilities.GetRoomAdjustedPlayerEyeHeight() - currentlySpawnedAvatar.scaledEyeHeight;
             }
 
-            return _beatSaberUtilities.GetRoomAdjustedPlayerEyeHeight() - currentlySpawnedAvatar.scaledEyeHeight;
+            return floorOffset;
         }
 
         private void OnResizeModeChanged(AvatarResizeMode resizeMode)
@@ -448,6 +454,11 @@ namespace CustomAvatar.Player
         private void OnIgnoreFirstPersonExclusionsChanged(bool ignore)
         {
             UpdateFirstPersonVisibility();
+        }
+
+        private void OnRoomAdjustChanged(Vector3 roomCenter, Quaternion quaternion)
+        {
+            UpdateAvatarVerticalPosition();
         }
 
         private void ResizeCurrentAvatar()
@@ -560,7 +571,15 @@ namespace CustomAvatar.Player
 
         private void UpdateAvatarVerticalPosition()
         {
-            _avatarContainer.transform.localPosition = new Vector3(0, GetFloorOffset(), 0);
+            Vector3 localPosition = _avatarContainer.transform.localPosition;
+            localPosition.y = GetFloorOffset();
+            _avatarContainer.transform.localPosition = localPosition;
+
+            if (!currentlySpawnedAvatar) return;
+            
+            Vector3 avatarPosition = currentlySpawnedAvatar.transform.localPosition;
+            avatarPosition.y = _settings.moveFloorWithRoomAdjust ? 0 : -_beatSaberUtilities.roomCenter.y;
+            currentlySpawnedAvatar.transform.localPosition = avatarPosition;
         }
 
         private List<string> GetAvatarFileNames()

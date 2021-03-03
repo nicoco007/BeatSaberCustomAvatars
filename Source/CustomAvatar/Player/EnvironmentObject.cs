@@ -1,6 +1,7 @@
 ﻿using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
+using CustomAvatar.Utilities;
 using IPA.Utilities;
 using UnityEngine;
 using Zenject;
@@ -12,6 +13,7 @@ namespace CustomAvatar.Player
         private ILogger<EnvironmentObject> _logger;
         private PlayerAvatarManager _playerAvatarManager;
         private Settings _settings;
+        private BeatSaberUtilities _beatSaberUtilities;
 
         private float _originalY;
 
@@ -21,11 +23,12 @@ namespace CustomAvatar.Player
         }
 
         [Inject]
-        internal void Construct(ILogger<EnvironmentObject> logger, PlayerAvatarManager playerAvatarManager, Settings settings)
+        internal void Construct(ILogger<EnvironmentObject> logger, PlayerAvatarManager playerAvatarManager, Settings settings, BeatSaberUtilities beatSaberUtilities)
         {
             _logger = logger;
             _playerAvatarManager = playerAvatarManager;
             _settings = settings;
+            _beatSaberUtilities = beatSaberUtilities;
         }
 
         internal void Start()
@@ -72,6 +75,12 @@ namespace CustomAvatar.Player
         private void UpdateOffset()
         {
             float floorOffset = _playerAvatarManager.GetFloorOffset();
+
+            if (_settings.moveFloorWithRoomAdjust)
+            {
+                floorOffset += _beatSaberUtilities.roomCenter.y;
+            }
+
             transform.localPosition = new Vector3(transform.localPosition.x, _originalY + floorOffset, transform.localPosition.z);
         }
     }
