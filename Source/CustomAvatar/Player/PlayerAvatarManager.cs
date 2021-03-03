@@ -65,7 +65,6 @@ namespace CustomAvatar.Player
         private readonly Settings _settings;
         private readonly AvatarSpawner _spawner;
         private readonly BeatSaberUtilities _beatSaberUtilities;
-        private readonly FloorController _floorController;
 
         private readonly Dictionary<string, AvatarInfo> _avatarInfos = new Dictionary<string, AvatarInfo>();
 
@@ -74,7 +73,7 @@ namespace CustomAvatar.Player
         private Settings.AvatarSpecificSettings _currentAvatarSettings;
         private GameObject _avatarContainer;
 
-        private PlayerAvatarManager(DiContainer container, ILogger<PlayerAvatarManager> logger, AvatarLoader avatarLoader, Settings settings, AvatarSpawner spawner, BeatSaberUtilities beatSaberUtilities, FloorController floorController)
+        internal PlayerAvatarManager(DiContainer container, ILogger<PlayerAvatarManager> logger, AvatarLoader avatarLoader, Settings settings, AvatarSpawner spawner, BeatSaberUtilities beatSaberUtilities)
         {
             _container = container;
             _logger = logger;
@@ -82,7 +81,6 @@ namespace CustomAvatar.Player
             _settings = settings;
             _spawner = spawner;
             _beatSaberUtilities = beatSaberUtilities;
-            _floorController = floorController;
         }
 
         public void Initialize()
@@ -128,7 +126,6 @@ namespace CustomAvatar.Player
             _settings.playerArmSpan.changed += OnPlayerArmSpanChanged;
             _settings.enableLocomotion.changed += OnEnableLocomotionChanged;
 
-            _floorController.floorPositionChanged += OnFloorPositionChanged;
             BeatSaberEvents.playerHeightChanged += OnPlayerHeightChanged;
 
             _avatarContainer = new GameObject("Avatar Container");
@@ -150,7 +147,6 @@ namespace CustomAvatar.Player
             _settings.playerArmSpan.changed -= OnPlayerArmSpanChanged;
             _settings.enableLocomotion.changed += OnEnableLocomotionChanged;
 
-            _floorController.floorPositionChanged -= OnFloorPositionChanged;
             BeatSaberEvents.playerHeightChanged -= OnPlayerHeightChanged;
 
             if (_fileSystemWatcher != null)
@@ -357,7 +353,7 @@ namespace CustomAvatar.Player
                 _currentAvatarSettings = null;
                 avatarChanged?.Invoke(null);
                 _settings.previousAvatarPath = null;
-                UpdateFloorOffsetForCurrentAvatar();
+                UpdateAvatarVerticalPosition();
                 return;
             }
 
@@ -422,6 +418,16 @@ namespace CustomAvatar.Player
 
             // transform is moved to parent's scene so we need to mark it as non-destructible again
             if (!transform) Object.DontDestroyOnLoad(_avatarContainer);
+        }
+
+        internal float GetFloorOffset()
+        {
+            if (_settings.floorHeightAdjust == FloorHeightAdjust.Off || !currentlySpawnedAvatar)
+            {
+                return 0;
+            }
+
+            return _beatSaberUtilities.GetRoomAdjustedPlayerEyeHeight() - currentlySpawnedAvatar.scaledEyeHeight;
         }
 
         private void OnResizeModeChanged(AvatarResizeMode resizeMode)
@@ -495,23 +501,9 @@ namespace CustomAvatar.Player
 
             currentlySpawnedAvatar.scale = scale;
 
-            UpdateFloorOffsetForCurrentAvatar();
+            UpdateAvatarVerticalPosition();
 
             avatarScaleChanged?.Invoke(scale);
-        }
-
-        private void UpdateFloorOffsetForCurrentAvatar()
-        {
-            if (_settings.floorHeightAdjust == FloorHeightAdjust.Off || !currentlySpawnedAvatar)
-            {
-                _floorController.SetFloorOffset(0);
-
-                return;
-            }
-
-            float floorOffset = _beatSaberUtilities.GetRoomAdjustedPlayerEyeHeight() - currentlySpawnedAvatar.scaledEyeHeight;
-
-            _floorController.SetFloorOffset(floorOffset);
         }
 
         private void UpdateFirstPersonVisibility()
@@ -566,14 +558,9 @@ namespace CustomAvatar.Player
             }
         }
 
-        private void OnFloorPositionChanged(float verticalPosition)
+        private void UpdateAvatarVerticalPosition()
         {
-            SetAvatarVerticalPosition(verticalPosition);
-        }
-
-        private void SetAvatarVerticalPosition(float verticalPosition)
-        {
-            _avatarContainer.transform.localPosition = new Vector3(0, verticalPosition, 0);
+            _avatarContainer.transform.localPosition = new Vector3(0, GetFloorOffset(), 0);
         }
 
         private List<string> GetAvatarFileNames()

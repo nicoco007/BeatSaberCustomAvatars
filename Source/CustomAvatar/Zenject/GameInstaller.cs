@@ -17,6 +17,7 @@
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Lighting;
+using CustomAvatar.Player;
 using Zenject;
 
 namespace CustomAvatar.Zenject
@@ -33,6 +34,7 @@ namespace CustomAvatar.Zenject
             }
 
             Container.BindInterfacesAndSelfTo<AvatarGameplayEventsPlayer>().AsSingle().NonLazy();
+            Container.BindInterfacesAndSelfTo<GameEnvironmentObjectManager>().AsSingle().NonLazy();
         }
     }
 }

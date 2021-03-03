@@ -23,7 +23,7 @@ namespace CustomAvatar.Zenject.Internal
 
         private static readonly List<InstallerRegistration> _installerRegistrations = new List<InstallerRegistration>();
         private static readonly List<Type> _componentsToBind = new List<Type>();
-        private static readonly Dictionary<Type, List<Type>> _componentsToAdd = new Dictionary<Type, List<Type>>();
+        private static readonly Dictionary<Type, List<ComponentRegistration>> _componentsToAdd = new Dictionary<Type, List<ComponentRegistration>>();
 
         private static ILogger<ZenjectHelper> _logger;
 
@@ -49,15 +49,17 @@ namespace CustomAvatar.Zenject.Internal
             _componentsToBind.Add(typeof(T));
         }
 
-        public static void AddComponentAlongsideExisting<TExisting, TAdd>() where TExisting : MonoBehaviour where TAdd : MonoBehaviour
+        public static void AddComponentAlongsideExisting<TExisting, TAdd>(string childTransformName = null, params object[] extraArgs) where TExisting : MonoBehaviour where TAdd : MonoBehaviour
         {
-            if (_componentsToAdd.TryGetValue(typeof(TExisting), out List<Type> types))
+            var componentRegistration = new ComponentRegistration(typeof(TAdd), childTransformName, extraArgs);
+
+            if (_componentsToAdd.TryGetValue(typeof(TExisting), out List<ComponentRegistration> types))
             {
-                types.Add(typeof(TAdd));
+                types.Add(componentRegistration);
             }
             else
             {
-                _componentsToAdd.Add(typeof(TExisting), new List<Type> { typeof(TAdd) });
+                _componentsToAdd.Add(typeof(TExisting), new List<ComponentRegistration> { componentRegistration });
             }
         }
 
@@ -153,14 +155,41 @@ namespace CustomAvatar.Zenject.Internal
         {
             Type monoBehaviourType = monoBehaviour.GetType();
 
-            if (!_componentsToAdd.TryGetValue(monoBehaviourType, out List<Type> componentsToAdd)) return;
+            if (!_componentsToAdd.TryGetValue(monoBehaviourType, out List<ComponentRegistration> componentsToAdd)) return;
 
-            GameObject gameObject = monoBehaviour.gameObject;
-
-            foreach (Type type in componentsToAdd)
+            foreach (ComponentRegistration componentRegistration in componentsToAdd)
             {
-                _logger.Info($"Adding '{type.FullName}' to GameObject '{gameObject.name}' (for '{monoBehaviourType.FullName}')");
-                context.Container.InstantiateComponent(type, gameObject);
+                GameObject target = monoBehaviour.gameObject;
+
+                if (!string.IsNullOrEmpty(componentRegistration.childTransformName))
+                {
+                    Transform transform = target.transform.Find(componentRegistration.childTransformName);
+
+                    if (!transform)
+                    {
+                        _logger.Warning($"Could not find transform '{componentRegistration.childTransformName}' under '{target.name}'");
+                        continue;
+                    }
+
+                    target = transform.gameObject;
+                }
+
+                _logger.Info($"Adding '{componentRegistration.type.FullName}' to GameObject '{target.name}' (for '{monoBehaviourType.FullName}')");
+                context.Container.InstantiateComponent(componentRegistration.type, target, componentRegistration.extraArgs);
+            }
+        }
+
+        private class ComponentRegistration
+        {
+            public Type type { get; }
+            public string childTransformName { get; }
+            public object[] extraArgs { get; }
+
+            public ComponentRegistration(Type type, string childTransformName, object[] extraArgs)
+            {
+                this.type = type;
+                this.childTransformName = childTransformName;
+                this.extraArgs = extraArgs;
             }
         }
     }

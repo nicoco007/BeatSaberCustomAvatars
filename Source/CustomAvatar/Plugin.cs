@@ -16,6 +16,7 @@
 
 using CustomAvatar.Avatar;
 using CustomAvatar.Logging;
+using CustomAvatar.Player;
 using CustomAvatar.Rendering;
 using CustomAvatar.Utilities;
 using CustomAvatar.Zenject;
@@ -48,6 +49,14 @@ namespace CustomAvatar
             ZenjectHelper.AddComponentAlongsideExisting<MainCamera, CustomAvatarsMainCameraController>();
             ZenjectHelper.AddComponentAlongsideExisting<SmoothCamera, CustomAvatarsSmoothCameraController>();
             ZenjectHelper.AddComponentAlongsideExisting<VRCenterAdjust, AvatarCenterAdjust>();
+
+            // TODO there might be a better way to deal with this
+            ZenjectHelper.AddComponentAlongsideExisting<MenuEnvironmentManager, EnvironmentObject>();
+            ZenjectHelper.AddComponentAlongsideExisting<MultiplayerLocalActivePlayerFacade, EnvironmentObject>("IsActiveObjects/Lasers");
+            ZenjectHelper.AddComponentAlongsideExisting<MultiplayerLocalActivePlayerFacade, EnvironmentObject>("IsActiveObjects/Construction");
+            ZenjectHelper.AddComponentAlongsideExisting<MultiplayerLocalActivePlayerFacade, EnvironmentObject>("IsActiveObjects/CenterRings");
+            ZenjectHelper.AddComponentAlongsideExisting<MultiplayerLocalInactivePlayerFacade, EnvironmentObject>("MultiplayerLocalInactivePlayerPlayerPlace/CirclePlayerPlace");
+            ZenjectHelper.AddComponentAlongsideExisting<MultiplayerConnectedPlayerFacade, EnvironmentObject>();
 
             ZenjectHelper.Register<CustomAvatarsInstaller>().WithArguments(ipaLogger).OnMonoInstaller<PCAppInit>();
             ZenjectHelper.Register<UIInstaller>().OnMonoInstaller<MenuViewControllersInstaller>();

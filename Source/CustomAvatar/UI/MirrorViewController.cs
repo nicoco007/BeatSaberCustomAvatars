@@ -33,10 +33,10 @@ namespace CustomAvatar.UI
 
         private GameObject _mirrorContainer;
 
+        private DiContainer _container;
         private MirrorHelper _mirrorHelper;
         private Settings _settings;
         private PlayerAvatarManager _avatarManager;
-        private FloorController _floorController;
 
         #region Components
         #pragma warning disable CS0649
@@ -50,12 +50,12 @@ namespace CustomAvatar.UI
         #region Behaviour Lifecycle
 
         [Inject]
-        private void Inject(MirrorHelper mirrorHelper, Settings settings, PlayerAvatarManager avatarManager, FloorController floorController)
+        internal void Construct(DiContainer container, MirrorHelper mirrorHelper, Settings settings, PlayerAvatarManager avatarManager)
         {
+            _container = container;
             _mirrorHelper = mirrorHelper;
             _settings = settings;
             _avatarManager = avatarManager;
-            _floorController = floorController;
         }
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
@@ -68,7 +68,7 @@ namespace CustomAvatar.UI
 
                 _mirrorContainer = new GameObject("Mirror Container");
                 _mirrorContainer.transform.SetParent(screenSystem, false);
-                _mirrorContainer.transform.position = new Vector3(0, _floorController.floorPosition, 0);
+                _container.InstantiateComponent<EnvironmentObject>(_mirrorContainer);
 
                 Vector2 mirrorSize = _settings.mirror.size;
                 _mirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, 2.6f), Quaternion.Euler(-90f, 0, 0), mirrorSize, _mirrorContainer.transform);
@@ -76,8 +76,6 @@ namespace CustomAvatar.UI
                 _avatarManager.avatarStartedLoading += OnAvatarStartedLoading;
                 _avatarManager.avatarChanged += OnAvatarChanged;
                 _avatarManager.avatarLoadFailed += OnAvatarLoadFailed;
-
-                _floorController.floorPositionChanged += OnFloorPositionChanged;
 
                 SetLoading(false);
             }
@@ -92,8 +90,6 @@ namespace CustomAvatar.UI
                 _avatarManager.avatarStartedLoading -= OnAvatarStartedLoading;
                 _avatarManager.avatarChanged -= OnAvatarChanged;
                 _avatarManager.avatarLoadFailed -= OnAvatarLoadFailed;
-
-                _floorController.floorPositionChanged -= OnFloorPositionChanged;
             }
 
             Destroy(_mirrorContainer);
@@ -118,12 +114,6 @@ namespace CustomAvatar.UI
             _errorText.color = new Color(0.85f, 0.85f, 0.85f, 0.8f);
             _errorText.text = $"Failed to load selected avatar\n<size=3>{exception.Message}</size>";
             _errorText.gameObject.SetActive(true);
-        }
-
-        private void OnFloorPositionChanged(float y)
-        {
-            Vector3 position = _mirrorContainer.transform.position;
-            _mirrorContainer.transform.position = new Vector3(position.x, y, position.z);
         }
 
         private void SetLoading(bool loading)
