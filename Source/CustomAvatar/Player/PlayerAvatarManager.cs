@@ -426,14 +426,9 @@ namespace CustomAvatar.Player
 
         internal float GetFloorOffset()
         {
-            float floorOffset = 0;
+            if (_settings.floorHeightAdjust == FloorHeightAdjust.Off || !currentlySpawnedAvatar) return 0;
 
-            if (_settings.floorHeightAdjust != FloorHeightAdjust.Off && currentlySpawnedAvatar)
-            {
-                floorOffset += _beatSaberUtilities.GetRoomAdjustedPlayerEyeHeight() - currentlySpawnedAvatar.scaledEyeHeight;
-            }
-
-            return floorOffset;
+            return _beatSaberUtilities.GetRoomAdjustedPlayerEyeHeight() - currentlySpawnedAvatar.scaledEyeHeight;
         }
 
         private void OnResizeModeChanged(AvatarResizeMode resizeMode)
@@ -459,6 +454,7 @@ namespace CustomAvatar.Player
         private void OnRoomAdjustChanged(Vector3 roomCenter, Quaternion quaternion)
         {
             UpdateAvatarVerticalPosition();
+            UpdateLocomotionEnabled();
         }
 
         private void ResizeCurrentAvatar()
@@ -548,6 +544,8 @@ namespace CustomAvatar.Player
             if (currentlySpawnedAvatar && currentlySpawnedAvatar.TryGetComponent(out AvatarIK ik))
             {
                 ik.isLocomotionEnabled = _settings.enableLocomotion;
+
+                currentlySpawnedAvatar.transform.localPosition = Quaternion.Inverse(_beatSaberUtilities.roomRotation) * -_beatSaberUtilities.roomCenter;
             }
         }
 
