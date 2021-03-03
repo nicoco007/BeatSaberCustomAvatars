@@ -41,6 +41,7 @@ namespace CustomAvatar.Avatar
             }
         }
 
+        [Obsolete]
         public bool isCalibrationModeEnabled
         {
             get => _isCalibrationModeEnabled;

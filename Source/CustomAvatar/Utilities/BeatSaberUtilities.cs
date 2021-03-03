@@ -120,12 +120,15 @@ namespace CustomAvatar.Utilities
         }
 
         /// <summary>
-        /// Set the local player's height.
+        /// Update the local player's height based on the head's current position. Similar to <see cref="PlayerHeightSettingsController.AutoSetHeight"/>
         /// </summary>
-        /// <param name="height">The player's height, in meters</param>
-        public void SetPlayerHeight(float height)
+        public void UpdatePlayerHeight()
         {
+            _vrPlatformHelper.GetNodePose(UnityEngine.XR.XRNode.Head, 0, out Vector3 position, out _);
+
             PlayerSpecificSettings currentSettings = _playerDataModel.playerData.playerSpecificSettings;
+            float height = position.y + roomCenter.y + MainSettingsModelSO.kHeadPosToPlayerHeightOffset;
+
             _playerDataModel.playerData.SetPlayerSpecificSettings(currentSettings.CopyWith(null, null, height, false));
         }
 

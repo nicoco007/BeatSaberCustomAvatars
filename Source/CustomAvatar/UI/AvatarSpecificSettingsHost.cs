@@ -231,11 +231,7 @@ namespace CustomAvatar.UI
         {
             _calibrating = enabled;
             _manualCalibrationHelper.enabled = enabled;
-
-            if (!_avatarManager.currentlySpawnedAvatar) return;
-
-            if (_avatarManager.currentlySpawnedAvatar.TryGetComponent(out AvatarIK ik)) ik.isCalibrationModeEnabled = enabled;
-            if (_avatarManager.currentlySpawnedAvatar.TryGetComponent(out AvatarTracking tracking)) tracking.isCalibrationModeEnabled = enabled;
+            _playerInput.isCalibrationModeEnabled = enabled;
         }
     }
 }

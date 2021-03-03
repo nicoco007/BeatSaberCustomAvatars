@@ -56,6 +56,12 @@ namespace CustomAvatar.Utilities
             }
         }
 
+        /// <summary>
+        /// Applies the game's room adjustment to the specified position and rotation.
+        /// For the inverse, see of <see cref="ApplyInverseRoomAdjust(ref Vector3, ref Quaternion)"/>.
+        /// </summary>
+        /// <param name="position">Position to adjust.</param>
+        /// <param name="rotation">Rotation to adjust.</param>
         public void ApplyRoomAdjust(ref Vector3 position, ref Quaternion rotation)
         {
             Vector3 roomCenter = _beatSaberUtilities.roomCenter;
@@ -68,6 +74,21 @@ namespace CustomAvatar.Utilities
             {
                 position.y -= roomCenter.y;
             }
+        }
+
+        /// <summary>
+        /// Applies the inverse of the game's room adjustment to the specified position and rotation.
+        /// Inverse of <see cref="ApplyRoomAdjust(ref Vector3, ref Quaternion)"/>.
+        /// </summary>
+        /// <param name="position">Position to adjust.</param>
+        /// <param name="rotation">Rotation to adjust.</param>
+        public void ApplyInverseRoomAdjust(ref Vector3 position, ref Quaternion rotation)
+        {
+            Vector3 roomCenter = _beatSaberUtilities.roomCenter;
+            Quaternion roomRotation = _beatSaberUtilities.roomRotation;
+
+            position = Quaternion.Inverse(roomRotation) * (position - roomCenter);
+            rotation = rotation * Quaternion.Inverse(roomRotation);
         }
 
         /// <summary>
@@ -84,12 +105,24 @@ namespace CustomAvatar.Utilities
         /// <summary>
         /// Scales the vertical movement of a tracked point based on the quotient of avatar height and player height.
         /// This moves the trackers as if the player was the height of the avatar, but only vertically (no horizontal scaling).
+        /// For the inverse, see of <see cref="ApplyInverseFloorScaling(SpawnedAvatar, ref Vector3)"/>.
         /// </summary>
-        public void ApplyTrackerFloorOffset(SpawnedAvatar spawnedAvatar, ref Vector3 position)
+        public void ApplyFloorScaling(SpawnedAvatar spawnedAvatar, ref Vector3 position)
         {
             if (_settings.floorHeightAdjust == FloorHeightAdjust.Off || !spawnedAvatar) return;
 
             position.y *= spawnedAvatar.scaledEyeHeight / _beatSaberUtilities.GetRoomAdjustedPlayerEyeHeight();
+        }
+
+        /// <summary>
+        /// Scales the vertical movement of a tracked point based on the inverse of the quotient of avatar height and player height.
+        /// Inverse of <see cref="ApplyFloorScaling(SpawnedAvatar, ref Vector3)"/>.
+        /// </summary>
+        public void ApplyInverseFloorScaling(SpawnedAvatar spawnedAvatar, ref Vector3 position)
+        {
+            if (_settings.floorHeightAdjust == FloorHeightAdjust.Off || !spawnedAvatar) return;
+
+            position.y /= spawnedAvatar.scaledEyeHeight / _beatSaberUtilities.GetRoomAdjustedPlayerEyeHeight();
         }
     }
 }

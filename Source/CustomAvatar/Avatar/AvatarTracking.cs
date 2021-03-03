@@ -25,6 +25,7 @@ namespace CustomAvatar.Avatar
 {
     public class AvatarTracking : MonoBehaviour
     {
+        [Obsolete]
         public bool isCalibrationModeEnabled { get; set; }
 
         private IAvatarInput _input;
@@ -56,6 +57,7 @@ namespace CustomAvatar.Avatar
                 SetPose(DeviceUse.LeftHand,  _spawnedAvatar.leftHand);
                 SetPose(DeviceUse.RightHand, _spawnedAvatar.rightHand);
 
+                #pragma warning disable CS0612
                 if (isCalibrationModeEnabled)
                 {
                     if (_spawnedAvatar.pelvis)
@@ -73,6 +75,7 @@ namespace CustomAvatar.Avatar
                         _trackingHelper.SetLocalPose(_spawnedAvatar.prefab.rightLeg.position * _spawnedAvatar.scale, _spawnedAvatar.prefab.rightLeg.rotation, _spawnedAvatar.rightLeg, transform.parent);
                     }
                 }
+                #pragma warning restore CS0612
                 else
                 {
                     SetPose(DeviceUse.Waist,     _spawnedAvatar.pelvis);
