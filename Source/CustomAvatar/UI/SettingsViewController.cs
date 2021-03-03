@@ -51,12 +51,14 @@ namespace CustomAvatar.UI
 
         private PlayerAvatarManager _avatarManager;
         private GameplaySetupViewController _gameplaySetupViewController;
+        private VRPlayerInputInternal _playerInput;
 
         [Inject]
-        internal void Construct(PlayerAvatarManager avatarManager, GameplaySetupViewController gameplaySetupViewController, GeneralSettingsHost generalSettingsHost, AvatarSpecificSettingsHost avatarSpecificSettingsHost, AutomaticFbtCalibrationHost automaticFbtCalibrationHost)
+        internal void Construct(PlayerAvatarManager avatarManager, GameplaySetupViewController gameplaySetupViewController, VRPlayerInputInternal playerInput, GeneralSettingsHost generalSettingsHost, AvatarSpecificSettingsHost avatarSpecificSettingsHost, AutomaticFbtCalibrationHost automaticFbtCalibrationHost)
         {
             _avatarManager = avatarManager;
             _gameplaySetupViewController = gameplaySetupViewController;
+            _playerInput = playerInput;
             _generalSettingsHost = generalSettingsHost;
             _avatarSpecificSettingsHost = avatarSpecificSettingsHost;
             _automaticFbtCalibrationHost = automaticFbtCalibrationHost;
@@ -68,23 +70,31 @@ namespace CustomAvatar.UI
 
             if (firstActivation)
             {
-                Transform header = Instantiate(_gameplaySetupViewController.transform.Find("HeaderPanel"), rectTransform, false);
+                RectTransform header = Instantiate((RectTransform)_gameplaySetupViewController.transform.Find("HeaderPanel"), rectTransform, false);
 
                 header.name = "HeaderPanel";
+                header.offsetMin = new Vector2(-45, -8);
+                header.offsetMax = new Vector2(45, 0);
 
                 Destroy(header.GetComponentInChildren<LocalizedTextMeshProUGUI>());
-                header.GetComponentInChildren<TextMeshProUGUI>().text = "Settings";
+
+                TextMeshProUGUI textMesh = header.Find("Text").GetComponent<TextMeshProUGUI>();
+                textMesh.text = "Settings";
+                textMesh.fontSize = 6;
+                textMesh.rectTransform.offsetMin = new Vector2(0, -1.86f);
+                textMesh.rectTransform.offsetMax = new Vector2(0, -1.86f);
             }
 
             _avatarManager.avatarStartedLoading += OnAvatarStartedLoading;
             _avatarManager.avatarChanged += OnAvatarChanged;
             _avatarManager.avatarLoadFailed += OnAvatarLoadFailed;
+            _playerInput.inputChanged += OnInputChanged;
+
+            OnAvatarChanged(_avatarManager.currentlySpawnedAvatar);
 
             _generalSettingsHost.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
             _avatarSpecificSettingsHost.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
             _automaticFbtCalibrationHost.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
-
-            OnAvatarChanged(_avatarManager.currentlySpawnedAvatar);
         }
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
@@ -94,6 +104,7 @@ namespace CustomAvatar.UI
             _avatarManager.avatarStartedLoading -= OnAvatarStartedLoading;
             _avatarManager.avatarChanged -= OnAvatarChanged;
             _avatarManager.avatarLoadFailed -= OnAvatarLoadFailed;
+            _playerInput.inputChanged -= OnInputChanged;
 
             _generalSettingsHost.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
             _avatarSpecificSettingsHost.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
@@ -115,10 +126,24 @@ namespace CustomAvatar.UI
             SetLoading(false);
         }
 
+        private void OnInputChanged()
+        {
+            UpdateUI(_avatarManager.currentlySpawnedAvatar);
+        }
+
         private void SetLoading(bool loading)
         {
             _loader.gameObject.SetActive(loading);
             SetInteractableRecursively(!loading && _avatarManager.currentlySpawnedAvatar);
+
+            UpdateUI(_avatarManager.currentlySpawnedAvatar);
+        }
+
+        private void UpdateUI(SpawnedAvatar avatar)
+        {
+            _generalSettingsHost.UpdateUI(avatar);
+            _avatarSpecificSettingsHost.UpdateUI(avatar);
+            _automaticFbtCalibrationHost.UpdateUI(avatar);
         }
 
         private void SetInteractableRecursively(bool enable)

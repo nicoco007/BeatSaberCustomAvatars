@@ -55,15 +55,13 @@ namespace CustomAvatar.UI
         #pragma warning restore IDE0052
         #endregion
 
-        private readonly PlayerAvatarManager _avatarManager;
         private readonly VRPlayerInputInternal _playerInput;
         private readonly Settings _settings;
         private readonly PlayerDataModel _playerDataModel;
         private readonly ArmSpanMeasurer _armSpanMeasurer;
 
-        internal GeneralSettingsHost(PlayerAvatarManager avatarManager, VRPlayerInputInternal playerInput, Settings settings, PlayerDataModel playerDataModel, ArmSpanMeasurer armSpanMeasurer)
+        internal GeneralSettingsHost(VRPlayerInputInternal playerInput, Settings settings, PlayerDataModel playerDataModel, ArmSpanMeasurer armSpanMeasurer)
         {
-            _avatarManager = avatarManager;
             _playerInput = playerInput;
             _settings = settings;
             _playerDataModel = playerDataModel;
@@ -81,34 +79,21 @@ namespace CustomAvatar.UI
 
             _armSpanLabel.SetText($"{_settings.playerArmSpan.value:0.00} m");
 
-            _playerInput.inputChanged += OnInputChanged;
             _settings.resizeMode.changed += OnSettingsResizeModeChanged;
             _armSpanMeasurer.updated += OnArmSpanMeasurementChanged;
             _armSpanMeasurer.completed += OnArmSpanMeasurementCompleted;
 
-            OnInputChanged();
             OnSettingsResizeModeChanged(_settings.resizeMode);
         }
 
         public void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
-            _playerInput.inputChanged -= OnInputChanged;
             _settings.resizeMode.changed -= OnSettingsResizeModeChanged;
-            _armSpanMeasurer.updated += OnArmSpanMeasurementChanged;
-            _armSpanMeasurer.completed += OnArmSpanMeasurementCompleted;
+            _armSpanMeasurer.updated -= OnArmSpanMeasurementChanged;
+            _armSpanMeasurer.completed -= OnArmSpanMeasurementCompleted;
         }
 
-        private void OnSettingsResizeModeChanged(AvatarResizeMode resizeMode)
-        {
-            _heightAdjustWarningText.gameObject.SetActive(resizeMode != AvatarResizeMode.None && _playerDataModel.playerData.playerSpecificSettings.automaticPlayerHeight);
-        }
-
-        private void OnInputChanged()
-        {
-            if (_avatarManager.currentlySpawnedAvatar) UpdateMeasureButton();
-        }
-
-        private void UpdateMeasureButton()
+        public void UpdateUI(SpawnedAvatar avatar)
         {
             if (_playerInput.TryGetUncalibratedPose(DeviceUse.LeftHand, out Pose _) && _playerInput.TryGetUncalibratedPose(DeviceUse.RightHand, out Pose _))
             {
@@ -120,6 +105,11 @@ namespace CustomAvatar.UI
                 _measureButton.interactable = false;
                 _measureButtonHoverHint.text = "Controllers not detected";
             }
+        }
+
+        private void OnSettingsResizeModeChanged(AvatarResizeMode resizeMode)
+        {
+            _heightAdjustWarningText.gameObject.SetActive(resizeMode != AvatarResizeMode.None && _playerDataModel.playerData.playerSpecificSettings.automaticPlayerHeight);
         }
 
         private void OnArmSpanMeasurementChanged(float armSpan)

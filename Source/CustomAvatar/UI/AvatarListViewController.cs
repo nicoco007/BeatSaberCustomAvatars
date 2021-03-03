@@ -134,12 +134,19 @@ namespace CustomAvatar.UI
 
             tableView.GetComponent<ScrollRect>().viewport = viewport;
 
-            Transform header = Instantiate(_leaderboardViewController.transform.Find("HeaderPanel"), rectTransform, false);
+            RectTransform header = Instantiate((RectTransform)_leaderboardViewController.transform.Find("HeaderPanel"), rectTransform, false);
 
             header.name = "HeaderPanel";
+            header.offsetMin = new Vector2(-45, -8);
+            header.offsetMax = new Vector2(45, 0);
 
             Destroy(header.GetComponentInChildren<LocalizedTextMeshProUGUI>());
-            header.GetComponentInChildren<TextMeshProUGUI>().text = "Avatars";
+
+            TextMeshProUGUI textMesh = header.Find("Text").GetComponent<TextMeshProUGUI>();
+            textMesh.text = "Avatars";
+            textMesh.fontSize = 6;
+            textMesh.rectTransform.offsetMin = new Vector2(0, -1.86f);
+            textMesh.rectTransform.offsetMax = new Vector2(0, -1.86f);
 
             _loadingIndicator = Instantiate(_leaderboardViewController.transform.Find("Container/LeaderboardTableView/LoadingControl/LoadingContainer/LoadingIndicator").gameObject, rectTransform, false);
 

@@ -68,48 +68,20 @@ namespace CustomAvatar.UI
             _manualCalibrationHelper = manualCalibrationHelper;
         }
 
-        public void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
-        {
-            _avatarManager.avatarStartedLoading += OnAvatarStartedLoading;
-            _avatarManager.avatarChanged += OnAvatarChanged;
-            _avatarManager.avatarLoadFailed += OnAvatarLoadFailed;
-            _playerInput.inputChanged += OnInputChanged;
-
-            OnAvatarChanged(_avatarManager.currentlySpawnedAvatar);
-        }
+        public void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) { }
 
         public void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
-            _avatarManager.avatarStartedLoading -= OnAvatarStartedLoading;
-            _avatarManager.avatarChanged -= OnAvatarChanged;
-            _avatarManager.avatarLoadFailed -= OnAvatarLoadFailed;
-            _playerInput.inputChanged -= OnInputChanged;
-
             DisableCalibrationMode(false);
         }
 
-        private void OnAvatarStartedLoading(string path)
-        {
-            DisableCalibrationMode(false);
-        }
-
-        private void OnAvatarChanged(SpawnedAvatar spawnedAvatar)
-        {
-            if (spawnedAvatar) UpdateUI(spawnedAvatar.prefab);
-        }
-
-        private void OnAvatarLoadFailed(Exception exception)
-        {
-            UpdateUI(null);
-        }
-
-        private void UpdateUI(AvatarPrefab avatar)
+        public void UpdateUI(SpawnedAvatar avatar)
         {
             if (_currentAvatarSettings != null) _currentAvatarSettings.useAutomaticCalibration.changed -= OnUseAutomaticCalibrationChanged;
 
             UpdateCalibrationButtons(avatar);
 
-            if (avatar == null)
+            if (!avatar)
             {
                 _clearButton.interactable = false;
                 _calibrateButton.interactable = false;
@@ -119,8 +91,8 @@ namespace CustomAvatar.UI
                 return;
             }
 
-            _currentAvatarSettings = _settings.GetAvatarSettings(avatar.fileName);
-            _currentAvatarManualCalibration = _calibrationData.GetAvatarManualCalibration(avatar.fileName);
+            _currentAvatarSettings = _settings.GetAvatarSettings(avatar.prefab.fileName);
+            _currentAvatarManualCalibration = _calibrationData.GetAvatarManualCalibration(avatar.prefab.fileName);
 
             _currentAvatarSettings.useAutomaticCalibration.changed += OnUseAutomaticCalibrationChanged;
 
@@ -129,18 +101,13 @@ namespace CustomAvatar.UI
             _bypassCalibration.Value = _currentAvatarSettings.bypassCalibration;
 
             _automaticCalibrationSetting.Value = _currentAvatarSettings.useAutomaticCalibration;
-            _automaticCalibrationSetting.interactable = avatar.descriptor.supportsAutomaticCalibration;
-            _automaticCalibrationHoverHint.text = avatar.descriptor.supportsAutomaticCalibration ? "Use automatic calibration instead of manual calibration." : "Not supported by current avatar";
+            _automaticCalibrationSetting.interactable = avatar.prefab.descriptor.supportsAutomaticCalibration;
+            _automaticCalibrationHoverHint.text = avatar.prefab.descriptor.supportsAutomaticCalibration ? "Use automatic calibration instead of manual calibration." : "Not supported by current avatar";
         }
 
-        private void OnInputChanged()
+        private void UpdateCalibrationButtons(SpawnedAvatar avatar)
         {
-            if (_avatarManager.currentlySpawnedAvatar) UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.prefab);
-        }
-
-        private void UpdateCalibrationButtons(AvatarPrefab avatar)
-        {
-            if (avatar == null)
+            if (!avatar)
             {
                 _calibrateButton.interactable = false;
                 _clearButton.interactable = false;
@@ -240,7 +207,7 @@ namespace CustomAvatar.UI
             if (!_avatarManager.currentlySpawnedAvatar) return;
 
             SetCalibrationMode(true);
-            UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.prefab);
+            UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar);
         }
 
         private void DisableCalibrationMode(bool save)
@@ -257,7 +224,7 @@ namespace CustomAvatar.UI
                 OnEnableAutomaticCalibrationChanged(false);
             }
 
-            UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.prefab);
+            UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar);
         }
 
         private void SetCalibrationMode(bool enabled)

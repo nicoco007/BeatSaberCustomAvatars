@@ -14,7 +14,6 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Collections.Generic;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components.Settings;
@@ -72,45 +71,13 @@ namespace CustomAvatar.UI
             _pelvisOffset.Value = _settings.automaticCalibration.pelvisOffset;
             _footOffset.Value = _settings.automaticCalibration.legOffset;
             _waistTrackerPosition.Value = _settings.automaticCalibration.waistTrackerPosition;
-
-            if (addedToHierarchy)
-            {
-                _avatarManager.avatarChanged += OnAvatarChanged;
-                _avatarManager.avatarLoadFailed += OnAvatarLoadFailed;
-                _playerInput.inputChanged += OnInputChanged;
-            }
-
-            OnAvatarChanged(_avatarManager.currentlySpawnedAvatar);
         }
 
-        public void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
-        {
-            if (removedFromHierarchy)
-            {
-                _avatarManager.avatarChanged -= OnAvatarChanged;
-                _avatarManager.avatarLoadFailed -= OnAvatarLoadFailed;
-                _playerInput.inputChanged -= OnInputChanged;
-            }
-        }
+        public void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling) { }
 
-        private void OnAvatarChanged(SpawnedAvatar spawnedAvatar)
+        public void UpdateUI(SpawnedAvatar avatar)
         {
-            if (spawnedAvatar) UpdateCalibrationButtons(spawnedAvatar.prefab);
-        }
-
-        private void OnAvatarLoadFailed(Exception exception)
-        {
-            UpdateCalibrationButtons(null);
-        }
-
-        private void OnInputChanged()
-        {
-            if (_avatarManager.currentlySpawnedAvatar) UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.prefab);
-        }
-
-        private void UpdateCalibrationButtons(AvatarPrefab avatar)
-        {
-            if (avatar == null)
+            if (!avatar)
             {
                 _autoCalibrateButton.interactable = false;
                 _autoClearButton.interactable = false;
@@ -130,7 +97,7 @@ namespace CustomAvatar.UI
                 return;
             }
 
-            if (avatar.descriptor.supportsAutomaticCalibration)
+            if (avatar.prefab.descriptor.supportsAutomaticCalibration)
             {
                 _autoCalibrateButton.interactable = true;
                 _autoClearButton.interactable = _calibrationData.automaticCalibration.isCalibrated;
@@ -173,7 +140,7 @@ namespace CustomAvatar.UI
             if (_avatarManager.currentlySpawnedAvatar)
             {
                 _settings.GetAvatarSettings(_avatarManager.currentlySpawnedAvatar.prefab.fileName).useAutomaticCalibration.value = true;
-                UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.prefab);
+                UpdateUI(_avatarManager.currentlySpawnedAvatar);
             }
         }
 
@@ -182,7 +149,7 @@ namespace CustomAvatar.UI
         {
             _playerInput.ClearAutomaticFullBodyTrackingData();
 
-            if (_avatarManager.currentlySpawnedAvatar) UpdateCalibrationButtons(_avatarManager.currentlySpawnedAvatar.prefab);
+            if (_avatarManager.currentlySpawnedAvatar) UpdateUI(_avatarManager.currentlySpawnedAvatar);
         }
 
         [UIAction("waist-tracker-position-change")]
