@@ -121,6 +121,8 @@ namespace CustomAvatar.Zenject.Internal
 
         private static void InstallBindings(Context __instance, List<MonoBehaviour> injectableMonoBehaviours)
         {
+            if (!_shouldInstall) return;
+
             if (__instance is SceneContext sceneContext)
             {
                 injectableMonoBehaviours.AddRange(_decoratorContextsAccessor(ref sceneContext).SelectMany(dc => _injectableMonoBehavioursAccessor(ref dc)));
