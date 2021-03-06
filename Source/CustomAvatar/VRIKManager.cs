@@ -22,7 +22,6 @@ using CustomAvatar.Logging;
 using UnityEngine;
 using UnityEngine.Events;
 using static BeatSaberFinalIK::RootMotion.FinalIK.IKSolverVR.Arm;
-using VRIK = BeatSaberFinalIK::RootMotion.FinalIK.VRIK;
 
 #if !UNITY_EDITOR
 using Zenject;
@@ -37,8 +36,6 @@ namespace CustomAvatar
         public bool fixTransforms = true;
 
         #region References
-        
-        [Header("References")]
 
         public Transform references_root;
         public Transform references_pelvis;
@@ -122,13 +119,10 @@ namespace CustomAvatar
 
         #endregion
 
-        [Header("Solver")]
         [Tooltip("If true, will keep the toes planted even if head target is out of reach.")]
         public bool solver_plantFeet = true;
 
         #region Spine
-
-        [Header("Spine")]
 
         [Tooltip("The head target.")]
         public Transform solver_spine_headTarget;
@@ -188,8 +182,6 @@ namespace CustomAvatar
 
         #region Left Arm
 
-        [Header("Left Arm")]
-
         [Tooltip("The hand target")]
         public Transform solver_leftArm_target;
 
@@ -233,8 +225,6 @@ namespace CustomAvatar
         #endregion
 
         #region Right Arm
-
-        [Header("Right Arm")]
 
         [Tooltip("The hand target")]
         public Transform solver_rightArm_target;
@@ -280,8 +270,6 @@ namespace CustomAvatar
 
         #region Left Leg
 
-        [Header("Left Leg")]
-
         [Tooltip("The toe/foot target.")]
         public Transform solver_leftLeg_target;
 
@@ -314,8 +302,6 @@ namespace CustomAvatar
 
         #region Right Leg
 
-        [Header("Right Leg")]
-
         [Tooltip("The toe/foot target.")]
         public Transform solver_rightLeg_target;
 
@@ -347,8 +333,6 @@ namespace CustomAvatar
         #endregion
 
         #region Locomotion
-
-        [Header("Locomotion")]
 
         [Tooltip("Used for blending in/out of procedural locomotion.")]
         [Range(0f, 1f)] public float solver_locomotion_weight = 1f;
