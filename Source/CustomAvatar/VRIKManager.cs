@@ -143,10 +143,10 @@ namespace CustomAvatar
         public Transform solver_spine_pelvisTarget;
 
         [Tooltip("Positional weight of the pelvis target.")]
-        [Range(0f, 1f)] public float solver_spine_pelvisPositionWeight;
+        [Range(0f, 1f)] public float solver_spine_pelvisPositionWeight = 1f;
 
         [Tooltip("Rotational weight of the pelvis target.")]
-        [Range(0f, 1f)] public float solver_spine_pelvisRotationWeight;
+        [Range(0f, 1f)] public float solver_spine_pelvisRotationWeight = 1f;
 
         [Tooltip("If 'Chest Goal Weight' is greater than 0, the chest will be turned towards this Transform.")]
         public Transform solver_spine_chestGoal;
@@ -289,10 +289,10 @@ namespace CustomAvatar
         public Transform solver_leftLeg_bendGoal;
 
         [Tooltip("Positional weight of the toe/foot target.")]
-        [Range(0f, 1f)] public float solver_leftLeg_positionWeight;
+        [Range(0f, 1f)] public float solver_leftLeg_positionWeight = 1f;
 
         [Tooltip("Rotational weight of the toe/foot target.")]
-        [Range(0f, 1f)] public float solver_leftLeg_rotationWeight;
+        [Range(0f, 1f)] public float solver_leftLeg_rotationWeight = 1f;
 
         [Tooltip("If greater than 0, will bend the knee towards the 'Bend Goal' Transform.")]
         [Range(0f, 1f)] public float solver_leftLeg_bendGoalWeight;
@@ -323,10 +323,10 @@ namespace CustomAvatar
         public Transform solver_rightLeg_bendGoal;
 
         [Tooltip("Positional weight of the toe/foot target.")]
-        [Range(0f, 1f)] public float solver_rightLeg_positionWeight;
+        [Range(0f, 1f)] public float solver_rightLeg_positionWeight = 1f;
 
         [Tooltip("Rotational weight of the toe/foot target.")]
-        [Range(0f, 1f)] public float solver_rightLeg_rotationWeight;
+        [Range(0f, 1f)] public float solver_rightLeg_rotationWeight = 1f;
 
         [Tooltip("If greater than 0, will bend the knee towards the 'Bend Goal' Transform.")]
         [Range(0f, 1f)] public float solver_rightLeg_bendGoalWeight;
