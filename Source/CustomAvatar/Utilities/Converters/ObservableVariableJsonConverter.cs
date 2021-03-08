@@ -20,26 +20,35 @@ using System;
 
 namespace CustomAvatar.Utilities.Converters
 {
-    internal class ObservableValueJsonConverter<T> : JsonConverter<ObservableValue<T>>
+    internal class ObservableValueJsonConverter : JsonConverter
     {
-        public override void WriteJson(JsonWriter writer, ObservableValue<T> value, JsonSerializer serializer)
+        public override bool CanConvert(Type objectType)
+        {
+            if (!objectType.IsGenericType) return false;
+
+            return objectType.GetGenericTypeDefinition() == typeof(ObservableValue<>);
+        }
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             if (value == null) serializer.Serialize(writer, null);
 
-            serializer.Serialize(writer, value.value);
+            serializer.Serialize(writer, value.GetType().GetProperty("value").GetValue(value));
         }
 
-        public override ObservableValue<T> ReadJson(JsonReader reader, Type objectType, ObservableValue<T> existingValue, bool hasExistingValue, JsonSerializer serializer)
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            T obj = serializer.Deserialize<T>(reader);
+            Type valueType = objectType.GenericTypeArguments[0];
+
+            object obj = serializer.Deserialize(reader, valueType);
 
             if (existingValue != null)
             {
-                existingValue.value = obj;
+                objectType.GetProperty("value").SetValue(existingValue, obj);
                 return existingValue;
             }
 
-            return new ObservableValue<T>(obj);
+            return Activator.CreateInstance(objectType, obj);
         }
     }
 }

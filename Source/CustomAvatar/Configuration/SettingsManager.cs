@@ -20,8 +20,6 @@ using CustomAvatar.Logging;
 using Newtonsoft.Json;
 using CustomAvatar.Utilities.Converters;
 using Newtonsoft.Json.Converters;
-using CustomAvatar.Avatar;
-using CustomAvatar.Player;
 
 namespace CustomAvatar.Configuration
 {
@@ -33,7 +31,7 @@ namespace CustomAvatar.Configuration
 
         private ILogger<SettingsManager> _logger;
 
-        private SettingsManager(ILogger<SettingsManager> logger)
+        internal SettingsManager(ILogger<SettingsManager> logger)
         {
             _logger = logger;
 
@@ -99,10 +97,7 @@ namespace CustomAvatar.Configuration
                     new StringEnumConverter(),
                     new FloatJsonConverter(),
                     new Vector2JsonConverter(),
-                    new ObservableValueJsonConverter<bool>(),
-                    new ObservableValueJsonConverter<float>(),
-                    new ObservableValueJsonConverter<AvatarResizeMode>(),
-                    new ObservableValueJsonConverter<FloorHeightAdjust>()
+                    new ObservableValueJsonConverter()
                 }
             };
         }
