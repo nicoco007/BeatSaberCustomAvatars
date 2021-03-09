@@ -50,14 +50,14 @@ namespace CustomAvatar.UI
         #endregion
 
         private PlayerAvatarManager _avatarManager;
-        private GameplaySetupViewController _gameplaySetupViewController;
+        private PlatformLeaderboardViewController _leaderboardViewController;
         private VRPlayerInputInternal _playerInput;
 
         [Inject]
-        internal void Construct(PlayerAvatarManager avatarManager, GameplaySetupViewController gameplaySetupViewController, VRPlayerInputInternal playerInput, GeneralSettingsHost generalSettingsHost, AvatarSpecificSettingsHost avatarSpecificSettingsHost, AutomaticFbtCalibrationHost automaticFbtCalibrationHost)
+        internal void Construct(PlayerAvatarManager avatarManager, PlatformLeaderboardViewController leaderboardViewController, VRPlayerInputInternal playerInput, GeneralSettingsHost generalSettingsHost, AvatarSpecificSettingsHost avatarSpecificSettingsHost, AutomaticFbtCalibrationHost automaticFbtCalibrationHost)
         {
             _avatarManager = avatarManager;
-            _gameplaySetupViewController = gameplaySetupViewController;
+            _leaderboardViewController = leaderboardViewController;
             _playerInput = playerInput;
             _generalSettingsHost = generalSettingsHost;
             _avatarSpecificSettingsHost = avatarSpecificSettingsHost;
@@ -70,19 +70,18 @@ namespace CustomAvatar.UI
 
             if (firstActivation)
             {
-                RectTransform header = Instantiate((RectTransform)_gameplaySetupViewController.transform.Find("HeaderPanel"), rectTransform, false);
+                RectTransform header = Instantiate((RectTransform)_leaderboardViewController.transform.Find("HeaderPanel"), rectTransform, false);
 
                 header.name = "HeaderPanel";
-                header.offsetMin = new Vector2(-45, -8);
-                header.offsetMax = new Vector2(45, 0);
 
                 Destroy(header.GetComponentInChildren<LocalizedTextMeshProUGUI>());
 
                 TextMeshProUGUI textMesh = header.Find("Text").GetComponent<TextMeshProUGUI>();
                 textMesh.text = "Settings";
-                textMesh.fontSize = 6;
-                textMesh.rectTransform.offsetMin = new Vector2(0, -1.86f);
-                textMesh.rectTransform.offsetMax = new Vector2(0, -1.86f);
+
+                ImageView bg = header.Find("BG").GetComponent<ImageView>();
+                bg.color0 = new Color(1, 1, 1, 0);
+                bg.color1 = new Color(1, 1, 1, 1);
             }
 
             _avatarManager.avatarStartedLoading += OnAvatarStartedLoading;

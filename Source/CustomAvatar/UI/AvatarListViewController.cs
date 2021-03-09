@@ -109,6 +109,7 @@ namespace CustomAvatar.UI
             RectTransform tableViewContainer = new GameObject("AvatarsTableView", typeof(RectTransform)).transform as RectTransform;
             RectTransform tableView = new GameObject("AvatarsTableView", typeof(RectTransform), typeof(ScrollRect), typeof(Touchable), typeof(EventSystemListener)).transform as RectTransform;
             RectTransform viewport = new GameObject("Viewport", typeof(RectTransform), typeof(RectMask2D)).transform as RectTransform;
+            RectTransform content = new GameObject("Content", typeof(RectTransform)).transform as RectTransform;
 
             tableViewContainer.gameObject.SetActive(false);
 
@@ -131,22 +132,22 @@ namespace CustomAvatar.UI
             tableViewContainer.SetParent(rectTransform, false);
             tableView.SetParent(tableViewContainer, false);
             viewport.SetParent(tableView, false);
+            content.SetParent(viewport, false);
 
             tableView.GetComponent<ScrollRect>().viewport = viewport;
+
+            ScrollView scrollView = tableView.gameObject.AddComponent<ScrollView>();
+            scrollView.SetField("_contentRectTransform", content);
+            scrollView.SetField("_viewport", viewport);
 
             RectTransform header = Instantiate((RectTransform)_leaderboardViewController.transform.Find("HeaderPanel"), rectTransform, false);
 
             header.name = "HeaderPanel";
-            header.offsetMin = new Vector2(-45, -8);
-            header.offsetMax = new Vector2(45, 0);
 
             Destroy(header.GetComponentInChildren<LocalizedTextMeshProUGUI>());
 
             TextMeshProUGUI textMesh = header.Find("Text").GetComponent<TextMeshProUGUI>();
             textMesh.text = "Avatars";
-            textMesh.fontSize = 6;
-            textMesh.rectTransform.offsetMin = new Vector2(0, -1.86f);
-            textMesh.rectTransform.offsetMax = new Vector2(0, -1.86f);
 
             _loadingIndicator = Instantiate(_leaderboardViewController.transform.Find("Container/LeaderboardTableView/LoadingControl/LoadingContainer/LoadingIndicator").gameObject, rectTransform, false);
 
@@ -161,15 +162,14 @@ namespace CustomAvatar.UI
             Button downButton = scrollBar.Find("DownButton").GetComponent<Button>();
             VerticalScrollIndicator verticalScrollIndicator = scrollBar.Find("VerticalScrollIndicator").GetComponent<VerticalScrollIndicator>();
 
-            _tableView = _container.InstantiateComponent<TableView>(tableView.gameObject);
+            scrollView.SetField("_pageUpButton", upButton);
+            scrollView.SetField("_pageDownButton", downButton);
+            scrollView.SetField("_verticalScrollIndicator", verticalScrollIndicator);
 
+            _tableView = _container.InstantiateComponent<TableView>(tableView.gameObject);
             _tableView.SetField("_preallocatedCells", new TableView.CellsGroup[0]);
             _tableView.SetField("_isInitialized", false);
-            _tableView.SetField("_pageUpButton", upButton);
-            _tableView.SetField("_pageDownButton", downButton);
-            _tableView.SetField("_verticalScrollIndicator", verticalScrollIndicator);
-            _tableView.SetField("_hideScrollButtonsIfNotNeeded", false);
-            _tableView.SetField("_hideScrollIndicatorIfNotNeeded", false);
+            _tableView.SetField("_scrollView", scrollView);
 
             _tableView.SetDataSource(this, true);
 
@@ -289,7 +289,7 @@ namespace CustomAvatar.UI
         {
             int currentRow = _avatarManager.currentlySpawnedAvatar ? _avatars.FindIndex(a => a.fileName == _avatarManager.currentlySpawnedAvatar.prefab.fileName) : 0;
 
-            if (scroll) _tableView.ScrollToCellWithIdx(currentRow, TableViewScroller.ScrollPositionType.Center, false);
+            if (scroll) _tableView.ScrollToCellWithIdx(currentRow, TableView.ScrollPositionType.Center, false);
 
             _tableView.SelectCellWithIdx(currentRow);
         }

@@ -159,10 +159,6 @@
   <ItemGroup>
     <CopyToOutput Include="$(ProjectDir)..\..\Packaging\CustomAvatar\**\*.*" />
   </ItemGroup>
-  <ItemGroup>
-    <None Remove="Resources\shaders.assets" />
-    <None Remove="Views\Mirror.bsml" />
-  </ItemGroup>
   <Target Name="Organize" AfterTargets="AfterBuild">
     <!-- remove deps.json file since it's not used -->
     <Delete Files="$(TargetDir)$(TargetName).deps.json" />

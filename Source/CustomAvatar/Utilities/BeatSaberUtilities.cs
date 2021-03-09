@@ -128,7 +128,7 @@ namespace CustomAvatar.Utilities
             PlayerSpecificSettings currentSettings = _playerDataModel.playerData.playerSpecificSettings;
             float height = position.y + roomCenter.y + MainSettingsModelSO.kHeadPosToPlayerHeightOffset;
 
-            _playerDataModel.playerData.SetPlayerSpecificSettings(currentSettings.CopyWith(null, null, height, false));
+            _playerDataModel.playerData.SetPlayerSpecificSettings(currentSettings.CopyWith(null, height, false));
         }
 
         private void OnRoomCenterChanged()

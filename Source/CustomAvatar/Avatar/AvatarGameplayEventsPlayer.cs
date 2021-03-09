@@ -105,7 +105,7 @@ namespace CustomAvatar.Avatar
         
         #endregion
 
-        private void OnNoteWasCut(NoteData data, NoteCutInfo cutInfo, int multiplier)
+        private void OnNoteWasCut(NoteData noteData, in NoteCutInfo cutInfo, int multiplier)
         {
             if (cutInfo.allIsOK)
             {
