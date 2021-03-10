@@ -66,5 +66,6 @@ if ($git_tag -ne "" -and $git_tag.Length -gt 0) {
 }
 
 Add-Content "$env:GITHUB_ENV" "ZIP_VERSION=$zip_version"
+Add-Content "$env:GITHUB_ENV" "GAME_VERSION=$($manifest_content.gameVersion)"
 
 $manifest_content | ConvertTo-Json -Compress | Set-Content $args[0]

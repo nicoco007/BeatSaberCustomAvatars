@@ -21,15 +21,16 @@ jobs:
       with:
         dotnet-version: 3.1.x
 
+    - name: Set manifest version
+      run: ./bsipa_version_hash.ps1 "Source\CustomAvatar\manifest.json" "Source\CustomAvatar\Properties\AssemblyInfo.cs"
+
     - name: Fetch Beat Saber Bindings
       uses: actions/checkout@v2
       with:
         repository: nicoco007/BeatSaberBindings
+        ref: v${{ env.GAME_VERSION }}
         token: ${{ secrets.PRIVATE_GITHUB_TOKEN }}
         path: BeatSaberBindings\Beat Saber_Data\Managed
-
-    - name: Set manifest version
-      run: ./bsipa_version_hash.ps1 "Source\CustomAvatar\manifest.json" "Source\CustomAvatar\Properties\AssemblyInfo.cs"
 
     - name: Build Debug
       run: dotnet build Source\CustomAvatar\CustomAvatar.csproj -c Debug -p:BeatSaberDir=..\..\BeatSaberBindings
