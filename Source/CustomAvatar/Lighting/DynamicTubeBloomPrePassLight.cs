@@ -129,7 +129,7 @@ namespace CustomAvatar.Lighting
             if (!_light) return;
 
             _light.color = _color;
-            _light.intensity = _distanceIntensity * _reference.width * _reference.lightWidthMultiplier * _reference.bloomFogIntensityMultiplier * GetActualAlpha(_color.a) * 20f;
+            _light.intensity = _distanceIntensity * _reference.width * _reference.lightWidthMultiplier * _reference.bloomFogIntensityMultiplier * GetActualAlpha(_color.a) * 2f;
 
             _light.enabled = _light.intensity > 0.001f;
         }

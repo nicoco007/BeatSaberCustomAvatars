@@ -25,36 +25,41 @@ namespace CustomAvatar.Lighting
 {
     internal class DynamicDirectionalLightingController : MonoBehaviour
     {
+        private static readonly Vector3 kOrigin = new Vector3(0, 1, 0);
+
         private ILogger<DynamicDirectionalLightingController> _logger;
-        private LightWithIdManager _lightManager;
         private Settings _settings;
 
         private List<(DirectionalLight, Light)> _directionalLights;
 
         #region Behaviour Lifecycle
-#pragma warning disable IDE0051
 
         [Inject]
-        internal void Construct(ILogger<DynamicDirectionalLightingController> logger, LightWithIdManager lightManager, Settings settings)
+        internal void Construct(ILogger<DynamicDirectionalLightingController> logger, Settings settings)
         {
             _logger = logger;
-            _lightManager = lightManager;
             _settings = settings;
         }
 
-        private void Start()
+        internal void Start()
         {
-            _lightManager.didChangeSomeColorsThisFrameEvent += OnChangedSomeColorsThisFrame;
-
             CreateLights();
         }
 
-        private void OnDestroy()
+        internal void LateUpdate()
         {
-            _lightManager.didChangeSomeColorsThisFrameEvent -= OnChangedSomeColorsThisFrame;
+            foreach ((DirectionalLight directionalLight, Light light) in _directionalLights)
+            {
+                // the game's "directional lights" act more like Unity's point lights with a radius and a falloff
+                float distance = Vector3.Distance(directionalLight.transform.position, kOrigin) * 2;
+                float intensityFalloff = Mathf.Max((directionalLight.radius - distance) / directionalLight.radius, 0);
+
+                light.color = directionalLight.color;
+                light.intensity = intensityFalloff * directionalLight.intensity;
+                light.transform.rotation = directionalLight.transform.rotation;
+            }
         }
 
-#pragma warning restore IDE0051
         #endregion
 
         private void CreateLights()
@@ -68,7 +73,7 @@ namespace CustomAvatar.Lighting
 
                 light.type = LightType.Directional;
                 light.color = directionalLight.color;
-                light.intensity = Mathf.Clamp01(directionalLight.intensity) * 0.8f;
+                light.intensity = 0;
                 light.cullingMask = AvatarLayers.kAllLayersMask;
                 light.shadows = LightShadows.Soft;
                 light.shadowStrength = 1;
@@ -84,15 +89,6 @@ namespace CustomAvatar.Lighting
             }
 
             _logger.Trace($"Created {_directionalLights.Count} DynamicDirectionalLights");
-        }
-
-        private void OnChangedSomeColorsThisFrame()
-        {
-            foreach ((DirectionalLight directionalLight, Light light) in _directionalLights)
-            {
-                light.color = directionalLight.color;
-                light.intensity = Mathf.Clamp01(directionalLight.intensity) * 0.8f;
-            }
         }
     }
 }
