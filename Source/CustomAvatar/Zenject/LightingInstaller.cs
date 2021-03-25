@@ -21,13 +21,9 @@ namespace CustomAvatar.Zenject
                     Container.Bind<TwoSidedLightingController>().FromNewComponentOnNewGameObject().NonLazy();
                     break;
 
-                case LightingLevel.SimpleDynamic:
+                case LightingLevel.Dynamic:
                     Container.Bind<DynamicDirectionalLightingController>().FromNewComponentOnNewGameObject().NonLazy();
                     break;
-
-                case LightingLevel.FullDynamic:
-                    Container.Bind<DynamicTubeBloomPrePassLightingController>().FromNewComponentOnNewGameObject().NonLazy();
-                    goto case LightingLevel.SimpleDynamic;
             }
         }
     }

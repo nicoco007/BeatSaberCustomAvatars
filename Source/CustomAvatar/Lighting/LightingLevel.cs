@@ -4,7 +4,6 @@
     {
         Off,
         TwoSided,
-        SimpleDynamic,
-        FullDynamic
+        Dynamic
     }
 }

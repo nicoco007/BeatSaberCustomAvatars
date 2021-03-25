@@ -73,7 +73,6 @@ namespace CustomAvatar.Configuration
         {
             public LightingLevel level = LightingLevel.Off;
             public ShadowQuality shadowQuality = ShadowQuality.Disable;
-            public ShadowLevel shadowLevel = ShadowLevel.Directional;
             public ShadowResolution shadowResolution = ShadowResolution.Low;
             public int pixelLightCount = 2;
         }
