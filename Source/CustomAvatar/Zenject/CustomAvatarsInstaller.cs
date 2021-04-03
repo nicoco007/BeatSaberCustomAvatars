@@ -59,6 +59,7 @@ namespace CustomAvatar.Zenject
 
             if (XRSettings.loadedDeviceName.Equals("openvr", StringComparison.InvariantCultureIgnoreCase) &&
                 OpenVR.IsRuntimeInstalled() &&
+                OpenVR.System != null &&
                 !Environment.GetCommandLineArgs().Contains("--force-xr"))
             {
                 Container.Bind<OpenVRFacade>().AsTransient();
