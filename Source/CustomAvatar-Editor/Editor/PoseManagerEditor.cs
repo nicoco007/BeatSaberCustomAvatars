@@ -24,19 +24,15 @@ namespace CustomAvatar.Editor
     [CustomEditor(typeof(PoseManager))]
     public class PoseManagerEditor : UnityEditor.Editor
     {
-        private GUIStyle _richLabel;
         private float _sliderValue;
-
-        public void OnEnable()
-        {
-            _richLabel = new GUIStyle()
-            {
-                richText = true
-            };
-        }
 
         public override void OnInspectorGUI()
         {
+            var richLabel = new GUIStyle(EditorStyles.label)
+            {
+                richText = true
+            };
+
             PoseManager poseManager = (PoseManager)target;
 
             if (!poseManager.animator.isHuman)
@@ -50,11 +46,11 @@ namespace CustomAvatar.Editor
 
             if (poseManager.openHandIsValid)
             {
-                GUILayout.Label(new GUIContent("<color='green'>\u2713</color> Open Hands", "Finger poses for open hands are set"), _richLabel);
+                GUILayout.Label(new GUIContent("<color='green'>\u2713</color> Open Hands", "Finger poses for open hands are set"), richLabel);
             }
             else
             {
-                GUILayout.Label(new GUIContent("<color='red'>\u2715</color> Open Hands", "Finger poses for open hands are not set"), _richLabel);
+                GUILayout.Label(new GUIContent("<color='red'>\u2715</color> Open Hands", "Finger poses for open hands are not set"), richLabel);
             }
 
             if (GUILayout.Button("Save Open Hands Pose"))
@@ -76,11 +72,11 @@ namespace CustomAvatar.Editor
             
             if (poseManager.closedHandIsValid)
             {
-                GUILayout.Label(new GUIContent("<color='green'>\u2713</color> Closed Hands", "Finger poses for closed hands are set"), _richLabel);
+                GUILayout.Label(new GUIContent("<color='green'>\u2713</color> Closed Hands", "Finger poses for closed hands are set"), richLabel);
             }
             else
             {
-                GUILayout.Label(new GUIContent("<color='red'>\u2715</color> Closed Hands", "Finger poses for closed hands are not set"), _richLabel);
+                GUILayout.Label(new GUIContent("<color='red'>\u2715</color> Closed Hands", "Finger poses for closed hands are not set"), richLabel);
             }
 
             if (GUILayout.Button("Save Closed Hands Pose"))
