@@ -178,7 +178,7 @@ namespace CustomAvatar.Zenject.Internal
 
                 if (componentRegistration.condition != null && !componentRegistration.condition(target))
                 {
-                    _logger.Trace($"Condition not met for putting '{componentRegistration.childTransformName}' onto '{target.name}'");
+                    _logger.Trace($"Condition not met for putting '{componentRegistration.type.FullName}' onto '{target.name}'");
                     continue;
                 }
 
