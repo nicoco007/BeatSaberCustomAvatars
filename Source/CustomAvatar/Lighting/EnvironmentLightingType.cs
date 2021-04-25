@@ -1,8 +1,7 @@
 ﻿namespace CustomAvatar.Lighting
 {
-    internal enum LightingLevel
+    internal enum EnvironmentLightingType
     {
-        Off,
         TwoSided,
         Dynamic
     }

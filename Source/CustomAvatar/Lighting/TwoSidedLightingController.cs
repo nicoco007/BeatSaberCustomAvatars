@@ -15,7 +15,9 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using CustomAvatar.Avatar;
+using CustomAvatar.Configuration;
 using UnityEngine;
+using Zenject;
 
 namespace CustomAvatar.Lighting
 {
@@ -23,16 +25,24 @@ namespace CustomAvatar.Lighting
     {
         private static readonly Color kAmbientColor = new Color(0.8f, 0.8f, 1);
 
+        private Settings _settings;
+
         #region Behaviour Lifecycle
         #pragma warning disable IDE0051
 
-        private void Start()
+        [Inject]
+        internal void Construct(Settings settings)
         {
-            AddLight(Quaternion.Euler(135, 0, 0), kAmbientColor, 0.9f); // front
-            AddLight(Quaternion.Euler(45, 0, 0), kAmbientColor, 0.9f); // back
+            _settings = settings;
+        }
+
+        internal void Start()
+        {
+            AddLight(Quaternion.Euler(135, 0, 0), kAmbientColor, _settings.lighting.environment.intensity); // front
+            AddLight(Quaternion.Euler(45, 0, 0), kAmbientColor, _settings.lighting.environment.intensity); // back
         }
         
-        #pragma warning disable IDE0051
+        #pragma warning restore IDE0051
         #endregion
 
         private void AddLight(Quaternion rotation, Color color, float intensity)

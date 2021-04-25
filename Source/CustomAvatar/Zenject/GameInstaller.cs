@@ -28,7 +28,7 @@ namespace CustomAvatar.Zenject
         {
             Settings.Lighting lightingSettings = Container.Resolve<Settings>().lighting;
 
-            if (lightingSettings.level == LightingLevel.Dynamic)
+            if (lightingSettings.sabers.enabled)
             {
                 Container.BindInterfacesAndSelfTo<SaberLightingController>().AsSingle().NonLazy();
             }

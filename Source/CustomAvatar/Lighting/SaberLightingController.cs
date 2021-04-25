@@ -12,7 +12,7 @@ namespace CustomAvatar.Lighting
         private Settings _settings;
 
         [Inject]
-        private void Inject(SaberManager saberManager, ColorManager colorManager, Settings settings)
+        internal void Construct(SaberManager saberManager, ColorManager colorManager, Settings settings)
         {
             _saberManager = saberManager;
             _colorManager = colorManager;
@@ -31,7 +31,7 @@ namespace CustomAvatar.Lighting
 
             light.type = LightType.Point;
             light.color = color;
-            light.intensity = 0.5f;
+            light.intensity = 0.6f;
             light.shadows = LightShadows.Soft;
             light.shadowStrength = 1;
             light.renderMode = LightRenderMode.ForcePixel; // point lights don't do much when vertex rendered

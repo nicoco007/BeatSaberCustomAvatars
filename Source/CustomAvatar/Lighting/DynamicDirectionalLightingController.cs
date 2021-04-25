@@ -55,7 +55,7 @@ namespace CustomAvatar.Lighting
                 float intensityFalloff = Mathf.Max((directionalLight.radius - distance) / directionalLight.radius, 0);
 
                 light.color = directionalLight.color;
-                light.intensity = intensityFalloff * directionalLight.intensity;
+                light.intensity = intensityFalloff * directionalLight.intensity * _settings.lighting.environment.intensity;
                 light.transform.rotation = directionalLight.transform.rotation;
             }
         }
@@ -77,7 +77,7 @@ namespace CustomAvatar.Lighting
                 light.cullingMask = AvatarLayers.kAllLayersMask;
                 light.shadows = LightShadows.Soft;
                 light.shadowStrength = 1;
-                light.renderMode = count < _settings.lighting.pixelLightCount ? LightRenderMode.ForcePixel : LightRenderMode.ForceVertex;
+                light.renderMode = count < _settings.lighting.environment.pixelLightCount ? LightRenderMode.ForcePixel : LightRenderMode.ForceVertex;
 
                 light.transform.parent = transform;
                 light.transform.position = Vector3.zero;

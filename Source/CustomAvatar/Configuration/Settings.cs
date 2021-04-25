@@ -71,9 +71,22 @@ namespace CustomAvatar.Configuration
 
         public class Lighting
         {
-            public LightingLevel level = LightingLevel.Off;
             public ShadowQuality shadowQuality = ShadowQuality.Disable;
             public ShadowResolution shadowResolution = ShadowResolution.Low;
+            public EnvironmentLighting environment = new EnvironmentLighting();
+            public LightingGroup sabers = new LightingGroup();
+        }
+
+        public class LightingGroup
+        {
+            [JsonProperty(Order = int.MinValue)]
+            public bool enabled = false;
+            public float intensity = 1;
+        }
+
+        public class EnvironmentLighting : LightingGroup
+        {
+            public EnvironmentLightingType type = EnvironmentLightingType.Dynamic;
             public int pixelLightCount = 2;
         }
 

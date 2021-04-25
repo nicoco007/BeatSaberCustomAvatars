@@ -15,13 +15,15 @@ namespace CustomAvatar.Zenject
 
         public override void InstallBindings()
         {
-            switch (_settings.lighting.level)
+            if (!_settings.lighting.environment.enabled) return;
+
+            switch (_settings.lighting.environment.type)
             {
-                case LightingLevel.TwoSided:
+                case EnvironmentLightingType.TwoSided:
                     Container.Bind<TwoSidedLightingController>().FromNewComponentOnNewGameObject().NonLazy();
                     break;
 
-                case LightingLevel.Dynamic:
+                case EnvironmentLightingType.Dynamic:
                     Container.Bind<DynamicDirectionalLightingController>().FromNewComponentOnNewGameObject().NonLazy();
                     break;
             }
