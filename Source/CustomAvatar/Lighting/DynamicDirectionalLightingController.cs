@@ -51,11 +51,11 @@ namespace CustomAvatar.Lighting
             foreach ((DirectionalLight directionalLight, Light light) in _directionalLights)
             {
                 // the game's "directional lights" act more like Unity's point lights with a radius and a falloff
-                float distance = Vector3.Distance(directionalLight.transform.position, kOrigin) * 2;
+                float distance = Vector3.Distance(directionalLight.transform.position, kOrigin);
                 float intensityFalloff = Mathf.Max((directionalLight.radius - distance) / directionalLight.radius, 0);
 
                 light.color = directionalLight.color;
-                light.intensity = intensityFalloff * directionalLight.intensity * _settings.lighting.environment.intensity;
+                light.intensity = intensityFalloff * directionalLight.intensity * _settings.lighting.environment.intensity * 0.8f;
                 light.transform.rotation = directionalLight.transform.rotation;
             }
         }
