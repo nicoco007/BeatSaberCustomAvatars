@@ -38,6 +38,15 @@ namespace CustomAvatar.UI
             _wasPressedSignal = originalTableCell.GetField<Signal, SelectableCell>("_wasPressedSignal");
         }
 
+        protected override void Start()
+        {
+            base.Start();
+
+            // this is needed because TMPro sometimes forgets the font size after instantiating
+            _nameText.fontSize = 4;
+            _authorText.fontSize = 3;
+        }
+
         public override void OnPointerClick(PointerEventData eventData)
         {
             base.OnPointerClick(eventData);
