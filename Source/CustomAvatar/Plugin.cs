@@ -15,6 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using CustomAvatar.Avatar;
+using CustomAvatar.Lighting;
 using CustomAvatar.Logging;
 using CustomAvatar.Player;
 using CustomAvatar.Rendering;
@@ -52,6 +53,7 @@ namespace CustomAvatar
 
             // TODO there might be a better way to deal with this
             ZenjectHelper.AddComponentAlongsideExisting<MenuEnvironmentManager, EnvironmentObject>();
+            ZenjectHelper.AddComponentAlongsideExisting<MenuEnvironmentManager, LogoLighting>("DefaultEnvironment/Logo");
             ZenjectHelper.AddComponentAlongsideExisting<MultiplayerLocalActivePlayerFacade, EnvironmentObject>("IsActiveObjects/Lasers");
             ZenjectHelper.AddComponentAlongsideExisting<MultiplayerLocalActivePlayerFacade, EnvironmentObject>("IsActiveObjects/Construction");
             ZenjectHelper.AddComponentAlongsideExisting<MultiplayerLocalActivePlayerFacade, EnvironmentObject>("IsActiveObjects/CenterRings");
