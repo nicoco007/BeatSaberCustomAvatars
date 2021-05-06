@@ -26,7 +26,7 @@ using Zenject;
 namespace CustomAvatar.Avatar
 {
     /// <summary>
-    /// Represents a <see cref="LoadedAvatar"/> that has been spawned into the game.
+    /// Represents a <see cref="AvatarPrefab"/> that has been spawned into the game.
     /// </summary>
 	public class SpawnedAvatar : MonoBehaviour
 	{
