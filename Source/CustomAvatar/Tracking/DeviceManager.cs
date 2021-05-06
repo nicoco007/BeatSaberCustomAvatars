@@ -48,28 +48,22 @@ namespace CustomAvatar.Tracking
             switch (use)
             {
                 case DeviceUse.Head:
-                    device = GetDevice(ref _head);
-                    return true;
+                    return TryGetDevice(_head, out device);
 
                 case DeviceUse.LeftHand:
-                    device = GetDevice(ref _leftHand);
-                    return true;
+                    return TryGetDevice(_leftHand, out device);
 
                 case DeviceUse.RightHand:
-                    device = GetDevice(ref _rightHand);
-                    return true;
+                    return TryGetDevice(_rightHand, out device);
 
                 case DeviceUse.Waist:
-                    device = GetDevice(ref _waist);
-                    return true;
+                    return TryGetDevice(_waist, out device);
 
                 case DeviceUse.LeftFoot:
-                    device = GetDevice(ref _leftFoot);
-                    return true;
+                    return TryGetDevice(_leftFoot, out device);
 
                 case DeviceUse.RightFoot:
-                    device = GetDevice(ref _rightFoot);
-                    return true;
+                    return TryGetDevice(_rightFoot, out device);
 
                 default:
                     device = default;
@@ -86,12 +80,16 @@ namespace CustomAvatar.Tracking
             }
         }
 
-        private TrackedDevice GetDevice(ref string id)
+        private bool TryGetDevice(string id, out TrackedDevice device)
         {
-            if (string.IsNullOrEmpty(id)) return default;
-            if (!_devices.ContainsKey(id)) return default;
+            if (string.IsNullOrEmpty(id) || !_devices.ContainsKey(id))
+            {
+                device = default;
+                return false;
+            }
 
-            return _devices[id];
+            device = _devices[id];
+            return true;
         }
 
         private void AssignDevices()
