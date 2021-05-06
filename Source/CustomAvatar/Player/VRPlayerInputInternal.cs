@@ -104,7 +104,8 @@ namespace CustomAvatar.Player
         {
             if (isCalibrationModeEnabled && (use == DeviceUse.Waist || use == DeviceUse.LeftFoot || use == DeviceUse.RightFoot))
             {
-                return GetPoseForAvatarTransform(use, out pose);
+                pose = Pose.identity;
+                return _deviceManager.TryGetDeviceState(use, out _) && GetPoseForAvatarTransform(use, out pose);
             }
 
             switch (use)
@@ -502,11 +503,6 @@ namespace CustomAvatar.Player
             pose = new Pose(transform.position * avatar.scale, transform.rotation);
 
             _trackingHelper.ApplyInverseRoomAdjust(ref pose.position, ref pose.rotation);
-
-            if (_settings.moveFloorWithRoomAdjust)
-            {
-                pose.position.y += _beatSaberUtilities.roomCenter.y;
-            }
 
             return true;
         }

@@ -87,8 +87,13 @@ namespace CustomAvatar.Utilities
             Vector3 roomCenter = _beatSaberUtilities.roomCenter;
             Quaternion roomRotation = _beatSaberUtilities.roomRotation;
 
-            position = Quaternion.Inverse(roomRotation) * (position - roomCenter);
-            rotation = rotation * Quaternion.Inverse(roomRotation);
+            position = Quaternion.Inverse(roomRotation) * position - roomCenter;
+            rotation = Quaternion.Inverse(roomRotation) * rotation;
+
+            if (_settings.moveFloorWithRoomAdjust)
+            {
+                position.y += roomCenter.y;
+            }
         }
 
         /// <summary>
