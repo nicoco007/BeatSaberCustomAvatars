@@ -7,10 +7,11 @@ namespace CustomAvatar.Zenject.Internal
 {
     internal class InstallerRegistration
     {
-        private static readonly MethodInfo _installMethod = typeof(DiContainer).GetMethod("Install", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Standard, new[] { typeof(object[]) }, null);
+        private static readonly MethodInfo kInstallMethod = typeof(DiContainer).GetMethod("Install", BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Standard, new[] { typeof(object[]) }, null);
 
-        public readonly Type installer;
+        public Type installer { get; }
 
+        private readonly MethodInfo _installMethod;
         private object[] _extraArgs;
         private InstallerRegistrationOnTarget _target;
 
@@ -20,6 +21,7 @@ namespace CustomAvatar.Zenject.Internal
 
             this.installer = installer;
 
+            _installMethod = kInstallMethod.MakeGenericMethod(installer);
             _extraArgs = new object[0];
         }
 
@@ -51,7 +53,7 @@ namespace CustomAvatar.Zenject.Internal
         {
             if (!_target.ShouldInstall(context)) return false;
 
-            _installMethod.MakeGenericMethod(installer).Invoke(context.Container, new[] { _extraArgs });
+            _installMethod.Invoke(context.Container, new[] { _extraArgs });
 
             return true;
         }

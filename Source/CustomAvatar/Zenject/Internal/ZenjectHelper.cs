@@ -8,6 +8,10 @@ using System.Reflection;
 using UnityEngine;
 using Zenject;
 
+#if DEBUG
+using System.Diagnostics;
+#endif
+
 namespace CustomAvatar.Zenject.Internal
 {
     internal class ZenjectHelper
@@ -21,8 +25,8 @@ namespace CustomAvatar.Zenject.Internal
 
         private static bool _shouldInstall;
 
-        private static readonly List<InstallerRegistration> _installerRegistrations = new List<InstallerRegistration>();
-        private static readonly List<Type> _componentsToBind = new List<Type>();
+        private static readonly HashSet<InstallerRegistration> _installerRegistrations = new HashSet<InstallerRegistration>();
+        private static readonly HashSet<Type> _componentsToBind = new HashSet<Type>();
         private static readonly Dictionary<Type, List<ComponentRegistration>> _componentsToAdd = new Dictionary<Type, List<ComponentRegistration>>();
 
         private static ILogger<ZenjectHelper> _logger;
@@ -86,6 +90,10 @@ namespace CustomAvatar.Zenject.Internal
 
         private static void InstallInstallers(Context __instance)
         {
+#if DEBUG
+            var stopwatch = Stopwatch.StartNew();
+#endif
+
             if (!_shouldInstall)
             {
                 if (__instance.name == kExpectedFirstSceneContextName)
@@ -117,11 +125,19 @@ namespace CustomAvatar.Zenject.Internal
                     _logger.Trace($"Installed {installerRegistration.installer.FullName}");
                 }
             }
+
+#if DEBUG
+            _logger.Trace($"InstallInstallers: {stopwatch.ElapsedTicks / (TimeSpan.TicksPerMillisecond / 1000)} us");
+#endif
         }
 
         private static void InstallBindings(Context __instance, List<MonoBehaviour> injectableMonoBehaviours)
         {
             if (!_shouldInstall) return;
+
+#if DEBUG
+            var stopwatch = Stopwatch.StartNew();
+#endif
 
             if (__instance is SceneContext sceneContext)
             {
@@ -133,6 +149,10 @@ namespace CustomAvatar.Zenject.Internal
                 BindIfNeeded(__instance, monoBehaviour);
                 AddComponents(__instance, monoBehaviour);
             }
+
+#if DEBUG
+            _logger.Trace($"InstallBindings: {stopwatch.ElapsedTicks / (TimeSpan.TicksPerMillisecond / 1000)} us");
+#endif
         }
 
         private static void BindIfNeeded(Context context, MonoBehaviour monoBehaviour)
@@ -143,13 +163,13 @@ namespace CustomAvatar.Zenject.Internal
 
             if (!context.Container.HasBinding(type))
             {
-                _logger.Info($"Binding '{type.FullName}' from {context.GetType().Name} '{context.name}' (scene '{context.gameObject.scene.name}')");
+                _logger.Trace($"Binding '{type.FullName}' from {context.GetType().Name} '{context.name}' (scene '{context.gameObject.scene.name}')");
 
                 context.Container.Bind(type).FromInstance(monoBehaviour).AsSingle().IfNotBound();
             }
             else
             {
-                _logger.Notice($"'{type.FullName}' is already bound on {context.GetType().Name} '{context.name}' (scene '{context.gameObject.scene.name}')");
+                _logger.Trace($"'{type.FullName}' is already bound on {context.GetType().Name} '{context.name}' (scene '{context.gameObject.scene.name}')");
             }
         }
 
@@ -182,7 +202,7 @@ namespace CustomAvatar.Zenject.Internal
                     continue;
                 }
 
-                _logger.Info($"Adding '{componentRegistration.type.FullName}' to GameObject '{target.name}' (for '{monoBehaviourType.FullName}')");
+                _logger.Trace($"Adding '{componentRegistration.type.FullName}' to GameObject '{target.name}' (for '{monoBehaviourType.FullName}')");
                 context.Container.InstantiateComponent(componentRegistration.type, target, componentRegistration.extraArgs);
             }
         }
