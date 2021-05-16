@@ -22,6 +22,8 @@ namespace CustomAvatar.Utilities
 {
     internal static class BinaryWriterExtensions
     {
+        private static float kMaxTextureSize = 256;
+
         public static void Write(this BinaryWriter writer, Pose pose)
         {
             writer.Write(pose.position);
@@ -61,13 +63,11 @@ namespace CustomAvatar.Utilities
             if (texture == null || (!texture.isReadable && !forceReadable)) return new byte[0];
 
             // create readable texture by rendering onto a RenderTexture
-            if (!texture.isReadable)
+            if (!texture.isReadable || texture.width > kMaxTextureSize || texture.height > kMaxTextureSize)
             {
-                float maxSize = 256;
-                float scale = Mathf.Min(1, maxSize / texture.width, maxSize / texture.height);
+                float scale = Mathf.Min(1, kMaxTextureSize / texture.width, kMaxTextureSize / texture.height);
                 int width = Mathf.RoundToInt(texture.width * scale);
                 int height = Mathf.RoundToInt(texture.height * scale);
-
                 RenderTexture renderTexture = RenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.ARGB32);
                 RenderTexture.active = renderTexture;
                 Graphics.Blit(texture, renderTexture);
