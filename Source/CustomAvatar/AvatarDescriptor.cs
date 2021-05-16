@@ -63,14 +63,14 @@ namespace CustomAvatar
         public Sprite cover;
 
         // Legacy stuff
-        #pragma warning disable 649
+#pragma warning disable CS0649, IDE0044
         [SerializeField] [HideInInspector] private string AvatarName;
         [SerializeField] [HideInInspector] private string AuthorName;
         [SerializeField] [HideInInspector] private Sprite CoverImage;
         [SerializeField] [HideInInspector] private string Name;
         [SerializeField] [HideInInspector] private string Author;
         [SerializeField] [HideInInspector] private Sprite Cover;
-        #pragma warning restore 649
+#pragma warning restore CS0649, IDE0044
 
         public void OnBeforeSerialize() { }
 
@@ -90,7 +90,7 @@ namespace CustomAvatar
             ikHelper.InitializeVRIK(transform.GetComponentInChildren<VRIKManager>(), transform);
         }
 
-        private void OnDrawGizmos()
+        internal void OnDrawGizmos()
         {
             if (!isActiveAndEnabled) return;
             if (!_saberMesh) _saberMesh = LoadMesh(Assembly.GetExecutingAssembly().GetManifestResourceStream("CustomAvatar.Resources.saber.dat"));
@@ -137,7 +137,7 @@ namespace CustomAvatar
             return mesh;
         }
 
-        private void SaveMesh(Mesh mesh)
+        internal void SaveMesh(Mesh mesh)
         {
             using (BinaryWriter writer = new BinaryWriter(File.OpenWrite("mesh.dat")))
             {
@@ -179,7 +179,7 @@ namespace CustomAvatar
         }
 #else
         [Inject]
-        private void Construct(ILogger<AvatarDescriptor> logger)
+        internal void Construct(ILogger<AvatarDescriptor> logger)
         {
             logger.name = name;
 

@@ -22,7 +22,7 @@ namespace CustomAvatar.Utilities
 {
     internal static class BinaryWriterExtensions
     {
-        private static float kMaxTextureSize = 256;
+        private static readonly float kMaxTextureSize = 256;
 
         public static void Write(this BinaryWriter writer, Pose pose)
         {
