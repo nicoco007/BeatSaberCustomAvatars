@@ -182,4 +182,14 @@
     <Copy SourceFiles="@(CopyToBeatSaberFolder)" DestinationFiles="@(CopyToBeatSaberFolder->'$(BeatSaberDir)\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
   <ProjectExtensions><VisualStudio><UserProperties manifest_1json__JsonSchema="https://json-schema.org/draft-04/schema" /></VisualStudio></ProjectExtensions>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="3.9.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Unity.Analyzers" Version="1.10.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
 </Project>

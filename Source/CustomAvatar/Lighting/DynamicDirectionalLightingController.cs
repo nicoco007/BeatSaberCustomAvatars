@@ -67,7 +67,7 @@ namespace CustomAvatar.Lighting
             int count = 0;
             _directionalLights = new List<(DirectionalLight, Light)>();
 
-            foreach (var directionalLight in DirectionalLight.lights)
+            foreach (DirectionalLight directionalLight in DirectionalLight.lights)
             {
                 Light light = new GameObject($"DynamicDirectionalLight({directionalLight.name})").AddComponent<Light>();
 
@@ -80,8 +80,7 @@ namespace CustomAvatar.Lighting
                 light.renderMode = count < _settings.lighting.environment.pixelLightCount ? LightRenderMode.ForcePixel : LightRenderMode.ForceVertex;
 
                 light.transform.parent = transform;
-                light.transform.position = Vector3.zero;
-                light.transform.rotation = directionalLight.transform.rotation;
+                light.transform.SetPositionAndRotation(Vector3.zero, directionalLight.transform.rotation);
 
                 _directionalLights.Add((directionalLight, light));
 

@@ -89,7 +89,7 @@ namespace CustomAvatar.Avatar
                 _logger.Info($"Spawning avatar '{avatar.descriptor.name}'");
             }
 
-            DiContainer subContainer = new DiContainer(_container);
+            var subContainer = new DiContainer(_container);
 
             GameObject avatarInstance = Object.Instantiate(avatar, parent, false).gameObject;
             Object.Destroy(avatarInstance.GetComponent<AvatarPrefab>());

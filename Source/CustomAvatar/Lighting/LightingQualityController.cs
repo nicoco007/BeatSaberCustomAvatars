@@ -20,7 +20,7 @@ namespace CustomAvatar.Lighting
             QualitySettings.shadowProjection = ShadowProjection.StableFit;
             QualitySettings.shadowmaskMode = ShadowmaskMode.Shadowmask;
 
-            QualitySettings.shadows          = _settings.lighting.shadowQuality;
+            QualitySettings.shadows = _settings.lighting.shadowQuality;
             QualitySettings.shadowResolution = _settings.lighting.shadowResolution;
         }
     }

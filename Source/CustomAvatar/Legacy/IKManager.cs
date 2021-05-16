@@ -17,7 +17,7 @@
 using System;
 using UnityEngine;
 
-#pragma warning disable CS0649
+#pragma warning disable CS0649, IDE1006
 namespace AvatarScriptPack
 {
     [Obsolete("Use VRIKManager")]

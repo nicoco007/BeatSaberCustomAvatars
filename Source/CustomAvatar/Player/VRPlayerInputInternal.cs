@@ -82,11 +82,11 @@ namespace CustomAvatar.Player
         public void Initialize()
         {
             _deviceManager.devicesChanged += OnDevicesUpdated;
-            _avatarManager.avatarChanged  += OnAvatarChanged;
+            _avatarManager.avatarChanged += OnAvatarChanged;
 
             _leftHandAnimAction = new SkeletalInput("/actions/customavatars/in/lefthandanim");
             _rightHandAnimAction = new SkeletalInput("/actions/customavatars/in/righthandanim");
-            
+
             OnAvatarChanged(_avatarManager.currentlySpawnedAvatar);
             OnDevicesUpdated();
         }
@@ -94,7 +94,7 @@ namespace CustomAvatar.Player
         public void Dispose()
         {
             _deviceManager.devicesChanged -= OnDevicesUpdated;
-            _avatarManager.avatarChanged  -= OnAvatarChanged;
+            _avatarManager.avatarChanged -= OnAvatarChanged;
 
             _leftHandAnimAction.Dispose();
             _rightHandAnimAction.Dispose();
@@ -102,7 +102,7 @@ namespace CustomAvatar.Player
 
         public bool TryGetPose(DeviceUse use, out Pose pose)
         {
-            if (isCalibrationModeEnabled && (use == DeviceUse.Waist || use == DeviceUse.LeftFoot || use == DeviceUse.RightFoot))
+            if (isCalibrationModeEnabled && (use == DeviceUse.Waist || use == DeviceUse.LeftFoot || use == DeviceUse.RightFoot))
             {
                 pose = Pose.identity;
                 return _deviceManager.TryGetDeviceState(use, out _) && GetPoseForAvatarTransform(use, out pose);
@@ -218,8 +218,8 @@ namespace CustomAvatar.Player
 
             CalibrationData.FullBodyCalibration fullBodyCalibration = _calibrationData.GetAvatarManualCalibration(spawnedAvatar.prefab.fileName);
 
-            SetCalibrationFromTarget(ref fullBodyCalibration.waist,     DeviceUse.Waist,     spawnedAvatar, spawnedAvatar.pelvis);
-            SetCalibrationFromTarget(ref fullBodyCalibration.leftFoot,  DeviceUse.LeftFoot,  spawnedAvatar, spawnedAvatar.leftLeg);
+            SetCalibrationFromTarget(ref fullBodyCalibration.waist, DeviceUse.Waist, spawnedAvatar, spawnedAvatar.pelvis);
+            SetCalibrationFromTarget(ref fullBodyCalibration.leftFoot, DeviceUse.LeftFoot, spawnedAvatar, spawnedAvatar.leftLeg);
             SetCalibrationFromTarget(ref fullBodyCalibration.rightFoot, DeviceUse.RightFoot, spawnedAvatar, spawnedAvatar.rightLeg);
 
             inputChanged?.Invoke();
@@ -237,7 +237,7 @@ namespace CustomAvatar.Player
             {
                 Vector3 leftFootPositionCorrection = leftFoot.position.y * Vector3.back;
                 Vector3 leftFootForward = leftFoot.rotation * Vector3.up; // forward on feet trackers is y (up)
-                Vector3 leftFootStraightForward = Vector3.ProjectOnPlane(leftFootForward, floorNormal); // get projection of forward vector on xz plane (floor)
+                var leftFootStraightForward = Vector3.ProjectOnPlane(leftFootForward, floorNormal); // get projection of forward vector on xz plane (floor)
                 Quaternion leftRotationCorrection = Quaternion.Inverse(leftFoot.rotation) * Quaternion.LookRotation(Vector3.up, leftFootStraightForward); // get difference between world rotation and flat forward rotation
 
                 fullBodyCalibration.leftFoot = new Pose(leftFootPositionCorrection, leftRotationCorrection);
@@ -248,7 +248,7 @@ namespace CustomAvatar.Player
             {
                 Vector3 rightFootPositionCorrection = rightFoot.position.y * Vector3.back;
                 Vector3 rightFootForward = rightFoot.rotation * Vector3.up;
-                Vector3 rightFootStraightForward = Vector3.ProjectOnPlane(rightFootForward, floorNormal);
+                var rightFootStraightForward = Vector3.ProjectOnPlane(rightFootForward, floorNormal);
                 Quaternion rightRotationCorrection = Quaternion.Inverse(rightFoot.rotation) * Quaternion.LookRotation(Vector3.up, rightFootStraightForward);
 
                 fullBodyCalibration.rightFoot = new Pose(rightFootPositionCorrection, rightRotationCorrection);
@@ -264,11 +264,11 @@ namespace CustomAvatar.Player
                 // since hips are at 4 2/3, we multiply by 3 to have some nice numbers
                 // hips @ 4 2/3 * 3 = 14
                 // eyes @ 7 1/2 * 3 = 22.5
-                Vector3 wantedWaistPosition = new Vector3(0, eyeHeight / 22.5f * 14f, 0);
+                var wantedWaistPosition = new Vector3(0, eyeHeight / 22.5f * 14f, 0);
                 Vector3 waistPositionCorrection = wantedWaistPosition - Vector3.up * waist.position.y;
 
                 Vector3 waistForward = waist.rotation * Vector3.forward;
-                Vector3 waistStraightForward = Vector3.ProjectOnPlane(waistForward, floorNormal);
+                var waistStraightForward = Vector3.ProjectOnPlane(waistForward, floorNormal);
                 Quaternion waistRotationCorrection = Quaternion.Inverse(waist.rotation) * Quaternion.LookRotation(waistStraightForward, Vector3.up);
 
                 fullBodyCalibration.waist = new Pose(waistPositionCorrection, waistRotationCorrection);
@@ -338,7 +338,7 @@ namespace CustomAvatar.Player
             if (_avatarSettings != null)
             {
                 _avatarSettings.useAutomaticCalibration.changed -= OnUseAutomaticCalibrationChanged;
-                _avatarSettings.bypassCalibration.changed       -= OnBypassCalibrationChanged;
+                _avatarSettings.bypassCalibration.changed -= OnBypassCalibrationChanged;
             }
 
             if (!spawnedAvatar)
@@ -348,12 +348,12 @@ namespace CustomAvatar.Player
 
                 return;
             }
-           
+
             _avatarSettings = _settings.GetAvatarSettings(spawnedAvatar.prefab.fileName);
             _manualCalibration = _calibrationData.GetAvatarManualCalibration(spawnedAvatar.prefab.fileName);
 
             _avatarSettings.useAutomaticCalibration.changed += OnUseAutomaticCalibrationChanged;
-            _avatarSettings.bypassCalibration.changed       += OnBypassCalibrationChanged;
+            _avatarSettings.bypassCalibration.changed += OnBypassCalibrationChanged;
         }
 
         private bool TryGetCalibratedHandPose(DeviceUse use, out Pose pose)
@@ -373,13 +373,13 @@ namespace CustomAvatar.Player
         {
             Pose correction = Pose.identity;
 
-            if (_avatarSettings?.useAutomaticCalibration == true)
+            if (_avatarSettings?.useAutomaticCalibration)
             {
                 correction = _calibrationData.automaticCalibration.waist;
 
-                Quaternion rotationOffset = Quaternion.Euler(0, (int)_settings.automaticCalibration.waistTrackerPosition, 0);
+                var rotationOffset = Quaternion.Euler(0, (int)_settings.automaticCalibration.waistTrackerPosition, 0);
 
-                correction.position -= (_calibrationData.automaticCalibration.waist.rotation * Vector3.forward) * _settings.automaticCalibration.pelvisOffset;
+                correction.position -= _calibrationData.automaticCalibration.waist.rotation * (Vector3.forward * _settings.automaticCalibration.pelvisOffset);
                 correction.rotation *= rotationOffset;
             }
             else if (_manualCalibration != null)
@@ -400,7 +400,7 @@ namespace CustomAvatar.Player
         {
             Pose correction = Pose.identity;
 
-            if (_avatarSettings?.useAutomaticCalibration == true)
+            if (_avatarSettings?.useAutomaticCalibration)
             {
                 correction = _calibrationData.automaticCalibration.leftFoot;
                 correction.position -= Vector3.up * _settings.automaticCalibration.legOffset;
@@ -423,7 +423,7 @@ namespace CustomAvatar.Player
         {
             Pose correction = Pose.identity;
 
-            if (_avatarSettings?.useAutomaticCalibration == true)
+            if (_avatarSettings?.useAutomaticCalibration)
             {
                 correction = _calibrationData.automaticCalibration.rightFoot;
                 correction.position -= Vector3.up * _settings.automaticCalibration.legOffset;

@@ -33,12 +33,12 @@ namespace CustomAvatar.UI
         public override string ResourceName => "CustomAvatar.Views.Settings.bsml";
 
         #region Components
-        #pragma warning disable CS0649
+#pragma warning disable CS0649
 
         [UIComponent("container")] private readonly RectTransform _container;
         [UIComponent("loader")] private readonly Transform _loader;
 
-        #pragma warning restore CS0649
+#pragma warning restore CS0649
         #endregion
 
         #region Values

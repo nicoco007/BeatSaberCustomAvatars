@@ -135,11 +135,11 @@ namespace CustomAvatar.Tracking
                 }
             }
 
-            AssignDevice(ref _head,      head,      DeviceUse.Head);
-            AssignDevice(ref _leftHand,  leftHand,  DeviceUse.LeftHand);
+            AssignDevice(ref _head, head, DeviceUse.Head);
+            AssignDevice(ref _leftHand, leftHand, DeviceUse.LeftHand);
             AssignDevice(ref _rightHand, rightHand, DeviceUse.RightHand);
-            AssignDevice(ref _waist,     waist,     DeviceUse.Waist);
-            AssignDevice(ref _leftFoot,  leftFoot,  DeviceUse.LeftFoot);
+            AssignDevice(ref _waist, waist, DeviceUse.Waist);
+            AssignDevice(ref _leftFoot, leftFoot, DeviceUse.LeftFoot);
             AssignDevice(ref _rightFoot, rightFoot, DeviceUse.RightFoot);
         }
 

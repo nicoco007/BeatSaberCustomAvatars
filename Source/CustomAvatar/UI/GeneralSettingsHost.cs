@@ -30,7 +30,7 @@ namespace CustomAvatar.UI
     internal class GeneralSettingsHost : IViewControllerHost
     {
         #region Components
-        #pragma warning disable CS0649, IDE0044
+#pragma warning disable CS0649, IDE0044
 
         [UIComponent("arm-span")] private CurvedTextMeshPro _armSpanLabel;
         [UIComponent("visible-in-first-person")] private ToggleSetting _visibleInFirstPerson;
@@ -43,16 +43,16 @@ namespace CustomAvatar.UI
         [UIComponent("measure-button")] private HoverHint _measureButtonHoverHint;
         [UIComponent("height-adjust-warning-text")] private RectTransform _heightAdjustWarningText;
 
-        #pragma warning restore CS0649, IDE0044
+#pragma warning restore CS0649, IDE0044
         #endregion
 
         #region Values
-        #pragma warning disable IDE0052
+#pragma warning disable IDE0052
 
         [UIValue("resize-mode-options")] private readonly List<object> _resizeModeOptions = new List<object> { AvatarResizeMode.None, AvatarResizeMode.Height, AvatarResizeMode.ArmSpan };
         [UIValue("floor-height-adjust-options")] private readonly List<object> _floorHeightAdjustOptions = new List<object> { FloorHeightAdjust.Off, FloorHeightAdjust.PlayersPlaceOnly, FloorHeightAdjust.EntireEnvironment };
-        
-        #pragma warning restore IDE0052
+
+#pragma warning restore IDE0052
         #endregion
 
         private readonly VRPlayerInputInternal _playerInput;
@@ -124,7 +124,7 @@ namespace CustomAvatar.UI
         }
 
         #region Actions
-        #pragma warning disable IDE0051
+#pragma warning disable IDE0051
 
         [UIAction("visible-in-first-person-change")]
         private void OnVisibleInFirstPersonChanged(bool value)
@@ -204,7 +204,7 @@ namespace CustomAvatar.UI
             _settings.moveFloorWithRoomAdjust.value = value;
         }
 
-        #pragma warning restore IDE0051
+#pragma warning restore IDE0051
         #endregion
     }
 }

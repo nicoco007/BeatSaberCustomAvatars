@@ -103,10 +103,10 @@ namespace CustomAvatar.Avatar
             }
 
             assetBundleCreateRequest.assetBundle.Unload(false);
-                
+
             try
             {
-                GameObject prefabObject = (GameObject)assetBundleRequest.asset;
+                var prefabObject = (GameObject)assetBundleRequest.asset;
                 AvatarPrefab avatarPrefab = _container.InstantiateComponent<AvatarPrefab>(prefabObject, new object[] { fullPath });
                 avatarPrefab.name = $"LoadedAvatar({avatarPrefab.descriptor.name})";
 
@@ -145,27 +145,27 @@ namespace CustomAvatar.Avatar
 
         private struct LoadHandlers
         {
-            private readonly Action<AvatarPrefab> success;
-            private readonly Action<Exception> error;
-            private readonly Action complete;
+            private readonly Action<AvatarPrefab> _success;
+            private readonly Action<Exception> _error;
+            private readonly Action _complete;
 
             public LoadHandlers(Action<AvatarPrefab> success, Action<Exception> error, Action complete)
             {
-                this.success = success;
-                this.error = error;
-                this.complete = complete;
+                _success = success;
+                _error = error;
+                _complete = complete;
             }
 
             public void InvokeSuccess(AvatarPrefab value)
             {
-                success?.Invoke(value);
-                complete?.Invoke();
+                _success?.Invoke(value);
+                _complete?.Invoke();
             }
 
             public void InvokeError(Exception exception)
             {
-                error?.Invoke(exception);
-                complete?.Invoke();
+                _error?.Invoke(exception);
+                _complete?.Invoke();
             }
         }
     }

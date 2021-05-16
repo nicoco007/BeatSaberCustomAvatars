@@ -40,7 +40,7 @@ namespace CustomAvatar.Utilities
         private static void PatchPlayerSpecificSettingsSetter(Harmony harmony)
         {
             MethodInfo methodToPatch = typeof(PlayerData).GetProperty("playerSpecificSettings", BindingFlags.Public | BindingFlags.Instance).SetMethod;
-            HarmonyMethod postfixPatch = new HarmonyMethod(typeof(BeatSaberEvents).GetMethod(nameof(OnPlayerHeightChanged), BindingFlags.NonPublic | BindingFlags.Static));
+            var postfixPatch = new HarmonyMethod(typeof(BeatSaberEvents).GetMethod(nameof(OnPlayerHeightChanged), BindingFlags.NonPublic | BindingFlags.Static));
 
             harmony.Patch(methodToPatch, null, postfixPatch);
         }
@@ -48,7 +48,7 @@ namespace CustomAvatar.Utilities
         private static void PatchMirrorRendererSO(Harmony harmony)
         {
             MethodInfo methodToPatch = typeof(MirrorRendererSO).GetMethod("CreateOrUpdateMirrorCamera", BindingFlags.NonPublic | BindingFlags.Instance);
-            HarmonyMethod postfixPatch = new HarmonyMethod(typeof(BeatSaberEvents).GetMethod(nameof(CreateOrUpdateMirrorCamera), BindingFlags.NonPublic | BindingFlags.Static));
+            var postfixPatch = new HarmonyMethod(typeof(BeatSaberEvents).GetMethod(nameof(CreateOrUpdateMirrorCamera), BindingFlags.NonPublic | BindingFlags.Static));
 
             harmony.Patch(methodToPatch, null, postfixPatch);
         }

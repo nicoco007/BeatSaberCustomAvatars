@@ -48,7 +48,7 @@ namespace CustomAvatar.Zenject
 
         private T CreateAndBindViewController<T>(float width) where T : ViewController
         {
-            GameObject gameObject = new GameObject(typeof(T).Name, typeof(RectTransform), typeof(Touchable), typeof(Canvas), typeof(CanvasGroup), typeof(VRGraphicRaycaster), typeof(T));
+            var gameObject = new GameObject(typeof(T).Name, typeof(RectTransform), typeof(Touchable), typeof(Canvas), typeof(CanvasGroup), typeof(VRGraphicRaycaster), typeof(T));
 
             T viewController = gameObject.GetComponent<T>();
             viewController.gameObject.layer = 5;

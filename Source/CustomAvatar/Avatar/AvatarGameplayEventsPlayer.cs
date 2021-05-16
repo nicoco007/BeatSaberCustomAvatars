@@ -23,13 +23,13 @@ namespace CustomAvatar.Avatar
 {
     internal class AvatarGameplayEventsPlayer : IInitializable, IDisposable
     {
-        private ILogger<AvatarGameplayEventsPlayer> _logger;
-        private PlayerAvatarManager _avatarManager;
-        private ScoreController _scoreController;
-        private ILevelEndActions _levelEndActions;
-        private IMultiplayerLevelEndActionsPublisher _multiplayerLevelEndActions;
-        private BeatmapObjectCallbackController _beatmapObjectCallbackController;
-        private ObstacleSaberSparkleEffectManager _sparkleEffectManager;
+        private readonly ILogger<AvatarGameplayEventsPlayer> _logger;
+        private readonly PlayerAvatarManager _avatarManager;
+        private readonly ScoreController _scoreController;
+        private readonly ILevelEndActions _levelEndActions;
+        private readonly IMultiplayerLevelEndActionsPublisher _multiplayerLevelEndActions;
+        private readonly BeatmapObjectCallbackController _beatmapObjectCallbackController;
+        private readonly ObstacleSaberSparkleEffectManager _sparkleEffectManager;
 
         private EventManager _eventManager;
         private ColorType _lastColor = ColorType.None;
@@ -102,7 +102,7 @@ namespace CustomAvatar.Avatar
 
             _beatmapObjectCallbackController.beatmapEventDidTriggerEvent -= BeatmapEventDidTrigger;
         }
-        
+
         #endregion
 
         private void OnNoteWasCut(NoteData noteData, in NoteCutInfo cutInfo, int multiplier)

@@ -31,7 +31,7 @@ namespace CustomAvatar.Lighting
 
             light.type = LightType.Point;
             light.color = color;
-            light.intensity = 0.6f;
+            light.intensity = 0.6f * _settings.lighting.sabers.intensity;
             light.shadows = LightShadows.Soft;
             light.shadowStrength = 1;
             light.renderMode = LightRenderMode.ForcePixel; // point lights don't do much when vertex rendered

@@ -34,14 +34,14 @@ namespace CustomAvatar.Tracking.UnityXR
 
         private bool _deviceRemovedSinceLastCall;
 
-        private UnityXRDeviceProvider(ILogger<UnityXRDeviceProvider> logger)
+        internal UnityXRDeviceProvider(ILogger<UnityXRDeviceProvider> logger)
         {
             _logger = logger;
         }
 
         public void Initialize()
         {
-            InputDevices.deviceDisconnected  += OnDeviceDisconnected;
+            InputDevices.deviceDisconnected += OnDeviceDisconnected;
         }
 
         public bool GetDevices(Dictionary<string, TrackedDevice> devices)
@@ -134,7 +134,7 @@ namespace CustomAvatar.Tracking.UnityXR
 
         public void Dispose()
         {
-            InputDevices.deviceDisconnected  -= OnDeviceDisconnected;
+            InputDevices.deviceDisconnected -= OnDeviceDisconnected;
         }
 
         private void OnDeviceDisconnected(InputDevice device)

@@ -36,7 +36,7 @@ namespace CustomAvatar.Avatar
         private Vector3 _prevBodyLocalPosition = Vector3.zero;
 
         #region Behaviour Lifecycle
-        #pragma warning disable IDE0051
+#pragma warning disable IDE0051
 
         [Inject]
         private void Construct(ILogger<AvatarTracking> logger, IAvatarInput input, SpawnedAvatar spawnedAvatar, TrackingHelper trackingHelper)
@@ -53,11 +53,11 @@ namespace CustomAvatar.Avatar
         {
             try
             {
-                SetPose(DeviceUse.Head,      _spawnedAvatar.head);
-                SetPose(DeviceUse.LeftHand,  _spawnedAvatar.leftHand);
+                SetPose(DeviceUse.Head, _spawnedAvatar.head);
+                SetPose(DeviceUse.LeftHand, _spawnedAvatar.leftHand);
                 SetPose(DeviceUse.RightHand, _spawnedAvatar.rightHand);
 
-                #pragma warning disable CS0612
+#pragma warning disable CS0612
                 if (isCalibrationModeEnabled)
                 {
                     if (_spawnedAvatar.pelvis)
@@ -75,17 +75,17 @@ namespace CustomAvatar.Avatar
                         _trackingHelper.SetLocalPose(_spawnedAvatar.prefab.rightLeg.position * _spawnedAvatar.scale, _spawnedAvatar.prefab.rightLeg.rotation, _spawnedAvatar.rightLeg, transform.parent);
                     }
                 }
-                #pragma warning restore CS0612
+#pragma warning restore CS0612
                 else
                 {
-                    SetPose(DeviceUse.Waist,     _spawnedAvatar.pelvis);
-                    SetPose(DeviceUse.LeftFoot,  _spawnedAvatar.leftLeg);
+                    SetPose(DeviceUse.Waist, _spawnedAvatar.pelvis);
+                    SetPose(DeviceUse.LeftFoot, _spawnedAvatar.leftLeg);
                     SetPose(DeviceUse.RightFoot, _spawnedAvatar.rightLeg);
                 }
 
                 if (_spawnedAvatar.body)
                 {
-                    _spawnedAvatar.body.position = _spawnedAvatar.head.position - (_spawnedAvatar.head.up * 0.1f);
+                    _spawnedAvatar.body.position = _spawnedAvatar.head.position - _spawnedAvatar.head.up * 0.1f;
 
                     var vel = new Vector3(_spawnedAvatar.body.localPosition.x - _prevBodyLocalPosition.x, 0.0f,
                         _spawnedAvatar.body.localPosition.z - _prevBodyLocalPosition.z);
@@ -106,7 +106,7 @@ namespace CustomAvatar.Avatar
             }
         }
 
-        #pragma warning restore IDE0051
+#pragma warning restore IDE0051
         #endregion
 
         private void SetPose(DeviceUse use, Transform target)

@@ -26,12 +26,12 @@ namespace CustomAvatar.Utilities
         {
             return new Pose(reader.ReadVector3(), reader.ReadQuaternion());
         }
-        
+
         public static Vector3 ReadVector3(this BinaryReader reader)
         {
             return new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
         }
-        
+
         public static Quaternion ReadQuaternion(this BinaryReader reader)
         {
             return new Quaternion(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
@@ -51,7 +51,7 @@ namespace CustomAvatar.Utilities
         {
             if (bytes.Length == 0) return null;
 
-            Texture2D texture = new Texture2D(0, 0, TextureFormat.ARGB32, false);
+            var texture = new Texture2D(0, 0, TextureFormat.ARGB32, false);
 
             texture.LoadImage(bytes);
 

@@ -11,9 +11,7 @@ namespace CustomAvatar.Utilities
 
             Scene scene = SceneManager.GetSceneByName(sceneName);
 
-            if (!scene.IsValid()) return false;
-
-            return scene.GetRootGameObjects().First().activeInHierarchy;
+            return scene.IsValid() && scene.GetRootGameObjects().First().activeInHierarchy;
         }
     }
 }

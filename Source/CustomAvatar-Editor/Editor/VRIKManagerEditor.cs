@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
@@ -28,13 +29,13 @@ namespace CustomAvatar.Editor
     {
         private static readonly Regex kRegex = new Regex("(?<!^)(?=[A-Z])");
 
-        private readonly Dictionary<string, bool> foldouts = new Dictionary<string, bool>();
+        private readonly Dictionary<string, bool> _foldouts = new Dictionary<string, bool>();
 
         public override void OnInspectorGUI()
         {
             string previousSection = null;
 
-            foreach (var field in typeof(VRIKManager).GetFields())
+            foreach (FieldInfo field in typeof(VRIKManager).GetFields())
             {
                 int lastSeparatorIndex = field.Name.LastIndexOf('_');
                 string section;
@@ -64,15 +65,15 @@ namespace CustomAvatar.Editor
 
                         if (previousSubSections.Contains(subSection)) continue;
 
-                        if (!foldouts.ContainsKey(subSection))
+                        if (!_foldouts.ContainsKey(subSection))
                         {
-                            foldouts.Add(subSection, true);
+                            _foldouts.Add(subSection, true);
                         }
 
-                        if (i == 0 || foldouts[subSections[i - 1]])
+                        if (i == 0 || _foldouts[subSections[i - 1]])
                         {
                             EditorGUI.indentLevel = i;
-                            foldouts[subSection] = EditorGUILayout.Foldout(foldouts[subSection], CamelCaseToNatural(subSection), true);
+                            _foldouts[subSection] = EditorGUILayout.Foldout(_foldouts[subSection], CamelCaseToNatural(subSection), true);
                         }
                     }
                 }
@@ -99,7 +100,7 @@ namespace CustomAvatar.Editor
         {
             foreach (string subSection in section.Split('_'))
             {
-                if (!foldouts[subSection]) return false;
+                if (!_foldouts[subSection]) return false;
             }
 
             return true;

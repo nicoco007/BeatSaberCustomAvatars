@@ -51,7 +51,7 @@ namespace CustomAvatar.Zenject
         {
             // logging
             Container.Bind(typeof(ILogger<>)).FromMethodUntyped(CreateLogger).AsTransient().When(ShouldCreateLogger);
-            
+
             // settings
             Container.BindInterfacesAndSelfTo<SettingsManager>().AsSingle();
             Container.Bind<Settings>().FromMethod((context) => context.Container.Resolve<SettingsManager>().settings);
@@ -85,9 +85,9 @@ namespace CustomAvatar.Zenject
             Container.BindInterfacesAndSelfTo<LightingQualityController>().AsSingle();
             Container.BindInterfacesAndSelfTo<BeatSaberUtilities>().AsSingle();
 
-            #pragma warning disable CS0612
+#pragma warning disable CS0612
             Container.BindInterfacesAndSelfTo<FloorController>().AsSingle();
-            #pragma warning restore CS0612
+#pragma warning restore CS0612
 
             // helper classes
             Container.Bind<MirrorHelper>().AsTransient();

@@ -132,12 +132,12 @@ namespace CustomAvatar.Avatar
                 ikHelper.CreateOffsetTargetsIfMissing(vrikManager, transform);
             }
 
-            head      = transform.Find("Head");
-            leftHand  = transform.Find("LeftHand");
+            head = transform.Find("Head");
+            leftHand = transform.Find("LeftHand");
             rightHand = transform.Find("RightHand");
-            pelvis    = transform.Find("Pelvis");
-            leftLeg   = transform.Find("LeftLeg");
-            rightLeg  = transform.Find("RightLeg");
+            pelvis = transform.Find("Pelvis");
+            leftLeg = transform.Find("LeftLeg");
+            rightLeg = transform.Find("RightLeg");
 
             if (vrikManager)
             {
@@ -160,7 +160,7 @@ namespace CustomAvatar.Avatar
                 _logger.Warning("Avatar root position is not at origin; this may cause unexpected issues");
             }
 
-            var poseManager = GetComponentInChildren<PoseManager>();
+            PoseManager poseManager = GetComponentInChildren<PoseManager>();
 
             isIKAvatar = vrikManager;
             supportsFingerTracking = poseManager && poseManager.isValid;

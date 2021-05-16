@@ -64,7 +64,6 @@
     <Compile Include="..\CustomAvatar\EventManager.cs" Link="EventManager.cs" />
     <Compile Include="..\CustomAvatar\EveryNthComboFilter.cs" Link="EveryNthComboFilter.cs" />
     <Compile Include="..\CustomAvatar\FirstPersonExclusion.cs" Link="FirstPersonExclusion.cs" />
-    <Compile Include="..\CustomAvatar\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
     <Compile Include="..\CustomAvatar\Logging\ILogger.cs" Link="Logging\ILogger.cs" />
     <Compile Include="..\CustomAvatar\Logging\UnityDebugLogger.cs" Link="Logging\UnityDebugLogger.cs" />
     <Compile Include="..\CustomAvatar\PoseManager.cs" Link="PoseManager.cs" />
@@ -98,4 +97,14 @@
 
     <Copy SourceFiles="@(CopyToUnityProjectFolder)" DestinationFiles="@(CopyToUnityProjectFolder->'$(UnityProjectDir)\Assets\Libraries\%(RecursiveDir)%(Filename)%(Extension)')" Condition="!Exists('$(UnityProjectDir)\Assets\Libraries\%(RecursiveDir)%(Filename)%(Extension)') OR '%(Extension)' != '.meta'" />
   </Target>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="3.9.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Unity.Analyzers" Version="1.10.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
 </Project>

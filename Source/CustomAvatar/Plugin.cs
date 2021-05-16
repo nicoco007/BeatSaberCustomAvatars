@@ -39,7 +39,7 @@ namespace CustomAvatar
 
             logger.Info("Initializing Custom Avatars");
 
-            Harmony harmony = new Harmony("com.nicoco007.beatsabercustomavatars");
+            var harmony = new Harmony("com.nicoco007.beatsabercustomavatars");
 
             ZenjectHelper.Init(harmony, ipaLogger);
             BeatSaberEvents.ApplyPatches(harmony, ipaLogger);

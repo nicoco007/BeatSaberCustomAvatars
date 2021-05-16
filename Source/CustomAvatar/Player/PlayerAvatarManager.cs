@@ -517,7 +517,7 @@ namespace CustomAvatar.Player
         {
             if (!currentlySpawnedAvatar) return;
 
-            var visibility = FirstPersonVisibility.Hidden;
+            FirstPersonVisibility visibility = FirstPersonVisibility.Hidden;
 
             if (_settings.isAvatarVisibleInFirstPerson)
             {
@@ -574,7 +574,7 @@ namespace CustomAvatar.Player
             _avatarContainer.transform.localPosition = localPosition;
 
             if (!currentlySpawnedAvatar) return;
-            
+
             Vector3 avatarPosition = currentlySpawnedAvatar.transform.localPosition;
             avatarPosition.y = _settings.moveFloorWithRoomAdjust ? 0 : -_beatSaberUtilities.roomCenter.y;
             currentlySpawnedAvatar.transform.localPosition = avatarPosition;

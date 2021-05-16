@@ -27,7 +27,7 @@ namespace AvatarScriptPack
 
 namespace RootMotion.FinalIK
 {
-    [Obsolete("Use BeatSaberFinalIK::RootMotion.FinalIK.VRIK")] internal class VRIK : BeatSaberFinalIK::RootMotion.FinalIK.VRIK {  }
+    [Obsolete("Use BeatSaberFinalIK::RootMotion.FinalIK.VRIK")] internal class VRIK : BeatSaberFinalIK::RootMotion.FinalIK.VRIK { }
     [Obsolete("Use BeatSaberFinalIK::RootMotion.FinalIK.TwistRelaxer")] internal class TwistRelaxer : BeatSaberFinalIK::RootMotion.FinalIK.TwistRelaxer { }
 }
 

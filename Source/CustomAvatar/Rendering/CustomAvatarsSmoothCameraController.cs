@@ -86,7 +86,7 @@ namespace CustomAvatar.Rendering
 
             if (!_settings.showAvatarInSmoothCamera)
             {
-                _camera.cullingMask = _camera.cullingMask & ~AvatarLayers.kAllLayersMask;
+                _camera.cullingMask &= ~AvatarLayers.kAllLayersMask;
                 _camera.nearClipPlane = kCameraDefaultNearClipMask;
             }
             else if (thirdPersonEnabled)

@@ -16,6 +16,7 @@
 
 using UnityEngine;
 
+#pragma warning disable IDE1006
 namespace CustomAvatar
 {
     public class FirstPersonExclusion : MonoBehaviour

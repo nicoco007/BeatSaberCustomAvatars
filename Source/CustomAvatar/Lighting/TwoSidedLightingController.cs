@@ -28,7 +28,6 @@ namespace CustomAvatar.Lighting
         private Settings _settings;
 
         #region Behaviour Lifecycle
-        #pragma warning disable IDE0051
 
         [Inject]
         internal void Construct(Settings settings)
@@ -41,14 +40,13 @@ namespace CustomAvatar.Lighting
             AddLight(Quaternion.Euler(135, 0, 0), kAmbientColor, _settings.lighting.environment.intensity); // front
             AddLight(Quaternion.Euler(45, 0, 0), kAmbientColor, _settings.lighting.environment.intensity); // back
         }
-        
-        #pragma warning restore IDE0051
+
         #endregion
 
         private void AddLight(Quaternion rotation, Color color, float intensity)
         {
             var container = new GameObject("Light");
-            var light = container.AddComponent<Light>();
+            Light light = container.AddComponent<Light>();
 
             light.type = LightType.Directional;
             light.color = color;
@@ -58,8 +56,7 @@ namespace CustomAvatar.Lighting
             light.shadowStrength = 1;
 
             container.transform.SetParent(transform, false);
-            container.transform.position = Vector3.zero;
-            container.transform.rotation = rotation;
+            container.transform.SetPositionAndRotation(Vector3.zero, rotation);
         }
     }
 }

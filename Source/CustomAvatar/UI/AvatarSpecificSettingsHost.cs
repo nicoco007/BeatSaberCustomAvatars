@@ -23,14 +23,13 @@ using UnityEngine.UI;
 using CustomAvatar.Tracking;
 using CustomAvatar.Player;
 using CustomAvatar.Configuration;
-using System;
 
 namespace CustomAvatar.UI
 {
     internal class AvatarSpecificSettingsHost : IViewControllerHost
     {
         #region Components
-        #pragma warning disable CS0649, IDE0044
+#pragma warning disable CS0649, IDE0044
 
 
         [UIComponent("ignore-exclusions")] private ToggleSetting _ignoreExclusionsSetting;
@@ -46,7 +45,7 @@ namespace CustomAvatar.UI
         [UIComponent("automatic-calibration")] private HoverHint _automaticCalibrationHoverHint;
         [UIComponent("calibrate-button")] private HoverHint _calibrateButtonHoverHint;
 
-        #pragma warning restore CS0649, IDE0044
+#pragma warning restore CS0649, IDE0044
         #endregion
 
         private readonly PlayerAvatarManager _avatarManager;
@@ -144,7 +143,7 @@ namespace CustomAvatar.UI
         }
 
         #region Actions
-        #pragma warning disable IDE0051
+#pragma warning disable IDE0051
 
         [UIAction("ignore-exclusions-change")]
         private void OnIgnoreExclusionsChanged(bool value)
@@ -199,7 +198,7 @@ namespace CustomAvatar.UI
             }
         }
 
-        #pragma warning restore IDE0051
+#pragma warning restore IDE0051
         #endregion
 
         private void EnableCalibrationMode()
@@ -215,7 +214,7 @@ namespace CustomAvatar.UI
             SetCalibrationMode(false);
 
             if (!_avatarManager.currentlySpawnedAvatar) return;
-            
+
             if (save)
             {
                 _playerInput.CalibrateFullBodyTrackingManual(_avatarManager.currentlySpawnedAvatar);

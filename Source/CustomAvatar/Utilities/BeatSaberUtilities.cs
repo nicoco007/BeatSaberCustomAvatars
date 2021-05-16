@@ -49,7 +49,7 @@ namespace CustomAvatar.Utilities
 
         public void Initialize()
         {
-            _mainSettingsModel.roomCenter.didChangeEvent   += OnRoomCenterChanged;
+            _mainSettingsModel.roomCenter.didChangeEvent += OnRoomCenterChanged;
             _mainSettingsModel.roomRotation.didChangeEvent += OnRoomRotationChanged;
 
             _vrControllerManufacturerNameGetter = ReflectionExtensions.CreatePrivatePropertyGetter<OpenVRHelper, OpenVRHelper.VRControllerManufacturerName>("vrControllerManufacturerName");
@@ -57,7 +57,7 @@ namespace CustomAvatar.Utilities
 
         public void Dispose()
         {
-            _mainSettingsModel.roomCenter.didChangeEvent   -= OnRoomCenterChanged;
+            _mainSettingsModel.roomCenter.didChangeEvent -= OnRoomCenterChanged;
             _mainSettingsModel.roomRotation.didChangeEvent -= OnRoomRotationChanged;
         }
 

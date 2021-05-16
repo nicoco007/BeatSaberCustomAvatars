@@ -17,6 +17,7 @@
 using System;
 using Valve.VR;
 
+#pragma warning disable IDE1006
 namespace CustomAvatar.Tracking.OpenVR
 {
     internal class OpenVRException : Exception

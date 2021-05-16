@@ -17,6 +17,7 @@
 using UnityEngine.Events;
 using UnityEngine.Serialization;
 
+#pragma warning disable IDE0051, IDE1006
 namespace CustomAvatar
 {
     public class ComboReachedEvent : EventFilterBehaviour

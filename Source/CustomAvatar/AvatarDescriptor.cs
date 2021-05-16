@@ -63,14 +63,14 @@ namespace CustomAvatar
         public Sprite cover;
 
         // Legacy stuff
-#pragma warning disable CS0649, IDE0044
+#pragma warning disable CS0649, IDE0044, IDE1006
         [SerializeField] [HideInInspector] private string AvatarName;
         [SerializeField] [HideInInspector] private string AuthorName;
         [SerializeField] [HideInInspector] private Sprite CoverImage;
         [SerializeField] [HideInInspector] private string Name;
         [SerializeField] [HideInInspector] private string Author;
         [SerializeField] [HideInInspector] private Sprite Cover;
-#pragma warning restore CS0649, IDE0044
+#pragma warning restore CS0649, IDE0044, IDE1006
 
         public void OnBeforeSerialize() { }
 
@@ -86,7 +86,7 @@ namespace CustomAvatar
 
         public void Start()
         {
-            IKHelper ikHelper = new IKHelper(new UnityDebugLogger<IKHelper>());
+            var ikHelper = new IKHelper(new UnityDebugLogger<IKHelper>());
             ikHelper.InitializeVRIK(transform.GetComponentInChildren<VRIKManager>(), transform);
         }
 
@@ -122,7 +122,7 @@ namespace CustomAvatar
                 }
 
                 length = reader.ReadInt32();
-                var triangles = new int[length];
+                int[] triangles = new int[length];
 
                 for (int i = 0; i < length; i++)
                 {
@@ -139,11 +139,11 @@ namespace CustomAvatar
 
         internal void SaveMesh(Mesh mesh)
         {
-            using (BinaryWriter writer = new BinaryWriter(File.OpenWrite("mesh.dat")))
+            using (var writer = new BinaryWriter(File.OpenWrite("mesh.dat")))
             {
                 writer.Write(mesh.vertices.Length);
 
-                foreach (var vertex in mesh.vertices)
+                foreach (Vector3 vertex in mesh.vertices)
                 {
                     writer.Write(vertex.x);
                     writer.Write(vertex.y);
@@ -152,7 +152,7 @@ namespace CustomAvatar
 
                 writer.Write(mesh.normals.Length);
 
-                foreach (var normal in mesh.normals)
+                foreach (Vector3 normal in mesh.normals)
                 {
                     writer.Write(normal.x);
                     writer.Write(normal.y);
@@ -161,7 +161,7 @@ namespace CustomAvatar
 
                 writer.Write(mesh.triangles.Length);
 
-                foreach (var triangle in mesh.triangles)
+                foreach (int triangle in mesh.triangles)
                 {
                     writer.Write(triangle);
                 }

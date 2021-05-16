@@ -26,7 +26,7 @@ namespace CustomAvatar.Avatar
         private IAvatarInput _input;
 
         #region Behaviour Lifecycle
-        #pragma warning disable IDE0051
+#pragma warning disable IDE0051
 
         [Inject]
         private void Inject(IAvatarInput input)
@@ -44,7 +44,7 @@ namespace CustomAvatar.Avatar
             ApplyFingerTracking();
         }
 
-        #pragma warning restore IDE0051
+#pragma warning restore IDE0051
         #endregion
 
         private void ApplyFingerTracking()

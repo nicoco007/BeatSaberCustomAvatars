@@ -6,7 +6,7 @@ namespace CustomAvatar.Zenject.Internal
 {
     internal class InstallerRegistrationOnMonoInstaller<T> : InstallerRegistrationOnTarget where T : MonoInstaller
     {
-        private Type _targetType;
+        private readonly Type _targetType;
 
         internal InstallerRegistrationOnMonoInstaller()
         {

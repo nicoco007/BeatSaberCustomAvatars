@@ -30,7 +30,7 @@ namespace CustomAvatar.UI
     internal class AutomaticFbtCalibrationHost : IViewControllerHost
     {
         #region Components
-        #pragma warning disable CS0649, IDE0044
+#pragma warning disable CS0649, IDE0044
 
         [UIComponent("calibrate-fbt-on-start")] private ToggleSetting _calibrateFullBodyTrackingOnStart;
         [UIComponent("pelvis-offset")] private IncrementSetting _pelvisOffset;
@@ -42,11 +42,11 @@ namespace CustomAvatar.UI
 
         [UIComponent("auto-calibrate-button")] private HoverHint _autoCalibrateButtonHoverHint;
 
-        #pragma warning restore CS0649, IDE0044
+#pragma warning restore CS0649, IDE0044
         #endregion
 
         #region Values
-        #pragma warning disable IDE0052
+#pragma warning disable IDE0052
 
         [UIValue("waist-tracker-position-options")] private readonly List<object> _waistTrackerOptions = new List<object> { WaistTrackerPosition.Front, WaistTrackerPosition.Left, WaistTrackerPosition.Right, WaistTrackerPosition.Back };
 
@@ -112,7 +112,7 @@ namespace CustomAvatar.UI
         }
 
         #region Actions
-        #pragma warning disable IDE0051
+#pragma warning disable IDE0051
 
         [UIAction("calibrate-fbt-on-start-change")]
         private void OnCalibrateFullBodyTrackingOnStartChanged(bool value)
@@ -157,8 +157,8 @@ namespace CustomAvatar.UI
         {
             _settings.automaticCalibration.waistTrackerPosition = waistTrackerPosition;
         }
-        
-        #pragma warning restore IDE0051
+
+#pragma warning restore IDE0051
         #endregion
     }
 }

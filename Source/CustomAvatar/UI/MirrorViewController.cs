@@ -39,12 +39,12 @@ namespace CustomAvatar.UI
         private PlayerAvatarManager _avatarManager;
 
         #region Components
-        #pragma warning disable CS0649
+#pragma warning disable CS0649
 
         [UIComponent("loader")] private readonly Transform _loader;
         [UIComponent("error-text")] private readonly CurvedTextMeshPro _errorText;
 
-        #pragma warning restore CS0649
+#pragma warning restore CS0649
         #endregion
 
         #region Behaviour Lifecycle

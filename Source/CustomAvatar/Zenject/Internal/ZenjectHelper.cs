@@ -20,14 +20,14 @@ namespace CustomAvatar.Zenject.Internal
 
         private static readonly Type[] kContextTypesWithSceneBindings = new[] { typeof(ProjectContext), typeof(SceneContext), typeof(GameObjectContext) };
 
-        private static readonly FieldAccessor<SceneContext, List<SceneDecoratorContext>>.Accessor _decoratorContextsAccessor = FieldAccessor<SceneContext, List<SceneDecoratorContext>>.GetAccessor("_decoratorContexts");
-        private static readonly FieldAccessor<SceneDecoratorContext, List<MonoBehaviour>>.Accessor _injectableMonoBehavioursAccessor = FieldAccessor<SceneDecoratorContext, List<MonoBehaviour>>.GetAccessor("_injectableMonoBehaviours");
+        private static readonly FieldAccessor<SceneContext, List<SceneDecoratorContext>>.Accessor kDecoratorContextsAccessor = FieldAccessor<SceneContext, List<SceneDecoratorContext>>.GetAccessor("_decoratorContexts");
+        private static readonly FieldAccessor<SceneDecoratorContext, List<MonoBehaviour>>.Accessor kInjectableMonoBehavioursAccessor = FieldAccessor<SceneDecoratorContext, List<MonoBehaviour>>.GetAccessor("_injectableMonoBehaviours");
 
         private static bool _shouldInstall;
 
-        private static readonly HashSet<InstallerRegistration> _installerRegistrations = new HashSet<InstallerRegistration>();
-        private static readonly HashSet<Type> _componentsToBind = new HashSet<Type>();
-        private static readonly Dictionary<Type, List<ComponentRegistration>> _componentsToAdd = new Dictionary<Type, List<ComponentRegistration>>();
+        private static readonly HashSet<InstallerRegistration> kInstallerRegistrations = new HashSet<InstallerRegistration>();
+        private static readonly HashSet<Type> kComponentsToBind = new HashSet<Type>();
+        private static readonly Dictionary<Type, List<ComponentRegistration>> kComponentsToAdd = new Dictionary<Type, List<ComponentRegistration>>();
 
         private static ILogger<ZenjectHelper> _logger;
 
@@ -43,27 +43,27 @@ namespace CustomAvatar.Zenject.Internal
         {
             var registration = new InstallerRegistration(typeof(TInstaller));
 
-            _installerRegistrations.Add(registration);
+            kInstallerRegistrations.Add(registration);
 
             return registration;
         }
 
         public static void BindSceneComponent<T>() where T : MonoBehaviour
         {
-            _componentsToBind.Add(typeof(T));
+            kComponentsToBind.Add(typeof(T));
         }
 
-        public static void AddComponentAlongsideExisting<TExisting, TAdd>(string childTransformName = null, Func<GameObject, bool> condition = null, params object[] extraArgs) where TExisting : MonoBehaviour where TAdd : MonoBehaviour
+        public static void AddComponentAlongsideExisting<TExisting, TAdd>(string childTransformName = null, Func<GameObject, bool> condition = null, params object[] extraArgs) where TExisting : MonoBehaviour where TAdd : MonoBehaviour
         {
             var componentRegistration = new ComponentRegistration(typeof(TAdd), childTransformName, condition, extraArgs);
 
-            if (_componentsToAdd.TryGetValue(typeof(TExisting), out List<ComponentRegistration> types))
+            if (kComponentsToAdd.TryGetValue(typeof(TExisting), out List<ComponentRegistration> types))
             {
                 types.Add(componentRegistration);
             }
             else
             {
-                _componentsToAdd.Add(typeof(TExisting), new List<ComponentRegistration> { componentRegistration });
+                kComponentsToAdd.Add(typeof(TExisting), new List<ComponentRegistration> { componentRegistration });
             }
         }
 
@@ -118,7 +118,7 @@ namespace CustomAvatar.Zenject.Internal
                 BindIfNeeded(__instance, installer);
             }
 
-            foreach (InstallerRegistration installerRegistration in _installerRegistrations)
+            foreach (InstallerRegistration installerRegistration in kInstallerRegistrations)
             {
                 if (installerRegistration.TryInstallInto(__instance))
                 {
@@ -141,7 +141,7 @@ namespace CustomAvatar.Zenject.Internal
 
             if (__instance is SceneContext sceneContext)
             {
-                injectableMonoBehaviours.AddRange(_decoratorContextsAccessor(ref sceneContext).SelectMany(dc => _injectableMonoBehavioursAccessor(ref dc)));
+                injectableMonoBehaviours.AddRange(kDecoratorContextsAccessor(ref sceneContext).SelectMany(dc => kInjectableMonoBehavioursAccessor(ref dc)));
             }
 
             foreach (MonoBehaviour monoBehaviour in injectableMonoBehaviours)
@@ -159,7 +159,7 @@ namespace CustomAvatar.Zenject.Internal
         {
             Type type = monoBehaviour.GetType();
 
-            if (!_componentsToBind.Contains(type)) return;
+            if (!kComponentsToBind.Contains(type)) return;
 
             if (!context.Container.HasBinding(type))
             {
@@ -177,7 +177,7 @@ namespace CustomAvatar.Zenject.Internal
         {
             Type monoBehaviourType = monoBehaviour.GetType();
 
-            if (!_componentsToAdd.TryGetValue(monoBehaviourType, out List<ComponentRegistration> componentsToAdd)) return;
+            if (!kComponentsToAdd.TryGetValue(monoBehaviourType, out List<ComponentRegistration> componentsToAdd)) return;
 
             foreach (ComponentRegistration componentRegistration in componentsToAdd)
             {

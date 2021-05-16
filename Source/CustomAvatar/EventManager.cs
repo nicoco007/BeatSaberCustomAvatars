@@ -18,6 +18,7 @@ using System;
 using UnityEngine;
 using UnityEngine.Events;
 
+#pragma warning disable IDE1006
 namespace CustomAvatar
 {
     public class EventManager : MonoBehaviour

@@ -24,7 +24,7 @@ namespace CustomAvatar.Player
                     break;
 
                 case FloorHeightAdjust.PlayersPlaceOnly:
-                    GameObject environment = GameObject.Find("/Environment");
+                    var environment = GameObject.Find("/Environment");
 
                     _container.InstantiateComponent<EnvironmentObject>(environment.transform.Find("PlayersPlace").gameObject);
 

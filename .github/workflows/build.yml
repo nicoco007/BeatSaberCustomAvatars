@@ -19,7 +19,7 @@ jobs:
     - name: Set up .NET Core
       uses: actions/setup-dotnet@v1.7.2
       with:
-        dotnet-version: 3.1.x
+        dotnet-version: 5.0.x
 
     - name: Set manifest version
       run: ./bsipa_version_hash.ps1 "Source\CustomAvatar\manifest.json" "Source\CustomAvatar\Properties\AssemblyInfo.cs"

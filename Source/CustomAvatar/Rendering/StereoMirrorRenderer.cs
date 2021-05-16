@@ -43,10 +43,10 @@ namespace CustomAvatar.Rendering
 
         private Renderer _renderer;
         private Camera _mirrorCamera;
-        private Dictionary<Camera, RenderTexture> _renderTextures = new Dictionary<Camera, RenderTexture>();
+        private readonly Dictionary<Camera, RenderTexture> _renderTextures = new Dictionary<Camera, RenderTexture>();
 
         #region Behaviour Lifecycle
-        #pragma warning disable IDE0051
+#pragma warning disable IDE0051
 
         [Inject]
         private void Inject(ShaderLoader shaderLoader, Settings settings)
@@ -79,7 +79,7 @@ namespace CustomAvatar.Rendering
             }
         }
 
-        #pragma warning restore IDE0051
+#pragma warning restore IDE0051
         #endregion
 
         private void PrepareForNextFrame()
@@ -104,7 +104,7 @@ namespace CustomAvatar.Rendering
             Vector3 cameraPosition = camera.transform.position;
             Quaternion cameraRotation = camera.transform.rotation;
             bool stereoEnabled = camera.stereoEnabled;
-            Plane plane = new Plane(reflectionPlaneNormal, reflectionPlanePosition);
+            var plane = new Plane(reflectionPlaneNormal, reflectionPlanePosition);
 
             // don't render if the camera is too close to the mirror to prevent errors
             if (plane.GetDistanceToPoint(cameraPosition) <= Mathf.Epsilon || (camera.orthographic && Mathf.Abs(Vector3.Dot(camera.transform.forward, reflectionPlaneNormal)) <= Mathf.Epsilon))
@@ -112,10 +112,8 @@ namespace CustomAvatar.Rendering
                 return null;
             }
 
-            RenderTexture renderTexture;
-
             // return immediately if we've already rendered for this frame
-            if (_renderTextures.TryGetValue(camera, out renderTexture))
+            if (_renderTextures.TryGetValue(camera, out RenderTexture renderTexture))
             {
                 return renderTexture;
             }
@@ -229,19 +227,19 @@ namespace CustomAvatar.Rendering
             Matrix4x4 identity = Matrix4x4.identity;
 
             identity.m00 = 1f - 2f * plane.x * plane.x;
-            identity.m01 =     -2f * plane.x * plane.y;
-            identity.m02 =     -2f * plane.x * plane.z;
-            identity.m03 =     -2f * plane.x * plane.w;
+            identity.m01 = -2f * plane.x * plane.y;
+            identity.m02 = -2f * plane.x * plane.z;
+            identity.m03 = -2f * plane.x * plane.w;
 
-            identity.m10 =     -2f * plane.y * plane.x;
+            identity.m10 = -2f * plane.y * plane.x;
             identity.m11 = 1f - 2f * plane.y * plane.y;
-            identity.m12 =     -2f * plane.y * plane.z;
-            identity.m13 =     -2f * plane.y * plane.w;
+            identity.m12 = -2f * plane.y * plane.z;
+            identity.m13 = -2f * plane.y * plane.w;
 
-            identity.m20 =     -2f * plane.z * plane.x;
-            identity.m21 =     -2f * plane.z * plane.y;
+            identity.m20 = -2f * plane.z * plane.x;
+            identity.m21 = -2f * plane.z * plane.y;
             identity.m22 = 1f - 2f * plane.z * plane.z;
-            identity.m23 =     -2f * plane.z * plane.w;
+            identity.m23 = -2f * plane.z * plane.w;
 
             identity.m30 = 0f;
             identity.m31 = 0f;

@@ -83,12 +83,14 @@ namespace CustomAvatar
 
         [Tooltip("Optional")]
         public Transform references_rightToes;
-        
-        [ContextMenu("Auto-detect References")]
-        public void AutoDetectReferences() {
-            var animator = transform.GetComponentInChildren<Animator>();
 
-            if (animator == null || !animator.isHuman) {
+        [ContextMenu("Auto-detect References")]
+        public void AutoDetectReferences()
+        {
+            Animator animator = transform.GetComponentInChildren<Animator>();
+
+            if (animator == null || !animator.isHuman)
+            {
                 _logger.Error("VRIK needs a Humanoid Animator to auto-detect biped references. Please assign references manually.");
                 return;
             }
@@ -385,7 +387,7 @@ namespace CustomAvatar
 
         [Tooltip("Called when the left foot has finished a step.")]
         public UnityEvent solver_locomotion_onLeftFootstep = new UnityEvent();
-        
+
         [Tooltip("Called when the right foot has finished a step")]
         public UnityEvent solver_locomotion_onRightFootstep = new UnityEvent();
 
@@ -409,22 +411,22 @@ namespace CustomAvatar
                                            );
 
         #region Behaviour Lifecycle
-        #pragma warning disable IDE0051
+#pragma warning disable IDE0051
 
-        #if !UNITY_EDITOR
+#if !UNITY_EDITOR
         [Inject]
+#endif
         private void Construct(ILogger<VRIKManager> logger)
         {
             _logger = logger;
         }
-        #endif
 
         private void Reset()
         {
             AutoDetectReferences();
         }
 
-        #pragma warning restore IDE0051
+#pragma warning restore IDE0051
         #endregion
     }
 }

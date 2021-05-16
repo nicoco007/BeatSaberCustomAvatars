@@ -77,7 +77,7 @@ namespace CustomAvatar.UI
             if (addedToHierarchy)
             {
                 _avatarManager.avatarChanged += OnAvatarChanged;
-                _avatarManager.avatarAdded   += OnAvatarAdded;
+                _avatarManager.avatarAdded += OnAvatarAdded;
                 _avatarManager.avatarRemoved += OnAvatarRemoved;
 
                 ReloadAvatars();
@@ -106,10 +106,10 @@ namespace CustomAvatar.UI
         // temporary while BSML doesn't support the new scroll buttons & indicator
         private void CreateTableView()
         {
-            RectTransform tableViewContainer = new GameObject("AvatarsTableView", typeof(RectTransform)).transform as RectTransform;
-            RectTransform tableView = new GameObject("AvatarsTableView", typeof(RectTransform), typeof(ScrollRect), typeof(Touchable), typeof(EventSystemListener)).transform as RectTransform;
-            RectTransform viewport = new GameObject("Viewport", typeof(RectTransform), typeof(RectMask2D)).transform as RectTransform;
-            RectTransform content = new GameObject("Content", typeof(RectTransform)).transform as RectTransform;
+            var tableViewContainer = (RectTransform)new GameObject("AvatarsTableView", typeof(RectTransform)).transform;
+            var tableView = (RectTransform)new GameObject("AvatarsTableView", typeof(RectTransform), typeof(ScrollRect), typeof(Touchable), typeof(EventSystemListener)).transform;
+            var viewport = (RectTransform)new GameObject("Viewport", typeof(RectTransform), typeof(RectMask2D)).transform;
+            var content = (RectTransform)new GameObject("Content", typeof(RectTransform)).transform;
 
             tableViewContainer.gameObject.SetActive(false);
 
@@ -185,7 +185,7 @@ namespace CustomAvatar.UI
 
             gameObject.name = "RefreshButton";
 
-            RectTransform rectTransform = (RectTransform)gameObject.transform;
+            var rectTransform = (RectTransform)gameObject.transform;
             rectTransform.anchorMin = new Vector2(1, 0);
             rectTransform.anchorMax = new Vector2(1, 0);
             rectTransform.offsetMin = new Vector2(-12, 2);
@@ -194,7 +194,7 @@ namespace CustomAvatar.UI
             Button button = gameObject.GetComponent<Button>();
             button.onClick.AddListener(OnRefreshButtonPressed);
             button.transform.SetParent(transform);
-            
+
             ImageView image = iconObject.GetComponent<ImageView>();
             image.sprite = LoadSpriteFromResource("CustomAvatar.Resources.arrows-rotate.png");
 
@@ -206,7 +206,7 @@ namespace CustomAvatar.UI
 
         private Sprite LoadSpriteFromResource(string resourceName)
         {
-            Texture2D texture = new Texture2D(0, 0);
+            var texture = new Texture2D(0, 0);
 
             using (Stream textureStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
             {
@@ -225,7 +225,7 @@ namespace CustomAvatar.UI
             if (removedFromHierarchy)
             {
                 _avatarManager.avatarChanged -= OnAvatarChanged;
-                _avatarManager.avatarAdded   -= OnAvatarAdded;
+                _avatarManager.avatarAdded -= OnAvatarAdded;
                 _avatarManager.avatarRemoved -= OnAvatarRemoved;
             }
         }
@@ -311,7 +311,7 @@ namespace CustomAvatar.UI
 
         public TableCell CellForIdx(TableView tableView, int idx)
         {
-            AvatarListTableCell tableCell = _tableView.DequeueReusableCellForIdentifier(kTableCellReuseIdentifier) as AvatarListTableCell;
+            var tableCell = _tableView.DequeueReusableCellForIdentifier(kTableCellReuseIdentifier) as AvatarListTableCell;
 
             if (!tableCell)
             {

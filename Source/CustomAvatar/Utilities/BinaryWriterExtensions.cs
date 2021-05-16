@@ -68,14 +68,14 @@ namespace CustomAvatar.Utilities
                 float scale = Mathf.Min(1, kMaxTextureSize / texture.width, kMaxTextureSize / texture.height);
                 int width = Mathf.RoundToInt(texture.width * scale);
                 int height = Mathf.RoundToInt(texture.height * scale);
-                RenderTexture renderTexture = RenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.ARGB32);
+                var renderTexture = RenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.ARGB32);
                 RenderTexture.active = renderTexture;
                 Graphics.Blit(texture, renderTexture);
                 texture = renderTexture.GetTexture2D();
                 RenderTexture.active = null;
                 RenderTexture.ReleaseTemporary(renderTexture);
             }
-            
+
             return texture.EncodeToPNG();
         }
     }

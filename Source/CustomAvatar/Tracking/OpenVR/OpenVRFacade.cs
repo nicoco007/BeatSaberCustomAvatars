@@ -20,7 +20,9 @@ using Valve.VR;
 
 namespace CustomAvatar.Tracking.OpenVR
 {
+#pragma warning disable IDE0065
     using OpenVR = Valve.VR.OpenVR;
+#pragma warning restore IDE0065
 
     internal class OpenVRFacade
     {
@@ -61,7 +63,7 @@ namespace CustomAvatar.Tracking.OpenVR
 
             if (length > 0)
             {
-                StringBuilder stringBuilder = new StringBuilder((int)length);
+                var stringBuilder = new StringBuilder((int)length);
                 OpenVR.System.GetStringTrackedDeviceProperty(deviceIndex, property, stringBuilder, length, ref error);
 
                 if (error != ETrackedPropertyError.TrackedProp_Success)

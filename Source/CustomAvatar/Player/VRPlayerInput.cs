@@ -17,8 +17,8 @@ namespace CustomAvatar.Player
 
         public event Action inputChanged;
 
-        private VRPlayerInputInternal _internalPlayerInput;
-        private TrackingHelper _trackingHelper;
+        private readonly VRPlayerInputInternal _internalPlayerInput;
+        private readonly TrackingHelper _trackingHelper;
 
         internal VRPlayerInput(VRPlayerInputInternal internalPlayerInput, TrackingHelper trackingHelper)
         {

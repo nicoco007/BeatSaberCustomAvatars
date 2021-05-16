@@ -28,8 +28,8 @@ namespace CustomAvatar.Avatar
     /// <summary>
     /// Represents a <see cref="AvatarPrefab"/> that has been spawned into the game.
     /// </summary>
-	public class SpawnedAvatar : MonoBehaviour
-	{
+    public class SpawnedAvatar : MonoBehaviour
+    {
         /// <summary>
         /// The <see cref="LoadedAvatar"/> used as a reference.
         /// </summary>
@@ -44,7 +44,7 @@ namespace CustomAvatar.Avatar
         /// <summary>
         /// The <see cref="IAvatarInput"/> used for tracking.
         /// </summary>
-		public IAvatarInput input { get; private set; }
+        public IAvatarInput input { get; private set; }
 
         /// <summary>
         /// The avatar's scale as a ratio of it's exported scale (i.e. it is initially 1 even if the avatar was exported with a different scale).
@@ -136,7 +136,7 @@ namespace CustomAvatar.Avatar
         }
 
         #region Behaviour Lifecycle
-        #pragma warning disable IDE0051
+#pragma warning disable IDE0051
 
         private void Awake()
         {
@@ -147,15 +147,15 @@ namespace CustomAvatar.Avatar
             _firstPersonExclusions = GetComponentsInChildren<FirstPersonExclusion>();
             _renderers = GetComponentsInChildren<Renderer>();
 
-            head      = transform.Find("Head");
-            body      = transform.Find("Body");
-            leftHand  = transform.Find("LeftHand");
+            head = transform.Find("Head");
+            body = transform.Find("Body");
+            leftHand = transform.Find("LeftHand");
             rightHand = transform.Find("RightHand");
-            pelvis    = transform.Find("Pelvis");
-            leftLeg   = transform.Find("LeftLeg");
-            rightLeg  = transform.Find("RightLeg");
+            pelvis = transform.Find("Pelvis");
+            leftLeg = transform.Find("LeftLeg");
+            rightLeg = transform.Find("RightLeg");
         }
-        
+
         [Inject]
         private void Construct(ILogger<SpawnedAvatar> logger, AvatarPrefab avatarPrefab, IAvatarInput avatarInput, GameScenesManager gameScenesManager)
         {
@@ -191,7 +191,7 @@ namespace CustomAvatar.Avatar
             Destroy(gameObject);
         }
 
-        #pragma warning restore IDE0051
+#pragma warning restore IDE0051
         #endregion
 
         private void OnTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
@@ -206,10 +206,10 @@ namespace CustomAvatar.Avatar
 
         private void SetChildrenToLayer(int layer)
         {
-	        foreach (Renderer renderer in _renderers)
+            foreach (Renderer renderer in _renderers)
             {
                 renderer.gameObject.layer = layer;
-	        }
+            }
         }
 
         private void ApplyFirstPersonExclusions()

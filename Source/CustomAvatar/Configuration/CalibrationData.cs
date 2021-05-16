@@ -81,7 +81,7 @@ namespace CustomAvatar.Configuration
         private void Load()
         {
             if (!File.Exists(kCalibrationDataFilePath)) return;
-            
+
             _logger.Info($"Reading calibration data from '{kCalibrationDataFilePath}'");
 
             using (var fileStream = new FileStream(kCalibrationDataFilePath, FileMode.Open, FileAccess.Read))
@@ -95,15 +95,15 @@ namespace CustomAvatar.Configuration
                     return;
                 }
 
-                automaticCalibration.waist     = reader.ReadPose();
-                automaticCalibration.leftFoot  = reader.ReadPose();
+                automaticCalibration.waist = reader.ReadPose();
+                automaticCalibration.leftFoot = reader.ReadPose();
                 automaticCalibration.rightFoot = reader.ReadPose();
 
                 int count = reader.ReadInt32();
 
                 _logger.Trace($"Reading {count} calibrations");
 
-                for (int i = 0; i < count; i++)
+                for (int i = 0; i < count; i++)
                 {
                     string fileName = reader.ReadString();
 
@@ -128,8 +128,8 @@ namespace CustomAvatar.Configuration
                         _manualCalibration.Add(fileName, new FullBodyCalibration());
                     }
 
-                    _manualCalibration[fileName].waist     = reader.ReadPose();
-                    _manualCalibration[fileName].leftFoot  = reader.ReadPose();
+                    _manualCalibration[fileName].waist = reader.ReadPose();
+                    _manualCalibration[fileName].leftFoot = reader.ReadPose();
                     _manualCalibration[fileName].rightFoot = reader.ReadPose();
                 }
             }
@@ -172,7 +172,7 @@ namespace CustomAvatar.Configuration
         {
             return !string.IsNullOrEmpty(str) && !str.Any(c => Path.GetInvalidFileNameChars().Contains(c));
         }
-        
+
         public class FullBodyCalibration
         {
             public Pose waist = Pose.identity;

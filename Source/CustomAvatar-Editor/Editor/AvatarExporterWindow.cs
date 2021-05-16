@@ -22,52 +22,51 @@ namespace CustomAvatar.Editor
 {
     public class AvatarExporterWindow : EditorWindow
     {
-        private AvatarDescriptor[] avatars;
-    
+        private AvatarDescriptor[] _avatars;
+
         [MenuItem("Window/Avatar Exporter")]
         public static void ShowWindow()
         {
-		    GetWindow(typeof(AvatarExporterWindow), false, "Avatar Exporter");
+            GetWindow(typeof(AvatarExporterWindow), false, "Avatar Exporter");
         }
 
         #region Behaviour Lifecycle
-        #pragma warning disable IDE0051
 
-        private void OnFocus()
+        internal void OnFocus()
         {
-		    avatars = FindObjectsOfType<AvatarDescriptor>();
+            _avatars = FindObjectsOfType<AvatarDescriptor>();
             Repaint();
         }
 
-        void OnGUI()
+        internal void OnGUI()
         {
-            GUIStyle titleLabelStyle = new GUIStyle(EditorStyles.largeLabel)
+            var titleLabelStyle = new GUIStyle(EditorStyles.largeLabel)
             {
                 fontSize = 16
             };
 
-            GUIStyle textureStyle = new GUIStyle(EditorStyles.label)
+            var textureStyle = new GUIStyle(EditorStyles.label)
             {
                 alignment = TextAnchor.UpperRight
             };
-        
-		    foreach (AvatarDescriptor avatar in avatars)
+
+            foreach (AvatarDescriptor avatar in _avatars)
             {
-                if (!avatar || !avatar.gameObject) continue;
+                if (!avatar || !avatar.gameObject) continue;
 
                 GUILayout.BeginHorizontal();
                 GUILayout.BeginVertical();
 
-			    GUILayout.Label(avatar.name, titleLabelStyle);
+                GUILayout.Label(avatar.name, titleLabelStyle);
 
                 GUILayout.Label("Properties", EditorStyles.largeLabel);
-                
-			    EditorGUILayout.LabelField("Game Object: ", avatar.gameObject.name);
-			    EditorGUILayout.LabelField("Author: ", avatar.author);
+
+                EditorGUILayout.LabelField("Game Object: ", avatar.gameObject.name);
+                EditorGUILayout.LabelField("Author: ", avatar.author);
 
                 GUILayout.EndVertical();
 
-                var texture = AssetPreview.GetAssetPreview(avatar.cover);
+                Texture2D texture = AssetPreview.GetAssetPreview(avatar.cover);
                 GUILayout.Label(texture, textureStyle, GUILayout.MaxWidth(80), GUILayout.MaxHeight(80));
 
                 GUILayout.EndHorizontal();
@@ -77,11 +76,10 @@ namespace CustomAvatar.Editor
                     SaveAvatar(avatar);
                 }
 
-			    GUILayout.Space(20);
-		    }
+                GUILayout.Space(20);
+            }
         }
 
-        #pragma warning restore IDE0051
         #endregion
 
         private void SaveAvatar(AvatarDescriptor avatar)
@@ -96,10 +94,10 @@ namespace CustomAvatar.Editor
 
             PrefabUtility.SaveAsPrefabAsset(avatar.gameObject, prefabPath);
 
-            AssetBundleBuild assetBundleBuild = new AssetBundleBuild
+            var assetBundleBuild = new AssetBundleBuild
             {
                 assetBundleName = destinationFileName,
-                assetNames = new[] { prefabPath }
+                assetNames = new[] { prefabPath }
             };
 
             assetBundleBuild.assetBundleName = destinationFileName;
@@ -108,7 +106,7 @@ namespace CustomAvatar.Editor
             BuildTarget activeBuildTarget = EditorUserBuildSettings.activeBuildTarget;
 
             AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(tempFolder, new[] { assetBundleBuild }, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
-            
+
             // switch back to what it was before creating the asset bundle
             EditorUserBuildSettings.SwitchActiveBuildTarget(selectedBuildTargetGroup, activeBuildTarget);
 
@@ -139,7 +137,7 @@ namespace CustomAvatar.Editor
             {
                 EditorUtility.DisplayDialog("Export Failed", "Failed to create asset bundle! Please check the Unity console for more information.", "OK");
             }
-            
+
             AssetDatabase.DeleteAsset(prefabPath);
             AssetDatabase.Refresh();
         }

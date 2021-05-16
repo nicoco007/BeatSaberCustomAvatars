@@ -7,11 +7,10 @@ namespace CustomAvatar.Lighting
     {
         public void Awake()
         {
-            GameObject lightGameObject = new GameObject("DirectionalLight");
+            var lightGameObject = new GameObject("DirectionalLight");
             Transform lightTransform = lightGameObject.transform;
             lightTransform.parent = transform;
-            lightTransform.position = Vector3.zero;
-            lightTransform.rotation = Quaternion.Euler(150, 0, 0);
+            lightTransform.SetPositionAndRotation(Vector3.zero, Quaternion.Euler(150, 0, 0));
 
             Light light = lightGameObject.AddComponent<Light>();
             light.type = LightType.Directional;

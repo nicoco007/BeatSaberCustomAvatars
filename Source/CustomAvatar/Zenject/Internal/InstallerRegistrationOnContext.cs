@@ -5,8 +5,8 @@ namespace CustomAvatar.Zenject.Internal
 {
     internal class InstallerRegistrationOnContext : InstallerRegistrationOnTarget
     {
-        private string _sceneName;
-        private string _contextName;
+        private readonly string _sceneName;
+        private readonly string _contextName;
 
         internal InstallerRegistrationOnContext(string sceneName, string contextName)
         {

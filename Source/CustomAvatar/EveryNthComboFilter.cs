@@ -16,6 +16,7 @@
 
 using UnityEngine.Events;
 
+#pragma warning disable IDE0051, IDE1006
 namespace CustomAvatar
 {
     public class EveryNthComboFilter : EventFilterBehaviour

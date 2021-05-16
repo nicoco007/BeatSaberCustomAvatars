@@ -31,7 +31,7 @@ namespace CustomAvatar.Utilities
         private readonly Settings _settings;
         private readonly BeatSaberUtilities _beatSaberUtilities;
 
-        private TrackingHelper(Settings settings, BeatSaberUtilities beatSaberUtilities)
+        internal TrackingHelper(Settings settings, BeatSaberUtilities beatSaberUtilities)
         {
             _settings = settings;
             _beatSaberUtilities = beatSaberUtilities;
@@ -41,8 +41,7 @@ namespace CustomAvatar.Utilities
         {
             ApplyLocalPose(ref position, ref rotation, parent);
 
-            target.position = position;
-            target.rotation = rotation;
+            target.SetPositionAndRotation(position, rotation);
         }
 
         public void ApplyLocalPose(ref Vector3 position, ref Quaternion rotation, Transform parent = null)

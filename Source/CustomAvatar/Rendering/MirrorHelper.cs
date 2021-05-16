@@ -43,10 +43,10 @@ namespace CustomAvatar.Rendering
             }
 
             // plane is 10 m in size at scale 1, width is x and height is z
-            Vector3 scale = new Vector3(size.x / 10, 1, size.y / 10); 
+            var scale = new Vector3(size.x / 10, 1, size.y / 10);
 
-            GameObject mirrorPlane = GameObject.CreatePrimitive(PrimitiveType.Plane);
-            GameObject.Destroy(mirrorPlane.GetComponent<Collider>());
+            var mirrorPlane = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            Object.Destroy(mirrorPlane.GetComponent<Collider>());
             mirrorPlane.transform.SetParent(container);
             mirrorPlane.name = "Stereo Mirror";
             mirrorPlane.transform.localScale = scale;

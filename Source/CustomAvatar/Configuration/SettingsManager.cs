@@ -29,7 +29,7 @@ namespace CustomAvatar.Configuration
 
         public Settings settings;
 
-        private ILogger<SettingsManager> _logger;
+        private readonly ILogger<SettingsManager> _logger;
 
         internal SettingsManager(ILogger<SettingsManager> logger)
         {
@@ -37,7 +37,7 @@ namespace CustomAvatar.Configuration
 
             Load();
         }
-        
+
         public void Dispose()
         {
             Save();
@@ -61,7 +61,7 @@ namespace CustomAvatar.Configuration
                 using (var reader = new StreamReader(kSettingsPath))
                 using (var jsonReader = new JsonTextReader(reader))
                 {
-                    var serializer = GetSerializer();
+                    JsonSerializer serializer = GetSerializer();
                     settings = serializer.Deserialize<Settings>(jsonReader) ?? new Settings();
                 }
             }
@@ -78,12 +78,22 @@ namespace CustomAvatar.Configuration
         {
             _logger.Info($"Saving settings to '{kSettingsPath}'");
 
-            using (var writer = new StreamWriter(kSettingsPath))
-            using (var jsonWriter = new JsonTextWriter(writer))
+            try
             {
-                var serializer = GetSerializer();
-                serializer.Serialize(jsonWriter, settings);
-                jsonWriter.Flush();
+                using (var writer = new StreamWriter(kSettingsPath))
+                using (var jsonWriter = new JsonTextWriter(writer))
+                {
+                    JsonSerializer serializer = GetSerializer();
+                    serializer.Serialize(jsonWriter, settings);
+                    jsonWriter.Flush();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Failed to write settings to file");
+                _logger.Error(ex);
+
+                settings = new Settings();
             }
         }
 
