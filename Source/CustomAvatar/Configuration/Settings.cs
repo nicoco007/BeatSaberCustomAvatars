@@ -29,22 +29,22 @@ namespace CustomAvatar.Configuration
 {
     internal class Settings
     {
-        public readonly ObservableValue<bool> isAvatarVisibleInFirstPerson = new ObservableValue<bool>();
-        public readonly ObservableValue<bool> moveFloorWithRoomAdjust = new ObservableValue<bool>();
-        public readonly ObservableValue<AvatarResizeMode> resizeMode = new ObservableValue<AvatarResizeMode>(AvatarResizeMode.Height);
-        public readonly ObservableValue<FloorHeightAdjust> floorHeightAdjust = new ObservableValue<FloorHeightAdjust>(FloorHeightAdjust.Off);
-        public string previousAvatarPath = null;
-        public readonly ObservableValue<float> playerArmSpan = new ObservableValue<float>(VRPlayerInput.kDefaultPlayerArmSpan);
-        public bool calibrateFullBodyTrackingOnStart = false;
-        public readonly ObservableValue<bool> enableLocomotion = new ObservableValue<bool>(true);
-        public readonly ObservableValue<float> cameraNearClipPlane = new ObservableValue<float>(0.1f);
-        public bool showAvatarInSmoothCamera = true;
-        public readonly Lighting lighting = new Lighting();
-        public readonly Mirror mirror = new Mirror();
-        public readonly AutomaticFullBodyCalibration automaticCalibration = new AutomaticFullBodyCalibration();
-        public readonly FullBodyMotionSmoothing fullBodyMotionSmoothing = new FullBodyMotionSmoothing();
+        public ObservableValue<bool> isAvatarVisibleInFirstPerson { get; } = new ObservableValue<bool>();
+        public ObservableValue<bool> moveFloorWithRoomAdjust { get; } = new ObservableValue<bool>();
+        public ObservableValue<AvatarResizeMode> resizeMode { get; } = new ObservableValue<AvatarResizeMode>(AvatarResizeMode.Height);
+        public ObservableValue<FloorHeightAdjust> floorHeightAdjust { get; } = new ObservableValue<FloorHeightAdjust>(FloorHeightAdjust.Off);
+        public string previousAvatarPath { get; set; }
+        public ObservableValue<float> playerArmSpan { get; } = new ObservableValue<float>(VRPlayerInput.kDefaultPlayerArmSpan);
+        public bool calibrateFullBodyTrackingOnStart { get; set; }
+        public ObservableValue<bool> enableLocomotion { get; } = new ObservableValue<bool>(true);
+        public ObservableValue<float> cameraNearClipPlane { get; } = new ObservableValue<float>(0.1f);
+        public bool showAvatarInSmoothCamera { get; set; } = true;
+        public Lighting lighting { get; } = new Lighting();
+        public Mirror mirror { get; } = new Mirror();
+        public AutomaticFullBodyCalibration automaticCalibration { get; } = new AutomaticFullBodyCalibration();
+        public FullBodyMotionSmoothing fullBodyMotionSmoothing { get; } = new FullBodyMotionSmoothing();
 
-        [JsonProperty(PropertyName = "avatarSpecificSettings", Order = int.MaxValue)] private Dictionary<string, AvatarSpecificSettings> _avatarSpecificSettings = new Dictionary<string, AvatarSpecificSettings>();
+        [JsonProperty(PropertyName = "avatarSpecificSettings", Order = int.MaxValue)] private readonly Dictionary<string, AvatarSpecificSettings> _avatarSpecificSettings = new Dictionary<string, AvatarSpecificSettings>();
 
         [OnSerializing]
         private void OnSerializing(StreamingContext context)
@@ -71,58 +71,58 @@ namespace CustomAvatar.Configuration
 
         public class Lighting
         {
-            public ShadowQuality shadowQuality = ShadowQuality.Disable;
-            public ShadowResolution shadowResolution = ShadowResolution.Low;
-            public EnvironmentLighting environment = new EnvironmentLighting();
-            public LightingGroup sabers = new LightingGroup();
+            public ShadowQuality shadowQuality { get; set; }
+            public ShadowResolution shadowResolution { get; set; }
+            public EnvironmentLighting environment { get; } = new EnvironmentLighting();
+            public LightingGroup sabers { get; } = new LightingGroup();
         }
 
         public class LightingGroup
         {
             [JsonProperty(Order = int.MinValue)]
-            public bool enabled = false;
-            public float intensity = 1;
+            public bool enabled { get; set; }
+            public float intensity { get; set; } = 1;
         }
 
         public class EnvironmentLighting : LightingGroup
         {
-            public EnvironmentLightingType type = EnvironmentLightingType.Dynamic;
-            public int pixelLightCount = 2;
+            public EnvironmentLightingType type { get; set; } = EnvironmentLightingType.Dynamic;
+            public int pixelLightCount { get; set; } = 2;
         }
 
         public class Mirror
         {
-            public Vector2 size = new Vector2(4f, 2f);
-            public float renderScale = 1.0f;
-            public int antiAliasing = 2;
+            public Vector2 size { get; set; } = new Vector2(4f, 2f);
+            public float renderScale { get; set; } = 1.0f;
+            public int antiAliasing { get; set; } = 2;
         }
 
         public class FullBodyMotionSmoothing
         {
-            public readonly TrackedPointSmoothing waist = new TrackedPointSmoothing { position = 0.5f, rotation = 0.2f };
-            public readonly TrackedPointSmoothing feet = new TrackedPointSmoothing { position = 0.5f, rotation = 0.2f };
+            public TrackedPointSmoothing waist { get; } = new TrackedPointSmoothing { position = 0.5f, rotation = 0.2f };
+            public TrackedPointSmoothing feet { get; } = new TrackedPointSmoothing { position = 0.5f, rotation = 0.2f };
         }
 
         public class TrackedPointSmoothing
         {
-            public float position;
-            public float rotation;
+            public float position { get; set; }
+            public float rotation { get; set; }
         }
 
         public class AutomaticFullBodyCalibration
         {
-            public float legOffset = 0.15f;
-            public float pelvisOffset = 0.1f;
+            public float legOffset { get; set; } = 0.15f;
+            public float pelvisOffset { get; set; } = 0.1f;
 
-            public WaistTrackerPosition waistTrackerPosition = WaistTrackerPosition.Front;
+            public WaistTrackerPosition waistTrackerPosition { get; set; }
         }
 
         public class AvatarSpecificSettings
         {
-            public readonly ObservableValue<bool> useAutomaticCalibration = new ObservableValue<bool>();
-            public readonly ObservableValue<bool> bypassCalibration = new ObservableValue<bool>();
-            public readonly ObservableValue<bool> ignoreExclusions = new ObservableValue<bool>(false);
-            public bool allowMaintainPelvisPosition = false;
+            public ObservableValue<bool> useAutomaticCalibration { get; } = new ObservableValue<bool>();
+            public ObservableValue<bool> bypassCalibration { get; } = new ObservableValue<bool>();
+            public ObservableValue<bool> ignoreExclusions { get; } = new ObservableValue<bool>(false);
+            public bool allowMaintainPelvisPosition { get; set; } = false;
         }
 
         public AvatarSpecificSettings GetAvatarSettings(string fileName)
