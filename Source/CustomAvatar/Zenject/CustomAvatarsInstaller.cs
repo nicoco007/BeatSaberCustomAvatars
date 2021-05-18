@@ -14,23 +14,23 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Linq;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Lighting;
 using CustomAvatar.Logging;
-using CustomAvatar.Rendering;
 using CustomAvatar.Player;
+using CustomAvatar.Rendering;
 using CustomAvatar.Tracking;
 using CustomAvatar.Tracking.OpenVR;
 using CustomAvatar.Tracking.UnityXR;
 using CustomAvatar.Utilities;
+using IPA.Utilities;
 using UnityEngine.XR;
 using Valve.VR;
 using Zenject;
 using Logger = IPA.Logging.Logger;
-using System;
-using IPA.Utilities;
 
 namespace CustomAvatar.Zenject
 {
@@ -38,12 +38,14 @@ namespace CustomAvatar.Zenject
     {
         public static readonly int kPlayerAvatarManagerExecutionOrder = 1000;
 
-        private readonly Logger _logger;
+        private readonly ILogger<CustomAvatarsInstaller> _logger;
+        private readonly Logger _ipaLogger;
         private readonly PCAppInit _pcAppInit;
 
-        public CustomAvatarsInstaller(Logger logger, PCAppInit pcAppInit)
+        public CustomAvatarsInstaller(Logger ipaLogger, PCAppInit pcAppInit)
         {
-            _logger = logger;
+            _logger = new IPALogger<CustomAvatarsInstaller>(ipaLogger);
+            _ipaLogger = ipaLogger;
             _pcAppInit = pcAppInit;
         }
 
@@ -53,8 +55,7 @@ namespace CustomAvatar.Zenject
             Container.Bind(typeof(ILogger<>)).FromMethodUntyped(CreateLogger).AsTransient().When(ShouldCreateLogger);
 
             // settings
-            Container.BindInterfacesAndSelfTo<SettingsManager>().AsSingle();
-            Container.Bind<Settings>().FromMethod((context) => context.Container.Resolve<SettingsManager>().settings);
+            Container.Bind<Settings>().FromInstance(LoadSettings());
             Container.BindInterfacesAndSelfTo<CalibrationData>().AsSingle();
 
             if (XRSettings.loadedDeviceName.Equals("openvr", StringComparison.InvariantCultureIgnoreCase) &&
@@ -99,12 +100,28 @@ namespace CustomAvatar.Zenject
 
         private object CreateLogger(InjectContext context)
         {
-            return Activator.CreateInstance(typeof(IPALogger<>).MakeGenericType(context.MemberType.GenericTypeArguments[0]), _logger);
+            return Activator.CreateInstance(typeof(IPALogger<>).MakeGenericType(context.MemberType.GenericTypeArguments[0]), _ipaLogger);
         }
 
         private bool ShouldCreateLogger(InjectContext context)
         {
             return context.ObjectType == context.MemberType.GenericTypeArguments[0];
+        }
+
+        private Settings LoadSettings()
+        {
+            try
+            {
+                _logger.Info($"Reading settings from '{Settings.kSettingsPath}'");
+                return Settings.Load();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Failed to read settings from file");
+                _logger.Error(ex);
+
+                return new Settings();
+            }
         }
     }
 }

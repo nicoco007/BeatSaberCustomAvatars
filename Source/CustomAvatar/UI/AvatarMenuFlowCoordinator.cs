@@ -17,6 +17,8 @@
 using System;
 using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.MenuButtons;
+using CustomAvatar.Configuration;
+using CustomAvatar.Logging;
 using HMUI;
 using Zenject;
 
@@ -24,10 +26,12 @@ namespace CustomAvatar.UI
 {
     internal class AvatarMenuFlowCoordinator : FlowCoordinator, IInitializable, IDisposable
     {
+        private ILogger<AvatarMenuFlowCoordinator> _logger;
         private MainFlowCoordinator _mainFlowCoordinator;
         private AvatarListViewController _avatarListViewController;
         private MirrorViewController _mirrorViewController;
         private SettingsViewController _settingsViewController;
+        private Settings _settings;
 
         private MenuButton _menuButton;
 
@@ -52,12 +56,14 @@ namespace CustomAvatar.UI
         }
 
         [Inject]
-        private void Inject(MainFlowCoordinator mainFlowCoordinator, AvatarListViewController avatarListViewController, MirrorViewController mirrorViewController, SettingsViewController settingsViewController)
+        private void Construct(ILogger<AvatarMenuFlowCoordinator> logger, MainFlowCoordinator mainFlowCoordinator, AvatarListViewController avatarListViewController, MirrorViewController mirrorViewController, SettingsViewController settingsViewController, Settings settings)
         {
+            _logger = logger;
             _mainFlowCoordinator = mainFlowCoordinator;
             _avatarListViewController = avatarListViewController;
             _mirrorViewController = mirrorViewController;
             _settingsViewController = settingsViewController;
+            _settings = settings;
         }
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
@@ -77,6 +83,17 @@ namespace CustomAvatar.UI
 
         protected override void BackButtonWasPressed(ViewController topViewController)
         {
+            try
+            {
+                _logger.Info($"Writing settings to '{Settings.kSettingsPath}'");
+                _settings.Save();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Failed to write settings to file");
+                _logger.Error(ex);
+            }
+
             BeatSaberUI.MainFlowCoordinator.DismissFlowCoordinator(this);
         }
     }

@@ -19,16 +19,21 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using CustomAvatar.Avatar;
-using CustomAvatar.Player;
 using CustomAvatar.Lighting;
+using CustomAvatar.Player;
 using CustomAvatar.Tracking;
+using CustomAvatar.Utilities.Converters;
+using IPA.Utilities;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using UnityEngine;
 
 namespace CustomAvatar.Configuration
 {
     internal class Settings
     {
+        public static readonly string kSettingsPath = Path.Combine(UnityGame.UserDataPath, "CustomAvatars.json");
+
         public ObservableValue<bool> isAvatarVisibleInFirstPerson { get; } = new ObservableValue<bool>();
         public ObservableValue<bool> moveFloorWithRoomAdjust { get; } = new ObservableValue<bool>();
         public ObservableValue<AvatarResizeMode> resizeMode { get; } = new ObservableValue<AvatarResizeMode>(AvatarResizeMode.Height);
@@ -45,6 +50,43 @@ namespace CustomAvatar.Configuration
         public FullBodyMotionSmoothing fullBodyMotionSmoothing { get; } = new FullBodyMotionSmoothing();
 
         [JsonProperty(PropertyName = "avatarSpecificSettings", Order = int.MaxValue)] private readonly Dictionary<string, AvatarSpecificSettings> _avatarSpecificSettings = new Dictionary<string, AvatarSpecificSettings>();
+
+        private static readonly JsonSerializer kJsonSerializer =
+            new JsonSerializer
+            {
+                Formatting = Formatting.Indented,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                Converters = {
+                    new StringEnumConverter(),
+                    new FloatJsonConverter(),
+                    new Vector2JsonConverter(),
+                    new ObservableValueJsonConverter()
+                }
+            };
+
+        public static Settings Load()
+        {
+            if (!File.Exists(kSettingsPath))
+            {
+                return new Settings();
+            }
+
+            using (var reader = new StreamReader(kSettingsPath))
+            using (var jsonReader = new JsonTextReader(reader))
+            {
+                return kJsonSerializer.Deserialize<Settings>(jsonReader) ?? new Settings();
+            }
+        }
+
+        public void Save()
+        {
+            using (var writer = new StreamWriter(kSettingsPath))
+            using (var jsonWriter = new JsonTextWriter(writer))
+            {
+                kJsonSerializer.Serialize(jsonWriter, this);
+                jsonWriter.Flush();
+            }
+        }
 
         [OnSerializing]
         private void OnSerializing(StreamingContext context)

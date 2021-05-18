@@ -14,25 +14,26 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using CustomAvatar.Logging;
-using CustomAvatar.Player;
-using CustomAvatar.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using CustomAvatar.Logging;
+using CustomAvatar.Player;
+using CustomAvatar.Utilities;
+using IPA.Utilities;
 using UnityEngine;
 
 namespace CustomAvatar.Configuration
 {
     internal class CalibrationData : IDisposable
     {
-        public static readonly string kCalibrationDataFilePath = Path.Combine(Path.GetFullPath("UserData"), "CustomAvatars.CalibrationData.dat");
+        public static readonly string kCalibrationDataFilePath = Path.Combine(UnityGame.UserDataPath, "CustomAvatars.CalibrationData.dat");
         public static readonly byte[] kCalibrationDataFileSignature = { 0x43, 0x41, 0x63, 0x64 }; // Custom Avatars calibration data (CAcd)
         public static readonly byte kCalibrationDataFileVersion = 1;
 
-        public readonly FullBodyCalibration automaticCalibration = new FullBodyCalibration();
+        public FullBodyCalibration automaticCalibration { get; } = new FullBodyCalibration();
 
         private readonly Dictionary<string, FullBodyCalibration> _manualCalibration = new Dictionary<string, FullBodyCalibration>();
 
