@@ -1,12 +1,11 @@
 ﻿using CustomAvatar.Logging;
-using HarmonyLib;
 using IPA.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using UnityEngine;
 using Zenject;
+using HarmonyLib;
 
 #if DEBUG
 using System.Diagnostics;
@@ -17,8 +16,6 @@ namespace CustomAvatar.Zenject.Internal
     internal class ZenjectHelper
     {
         private const string kExpectedFirstSceneContextName = "AppCoreSceneContext";
-
-        private static readonly Type[] kContextTypesWithSceneBindings = new[] { typeof(ProjectContext), typeof(SceneContext), typeof(GameObjectContext) };
 
         private static readonly FieldAccessor<SceneContext, List<SceneDecoratorContext>>.Accessor kDecoratorContextsAccessor = FieldAccessor<SceneContext, List<SceneDecoratorContext>>.GetAccessor("_decoratorContexts");
         private static readonly FieldAccessor<SceneDecoratorContext, List<MonoBehaviour>>.Accessor kInjectableMonoBehavioursAccessor = FieldAccessor<SceneDecoratorContext, List<MonoBehaviour>>.GetAccessor("_injectableMonoBehaviours");
@@ -31,12 +28,9 @@ namespace CustomAvatar.Zenject.Internal
 
         private static ILogger<ZenjectHelper> _logger;
 
-        internal static void Init(Harmony harmony, IPA.Logging.Logger logger)
+        internal static void Init(IPA.Logging.Logger logger)
         {
             _logger = new IPALogger<ZenjectHelper>(logger);
-
-            PatchInstallInstallers(harmony);
-            PatchInstallBindings(harmony);
         }
 
         public static InstallerRegistration Register<TInstaller>() where TInstaller : Installer
@@ -64,27 +58,6 @@ namespace CustomAvatar.Zenject.Internal
             else
             {
                 kComponentsToAdd.Add(typeof(TExisting), new List<ComponentRegistration> { componentRegistration });
-            }
-        }
-
-        private static void PatchInstallInstallers(Harmony harmony)
-        {
-            MethodInfo methodToPatch = typeof(Context).GetMethod("InstallInstallers", BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[0], null);
-            MethodInfo patch = typeof(ZenjectHelper).GetMethod(nameof(InstallInstallers), BindingFlags.NonPublic | BindingFlags.Static);
-
-            harmony.Patch(methodToPatch, null, new HarmonyMethod(patch));
-        }
-
-        private static void PatchInstallBindings(Harmony harmony)
-        {
-            foreach (Type type in kContextTypesWithSceneBindings)
-            {
-                _logger.Trace($"Applying patch to '{type.FullName}'");
-
-                MethodInfo methodToPatch = type.GetMethod("InstallBindings", BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(List<MonoBehaviour>) }, null);
-                MethodInfo patch = typeof(ZenjectHelper).GetMethod(nameof(InstallBindings), BindingFlags.NonPublic | BindingFlags.Static);
-
-                harmony.Patch(methodToPatch, null, new HarmonyMethod(patch));
             }
         }
 
@@ -220,6 +193,42 @@ namespace CustomAvatar.Zenject.Internal
                 this.childTransformName = childTransformName;
                 this.condition = condition;
                 this.extraArgs = extraArgs;
+            }
+        }
+
+        [HarmonyPatch(typeof(Context), "InstallInstallers", new Type[0])]
+        internal static class Context_InstallInstallers
+        {
+            public static void Postfix(Context __instance)
+            {
+                InstallInstallers(__instance);
+            }
+        }
+
+        [HarmonyPatch(typeof(ProjectContext), "InstallBindings")]
+        private static class ProjectContext_InstallBindings
+        {
+            public static void Postfix(ProjectContext __instance, List<MonoBehaviour> injectableMonoBehaviours)
+            {
+                InstallBindings(__instance, injectableMonoBehaviours);
+            }
+        }
+
+        [HarmonyPatch(typeof(SceneContext), "InstallBindings")]
+        private static class SceneContext_InstallBindings
+        {
+            public static void Postfix(SceneContext __instance, List<MonoBehaviour> injectableMonoBehaviours)
+            {
+                InstallBindings(__instance, injectableMonoBehaviours);
+            }
+        }
+
+        [HarmonyPatch(typeof(GameObjectContext), "InstallBindings")]
+        private static class GameObjectContext_InstallBindings
+        {
+            public static void Postfix(GameObjectContext __instance, List<MonoBehaviour> injectableMonoBehaviours)
+            {
+                InstallBindings(__instance, injectableMonoBehaviours);
             }
         }
     }

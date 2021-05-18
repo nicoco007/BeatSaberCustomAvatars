@@ -19,7 +19,6 @@ using CustomAvatar.Lighting;
 using CustomAvatar.Logging;
 using CustomAvatar.Player;
 using CustomAvatar.Rendering;
-using CustomAvatar.Utilities;
 using CustomAvatar.Zenject;
 using CustomAvatar.Zenject.Internal;
 using HarmonyLib;
@@ -28,9 +27,11 @@ using Logger = IPA.Logging.Logger;
 
 namespace CustomAvatar
 {
-    [Plugin(RuntimeOptions.SingleStartInit)]
+    [Plugin(RuntimeOptions.DynamicInit)]
     internal class Plugin
     {
+        private readonly Harmony _harmony = new Harmony("com.nicoco007.beatsabercustomavatars");
+
         [Init]
         public Plugin(Logger ipaLogger)
         {
@@ -39,10 +40,7 @@ namespace CustomAvatar
 
             logger.Info("Initializing Custom Avatars");
 
-            var harmony = new Harmony("com.nicoco007.beatsabercustomavatars");
-
-            ZenjectHelper.Init(harmony, ipaLogger);
-            BeatSaberEvents.ApplyPatches(harmony, ipaLogger);
+            ZenjectHelper.Init(ipaLogger);
 
             ZenjectHelper.BindSceneComponent<PCAppInit>();
             ZenjectHelper.BindSceneComponent<ObstacleSaberSparkleEffectManager>();
@@ -51,7 +49,6 @@ namespace CustomAvatar
             ZenjectHelper.AddComponentAlongsideExisting<SmoothCamera, CustomAvatarsSmoothCameraController>();
             ZenjectHelper.AddComponentAlongsideExisting<VRCenterAdjust, AvatarCenterAdjust>(null, go => go.name == "Origin" && go.scene.name != "Tutorial"); // don't add on tutorial - temporary fix to avoid Counters+ disabling the avatar
 
-            // TODO there might be a better way to deal with this
             ZenjectHelper.AddComponentAlongsideExisting<MenuEnvironmentManager, EnvironmentObject>();
             ZenjectHelper.AddComponentAlongsideExisting<MenuEnvironmentManager, LogoLighting>("DefaultEnvironment/Logo");
             ZenjectHelper.AddComponentAlongsideExisting<MultiplayerLocalActivePlayerFacade, EnvironmentObject>("IsActiveObjects/Lasers");
@@ -70,7 +67,16 @@ namespace CustomAvatar
             ZenjectHelper.Register<GameInstaller>().OnMonoInstaller<GameplayCoreInstaller>();
         }
 
-        [OnStart, OnExit]
-        public void NoOp() { }
+        [OnEnable]
+        public void OnEnable()
+        {
+            _harmony.PatchAll();
+        }
+
+        [OnDisable]
+        public void OnDisable()
+        {
+            _harmony.UnpatchAll(_harmony.Id);
+        }
     }
 }
