@@ -110,15 +110,11 @@ namespace CustomAvatar.Editor
             // switch back to what it was before creating the asset bundle
             EditorUserBuildSettings.SwitchActiveBuildTarget(selectedBuildTargetGroup, activeBuildTarget);
 
-            if (manifest != null)
-            {
-                string tempAssetBundlePath = Path.Combine(tempFolder, destinationFileName);
+            string[] assetBundleNames = manifest.GetAllAssetBundles();
 
-                if (!File.Exists(tempAssetBundlePath))
-                {
-                    // Unity on Linux saves to a lowercase file name for some reason
-                    tempAssetBundlePath = Path.Combine(tempFolder, destinationFileName.ToLower());
-                }
+            if (manifest != null || assetBundleNames.Length != 1)
+            {
+                string tempAssetBundlePath = Path.Combine(tempFolder, assetBundleNames[0]);
 
                 try
                 {
