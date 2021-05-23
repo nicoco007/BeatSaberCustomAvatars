@@ -17,6 +17,7 @@
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using CustomAvatar.Exceptions;
 using CustomAvatar.Logging;
 using UnityEngine;
 using Zenject;

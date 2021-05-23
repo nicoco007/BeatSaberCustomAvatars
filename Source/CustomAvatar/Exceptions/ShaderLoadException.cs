@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CustomAvatar.Utilities
+namespace CustomAvatar.Exceptions
 {
     internal class ShaderLoadException : Exception
     {
