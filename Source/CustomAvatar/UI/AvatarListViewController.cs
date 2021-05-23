@@ -17,7 +17,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using CustomAvatar.Avatar;
 using CustomAvatar.Player;
 using HMUI;
@@ -49,6 +51,12 @@ namespace CustomAvatar.UI
         private Sprite _blankAvatarIcon;
         private Sprite _noAvatarIcon;
 
+        private bool _isLoading
+        {
+            get => _loadingIndicator.activeSelf;
+            set => _loadingIndicator.SetActive(value);
+        }
+
         [Inject]
         internal void Construct(PlayerAvatarManager avatarManager, DiContainer container, PlayerOptionsViewController playerOptionsViewController, LevelCollectionViewController levelCollectionViewController, PlatformLeaderboardViewController leaderboardViewController)
         {
@@ -59,7 +67,7 @@ namespace CustomAvatar.UI
             _leaderboardViewController = leaderboardViewController;
         }
 
-        protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
+        protected override async void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
 
@@ -80,7 +88,7 @@ namespace CustomAvatar.UI
                 _avatarManager.avatarAdded += OnAvatarAdded;
                 _avatarManager.avatarRemoved += OnAvatarRemoved;
 
-                ReloadAvatars();
+                await ReloadAvatars();
             }
         }
 
@@ -230,9 +238,9 @@ namespace CustomAvatar.UI
             }
         }
 
-        private void OnAvatarClicked(TableView table, int row)
+        private async void OnAvatarClicked(TableView table, int row)
         {
-            _avatarManager.SwitchToAvatarAsync(_avatars[row].fileName);
+            await _avatarManager.SwitchToAvatarAsync(_avatars[row].fileName);
         }
 
         private void OnAvatarChanged(SpawnedAvatar avatar)
@@ -242,30 +250,41 @@ namespace CustomAvatar.UI
 
         private void OnAvatarAdded(AvatarInfo avatarInfo)
         {
+            if (_isLoading)
+            {
+                return;
+            }
+
             _avatars.Add(new AvatarListItem(avatarInfo));
             ReloadData();
         }
 
         private void OnAvatarRemoved(AvatarInfo avatarInfo)
         {
+            if (_isLoading)
+            {
+                return;
+            }
+
             _avatars.RemoveAll(a => a.fileName == avatarInfo.fileName);
             ReloadData();
         }
 
-        private void OnRefreshButtonPressed()
+        private async void OnRefreshButtonPressed()
         {
-            ReloadAvatars(true);
+            await ReloadAvatars(true);
         }
 
-        private void ReloadAvatars(bool force = false)
+        private async Task ReloadAvatars(bool force = false)
         {
             _avatars.Clear();
             _tableView.ReloadData();
 
-            SetLoading(true);
+            _isLoading = true;
 
             _avatars.Add(new AvatarListItem("No Avatar", _noAvatarIcon));
-            _avatarManager.GetAvatarInfosAsync(avatar => _avatars.Add(new AvatarListItem(avatar)), null, ReloadData, force);
+            _avatars.AddRange((await _avatarManager.GetAvatarInfosAsync(force)).Select(i => new AvatarListItem(i)));
+            ReloadData();
         }
 
         private void ReloadData()
@@ -280,7 +299,7 @@ namespace CustomAvatar.UI
 
             _tableView.ReloadData();
 
-            SetLoading(false);
+            _isLoading = false;
 
             UpdateSelectedRow(true);
         }
@@ -292,11 +311,6 @@ namespace CustomAvatar.UI
             if (scroll) _tableView.ScrollToCellWithIdx(currentRow, TableView.ScrollPositionType.Center, false);
 
             _tableView.SelectCellWithIdx(currentRow);
-        }
-
-        private void SetLoading(bool loading)
-        {
-            _loadingIndicator.SetActive(loading);
         }
 
         public float CellSize()

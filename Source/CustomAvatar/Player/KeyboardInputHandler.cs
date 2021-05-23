@@ -40,11 +40,11 @@ namespace CustomAvatar.Player
         {
             if (Input.GetKeyDown(KeyCode.PageDown))
             {
-                _avatarManager.SwitchToNextAvatar();
+                _ = _avatarManager.SwitchToNextAvatarAsync();
             }
             else if (Input.GetKeyDown(KeyCode.PageUp))
             {
-                _avatarManager.SwitchToPreviousAvatar();
+                _ = _avatarManager.SwitchToPreviousAvatarAsync();
             }
             else if (Input.GetKeyDown(KeyCode.Home))
             {

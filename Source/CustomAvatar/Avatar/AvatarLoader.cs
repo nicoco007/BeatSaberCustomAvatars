@@ -17,8 +17,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using CustomAvatar.Exceptions;
 using CustomAvatar.Logging;
+using CustomAvatar.Utilities;
 using UnityEngine;
 using Zenject;
 
@@ -34,7 +36,10 @@ namespace CustomAvatar.Avatar
         private readonly ILogger<AvatarLoader> _logger;
         private readonly DiContainer _container;
 
+        [Obsolete]
         private readonly Dictionary<string, List<LoadHandlers>> _handlers = new Dictionary<string, List<LoadHandlers>>();
+
+        private readonly Dictionary<string, Task<AvatarPrefab>> _tasks = new Dictionary<string, Task<AvatarPrefab>>();
 
         internal AvatarLoader(ILogger<AvatarLoader> logger, DiContainer container)
         {
@@ -42,13 +47,12 @@ namespace CustomAvatar.Avatar
             _container = container;
         }
 
-        [Obsolete("Use LoadFromFileAsync instead")]
+        [Obsolete("Use LoadFromFileAsync(string) instead")]
         public IEnumerator<AsyncOperation> FromFileCoroutine(string path, Action<LoadedAvatar> success = null, Action<Exception> error = null, Action complete = null)
         {
             return LoadFromFileAsync(path, (avatarPrefab) => success?.Invoke(avatarPrefab.loadedAvatar), error, complete);
         }
 
-        // TODO from stream/memory
         /// <summary>
         /// Load an avatar from a file.
         /// </summary>
@@ -56,6 +60,7 @@ namespace CustomAvatar.Avatar
         /// <param name="success">Action to call if the avatar is loaded successfully</param>
         /// <param name="error">Action to call if the avatar isn't loaded successfully</param>
         /// <returns><see cref="IEnumerator{AsyncOperation}"/></returns>
+        [Obsolete("Use LoadFromFileAsync(string) instead")]
         public IEnumerator<AsyncOperation> LoadFromFileAsync(string path, Action<AvatarPrefab> success = null, Action<Exception> error = null, Action complete = null)
         {
             if (string.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
@@ -108,7 +113,7 @@ namespace CustomAvatar.Avatar
             {
                 var prefabObject = (GameObject)assetBundleRequest.asset;
                 AvatarPrefab avatarPrefab = _container.InstantiateComponent<AvatarPrefab>(prefabObject, new object[] { fullPath });
-                avatarPrefab.name = $"LoadedAvatar({avatarPrefab.descriptor.name})";
+                avatarPrefab.name = $"AvatarPrefab({avatarPrefab.descriptor.name})";
 
                 HandleSuccess(fullPath, avatarPrefab);
             }
@@ -118,6 +123,65 @@ namespace CustomAvatar.Avatar
             }
         }
 
+        /// <summary>
+        /// Load an avatar from a file.
+        /// </summary>
+        /// <param name="path">Path to the .avatar file.</param>
+        /// <returns>A <see cref="Task{T}"/> that completes once the avatar has loaded.</returns>
+        public Task<AvatarPrefab> LoadFromFileAsync(string path)
+        {
+            if (string.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
+
+            string fullPath = Path.GetFullPath(path);
+
+            if (!File.Exists(fullPath))
+            {
+                throw new IOException($"File '{fullPath}' does not exist");
+            }
+
+            if (_tasks.TryGetValue(fullPath, out Task<AvatarPrefab> task))
+            {
+                return task;
+            }
+
+            _logger.Info($"Loading avatar from '{fullPath}'");
+
+            task = LoadAssetBundle(fullPath);
+            _tasks.Add(fullPath, task);
+            return task;
+        }
+
+        private async Task<AvatarPrefab> LoadAssetBundle(string fullPath)
+        {
+            AssetBundleCreateRequest assetBundleCreateRequest = await AssetBundle.LoadFromFileAsync(fullPath);
+            AssetBundle assetBundle = assetBundleCreateRequest.assetBundle;
+
+            if (!assetBundle)
+            {
+                throw new AvatarLoadException("Could not load asset bundle");
+            }
+
+            AssetBundleRequest assetBundleRequest = await assetBundle.LoadAssetWithSubAssetsAsync<GameObject>(kGameObjectName);
+            var prefabObject = (GameObject)assetBundleRequest.asset;
+
+            if (!prefabObject)
+            {
+                assetBundle.Unload(true);
+
+                throw new AvatarLoadException("Could not load asset from asset bundle");
+            }
+
+            assetBundle.Unload(false);
+
+            AvatarPrefab avatarPrefab = _container.InstantiateComponent<AvatarPrefab>(prefabObject, new object[] { fullPath });
+            avatarPrefab.name = $"AvatarPrefab({avatarPrefab.descriptor.name})";
+
+            _tasks.Remove(fullPath);
+
+            return avatarPrefab;
+        }
+
+        [Obsolete]
         private void HandleSuccess(string fullPath, AvatarPrefab avatarPrefab)
         {
             _logger.Info($"Successfully loaded avatar '{avatarPrefab.descriptor.name}' by '{avatarPrefab.descriptor.author}' from '{fullPath}'");
@@ -130,6 +194,7 @@ namespace CustomAvatar.Avatar
             _handlers.Remove(fullPath);
         }
 
+        [Obsolete]
         private void HandleException(string fullPath, Exception exception)
         {
             _logger.Error($"Failed to load avatar at '{fullPath}'");
@@ -143,6 +208,7 @@ namespace CustomAvatar.Avatar
             _handlers.Remove(fullPath);
         }
 
+        [Obsolete]
         private struct LoadHandlers
         {
             private readonly Action<AvatarPrefab> _success;

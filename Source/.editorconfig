@@ -23,7 +23,7 @@ dotnet_diagnostic.IDE0073.severity = warning
 file_header_template = unset
 
 # this. and Me. preferences
-dotnet_diagnostic.IDE0003.severity = warning
+dotnet_diagnostic.IDE0003.severity = none
 dotnet_diagnostic.IDE0009.severity = warning
 dotnet_style_qualification_for_event = false
 dotnet_style_qualification_for_field = false

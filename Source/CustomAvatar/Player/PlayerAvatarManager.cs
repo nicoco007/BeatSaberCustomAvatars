@@ -19,6 +19,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.HarmonyPatches;
@@ -41,6 +43,8 @@ namespace CustomAvatar.Player
         public static readonly byte[] kCacheFileSignature = { 0x43, 0x41, 0x64, 0x62 }; // Custom Avatars Database (CAdb)
         public static readonly byte kCacheFileVersion = 1;
 
+        private const int kMaxNumberOfConcurrentLoadingTasks = 4;
+
         /// <summary>
         /// The player's currently spawned avatar. This can be null.
         /// </summary>
@@ -55,7 +59,15 @@ namespace CustomAvatar.Player
         /// Event triggered when a new avatar has finished loading and is spawned. Note that the argument may be null if no avatar was selected to replace the previous one.
         /// </summary>
         public event Action<SpawnedAvatar> avatarChanged;
+
+        /// <summary>
+        /// Event triggered when the selected avatar has failed to load.
+        /// </summary>
         public event Action<Exception> avatarLoadFailed;
+
+        /// <summary>
+        /// Event triggered when the selected avatar's scale changes.
+        /// </summary>
         public event Action<float> avatarScaleChanged;
 
         internal event Action<AvatarInfo> avatarAdded;
@@ -167,17 +179,9 @@ namespace CustomAvatar.Player
             SaveAvatarInfosToFile();
         }
 
-        internal void GetAvatarInfosAsync(Action<AvatarInfo> success = null, Action<Exception> error = null, Action complete = null, bool forceReload = false)
+        internal async Task<List<AvatarInfo>> GetAvatarInfosAsync(bool forceReload = false)
         {
             List<string> fileNames = GetAvatarFileNames();
-
-            if (fileNames.Count == 0)
-            {
-                complete?.Invoke();
-                return;
-            }
-
-            int loadedCount = 0;
 
             foreach (string existingFile in _avatarInfos.Keys.ToList())
             {
@@ -190,79 +194,60 @@ namespace CustomAvatar.Player
             if (forceReload)
             {
                 string fullPath = currentlySpawnedAvatar ? currentlySpawnedAvatar.prefab.fullPath : null;
-                SwitchToAvatarAsync(null);
+                _ = SwitchToAvatarAsync(null);
                 _switchingToPath = fullPath;
             }
 
-            foreach (string fileName in fileNames)
+            var tasks = new List<Task>();
+
+            using (var semaphore = new SemaphoreSlim(kMaxNumberOfConcurrentLoadingTasks))
             {
-                string fullPath = Path.Combine(kCustomAvatarsPath, fileName);
-
-                if (!forceReload && _avatarInfos.ContainsKey(fileName) && _avatarInfos[fileName].IsForFile(fullPath))
+                foreach (string fileName in fileNames)
                 {
-                    _logger.Trace($"Using cached information for '{fileName}'");
-                    success?.Invoke(_avatarInfos[fileName]);
+                    await semaphore.WaitAsync();
 
-                    if (++loadedCount == fileNames.Count) complete?.Invoke();
+                    string fullPath = Path.Combine(kCustomAvatarsPath, fileName);
+
+                    if (!forceReload && _avatarInfos.ContainsKey(fileName) && _avatarInfos[fileName].IsForFile(fullPath))
+                    {
+                        _logger.Trace($"Using cached information for '{fileName}'");
+                        semaphore.Release();
+                    }
+                    else
+                    {
+                        tasks.Add(new Func<Task>(async () =>
+                        {
+                            await LoadAvatarAsync(fullPath);
+                            semaphore.Release();
+                        })());
+                    }
                 }
-                else
-                {
-                    SharedCoroutineStarter.instance.StartCoroutine(_avatarLoader.LoadFromFileAsync(fullPath,
-                        (avatar) =>
-                        {
-                            var info = new AvatarInfo(avatar);
 
-                            if (_avatarInfos.ContainsKey(fileName))
-                            {
-                                _avatarInfos[fileName] = info;
-                            }
-                            else
-                            {
-                                _avatarInfos.Add(fileName, info);
-                            }
-
-                            success?.Invoke(info);
-
-                            if (avatar.fullPath == _switchingToPath)
-                            {
-                                SwitchToAvatar(avatar);
-                            }
-                            else
-                            {
-                                Object.Destroy(avatar.gameObject);
-                            }
-                        },
-                        (exception) =>
-                        {
-                            error?.Invoke(exception);
-                        },
-                        () =>
-                        {
-                            if (++loadedCount == fileNames.Count) complete?.Invoke();
-                        }));
-                }
+                await Task.WhenAll(tasks);
             }
+
+            return _avatarInfos.Values.ToList();
         }
 
-        public void LoadAvatarFromSettingsAsync()
+        public Task LoadAvatarFromSettingsAsync()
         {
             string previousAvatarFileName = _settings.previousAvatarPath;
 
             if (string.IsNullOrEmpty(previousAvatarFileName))
             {
-                return;
+                return Task.CompletedTask;
             }
 
             if (!File.Exists(Path.Combine(kCustomAvatarsPath, previousAvatarFileName)))
             {
                 _logger.Warning("Previously loaded avatar no longer exists");
-                return;
+                return Task.CompletedTask;
             }
 
-            SwitchToAvatarAsync(previousAvatarFileName);
+            return SwitchToAvatarAsync(previousAvatarFileName);
         }
 
-        public void SwitchToAvatarAsync(string fileName)
+        public async Task SwitchToAvatarAsync(string fileName)
         {
             if (currentlySpawnedAvatar) Object.Destroy(currentlySpawnedAvatar.prefab.gameObject);
             Object.Destroy(currentlySpawnedAvatar);
@@ -283,51 +268,69 @@ namespace CustomAvatar.Player
 
             avatarStartedLoading?.Invoke(fullPath);
 
-            SharedCoroutineStarter.instance.StartCoroutine(_avatarLoader.LoadFromFileAsync(fullPath, SwitchToAvatar, OnAvatarLoadFailed));
+            try
+            {
+                AvatarPrefab avatarPrefab = await _avatarLoader.LoadFromFileAsync(fullPath);
+                SwitchToAvatar(avatarPrefab);
+            }
+            catch (Exception ex)
+            {
+                avatarLoadFailed?.Invoke(ex);
+            }
         }
 
-        private void LoadAvatar(string fullPath, Action<AvatarPrefab> success = null, Action<Exception> error = null, Action complete = null)
+        private async Task<AvatarPrefab> LoadAvatarAsync(string fullPath)
         {
-            SharedCoroutineStarter.instance.StartCoroutine(_avatarLoader.LoadFromFileAsync(fullPath,
-                (avatar) =>
-                {
-                    var info = new AvatarInfo(avatar);
-                    string fileName = info.fileName;
+            AvatarPrefab avatar = await _avatarLoader.LoadFromFileAsync(fullPath);
 
-                    if (_avatarInfos.ContainsKey(fileName))
-                    {
-                        _avatarInfos[fileName] = info;
-                    }
-                    else
-                    {
-                        _avatarInfos.Add(fileName, info);
-                    }
+            var info = new AvatarInfo(avatar);
+            string fileName = info.fileName;
 
-                    success?.Invoke(avatar);
-                    avatarAdded?.Invoke(info);
-                }, error, complete));
+            if (_avatarInfos.ContainsKey(fileName))
+            {
+                _avatarInfos[fileName] = info;
+            }
+            else
+            {
+                _avatarInfos.Add(fileName, info);
+            }
+
+            avatarAdded?.Invoke(info);
+
+            if (avatar.fullPath == _switchingToPath)
+            {
+                SwitchToAvatar(avatar);
+            }
+            else
+            {
+                Object.Destroy(avatar.gameObject);
+            }
+
+            return avatar;
         }
 
-        private void OnAvatarFileChanged(object sender, FileSystemEventArgs e)
+        private async void OnAvatarFileChanged(object sender, FileSystemEventArgs e)
         {
             _logger.Trace($"File change detected: '{e.FullPath}'");
 
             if (currentlySpawnedAvatar && e.FullPath == currentlySpawnedAvatar.prefab.fullPath)
             {
                 _logger.Info("Reloading spawned avatar");
-                SwitchToAvatarAsync(e.Name);
+                await SwitchToAvatarAsync(e.Name);
             }
             else
             {
                 _logger.Info($"Reloading avatar info for '{e.FullPath}'");
-                LoadAvatar(e.FullPath, (avatar) => Object.Destroy(avatar.gameObject));
+                AvatarPrefab avatarPrefab = await LoadAvatarAsync(e.FullPath);
+                Object.Destroy(avatarPrefab.gameObject);
             }
         }
 
-        private void OnAvatarFileCreated(object sender, FileSystemEventArgs e)
+        private async void OnAvatarFileCreated(object sender, FileSystemEventArgs e)
         {
             _logger.Info($"Loading avatar info for '{e.FullPath}'");
-            LoadAvatar(e.FullPath, (avatar) => Object.Destroy(avatar.gameObject));
+            AvatarPrefab avatarPrefab = await LoadAvatarAsync(e.FullPath);
+            Object.Destroy(avatarPrefab.gameObject);
         }
 
         private void OnAvatarFileDeleted(object sender, FileSystemEventArgs e)
@@ -346,13 +349,7 @@ namespace CustomAvatar.Player
 
         private void SwitchToAvatar(AvatarPrefab avatar)
         {
-            if ((currentlySpawnedAvatar && currentlySpawnedAvatar.prefab == avatar) || avatar?.fullPath != _switchingToPath)
-            {
-                Object.Destroy(avatar.gameObject);
-                return;
-            }
-
-            if (avatar == null)
+            if (!avatar)
             {
                 _logger.Info("No avatar selected");
                 if (_currentAvatarSettings != null) _currentAvatarSettings.ignoreExclusions.changed -= OnIgnoreFirstPersonExclusionsChanged;
@@ -360,6 +357,11 @@ namespace CustomAvatar.Player
                 avatarChanged?.Invoke(null);
                 _settings.previousAvatarPath = null;
                 UpdateAvatarVerticalPosition();
+                return;
+            }
+            else if ((currentlySpawnedAvatar && currentlySpawnedAvatar.prefab == avatar) || avatar.fullPath != _switchingToPath)
+            {
+                Object.Destroy(avatar.gameObject);
                 return;
             }
 
@@ -389,12 +391,7 @@ namespace CustomAvatar.Player
             avatarChanged?.Invoke(currentlySpawnedAvatar);
         }
 
-        private void OnAvatarLoadFailed(Exception error)
-        {
-            avatarLoadFailed?.Invoke(error);
-        }
-
-        public void SwitchToNextAvatar()
+        public async Task SwitchToNextAvatarAsync()
         {
             List<string> files = GetAvatarFileNames();
             files.Insert(0, null);
@@ -403,10 +400,10 @@ namespace CustomAvatar.Player
 
             index = (index + 1) % files.Count;
 
-            SwitchToAvatarAsync(files[index]);
+            await SwitchToAvatarAsync(files[index]);
         }
 
-        public void SwitchToPreviousAvatar()
+        public async Task SwitchToPreviousAvatarAsync()
         {
             List<string> files = GetAvatarFileNames();
             files.Insert(0, null);
@@ -415,7 +412,7 @@ namespace CustomAvatar.Player
 
             index = (index + files.Count - 1) % files.Count;
 
-            SwitchToAvatarAsync(files[index]);
+            await SwitchToAvatarAsync(files[index]);
         }
 
         internal void SetParent(Transform transform)
