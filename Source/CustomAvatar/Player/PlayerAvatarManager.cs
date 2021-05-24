@@ -275,6 +275,9 @@ namespace CustomAvatar.Player
             }
             catch (Exception ex)
             {
+                _logger.Error("Failed to load selected avatar");
+                _logger.Error(ex);
+
                 avatarLoadFailed?.Invoke(ex);
             }
         }
