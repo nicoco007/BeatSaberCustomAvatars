@@ -110,32 +110,30 @@ namespace CustomAvatar.Editor
             // switch back to what it was before creating the asset bundle
             EditorUserBuildSettings.SwitchActiveBuildTarget(selectedBuildTargetGroup, activeBuildTarget);
 
-            string[] assetBundleNames = manifest.GetAllAssetBundles();
-
-            if (manifest != null || assetBundleNames.Length != 1)
-            {
-                string tempAssetBundlePath = Path.Combine(tempFolder, assetBundleNames[0]);
-
-                try
-                {
-                    File.Copy(tempAssetBundlePath, destinationPath, true);
-
-                    EditorUtility.DisplayDialog("Export Successful!", $"{avatar.name} was exported successfully!", "OK");
-                }
-                catch (IOException ex)
-                {
-                    Debug.LogError(ex);
-
-                    EditorUtility.DisplayDialog("Export Failed", $"Could not copy avatar to selected folder. Please check the Unity console for more information.", "OK");
-                }
-            }
-            else
-            {
-                EditorUtility.DisplayDialog("Export Failed", "Failed to create asset bundle! Please check the Unity console for more information.", "OK");
-            }
-
             AssetDatabase.DeleteAsset(prefabPath);
             AssetDatabase.Refresh();
+
+            if (!manifest)
+            {
+                EditorUtility.DisplayDialog("Export Failed", "Failed to create asset bundle! Please check the Unity console for more information.", "OK");
+                return;
+            }
+
+            string[] assetBundleNames = manifest.GetAllAssetBundles();
+            string tempAssetBundlePath = Path.Combine(tempFolder, assetBundleNames[0]);
+
+            try
+            {
+                File.Copy(tempAssetBundlePath, destinationPath, true);
+
+                EditorUtility.DisplayDialog("Export Successful!", $"{avatar.name} was exported successfully!", "OK");
+            }
+            catch (IOException ex)
+            {
+                Debug.LogError(ex);
+
+                EditorUtility.DisplayDialog("Export Failed", $"Could not copy avatar to selected folder. Please check the Unity console for more information.", "OK");
+            }
         }
     }
 }
