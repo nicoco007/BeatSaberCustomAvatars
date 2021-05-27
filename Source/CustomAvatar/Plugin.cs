@@ -15,7 +15,6 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using CustomAvatar.Avatar;
-using CustomAvatar.Lighting;
 using CustomAvatar.Logging;
 using CustomAvatar.Player;
 using CustomAvatar.Rendering;
@@ -49,8 +48,6 @@ namespace CustomAvatar
             ZenjectHelper.AddComponentAlongsideExisting<SmoothCamera, CustomAvatarsSmoothCameraController>();
             ZenjectHelper.AddComponentAlongsideExisting<VRCenterAdjust, AvatarCenterAdjust>(null, go => go.name == "Origin" && go.scene.name != "Tutorial"); // don't add on tutorial - temporary fix to avoid Counters+ disabling the avatar
 
-            ZenjectHelper.AddComponentAlongsideExisting<MenuEnvironmentManager, EnvironmentObject>();
-            ZenjectHelper.AddComponentAlongsideExisting<MenuEnvironmentManager, LogoLighting>("DefaultEnvironment/Logo");
             ZenjectHelper.AddComponentAlongsideExisting<MultiplayerLocalActivePlayerFacade, EnvironmentObject>("IsActiveObjects/Lasers");
             ZenjectHelper.AddComponentAlongsideExisting<MultiplayerLocalActivePlayerFacade, EnvironmentObject>("IsActiveObjects/Construction");
             ZenjectHelper.AddComponentAlongsideExisting<MultiplayerLocalActivePlayerFacade, EnvironmentObject>("IsActiveObjects/CenterRings");
@@ -61,7 +58,7 @@ namespace CustomAvatar
             ZenjectHelper.Register<UIInstaller>().OnMonoInstaller<MenuViewControllersInstaller>();
 
             ZenjectHelper.Register<LightingInstaller>().OnContext("HealthWarning", "SceneContext");
-            ZenjectHelper.Register<LightingInstaller>().OnContext("MenuEnvironment", "SceneDecoratorContext");
+            ZenjectHelper.Register<LightingInstaller>().OnContext("MainMenu", "SceneContext");
             ZenjectHelper.Register<LightingInstaller>().OnContext("GameCore", "SceneContext");
 
             ZenjectHelper.Register<GameInstaller>().OnMonoInstaller<GameplayCoreInstaller>();

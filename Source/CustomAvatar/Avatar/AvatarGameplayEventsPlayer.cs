@@ -161,16 +161,16 @@ namespace CustomAvatar.Avatar
             _eventManager.OnLevelFail?.Invoke();
         }
 
-        private void OnPlayerDidFinish(LevelCompletionResults results)
+        private void OnPlayerDidFinish(MultiplayerLevelCompletionResults results)
         {
-            switch (results.levelEndStateType)
+            switch (results.levelEndState)
             {
-                case LevelCompletionResults.LevelEndStateType.Cleared:
+                case MultiplayerLevelCompletionResults.MultiplayerLevelEndState.Cleared:
                     _logger.Trace("Invoke OnLevelFinish");
                     _eventManager.OnLevelFinish?.Invoke();
                     break;
 
-                case LevelCompletionResults.LevelEndStateType.Failed:
+                case MultiplayerLevelCompletionResults.MultiplayerLevelEndState.Failed:
                     _logger.Trace("Invoke OnLevelFail");
                     _eventManager.OnLevelFail?.Invoke();
                     break;

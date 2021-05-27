@@ -64,7 +64,7 @@ namespace CustomAvatar.UI
 
             if (addedToHierarchy)
             {
-                Transform screenSystem = GameObject.Find("Wrapper/ScreenSystem").transform;
+                Transform screenSystem = GameObject.Find("MenuCore/UI/ScreenSystem").transform;
 
                 _mirrorContainer = new GameObject("Mirror Container");
                 _mirrorContainer.transform.SetParent(screenSystem, false);

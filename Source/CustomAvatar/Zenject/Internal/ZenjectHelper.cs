@@ -1,11 +1,11 @@
-﻿using CustomAvatar.Logging;
-using IPA.Utilities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CustomAvatar.Logging;
+using HarmonyLib;
+using IPA.Utilities;
 using UnityEngine;
 using Zenject;
-using HarmonyLib;
 
 #if DEBUG
 using System.Diagnostics;
