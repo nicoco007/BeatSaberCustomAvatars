@@ -14,6 +14,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using CustomAvatar.Lighting;
 using CustomAvatar.Player;
 using CustomAvatar.UI;
 using HMUI;
@@ -44,6 +45,8 @@ namespace CustomAvatar.Zenject
             Container.Bind<ManualCalibrationHelper>().FromNewComponentOn(settingsViewController.gameObject).AsSingle();
 
             Container.BindInterfacesAndSelfTo<AvatarMenuFlowCoordinator>().FromNewComponentOnNewGameObject();
+
+            Container.BindInterfacesAndSelfTo<MenuLightingCreator>().AsSingle().NonLazy();
         }
 
         private T CreateAndBindViewController<T>(float width) where T : ViewController
