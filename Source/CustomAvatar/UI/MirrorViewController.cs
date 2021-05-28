@@ -37,6 +37,7 @@ namespace CustomAvatar.UI
         private MirrorHelper _mirrorHelper;
         private Settings _settings;
         private PlayerAvatarManager _avatarManager;
+        private HierarchyManager _hierarchyManager;
 
         #region Components
 #pragma warning disable CS0649
@@ -50,12 +51,13 @@ namespace CustomAvatar.UI
         #region Behaviour Lifecycle
 
         [Inject]
-        internal void Construct(DiContainer container, MirrorHelper mirrorHelper, Settings settings, PlayerAvatarManager avatarManager)
+        internal void Construct(DiContainer container, MirrorHelper mirrorHelper, Settings settings, PlayerAvatarManager avatarManager, HierarchyManager hierarchyManager)
         {
             _container = container;
             _mirrorHelper = mirrorHelper;
             _settings = settings;
             _avatarManager = avatarManager;
+            _hierarchyManager = hierarchyManager;
         }
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
@@ -64,10 +66,8 @@ namespace CustomAvatar.UI
 
             if (addedToHierarchy)
             {
-                Transform screenSystem = GameObject.Find("MenuCore/UI/ScreenSystem").transform;
-
                 _mirrorContainer = new GameObject("Mirror Container");
-                _mirrorContainer.transform.SetParent(screenSystem, false);
+                _mirrorContainer.transform.SetParent(_hierarchyManager.transform, false);
                 _container.InstantiateComponent<EnvironmentObject>(_mirrorContainer);
 
                 Vector2 mirrorSize = _settings.mirror.size;
