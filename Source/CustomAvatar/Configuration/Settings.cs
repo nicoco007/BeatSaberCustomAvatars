@@ -115,6 +115,7 @@ namespace CustomAvatar.Configuration
         {
             public ShadowQuality shadowQuality { get; set; }
             public ShadowResolution shadowResolution { get; set; }
+            public int pixelLightCount { get; set; } = 2;
             public EnvironmentLighting environment { get; } = new EnvironmentLighting();
             public LightingGroup sabers { get; } = new LightingGroup();
         }
@@ -129,7 +130,6 @@ namespace CustomAvatar.Configuration
         public class EnvironmentLighting : LightingGroup
         {
             public EnvironmentLightingType type { get; set; } = EnvironmentLightingType.Dynamic;
-            public int pixelLightCount { get; set; } = 2;
         }
 
         public class Mirror

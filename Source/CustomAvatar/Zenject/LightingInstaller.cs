@@ -25,6 +25,7 @@ namespace CustomAvatar.Zenject
 
                 case EnvironmentLightingType.Dynamic:
                     Container.Bind<DynamicDirectionalLightingController>().FromNewComponentOnNewGameObject().NonLazy();
+                    Container.Bind<DynamicTubeBloomPrePassLightingController>().FromNewComponentOnNewGameObject().NonLazy();
                     break;
             }
         }

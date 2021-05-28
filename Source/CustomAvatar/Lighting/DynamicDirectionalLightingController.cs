@@ -55,7 +55,7 @@ namespace CustomAvatar.Lighting
                 float intensityFalloff = Mathf.Max((directionalLight.radius - distance) / directionalLight.radius, 0);
 
                 light.color = directionalLight.color;
-                light.intensity = intensityFalloff * directionalLight.intensity * _settings.lighting.environment.intensity * 0.8f;
+                light.intensity = intensityFalloff * directionalLight.intensity * _settings.lighting.environment.intensity * 0.5f;
                 light.transform.rotation = directionalLight.transform.rotation;
             }
         }
@@ -64,7 +64,6 @@ namespace CustomAvatar.Lighting
 
         private void CreateLights()
         {
-            int count = 0;
             _directionalLights = new List<(DirectionalLight, Light)>();
 
             foreach (DirectionalLight directionalLight in DirectionalLight.lights)
@@ -77,14 +76,12 @@ namespace CustomAvatar.Lighting
                 light.cullingMask = AvatarLayers.kAllLayersMask;
                 light.shadows = LightShadows.Soft;
                 light.shadowStrength = 1;
-                light.renderMode = count < _settings.lighting.environment.pixelLightCount ? LightRenderMode.ForcePixel : LightRenderMode.ForceVertex;
+                light.renderMode = LightRenderMode.Auto;
 
                 light.transform.parent = transform;
                 light.transform.SetPositionAndRotation(Vector3.zero, directionalLight.transform.rotation);
 
                 _directionalLights.Add((directionalLight, light));
-
-                count++;
             }
 
             _logger.Trace($"Created {_directionalLights.Count} DynamicDirectionalLights");

@@ -22,6 +22,7 @@ namespace CustomAvatar.Lighting
 
             QualitySettings.shadows = _settings.lighting.shadowQuality;
             QualitySettings.shadowResolution = _settings.lighting.shadowResolution;
+            QualitySettings.pixelLightCount = _settings.lighting.pixelLightCount;
         }
     }
 }
