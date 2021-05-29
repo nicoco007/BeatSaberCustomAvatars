@@ -57,6 +57,25 @@ namespace CustomAvatar.Utilities
             return CreateDelegate<Func<TSubject, TResult>>(method);
         }
 
+        internal static Action<TSubject, TValue> CreatePropertySetter<TSubject, TValue>(string propertyName)
+        {
+            PropertyInfo property = typeof(TSubject).GetProperty(propertyName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+
+            if (property == null)
+            {
+                throw new InvalidOperationException($"Property '{propertyName}' does not exist on '{typeof(TSubject).FullName}'");
+            }
+
+            MethodInfo method = property.SetMethod;
+
+            if (method == null)
+            {
+                throw new InvalidOperationException($"Property '{propertyName}' does not have a getter");
+            }
+
+            return CreateDelegate<Action<TSubject, TValue>>(method);
+        }
+
         private static TDelegate CreateDelegate<TDelegate>(MethodInfo method) where TDelegate : Delegate
         {
             if (method == null)

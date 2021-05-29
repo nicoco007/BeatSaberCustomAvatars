@@ -1,4 +1,6 @@
-﻿using CustomAvatar.Avatar;
+﻿using System;
+using System.Linq;
+using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Utilities;
@@ -10,6 +12,9 @@ namespace CustomAvatar.Player
 {
     internal class EnvironmentObject : MonoBehaviour
     {
+        // found this property through UnityExplorer, hopefully it doesn't disappear in future versions of Unity
+        private static readonly Action<Renderer, Transform> kStaticBatchRootTransformSetter = ReflectionExtensions.CreatePropertySetter<Renderer, Transform>("staticBatchRootTransform");
+
         private ILogger<EnvironmentObject> _logger;
         private PlayerAvatarManager _playerAvatarManager;
         private Settings _settings;
@@ -20,6 +25,11 @@ namespace CustomAvatar.Player
         internal void Awake()
         {
             _originalY = transform.localPosition.y;
+
+            foreach (MeshRenderer renderer in GetComponentsInChildren<MeshRenderer>().Where(mr => mr.isPartOfStaticBatch))
+            {
+                kStaticBatchRootTransformSetter(renderer, transform);
+            }
         }
 
         [Inject]
