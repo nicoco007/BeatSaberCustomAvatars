@@ -149,7 +149,7 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="manifest.json" />
-    <EmbeddedResource Include="Views\**\*.*" />
+    <EmbeddedResource Include="UI\Views\**\*.*" />
     <EmbeddedResource Include="Resources\**\*.*" />
   </ItemGroup>
   <ItemGroup>

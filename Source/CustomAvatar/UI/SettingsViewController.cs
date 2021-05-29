@@ -30,7 +30,7 @@ namespace CustomAvatar.UI
 {
     internal partial class SettingsViewController : BSMLResourceViewController
     {
-        public override string ResourceName => "CustomAvatar.Views.Settings.bsml";
+        public override string ResourceName => "CustomAvatar.UI.Views.Settings.bsml";
 
         #region Components
 #pragma warning disable CS0649

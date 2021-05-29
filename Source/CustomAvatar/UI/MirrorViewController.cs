@@ -29,7 +29,7 @@ namespace CustomAvatar.UI
 {
     internal class MirrorViewController : BSMLResourceViewController
     {
-        public override string ResourceName => "CustomAvatar.Views.Mirror.bsml";
+        public override string ResourceName => "CustomAvatar.UI.Views.Mirror.bsml";
 
         private GameObject _mirrorContainer;
 
