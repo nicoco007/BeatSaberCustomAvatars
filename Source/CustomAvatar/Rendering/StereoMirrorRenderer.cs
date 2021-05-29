@@ -20,6 +20,7 @@ using CustomAvatar.Utilities;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.XR;
 using Zenject;
 
 namespace CustomAvatar.Rendering
@@ -119,8 +120,8 @@ namespace CustomAvatar.Rendering
             }
 
             float renderScale = _settings.mirror.renderScale;
-            int renderWidth = (int)Mathf.Min(camera.pixelWidth * renderScale, SystemInfo.maxTextureSize);
-            int renderHeight = (int)Mathf.Min(camera.pixelHeight * renderScale, SystemInfo.maxTextureSize);
+            int renderWidth = (int)Mathf.Min(XRSettings.eyeTextureWidth * renderScale, SystemInfo.maxTextureSize);
+            int renderHeight = (int)Mathf.Min(XRSettings.eyeTextureHeight * renderScale, SystemInfo.maxTextureSize);
 
             // render to double-wide texture
             if (stereoEnabled) renderWidth *= 2;
