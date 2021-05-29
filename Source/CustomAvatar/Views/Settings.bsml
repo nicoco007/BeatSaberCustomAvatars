@@ -4,8 +4,8 @@
   <tab-selector tab-tag="avatar-tabs" size-delta-x="0" size-delta-y="7" anchor-pos-x="0" anchor-pos-y="-10" />
 
   <tab tags="avatar-tabs" tab-name="General" anchor-max-y="0.8">
-    <macro.as-host host="general-settings-host">
-      <settings-container anchor-pos-y="0" size-delta-y="0">
+    <settings-container anchor-pos-y="0" size-delta-y="0">
+      <macro.as-host host="general-settings-host">
         <toggle-setting text="Visible in First Person" id="visible-in-first-person" on-change="visible-in-first-person-change"/>
         <dropdown-list-setting text="Resize Mode" id="resize-mode" on-change="resize-mode-change" options="resize-mode-options" formatter="resize-mode-formatter"></dropdown-list-setting>
         <horizontal pref-width="90" id="height-adjust-warning-text">
@@ -21,28 +21,13 @@
           <text id="arm-span" font-size="4" align="Left" italics="true"></text>
           <button id="measure-button" text="Measure" on-click="measure-arm-span-click" hover-hint="For optimal results, hold your arms out to either side of your body and point the ends of the controllers outwards as far as possible (turn your hands if necessary)."></button>
         </horizontal>
-      </settings-container>
-    </macro.as-host>
-  </tab>
+      </macro.as-host>
 
-  <tab tags="avatar-tabs" tab-name="Avatar Specific" anchor-max-y="0.8">
-    <macro.as-host host="avatar-specific-settings-host">
-      <settings-container anchor-pos-y="0" size-delta-y="0">
-        <toggle-setting id="ignore-exclusions" text="Ignore first person exclusions" hover-hint="Show the entire model in first person, even if some parts were configured to be hidden in first person. This may cause issues on certain avatars." on-change="ignore-exclusions-change"/>
-        <toggle-setting id="bypass-calibration" text="Bypass calibration" hover-hint="Disable the need for calibration before full body tracking is applied." on-change="bypass-calibration-change"/>
-        <toggle-setting id="automatic-calibration" text="Use automatic calibration" hover-hint="Must be supported by avatar" on-change="automatic-calibration-change"/>
+      <horizontal pref-width="90">
+        <text color="#808080" text="Automatic Calibration" font-size="4" italics="true" align="Baseline" />
+      </horizontal>
 
-        <horizontal child-align="MiddleLeft" child-expand-width="true" child-control-width="true" pad-top="1" pad-bottom="1">
-          <button id="calibrate-button" text="Calibrate FBT" hover-hint="Calibrate full body tracking." on-click="calibrate-fbt-click"></button>
-          <button id="clear-button" text="Clear" hover-hint="Clear calibration data." on-click="clear-fbt-calibration-data-click"></button>
-        </horizontal>
-      </settings-container>
-    </macro.as-host>
-  </tab>
-
-  <tab tags="avatar-tabs" tab-name="Automatic FBT Calibration" anchor-max-y="0.8">
-    <macro.as-host host="automatic-fbt-calibration-host">
-      <settings-container anchor-pos-y="0" size-delta-y="0">
+      <macro.as-host host="automatic-fbt-calibration-host">
         <increment-setting id="pelvis-offset" text="Pelvis Offset" hover-hint="Horizontal distance between pelvis and tracker" min="-0.5" max="0.5" increment="0.01" on-change="pelvis-offset-change"></increment-setting>
         <increment-setting id="foot-offset" text="Foot Offset" hover-hint="Horizontal distance between heel and tracker" min="0" max="0.5" increment="0.01" on-change="foot-offset-change"></increment-setting>
 
@@ -54,6 +39,21 @@
         </horizontal>
 
         <toggle-setting text="Calibrate FBT on start" hover-hint="Run automatic full body tracking when the game starts. Only works with avatars that support automatic calibration and have it enabled." id="calibrate-fbt-on-start" on-change="calibrate-fbt-on-start-change"/>
+      </macro.as-host>
+    </settings-container>
+  </tab>
+
+  <tab tags="avatar-tabs" tab-name="Current Avatar" anchor-max-y="0.8">
+    <macro.as-host host="avatar-specific-settings-host">
+      <settings-container anchor-pos-y="0" size-delta-y="0">
+        <toggle-setting id="ignore-exclusions" text="Ignore first person exclusions" hover-hint="Show the entire model in first person, even if some parts were configured to be hidden in first person. This may cause issues on certain avatars." on-change="ignore-exclusions-change"/>
+        <toggle-setting id="bypass-calibration" text="Bypass calibration" hover-hint="Disable the need for calibration before full body tracking is applied." on-change="bypass-calibration-change"/>
+        <toggle-setting id="automatic-calibration" text="Use automatic calibration" hover-hint="Must be supported by avatar" on-change="automatic-calibration-change"/>
+
+        <horizontal child-align="MiddleLeft" child-expand-width="true" child-control-width="true" pad-top="1" pad-bottom="1">
+          <button id="calibrate-button" text="Calibrate FBT" hover-hint="Calibrate full body tracking." on-click="calibrate-fbt-click"></button>
+          <button id="clear-button" text="Clear" hover-hint="Clear calibration data." on-click="clear-fbt-calibration-data-click"></button>
+        </horizontal>
       </settings-container>
     </macro.as-host>
   </tab>
