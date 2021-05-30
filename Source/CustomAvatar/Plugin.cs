@@ -59,6 +59,7 @@ namespace CustomAvatar
             ZenjectHelper.Register<CustomAvatarsInstaller>().WithArguments(ipaLogger).OnMonoInstaller<PCAppInit>();
             ZenjectHelper.Register<UIInstaller>().OnMonoInstaller<MenuViewControllersInstaller>();
 
+            ZenjectHelper.Register<HealthWarningInstaller>().OnContext("HealthWarning", "SceneContext");
             ZenjectHelper.Register<LightingInstaller>().OnContext("HealthWarning", "SceneContext");
             ZenjectHelper.Register<LightingInstaller>().OnContext("MainMenu", "SceneContext");
             ZenjectHelper.Register<LightingInstaller>().OnContext("GameCore", "SceneContext");
