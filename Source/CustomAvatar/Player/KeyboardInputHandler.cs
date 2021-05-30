@@ -58,7 +58,7 @@ namespace CustomAvatar.Player
             }
             else if (Input.GetKeyDown(KeyCode.Insert))
             {
-                _settings.floorHeightAdjust.value = (FloorHeightAdjust)(((int)_settings.floorHeightAdjust.value + 1) % Enum.GetValues(typeof(FloorHeightAdjust)).Length);
+                _settings.floorHeightAdjust.value = (FloorHeightAdjustMode)(((int)_settings.floorHeightAdjust.value + 1) % Enum.GetValues(typeof(FloorHeightAdjustMode)).Length);
                 _logger.Info($"Set floor height adjust to {_settings.floorHeightAdjust}");
             }
         }

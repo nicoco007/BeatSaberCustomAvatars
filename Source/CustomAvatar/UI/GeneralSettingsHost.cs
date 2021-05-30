@@ -50,7 +50,7 @@ namespace CustomAvatar.UI
 #pragma warning disable IDE0052
 
         [UIValue("resize-mode-options")] private readonly List<object> _resizeModeOptions = new List<object> { AvatarResizeMode.None, AvatarResizeMode.Height, AvatarResizeMode.ArmSpan };
-        [UIValue("floor-height-adjust-options")] private readonly List<object> _floorHeightAdjustOptions = new List<object> { FloorHeightAdjust.Off, FloorHeightAdjust.PlayersPlaceOnly, FloorHeightAdjust.EntireEnvironment };
+        [UIValue("floor-height-adjust-options")] private readonly List<object> _floorHeightAdjustOptions = new List<object> { FloorHeightAdjustMode.Off, FloorHeightAdjustMode.PlayersPlaceOnly, FloorHeightAdjustMode.EntireEnvironment };
 
 #pragma warning restore IDE0052
         #endregion
@@ -165,15 +165,15 @@ namespace CustomAvatar.UI
         [UIAction("floor-height-adjust-formatter")]
         private string FloorHeightAdjustFormatter(object value)
         {
-            if (!(value is FloorHeightAdjust)) return null;
+            if (!(value is FloorHeightAdjustMode)) return null;
 
-            switch ((FloorHeightAdjust)value)
+            switch ((FloorHeightAdjustMode)value)
             {
-                case FloorHeightAdjust.Off:
+                case FloorHeightAdjustMode.Off:
                     return "Off";
-                case FloorHeightAdjust.PlayersPlaceOnly:
+                case FloorHeightAdjustMode.PlayersPlaceOnly:
                     return "Player's Place Only";
-                case FloorHeightAdjust.EntireEnvironment:
+                case FloorHeightAdjustMode.EntireEnvironment:
                     return "Entire Environment";
                 default:
                     return null;
@@ -181,7 +181,7 @@ namespace CustomAvatar.UI
         }
 
         [UIAction("floor-height-adjust-change")]
-        private void OnFloorHeightAdjustChanged(FloorHeightAdjust value)
+        private void OnFloorHeightAdjustChanged(FloorHeightAdjustMode value)
         {
             _settings.floorHeightAdjust.value = value;
         }

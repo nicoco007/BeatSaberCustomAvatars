@@ -16,7 +16,7 @@
 
 namespace CustomAvatar.Player
 {
-    internal enum FloorHeightAdjust
+    internal enum FloorHeightAdjustMode
     {
         Off,
         PlayersPlaceOnly,

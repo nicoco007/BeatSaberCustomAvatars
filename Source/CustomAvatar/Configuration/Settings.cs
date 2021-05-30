@@ -37,7 +37,7 @@ namespace CustomAvatar.Configuration
         public ObservableValue<bool> isAvatarVisibleInFirstPerson { get; } = new ObservableValue<bool>();
         public ObservableValue<bool> moveFloorWithRoomAdjust { get; } = new ObservableValue<bool>();
         public ObservableValue<AvatarResizeMode> resizeMode { get; } = new ObservableValue<AvatarResizeMode>(AvatarResizeMode.Height);
-        public ObservableValue<FloorHeightAdjust> floorHeightAdjust { get; } = new ObservableValue<FloorHeightAdjust>(FloorHeightAdjust.Off);
+        public ObservableValue<FloorHeightAdjustMode> floorHeightAdjust { get; } = new ObservableValue<FloorHeightAdjustMode>(FloorHeightAdjustMode.Off);
         public string previousAvatarPath { get; set; }
         public ObservableValue<float> playerArmSpan { get; } = new ObservableValue<float>(VRPlayerInput.kDefaultPlayerArmSpan);
         public bool calibrateFullBodyTrackingOnStart { get; set; }

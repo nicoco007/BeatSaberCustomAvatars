@@ -35,11 +35,11 @@ namespace CustomAvatar.Player
         {
             switch (_settings.floorHeightAdjust.value)
             {
-                case FloorHeightAdjust.EntireEnvironment:
+                case FloorHeightAdjustMode.EntireEnvironment:
                     _container.InstantiateComponent<EnvironmentObject>(GameObject.Find("/Environment"));
                     break;
 
-                case FloorHeightAdjust.PlayersPlaceOnly:
+                case FloorHeightAdjustMode.PlayersPlaceOnly:
                     var environment = GameObject.Find("/Environment");
 
                     _container.InstantiateComponent<EnvironmentObject>(environment.transform.Find("PlayersPlace").gameObject);

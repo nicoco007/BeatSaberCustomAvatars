@@ -105,7 +105,7 @@ namespace CustomAvatar.Player
             UpdateOffset();
         }
 
-        private void OnFloorHeightAdjustChanged(FloorHeightAdjust value)
+        private void OnFloorHeightAdjustChanged(FloorHeightAdjustMode value)
         {
             UpdateOffset();
         }

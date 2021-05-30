@@ -101,7 +101,7 @@ namespace CustomAvatar.Utilities
         /// </summary>
         public void ApplyFloorOffset(SpawnedAvatar spawnedAvatar, ref Vector3 position)
         {
-            if (_settings.floorHeightAdjust == FloorHeightAdjust.Off || !spawnedAvatar) return;
+            if (_settings.floorHeightAdjust == FloorHeightAdjustMode.Off || !spawnedAvatar) return;
 
             position.y += spawnedAvatar.scaledEyeHeight - _beatSaberUtilities.GetRoomAdjustedPlayerEyeHeight();
         }
@@ -113,7 +113,7 @@ namespace CustomAvatar.Utilities
         /// </summary>
         public void ApplyFloorScaling(SpawnedAvatar spawnedAvatar, ref Vector3 position)
         {
-            if (_settings.floorHeightAdjust == FloorHeightAdjust.Off || !spawnedAvatar) return;
+            if (_settings.floorHeightAdjust == FloorHeightAdjustMode.Off || !spawnedAvatar) return;
 
             position.y *= spawnedAvatar.scaledEyeHeight / _beatSaberUtilities.GetRoomAdjustedPlayerEyeHeight();
         }
@@ -124,7 +124,7 @@ namespace CustomAvatar.Utilities
         /// </summary>
         public void ApplyInverseFloorScaling(SpawnedAvatar spawnedAvatar, ref Vector3 position)
         {
-            if (_settings.floorHeightAdjust == FloorHeightAdjust.Off || !spawnedAvatar) return;
+            if (_settings.floorHeightAdjust == FloorHeightAdjustMode.Off || !spawnedAvatar) return;
 
             position.y /= spawnedAvatar.scaledEyeHeight / _beatSaberUtilities.GetRoomAdjustedPlayerEyeHeight();
         }

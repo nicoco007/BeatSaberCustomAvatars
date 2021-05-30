@@ -75,7 +75,7 @@ namespace CustomAvatar.Player
             floorPositionChanged?.Invoke(floorPosition);
         }
 
-        private void OnFloorHeightAdjustChanged(FloorHeightAdjust floorHeightAdjust)
+        private void OnFloorHeightAdjustChanged(FloorHeightAdjustMode floorHeightAdjust)
         {
             floorPositionChanged?.Invoke(floorPosition);
         }

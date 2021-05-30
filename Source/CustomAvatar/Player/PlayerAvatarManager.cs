@@ -428,7 +428,7 @@ namespace CustomAvatar.Player
 
         internal float GetFloorOffset()
         {
-            if (_settings.floorHeightAdjust == FloorHeightAdjust.Off || !currentlySpawnedAvatar) return 0;
+            if (_settings.floorHeightAdjust == FloorHeightAdjustMode.Off || !currentlySpawnedAvatar) return 0;
 
             return _beatSaberUtilities.GetRoomAdjustedPlayerEyeHeight() - currentlySpawnedAvatar.scaledEyeHeight;
         }
@@ -438,7 +438,7 @@ namespace CustomAvatar.Player
             ResizeCurrentAvatar();
         }
 
-        private void OnFloorHeightAdjustChanged(FloorHeightAdjust floorHeightAdjust)
+        private void OnFloorHeightAdjustChanged(FloorHeightAdjustMode floorHeightAdjust)
         {
             ResizeCurrentAvatar();
         }
