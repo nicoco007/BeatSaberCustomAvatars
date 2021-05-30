@@ -25,14 +25,12 @@ namespace CustomAvatar.Lighting
     internal class MenuLightingCreator : IInitializable, IDisposable
     {
         private readonly LightWithIdManager _lightWithIdManager;
-        private readonly MenuEnvironmentManager _menuEnvironmentManager;
 
         private Light _light;
 
-        public MenuLightingCreator(LightWithIdManager lightWithIdManager, MenuEnvironmentManager menuEnvironmentManager)
+        public MenuLightingCreator(LightWithIdManager lightWithIdManager)
         {
             _lightWithIdManager = lightWithIdManager;
-            _menuEnvironmentManager = menuEnvironmentManager;
         }
 
         public void Initialize()
@@ -40,7 +38,7 @@ namespace CustomAvatar.Lighting
             var lightObject = new GameObject("Menu Light");
             Transform lightTransform = lightObject.transform;
 
-            lightObject.transform.SetParent(_menuEnvironmentManager.transform, false);
+            lightObject.transform.SetParent(GameObject.Find("/MenuCore").transform, false);
             lightObject.transform.rotation = Quaternion.Euler(30, 180, 0);
 
             _light = lightObject.AddComponent<Light>();
