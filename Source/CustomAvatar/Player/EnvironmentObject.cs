@@ -16,9 +16,9 @@ namespace CustomAvatar.Player
         private static readonly Action<Renderer, Transform> kStaticBatchRootTransformSetter = ReflectionExtensions.CreatePropertySetter<Renderer, Transform>("staticBatchRootTransform");
 
         private ILogger<EnvironmentObject> _logger;
-        private PlayerAvatarManager _playerAvatarManager;
-        private Settings _settings;
-        private BeatSaberUtilities _beatSaberUtilities;
+        protected PlayerAvatarManager _playerAvatarManager;
+        protected Settings _settings;
+        protected BeatSaberUtilities _beatSaberUtilities;
 
         private float _originalY;
 
@@ -67,6 +67,18 @@ namespace CustomAvatar.Player
             _settings.floorHeightAdjust.changed -= OnFloorHeightAdjustChanged;
         }
 
+        protected virtual void UpdateOffset()
+        {
+            float floorOffset = _playerAvatarManager.GetFloorOffset();
+
+            if (_settings.moveFloorWithRoomAdjust)
+            {
+                floorOffset += _beatSaberUtilities.roomCenter.y;
+            }
+
+            transform.localPosition = new Vector3(transform.localPosition.x, _originalY + floorOffset, transform.localPosition.z);
+        }
+
         private void OnAvatarChanged(SpawnedAvatar avatar)
         {
             UpdateOffset();
@@ -80,18 +92,6 @@ namespace CustomAvatar.Player
         private void OnFloorHeightAdjustChanged(FloorHeightAdjust value)
         {
             UpdateOffset();
-        }
-
-        private void UpdateOffset()
-        {
-            float floorOffset = _playerAvatarManager.GetFloorOffset();
-
-            if (_settings.moveFloorWithRoomAdjust)
-            {
-                floorOffset += _beatSaberUtilities.roomCenter.y;
-            }
-
-            transform.localPosition = new Vector3(transform.localPosition.x, _originalY + floorOffset, transform.localPosition.z);
         }
     }
 }

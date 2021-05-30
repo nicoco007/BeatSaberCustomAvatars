@@ -34,12 +34,12 @@ namespace CustomAvatar.Rendering
             _shaderLoader = shaderLoader;
         }
 
-        public void CreateMirror(Vector3 position, Quaternion rotation, Vector2 size, Transform container)
+        public StereoMirrorRenderer CreateMirror(Vector3 position, Quaternion rotation, Vector2 size, Transform container)
         {
             if (!_shaderLoader.stereoMirrorShader)
             {
                 _logger.Error("Stereo Mirror shader not loaded; mirror will not be created");
-                return;
+                return null;
             }
 
             // plane is 10 m in size at scale 1, width is x and height is z
@@ -53,7 +53,7 @@ namespace CustomAvatar.Rendering
             mirrorPlane.transform.localPosition = position;
             mirrorPlane.transform.localRotation = rotation;
 
-            _container.InstantiateComponent<StereoMirrorRenderer>(mirrorPlane);
+            return _container.InstantiateComponent<StereoMirrorRenderer>(mirrorPlane);
         }
     }
 }

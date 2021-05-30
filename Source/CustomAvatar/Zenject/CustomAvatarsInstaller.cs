@@ -105,7 +105,7 @@ namespace CustomAvatar.Zenject
 
         private bool ShouldCreateLogger(InjectContext context)
         {
-            return context.ObjectType == context.MemberType.GenericTypeArguments[0];
+            return context.MemberType.GenericTypeArguments[0].IsAssignableFrom(context.ObjectType);
         }
 
         private Settings LoadSettings()

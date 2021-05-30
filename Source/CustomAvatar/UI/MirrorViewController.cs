@@ -31,7 +31,7 @@ namespace CustomAvatar.UI
     {
         public override string ResourceName => "CustomAvatar.UI.Views.Mirror.bsml";
 
-        private GameObject _mirrorContainer;
+        private GameObject _mirror;
 
         private DiContainer _container;
         private MirrorHelper _mirrorHelper;
@@ -64,26 +64,21 @@ namespace CustomAvatar.UI
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
 
+            _avatarManager.avatarStartedLoading += OnAvatarStartedLoading;
+            _avatarManager.avatarChanged += OnAvatarChanged;
+            _avatarManager.avatarLoadFailed += OnAvatarLoadFailed;
+
+            SetLoading(false);
+
             if (addedToHierarchy)
             {
-                _mirrorContainer = new GameObject("Mirror Container");
-
-                Transform parent = _hierarchyManager.transform;
-                Transform transform = _mirrorContainer.transform;
-                transform.SetParent(parent, false);
-                transform.position = new Vector3(transform.position.x, 0, transform.position.z);
-                transform.localScale = new Vector3(1.5f / parent.localScale.x, 1.5f / parent.localScale.y, 1.5f / parent.localScale.z);
-
-                _container.InstantiateComponent<EnvironmentObject>(_mirrorContainer);
-
                 Vector2 mirrorSize = _settings.mirror.size;
-                _mirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, 2.6f), Quaternion.Euler(-90f, 0, 0), mirrorSize, transform);
+                StereoMirrorRenderer renderer = _mirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, _hierarchyManager.transform.Find("ScreenContainer").position.z), Quaternion.Euler(-90f, 0, 0), mirrorSize, null);
 
-                _avatarManager.avatarStartedLoading += OnAvatarStartedLoading;
-                _avatarManager.avatarChanged += OnAvatarChanged;
-                _avatarManager.avatarLoadFailed += OnAvatarLoadFailed;
+                if (!renderer) return;
 
-                SetLoading(false);
+                _mirror = renderer.gameObject;
+                _container.InstantiateComponent<AutoResizeMirror>(_mirror);
             }
         }
 
@@ -93,12 +88,12 @@ namespace CustomAvatar.UI
 
             if (removedFromHierarchy)
             {
-                _avatarManager.avatarStartedLoading -= OnAvatarStartedLoading;
-                _avatarManager.avatarChanged -= OnAvatarChanged;
-                _avatarManager.avatarLoadFailed -= OnAvatarLoadFailed;
+                Destroy(_mirror);
             }
 
-            Destroy(_mirrorContainer);
+            _avatarManager.avatarStartedLoading -= OnAvatarStartedLoading;
+            _avatarManager.avatarChanged -= OnAvatarChanged;
+            _avatarManager.avatarLoadFailed -= OnAvatarLoadFailed;
         }
 
         #endregion
@@ -126,6 +121,26 @@ namespace CustomAvatar.UI
         {
             _loader.gameObject.SetActive(loading);
             _errorText.gameObject.SetActive(false);
+        }
+
+        private class AutoResizeMirror : EnvironmentObject
+        {
+            protected override void UpdateOffset()
+            {
+                float floorOffset = _playerAvatarManager.GetFloorOffset();
+
+                if (_settings.moveFloorWithRoomAdjust)
+                {
+                    floorOffset += _beatSaberUtilities.roomCenter.y;
+                }
+
+                float scale = transform.localPosition.z / 2.6f; // screen system scale
+                float width = 4 * scale;
+                float height = 2f + 0.5f * scale - floorOffset;
+
+                transform.localPosition = new Vector3(transform.localPosition.x, floorOffset + height / 2, transform.localPosition.z);
+                transform.localScale = new Vector3(width / 10, 1, height / 10);
+            }
         }
     }
 }
