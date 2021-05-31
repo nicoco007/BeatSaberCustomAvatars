@@ -217,8 +217,20 @@ namespace CustomAvatar.Player
                     {
                         tasks.Add(new Func<Task>(async () =>
                         {
-                            await LoadAvatarAsync(fullPath);
-                            semaphore.Release();
+                            try
+                            {
+                                AvatarPrefab avatarPrefab = await _avatarLoader.LoadFromFileAsync(fullPath);
+                                SwitchToAvatar(avatarPrefab);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.Error($"Failed to load avatar '{fullPath}'");
+                                _logger.Error(ex);
+                            }
+                            finally
+                            {
+                                semaphore.Release();
+                            }
                         })());
                     }
                 }
