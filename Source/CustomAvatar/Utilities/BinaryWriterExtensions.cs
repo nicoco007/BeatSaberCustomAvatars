@@ -47,22 +47,18 @@ namespace CustomAvatar.Utilities
 
         public static void Write(this BinaryWriter writer, Texture2D texture, bool forceReadable)
         {
-            byte[] textureBytes = BytesFromTexture2D(texture, forceReadable);
+            if (texture == null || (!texture.isReadable && !forceReadable))
+            {
+                writer.Write(0);
+                writer.Write(0);
+                writer.Write(0);
+                writer.Write(0);
+                writer.Write(0);
+                return;
+            }
 
-            writer.Write(textureBytes.Length);
-            writer.Write(textureBytes);
-        }
-
-        public static void Write(this BinaryWriter writer, DateTime dateTime)
-        {
-            writer.Write(dateTime.ToBinary());
-        }
-
-        private static byte[] BytesFromTexture2D(Texture2D texture, bool forceReadable)
-        {
-            if (texture == null || (!texture.isReadable && !forceReadable)) return new byte[0];
-
-            // create readable texture by rendering onto a RenderTexture
+            // this is a pretty expensive operation (few milliseconds) but since we only need to do it once (images
+            // loaded from cache are always readable) and only do it when the game closes, it's not that bad
             if (!texture.isReadable || texture.width > kMaxTextureSize || texture.height > kMaxTextureSize)
             {
                 float scale = Mathf.Min(1, kMaxTextureSize / texture.width, kMaxTextureSize / texture.height);
@@ -72,11 +68,24 @@ namespace CustomAvatar.Utilities
                 RenderTexture.active = renderTexture;
                 Graphics.Blit(texture, renderTexture);
                 texture = renderTexture.GetTexture2D();
+                texture.Compress(true);
                 RenderTexture.active = null;
                 RenderTexture.ReleaseTemporary(renderTexture);
             }
 
-            return texture.EncodeToPNG();
+            byte[] textureBytes = texture.GetRawTextureData();
+
+            writer.Write(texture.width);
+            writer.Write(texture.height);
+            writer.Write((int)texture.graphicsFormat);
+            writer.Write(texture.mipmapCount);
+            writer.Write(textureBytes.Length);
+            writer.Write(textureBytes);
+        }
+
+        public static void Write(this BinaryWriter writer, DateTime dateTime)
+        {
+            writer.Write(dateTime.ToBinary());
         }
     }
 }

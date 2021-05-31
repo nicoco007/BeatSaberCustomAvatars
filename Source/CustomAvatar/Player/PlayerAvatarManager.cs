@@ -41,7 +41,7 @@ namespace CustomAvatar.Player
         public static readonly string kCustomAvatarsPath = Path.Combine(UnityGame.InstallPath, "CustomAvatars");
         public static readonly string kAvatarInfoCacheFilePath = Path.Combine(kCustomAvatarsPath, "cache.dat");
         public static readonly byte[] kCacheFileSignature = { 0x43, 0x41, 0x64, 0x62 }; // Custom Avatars Database (CAdb)
-        public static readonly byte kCacheFileVersion = 1;
+        public static readonly byte kCacheFileVersion = 2;
 
         private const int kMaxNumberOfConcurrentLoadingTasks = 4;
 
@@ -630,6 +630,12 @@ namespace CustomAvatar.Player
                             reader.ReadDateTime(),
                             reader.ReadDateTime()
                         );
+
+                        if (string.IsNullOrWhiteSpace(avatarInfo.fileName) || Path.GetInvalidFileNameChars().Any(c => avatarInfo.fileName.Contains(c)))
+                        {
+                            _logger.Error($"Invalid avatar file name '{avatarInfo.fileName}'");
+                            continue;
+                        }
 
                         string fullPath = Path.Combine(kCustomAvatarsPath, avatarInfo.fileName);
 

@@ -17,6 +17,7 @@
 using System;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 
 namespace CustomAvatar.Utilities
 {
@@ -39,7 +40,7 @@ namespace CustomAvatar.Utilities
 
         public static Texture2D ReadTexture2D(this BinaryReader reader)
         {
-            return BytesToTexture2D(reader.ReadBytes(reader.ReadInt32()));
+            return BytesToTexture2D(reader.ReadInt32(), reader.ReadInt32(), (GraphicsFormat)reader.ReadInt32(), reader.ReadInt32(), reader.ReadBytes(reader.ReadInt32()));
         }
 
         public static DateTime ReadDateTime(this BinaryReader reader)
@@ -47,13 +48,14 @@ namespace CustomAvatar.Utilities
             return DateTime.FromBinary(reader.ReadInt64());
         }
 
-        private static Texture2D BytesToTexture2D(byte[] bytes)
+        private static Texture2D BytesToTexture2D(int width, int height, GraphicsFormat graphicsFormat, int mipCount, byte[] bytes)
         {
             if (bytes.Length == 0) return null;
 
-            var texture = new Texture2D(0, 0, TextureFormat.ARGB32, false);
+            var texture = new Texture2D(width, height, graphicsFormat, mipCount, TextureCreationFlags.MipChain);
 
-            texture.LoadImage(bytes);
+            texture.LoadRawTextureData(bytes);
+            texture.Apply();
 
             return texture;
         }
