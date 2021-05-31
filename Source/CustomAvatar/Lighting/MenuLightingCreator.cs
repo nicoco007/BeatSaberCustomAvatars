@@ -61,7 +61,14 @@ namespace CustomAvatar.Lighting
 
         private void UpdateLightColor()
         {
-            _light.color = DirectionalLight.lights.Aggregate(Color.black, (acc, l) => acc + l.color * l.intensity) / DirectionalLight.lights.Sum(l => l.intensity);
+            Color color = DirectionalLight.lights.Aggregate(new Color(0, 0, 0, 0), (acc, l) => acc + l.color * l.intensity) / DirectionalLight.lights.Sum(l => l.intensity);
+
+            _light.color = color;
+            _light.intensity = color.a;
+
+            RenderSettings.ambientSkyColor = color * 0.2f;
+            RenderSettings.ambientEquatorColor = color * 0.5f;
+            RenderSettings.ambientGroundColor = color * 0.1f;
         }
     }
 }
