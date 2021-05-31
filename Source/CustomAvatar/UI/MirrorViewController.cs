@@ -113,8 +113,7 @@ namespace CustomAvatar.UI
         {
             SetLoading(false);
 
-            _errorText.color = new Color(0.85f, 0.85f, 0.85f, 0.8f);
-            _errorText.text = $"Failed to load selected avatar\n<size=3>{exception.Message}</size>";
+            _errorText.text = $"Failed to load selected avatar\n<size=75%>{exception.Message}</size>";
             _errorText.gameObject.SetActive(true);
         }
 
