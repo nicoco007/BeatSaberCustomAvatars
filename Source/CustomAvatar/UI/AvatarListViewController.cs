@@ -22,6 +22,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using CustomAvatar.Avatar;
 using CustomAvatar.Player;
+using CustomAvatar.Utilities;
 using HMUI;
 using IPA.Utilities;
 using Polyglot;
@@ -48,8 +49,10 @@ namespace CustomAvatar.UI
         private readonly List<AvatarListItem> _avatars = new List<AvatarListItem>();
         private AvatarListTableCell _tableCellPrefab;
 
-        private Sprite _blankAvatarIcon;
-        private Sprite _noAvatarIcon;
+        private Texture2D _atlas;
+        private Sprite _blankAvatarSprite;
+        private Sprite _noAvatarSprite;
+        private Sprite _reloadSprite;
 
         private bool _isLoading
         {
@@ -67,6 +70,27 @@ namespace CustomAvatar.UI
             _leaderboardViewController = leaderboardViewController;
         }
 
+        protected void Start()
+        {
+            using (Stream fileStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("CustomAvatar.Resources.ui.dds"))
+            {
+                _atlas = SimpleDdsLoader.LoadImage(fileStream);
+                _noAvatarSprite = Sprite.Create(_atlas, new Rect(0, 0, 256, 256), new Vector2(0.5f, 0.5f));
+                _blankAvatarSprite = Sprite.Create(_atlas, new Rect(256, 0, 256, 256), new Vector2(0.5f, 0.5f));
+                _reloadSprite = Sprite.Create(_atlas, new Rect(0, 256, 128, 128), new Vector2(0.5f, 0.5f));
+            }
+        }
+
+        protected override void OnDestroy()
+        {
+            Destroy(_noAvatarSprite);
+            Destroy(_blankAvatarSprite);
+            Destroy(_reloadSprite);
+            Destroy(_atlas);
+
+            base.OnDestroy();
+        }
+
         protected override async void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
@@ -75,21 +99,24 @@ namespace CustomAvatar.UI
             {
                 _tableCellPrefab = CreateTableCellPrefab();
 
-                _blankAvatarIcon = LoadSpriteFromResource("CustomAvatar.Resources.mystery-man.png");
-                _noAvatarIcon = LoadSpriteFromResource("CustomAvatar.Resources.ban.png");
-
                 CreateTableView();
                 CreateRefreshButton();
             }
 
-            if (addedToHierarchy)
-            {
-                _avatarManager.avatarChanged += OnAvatarChanged;
-                _avatarManager.avatarAdded += OnAvatarAdded;
-                _avatarManager.avatarRemoved += OnAvatarRemoved;
+            _avatarManager.avatarChanged += OnAvatarChanged;
+            _avatarManager.avatarAdded += OnAvatarAdded;
+            _avatarManager.avatarRemoved += OnAvatarRemoved;
 
-                await ReloadAvatars();
-            }
+            await ReloadAvatars();
+        }
+
+        protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
+        {
+            base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
+
+            _avatarManager.avatarChanged -= OnAvatarChanged;
+            _avatarManager.avatarAdded -= OnAvatarAdded;
+            _avatarManager.avatarRemoved -= OnAvatarRemoved;
         }
 
         private AvatarListTableCell CreateTableCellPrefab()
@@ -204,38 +231,12 @@ namespace CustomAvatar.UI
             button.transform.SetParent(transform);
 
             ImageView image = iconObject.GetComponent<ImageView>();
-            image.sprite = LoadSpriteFromResource("CustomAvatar.Resources.arrows-rotate.png");
+            image.sprite = _reloadSprite;
 
             HoverHint hoverHint = _container.InstantiateComponent<HoverHint>(gameObject);
             hoverHint.text = "Force reload all avatars, including the one currently spawned. This will most likely lag your game for a few seconds if you have many avatars loaded.";
 
             Destroy(gameObject.GetComponent<LocalizedHoverHint>());
-        }
-
-        private Sprite LoadSpriteFromResource(string resourceName)
-        {
-            var texture = new Texture2D(0, 0);
-
-            using (Stream textureStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
-            {
-                byte[] textureBytes = new byte[textureStream.Length];
-                textureStream.Read(textureBytes, 0, (int)textureStream.Length);
-                texture.LoadImage(textureBytes);
-            }
-
-            return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
-        }
-
-        protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
-        {
-            base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
-
-            if (removedFromHierarchy)
-            {
-                _avatarManager.avatarChanged -= OnAvatarChanged;
-                _avatarManager.avatarAdded -= OnAvatarAdded;
-                _avatarManager.avatarRemoved -= OnAvatarRemoved;
-            }
         }
 
         private async void OnAvatarClicked(TableView table, int row)
@@ -282,7 +283,7 @@ namespace CustomAvatar.UI
 
             _isLoading = true;
 
-            _avatars.Add(new AvatarListItem("No Avatar", _noAvatarIcon));
+            _avatars.Add(new AvatarListItem("No Avatar", _noAvatarSprite));
             _avatars.AddRange((await _avatarManager.GetAvatarInfosAsync(force)).Select(i => new AvatarListItem(i)));
             ReloadData();
         }
@@ -334,7 +335,7 @@ namespace CustomAvatar.UI
             }
 
             AvatarListItem avatar = _avatars[idx];
-            Sprite icon = avatar.icon ? avatar.icon : _blankAvatarIcon;
+            Sprite icon = avatar.icon ? avatar.icon : _blankAvatarSprite;
 
             tableCell.nameText.text = avatar.name;
             tableCell.authorText.text = avatar.author;
