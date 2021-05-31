@@ -12,7 +12,7 @@
           <text color="#FFFF88FF" text="You are using Automatic Player Height; please disable it in Player Settings and set your height manually." font-size="2.5" italics="true" />
         </horizontal>
         <dropdown-list-setting text="Floor Height Adjust" hover-hint="Move the floor/environment so the avatar is standing at full height even if it is taller or shorter than the player." id="floor-height-adjust" on-change="floor-height-adjust-change" options="floor-height-adjust-options" formatter="floor-height-adjust-formatter"/>
-
+        
         <horizontal pref-height="7">
           <text text="Arm Span" font-size="4" align="Left" italics="true"></text>
           <text id="arm-span" font-size="4" align="Left" italics="true"></text>
@@ -59,6 +59,14 @@
           <button id="calibrate-button" text="Calibrate FBT" hover-hint="Calibrate full body tracking." on-click="calibrate-fbt-click"></button>
           <button id="clear-button" text="Clear" hover-hint="Clear calibration data." on-click="clear-fbt-calibration-data-click"></button>
         </horizontal>
+      </settings-container>
+    </macro.as-host>
+  </tab>
+
+  <tab tags="avatar-tabs" tab-name="Interface" anchor-max-y="0.8">
+    <macro.as-host host="interface-settings-host">
+      <settings-container anchor-pos-y="0" size-delta-y="0">
+        <increment-setting text="Mirror Render Scale" value="mirror-render-scale-value" apply-on-change="true" min="0.5" max="2" increment="0.1" />
       </settings-container>
     </macro.as-host>
   </tab>

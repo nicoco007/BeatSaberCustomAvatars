@@ -57,7 +57,7 @@ namespace CustomAvatar.Player
             _beatSaberUtilities = beatSaberUtilities;
         }
 
-        internal void Start()
+        internal virtual void Start()
         {
             _playerAvatarManager.avatarChanged += OnAvatarChanged;
             _playerAvatarManager.avatarScaleChanged += OnAvatarScaleChanged;
@@ -76,7 +76,7 @@ namespace CustomAvatar.Player
             UpdateOffset();
         }
 
-        internal void OnDestroy()
+        internal virtual void OnDestroy()
         {
             _playerAvatarManager.avatarChanged -= OnAvatarChanged;
             _playerAvatarManager.avatarScaleChanged -= OnAvatarScaleChanged;

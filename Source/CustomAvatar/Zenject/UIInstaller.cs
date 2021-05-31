@@ -40,6 +40,7 @@ namespace CustomAvatar.Zenject
             Container.Bind<GeneralSettingsHost>().AsSingle();
             Container.Bind<AvatarSpecificSettingsHost>().AsSingle();
             Container.Bind<AutomaticFbtCalibrationHost>().AsSingle();
+            Container.Bind<InterfaceSettingsHost>().AsSingle();
 
             Container.Bind<ArmSpanMeasurer>().FromNewComponentOn(settingsViewController.gameObject).AsSingle();
             Container.Bind<ManualCalibrationHelper>().FromNewComponentOn(settingsViewController.gameObject).AsSingle();

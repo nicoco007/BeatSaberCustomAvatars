@@ -15,12 +15,11 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using CustomAvatar.Avatar;
-using CustomAvatar.Configuration;
 using CustomAvatar.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.XR;
 using Zenject;
 
 namespace CustomAvatar.Rendering
@@ -40,20 +39,38 @@ namespace CustomAvatar.Rendering
         private static readonly Rect kFullRect = new Rect(0f, 0f, 1f, 1f);
 
         private ShaderLoader _shaderLoader;
-        private Settings _settings;
 
         private Renderer _renderer;
         private Camera _mirrorCamera;
+        private int _antiAliasing = 2;
         private readonly Dictionary<Camera, RenderTexture> _renderTextures = new Dictionary<Camera, RenderTexture>();
+
+        public int renderWidth { get; set; } = 1024;
+
+        public int renderHeight { get; set; } = 1024;
+
+        public int antiAliasing
+        {
+            get => _antiAliasing;
+            set
+            {
+                if (!kValidAntiAliasingValues.Contains(value))
+                {
+                    throw new ArgumentException("Antialiasing must be one of 1, 2, 4, or 8");
+                }
+
+                _antiAliasing = value;
+            }
+        }
+
 
         #region Behaviour Lifecycle
 #pragma warning disable IDE0051
 
         [Inject]
-        private void Inject(ShaderLoader shaderLoader, Settings settings)
+        private void Inject(ShaderLoader shaderLoader)
         {
             _shaderLoader = shaderLoader;
-            _settings = settings;
         }
 
         private void Start()
@@ -97,7 +114,7 @@ namespace CustomAvatar.Rendering
         {
             Camera camera = Camera.current;
 
-            if (!camera || camera == _mirrorCamera)
+            if (!camera || camera == _mirrorCamera || renderWidth <= 0 || renderHeight <= 0)
             {
                 return null;
             }
@@ -119,15 +136,10 @@ namespace CustomAvatar.Rendering
                 return renderTexture;
             }
 
-            float renderScale = _settings.mirror.renderScale;
-            int renderWidth = (int)Mathf.Min(XRSettings.eyeTextureWidth * renderScale, SystemInfo.maxTextureSize);
-            int renderHeight = (int)Mathf.Min(XRSettings.eyeTextureHeight * renderScale, SystemInfo.maxTextureSize);
-
             // render to double-wide texture
             if (stereoEnabled) renderWidth *= 2;
 
-            int antiAliasing = kValidAntiAliasingValues.Contains(_settings.mirror.antiAliasing) ? _settings.mirror.antiAliasing : 1;
-            renderTexture = RenderTexture.GetTemporary(renderWidth, renderHeight, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default, antiAliasing);
+            renderTexture = RenderTexture.GetTemporary(Mathf.Min(renderWidth, SystemInfo.maxTextureSize), Mathf.Min(renderWidth, SystemInfo.maxTextureSize), 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default, _antiAliasing);
 
             _renderTextures[camera] = renderTexture;
 

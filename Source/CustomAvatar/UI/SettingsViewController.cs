@@ -28,7 +28,7 @@ using Zenject;
 
 namespace CustomAvatar.UI
 {
-    internal partial class SettingsViewController : BSMLResourceViewController
+    internal class SettingsViewController : BSMLResourceViewController
     {
         public override string ResourceName => "CustomAvatar.UI.Views.Settings.bsml";
 
@@ -42,11 +42,14 @@ namespace CustomAvatar.UI
         #endregion
 
         #region Values
+#pragma warning disable IDE0052
 
         [UIValue("general-settings-host")] private GeneralSettingsHost _generalSettingsHost;
         [UIValue("avatar-specific-settings-host")] private AvatarSpecificSettingsHost _avatarSpecificSettingsHost;
         [UIValue("automatic-fbt-calibration-host")] private AutomaticFbtCalibrationHost _automaticFbtCalibrationHost;
+        [UIValue("interface-settings-host")] private InterfaceSettingsHost _interfaceSettingsHost;
 
+#pragma warning restore IDE0052
         #endregion
 
         private PlayerAvatarManager _avatarManager;
@@ -54,7 +57,7 @@ namespace CustomAvatar.UI
         private VRPlayerInputInternal _playerInput;
 
         [Inject]
-        internal void Construct(PlayerAvatarManager avatarManager, PlatformLeaderboardViewController leaderboardViewController, VRPlayerInputInternal playerInput, GeneralSettingsHost generalSettingsHost, AvatarSpecificSettingsHost avatarSpecificSettingsHost, AutomaticFbtCalibrationHost automaticFbtCalibrationHost)
+        internal void Construct(PlayerAvatarManager avatarManager, PlatformLeaderboardViewController leaderboardViewController, VRPlayerInputInternal playerInput, GeneralSettingsHost generalSettingsHost, AvatarSpecificSettingsHost avatarSpecificSettingsHost, AutomaticFbtCalibrationHost automaticFbtCalibrationHost, InterfaceSettingsHost interfaceSettingsHost)
         {
             _avatarManager = avatarManager;
             _leaderboardViewController = leaderboardViewController;
@@ -62,6 +65,7 @@ namespace CustomAvatar.UI
             _generalSettingsHost = generalSettingsHost;
             _avatarSpecificSettingsHost = avatarSpecificSettingsHost;
             _automaticFbtCalibrationHost = automaticFbtCalibrationHost;
+            _interfaceSettingsHost = interfaceSettingsHost;
         }
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)

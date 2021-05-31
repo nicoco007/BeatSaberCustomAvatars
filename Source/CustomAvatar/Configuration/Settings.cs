@@ -45,7 +45,7 @@ namespace CustomAvatar.Configuration
         public ObservableValue<float> cameraNearClipPlane { get; } = new ObservableValue<float>(0.1f);
         public bool showAvatarInSmoothCamera { get; set; } = true;
         public Lighting lighting { get; } = new Lighting();
-        public Mirror mirror { get; } = new Mirror();
+        public ObservableValue<float> mirrorRenderScale { get; } = new ObservableValue<float>(1.0f);
         public AutomaticFullBodyCalibration automaticCalibration { get; } = new AutomaticFullBodyCalibration();
         public FullBodyMotionSmoothing fullBodyMotionSmoothing { get; } = new FullBodyMotionSmoothing();
 
@@ -130,13 +130,6 @@ namespace CustomAvatar.Configuration
         public class EnvironmentLighting : LightingGroup
         {
             public EnvironmentLightingType type { get; set; } = EnvironmentLightingType.Dynamic;
-        }
-
-        public class Mirror
-        {
-            public Vector2 size { get; set; } = new Vector2(4f, 2f);
-            public float renderScale { get; set; } = 1.0f;
-            public int antiAliasing { get; set; } = 2;
         }
 
         public class FullBodyMotionSmoothing

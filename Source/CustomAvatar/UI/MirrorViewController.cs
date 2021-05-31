@@ -14,28 +14,29 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using CustomAvatar.Configuration;
-using CustomAvatar.Rendering;
-using UnityEngine;
-using Zenject;
+using System;
+using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberMarkupLanguage.ViewControllers;
 using CustomAvatar.Avatar;
 using CustomAvatar.Player;
-using BeatSaberMarkupLanguage.ViewControllers;
-using BeatSaberMarkupLanguage.Attributes;
-using System;
+using CustomAvatar.Rendering;
 using HMUI;
+using UnityEngine;
+using Zenject;
 
 namespace CustomAvatar.UI
 {
     internal class MirrorViewController : BSMLResourceViewController
     {
+        private const int kPixelsPerMeter = 256;
+
         public override string ResourceName => "CustomAvatar.UI.Views.Mirror.bsml";
 
-        private GameObject _mirror;
+        private StereoMirrorRenderer _mirror;
 
         private DiContainer _container;
         private MirrorHelper _mirrorHelper;
-        private Settings _settings;
+        private MainSettingsModelSO _mainSettingsModel;
         private PlayerAvatarManager _avatarManager;
         private HierarchyManager _hierarchyManager;
 
@@ -51,11 +52,11 @@ namespace CustomAvatar.UI
         #region Behaviour Lifecycle
 
         [Inject]
-        internal void Construct(DiContainer container, MirrorHelper mirrorHelper, Settings settings, PlayerAvatarManager avatarManager, HierarchyManager hierarchyManager)
+        internal void Construct(DiContainer container, MirrorHelper mirrorHelper, MainSettingsModelSO mainSettingsModel, PlayerAvatarManager avatarManager, HierarchyManager hierarchyManager)
         {
             _container = container;
             _mirrorHelper = mirrorHelper;
-            _settings = settings;
+            _mainSettingsModel = mainSettingsModel;
             _avatarManager = avatarManager;
             _hierarchyManager = hierarchyManager;
         }
@@ -72,13 +73,13 @@ namespace CustomAvatar.UI
 
             if (addedToHierarchy)
             {
-                Vector2 mirrorSize = _settings.mirror.size;
-                StereoMirrorRenderer renderer = _mirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, _hierarchyManager.transform.Find("ScreenContainer").position.z), Quaternion.Euler(-90f, 0, 0), mirrorSize, null);
+                var mirrorSize = new Vector2(4, 2);
+                _mirror = _mirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, _hierarchyManager.transform.Find("ScreenContainer").position.z), Quaternion.Euler(-90f, 0, 0), mirrorSize, null);
 
-                if (!renderer) return;
+                if (!_mirror) return;
 
-                _mirror = renderer.gameObject;
-                _container.InstantiateComponent<AutoResizeMirror>(_mirror);
+                _mirror.antiAliasing = _mainSettingsModel.antiAliasingLevel;
+                _container.InstantiateComponent<AutoResizeMirror>(_mirror.gameObject, new object[] { _mirror });
             }
         }
 
@@ -88,7 +89,7 @@ namespace CustomAvatar.UI
 
             if (removedFromHierarchy)
             {
-                Destroy(_mirror);
+                Destroy(_mirror.gameObject);
             }
 
             _avatarManager.avatarStartedLoading -= OnAvatarStartedLoading;
@@ -125,6 +126,33 @@ namespace CustomAvatar.UI
 
         private class AutoResizeMirror : EnvironmentObject
         {
+            private StereoMirrorRenderer _mirror;
+            private MainSettingsModelSO _mainSettingsModel;
+
+            private float _width;
+            private float _height;
+
+            [Inject]
+            public void Construct(StereoMirrorRenderer mirror, MainSettingsModelSO mainSettingsModel)
+            {
+                _mirror = mirror;
+                _mainSettingsModel = mainSettingsModel;
+            }
+
+            internal override void Start()
+            {
+                base.Start();
+
+                _settings.mirrorRenderScale.changed += OnMirrorRenderScaleChanged;
+            }
+
+            internal override void OnDestroy()
+            {
+                base.OnDestroy();
+
+                _settings.mirrorRenderScale.changed -= OnMirrorRenderScaleChanged;
+            }
+
             protected override void UpdateOffset()
             {
                 float floorOffset = _playerAvatarManager.GetFloorOffset();
@@ -135,11 +163,24 @@ namespace CustomAvatar.UI
                 }
 
                 float scale = transform.localPosition.z / 2.6f; // screen system scale
-                float width = 4 * scale;
-                float height = 2f + 0.5f * scale - floorOffset;
+                _width = 2 + 2 * scale;
+                _height = 2f + 0.5f * scale - floorOffset;
 
-                transform.localPosition = new Vector3(transform.localPosition.x, floorOffset + height / 2, transform.localPosition.z);
-                transform.localScale = new Vector3(width / 10, 1, height / 10);
+                transform.localPosition = new Vector3(transform.localPosition.x, floorOffset + _height / 2, transform.localPosition.z);
+                transform.localScale = new Vector3(_width / 10, 1, _height / 10);
+
+                UpdateResolution();
+            }
+
+            private void OnMirrorRenderScaleChanged(float mirrorRenderScale)
+            {
+                UpdateResolution();
+            }
+
+            private void UpdateResolution()
+            {
+                _mirror.renderWidth = Mathf.RoundToInt(_width * kPixelsPerMeter * _settings.mirrorRenderScale * _mainSettingsModel.vrResolutionScale);
+                _mirror.renderHeight = Mathf.RoundToInt(_height * kPixelsPerMeter * _settings.mirrorRenderScale * _mainSettingsModel.vrResolutionScale);
             }
         }
     }
