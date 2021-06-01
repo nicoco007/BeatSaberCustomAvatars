@@ -28,7 +28,7 @@ namespace CustomAvatar.UI
 {
     internal class MirrorViewController : BSMLResourceViewController
     {
-        private const int kPixelsPerMeter = 256;
+        private const int kPixelsPerMeter = 512;
 
         public override string ResourceName => "CustomAvatar.UI.Views.Mirror.bsml";
 

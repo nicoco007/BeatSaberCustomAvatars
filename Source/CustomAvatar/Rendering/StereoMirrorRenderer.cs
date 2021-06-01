@@ -136,10 +136,7 @@ namespace CustomAvatar.Rendering
                 return renderTexture;
             }
 
-            // render to double-wide texture
-            if (stereoEnabled) renderWidth *= 2;
-
-            renderTexture = RenderTexture.GetTemporary(Mathf.Min(renderWidth, SystemInfo.maxTextureSize), Mathf.Min(renderWidth, SystemInfo.maxTextureSize), 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default, _antiAliasing);
+            renderTexture = RenderTexture.GetTemporary(Mathf.Min(stereoEnabled ? renderWidth * 2 : renderWidth, SystemInfo.maxTextureSize), Mathf.Min(renderHeight, SystemInfo.maxTextureSize), 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default, _antiAliasing);
 
             _renderTextures[camera] = renderTexture;
 
