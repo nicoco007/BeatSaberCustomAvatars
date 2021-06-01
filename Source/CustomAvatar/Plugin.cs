@@ -46,7 +46,7 @@ namespace CustomAvatar
 
             ZenjectHelper.AddComponentAlongsideExisting<MainCamera, CustomAvatarsMainCameraController>();
             ZenjectHelper.AddComponentAlongsideExisting<SmoothCamera, CustomAvatarsSmoothCameraController>();
-            ZenjectHelper.AddComponentAlongsideExisting<VRCenterAdjust, AvatarCenterAdjust>(null, go => go.name == "Origin" && (!go.transform.parent || go.transform.parent.name == "FPFCToggle") && go.scene.name != "Tutorial"); // don't add on tutorial - temporary fix to avoid Counters+ disabling the avatar
+            ZenjectHelper.AddComponentAlongsideExisting<VRCenterAdjust, AvatarCenterAdjust>(null, go => go.name == "Origin" && go.scene.name != "Tutorial"); // don't add on tutorial - temporary fix to avoid Counters+ disabling the avatar
 
             ZenjectHelper.AddComponentAlongsideExisting<BloomFogEnvironment, EnvironmentObject>();
             ZenjectHelper.AddComponentAlongsideExisting<MenuEnvironmentManager, EnvironmentObject>();
