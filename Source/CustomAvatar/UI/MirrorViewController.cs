@@ -28,7 +28,7 @@ namespace CustomAvatar.UI
 {
     internal class MirrorViewController : BSMLResourceViewController
     {
-        private const int kPixelsPerMeter = 512;
+        private const int kRenderWidth = 2048;
 
         public override string ResourceName => "CustomAvatar.UI.Views.Mirror.bsml";
 
@@ -162,7 +162,7 @@ namespace CustomAvatar.UI
                 }
 
                 float scale = transform.localPosition.z / 2.6f; // screen system scale
-                _width = 2 + 2 * scale;
+                _width = 2.5f + scale;
                 _height = 2f + 0.5f * scale - floorOffset;
 
                 transform.localPosition = new Vector3(transform.localPosition.x, floorOffset + _height / 2, transform.localPosition.z);
@@ -178,8 +178,8 @@ namespace CustomAvatar.UI
 
             private void UpdateResolution()
             {
-                _mirror.renderWidth = Mathf.RoundToInt(_width * kPixelsPerMeter * _settings.mirrorRenderScale * _mainSettingsModel.vrResolutionScale);
-                _mirror.renderHeight = Mathf.RoundToInt(_height * kPixelsPerMeter * _settings.mirrorRenderScale * _mainSettingsModel.vrResolutionScale);
+                _mirror.renderWidth = Mathf.RoundToInt(kRenderWidth * _settings.mirrorRenderScale * _mainSettingsModel.vrResolutionScale);
+                _mirror.renderHeight = Mathf.RoundToInt(kRenderWidth / _width * _height * _settings.mirrorRenderScale * _mainSettingsModel.vrResolutionScale);
             }
         }
     }
