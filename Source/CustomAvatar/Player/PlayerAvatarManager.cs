@@ -219,8 +219,7 @@ namespace CustomAvatar.Player
                         {
                             try
                             {
-                                AvatarPrefab avatarPrefab = await _avatarLoader.LoadFromFileAsync(fullPath);
-                                SwitchToAvatar(avatarPrefab);
+                                await LoadAvatarAsync(fullPath);
                             }
                             catch (Exception ex)
                             {
