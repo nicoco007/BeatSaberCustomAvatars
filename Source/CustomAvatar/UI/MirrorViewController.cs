@@ -18,24 +18,25 @@ using System;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
 using CustomAvatar.Avatar;
+using CustomAvatar.Configuration;
 using CustomAvatar.Player;
 using CustomAvatar.Rendering;
 using HMUI;
 using UnityEngine;
+using UnityEngine.XR;
 using Zenject;
 
 namespace CustomAvatar.UI
 {
     internal class MirrorViewController : BSMLResourceViewController
     {
-        private const int kRenderWidth = 2048;
-
         public override string ResourceName => "CustomAvatar.UI.Views.Mirror.bsml";
 
         private StereoMirrorRenderer _mirror;
 
         private DiContainer _container;
         private MirrorHelper _mirrorHelper;
+        private Settings _settings;
         private MainSettingsModelSO _mainSettingsModel;
         private PlayerAvatarManager _avatarManager;
         private HierarchyManager _hierarchyManager;
@@ -52,10 +53,11 @@ namespace CustomAvatar.UI
         #region Behaviour Lifecycle
 
         [Inject]
-        internal void Construct(DiContainer container, MirrorHelper mirrorHelper, MainSettingsModelSO mainSettingsModel, PlayerAvatarManager avatarManager, HierarchyManager hierarchyManager)
+        internal void Construct(DiContainer container, MirrorHelper mirrorHelper, Settings settings, MainSettingsModelSO mainSettingsModel, PlayerAvatarManager avatarManager, HierarchyManager hierarchyManager)
         {
             _container = container;
             _mirrorHelper = mirrorHelper;
+            _settings = settings;
             _mainSettingsModel = mainSettingsModel;
             _avatarManager = avatarManager;
             _hierarchyManager = hierarchyManager;
@@ -69,6 +71,8 @@ namespace CustomAvatar.UI
             _avatarManager.avatarChanged += OnAvatarChanged;
             _avatarManager.avatarLoadFailed += OnAvatarLoadFailed;
 
+            _settings.mirrorRenderScale.changed += OnMirrorRenderScaleChanged;
+
             SetLoading(false);
 
             if (addedToHierarchy)
@@ -79,8 +83,11 @@ namespace CustomAvatar.UI
                 if (!_mirror) return;
 
                 _mirror.antiAliasing = _mainSettingsModel.antiAliasingLevel;
-                _container.InstantiateComponent<AutoResizeMirror>(_mirror.gameObject, new object[] { _mirror });
+
+                _container.InstantiateComponent<AutoResizeMirror>(_mirror.gameObject);
             }
+
+            OnMirrorRenderScaleChanged(_settings.mirrorRenderScale);
         }
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
@@ -95,6 +102,8 @@ namespace CustomAvatar.UI
             _avatarManager.avatarStartedLoading -= OnAvatarStartedLoading;
             _avatarManager.avatarChanged -= OnAvatarChanged;
             _avatarManager.avatarLoadFailed -= OnAvatarLoadFailed;
+
+            _settings.mirrorRenderScale.changed -= OnMirrorRenderScaleChanged;
         }
 
         #endregion
@@ -117,6 +126,14 @@ namespace CustomAvatar.UI
             _errorText.gameObject.SetActive(true);
         }
 
+        private void OnMirrorRenderScaleChanged(float scale)
+        {
+            if (!_mirror) return;
+
+            _mirror.renderWidth = Mathf.RoundToInt(XRSettings.eyeTextureWidth * scale * _mainSettingsModel.vrResolutionScale);
+            _mirror.renderHeight = Mathf.RoundToInt(XRSettings.eyeTextureHeight * scale * _mainSettingsModel.vrResolutionScale);
+        }
+
         private void SetLoading(bool loading)
         {
             _loader.gameObject.SetActive(loading);
@@ -125,33 +142,6 @@ namespace CustomAvatar.UI
 
         private class AutoResizeMirror : EnvironmentObject
         {
-            private StereoMirrorRenderer _mirror;
-            private MainSettingsModelSO _mainSettingsModel;
-
-            private float _width;
-            private float _height;
-
-            [Inject]
-            public void Construct(StereoMirrorRenderer mirror, MainSettingsModelSO mainSettingsModel)
-            {
-                _mirror = mirror;
-                _mainSettingsModel = mainSettingsModel;
-            }
-
-            internal override void Start()
-            {
-                base.Start();
-
-                _settings.mirrorRenderScale.changed += OnMirrorRenderScaleChanged;
-            }
-
-            internal override void OnDestroy()
-            {
-                base.OnDestroy();
-
-                _settings.mirrorRenderScale.changed -= OnMirrorRenderScaleChanged;
-            }
-
             protected override void UpdateOffset()
             {
                 float floorOffset = _playerAvatarManager.GetFloorOffset();
@@ -162,24 +152,11 @@ namespace CustomAvatar.UI
                 }
 
                 float scale = transform.localPosition.z / 2.6f; // screen system scale
-                _width = 2.5f + scale;
-                _height = 2f + 0.5f * scale - floorOffset;
+                float width = 2.5f + scale;
+                float height = 2f + 0.5f * scale - floorOffset;
 
-                transform.localPosition = new Vector3(transform.localPosition.x, floorOffset + _height / 2, transform.localPosition.z);
-                transform.localScale = new Vector3(_width / 10, 1, _height / 10);
-
-                UpdateResolution();
-            }
-
-            private void OnMirrorRenderScaleChanged(float mirrorRenderScale)
-            {
-                UpdateResolution();
-            }
-
-            private void UpdateResolution()
-            {
-                _mirror.renderWidth = Mathf.RoundToInt(kRenderWidth * _settings.mirrorRenderScale * _mainSettingsModel.vrResolutionScale);
-                _mirror.renderHeight = Mathf.RoundToInt(kRenderWidth / _width * _height * _settings.mirrorRenderScale * _mainSettingsModel.vrResolutionScale);
+                transform.localPosition = new Vector3(transform.localPosition.x, floorOffset + height / 2, transform.localPosition.z);
+                transform.localScale = new Vector3(width / 10, 1, height / 10);
             }
         }
     }
