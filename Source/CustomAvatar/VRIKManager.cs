@@ -175,7 +175,7 @@ namespace CustomAvatar
         public float solver_spine_moveBodyBackWhenCrouching = 0.5f;
 
         [Tooltip("How much will the pelvis maintain it's animated position?")]
-        [Range(0f, 1f)] public float solver_spine_maintainPelvisPosition = 0.2f;
+        [Range(0f, 1f)] public float solver_spine_maintainPelvisPosition = 0f;
 
         [Tooltip("Will automatically rotate the root of the character if the head target has turned past this angle.")]
         [Range(0f, 180f)] public float solver_spine_maxRootAngle = 25f;
