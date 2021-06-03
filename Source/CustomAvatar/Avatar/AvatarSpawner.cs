@@ -111,8 +111,6 @@ namespace CustomAvatar.Avatar
                 }
             }
 
-            spawnedAvatar.name = "ASDTKEYTAYK";
-
             return spawnedAvatar;
         }
 
