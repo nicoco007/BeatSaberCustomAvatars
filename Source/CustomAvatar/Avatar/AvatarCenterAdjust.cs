@@ -42,7 +42,10 @@ namespace CustomAvatar.Avatar
 
         public void OnDestroy()
         {
-            _playerAvatarManager?.SetParent(null);
+            if (_playerAvatarManager?.parent == transform)
+            {
+                _playerAvatarManager.SetParent(null);
+            }
         }
     }
 }

@@ -50,6 +50,8 @@ namespace CustomAvatar.Player
         /// </summary>
         public SpawnedAvatar currentlySpawnedAvatar { get; private set; }
 
+        public Transform parent => _avatarContainer.transform.parent;
+
         /// <summary>
         /// Event triggered when the current avatar is deleted an a new one starts loading. Note that the argument may be null if no avatar was selected to replace the previous one.
         /// </summary>
@@ -429,12 +431,20 @@ namespace CustomAvatar.Player
             await SwitchToAvatarAsync(files[index]);
         }
 
-        internal void SetParent(Transform transform)
+        internal void SetParent(Transform parent)
         {
-            _avatarContainer.transform.SetParent(transform, false);
+            _avatarContainer.transform.SetParent(parent, false);
 
             // transform is moved to parent's scene so we need to mark it as non-destructible again
-            if (!transform) Object.DontDestroyOnLoad(_avatarContainer);
+            if (parent)
+            {
+                _logger.Trace($"Parented avatar container to '{parent.name}' (scene '{parent.gameObject.scene.name}')");
+            }
+            else
+            {
+                _logger.Warning($"Parented avatar container to nothing!");
+                Object.DontDestroyOnLoad(_avatarContainer);
+            }
         }
 
         internal float GetFloorOffset()
