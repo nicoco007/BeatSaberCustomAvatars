@@ -50,8 +50,6 @@ namespace CustomAvatar.Player
         /// </summary>
         public SpawnedAvatar currentlySpawnedAvatar { get; private set; }
 
-        public Transform parent => _avatarContainer.transform.parent;
-
         /// <summary>
         /// Event triggered when the current avatar is deleted an a new one starts loading. Note that the argument may be null if no avatar was selected to replace the previous one.
         /// </summary>
@@ -83,6 +81,7 @@ namespace CustomAvatar.Player
         private readonly BeatSaberUtilities _beatSaberUtilities;
 
         private readonly Dictionary<string, AvatarInfo> _avatarInfos = new Dictionary<string, AvatarInfo>();
+        private readonly Stack<Transform> _parentHistory = new Stack<Transform>();
 
         private FileSystemWatcher _fileSystemWatcher;
         private string _switchingToPath;
@@ -431,12 +430,42 @@ namespace CustomAvatar.Player
             await SwitchToAvatarAsync(files[index]);
         }
 
-        internal void SetParent(Transform parent)
+        internal void ParentTo(Transform parent)
         {
-            _avatarContainer.transform.SetParent(parent, false);
+            if (!parent) throw new ArgumentNullException(nameof(parent));
 
-            // transform is moved to parent's scene so we need to mark it as non-destructible again
-            if (parent)
+            _parentHistory.Push(parent);
+            _avatarContainer.transform.SetParent(parent, false);
+            _logger.Trace($"Parented avatar container to '{parent.name}' (scene '{parent.gameObject.scene.name}')");
+        }
+
+        internal void UnparentFrom(Transform parent)
+        {
+            if (!parent) throw new ArgumentNullException(nameof(parent));
+
+            if (_avatarContainer.transform.parent != parent)
+            {
+                return;
+            }
+
+            Transform newParent = _parentHistory.Pop();
+
+            while (!newParent || newParent == parent)
+            {
+                if (_parentHistory.Count > 0)
+                {
+                    newParent = _parentHistory.Pop();
+                }
+                else
+                {
+                    newParent = null;
+                    break;
+                }
+            }
+
+            _avatarContainer.transform.SetParent(newParent, false);
+
+            if (newParent)
             {
                 _logger.Trace($"Parented avatar container to '{parent.name}' (scene '{parent.gameObject.scene.name}')");
             }

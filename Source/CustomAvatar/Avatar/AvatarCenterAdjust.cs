@@ -32,7 +32,7 @@ namespace CustomAvatar.Avatar
 
         public void OnEnable()
         {
-            _playerAvatarManager?.SetParent(transform);
+            _playerAvatarManager?.ParentTo(transform);
         }
 
         public void Start()
@@ -42,10 +42,7 @@ namespace CustomAvatar.Avatar
 
         public void OnDestroy()
         {
-            if (_playerAvatarManager?.parent == transform)
-            {
-                _playerAvatarManager.SetParent(null);
-            }
+            _playerAvatarManager?.UnparentFrom(transform);
         }
     }
 }
