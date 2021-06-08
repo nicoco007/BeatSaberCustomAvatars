@@ -15,6 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using CustomAvatar.Avatar;
+using CustomAvatar.Configuration;
 using UnityEngine;
 using Zenject;
 
@@ -33,6 +34,7 @@ namespace CustomAvatar.Lighting
         }
 
         private TubeBloomPrePassLight _reference;
+        private Settings _settings;
 
         private Light _light;
         private Color _color;
@@ -40,9 +42,10 @@ namespace CustomAvatar.Lighting
         #region Behaviour Lifecycle
 
         [Inject]
-        internal void Construct(TubeBloomPrePassLight reference)
+        internal void Construct(TubeBloomPrePassLight reference, Settings settings)
         {
             _reference = reference;
+            _settings = settings;
         }
 
         internal void Start()
@@ -54,7 +57,7 @@ namespace CustomAvatar.Lighting
             _light.renderMode = LightRenderMode.Auto;
             _light.shadows = LightShadows.None;
             _light.shadowStrength = 1;
-            _light.range = 1000;
+            _light.range = 100;
 
             UpdateUnityLight();
         }
@@ -66,7 +69,7 @@ namespace CustomAvatar.Lighting
             if (!_light) return;
 
             _light.color = _color;
-            _light.intensity = _reference.width * _reference.lightWidthMultiplier * _color.a;
+            _light.intensity = _reference.width * _reference.lightWidthMultiplier * _color.a * _settings.lighting.environment.intensity;
         }
     }
 }
