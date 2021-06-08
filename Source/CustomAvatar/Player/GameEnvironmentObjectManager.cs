@@ -14,7 +14,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
+using CustomAvatar.Rendering;
 using UnityEngine;
 using Zenject;
 
@@ -48,6 +50,15 @@ namespace CustomAvatar.Player
                     if (shadow) _container.InstantiateComponent<EnvironmentObject>(shadow.gameObject);
 
                     break;
+            }
+
+            // ScoreSaber replay spectator camera
+            var spectatorParent = GameObject.Find("/SpectatorParent");
+
+            if (spectatorParent)
+            {
+                _container.InstantiateComponent<AvatarCenterAdjust>(spectatorParent);
+                _container.InstantiateComponent<CustomAvatarsMainCameraController>(spectatorParent.GetComponentInChildren<Camera>().gameObject);
             }
         }
     }

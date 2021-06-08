@@ -35,6 +35,7 @@ namespace CustomAvatar.Zenject
 
             Container.BindInterfacesAndSelfTo<AvatarGameplayEventsPlayer>().AsSingle().NonLazy();
             Container.BindInterfacesAndSelfTo<GameEnvironmentObjectManager>().AsSingle().NonLazy();
+            Container.BindExecutionOrder<GameEnvironmentObjectManager>(1000);
         }
     }
 }
