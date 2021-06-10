@@ -15,6 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using CustomAvatar.Configuration;
+using CustomAvatar.HarmonyPatches;
 using CustomAvatar.Tracking;
 using System;
 using UnityEngine;
@@ -27,17 +28,20 @@ namespace CustomAvatar.Utilities
         public static readonly float kDefaultPlayerEyeHeight = MainSettingsModelSO.kDefaultPlayerHeight - MainSettingsModelSO.kHeadPosToPlayerHeightOffset;
         public static readonly float kDefaultPlayerArmSpan = MainSettingsModelSO.kDefaultPlayerHeight;
 
+        private static readonly Func<OpenVRHelper, OpenVRHelper.VRControllerManufacturerName> kVrControllerManufacturerNameGetter = ReflectionExtensions.CreatePrivatePropertyGetter<OpenVRHelper, OpenVRHelper.VRControllerManufacturerName>("vrControllerManufacturerName");
+
         public Vector3 roomCenter => _mainSettingsModel.roomCenter;
         public Quaternion roomRotation => Quaternion.Euler(0, _mainSettingsModel.roomRotation, 0);
+        public float playerHeight => _playerDataModel.playerData.playerSpecificSettings.playerHeight;
+        public float playerEyeHeight => playerHeight - MainSettingsModelSO.kHeadPosToPlayerHeightOffset;
 
         public event Action<Vector3, Quaternion> roomAdjustChanged;
+        public event Action<float> playerHeightChanged;
 
         private readonly MainSettingsModelSO _mainSettingsModel;
         private readonly PlayerDataModel _playerDataModel;
         private readonly Settings _settings;
         private readonly IVRPlatformHelper _vrPlatformHelper;
-
-        private Func<OpenVRHelper, OpenVRHelper.VRControllerManufacturerName> _vrControllerManufacturerNameGetter;
 
         internal BeatSaberUtilities(MainSettingsModelSO mainSettingsModel, PlayerDataModel playerDataModel, Settings settings, IVRPlatformHelper vrPlatformHelper)
         {
@@ -52,13 +56,15 @@ namespace CustomAvatar.Utilities
             _mainSettingsModel.roomCenter.didChangeEvent += OnRoomCenterChanged;
             _mainSettingsModel.roomRotation.didChangeEvent += OnRoomRotationChanged;
 
-            _vrControllerManufacturerNameGetter = ReflectionExtensions.CreatePrivatePropertyGetter<OpenVRHelper, OpenVRHelper.VRControllerManufacturerName>("vrControllerManufacturerName");
+            PlayerData_playerSpecificSettings.playerHeightChanged += OnPlayerHeightChanged;
         }
 
         public void Dispose()
         {
             _mainSettingsModel.roomCenter.didChangeEvent -= OnRoomCenterChanged;
             _mainSettingsModel.roomRotation.didChangeEvent -= OnRoomRotationChanged;
+
+            PlayerData_playerSpecificSettings.playerHeightChanged -= OnPlayerHeightChanged;
         }
 
         /// <summary>
@@ -66,11 +72,9 @@ namespace CustomAvatar.Utilities
         /// </summary>
         public float GetRoomAdjustedPlayerEyeHeight()
         {
-            float playerEyeHeight = _playerDataModel.playerData.playerSpecificSettings.playerHeight - MainSettingsModelSO.kHeadPosToPlayerHeightOffset;
-
             if (_settings.moveFloorWithRoomAdjust)
             {
-                playerEyeHeight -= _mainSettingsModel.roomCenter.value.y;
+                return playerEyeHeight - _mainSettingsModel.roomCenter.value.y;
             }
 
             return playerEyeHeight;
@@ -86,14 +90,14 @@ namespace CustomAvatar.Utilities
             Vector3 position = _mainSettingsModel.controllerPosition;
             Vector3 rotation = _mainSettingsModel.controllerRotation;
 
-            if (_vrPlatformHelper.vrPlatformSDK == VRPlatformSDK.Oculus)
+            if (_vrPlatformHelper is OculusVRHelper)
             {
                 rotation += new Vector3(-40f, 0f, 0f);
                 position += new Vector3(0f, 0f, 0.055f);
             }
-            else if (_vrPlatformHelper.vrPlatformSDK == VRPlatformSDK.OpenVR)
+            else if (_vrPlatformHelper is OpenVRHelper openVRHelper)
             {
-                if (_vrControllerManufacturerNameGetter((OpenVRHelper)_vrPlatformHelper) == OpenVRHelper.VRControllerManufacturerName.Valve)
+                if (kVrControllerManufacturerNameGetter(openVRHelper) == OpenVRHelper.VRControllerManufacturerName.Valve)
                 {
                     rotation += new Vector3(-16.3f, 0f, 0f);
                     position += new Vector3(0f, 0.022f, -0.01f);
@@ -118,19 +122,6 @@ namespace CustomAvatar.Utilities
             pose.position += pose.rotation * position;
         }
 
-        /// <summary>
-        /// Update the local player's height based on the head's current position. Similar to <see cref="PlayerHeightSettingsController.AutoSetHeight"/>
-        /// </summary>
-        public void UpdatePlayerHeight()
-        {
-            _vrPlatformHelper.GetNodePose(UnityEngine.XR.XRNode.Head, 0, out Vector3 position, out _);
-
-            PlayerSpecificSettings currentSettings = _playerDataModel.playerData.playerSpecificSettings;
-            float height = position.y + roomCenter.y + MainSettingsModelSO.kHeadPosToPlayerHeightOffset;
-
-            _playerDataModel.playerData.SetPlayerSpecificSettings(currentSettings.CopyWith(null, height, false));
-        }
-
         private void OnRoomCenterChanged()
         {
             roomAdjustChanged?.Invoke(roomCenter, roomRotation);
@@ -139,6 +130,11 @@ namespace CustomAvatar.Utilities
         private void OnRoomRotationChanged()
         {
             roomAdjustChanged?.Invoke(roomCenter, roomRotation);
+        }
+
+        private void OnPlayerHeightChanged(float playerHeight)
+        {
+            playerHeightChanged?.Invoke(playerHeight);
         }
     }
 }

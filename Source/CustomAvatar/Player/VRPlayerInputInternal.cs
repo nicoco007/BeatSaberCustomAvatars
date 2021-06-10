@@ -214,7 +214,7 @@ namespace CustomAvatar.Player
 
         internal void CalibrateFullBodyTrackingManual(SpawnedAvatar spawnedAvatar)
         {
-            _logger.Info("Running manual full body tracking calibration");
+            _logger.Info("Applying manual full body tracking calibration");
 
             CalibrationData.FullBodyCalibration fullBodyCalibration = _calibrationData.GetAvatarManualCalibration(spawnedAvatar.prefab.fileName);
 
@@ -227,7 +227,7 @@ namespace CustomAvatar.Player
 
         internal void CalibrateFullBodyTrackingAuto()
         {
-            _logger.Info("Running automatic full body tracking calibration");
+            _logger.Info("Applying automatic full body tracking calibration");
 
             CalibrationData.FullBodyCalibration fullBodyCalibration = _calibrationData.automaticCalibration;
 
@@ -241,7 +241,7 @@ namespace CustomAvatar.Player
                 Quaternion leftRotationCorrection = Quaternion.Inverse(leftFoot.rotation) * Quaternion.LookRotation(Vector3.up, leftFootStraightForward); // get difference between world rotation and flat forward rotation
 
                 fullBodyCalibration.leftFoot = new Pose(leftFootPositionCorrection, leftRotationCorrection);
-                _logger.Info("Set left foot pose correction " + fullBodyCalibration.leftFoot);
+                _logger.Trace("Set left foot pose correction " + fullBodyCalibration.leftFoot);
             }
 
             if (TryGetRawPose(DeviceUse.RightFoot, out Pose rightFoot))
@@ -252,14 +252,14 @@ namespace CustomAvatar.Player
                 Quaternion rightRotationCorrection = Quaternion.Inverse(rightFoot.rotation) * Quaternion.LookRotation(Vector3.up, rightFootStraightForward);
 
                 fullBodyCalibration.rightFoot = new Pose(rightFootPositionCorrection, rightRotationCorrection);
-                _logger.Info("Set right foot pose correction " + fullBodyCalibration.rightFoot);
+                _logger.Trace("Set right foot pose correction " + fullBodyCalibration.rightFoot);
             }
 
             if (TryGetRawPose(DeviceUse.Head, out Pose head) && TryGetRawPose(DeviceUse.Waist, out Pose waist))
             {
                 // using "ideal" 8 head high body proportions w/ eyes at 1/2 head height for simplicity
                 // reference: https://miro.medium.com/max/3200/1*cqTRyEGl26l4CImEmWz68Q.jpeg
-                float eyeHeight = head.position.y;
+                float eyeHeight = _beatSaberUtilities.playerEyeHeight;
 
                 // since hips are at 4 2/3, we multiply by 3 to have some nice numbers
                 // hips @ 4 2/3 * 3 = 14
@@ -272,9 +272,7 @@ namespace CustomAvatar.Player
                 Quaternion waistRotationCorrection = Quaternion.Inverse(waist.rotation) * Quaternion.LookRotation(waistStraightForward, Vector3.up);
 
                 fullBodyCalibration.waist = new Pose(waistPositionCorrection, waistRotationCorrection);
-                _logger.Info("Set waist pose correction " + fullBodyCalibration.waist);
-
-                _beatSaberUtilities.UpdatePlayerHeight();
+                _logger.Trace("Set waist pose correction " + fullBodyCalibration.waist);
             }
 
             inputChanged?.Invoke();
@@ -313,7 +311,7 @@ namespace CustomAvatar.Player
 
             calibration = new Pose(positionOffset, rotationOffset);
 
-            _logger.Info($"Set {use} pose correction: " + calibration);
+            _logger.Trace($"Set {use} pose correction: " + calibration);
         }
 
         private Pose GetUnscaledAvatarTargetPose(SpawnedAvatar spawnedAvatar, Transform target)
