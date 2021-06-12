@@ -69,7 +69,8 @@ namespace CustomAvatar.Lighting
             if (!_light) return;
 
             _light.color = _color;
-            _light.intensity = _reference.width * _reference.lightWidthMultiplier * _color.a * _settings.lighting.environment.intensity;
+            _light.intensity = _color.a * _settings.lighting.environment.intensity;
+            _light.range = _reference.width * _reference.lightWidthMultiplier * 100;
         }
     }
 }
