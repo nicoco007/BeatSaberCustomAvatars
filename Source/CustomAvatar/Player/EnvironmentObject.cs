@@ -40,7 +40,7 @@ namespace CustomAvatar.Player
 
         internal void Awake()
         {
-            _originalY = transform.localPosition.y;
+            _originalY = transform.position.y;
 
             foreach (MeshRenderer renderer in GetComponentsInChildren<MeshRenderer>().Where(mr => mr.isPartOfStaticBatch))
             {
@@ -92,7 +92,7 @@ namespace CustomAvatar.Player
                 floorOffset += _beatSaberUtilities.roomCenter.y;
             }
 
-            transform.localPosition = new Vector3(transform.localPosition.x, _originalY + floorOffset, transform.localPosition.z);
+            transform.position = new Vector3(transform.position.x, _originalY + floorOffset, transform.position.z);
         }
 
         private void OnAvatarChanged(SpawnedAvatar avatar)
