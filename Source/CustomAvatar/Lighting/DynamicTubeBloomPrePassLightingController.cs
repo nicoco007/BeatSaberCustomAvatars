@@ -82,7 +82,8 @@ namespace CustomAvatar.Lighting
 
                     _lights[id].Add(light);
 
-                    light.transform.SetParent(tubeLight.transform, false);
+                    light.transform.SetParent(transform, false);
+                    light.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
                 }
             }
 
