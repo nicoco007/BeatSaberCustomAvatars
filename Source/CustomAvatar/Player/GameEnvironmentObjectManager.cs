@@ -14,6 +14,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Rendering;
@@ -22,8 +23,12 @@ using Zenject;
 
 namespace CustomAvatar.Player
 {
-    internal class GameEnvironmentObjectManager : IInitializable
+    internal class GameEnvironmentObjectManager : IInitializable, IDisposable
     {
+        private static readonly int kReflectionProbeTexture1PropertyId = Shader.PropertyToID("_ReflectionProbeTexture1");
+        private static readonly int kReflectionProbeTexture2PropertyId = Shader.PropertyToID("_ReflectionProbeTexture2");
+        private static readonly Cubemap kBlackCubemap = new Cubemap(0, TextureFormat.DXT1Crunched, false);
+
         private readonly DiContainer _container;
         private readonly Settings _settings;
 
@@ -60,6 +65,12 @@ namespace CustomAvatar.Player
                 _container.InstantiateComponent<AvatarCenterAdjust>(spectatorParent);
                 _container.InstantiateComponent<CustomAvatarsMainCameraController>(spectatorParent.GetComponentInChildren<Camera>().gameObject);
             }
+        }
+
+        public void Dispose()
+        {
+            Shader.SetGlobalTexture(kReflectionProbeTexture1PropertyId, kBlackCubemap);
+            Shader.SetGlobalTexture(kReflectionProbeTexture2PropertyId, kBlackCubemap);
         }
     }
 }
