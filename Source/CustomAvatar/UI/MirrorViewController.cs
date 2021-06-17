@@ -71,7 +71,8 @@ namespace CustomAvatar.UI
             _avatarManager.avatarChanged += OnAvatarChanged;
             _avatarManager.avatarLoadFailed += OnAvatarLoadFailed;
 
-            _settings.mirrorRenderScale.changed += OnMirrorRenderScaleChanged;
+            _settings.mirror.renderScale.changed += OnMirrorRenderScaleChanged;
+            _settings.mirror.antiAliasingLevel.changed += OnMirrorAntiAliasingLevelChanged;
 
             SetLoading(false);
 
@@ -82,12 +83,10 @@ namespace CustomAvatar.UI
 
                 if (!_mirror) return;
 
-                _mirror.antiAliasing = _mainSettingsModel.antiAliasingLevel;
-
                 _container.InstantiateComponent<AutoResizeMirror>(_mirror.gameObject);
             }
 
-            OnMirrorRenderScaleChanged(_settings.mirrorRenderScale);
+            OnMirrorRenderScaleChanged(_settings.mirror.renderScale);
         }
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
@@ -103,7 +102,8 @@ namespace CustomAvatar.UI
             _avatarManager.avatarChanged -= OnAvatarChanged;
             _avatarManager.avatarLoadFailed -= OnAvatarLoadFailed;
 
-            _settings.mirrorRenderScale.changed -= OnMirrorRenderScaleChanged;
+            _settings.mirror.renderScale.changed -= OnMirrorRenderScaleChanged;
+            _settings.mirror.antiAliasingLevel.changed -= OnMirrorAntiAliasingLevelChanged;
         }
 
         #endregion
@@ -126,7 +126,17 @@ namespace CustomAvatar.UI
             _errorText.gameObject.SetActive(true);
         }
 
-        private void OnMirrorRenderScaleChanged(float scale)
+        private void OnMirrorRenderScaleChanged(float renderScale)
+        {
+            UpdateMirrorRenderSettings(renderScale, _settings.mirror.antiAliasingLevel);
+        }
+
+        private void OnMirrorAntiAliasingLevelChanged(int antiAliasingLevel)
+        {
+            UpdateMirrorRenderSettings(_settings.mirror.renderScale, antiAliasingLevel);
+        }
+
+        private void UpdateMirrorRenderSettings(float scale, int antiAliasingLevel)
         {
             if (!_mirror) return;
 
@@ -145,6 +155,8 @@ namespace CustomAvatar.UI
 
             _mirror.renderWidth = Mathf.RoundToInt(baseWidth * scale * _mainSettingsModel.vrResolutionScale);
             _mirror.renderHeight = Mathf.RoundToInt(baseHeight * scale * _mainSettingsModel.vrResolutionScale);
+
+            _mirror.antiAliasing = antiAliasingLevel;
         }
 
         private void SetLoading(bool loading)

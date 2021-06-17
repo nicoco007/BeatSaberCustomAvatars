@@ -67,6 +67,7 @@
     <macro.as-host host="interface-settings-host">
       <settings-container anchor-pos-y="0" size-delta-y="0">
         <increment-setting text="Mirror Render Scale" value="mirror-render-scale-value" apply-on-change="true" min="0.5" max="2" increment="0.1" />
+		<list-setting text="Mirror Anti Aliasing" value="mirror-anti-aliasing-level-value" apply-on-change="true" options="mirror-anti-aliasing-level-options" formatter="mirror-anti-aliasing-level-formatter" />
       </settings-container>
     </macro.as-host>
   </tab>

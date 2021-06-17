@@ -14,6 +14,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
 using BeatSaberMarkupLanguage.Attributes;
 using CustomAvatar.Configuration;
 
@@ -30,10 +31,27 @@ namespace CustomAvatar.UI
 
 
         [UIValue("mirror-render-scale-value")]
-        internal float mirrorLocation
+        internal float renderScale
         {
-            get => _settings.mirrorRenderScale;
-            set => _settings.mirrorRenderScale.value = value;
+            get => _settings.mirror.renderScale;
+            set => _settings.mirror.renderScale.value = value;
+        }
+
+
+        [UIValue("mirror-anti-aliasing-level-value")]
+        internal int antiAliasingLevel
+        {
+            get => _settings.mirror.antiAliasingLevel;
+            set => _settings.mirror.antiAliasingLevel.value = value;
+        }
+
+        [UIValue("mirror-anti-aliasing-level-options")]
+        internal List<object> antiAliasingLevelOptions = new List<object>(new object[] { 1, 2, 4, 8 });
+
+        [UIAction("mirror-anti-aliasing-level-formatter")]
+        internal string MirrorAntiAliasingLevelFormatter(int value)
+        {
+            return $"{value}x";
         }
     }
 }
