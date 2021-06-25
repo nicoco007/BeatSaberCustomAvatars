@@ -134,7 +134,7 @@ namespace CustomAvatar.Configuration
 
         public class Mirror
         {
-            public ObservableValue<float> renderScale { get; } = new ObservableValue<float>(0.8f);
+            public ObservableValue<float> renderScale { get; } = new ObservableValue<float>(1);
             public ObservableValue<int> antiAliasingLevel { get; } = new ObservableValue<int>(1);
         }
 
