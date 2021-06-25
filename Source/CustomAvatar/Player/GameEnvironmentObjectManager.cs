@@ -27,7 +27,7 @@ namespace CustomAvatar.Player
     {
         private static readonly int kReflectionProbeTexture1PropertyId = Shader.PropertyToID("_ReflectionProbeTexture1");
         private static readonly int kReflectionProbeTexture2PropertyId = Shader.PropertyToID("_ReflectionProbeTexture2");
-        private static readonly Cubemap kBlackCubemap = new Cubemap(0, TextureFormat.DXT1Crunched, false);
+        private static readonly Cubemap kBlackCubemap = new Cubemap(0, TextureFormat.DXT1, false);
 
         private readonly DiContainer _container;
         private readonly Settings _settings;
@@ -62,7 +62,10 @@ namespace CustomAvatar.Player
 
             if (spectatorParent)
             {
-                _container.InstantiateComponent<AvatarCenterAdjust>(spectatorParent);
+                var avatarParent = new GameObject("AvatarParent");
+                avatarParent.transform.SetParent(spectatorParent.transform, false);
+                _container.InstantiateComponent<AvatarCenterAdjust>(avatarParent);
+
                 _container.InstantiateComponent<CustomAvatarsMainCameraController>(spectatorParent.GetComponentInChildren<Camera>().gameObject);
             }
         }
