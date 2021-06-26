@@ -51,7 +51,14 @@ namespace CustomAvatar.UI
         [UIAction("mirror-anti-aliasing-level-formatter")]
         internal string MirrorAntiAliasingLevelFormatter(int value)
         {
-            return $"{value}x";
+            if (value > 1)
+            {
+                return $"{value}x";
+            }
+            else
+            {
+                return "Off";
+            }
         }
     }
 }
