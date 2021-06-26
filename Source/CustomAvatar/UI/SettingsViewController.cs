@@ -42,14 +42,12 @@ namespace CustomAvatar.UI
         #endregion
 
         #region Values
-#pragma warning disable IDE0052
 
-        [UIValue("general-settings-host")] private GeneralSettingsHost _generalSettingsHost;
-        [UIValue("avatar-specific-settings-host")] private AvatarSpecificSettingsHost _avatarSpecificSettingsHost;
-        [UIValue("automatic-fbt-calibration-host")] private AutomaticFbtCalibrationHost _automaticFbtCalibrationHost;
-        [UIValue("interface-settings-host")] private InterfaceSettingsHost _interfaceSettingsHost;
+        internal GeneralSettingsHost generalSettingsHost;
+        internal AvatarSpecificSettingsHost avatarSpecificSettingsHost;
+        internal AutomaticFbtCalibrationHost automaticFbtCalibrationHost;
+        internal InterfaceSettingsHost interfaceSettingsHost;
 
-#pragma warning restore IDE0052
         #endregion
 
         private PlayerAvatarManager _avatarManager;
@@ -62,10 +60,10 @@ namespace CustomAvatar.UI
             _avatarManager = avatarManager;
             _leaderboardViewController = leaderboardViewController;
             _playerInput = playerInput;
-            _generalSettingsHost = generalSettingsHost;
-            _avatarSpecificSettingsHost = avatarSpecificSettingsHost;
-            _automaticFbtCalibrationHost = automaticFbtCalibrationHost;
-            _interfaceSettingsHost = interfaceSettingsHost;
+            this.generalSettingsHost = generalSettingsHost;
+            this.avatarSpecificSettingsHost = avatarSpecificSettingsHost;
+            this.automaticFbtCalibrationHost = automaticFbtCalibrationHost;
+            this.interfaceSettingsHost = interfaceSettingsHost;
         }
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
@@ -95,9 +93,9 @@ namespace CustomAvatar.UI
 
             OnAvatarChanged(_avatarManager.currentlySpawnedAvatar);
 
-            _generalSettingsHost.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
-            _avatarSpecificSettingsHost.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
-            _automaticFbtCalibrationHost.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
+            generalSettingsHost.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
+            avatarSpecificSettingsHost.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
+            automaticFbtCalibrationHost.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
         }
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
@@ -109,9 +107,9 @@ namespace CustomAvatar.UI
             _avatarManager.avatarLoadFailed -= OnAvatarLoadFailed;
             _playerInput.inputChanged -= OnInputChanged;
 
-            _generalSettingsHost.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
-            _avatarSpecificSettingsHost.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
-            _automaticFbtCalibrationHost.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
+            generalSettingsHost.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
+            avatarSpecificSettingsHost.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
+            automaticFbtCalibrationHost.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
         }
 
         private void OnAvatarStartedLoading(string fileName)
@@ -144,9 +142,9 @@ namespace CustomAvatar.UI
 
         private void UpdateUI(SpawnedAvatar avatar)
         {
-            _generalSettingsHost.UpdateUI(avatar);
-            _avatarSpecificSettingsHost.UpdateUI(avatar);
-            _automaticFbtCalibrationHost.UpdateUI(avatar);
+            generalSettingsHost.UpdateUI(avatar);
+            avatarSpecificSettingsHost.UpdateUI(avatar);
+            automaticFbtCalibrationHost.UpdateUI(avatar);
         }
 
         private void SetInteractableRecursively(bool enable)

@@ -46,9 +46,8 @@ namespace CustomAvatar.UI
         #endregion
 
         #region Values
-#pragma warning disable IDE0052
 
-        [UIValue("waist-tracker-position-options")] private readonly List<object> _waistTrackerOptions = new List<object> { WaistTrackerPosition.Front, WaistTrackerPosition.Left, WaistTrackerPosition.Right, WaistTrackerPosition.Back };
+        internal readonly List<object> waistTrackerOptions = new List<object> { WaistTrackerPosition.Front, WaistTrackerPosition.Left, WaistTrackerPosition.Right, WaistTrackerPosition.Back };
 
         #endregion
 
@@ -114,25 +113,21 @@ namespace CustomAvatar.UI
         #region Actions
 #pragma warning disable IDE0051
 
-        [UIAction("calibrate-fbt-on-start-change")]
         private void OnCalibrateFullBodyTrackingOnStartChanged(bool value)
         {
             _settings.calibrateFullBodyTrackingOnStart = value;
         }
 
-        [UIAction("pelvis-offset-change")]
         private void OnPelvisOffsetChanged(float value)
         {
             _settings.automaticCalibration.pelvisOffset = value;
         }
 
-        [UIAction("foot-offset-change")]
-        private void OnLeftFootOffsetChanged(float value)
+        private void OnFootOffsetChanged(float value)
         {
             _settings.automaticCalibration.legOffset = value;
         }
 
-        [UIAction("auto-calibrate-fbt-click")]
         private void OnCalibrateAutoFullBodyTrackingClicked()
         {
             _playerInput.CalibrateFullBodyTrackingAuto();
@@ -144,7 +139,6 @@ namespace CustomAvatar.UI
             }
         }
 
-        [UIAction("auto-clear-fbt-calibration-data-click")]
         private void OnClearAutoFullBodyTrackingCalibrationDataClicked()
         {
             _playerInput.ClearAutomaticFullBodyTrackingData();
@@ -152,7 +146,6 @@ namespace CustomAvatar.UI
             if (_avatarManager.currentlySpawnedAvatar) UpdateUI(_avatarManager.currentlySpawnedAvatar);
         }
 
-        [UIAction("waist-tracker-position-change")]
         private void OnWaistTrackerPositionChanged(WaistTrackerPosition waistTrackerPosition)
         {
             _settings.automaticCalibration.waistTrackerPosition = waistTrackerPosition;

@@ -31,7 +31,6 @@ namespace CustomAvatar.UI
         #region Components
 #pragma warning disable CS0649, IDE0044
 
-
         [UIComponent("ignore-exclusions")] private ToggleSetting _ignoreExclusionsSetting;
         [UIComponent("bypass-calibration")] private ToggleSetting _bypassCalibration;
         [UIComponent("automatic-calibration")] private ToggleSetting _automaticCalibrationSetting;
@@ -145,7 +144,6 @@ namespace CustomAvatar.UI
         #region Actions
 #pragma warning disable IDE0051
 
-        [UIAction("ignore-exclusions-change")]
         private void OnIgnoreExclusionsChanged(bool value)
         {
             if (_currentAvatarSettings == null) return;
@@ -153,7 +151,6 @@ namespace CustomAvatar.UI
             _currentAvatarSettings.ignoreExclusions.value = value;
         }
 
-        [UIAction("bypass-calibration-change")]
         private void OnEnableBypassCalibrationChanged(bool value)
         {
             if (_currentAvatarSettings == null) return;
@@ -161,7 +158,6 @@ namespace CustomAvatar.UI
             _currentAvatarSettings.bypassCalibration.value = value;
         }
 
-        [UIAction("automatic-calibration-change")]
         private void OnEnableAutomaticCalibrationChanged(bool value)
         {
             DisableCalibrationMode(false);
@@ -171,7 +167,6 @@ namespace CustomAvatar.UI
             _currentAvatarSettings.useAutomaticCalibration.value = value;
         }
 
-        [UIAction("calibrate-fbt-click")]
         private void OnCalibrateFullBodyTrackingClicked()
         {
             if (!_calibrating)
@@ -184,7 +179,6 @@ namespace CustomAvatar.UI
             }
         }
 
-        [UIAction("clear-fbt-calibration-data-click")]
         private void OnClearFullBodyTrackingCalibrationDataClicked()
         {
             if (_calibrating)

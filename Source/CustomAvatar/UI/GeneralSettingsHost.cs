@@ -47,12 +47,10 @@ namespace CustomAvatar.UI
         #endregion
 
         #region Values
-#pragma warning disable IDE0052
 
-        [UIValue("resize-mode-options")] private readonly List<object> _resizeModeOptions = new List<object> { AvatarResizeMode.None, AvatarResizeMode.Height, AvatarResizeMode.ArmSpan };
-        [UIValue("floor-height-adjust-options")] private readonly List<object> _floorHeightAdjustOptions = new List<object> { FloorHeightAdjustMode.Off, FloorHeightAdjustMode.PlayersPlaceOnly, FloorHeightAdjustMode.EntireEnvironment };
+        internal readonly List<object> resizeModeOptions = new List<object> { AvatarResizeMode.None, AvatarResizeMode.Height, AvatarResizeMode.ArmSpan };
+        internal readonly List<object> floorHeightAdjustOptions = new List<object> { FloorHeightAdjustMode.Off, FloorHeightAdjustMode.PlayersPlaceOnly, FloorHeightAdjustMode.EntireEnvironment };
 
-#pragma warning restore IDE0052
         #endregion
 
         private readonly VRPlayerInputInternal _playerInput;
@@ -126,19 +124,16 @@ namespace CustomAvatar.UI
         #region Actions
 #pragma warning disable IDE0051
 
-        [UIAction("visible-in-first-person-change")]
         private void OnVisibleInFirstPersonChanged(bool value)
         {
             _settings.isAvatarVisibleInFirstPerson.value = value;
         }
 
-        [UIAction("resize-mode-change")]
         private void OnResizeModeChanged(AvatarResizeMode value)
         {
             _settings.resizeMode.value = value;
         }
 
-        [UIAction("resize-mode-formatter")]
         private string ResizeModeFormatter(object value)
         {
             if (!(value is AvatarResizeMode)) return null;
@@ -156,13 +151,11 @@ namespace CustomAvatar.UI
             }
         }
 
-        [UIAction("enable-locomotion-change")]
         private void OnEnableLocomotionChanged(bool value)
         {
             _settings.enableLocomotion.value = value;
         }
 
-        [UIAction("floor-height-adjust-formatter")]
         private string FloorHeightAdjustFormatter(object value)
         {
             if (!(value is FloorHeightAdjustMode)) return null;
@@ -180,25 +173,21 @@ namespace CustomAvatar.UI
             }
         }
 
-        [UIAction("floor-height-adjust-change")]
         private void OnFloorHeightAdjustChanged(FloorHeightAdjustMode value)
         {
             _settings.floorHeightAdjust.value = value;
         }
 
-        [UIAction("camera-clip-plane-change")]
         private void OnCameraClipPlaneChanged(float value)
         {
             _settings.cameraNearClipPlane.value = value;
         }
 
-        [UIAction("measure-arm-span-click")]
         private void OnMeasureArmSpanButtonClicked()
         {
             _armSpanMeasurer.MeasureArmSpan();
         }
 
-        [UIAction("move-floor-with-room-adjust-change")]
         private void OnMoveFloorWithRoomAdjustChanged(bool value)
         {
             _settings.moveFloorWithRoomAdjust.value = value;
