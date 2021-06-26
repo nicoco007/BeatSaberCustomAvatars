@@ -16,7 +16,6 @@
 
 extern alias BeatSaberFinalIK;
 
-using System;
 using BeatSaberFinalIK::RootMotion.FinalIK;
 using CustomAvatar.Logging;
 using UnityEngine;
@@ -52,7 +51,12 @@ namespace CustomAvatar.Utilities
         private void CreateOffsetTargetIfMissing(Transform root, string name, Transform reference, ref float positionWeight, ref float rotationWeight)
         {
             if (root.Find(name)) return;
-            if (!reference) throw new ArgumentNullException(nameof(reference), $"Reference for {name} is missing");
+
+            if (!reference)
+            {
+                _logger.Warning($"Reference for {name} is missing");
+                return;
+            }
 
             Transform offsetTarget = new GameObject(name).transform;
 
@@ -64,6 +68,7 @@ namespace CustomAvatar.Utilities
 
             _logger.Trace($"Created offset IK target for '{name}'");
         }
+
         private void CreateTargetsIfMissing(VRIKManager vrikManager, Transform root)
         {
             vrikManager.solver_spine_headTarget = CreateTargetIfMissing(vrikManager.solver_spine_headTarget, vrikManager.references_head, root.Find("Head"));

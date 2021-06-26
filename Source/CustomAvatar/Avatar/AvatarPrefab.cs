@@ -127,11 +127,6 @@ namespace CustomAvatar.Avatar
                 Destroy(existingVrik);
             }
 
-            if (vrikManager)
-            {
-                ikHelper.CreateOffsetTargetsIfMissing(vrikManager, transform);
-            }
-
             head = transform.Find("Head");
             leftHand = transform.Find("LeftHand");
             rightHand = transform.Find("RightHand");
@@ -141,9 +136,13 @@ namespace CustomAvatar.Avatar
 
             if (vrikManager)
             {
-                if (vrikManager.references_root != vrikManager.transform)
+                if (vrikManager.areReferencesFilled)
                 {
-                    _logger.Warning("VRIKManager is not on the root reference transform; this may cause unexpected issues");
+                    ikHelper.CreateOffsetTargetsIfMissing(vrikManager, transform);
+                }
+                else
+                {
+                    _logger.Warning("VRIKManager references are not filled; avatar will probably not work as expected");
                 }
 
                 CheckTargetWeight("Left Arm", leftHand, vrikManager.solver_leftArm_positionWeight, vrikManager.solver_leftArm_rotationWeight);
