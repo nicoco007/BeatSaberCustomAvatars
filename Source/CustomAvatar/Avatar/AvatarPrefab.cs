@@ -127,13 +127,6 @@ namespace CustomAvatar.Avatar
                 Destroy(existingVrik);
             }
 
-            head = transform.Find("Head");
-            leftHand = transform.Find("LeftHand");
-            rightHand = transform.Find("RightHand");
-            pelvis = transform.Find("Pelvis");
-            leftLeg = transform.Find("LeftLeg");
-            rightLeg = transform.Find("RightLeg");
-
             if (vrikManager)
             {
                 if (vrikManager.areReferencesFilled)
@@ -144,7 +137,17 @@ namespace CustomAvatar.Avatar
                 {
                     _logger.Warning("VRIKManager references are not filled; avatar will probably not work as expected");
                 }
+            }
 
+            head = transform.Find("Head");
+            leftHand = transform.Find("LeftHand");
+            rightHand = transform.Find("RightHand");
+            pelvis = transform.Find("Pelvis");
+            leftLeg = transform.Find("LeftLeg");
+            rightLeg = transform.Find("RightLeg");
+
+            if (vrikManager)
+            {
                 CheckTargetWeight("Left Arm", leftHand, vrikManager.solver_leftArm_positionWeight, vrikManager.solver_leftArm_rotationWeight);
                 CheckTargetWeight("Right Arm", rightHand, vrikManager.solver_rightArm_positionWeight, vrikManager.solver_rightArm_rotationWeight);
                 CheckTargetWeight("Pelvis", pelvis, vrikManager.solver_spine_pelvisPositionWeight, vrikManager.solver_spine_pelvisRotationWeight);
