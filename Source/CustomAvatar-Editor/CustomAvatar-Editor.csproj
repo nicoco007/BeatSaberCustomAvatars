@@ -4,7 +4,6 @@
     <RootNamespace>CustomAvatar</RootNamespace>
     <AssemblyName>CustomAvatar</AssemblyName>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <DefineConstants>UNITY_EDITOR</DefineConstants>
     <UnityProjectDir>$(ProjectDir)..\..\Unity\BeatSaberCustomAvatars</UnityProjectDir>
     <PathMap>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)=$(MSBuildProjectName)</PathMap>
@@ -67,7 +66,6 @@
     <Compile Include="..\CustomAvatar\Logging\ILogger.cs" Link="Logging\ILogger.cs" />
     <Compile Include="..\CustomAvatar\Logging\UnityDebugLogger.cs" Link="Logging\UnityDebugLogger.cs" />
     <Compile Include="..\CustomAvatar\PoseManager.cs" Link="PoseManager.cs" />
-    <Compile Include="..\CustomAvatar\Properties\AssemblyInfo.cs" Link="Properties\AssemblyInfo.cs" />
     <Compile Include="..\CustomAvatar\Utilities\IKHelper.cs" Link="Utilities\IKHelper.cs" />
     <Compile Include="..\CustomAvatar\VRIKManager.cs" Link="VRIKManager.cs" />
   </ItemGroup>
@@ -77,6 +75,18 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\**\*.*" />
   </ItemGroup>
+  <Target Name="CheckBSMTInstalled" AfterTargets="BeforeBuild" Condition="'$(BSMTTaskAssembly)' == ''">
+	<Error Text="The BeatSaberModdingTools.Tasks NuGet package doesn't seem to be installed. Please restore NuGet packages before building the project." />
+  </Target>
+  <Target Name="SetAssemblyVersion" AfterTargets="CheckBSMTInstalled">
+	<GetManifestInfo ManifestPath="../CustomAvatar/manifest.json">
+	  <Output TaskParameter="BasePluginVersion" PropertyName="BasePluginVersion" />
+	</GetManifestInfo>
+
+	<PropertyGroup>
+	  <Version>$(BasePluginVersion)</Version>
+	</PropertyGroup>
+  </Target>
   <Target Name="Organize" AfterTargets="AfterBuild">
     <!-- remove deps.json file since it's not used -->
     <Delete Files="$(TargetDir)$(TargetName).deps.json" />
@@ -98,11 +108,15 @@
     <Copy SourceFiles="@(CopyToUnityProjectFolder)" DestinationFiles="@(CopyToUnityProjectFolder->'$(UnityProjectDir)\Assets\Libraries\%(RecursiveDir)%(Filename)%(Extension)')" Condition="!Exists('$(UnityProjectDir)\Assets\Libraries\%(RecursiveDir)%(Filename)%(Extension)') OR '%(Extension)' != '.meta'" />
   </Target>
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="3.9.0">
+    <PackageReference Include="BeatSaberModdingTools.Tasks" Version="1.4.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Unity.Analyzers" Version="1.10.2">
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="3.10.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Unity.Analyzers" Version="1.11.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

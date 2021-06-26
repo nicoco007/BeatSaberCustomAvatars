@@ -22,7 +22,7 @@ jobs:
         dotnet-version: 5.0.x
 
     - name: Set manifest version
-      run: ./bsipa_version_hash.ps1 "Source\CustomAvatar\manifest.json" "Source\CustomAvatar\Properties\AssemblyInfo.cs"
+      run: ./bsipa_version_hash.ps1 "Source\CustomAvatar\manifest.json"
 
     - name: Fetch Beat Saber Bindings
       uses: actions/checkout@v2
