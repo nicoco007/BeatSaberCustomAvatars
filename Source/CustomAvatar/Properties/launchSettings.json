@@ -8,7 +8,7 @@
     "Beat Saber (FPFC)": {
       "commandName": "Executable",
       "executablePath": "$(SteamExecutable)",
-      "commandLineArgs": "-applaunch 620980 fpfc --verbose --debug --trace --enable=RuntimeUnityEditor.Core --enable=RuntimeUnityEditor.BSIPA4"
+      "commandLineArgs": "-applaunch 620980 fpfc --verbose --debug --trace"
     },
     "Beat Saber (Force XR)": {
       "commandName": "Executable",
