@@ -92,8 +92,11 @@ namespace CustomAvatar.Player
 
             if (spectatorParent)
             {
+                // "SpectatorParent" has position room adjust applied but not rotation
                 var avatarParent = new GameObject("AvatarParent");
-                avatarParent.transform.SetParent(spectatorParent.transform, false);
+                Transform avatarParentTransform = avatarParent.transform;
+                avatarParentTransform.localRotation = _beatSaberUtilities.roomRotation;
+                avatarParentTransform.SetParent(spectatorParent.transform, false);
                 _container.InstantiateComponent<AvatarCenterAdjust>(avatarParent);
 
                 Camera spectatorCamera = spectatorParent.GetComponentInChildren<Camera>();
