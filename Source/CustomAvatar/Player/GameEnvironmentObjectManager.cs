@@ -17,7 +17,9 @@
 using System;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
+using CustomAvatar.Logging;
 using CustomAvatar.Rendering;
+using CustomAvatar.Utilities;
 using UnityEngine;
 using Zenject;
 
@@ -30,31 +32,59 @@ namespace CustomAvatar.Player
         private static readonly Cubemap kBlackCubemap = new Cubemap(0, TextureFormat.DXT1, false);
 
         private readonly DiContainer _container;
+        private readonly ILogger<GameEnvironmentObjectManager> _logger;
         private readonly Settings _settings;
+        private readonly BeatSaberUtilities _beatSaberUtilities;
 
-        internal GameEnvironmentObjectManager(DiContainer container, Settings settings)
+        internal GameEnvironmentObjectManager(DiContainer container, ILogger<GameEnvironmentObjectManager> logger, Settings settings, BeatSaberUtilities beatSaberUtilities)
         {
             _container = container;
+            _logger = logger;
             _settings = settings;
+            _beatSaberUtilities = beatSaberUtilities;
         }
 
         public void Initialize()
         {
-            switch (_settings.floorHeightAdjust.value)
+            var environment = GameObject.Find("/Environment");
+
+            if (environment)
             {
-                case FloorHeightAdjustMode.EntireEnvironment:
-                    _container.InstantiateComponent<EnvironmentObject>(GameObject.Find("/Environment"));
-                    break;
+                switch (_settings.floorHeightAdjust.value)
+                {
+                    case FloorHeightAdjustMode.EntireEnvironment:
+                        _container.InstantiateComponent<EnvironmentObject>(environment);
+                        break;
 
-                case FloorHeightAdjustMode.PlayersPlaceOnly:
-                    var environment = GameObject.Find("/Environment");
+                    case FloorHeightAdjustMode.PlayersPlaceOnly:
+                        Transform environmentTransform = environment.transform;
+                        Transform playersPlace = environmentTransform.Find("PlayersPlace");
+                        Transform shadow = environmentTransform.Find("PlayersPlaceShadow");
 
-                    _container.InstantiateComponent<EnvironmentObject>(environment.transform.Find("PlayersPlace").gameObject);
+                        if (playersPlace)
+                        {
+                            _container.InstantiateComponent<EnvironmentObject>(playersPlace.gameObject);
+                        }
+                        else
+                        {
+                            _logger.Warning($"{playersPlace.name} not found!");
+                        }
 
-                    Transform shadow = environment.transform.Find("PlayersPlaceShadow");
-                    if (shadow) _container.InstantiateComponent<EnvironmentObject>(shadow.gameObject);
+                        if (shadow)
+                        {
+                            _container.InstantiateComponent<EnvironmentObject>(shadow.gameObject);
+                        }
+                        else
+                        {
+                            _logger.Warning($"{shadow.name} not found!");
+                        }
 
-                    break;
+                        break;
+                }
+            }
+            else
+            {
+                _logger.Warning($"{environment.name} not found!");
             }
 
             // ScoreSaber replay spectator camera
@@ -66,7 +96,16 @@ namespace CustomAvatar.Player
                 avatarParent.transform.SetParent(spectatorParent.transform, false);
                 _container.InstantiateComponent<AvatarCenterAdjust>(avatarParent);
 
-                _container.InstantiateComponent<CustomAvatarsMainCameraController>(spectatorParent.GetComponentInChildren<Camera>().gameObject);
+                Camera spectatorCamera = spectatorParent.GetComponentInChildren<Camera>();
+
+                if (spectatorCamera)
+                {
+                    _container.InstantiateComponent<CustomAvatarsMainCameraController>(spectatorCamera.gameObject);
+                }
+                else
+                {
+                    _logger.Warning($"Spectator camera not found!");
+                }
             }
         }
 
