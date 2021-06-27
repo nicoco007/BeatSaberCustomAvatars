@@ -15,7 +15,6 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
@@ -41,14 +40,31 @@ namespace CustomAvatar.UI
         private PlayerAvatarManager _avatarManager;
         private HierarchyManager _hierarchyManager;
 
-        #region Components
-#pragma warning disable CS0649
+        private bool _isLoaderActive;
+        private string _errorMessage;
 
-        [UIComponent("loader")] private readonly Transform _loader;
-        [UIComponent("error-text")] private readonly CurvedTextMeshPro _errorText;
+        protected bool isLoaderActive
+        {
+            get => _isLoaderActive;
+            set
+            {
+                _isLoaderActive = value;
+                NotifyPropertyChanged();
+            }
+        }
 
-#pragma warning restore CS0649
-        #endregion
+        protected string errorMessage
+        {
+            get => _errorMessage;
+            set
+            {
+                _errorMessage = value ?? string.Empty;
+                NotifyPropertyChanged();
+                NotifyPropertyChanged(nameof(isErrorMessageVisible));
+            }
+        }
+
+        protected bool isErrorMessageVisible => !string.IsNullOrEmpty(errorMessage);
 
         #region Behaviour Lifecycle
 
@@ -122,8 +138,7 @@ namespace CustomAvatar.UI
         {
             SetLoading(false);
 
-            _errorText.text = $"Failed to load selected avatar\n<size=75%>{exception.Message}</size>";
-            _errorText.gameObject.SetActive(true);
+            errorMessage = $"Failed to load selected avatar\n<size=75%>{exception.Message}</size>";
         }
 
         private void OnMirrorRenderScaleChanged(float renderScale)
@@ -161,19 +176,19 @@ namespace CustomAvatar.UI
 
         private void SetLoading(bool loading)
         {
-            _loader.gameObject.SetActive(loading);
-            _errorText.gameObject.SetActive(false);
+            isLoaderActive = loading;
+            errorMessage = null;
         }
 
         private class AutoResizeMirror : EnvironmentObject
         {
             protected override void UpdateOffset()
             {
-                float floorOffset = _playerAvatarManager.GetFloorOffset();
+                float floorOffset = playerAvatarManager.GetFloorOffset();
 
-                if (_settings.moveFloorWithRoomAdjust)
+                if (settings.moveFloorWithRoomAdjust)
                 {
-                    floorOffset += _beatSaberUtilities.roomCenter.y;
+                    floorOffset += beatSaberUtilities.roomCenter.y;
                 }
 
                 float scale = transform.localPosition.z / 2.6f; // screen system scale

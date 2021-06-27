@@ -16,36 +16,15 @@
 
 using CustomAvatar.Avatar;
 using CustomAvatar.Player;
-using BeatSaberMarkupLanguage.Attributes;
-using BeatSaberMarkupLanguage.Components.Settings;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using HMUI;
 using CustomAvatar.Configuration;
 using CustomAvatar.Tracking;
 
 namespace CustomAvatar.UI
 {
-    internal class GeneralSettingsHost : IViewControllerHost
+    internal class GeneralSettingsHost : ViewControllerHost
     {
-        #region Components
-#pragma warning disable CS0649, IDE0044
-
-        [UIComponent("arm-span")] private CurvedTextMeshPro _armSpanLabel;
-        [UIComponent("visible-in-first-person")] private ToggleSetting _visibleInFirstPerson;
-        [UIComponent("resize-mode")] private DropDownListSetting _resizeMode;
-        [UIComponent("enable-locomotion")] private ToggleSetting _enableLocomotion;
-        [UIComponent("floor-height-adjust")] private DropDownListSetting _floorHeightAdjust;
-        [UIComponent("move-floor-with-room-adjust")] private ToggleSetting _moveFloorWithRoomAdjust;
-        [UIComponent("camera-clip-plane")] private IncrementSetting _cameraNearClipPlane;
-        [UIComponent("measure-button")] private Button _measureButton;
-        [UIComponent("measure-button")] private HoverHint _measureButtonHoverHint;
-        [UIComponent("height-adjust-warning-text")] private RectTransform _heightAdjustWarningText;
-
-#pragma warning restore CS0649, IDE0044
-        #endregion
-
         #region Values
 
         internal readonly List<object> resizeModeOptions = new List<object> { AvatarResizeMode.None, AvatarResizeMode.Height, AvatarResizeMode.ArmSpan };
@@ -58,6 +37,8 @@ namespace CustomAvatar.UI
         private readonly PlayerDataModel _playerDataModel;
         private readonly ArmSpanMeasurer _armSpanMeasurer;
 
+        private string _armSpanLabelText;
+
         internal GeneralSettingsHost(VRPlayerInputInternal playerInput, Settings settings, PlayerDataModel playerDataModel, ArmSpanMeasurer armSpanMeasurer)
         {
             _playerInput = playerInput;
@@ -66,79 +47,129 @@ namespace CustomAvatar.UI
             _armSpanMeasurer = armSpanMeasurer;
         }
 
-        public void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
+        public bool visibleInFirstPerson
         {
-            _visibleInFirstPerson.Value = _settings.isAvatarVisibleInFirstPerson;
-            _resizeMode.Value = _settings.resizeMode.value;
-            _enableLocomotion.Value = _settings.enableLocomotion;
-            _floorHeightAdjust.Value = _settings.floorHeightAdjust.value;
-            _moveFloorWithRoomAdjust.Value = _settings.moveFloorWithRoomAdjust;
-            _cameraNearClipPlane.Value = _settings.cameraNearClipPlane;
+            get => _settings.isAvatarVisibleInFirstPerson;
+            set
+            {
+                _settings.isAvatarVisibleInFirstPerson.value = value;
+                NotifyPropertyChanged();
+            }
+        }
 
-            _armSpanLabel.SetText($"{_settings.playerArmSpan.value:0.00} m");
+        public AvatarResizeMode resizeMode
+        {
+            get => _settings.resizeMode;
+            set
+            {
+                _settings.resizeMode.value = value;
+                NotifyPropertyChanged();
+                NotifyPropertyChanged(nameof(showHeightAdjustWarning));
+            }
+        }
 
-            _settings.resizeMode.changed += OnSettingsResizeModeChanged;
+        public bool enableLocomotion
+        {
+            get => _settings.enableLocomotion;
+            set
+            {
+                _settings.enableLocomotion.value = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        public FloorHeightAdjustMode floorHeightAdjustMode
+        {
+            get => _settings.floorHeightAdjust;
+            set
+            {
+                _settings.floorHeightAdjust.value = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        public bool moveFloorWithRoomAdjust
+        {
+            get => _settings.moveFloorWithRoomAdjust;
+            set
+            {
+                _settings.moveFloorWithRoomAdjust.value = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        public float cameraNearClipPlane
+        {
+            get => _settings.cameraNearClipPlane;
+            set
+            {
+                _settings.cameraNearClipPlane.value = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        public bool isMeasureButtonEnabled => _playerInput.TryGetUncalibratedPose(DeviceUse.LeftHand, out Pose _) && _playerInput.TryGetUncalibratedPose(DeviceUse.RightHand, out Pose _);
+
+        public string measureButtonHoverHintText => isMeasureButtonEnabled
+            ? "For optimal results, hold your arms out to either side of your body and point the ends of the controllers outwards as far as possible (turn your hands if necessary)."
+            : "Both controllers must be turned on to measure arm span.";
+
+        public bool showHeightAdjustWarning => _settings.resizeMode != AvatarResizeMode.None && _playerDataModel.playerData.playerSpecificSettings.automaticPlayerHeight;
+
+        public string armSpanLabelText
+        {
+            get => _armSpanLabelText;
+            set
+            {
+                _armSpanLabelText = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        public override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
+        {
             _armSpanMeasurer.updated += OnArmSpanMeasurementChanged;
             _armSpanMeasurer.completed += OnArmSpanMeasurementCompleted;
+            _playerInput.inputChanged += OnPlayerInputChanged;
 
-            OnSettingsResizeModeChanged(_settings.resizeMode);
+            armSpanLabelText = $"{_settings.playerArmSpan:0.00} m";
+
+            NotifyPropertyChanged(nameof(showHeightAdjustWarning));
+            OnPlayerInputChanged();
         }
 
-        public void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
+        public override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
-            _settings.resizeMode.changed -= OnSettingsResizeModeChanged;
             _armSpanMeasurer.updated -= OnArmSpanMeasurementChanged;
             _armSpanMeasurer.completed -= OnArmSpanMeasurementCompleted;
+            _playerInput.inputChanged -= OnPlayerInputChanged;
         }
 
-        public void UpdateUI(SpawnedAvatar avatar)
+        private void OnPlayerInputChanged()
         {
-            if (_playerInput.TryGetUncalibratedPose(DeviceUse.LeftHand, out Pose _) && _playerInput.TryGetUncalibratedPose(DeviceUse.RightHand, out Pose _))
-            {
-                _measureButton.interactable = true;
-                _measureButtonHoverHint.text = "For optimal results, hold your arms out to either side of your body and point the ends of the controllers outwards as far as possible (turn your hands if necessary).";
-            }
-            else
-            {
-                _measureButton.interactable = false;
-                _measureButtonHoverHint.text = "Controllers not detected";
-            }
-        }
-
-        private void OnSettingsResizeModeChanged(AvatarResizeMode resizeMode)
-        {
-            _heightAdjustWarningText.gameObject.SetActive(resizeMode != AvatarResizeMode.None && _playerDataModel.playerData.playerSpecificSettings.automaticPlayerHeight);
+            NotifyPropertyChanged(nameof(isMeasureButtonEnabled));
+            NotifyPropertyChanged(nameof(measureButtonHoverHintText));
         }
 
         private void OnArmSpanMeasurementChanged(float armSpan)
         {
-            _armSpanLabel.SetText($"Measuring... {armSpan:0.00} m");
+            armSpanLabelText = $"Measuring... {armSpan:0.00} m";
         }
 
         private void OnArmSpanMeasurementCompleted(float armSpan)
         {
-            _armSpanLabel.SetText($"{armSpan:0.00} m");
             _settings.playerArmSpan.value = armSpan;
+            armSpanLabelText = $"{armSpan:0.00} m";
         }
 
         #region Actions
 #pragma warning disable IDE0051
 
-        private void OnVisibleInFirstPersonChanged(bool value)
-        {
-            _settings.isAvatarVisibleInFirstPerson.value = value;
-        }
-
-        private void OnResizeModeChanged(AvatarResizeMode value)
-        {
-            _settings.resizeMode.value = value;
-        }
-
         private string ResizeModeFormatter(object value)
         {
-            if (!(value is AvatarResizeMode)) return null;
+            if (!(value is AvatarResizeMode avatarResizeMode)) return null;
 
-            switch ((AvatarResizeMode)value)
+            switch (avatarResizeMode)
             {
                 case AvatarResizeMode.Height:
                     return "Height";
@@ -151,16 +182,11 @@ namespace CustomAvatar.UI
             }
         }
 
-        private void OnEnableLocomotionChanged(bool value)
-        {
-            _settings.enableLocomotion.value = value;
-        }
-
         private string FloorHeightAdjustFormatter(object value)
         {
-            if (!(value is FloorHeightAdjustMode)) return null;
+            if (!(value is FloorHeightAdjustMode floorHeightAdjustMode)) return null;
 
-            switch ((FloorHeightAdjustMode)value)
+            switch (floorHeightAdjustMode)
             {
                 case FloorHeightAdjustMode.Off:
                     return "Off";
@@ -173,24 +199,9 @@ namespace CustomAvatar.UI
             }
         }
 
-        private void OnFloorHeightAdjustChanged(FloorHeightAdjustMode value)
-        {
-            _settings.floorHeightAdjust.value = value;
-        }
-
-        private void OnCameraClipPlaneChanged(float value)
-        {
-            _settings.cameraNearClipPlane.value = value;
-        }
-
         private void OnMeasureArmSpanButtonClicked()
         {
             _armSpanMeasurer.MeasureArmSpan();
-        }
-
-        private void OnMoveFloorWithRoomAdjustChanged(bool value)
-        {
-            _settings.moveFloorWithRoomAdjust.value = value;
         }
 
 #pragma warning restore IDE0051
