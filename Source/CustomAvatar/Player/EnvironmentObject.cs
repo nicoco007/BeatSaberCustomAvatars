@@ -32,11 +32,13 @@ namespace CustomAvatar.Player
         private static readonly Action<Renderer, Transform> kStaticBatchRootTransformSetter = ReflectionExtensions.CreatePropertySetter<Renderer, Transform>("staticBatchRootTransform");
 
         private ILogger<EnvironmentObject> _logger;
-        protected PlayerAvatarManager _playerAvatarManager;
-        protected Settings _settings;
-        protected BeatSaberUtilities _beatSaberUtilities;
-
         private float _originalY;
+
+        protected PlayerAvatarManager playerAvatarManager { get; private set; }
+
+        protected Settings settings { get; private set; }
+
+        protected BeatSaberUtilities beatSaberUtilities { get; private set; }
 
         internal void Awake()
         {
@@ -52,16 +54,16 @@ namespace CustomAvatar.Player
         internal void Construct(ILogger<EnvironmentObject> logger, PlayerAvatarManager playerAvatarManager, Settings settings, BeatSaberUtilities beatSaberUtilities)
         {
             _logger = logger;
-            _playerAvatarManager = playerAvatarManager;
-            _settings = settings;
-            _beatSaberUtilities = beatSaberUtilities;
+            this.playerAvatarManager = playerAvatarManager;
+            this.settings = settings;
+            this.beatSaberUtilities = beatSaberUtilities;
         }
 
         internal virtual void Start()
         {
-            _playerAvatarManager.avatarChanged += OnAvatarChanged;
-            _playerAvatarManager.avatarScaleChanged += OnAvatarScaleChanged;
-            _settings.floorHeightAdjust.changed += OnFloorHeightAdjustChanged;
+            playerAvatarManager.avatarChanged += OnAvatarChanged;
+            playerAvatarManager.avatarScaleChanged += OnAvatarScaleChanged;
+            settings.floorHeightAdjust.changed += OnFloorHeightAdjustChanged;
 
             foreach (Mirror mirror in GetComponentsInChildren<Mirror>())
             {
@@ -78,18 +80,18 @@ namespace CustomAvatar.Player
 
         internal virtual void OnDestroy()
         {
-            _playerAvatarManager.avatarChanged -= OnAvatarChanged;
-            _playerAvatarManager.avatarScaleChanged -= OnAvatarScaleChanged;
-            _settings.floorHeightAdjust.changed -= OnFloorHeightAdjustChanged;
+            playerAvatarManager.avatarChanged -= OnAvatarChanged;
+            playerAvatarManager.avatarScaleChanged -= OnAvatarScaleChanged;
+            settings.floorHeightAdjust.changed -= OnFloorHeightAdjustChanged;
         }
 
         protected virtual void UpdateOffset()
         {
-            float floorOffset = _playerAvatarManager.GetFloorOffset();
+            float floorOffset = playerAvatarManager.GetFloorOffset();
 
-            if (_settings.moveFloorWithRoomAdjust)
+            if (settings.moveFloorWithRoomAdjust)
             {
-                floorOffset += _beatSaberUtilities.roomCenter.y;
+                floorOffset += beatSaberUtilities.roomCenter.y;
             }
 
             transform.position = new Vector3(transform.position.x, _originalY + floorOffset, transform.position.z);

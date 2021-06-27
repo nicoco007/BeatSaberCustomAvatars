@@ -324,11 +324,11 @@ dotnet_naming_symbols.constants.applicable_accessibilities = public, internal, p
 dotnet_naming_symbols.constants.required_modifiers = const
 
 dotnet_naming_symbols.private_members.applicable_kinds = field, property, event
-dotnet_naming_symbols.private_members.applicable_accessibilities = private, protected, private_protected
+dotnet_naming_symbols.private_members.applicable_accessibilities = private
 dotnet_naming_symbols.private_members.required_modifiers = 
 
 dotnet_naming_symbols.public_members.applicable_kinds = field, property, event
-dotnet_naming_symbols.public_members.applicable_accessibilities = public, internal, protected_internal
+dotnet_naming_symbols.public_members.applicable_accessibilities = public, internal, protected_internal, protected, private_protected
 dotnet_naming_symbols.public_members.required_modifiers = 
 
 # Naming styles
