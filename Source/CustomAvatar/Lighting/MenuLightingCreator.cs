@@ -17,6 +17,7 @@
 using System;
 using System.Linq;
 using CustomAvatar.Avatar;
+using CustomAvatar.Configuration;
 using UnityEngine;
 using Zenject;
 
@@ -25,16 +26,20 @@ namespace CustomAvatar.Lighting
     internal class MenuLightingCreator : IInitializable, IDisposable
     {
         private readonly LightWithIdManager _lightWithIdManager;
+        private readonly Settings _settings;
 
         private Light _light;
 
-        public MenuLightingCreator(LightWithIdManager lightWithIdManager)
+        public MenuLightingCreator(LightWithIdManager lightWithIdManager, Settings settings)
         {
             _lightWithIdManager = lightWithIdManager;
+            _settings = settings;
         }
 
         public void Initialize()
         {
+            if (!_settings.lighting.environment.enabled) return;
+
             var lightObject = new GameObject("Menu Light");
             Transform lightTransform = lightObject.transform;
 
