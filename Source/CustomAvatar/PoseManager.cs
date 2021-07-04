@@ -106,75 +106,80 @@ namespace CustomAvatar
 
         public bool openHandIsValid =>
             animator && animator.isHuman &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftThumbProximal) || !openHand_LeftThumbProximal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftThumbIntermediate) || !openHand_LeftThumbIntermediate.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftThumbDistal) || !openHand_LeftThumbDistal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftIndexProximal) || !openHand_LeftIndexProximal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftIndexIntermediate) || !openHand_LeftIndexIntermediate.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftIndexDistal) || !openHand_LeftIndexDistal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftMiddleProximal) || !openHand_LeftMiddleProximal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftMiddleIntermediate) || !openHand_LeftMiddleIntermediate.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftMiddleDistal) || !openHand_LeftMiddleDistal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftRingProximal) || !openHand_LeftRingProximal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftRingIntermediate) || !openHand_LeftRingIntermediate.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftRingDistal) || !openHand_LeftRingDistal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftLittleProximal) || !openHand_LeftLittleProximal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftLittleIntermediate) || !openHand_LeftLittleIntermediate.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftLittleDistal) || !openHand_LeftLittleDistal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightThumbProximal) || !openHand_RightThumbProximal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightThumbIntermediate) || !openHand_RightThumbIntermediate.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightThumbDistal) || !openHand_RightThumbDistal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightIndexProximal) || !openHand_RightIndexProximal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightIndexIntermediate) || !openHand_RightIndexIntermediate.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightIndexDistal) || !openHand_RightIndexDistal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightMiddleProximal) || !openHand_RightMiddleProximal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightMiddleIntermediate) || !openHand_RightMiddleIntermediate.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightMiddleDistal) || !openHand_RightMiddleDistal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightRingProximal) || !openHand_RightRingProximal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightRingIntermediate) || !openHand_RightRingIntermediate.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightRingDistal) || !openHand_RightRingDistal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightLittleProximal) || !openHand_RightLittleProximal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightLittleIntermediate) || !openHand_RightLittleIntermediate.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightLittleDistal) || !openHand_RightLittleDistal.Equals(Pose.identity));
+            (!animator.GetBoneTransform(HumanBodyBones.LeftThumbProximal) || IsValidPose(openHand_LeftThumbProximal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.LeftThumbIntermediate) || IsValidPose(openHand_LeftThumbIntermediate)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.LeftThumbDistal) || IsValidPose(openHand_LeftThumbDistal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.LeftIndexProximal) || IsValidPose(openHand_LeftIndexProximal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.LeftIndexIntermediate) || IsValidPose(openHand_LeftIndexIntermediate)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.LeftIndexDistal) || IsValidPose(openHand_LeftIndexDistal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.LeftMiddleProximal) || IsValidPose(openHand_LeftMiddleProximal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.LeftMiddleIntermediate) || IsValidPose(openHand_LeftMiddleIntermediate)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.LeftMiddleDistal) || IsValidPose(openHand_LeftMiddleDistal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.LeftRingProximal) || IsValidPose(openHand_LeftRingProximal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.LeftRingIntermediate) || IsValidPose(openHand_LeftRingIntermediate)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.LeftRingDistal) || IsValidPose(openHand_LeftRingDistal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.LeftLittleProximal) || IsValidPose(openHand_LeftLittleProximal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.LeftLittleIntermediate) || IsValidPose(openHand_LeftLittleIntermediate)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.LeftLittleDistal) || IsValidPose(openHand_LeftLittleDistal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightThumbProximal) || IsValidPose(openHand_RightThumbProximal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightThumbIntermediate) || IsValidPose(openHand_RightThumbIntermediate)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightThumbDistal) || IsValidPose(openHand_RightThumbDistal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightIndexProximal) || IsValidPose(openHand_RightIndexProximal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightIndexIntermediate) || IsValidPose(openHand_RightIndexIntermediate)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightIndexDistal) || IsValidPose(openHand_RightIndexDistal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightMiddleProximal) || IsValidPose(openHand_RightMiddleProximal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightMiddleIntermediate) || IsValidPose(openHand_RightMiddleIntermediate)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightMiddleDistal) || IsValidPose(openHand_RightMiddleDistal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightRingProximal) || IsValidPose(openHand_RightRingProximal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightRingIntermediate) || IsValidPose(openHand_RightRingIntermediate)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightRingDistal) || IsValidPose(openHand_RightRingDistal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightLittleProximal) || IsValidPose(openHand_RightLittleProximal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightLittleIntermediate) || IsValidPose(openHand_RightLittleIntermediate)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightLittleDistal) || IsValidPose(openHand_RightLittleDistal));
 
         public bool closedHandIsValid =>
             animator && animator.isHuman &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftThumbProximal) || !closedHand_LeftThumbProximal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftThumbIntermediate) || !closedHand_LeftThumbIntermediate.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftThumbDistal) || !closedHand_LeftThumbDistal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftIndexProximal) || !closedHand_LeftIndexProximal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftIndexIntermediate) || !closedHand_LeftIndexIntermediate.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftIndexDistal) || !closedHand_LeftIndexDistal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftMiddleProximal) || !closedHand_LeftMiddleProximal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftMiddleIntermediate) || !closedHand_LeftMiddleIntermediate.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftMiddleDistal) || !closedHand_LeftMiddleDistal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftRingProximal) || !closedHand_LeftRingProximal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftRingIntermediate) || !closedHand_LeftRingIntermediate.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftRingDistal) || !closedHand_LeftRingDistal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftLittleProximal) || !closedHand_LeftLittleProximal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftLittleIntermediate) || !closedHand_LeftLittleIntermediate.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.LeftLittleDistal) || !closedHand_LeftLittleDistal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightThumbProximal) || !closedHand_RightThumbProximal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightThumbIntermediate) || !closedHand_RightThumbIntermediate.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightThumbDistal) || !closedHand_RightThumbDistal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightIndexProximal) || !closedHand_RightIndexProximal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightIndexIntermediate) || !closedHand_RightIndexIntermediate.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightIndexDistal) || !closedHand_RightIndexDistal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightMiddleProximal) || !closedHand_RightMiddleProximal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightMiddleIntermediate) || !closedHand_RightMiddleIntermediate.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightMiddleDistal) || !closedHand_RightMiddleDistal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightRingProximal) || !closedHand_RightRingProximal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightRingIntermediate) || !closedHand_RightRingIntermediate.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightRingDistal) || !closedHand_RightRingDistal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightLittleProximal) || !closedHand_RightLittleProximal.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightLittleIntermediate) || !closedHand_RightLittleIntermediate.Equals(Pose.identity)) &&
-            (!animator.GetBoneTransform(HumanBodyBones.RightLittleDistal) || !closedHand_RightLittleDistal.Equals(Pose.identity));
+            (!animator.GetBoneTransform(HumanBodyBones.LeftThumbProximal) || IsValidPose(closedHand_LeftThumbProximal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.LeftThumbIntermediate) || IsValidPose(closedHand_LeftThumbIntermediate)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.LeftThumbDistal) || IsValidPose(closedHand_LeftThumbDistal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.LeftIndexProximal) || IsValidPose(closedHand_LeftIndexProximal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.LeftIndexIntermediate) || IsValidPose(closedHand_LeftIndexIntermediate)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.LeftIndexDistal) || IsValidPose(closedHand_LeftIndexDistal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.LeftMiddleProximal) || IsValidPose(closedHand_LeftMiddleProximal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.LeftMiddleIntermediate) || IsValidPose(closedHand_LeftMiddleIntermediate)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.LeftMiddleDistal) || IsValidPose(closedHand_LeftMiddleDistal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.LeftRingProximal) || IsValidPose(closedHand_LeftRingProximal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.LeftRingIntermediate) || IsValidPose(closedHand_LeftRingIntermediate)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.LeftRingDistal) || IsValidPose(closedHand_LeftRingDistal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.LeftLittleProximal) || IsValidPose(closedHand_LeftLittleProximal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.LeftLittleIntermediate) || IsValidPose(closedHand_LeftLittleIntermediate)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.LeftLittleDistal) || IsValidPose(closedHand_LeftLittleDistal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightThumbProximal) || IsValidPose(closedHand_RightThumbProximal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightThumbIntermediate) || IsValidPose(closedHand_RightThumbIntermediate)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightThumbDistal) || IsValidPose(closedHand_RightThumbDistal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightIndexProximal) || IsValidPose(closedHand_RightIndexProximal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightIndexIntermediate) || IsValidPose(closedHand_RightIndexIntermediate)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightIndexDistal) || IsValidPose(closedHand_RightIndexDistal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightMiddleProximal) || IsValidPose(closedHand_RightMiddleProximal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightMiddleIntermediate) || IsValidPose(closedHand_RightMiddleIntermediate)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightMiddleDistal) || IsValidPose(closedHand_RightMiddleDistal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightRingProximal) || IsValidPose(closedHand_RightRingProximal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightRingIntermediate) || IsValidPose(closedHand_RightRingIntermediate)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightRingDistal) || IsValidPose(closedHand_RightRingDistal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightLittleProximal) || IsValidPose(closedHand_RightLittleProximal)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightLittleIntermediate) || IsValidPose(closedHand_RightLittleIntermediate)) &&
+            (!animator.GetBoneTransform(HumanBodyBones.RightLittleDistal) || IsValidPose(closedHand_RightLittleDistal));
 
         public bool isValid => closedHandIsValid && openHandIsValid;
 
-        public void OnEnable()
+        public void Awake()
         {
             animator = GetComponent<Animator>();
+        }
+
+        public void Reset()
+        {
+            Awake();
         }
 
         public void InterpolateHandPoses(float t)
@@ -238,7 +243,7 @@ namespace CustomAvatar
             Transform boneTransform = animator.GetBoneTransform(bodyBone);
 
             if (!boneTransform) return;
-            if (openPose.Equals(Pose.identity) || closedPose.Equals(Pose.identity)) return;
+            if (openPose.Equals(default) || closedPose.Equals(default)) return;
 
             boneTransform.localPosition = Vector3.Lerp(openPose.position, closedPose.position, fade);
             boneTransform.localRotation = Quaternion.Slerp(openPose.rotation, closedPose.rotation, fade);
@@ -320,76 +325,72 @@ namespace CustomAvatar
 
         public void ClearOpenHandPoses()
         {
-            if (!animator.isHuman) return;
+            openHand_LeftThumbProximal = default;
+            openHand_LeftThumbIntermediate = default;
+            openHand_LeftThumbDistal = default;
+            openHand_LeftIndexProximal = default;
+            openHand_LeftIndexIntermediate = default;
+            openHand_LeftIndexDistal = default;
+            openHand_LeftMiddleProximal = default;
+            openHand_LeftMiddleIntermediate = default;
+            openHand_LeftMiddleDistal = default;
+            openHand_LeftRingProximal = default;
+            openHand_LeftRingIntermediate = default;
+            openHand_LeftRingDistal = default;
+            openHand_LeftLittleProximal = default;
+            openHand_LeftLittleIntermediate = default;
+            openHand_LeftLittleDistal = default;
 
-            openHand_LeftThumbProximal = Pose.identity;
-            openHand_LeftThumbIntermediate = Pose.identity;
-            openHand_LeftThumbDistal = Pose.identity;
-            openHand_LeftIndexProximal = Pose.identity;
-            openHand_LeftIndexIntermediate = Pose.identity;
-            openHand_LeftIndexDistal = Pose.identity;
-            openHand_LeftMiddleProximal = Pose.identity;
-            openHand_LeftMiddleIntermediate = Pose.identity;
-            openHand_LeftMiddleDistal = Pose.identity;
-            openHand_LeftRingProximal = Pose.identity;
-            openHand_LeftRingIntermediate = Pose.identity;
-            openHand_LeftRingDistal = Pose.identity;
-            openHand_LeftLittleProximal = Pose.identity;
-            openHand_LeftLittleIntermediate = Pose.identity;
-            openHand_LeftLittleDistal = Pose.identity;
-
-            openHand_RightThumbProximal = Pose.identity;
-            openHand_RightThumbIntermediate = Pose.identity;
-            openHand_RightThumbDistal = Pose.identity;
-            openHand_RightIndexProximal = Pose.identity;
-            openHand_RightIndexIntermediate = Pose.identity;
-            openHand_RightIndexDistal = Pose.identity;
-            openHand_RightMiddleProximal = Pose.identity;
-            openHand_RightMiddleIntermediate = Pose.identity;
-            openHand_RightMiddleDistal = Pose.identity;
-            openHand_RightRingProximal = Pose.identity;
-            openHand_RightRingIntermediate = Pose.identity;
-            openHand_RightRingDistal = Pose.identity;
-            openHand_RightLittleProximal = Pose.identity;
-            openHand_RightLittleIntermediate = Pose.identity;
-            openHand_RightLittleDistal = Pose.identity;
+            openHand_RightThumbProximal = default;
+            openHand_RightThumbIntermediate = default;
+            openHand_RightThumbDistal = default;
+            openHand_RightIndexProximal = default;
+            openHand_RightIndexIntermediate = default;
+            openHand_RightIndexDistal = default;
+            openHand_RightMiddleProximal = default;
+            openHand_RightMiddleIntermediate = default;
+            openHand_RightMiddleDistal = default;
+            openHand_RightRingProximal = default;
+            openHand_RightRingIntermediate = default;
+            openHand_RightRingDistal = default;
+            openHand_RightLittleProximal = default;
+            openHand_RightLittleIntermediate = default;
+            openHand_RightLittleDistal = default;
         }
 
         public void ClearClosedHandPoses()
         {
-            if (!animator.isHuman) return;
+            closedHand_LeftThumbProximal = default;
+            closedHand_LeftThumbIntermediate = default;
+            closedHand_LeftThumbDistal = default;
+            closedHand_LeftIndexProximal = default;
+            closedHand_LeftIndexIntermediate = default;
+            closedHand_LeftIndexDistal = default;
+            closedHand_LeftMiddleProximal = default;
+            closedHand_LeftMiddleIntermediate = default;
+            closedHand_LeftMiddleDistal = default;
+            closedHand_LeftRingProximal = default;
+            closedHand_LeftRingIntermediate = default;
+            closedHand_LeftRingDistal = default;
+            closedHand_LeftLittleProximal = default;
+            closedHand_LeftLittleIntermediate = default;
+            closedHand_LeftLittleDistal = default;
 
-            closedHand_LeftThumbProximal = Pose.identity;
-            closedHand_LeftThumbIntermediate = Pose.identity;
-            closedHand_LeftThumbDistal = Pose.identity;
-            closedHand_LeftIndexProximal = Pose.identity;
-            closedHand_LeftIndexIntermediate = Pose.identity;
-            closedHand_LeftIndexDistal = Pose.identity;
-            closedHand_LeftMiddleProximal = Pose.identity;
-            closedHand_LeftMiddleIntermediate = Pose.identity;
-            closedHand_LeftMiddleDistal = Pose.identity;
-            closedHand_LeftRingProximal = Pose.identity;
-            closedHand_LeftRingIntermediate = Pose.identity;
-            closedHand_LeftRingDistal = Pose.identity;
-            closedHand_LeftLittleProximal = Pose.identity;
-            closedHand_LeftLittleIntermediate = Pose.identity;
-            closedHand_LeftLittleDistal = Pose.identity;
-
-            closedHand_RightThumbProximal = Pose.identity;
-            closedHand_RightThumbIntermediate = Pose.identity;
-            closedHand_RightThumbDistal = Pose.identity;
-            closedHand_RightIndexProximal = Pose.identity;
-            closedHand_RightIndexIntermediate = Pose.identity;
-            closedHand_RightIndexDistal = Pose.identity;
-            closedHand_RightMiddleProximal = Pose.identity;
-            closedHand_RightMiddleIntermediate = Pose.identity;
-            closedHand_RightMiddleDistal = Pose.identity;
-            closedHand_RightRingProximal = Pose.identity;
-            closedHand_RightRingIntermediate = Pose.identity;
-            closedHand_RightRingDistal = Pose.identity;
-            closedHand_RightLittleProximal = Pose.identity;
-            closedHand_RightLittleIntermediate = Pose.identity;
-            closedHand_RightLittleDistal = Pose.identity;
+            closedHand_RightThumbProximal = default;
+            closedHand_RightThumbIntermediate = default;
+            closedHand_RightThumbDistal = default;
+            closedHand_RightIndexProximal = default;
+            closedHand_RightIndexIntermediate = default;
+            closedHand_RightIndexDistal = default;
+            closedHand_RightMiddleProximal = default;
+            closedHand_RightMiddleIntermediate = default;
+            closedHand_RightMiddleDistal = default;
+            closedHand_RightRingProximal = default;
+            closedHand_RightRingIntermediate = default;
+            closedHand_RightRingDistal = default;
+            closedHand_RightLittleProximal = default;
+            closedHand_RightLittleIntermediate = default;
+            closedHand_RightLittleDistal = default;
         }
 
         private Pose GetPose(HumanBodyBones bone)
@@ -400,6 +401,16 @@ namespace CustomAvatar
         private Pose TransformToLocalPose(Transform transform)
         {
             return transform ? new Pose(transform.localPosition, transform.localRotation) : Pose.identity;
+        }
+
+        private bool IsValidPose(Pose pose)
+        {
+            // pose.Equals(other) does
+            //   pose.position == other.position && pose.rotation == other.rotation
+            // instead of
+            //   position.Equals(other.position) && rotation.Equals(other.rotation)
+            // thanks Unity
+            return !pose.position.Equals(default) && !pose.rotation.Equals(default) && (pose.rotation.x != 0 || pose.rotation.y != 0 || pose.rotation.z != 0 || pose.rotation.w != 0);
         }
     }
 }
