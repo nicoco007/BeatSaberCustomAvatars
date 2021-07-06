@@ -109,7 +109,7 @@ namespace CustomAvatar.UI
         {
             base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
 
-            if (removedFromHierarchy)
+            if (removedFromHierarchy && _mirror)
             {
                 Destroy(_mirror.gameObject);
             }
