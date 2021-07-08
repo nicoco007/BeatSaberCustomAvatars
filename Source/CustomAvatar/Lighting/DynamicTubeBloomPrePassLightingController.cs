@@ -67,12 +67,9 @@ namespace CustomAvatar.Lighting
             {
                 if (lightsWithId[id] == null) continue;
 
-                foreach (ILightWithId lightWithId in lightsWithId[id])
+                foreach (TubeBloomPrePassLightWithId tubeLightWithId in lightsWithId[id].OfType<TubeBloomPrePassLightWithId>())
                 {
-                    if (!(lightWithId is TubeBloomPrePassLightWithId tubeLightWithId)) continue;
-
                     TubeBloomPrePassLight tubeLight = tubeLightWithId.GetField<TubeBloomPrePassLight, TubeBloomPrePassLightWithId>("_tubeBloomPrePassLight");
-
                     DynamicTubeBloomPrePassLight light = _container.InstantiateComponent<DynamicTubeBloomPrePassLight>(new GameObject($"DynamicTubeBloomPrePassLight({tubeLight.name})"), new[] { tubeLight });
 
                     if (_lights[id] == null)
