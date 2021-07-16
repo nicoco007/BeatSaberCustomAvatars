@@ -12,9 +12,9 @@
         <dropdown-list-setting text="Floor Height Adjust" hover-hint="Move the floor/environment so the avatar is standing at full height even if it is taller or shorter than the player." value="floorHeightAdjustMode" bind-value="true" apply-on-change="true" options="floorHeightAdjustOptions" formatter="FloorHeightAdjustFormatter"/>
         
         <horizontal pref-height="7">
-          <text text="Arm Span" font-size="4" align="Left" italics="true"></text>
-          <text text="~armSpanLabelText" font-size="4" align="Left" italics="true"></text>
-          <button text="Measure" interactable="~isMeasureButtonEnabled" hover-hint="~measureButtonHoverHintText" on-click="OnMeasureArmSpanButtonClicked"></button>
+		  <text text="Arm Span" font-size="4" align="Left" italics="true"></text>
+		  <slider value="armSpan" step="0.01" minimum="0" formatter="ArmSpanFormatter" interactable="~isHeightAdjustInteractable"/>
+		  <button text="~measureButtonText" interactable="~isMeasureButtonEnabled" hover-hint="~measureButtonHoverHintText" on-click="OnMeasureArmSpanButtonClicked"></button>
         </horizontal>
 
         <horizontal pref-width="90" pad-top="2">

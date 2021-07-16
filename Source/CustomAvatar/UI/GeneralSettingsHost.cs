@@ -37,7 +37,7 @@ namespace CustomAvatar.UI
         private readonly PlayerDataModel _playerDataModel;
         private readonly ArmSpanMeasurer _armSpanMeasurer;
 
-        private string _armSpanLabelText;
+        private float _armSpan;
 
         internal GeneralSettingsHost(VRPlayerInputInternal playerInput, Settings settings, PlayerDataModel playerDataModel, ArmSpanMeasurer armSpanMeasurer)
         {
@@ -110,19 +110,26 @@ namespace CustomAvatar.UI
 
         public bool isMeasureButtonEnabled => _playerInput.TryGetUncalibratedPose(DeviceUse.LeftHand, out Pose _) && _playerInput.TryGetUncalibratedPose(DeviceUse.RightHand, out Pose _);
 
+        public string measureButtonText => _armSpanMeasurer.isMeasuring ? "Cancel" : "Measure";
+
         public string measureButtonHoverHintText => isMeasureButtonEnabled
             ? "For optimal results, hold your arms out to either side of your body and point the ends of the controllers outwards as far as possible (turn your hands if necessary)."
             : "Both controllers must be turned on to measure arm span.";
 
+        public bool isHeightAdjustInteractable => !_armSpanMeasurer.isMeasuring;
+
         public bool showHeightAdjustWarning => _settings.resizeMode != AvatarResizeMode.None && _playerDataModel.playerData.playerSpecificSettings.automaticPlayerHeight;
 
-        public string armSpanLabelText
+        public float armSpan
         {
-            get => _armSpanLabelText;
+            get => _armSpan;
             set
             {
-                _armSpanLabelText = value;
+                _armSpan = value;
+                _settings.playerArmSpan.value = value;
                 NotifyPropertyChanged();
+
+                resizeMode = AvatarResizeMode.ArmSpan;
             }
         }
 
@@ -132,7 +139,8 @@ namespace CustomAvatar.UI
             _armSpanMeasurer.completed += OnArmSpanMeasurementCompleted;
             _playerInput.inputChanged += OnPlayerInputChanged;
 
-            armSpanLabelText = $"{_settings.playerArmSpan:0.00} m";
+            _armSpan = _settings.playerArmSpan;
+            NotifyPropertyChanged(nameof(armSpan));
 
             NotifyPropertyChanged(nameof(showHeightAdjustWarning));
             OnPlayerInputChanged();
@@ -153,13 +161,16 @@ namespace CustomAvatar.UI
 
         private void OnArmSpanMeasurementChanged(float armSpan)
         {
-            armSpanLabelText = $"Measuring... {armSpan:0.00} m";
+            // update UI but not config
+            _armSpan = armSpan;
+            NotifyPropertyChanged(nameof(armSpan));
         }
 
         private void OnArmSpanMeasurementCompleted(float armSpan)
         {
-            _settings.playerArmSpan.value = armSpan;
-            armSpanLabelText = $"{armSpan:0.00} m";
+            this.armSpan = armSpan;
+            NotifyPropertyChanged(nameof(isHeightAdjustInteractable));
+            NotifyPropertyChanged(nameof(measureButtonText));
         }
 
         #region Actions
@@ -199,9 +210,32 @@ namespace CustomAvatar.UI
             }
         }
 
+        private string ArmSpanFormatter(float value)
+        {
+            if (_armSpanMeasurer.isMeasuring)
+            {
+                return $"Measuring... {value:0.00} m";
+            }
+            else
+            {
+                return $"{value:0.00} m";
+            }
+        }
+
         private void OnMeasureArmSpanButtonClicked()
         {
-            _armSpanMeasurer.MeasureArmSpan();
+            if (_armSpanMeasurer.isMeasuring)
+            {
+                _armSpanMeasurer.Cancel();
+                this.armSpan = _settings.playerArmSpan;
+            }
+            else
+            {
+                _armSpanMeasurer.MeasureArmSpan();
+            }
+
+            NotifyPropertyChanged(nameof(isHeightAdjustInteractable));
+            NotifyPropertyChanged(nameof(measureButtonText));
         }
 
 #pragma warning restore IDE0051

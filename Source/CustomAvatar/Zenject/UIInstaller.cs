@@ -17,6 +17,7 @@
 using CustomAvatar.Lighting;
 using CustomAvatar.Player;
 using CustomAvatar.UI;
+using CustomAvatar.UI.Slider;
 using HMUI;
 using UnityEngine;
 using VRUIControls;
@@ -28,6 +29,13 @@ namespace CustomAvatar.Zenject
     {
         private const float kCenterViewControllerWidth = 160;
         private const float kSideViewControllerWidth = 120;
+
+        private readonly ArmSpanSliderTag _armSpanSliderTag;
+
+        public UIInstaller(ArmSpanSliderTag armSpanSliderTag)
+        {
+            _armSpanSliderTag = armSpanSliderTag;
+        }
 
         public override void InstallBindings()
         {
@@ -48,6 +56,8 @@ namespace CustomAvatar.Zenject
             Container.BindInterfacesAndSelfTo<AvatarMenuFlowCoordinator>().FromNewComponentOnNewGameObject();
 
             Container.BindInterfacesAndSelfTo<MenuLightingCreator>().AsSingle().NonLazy();
+
+            _armSpanSliderTag.Init(Container);
         }
 
         private T CreateAndBindViewController<T>(float width) where T : ViewController

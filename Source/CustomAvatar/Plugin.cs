@@ -14,10 +14,12 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using BeatSaberMarkupLanguage;
 using CustomAvatar.Avatar;
 using CustomAvatar.Logging;
 using CustomAvatar.Player;
 using CustomAvatar.Rendering;
+using CustomAvatar.UI.Slider;
 using CustomAvatar.Zenject;
 using CustomAvatar.Zenject.Internal;
 using HarmonyLib;
@@ -34,6 +36,11 @@ namespace CustomAvatar
         [Init]
         public Plugin(Logger ipaLogger)
         {
+            var armSpanSliderTag = new ArmSpanSliderTag();
+
+            BSMLParser.instance.RegisterTag(armSpanSliderTag);
+            BSMLParser.instance.RegisterTypeHandler(new ArmSpanSliderHandler());
+
             // can't inject at this point so just create it
             ILogger<Plugin> logger = new IPALogger<Plugin>(ipaLogger);
 
@@ -57,7 +64,7 @@ namespace CustomAvatar
             ZenjectHelper.AddComponentAlongsideExisting<MultiplayerConnectedPlayerFacade, EnvironmentObject>();
 
             ZenjectHelper.Register<CustomAvatarsInstaller>().WithArguments(ipaLogger).OnMonoInstaller<PCAppInit>();
-            ZenjectHelper.Register<UIInstaller>().OnContext("MainMenu", "MenuCore");
+            ZenjectHelper.Register<UIInstaller>().WithArguments(armSpanSliderTag).OnContext("MainMenu", "MenuCore");
 
             ZenjectHelper.Register<HealthWarningInstaller>().OnContext("HealthWarning", "SceneContext");
             ZenjectHelper.Register<LightingInstaller>().OnContext("HealthWarning", "SceneContext");

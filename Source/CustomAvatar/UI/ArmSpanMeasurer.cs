@@ -32,9 +32,10 @@ namespace CustomAvatar.UI
 
         private IAvatarInput _playerInput;
 
-        private bool _isMeasuring;
         private float _lastUpdateTime;
         private float _lastMeasuredArmSpan;
+
+        public bool isMeasuring { get; private set; }
 
         [Inject]
         internal void Construct(VRPlayerInput playerInput)
@@ -44,14 +45,23 @@ namespace CustomAvatar.UI
 
         public void MeasureArmSpan()
         {
-            if (_isMeasuring) return;
+            if (isMeasuring) return;
             if (!_playerInput.TryGetPose(DeviceUse.LeftHand, out Pose _) || !_playerInput.TryGetPose(DeviceUse.RightHand, out Pose _)) return;
 
-            _isMeasuring = true;
+            isMeasuring = true;
             _lastMeasuredArmSpan = 0;
             _lastUpdateTime = Time.timeSinceLevelLoad;
 
             InvokeRepeating(nameof(ScanArmSpan), 0.0f, 0.1f);
+        }
+
+        public void Cancel()
+        {
+            if (!isMeasuring) return;
+
+            CancelInvoke(nameof(ScanArmSpan));
+
+            isMeasuring = false;
         }
 
         private void ScanArmSpan()
@@ -73,8 +83,8 @@ namespace CustomAvatar.UI
             {
                 CancelInvoke(nameof(ScanArmSpan));
 
+                isMeasuring = false;
                 completed?.Invoke(_lastMeasuredArmSpan);
-                _isMeasuring = false;
             }
         }
     }
