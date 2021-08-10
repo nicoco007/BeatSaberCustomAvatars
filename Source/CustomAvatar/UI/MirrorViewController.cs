@@ -21,13 +21,16 @@ using CustomAvatar.Configuration;
 using CustomAvatar.Player;
 using CustomAvatar.Rendering;
 using HMUI;
+using Polyglot;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.XR;
 using Zenject;
 
 namespace CustomAvatar.UI
 {
-    internal class MirrorViewController : BSMLResourceViewController
+    internal class MirrorViewController : BSMLResourceViewController, IProgress<float>
     {
         public override string ResourceName => "CustomAvatar.UI.Views.Mirror.bsml";
 
@@ -39,9 +42,15 @@ namespace CustomAvatar.UI
         private MainSettingsModelSO _mainSettingsModel;
         private PlayerAvatarManager _avatarManager;
         private HierarchyManager _hierarchyManager;
+        private PlatformLeaderboardViewController _platformLeaderboardViewController;
 
         private bool _isLoaderActive;
         private string _errorMessage;
+
+        private GameObject _progressObject;
+        private Image _progressBar;
+        private TextMeshProUGUI _progressTitle;
+        private TextMeshProUGUI _progressText;
 
         protected bool isLoaderActive
         {
@@ -69,7 +78,7 @@ namespace CustomAvatar.UI
         #region Behaviour Lifecycle
 
         [Inject]
-        internal void Construct(DiContainer container, MirrorHelper mirrorHelper, Settings settings, MainSettingsModelSO mainSettingsModel, PlayerAvatarManager avatarManager, HierarchyManager hierarchyManager)
+        internal void Construct(DiContainer container, MirrorHelper mirrorHelper, Settings settings, MainSettingsModelSO mainSettingsModel, PlayerAvatarManager avatarManager, HierarchyManager hierarchyManager, PlatformLeaderboardViewController platformLeaderboardViewController)
         {
             _container = container;
             _mirrorHelper = mirrorHelper;
@@ -77,20 +86,19 @@ namespace CustomAvatar.UI
             _mainSettingsModel = mainSettingsModel;
             _avatarManager = avatarManager;
             _hierarchyManager = hierarchyManager;
+            _platformLeaderboardViewController = platformLeaderboardViewController;
         }
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
 
-            _avatarManager.avatarStartedLoading += OnAvatarStartedLoading;
+            _avatarManager.avatarLoading += OnAvatarLoading;
             _avatarManager.avatarChanged += OnAvatarChanged;
             _avatarManager.avatarLoadFailed += OnAvatarLoadFailed;
 
             _settings.mirror.renderScale.changed += OnMirrorRenderScaleChanged;
             _settings.mirror.antiAliasingLevel.changed += OnMirrorAntiAliasingLevelChanged;
-
-            SetLoading(false);
 
             if (addedToHierarchy)
             {
@@ -102,7 +110,57 @@ namespace CustomAvatar.UI
                 _container.InstantiateComponent<AutoResizeMirror>(_mirror.gameObject);
             }
 
+            if (firstActivation)
+            {
+                var containerTransform = (RectTransform)Instantiate(_platformLeaderboardViewController.transform.Find("Container/LeaderboardTableView/LoadingControl/DownloadingContainer"));
+                containerTransform.SetParent(gameObject.transform, false);
+                containerTransform.name = "ProgressContainer";
+                containerTransform.anchorMin = new Vector2(0.3f, 0.5f);
+                containerTransform.anchorMax = new Vector2(0.7f, 0.5f);
+
+                GameObject containerGameObject = containerTransform.gameObject;
+                _progressObject = containerGameObject;
+
+                var progressBarTransform = (RectTransform)containerTransform.Find("DownloadingProgress");
+                progressBarTransform.name = "ProgressBar";
+                _progressBar = progressBarTransform.GetComponent<Image>();
+
+                var progressBackgroundTransform = (RectTransform)containerTransform.Find("DownloadingBG");
+                progressBackgroundTransform.name = "ProgressBG";
+                Image progressBackgroundImage = progressBackgroundTransform.GetComponent<Image>();
+                progressBackgroundImage.color = new Color(1, 1, 1, 0.2f);
+
+                var progressTitleTransform = (RectTransform)containerTransform.Find("DownloadingText");
+                progressTitleTransform.name = "ProgressTitle";
+                Destroy(progressTitleTransform.GetComponent<LocalizedTextMeshProUGUI>());
+                _progressTitle = progressTitleTransform.GetComponent<TextMeshProUGUI>();
+
+                // CurvedTextMeshPro doesn't save fontSize properly when inactive
+                containerGameObject.SetActive(true);
+
+                var progressTextObject = new GameObject("ProgressText", typeof(RectTransform));
+                var progressTextTransform = (RectTransform)progressTextObject.transform;
+                progressTextTransform.SetParent(containerTransform, false);
+                progressTextTransform.anchorMin = new Vector2(1, 0.5f);
+                progressTextTransform.anchorMax = new Vector2(0, 0.5f);
+                progressTextTransform.anchoredPosition = new Vector2(0, -4);
+                _progressText = progressTextObject.AddComponent<CurvedTextMeshPro>();
+                _progressText.fontMaterial = _progressTitle.fontMaterial;
+                _progressText.fontSize = 3;
+                _progressText.alignment = TextAlignmentOptions.Center;
+                _progressText.enableWordWrapping = false;
+
+                containerGameObject.SetActive(false);
+            }
+
+            SetLoading(false);
             OnMirrorRenderScaleChanged(_settings.mirror.renderScale);
+        }
+
+        public void Report(float progress)
+        {
+            _progressBar.fillAmount = progress;
+            _progressText.text = $"{progress * 100:0}%";
         }
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
@@ -114,7 +172,7 @@ namespace CustomAvatar.UI
                 Destroy(_mirror.gameObject);
             }
 
-            _avatarManager.avatarStartedLoading -= OnAvatarStartedLoading;
+            _avatarManager.avatarLoading -= OnAvatarLoading;
             _avatarManager.avatarChanged -= OnAvatarChanged;
             _avatarManager.avatarLoadFailed -= OnAvatarLoadFailed;
 
@@ -124,8 +182,9 @@ namespace CustomAvatar.UI
 
         #endregion
 
-        private void OnAvatarStartedLoading(string fileName)
+        private void OnAvatarLoading(string filePath, string name)
         {
+            _progressTitle.text = $"Loading {name}";
             SetLoading(true);
         }
 
@@ -176,7 +235,7 @@ namespace CustomAvatar.UI
 
         private void SetLoading(bool loading)
         {
-            isLoaderActive = loading;
+            _progressObject.SetActive(loading);
             errorMessage = null;
         }
 

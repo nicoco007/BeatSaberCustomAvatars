@@ -39,6 +39,7 @@ namespace CustomAvatar.UI
 
         private PlayerAvatarManager _avatarManager;
         private DiContainer _container;
+        private MirrorViewController _mirrorViewController;
         private PlayerOptionsViewController _playerOptionsViewController;
         private LevelCollectionViewController _levelCollectionViewController;
         private PlatformLeaderboardViewController _leaderboardViewController;
@@ -61,10 +62,11 @@ namespace CustomAvatar.UI
         }
 
         [Inject]
-        internal void Construct(PlayerAvatarManager avatarManager, DiContainer container, PlayerOptionsViewController playerOptionsViewController, LevelCollectionViewController levelCollectionViewController, PlatformLeaderboardViewController leaderboardViewController)
+        internal void Construct(PlayerAvatarManager avatarManager, DiContainer container, MirrorViewController mirrorViewController, PlayerOptionsViewController playerOptionsViewController, LevelCollectionViewController levelCollectionViewController, PlatformLeaderboardViewController leaderboardViewController)
         {
             _avatarManager = avatarManager;
             _container = container;
+            _mirrorViewController = mirrorViewController;
             _playerOptionsViewController = playerOptionsViewController;
             _levelCollectionViewController = levelCollectionViewController;
             _leaderboardViewController = leaderboardViewController;
@@ -241,7 +243,7 @@ namespace CustomAvatar.UI
 
         private async void OnAvatarClicked(TableView table, int row)
         {
-            await _avatarManager.SwitchToAvatarAsync(_avatars[row].fileName);
+            await _avatarManager.SwitchToAvatarAsync(_avatars[row].fileName, _mirrorViewController);
         }
 
         private void OnAvatarChanged(SpawnedAvatar avatar)

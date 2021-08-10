@@ -43,6 +43,13 @@ namespace CustomAvatar.Player
         public static readonly byte[] kCacheFileSignature = { 0x43, 0x41, 0x64, 0x62 }; // Custom Avatars Database (CAdb)
         public static readonly byte kCacheFileVersion = 2;
 
+        /// <summary>
+        /// Delegate for <see cref="avatarLoading"/>.
+        /// </summary>
+        /// <param name="fullPath">Full path of the avatar file.</param>
+        /// <param name="name">If the avatar was previously loaded successfully and cached, the name of the avatar. If not, the avatar file's name without extension.</param>
+        public delegate void AvatarLoadingDelegate(string fullPath, string name);
+
         private const int kMaxNumberOfConcurrentLoadingTasks = 4;
 
         /// <summary>
@@ -54,6 +61,11 @@ namespace CustomAvatar.Player
         /// Event triggered when the current avatar is deleted an a new one starts loading. Note that the argument may be null if no avatar was selected to replace the previous one.
         /// </summary>
         public event Action<string> avatarStartedLoading;
+
+        /// <summary>
+        /// Event triggered when the current avatar is deleted an a new one starts loading. Note that both arguments may be null if no avatar was selected to replace the previous one.
+        /// </summary>
+        public event AvatarLoadingDelegate avatarLoading;
 
         /// <summary>
         /// Event triggered when a new avatar has finished loading and is spawned. Note that the argument may be null if no avatar was selected to replace the previous one.
@@ -87,6 +99,7 @@ namespace CustomAvatar.Player
         private string _switchingToPath;
         private Settings.AvatarSpecificSettings _currentAvatarSettings;
         private GameObject _avatarContainer;
+        private CancellationTokenSource _avatarLoadCancellationTokenSource;
 
         internal PlayerAvatarManager(DiContainer container, ILogger<PlayerAvatarManager> logger, AvatarLoader avatarLoader, Settings settings, AvatarSpawner spawner, BeatSaberUtilities beatSaberUtilities)
         {
@@ -195,7 +208,7 @@ namespace CustomAvatar.Player
             if (forceReload)
             {
                 string fullPath = currentlySpawnedAvatar ? currentlySpawnedAvatar.prefab.fullPath : null;
-                _ = SwitchToAvatarAsync(null);
+                _ = SwitchToAvatarAsync(null, null);
                 _switchingToPath = fullPath;
             }
 
@@ -256,12 +269,12 @@ namespace CustomAvatar.Player
                 return Task.CompletedTask;
             }
 
-            return SwitchToAvatarAsync(previousAvatarFileName);
+            return SwitchToAvatarAsync(previousAvatarFileName, null);
         }
 
-        public async Task SwitchToAvatarAsync(string fileName)
+        public async Task SwitchToAvatarAsync(string fileName, IProgress<float> progress)
         {
-            if (currentlySpawnedAvatar) Object.Destroy(currentlySpawnedAvatar.prefab.gameObject);
+            if (currentlySpawnedAvatar && currentlySpawnedAvatar.prefab) Object.Destroy(currentlySpawnedAvatar.prefab.gameObject);
             Object.Destroy(currentlySpawnedAvatar);
             currentlySpawnedAvatar = null;
             _currentAvatarSettings = null;
@@ -278,16 +291,29 @@ namespace CustomAvatar.Player
 
             _switchingToPath = fullPath;
 
+            _avatarInfos.TryGetValue(fileName, out AvatarInfo cachedInfo);
+
             avatarStartedLoading?.Invoke(fullPath);
+            avatarLoading?.Invoke(fullPath, !string.IsNullOrWhiteSpace(cachedInfo.name) ? cachedInfo.name : fileName);
 
             try
             {
-                AvatarPrefab avatarPrefab = await _avatarLoader.LoadFromFileAsync(fullPath);
+                if (_avatarLoadCancellationTokenSource != null)
+                {
+                    _avatarLoadCancellationTokenSource.Cancel();
+                }
+
+                _avatarLoadCancellationTokenSource = new CancellationTokenSource();
+                AvatarPrefab avatarPrefab = await _avatarLoader.LoadFromFileAsync(fullPath, progress, _avatarLoadCancellationTokenSource.Token);
                 SwitchToAvatar(avatarPrefab);
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.Trace($"Canceled loading of '{fullPath}'");
             }
             catch (Exception ex)
             {
-                _logger.Error("Failed to load selected avatar");
+                _logger.Error($"Failed to load '{fullPath}'");
                 _logger.Error(ex);
 
                 avatarLoadFailed?.Invoke(ex);
@@ -331,7 +357,7 @@ namespace CustomAvatar.Player
             if (currentlySpawnedAvatar && e.FullPath == currentlySpawnedAvatar.prefab.fullPath)
             {
                 _logger.Info("Reloading spawned avatar");
-                await SwitchToAvatarAsync(e.Name);
+                await SwitchToAvatarAsync(e.Name, null);
             }
             else
             {
@@ -415,7 +441,7 @@ namespace CustomAvatar.Player
 
             index = (index + 1) % files.Count;
 
-            await SwitchToAvatarAsync(files[index]);
+            await SwitchToAvatarAsync(files[index], null);
         }
 
         public async Task SwitchToPreviousAvatarAsync()
@@ -427,7 +453,7 @@ namespace CustomAvatar.Player
 
             index = (index + files.Count - 1) % files.Count;
 
-            await SwitchToAvatarAsync(files[index]);
+            await SwitchToAvatarAsync(files[index], null);
         }
 
         internal void ParentTo(Transform parent)
