@@ -3,10 +3,11 @@
   <PropertyGroup>
     <RootNamespace>CustomAvatar</RootNamespace>
     <AssemblyName>CustomAvatar</AssemblyName>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <DefineConstants>UNITY_EDITOR</DefineConstants>
     <UnityProjectDir>$(ProjectDir)..\..\Unity\BeatSaberCustomAvatars</UnityProjectDir>
     <PathMap>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)=$(MSBuildProjectName)</PathMap>
+	<Platforms>x64</Platforms>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration) == 'Release'">
     <DebugType>none</DebugType>
