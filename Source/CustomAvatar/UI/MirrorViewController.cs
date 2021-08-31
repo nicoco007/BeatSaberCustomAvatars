@@ -103,7 +103,7 @@ namespace CustomAvatar.UI
             if (addedToHierarchy)
             {
                 var mirrorSize = new Vector2(4, 2);
-                _mirror = _mirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, _hierarchyManager.transform.Find("ScreenContainer").position.z), Quaternion.Euler(-90f, 0, 0), mirrorSize, null);
+                _mirror = _mirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, _hierarchyManager.transform.Find("TopScreen").position.z), Quaternion.Euler(-90f, 0, 0), mirrorSize, null);
 
                 if (!_mirror) return;
 
