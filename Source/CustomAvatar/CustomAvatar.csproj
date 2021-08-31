@@ -152,6 +152,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="$(ProjectName).csproj.user" />
+  </ItemGroup>
+  <ItemGroup>
     <EmbeddedResource Include="manifest.json" />
     <EmbeddedResource Include="UI\Views\**\*.*" />
     <EmbeddedResource Include="Resources\**\*.*" />

@@ -58,6 +58,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="$(ProjectName).csproj.user" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="..\CustomAvatar\AvatarDescriptor.cs" Link="AvatarDescriptor.cs" />
     <Compile Include="..\CustomAvatar\ComboReachedEvent.cs" Link="ComboReachedEvent.cs" />
     <Compile Include="..\CustomAvatar\EventFilterBehaviour.cs" Link="EventFilterBehaviour.cs" />
