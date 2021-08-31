@@ -15,6 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using CustomAvatar.Avatar;
+using CustomAvatar.Configuration;
 using HarmonyLib;
 using UnityEngine;
 
@@ -23,9 +24,18 @@ namespace CustomAvatar.HarmonyPatches
     [HarmonyPatch(typeof(MirrorRendererSO), "CreateOrUpdateMirrorCamera")]
     internal static class MirrorRendererSO_CreateOrUpdateMirrorCamera
     {
+        internal static Settings settings { get; set; }
+
         public static void Postfix(Camera ____mirrorCamera)
         {
-            ____mirrorCamera.cullingMask |= AvatarLayers.kAllLayersMask;
+            if (settings.showAvatarInMirrors)
+            {
+                ____mirrorCamera.cullingMask |= AvatarLayers.kAllLayersMask;
+            }
+            else
+            {
+                ____mirrorCamera.cullingMask &= ~AvatarLayers.kAllLayersMask;
+            }
         }
     }
 }

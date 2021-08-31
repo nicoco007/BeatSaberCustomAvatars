@@ -57,6 +57,26 @@ namespace CustomAvatar.UI
             }
         }
 
+        public bool showAvatarInSmoothCamera
+        {
+            get => _settings.showAvatarInSmoothCamera;
+            set
+            {
+                _settings.showAvatarInSmoothCamera.value = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        public bool showAvatarInMirrors
+        {
+            get => _settings.showAvatarInMirrors;
+            set
+            {
+                _settings.showAvatarInMirrors = value;
+                NotifyPropertyChanged();
+            }
+        }
+
         public AvatarResizeMode resizeMode
         {
             get => _settings.resizeMode;
