@@ -14,6 +14,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Linq;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
@@ -69,7 +71,19 @@ namespace CustomAvatar.Rendering
         {
             _logger.Info($"Setting avatar culling mask and near clip plane on '{_camera.name}'");
 
-            _camera.cullingMask = (_camera.cullingMask & ~AvatarLayers.kOnlyInThirdPersonMask) | AvatarLayers.kAlwaysVisibleMask;
+            int mask = _camera.cullingMask | AvatarLayers.kAlwaysVisibleMask;
+
+            // FPFC basically ends up being a 3rd person camera
+            if (Environment.GetCommandLineArgs().Contains("fpfc"))
+            {
+                mask |= AvatarLayers.kOnlyInThirdPersonMask;
+            }
+            else
+            {
+                mask &= ~AvatarLayers.kOnlyInThirdPersonMask;
+            }
+
+            _camera.cullingMask = mask;
             _camera.nearClipPlane = _settings.cameraNearClipPlane;
         }
     }
