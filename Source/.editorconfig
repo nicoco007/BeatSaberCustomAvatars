@@ -1,5 +1,11 @@
 root = true
 
+[*.bsml]
+indent_size = 2
+indent_style = space
+trim_trailing_whitespace = true
+tab_width = 2
+
 [*.cs]
 
 # In general, the format for this file has the dotnet_diagnostic directive immediately preceding what it affects

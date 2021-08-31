@@ -43,7 +43,8 @@ namespace CustomAvatar.Configuration
         public bool calibrateFullBodyTrackingOnStart { get; set; }
         public ObservableValue<bool> enableLocomotion { get; } = new ObservableValue<bool>(true);
         public ObservableValue<float> cameraNearClipPlane { get; } = new ObservableValue<float>(0.1f);
-        public bool showAvatarInSmoothCamera { get; set; } = true;
+        public ObservableValue<bool> showAvatarInSmoothCamera { get; } = new ObservableValue<bool>(true);
+        public bool showAvatarInMirrors { get; set; } = true;
         public Lighting lighting { get; } = new Lighting();
         public Mirror mirror { get; } = new Mirror();
         public AutomaticFullBodyCalibration automaticCalibration { get; } = new AutomaticFullBodyCalibration();

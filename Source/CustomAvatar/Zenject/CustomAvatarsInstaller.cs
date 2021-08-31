@@ -18,6 +18,7 @@ using System;
 using System.Linq;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
+using CustomAvatar.HarmonyPatches;
 using CustomAvatar.Lighting;
 using CustomAvatar.Logging;
 using CustomAvatar.Player;
@@ -55,7 +56,9 @@ namespace CustomAvatar.Zenject
             Container.Bind(typeof(ILogger<>)).FromMethodUntyped(CreateLogger).AsTransient().When(ShouldCreateLogger);
 
             // settings
-            Container.Bind<Settings>().FromInstance(LoadSettings());
+            Settings settings = LoadSettings();
+            MirrorRendererSO_CreateOrUpdateMirrorCamera.settings = settings;
+            Container.Bind<Settings>().FromInstance(settings);
             Container.BindInterfacesAndSelfTo<CalibrationData>().AsSingle();
 
             if (XRSettings.loadedDeviceName.Equals("openvr", StringComparison.InvariantCultureIgnoreCase) &&

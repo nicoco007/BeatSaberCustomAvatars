@@ -5,6 +5,8 @@
     <settings-container anchor-pos-y="0" size-delta-y="0">
       <macro.as-host host="generalSettingsHost">
         <toggle-setting text="Visible in First Person" value="visibleInFirstPerson" bind-value="true" apply-on-change="true"/>
+        <toggle-setting text="Show in Smooth Camera" value="showAvatarInSmoothCamera" bind-value="true" apply-on-change="true"/>
+        <toggle-setting text="Show in Mirrors" value="showAvatarInMirrors" bind-value="true" apply-on-change="true"/>
         <dropdown-list-setting text="Resize Mode" value="resizeMode" bind-value="true" apply-on-change="true" options="resizeModeOptions" formatter="ResizeModeFormatter"></dropdown-list-setting>
         <horizontal pref-width="90" active="~showHeightAdjustWarning">
           <text color="#FFFF88FF" text="You are using Automatic Player Height; please disable it in Player Settings and set your height manually." font-size="2.5" italics="true" />
@@ -12,16 +14,16 @@
         <dropdown-list-setting text="Floor Height Adjust" hover-hint="Move the floor/environment so the avatar is standing at full height even if it is taller or shorter than the player." value="floorHeightAdjustMode" bind-value="true" apply-on-change="true" options="floorHeightAdjustOptions" formatter="FloorHeightAdjustFormatter"/>
         
         <horizontal pref-height="7">
-		  <text text="Arm Span" font-size="4" align="Left" italics="true"></text>
-		  <slider value="armSpan" step="0.01" minimum="0" formatter="ArmSpanFormatter" interactable="~isHeightAdjustInteractable"/>
-		  <button text="~measureButtonText" interactable="~isMeasureButtonEnabled" hover-hint="~measureButtonHoverHintText" on-click="OnMeasureArmSpanButtonClicked"></button>
+          <text text="Arm Span" font-size="4" align="Left" italics="true"></text>
+          <slider value="armSpan" step="0.01" minimum="0" formatter="ArmSpanFormatter" interactable="~isHeightAdjustInteractable"/>
+          <button text="~measureButtonText" interactable="~isMeasureButtonEnabled" hover-hint="~measureButtonHoverHintText" on-click="OnMeasureArmSpanButtonClicked"></button>
         </horizontal>
 
         <horizontal pref-width="90" pad-top="2">
           <text color="#808080" text="Advanced" font-size="4" italics="true" align="Baseline" />
         </horizontal>
 
-		<toggle-setting value="moveFloorWithRoomAdjust" bind-value="true" apply-on-change="true" text="Move Floor with Room Adjust" hover-hint="Move the floor/environment along with the game's built-in vertical room adjust."/>
+      <toggle-setting value="moveFloorWithRoomAdjust" bind-value="true" apply-on-change="true" text="Move Floor with Room Adjust" hover-hint="Move the floor/environment along with the game's built-in vertical room adjust."/>
         <toggle-setting value="enableLocomotion" bind-value="true" apply-on-change="true" text="Enable locomotion" hover-hint="Allow feet and waist to be moved automatically to follow your head/body when not using dedicated trackers. Only affects full body avatars."/>
         <increment-setting value="cameraNearClipPlane" bind-value="true" apply-on-change="true" text="Camera Near Clip Plane" hover-hint="Distance from the eyes at which objets start being visible." min="0.01" max="0.3" increment="0.01"/>
       </macro.as-host>
@@ -48,8 +50,8 @@
 
   <tab tags="avatar-tabs" tab-name="Current Avatar" anchor-max-y="0.8">
     <macro.as-host host="avatarSpecificSettingsHost">
-	  <loading-indicator active="~isLoaderActive" />
-		
+    <loading-indicator active="~isLoaderActive" />
+    
       <settings-container anchor-pos-y="0" size-delta-y="0">
         <toggle-setting text="Ignore first person exclusions" value="ignoreExclusions" bind-value="true" apply-on-change="true" interactable="~isAvatarSpecificSettingsAvailable" hover-hint="Show the entire model in first person, even if some parts were configured to be hidden in first person. This may cause issues on certain avatars."/>
         <toggle-setting text="Bypass calibration" value="bypassCalibration" bind-value="true" apply-on-change="true" interactable="~isAvatarSpecificSettingsAvailable" hover-hint="Disable the need for calibration before full body tracking is applied."/>
@@ -67,7 +69,7 @@
     <macro.as-host host="interfaceSettingsHost">
       <settings-container anchor-pos-y="0" size-delta-y="0">
         <increment-setting text="Mirror Render Scale" value="renderScale" bind-value="true" apply-on-change="true" min="0.5" max="2" increment="0.1" />
-		<list-setting text="Mirror Anti Aliasing" value="antiAliasingLevel" bind-value="true" apply-on-change="true" options="antiAliasingLevelOptions" formatter="AntiAliasingLevelFormatter" />
+        <list-setting text="Mirror Anti Aliasing" value="antiAliasingLevel" bind-value="true" apply-on-change="true" options="antiAliasingLevelOptions" formatter="AntiAliasingLevelFormatter" />
       </settings-container>
     </macro.as-host>
   </tab>
