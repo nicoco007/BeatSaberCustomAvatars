@@ -30,7 +30,7 @@ using Zenject;
 
 namespace CustomAvatar.UI
 {
-    internal class MirrorViewController : BSMLResourceViewController, IProgress<float>
+    internal class MirrorViewController : BSMLResourceViewController
     {
         public override string ResourceName => "CustomAvatar.UI.Views.Mirror.bsml";
 
@@ -87,6 +87,12 @@ namespace CustomAvatar.UI
             _avatarManager = avatarManager;
             _hierarchyManager = hierarchyManager;
             _platformLeaderboardViewController = platformLeaderboardViewController;
+        }
+
+        internal void UpdateProgress(float progress)
+        {
+            _progressBar.fillAmount = progress;
+            _progressText.text = $"{progress * 100:0}%";
         }
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
@@ -155,12 +161,6 @@ namespace CustomAvatar.UI
 
             SetLoading(false);
             OnMirrorRenderScaleChanged(_settings.mirror.renderScale);
-        }
-
-        public void Report(float progress)
-        {
-            _progressBar.fillAmount = progress;
-            _progressText.text = $"{progress * 100:0}%";
         }
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)

@@ -243,7 +243,7 @@ namespace CustomAvatar.UI
 
         private async void OnAvatarClicked(TableView table, int row)
         {
-            await _avatarManager.SwitchToAvatarAsync(_avatars[row].fileName, _mirrorViewController);
+            await _avatarManager.SwitchToAvatarAsync(_avatars[row].fileName, new Progress<float>(_mirrorViewController.UpdateProgress));
         }
 
         private void OnAvatarChanged(SpawnedAvatar avatar)
