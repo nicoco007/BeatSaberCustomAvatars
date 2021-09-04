@@ -4,7 +4,7 @@
   <tab tags="avatar-tabs" tab-name="General" anchor-max-y="0.8">
     <settings-container anchor-pos-y="0" size-delta-y="0">
       <macro.as-host host="generalSettingsHost">
-        <toggle-setting text="Visible in First Person" value="visibleInFirstPerson" bind-value="true" apply-on-change="true"/>
+        <toggle-setting text="Show in First Person" value="visibleInFirstPerson" bind-value="true" apply-on-change="true"/>
         <toggle-setting text="Show in Smooth Camera" value="showAvatarInSmoothCamera" bind-value="true" apply-on-change="true"/>
         <toggle-setting text="Show in Mirrors" value="showAvatarInMirrors" bind-value="true" apply-on-change="true"/>
         <dropdown-list-setting text="Resize Mode" value="resizeMode" bind-value="true" apply-on-change="true" options="resizeModeOptions" formatter="ResizeModeFormatter"></dropdown-list-setting>
