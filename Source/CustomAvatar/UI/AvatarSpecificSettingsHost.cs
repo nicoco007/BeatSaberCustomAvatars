@@ -113,7 +113,7 @@ namespace CustomAvatar.UI
 
         public override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
-            _avatarManager.avatarStartedLoading += OnAvatarStartedLoading;
+            _avatarManager.avatarLoading += OnAvatarLoading;
             _avatarManager.avatarChanged += OnAvatarChanged;
             _playerInput.inputChanged += OnInputChanged;
 
@@ -125,12 +125,12 @@ namespace CustomAvatar.UI
         {
             DisableCalibrationMode(false);
 
-            _avatarManager.avatarStartedLoading -= OnAvatarStartedLoading;
+            _avatarManager.avatarLoading -= OnAvatarLoading;
             _avatarManager.avatarChanged -= OnAvatarChanged;
             _playerInput.inputChanged -= OnInputChanged;
         }
 
-        private void OnAvatarStartedLoading(string path)
+        private void OnAvatarLoading(string fullPath, string name)
         {
             DisableCalibrationMode(false);
 

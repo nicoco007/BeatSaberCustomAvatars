@@ -14,10 +14,13 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.ComponentModel;
 using HMUI;
 using IPA.Utilities;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace CustomAvatar.UI
 {
@@ -27,18 +30,37 @@ namespace CustomAvatar.UI
         private static readonly Color kHighlightedBackgroundColor = new Color(1, 1, 1, 0.2f);
         private static readonly Color kSelectedAndHighlightedBackgroundColor = new Color(0, 0.75f, 1, 0.75f);
 
-        public ImageView backgroundImage => _backgroundImage;
-        public CurvedTextMeshPro nameText => _nameText;
-        public CurvedTextMeshPro authorText => _authorText;
-        public ImageView cover => _cover;
+        private static readonly Color kRegularTextColor = Color.white;
+        private static readonly Color kErrorTextColor = new Color(0.65f, 0.11f, 0.16f);
 
         [SerializeField] private ImageView _backgroundImage;
         [SerializeField] private CurvedTextMeshPro _nameText;
         [SerializeField] private CurvedTextMeshPro _authorText;
         [SerializeField] private ImageView _cover;
         [SerializeField] private Signal _wasPressedSignal;
+        [SerializeField] private GameObject _progressObject;
+        [SerializeField] private Image _progressBar;
+        [SerializeField] private TextMeshProUGUI _progressText;
 
-        public void Init(LevelListTableCell originalTableCell)
+        private AvatarListItem _listItem;
+
+        public AvatarListItem listItem
+        {
+            get => _listItem;
+            set
+            {
+                if (_listItem != null)
+                {
+                    _listItem.PropertyChanged -= OnPropertyChanged;
+                }
+
+                _listItem = value;
+                _listItem.PropertyChanged += OnPropertyChanged;
+                UpdateData();
+            }
+        }
+
+        public void Init(LevelListTableCell originalTableCell, PlatformLeaderboardViewController platformLeaderboardViewController)
         {
             _backgroundImage = transform.Find("Background").GetComponent<ImageView>();
             _nameText = transform.Find("SongName").GetComponent<CurvedTextMeshPro>();
@@ -52,6 +74,51 @@ namespace CustomAvatar.UI
             _authorText.name = "AvatarAuthor";
 
             _wasPressedSignal = originalTableCell.GetField<Signal, SelectableCell>("_wasPressedSignal");
+
+            var containerTransform = (RectTransform)Instantiate(platformLeaderboardViewController.transform.Find("Container/LeaderboardTableView/LoadingControl/DownloadingContainer"));
+            containerTransform.SetParent(gameObject.transform, false);
+            containerTransform.name = "ProgressContainer";
+            containerTransform.anchorMin = new Vector2(0, 0.5f);
+            containerTransform.anchorMax = new Vector2(1, 0.5f);
+            containerTransform.offsetMin = new Vector2(6, -0.3f);
+            containerTransform.offsetMax = new Vector2(0, -3.3f);
+
+            _progressObject = containerTransform.gameObject;
+            _progressObject.SetActive(true);
+
+            var progressBarTransform = (RectTransform)containerTransform.Find("DownloadingProgress");
+            progressBarTransform.name = "ProgressBar";
+            progressBarTransform.offsetMin = new Vector2(4, -0.75f);
+            progressBarTransform.offsetMax = new Vector2(-10, 0.75f);
+            _progressBar = progressBarTransform.GetComponent<Image>();
+            _progressBar.fillAmount = 0;
+
+            var progressBackgroundTransform = (RectTransform)containerTransform.Find("DownloadingBG");
+            progressBackgroundTransform.name = "ProgressBG";
+            progressBackgroundTransform.offsetMin = new Vector2(4, -0.75f);
+            progressBackgroundTransform.offsetMax = new Vector2(-10, 0.75f);
+
+            var progressTitleTransform = (RectTransform)containerTransform.Find("DownloadingText");
+            DestroyImmediate(progressTitleTransform.gameObject);
+
+            var progressTextObject = new GameObject("ProgressText", typeof(RectTransform));
+            var progressTextTransform = (RectTransform)progressTextObject.transform;
+            progressTextTransform.SetParent(containerTransform, false);
+            _progressText = progressTextObject.AddComponent<CurvedTextMeshPro>();
+            _progressText.font = _nameText.font;
+            _progressText.fontMaterial = _nameText.fontMaterial;
+            _progressText.fontSize = 3;
+            _progressText.alignment = TextAlignmentOptions.BaselineRight;
+            _progressText.enableWordWrapping = false;
+            _progressText.text = "0%";
+            _progressText.fontStyle = FontStyles.Italic;
+            _progressText.autoSizeTextContainer = false;
+            progressTextTransform.anchorMin = new Vector2(1, 0.5f);
+            progressTextTransform.anchorMax = new Vector2(1, 0.5f);
+            progressTextTransform.sizeDelta = new Vector2(6, 5);
+            progressTextTransform.anchoredPosition = new Vector2(-6, -0.9f);
+
+            _progressObject.SetActive(false);
         }
 
         protected override void Start()
@@ -65,8 +132,12 @@ namespace CustomAvatar.UI
 
         public override void OnPointerClick(PointerEventData eventData)
         {
+            if (interactable)
+            {
+                _wasPressedSignal?.Raise();
+            }
+
             base.OnPointerClick(eventData);
-            _wasPressedSignal?.Raise();
         }
 
         public override void OnSubmit(BaseEventData eventData)
@@ -85,22 +156,59 @@ namespace CustomAvatar.UI
             RefreshVisuals();
         }
 
+        private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
+        {
+            UpdateData();
+        }
+
+        private void UpdateData()
+        {
+            _cover.sprite = listItem.icon;
+
+            if (listItem.loadException != null)
+            {
+                interactable = false;
+                _nameText.text = $"Failed to load {listItem.name}";
+                _nameText.color = kErrorTextColor;
+                _authorText.text = $"{listItem.loadException.GetType().Name}: {listItem.loadException.Message}";
+                _authorText.color = kErrorTextColor;
+                _authorText.gameObject.SetActive(true);
+                _progressObject.SetActive(false);
+            }
+            else
+            {
+                interactable = listItem.isLoaded;
+                _nameText.text = listItem.name;
+                _nameText.color = kRegularTextColor;
+                _authorText.text = listItem.author;
+                _authorText.color = kRegularTextColor;
+                _authorText.gameObject.SetActive(listItem.isLoaded);
+                _progressObject.SetActive(!listItem.isLoaded);
+                _progressBar.fillAmount = listItem.loadProgress;
+                _progressText.text = $"{listItem.loadProgress * 100:0}%";
+            }
+
+            _authorText.alpha = 0.75f;
+
+            RefreshVisuals();
+        }
+
         private void RefreshVisuals()
         {
             if (selected && highlighted)
             {
-                backgroundImage.color = kSelectedAndHighlightedBackgroundColor;
+                _backgroundImage.color = kSelectedAndHighlightedBackgroundColor;
             }
             else if (highlighted)
             {
-                backgroundImage.color = kHighlightedBackgroundColor;
+                _backgroundImage.color = kHighlightedBackgroundColor;
             }
             else if (selected)
             {
-                backgroundImage.color = kSelectedBackgroundColor;
+                _backgroundImage.color = kSelectedBackgroundColor;
             }
 
-            backgroundImage.enabled = selected || highlighted;
+            _backgroundImage.enabled = interactable && (selected || highlighted);
         }
     }
 }

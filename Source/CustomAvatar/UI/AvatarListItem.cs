@@ -14,32 +14,93 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using CustomAvatar.Avatar;
 using UnityEngine;
 
 namespace CustomAvatar.UI
 {
-    internal readonly struct AvatarListItem
+    internal class AvatarListItem : INotifyPropertyChanged
     {
-        public readonly string name;
-        public readonly string author;
-        public readonly Sprite icon;
-        public readonly string fileName;
+        private bool _isLoaded;
 
-        internal AvatarListItem(AvatarInfo avatar)
+        public AvatarListItem(AvatarInfo avatar, bool isLoaded, Sprite fallbackIcon)
         {
-            name = avatar.name;
-            author = avatar.author;
-            icon = avatar.icon;
-            fileName = avatar.fileName;
+            _isLoaded = isLoaded;
+            this.name = avatar.name;
+            this.author = avatar.author;
+            this.icon = avatar.icon ? avatar.icon : fallbackIcon;
+            this.fileName = avatar.fileName;
+            this.loadProgress = 0;
+            this.loadException = null;
         }
 
-        internal AvatarListItem(string name, Sprite icon)
+        public AvatarListItem(string name, Sprite icon, string fileName, bool isLoaded)
         {
+            _isLoaded = isLoaded;
             this.name = name;
             this.author = null;
             this.icon = icon;
-            this.fileName = null;
+            this.fileName = fileName;
+            this.loadProgress = 0;
+            this.loadException = null;
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public bool isLoaded
+        {
+            get => _isLoaded;
+            set
+            {
+                _isLoaded = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        public string name { get; private set; }
+
+        public string author { get; private set; }
+
+        public Sprite icon { get; private set; }
+
+        public string fileName { get; private set; }
+
+        public float loadProgress { get; private set; }
+
+        public Exception loadException { get; private set; }
+
+        public void UpdateProgress(float progress)
+        {
+            loadProgress = progress;
+
+            NotifyPropertyChanged(nameof(loadProgress));
+        }
+
+        public void SetLoadedInfo(AvatarInfo avatarInfo, Sprite fallbackIcon)
+        {
+            name = avatarInfo.name;
+            author = avatarInfo.author;
+            icon = avatarInfo.icon ? avatarInfo.icon : fallbackIcon;
+            fileName = avatarInfo.fileName;
+            isLoaded = true;
+
+            NotifyPropertyChanged(string.Empty);
+        }
+
+        public void SetException(Exception exception, Sprite icon)
+        {
+            this.loadException = exception;
+            this.icon = icon;
+
+            NotifyPropertyChanged(string.Empty);
+        }
+
+        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }
