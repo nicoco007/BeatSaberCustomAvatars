@@ -24,7 +24,7 @@ namespace CustomAvatar.Lighting
 {
     internal class DynamicTubeBloomPrePassLight : MonoBehaviour
     {
-        private const float kTubeLightIntensityMultiplier = 5f;
+        private const float kTubeLightIntensityMultiplier = 15f;
 
         private static readonly Vector3 kOrigin = new Vector3(0, 1, 0);
         private static readonly FieldAccessor<TubeBloomPrePassLight, float>.Accessor kCenterAccessor = FieldAccessor<TubeBloomPrePassLight, float>.GetAccessor("_center");
@@ -67,7 +67,6 @@ namespace CustomAvatar.Lighting
             _light.cullingMask = AvatarLayers.kAllLayersMask;
             _light.renderMode = LightRenderMode.ForceVertex;
             _light.shadows = LightShadows.None;
-            _light.shadowStrength = 1;
 
             UpdateIntensity();
         }
@@ -108,7 +107,7 @@ namespace CustomAvatar.Lighting
             if (!_light) return;
 
             _light.color = _color;
-            _light.intensity = _distanceIntensity * _reference.width * _color.a * (_reference.lightWidthMultiplier + _reference.bloomFogIntensityMultiplier * 0.1f) * kTubeLightIntensityMultiplier * _settings.lighting.environment.intensity;
+            _light.intensity = _distanceIntensity * _reference.width * _color.a * Mathf.Sqrt(_reference.bloomFogIntensityMultiplier) * kTubeLightIntensityMultiplier * _settings.lighting.environment.intensity;
 
             _light.enabled = _light.intensity > 0.001f;
         }
