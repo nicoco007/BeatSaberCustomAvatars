@@ -24,7 +24,7 @@ namespace CustomAvatar.Lighting
 {
     internal class DynamicTubeBloomPrePassLight : MonoBehaviour
     {
-        private const float kTubeLightIntensityMultiplier = 15f;
+        private const float kTubeLightIntensityMultiplier = 5f;
 
         private static readonly Vector3 kOrigin = new Vector3(0, 1, 0);
         private static readonly FieldAccessor<TubeBloomPrePassLight, float>.Accessor kCenterAccessor = FieldAccessor<TubeBloomPrePassLight, float>.GetAccessor("_center");
@@ -83,22 +83,22 @@ namespace CustomAvatar.Lighting
         {
             if (_reference.transform.position == _previousPosition) return;
 
-            Vector3 position = _reference.transform.position;
-            Vector3 up = _reference.transform.rotation * Vector3.up;
+            Vector3 lightPosition = _reference.transform.position;
+            Vector3 up = _reference.transform.up;
 
-            var projectionOfPositionOnLight = Vector3.Project(position, up);
+            var projectionOfPositionOnLight = Vector3.Project(lightPosition, up);
 
             float perpendicularPointToCenter = projectionOfPositionOnLight.magnitude;
-            float sqrMinimumDistance = (position - projectionOfPositionOnLight).sqrMagnitude;
+            float sqrMinimumDistance = (lightPosition - projectionOfPositionOnLight).sqrMagnitude;
 
-            float xA = perpendicularPointToCenter + (1.0f - _center) * _reference.length;
-            float xB = perpendicularPointToCenter - _center * _reference.length;
+            float xA = perpendicularPointToCenter + _center * _reference.length;
+            float xB = perpendicularPointToCenter - (1.0f - _center) * _reference.length;
 
             float closestPointToPlayer = Mathf.Clamp(projectionOfPositionOnLight.magnitude, Mathf.Min(xA, xB), Mathf.Max(xA, xB));
-            transform.rotation = Quaternion.LookRotation(kOrigin - (_reference.transform.position + closestPointToPlayer * up));
+            transform.rotation = Quaternion.LookRotation(kOrigin - (lightPosition + closestPointToPlayer * up));
 
             _distanceIntensity = Mathf.Abs(RelativeIntensityAlongLine(xB, sqrMinimumDistance) - RelativeIntensityAlongLine(xA, sqrMinimumDistance));
-            _previousPosition = _reference.transform.position;
+            _previousPosition = lightPosition;
 
             UpdateUnityLight();
         }
