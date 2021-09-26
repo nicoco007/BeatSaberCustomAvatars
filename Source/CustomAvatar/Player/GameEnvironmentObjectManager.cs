@@ -59,7 +59,6 @@ namespace CustomAvatar.Player
                     case FloorHeightAdjustMode.PlayersPlaceOnly:
                         Transform environmentTransform = environment.transform;
                         Transform playersPlace = environmentTransform.Find("PlayersPlace");
-                        Transform shadow = environmentTransform.Find("PlayersPlaceShadow");
 
                         if (playersPlace)
                         {
@@ -67,16 +66,7 @@ namespace CustomAvatar.Player
                         }
                         else
                         {
-                            _logger.Warning($"{playersPlace.name} not found!");
-                        }
-
-                        if (shadow)
-                        {
-                            _container.InstantiateComponent<EnvironmentObject>(shadow.gameObject);
-                        }
-                        else
-                        {
-                            _logger.Warning($"{shadow.name} not found!");
+                            _logger.Warning($"PlayersPlace not found!");
                         }
 
                         break;
