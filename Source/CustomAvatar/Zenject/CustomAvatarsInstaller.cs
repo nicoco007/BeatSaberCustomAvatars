@@ -53,7 +53,7 @@ namespace CustomAvatar.Zenject
         public override void InstallBindings()
         {
             // logging
-            Container.Bind(typeof(ILogger<>)).FromMethodUntyped(CreateLogger).AsTransient().When(ShouldCreateLogger);
+            Container.Bind(typeof(ILogger<>)).FromMethodUntyped(CreateLogger).AsTransient();
 
             // settings
             Settings settings = LoadSettings();
@@ -103,12 +103,11 @@ namespace CustomAvatar.Zenject
 
         private object CreateLogger(InjectContext context)
         {
-            return Activator.CreateInstance(typeof(IPALogger<>).MakeGenericType(context.MemberType.GenericTypeArguments[0]), _ipaLogger);
-        }
+            Type genericType = context.MemberType.GenericTypeArguments[0];
 
-        private bool ShouldCreateLogger(InjectContext context)
-        {
-            return context.MemberType.GenericTypeArguments[0].IsAssignableFrom(context.ObjectType);
+            return genericType.IsAssignableFrom(context.ObjectType)
+                ? Activator.CreateInstance(typeof(IPALogger<>).MakeGenericType(genericType), _ipaLogger)
+                : throw new InvalidOperationException($"Cannot create logger with generic type '{genericType}' for type '{context.ObjectType}'");
         }
 
         private Settings LoadSettings()
