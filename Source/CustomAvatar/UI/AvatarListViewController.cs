@@ -200,7 +200,7 @@ namespace CustomAvatar.UI
 
             tableView.GetComponent<ScrollRect>().viewport = viewport;
 
-            ScrollView scrollView = tableView.gameObject.AddComponent<ScrollView>();
+            ScrollView scrollView = _container.InstantiateComponent<ScrollView>(tableView.gameObject);
             scrollView.SetField("_contentRectTransform", content);
             scrollView.SetField("_viewport", viewport);
 
