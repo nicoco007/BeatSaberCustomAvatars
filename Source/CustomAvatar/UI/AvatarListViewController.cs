@@ -130,6 +130,7 @@ namespace CustomAvatar.UI
             }
 
             await ReloadAvatars();
+            UpdateSelectedRow();
         }
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
