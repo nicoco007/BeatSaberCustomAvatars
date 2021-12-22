@@ -90,6 +90,12 @@ namespace CustomAvatar.Utilities
             Vector3 position = _mainSettingsModel.controllerPosition;
             Vector3 rotation = _mainSettingsModel.controllerRotation;
 
+            // Z rotation isn't mirrored by the game for some reason
+            if (use == DeviceUse.LeftHand)
+            {
+                rotation.z = -rotation.z;
+            }
+
             if (_vrPlatformHelper is OculusVRHelper)
             {
                 rotation += new Vector3(-40f, 0f, 0f);
