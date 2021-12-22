@@ -83,7 +83,7 @@ namespace CustomAvatar
         [OnDisable]
         public void OnDisable()
         {
-            _harmony.UnpatchAll(_harmony.Id);
+            _harmony.UnpatchSelf();
         }
     }
 }
