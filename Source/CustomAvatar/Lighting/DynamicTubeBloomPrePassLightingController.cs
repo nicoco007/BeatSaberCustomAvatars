@@ -44,14 +44,14 @@ namespace CustomAvatar.Lighting
 
         internal void Start()
         {
-            _lightManager.didSetColorForIdEvent += OnSetColorForId;
+            _lightManager.didChangeSomeColorsThisFrameEvent += OnDidChangeSomeColorsThisFrame;
 
             CreateLights();
         }
 
         internal void OnDestroy()
         {
-            _lightManager.didSetColorForIdEvent -= OnSetColorForId;
+            _lightManager.didChangeSomeColorsThisFrameEvent -= OnDidChangeSomeColorsThisFrame;
         }
 
         #endregion
@@ -87,13 +87,15 @@ namespace CustomAvatar.Lighting
             _logger.Trace($"Created {_lights.Sum(l => l?.Count)} DynamicTubeBloomPrePassLights");
         }
 
-        private void OnSetColorForId(int id, Color color)
+        private void OnDidChangeSomeColorsThisFrame()
         {
-            if (_lights[id] != null)
+            for (int i = 0; i < _lights.Count(); i++)
             {
-                foreach (DynamicTubeBloomPrePassLight light in _lights[id])
+                if (_lights[i] == null) continue;
+
+                foreach (DynamicTubeBloomPrePassLight light in _lights[i])
                 {
-                    light.color = color;
+                    light.color = light.reference.color;
                 }
             }
         }

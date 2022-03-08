@@ -34,7 +34,7 @@ namespace CustomAvatar.Zenject
         public override void InstallBindings()
         {
             TryAddEnvironmentObject("/BasicMenuGround");
-            TryAddEnvironmentObject("/MenuFogRing");
+            TryAddEnvironmentObject("/MenuFogRing (1)");
 
             Container.BindInterfacesAndSelfTo<MenuLightingCreator>().AsSingle().NonLazy();
         }
@@ -45,7 +45,7 @@ namespace CustomAvatar.Zenject
 
             if (gameObject)
             {
-                Container.InstantiateComponent<EnvironmentObject>(gameObject);
+                Container.QueueForInject(gameObject.AddComponent<EnvironmentObject>());
             }
             else
             {

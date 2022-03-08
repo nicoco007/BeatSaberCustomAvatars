@@ -2,11 +2,11 @@
   "$schema": "https://raw.githubusercontent.com/nike4613/ModSaber-MetadataFileSchema/master/Schema.json",
   "author": "Custom Avatars Contributors",
   "description": "Allows the use of custom player models for body presence.",
-  "gameVersion": "1.19.0",
+  "gameVersion": "1.20.0",
   "id": "CustomAvatar",
   "icon": "CustomAvatar.Resources.icon.png",
   "name": "Custom Avatars",
-  "version": "5.2.10+dev",
+  "version": "5.2.11+dev",
   "dependsOn": {
     "BSIPA": "^4.2.1",
     "BeatSaberMarkupLanguage": "^1.6.0",

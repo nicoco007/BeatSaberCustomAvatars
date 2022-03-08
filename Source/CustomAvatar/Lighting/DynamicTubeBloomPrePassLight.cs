@@ -39,6 +39,8 @@ namespace CustomAvatar.Lighting
             }
         }
 
+        public TubeBloomPrePassLight reference => _reference;
+
         private TubeBloomPrePassLight _reference;
         private Settings _settings;
 

@@ -42,9 +42,7 @@ namespace CustomAvatar.Lighting
 
             var lightObject = new GameObject("Menu Light");
             Transform lightTransform = lightObject.transform;
-
-            lightObject.transform.SetParent(GameObject.Find("/MenuCore").transform, false);
-            lightObject.transform.rotation = Quaternion.Euler(30, 180, 0);
+            lightTransform.rotation = Quaternion.Euler(30, 180, 0);
 
             _light = lightObject.AddComponent<Light>();
             _light.type = LightType.Directional;

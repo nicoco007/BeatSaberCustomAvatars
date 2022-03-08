@@ -26,24 +26,25 @@ namespace CustomAvatar.Avatar
         private readonly ILogger<AvatarGameplayEventsPlayer> _logger;
         private readonly PlayerAvatarManager _avatarManager;
         private readonly ScoreController _scoreController;
+        private readonly ComboController _comboController;
+        private readonly BeatmapObjectManager _beatmapObjectManager;
         private readonly ILevelEndActions _levelEndActions;
         private readonly IMultiplayerLevelEndActionsPublisher _multiplayerLevelEndActions;
-        private readonly BeatmapObjectCallbackController _beatmapObjectCallbackController;
         private readonly ObstacleSaberSparkleEffectManager _sparkleEffectManager;
 
         private EventManager _eventManager;
-        private ColorType _lastColor = ColorType.None;
 
         #region Behaviour Lifecycle
 
-        public AvatarGameplayEventsPlayer(ILogger<AvatarGameplayEventsPlayer> logger, PlayerAvatarManager avatarManager, ScoreController scoreController, [InjectOptional] ILevelEndActions levelEndActions, [InjectOptional] IMultiplayerLevelEndActionsPublisher multiplayerLevelEndActions, BeatmapObjectCallbackController beatmapObjectCallbackController, ObstacleSaberSparkleEffectManager sparkleEffectManager)
+        public AvatarGameplayEventsPlayer(ILogger<AvatarGameplayEventsPlayer> logger, PlayerAvatarManager avatarManager, ScoreController scoreController, ComboController comboController, BeatmapObjectManager beatmapObjectManager, [InjectOptional] ILevelEndActions levelEndActions, [InjectOptional] IMultiplayerLevelEndActionsPublisher multiplayerLevelEndActions, ObstacleSaberSparkleEffectManager sparkleEffectManager)
         {
             _logger = logger;
             _avatarManager = avatarManager;
             _scoreController = scoreController;
+            _comboController = comboController;
+            _beatmapObjectManager = beatmapObjectManager;
             _levelEndActions = levelEndActions;
             _multiplayerLevelEndActions = multiplayerLevelEndActions;
-            _beatmapObjectCallbackController = beatmapObjectCallbackController;
             _sparkleEffectManager = sparkleEffectManager;
         }
 
@@ -59,9 +60,11 @@ namespace CustomAvatar.Avatar
 
             _eventManager.OnLevelStart?.Invoke();
 
-            _scoreController.noteWasCutEvent += OnNoteWasCut;
+            _beatmapObjectManager.noteWasCutEvent += OnNoteWasCut;
+
             _scoreController.multiplierDidChangeEvent += OnMultiplierDidChange;
-            _scoreController.comboDidChangeEvent += OnComboDidChange;
+
+            _comboController.comboDidChangeEvent += OnComboDidChange;
 
             _sparkleEffectManager.sparkleEffectDidStartEvent += OnSparkleEffectDidStart;
             _sparkleEffectManager.sparkleEffectDidEndEvent += OnSparkleEffectDidEnd;
@@ -76,15 +79,15 @@ namespace CustomAvatar.Avatar
             {
                 _multiplayerLevelEndActions.playerDidFinishEvent += OnPlayerDidFinish;
             }
-
-            _beatmapObjectCallbackController.beatmapEventDidTriggerEvent += BeatmapEventDidTrigger;
         }
 
         public void Dispose()
         {
-            _scoreController.noteWasCutEvent -= OnNoteWasCut;
+            _beatmapObjectManager.noteWasCutEvent -= OnNoteWasCut;
+
             _scoreController.multiplierDidChangeEvent -= OnMultiplierDidChange;
-            _scoreController.comboDidChangeEvent -= OnComboDidChange;
+
+            _comboController.comboDidChangeEvent -= OnComboDidChange;
 
             _sparkleEffectManager.sparkleEffectDidStartEvent -= OnSparkleEffectDidStart;
             _sparkleEffectManager.sparkleEffectDidEndEvent -= OnSparkleEffectDidEnd;
@@ -99,13 +102,11 @@ namespace CustomAvatar.Avatar
             {
                 _multiplayerLevelEndActions.playerDidFinishEvent -= OnPlayerDidFinish;
             }
-
-            _beatmapObjectCallbackController.beatmapEventDidTriggerEvent -= BeatmapEventDidTrigger;
         }
 
         #endregion
 
-        private void OnNoteWasCut(NoteData noteData, in NoteCutInfo cutInfo, int multiplier)
+        private void OnNoteWasCut(NoteController noteController, in NoteCutInfo cutInfo)
         {
             if (cutInfo.allIsOK)
             {
@@ -163,40 +164,17 @@ namespace CustomAvatar.Avatar
 
         private void OnPlayerDidFinish(MultiplayerLevelCompletionResults results)
         {
-            switch (results.levelEndState)
+            switch (results.playerLevelEndState)
             {
-                case MultiplayerLevelCompletionResults.MultiplayerLevelEndState.Cleared:
+                case MultiplayerLevelCompletionResults.MultiplayerPlayerLevelEndState.SongFinished:
                     _logger.Trace("Invoke OnLevelFinish");
                     _eventManager.OnLevelFinish?.Invoke();
                     break;
 
-                case MultiplayerLevelCompletionResults.MultiplayerLevelEndState.Failed:
+                case MultiplayerLevelCompletionResults.MultiplayerPlayerLevelEndState.NotFinished:
                     _logger.Trace("Invoke OnLevelFail");
                     _eventManager.OnLevelFail?.Invoke();
                     break;
-            }
-        }
-
-        private void BeatmapEventDidTrigger(BeatmapEventData eventData)
-        {
-            // lighting events seem to be 0 through 4
-            if (eventData == null || eventData.type < BeatmapEventType.Event0 || eventData.type > BeatmapEventType.Event4) return;
-
-            // event values 1 through 3 are "color b" (default blue) and 5 through 7 are "color a" (default red) based on information in LightSwitchEventEffect
-            if (eventData.value >= 1 && eventData.value <= 3 && _lastColor != ColorType.ColorB)
-            {
-                _logger.Trace("Invoke OnBlueLightOn");
-                _eventManager.OnBlueLightOn?.Invoke();
-
-                _lastColor = ColorType.ColorB;
-            }
-
-            if (eventData.value >= 5 && eventData.value <= 7 && _lastColor != ColorType.ColorA)
-            {
-                _logger.Trace("Invoke OnRedLightOn");
-                _eventManager.OnRedLightOn?.Invoke();
-
-                _lastColor = ColorType.ColorA;
             }
         }
     }
