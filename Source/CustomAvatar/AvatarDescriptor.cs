@@ -63,14 +63,14 @@ namespace CustomAvatar
         public Sprite cover;
 
         // Legacy stuff
-#pragma warning disable CS0649, IDE0044, IDE1006
+#pragma warning disable CS0649, IDE0044, IDE1006, IDE0055
         [SerializeField] [HideInInspector] private string AvatarName;
         [SerializeField] [HideInInspector] private string AuthorName;
         [SerializeField] [HideInInspector] private Sprite CoverImage;
         [SerializeField] [HideInInspector] private string Name;
         [SerializeField] [HideInInspector] private string Author;
         [SerializeField] [HideInInspector] private Sprite Cover;
-#pragma warning restore CS0649, IDE0044, IDE1006
+#pragma warning restore CS0649, IDE0044, IDE1006, IDE0055
 
         public void OnBeforeSerialize() { }
 

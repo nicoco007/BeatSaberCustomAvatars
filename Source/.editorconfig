@@ -278,7 +278,7 @@ csharp_preserve_single_line_blocks = true
 csharp_preserve_single_line_statements = true
 
 #### Naming styles ####
-# These are based off of Unity's apparent "conventions"
+# These are based off of Unity's and Beat Saber's apparent "conventions"
 
 # https://docs.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/naming-rules
 

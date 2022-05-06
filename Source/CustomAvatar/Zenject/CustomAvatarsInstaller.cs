@@ -38,6 +38,13 @@ namespace CustomAvatar.Zenject
     internal class CustomAvatarsInstaller : Installer
     {
         public static readonly int kPlayerAvatarManagerExecutionOrder = 1000;
+        private static readonly LightIntensityData kLightIntensityData = new LightIntensityData
+        {
+            directionalLight = 0.4f,
+            parametric3SliceSprite = 1f,
+            parametricBoxLight = 5f,
+            tubeBloomPrePassLight = 0.5f,
+        };
 
         private readonly ILogger<CustomAvatarsInstaller> _logger;
         private readonly Logger _ipaLogger;
@@ -99,6 +106,9 @@ namespace CustomAvatar.Zenject
             Container.Bind<TrackingHelper>().AsTransient();
 
             Container.Bind<MainSettingsModelSO>().FromInstance(_pcAppInit.GetField<MainSettingsModelSO, PCAppInit>("_mainSettingsModel")).IfNotBound();
+
+            Container.Bind<DynamicLightCreator>().AsCached();
+            Container.Bind<LightIntensityData>().FromInstance(kLightIntensityData);
         }
 
         private object CreateLogger(InjectContext context)

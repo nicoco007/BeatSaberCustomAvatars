@@ -14,32 +14,18 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using CustomAvatar.Configuration;
-using CustomAvatar.Lighting;
-using Zenject;
-
-namespace CustomAvatar.Zenject
+namespace CustomAvatar.Lighting
 {
-    internal class LightingInstaller : Installer
+    internal class LightIntensityData
     {
+        public float directionalLight { get; set; }
 
-        private readonly Settings _settings;
+        public float tubeBloomPrePassLight { get; set; }
 
-        public LightingInstaller(Settings settings)
-        {
-            _settings = settings;
-        }
+        public float parametric3SliceSprite { get; set; }
 
-        public override void InstallBindings()
-        {
-            if (!_settings.lighting.environment.enabled) return;
+        public float parametricBoxLight { get; set; }
 
-            switch (_settings.lighting.environment.type)
-            {
-                case EnvironmentLightingType.TwoSided:
-                    Container.Bind<TwoSidedLightingController>().FromNewComponentOnNewGameObject().NonLazy();
-                    break;
-            }
-        }
+        public float ambient { get; set; }
     }
 }

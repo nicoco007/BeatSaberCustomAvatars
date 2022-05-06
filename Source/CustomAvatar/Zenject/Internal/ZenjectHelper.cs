@@ -41,6 +41,7 @@ namespace CustomAvatar.Zenject.Internal
         private static readonly HashSet<InstallerRegistration> kInstallerRegistrations = new HashSet<InstallerRegistration>();
         private static readonly HashSet<Type> kComponentsToBind = new HashSet<Type>();
         private static readonly Dictionary<Type, List<ComponentRegistration>> kComponentsToAdd = new Dictionary<Type, List<ComponentRegistration>>();
+        private static readonly Dictionary<Type, List<Action<DiContainer, MonoBehaviour>>> kComponentsToRunCallback = new Dictionary<Type, List<Action<DiContainer, MonoBehaviour>>>();
 
         private static ILogger<ZenjectHelper> _logger;
 
@@ -74,6 +75,20 @@ namespace CustomAvatar.Zenject.Internal
             else
             {
                 kComponentsToAdd.Add(typeof(TExisting), new List<ComponentRegistration> { componentRegistration });
+            }
+        }
+
+        public static void AddComponentCallback<T>(Action<DiContainer, T> callback) where T : MonoBehaviour
+        {
+            var nongenericCallback = new Action<DiContainer, MonoBehaviour>((container, monoBehaviour) => callback(container, (T)monoBehaviour));
+
+            if (kComponentsToRunCallback.TryGetValue(typeof(T), out List<Action<DiContainer, MonoBehaviour>> types))
+            {
+                types.Add(nongenericCallback);
+            }
+            else
+            {
+                kComponentsToRunCallback.Add(typeof(T), new List<Action<DiContainer, MonoBehaviour>> { nongenericCallback });
             }
         }
 
@@ -137,6 +152,7 @@ namespace CustomAvatar.Zenject.Internal
             {
                 BindIfNeeded(__instance, monoBehaviour);
                 AddComponents(__instance, monoBehaviour);
+                RunCallbacks(__instance, monoBehaviour);
             }
 
 #if DEBUG
@@ -193,6 +209,21 @@ namespace CustomAvatar.Zenject.Internal
 
                 _logger.Trace($"Adding '{componentRegistration.type.FullName}' to GameObject '{target.name}' (for '{monoBehaviourType.FullName}')");
                 context.Container.InstantiateComponent(componentRegistration.type, target, componentRegistration.extraArgs);
+            }
+        }
+
+        private static void RunCallbacks(Context context, MonoBehaviour monoBehaviour)
+        {
+            Type monoBehaviourType = monoBehaviour.GetType();
+
+            if (!kComponentsToRunCallback.TryGetValue(monoBehaviourType, out List<Action<DiContainer, MonoBehaviour>> callbacks))
+            {
+                return;
+            }
+
+            foreach (Action<DiContainer, MonoBehaviour> callback in callbacks)
+            {
+                callback.Invoke(context.Container, monoBehaviour);
             }
         }
 

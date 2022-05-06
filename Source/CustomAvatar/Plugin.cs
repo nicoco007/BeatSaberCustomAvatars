@@ -16,6 +16,7 @@
 
 using BeatSaberMarkupLanguage;
 using CustomAvatar.Avatar;
+using CustomAvatar.Lighting;
 using CustomAvatar.Logging;
 using CustomAvatar.Player;
 using CustomAvatar.Rendering;
@@ -63,14 +64,13 @@ namespace CustomAvatar
             ZenjectHelper.AddComponentAlongsideExisting<MultiplayerLocalInactivePlayerFacade, EnvironmentObject>("MultiplayerLocalInactivePlayerPlayerPlace/CirclePlayerPlace");
             ZenjectHelper.AddComponentAlongsideExisting<MultiplayerConnectedPlayerFacade, EnvironmentObject>();
 
+            ZenjectHelper.AddComponentCallback<TubeBloomPrePassLight>((container, tubeBloomPrePassLight) => container.Resolve<DynamicLightCreator>().ConfigureTubeBloomPrePassLight(tubeBloomPrePassLight));
+            ZenjectHelper.AddComponentCallback<DirectionalLight>((container, directionalLight) => container.Resolve<DynamicLightCreator>().ConfigureDirectionalLight(directionalLight));
+            ZenjectHelper.AddComponentCallback<BloomPrePassBackgroundColorsGradient>((container, bloomPrePassBackgroundColorsGradient) => container.Resolve<DynamicLightCreator>().ConfigureBloomPrePassBackgroundColorsGradient(bloomPrePassBackgroundColorsGradient));
+
             ZenjectHelper.Register<CustomAvatarsInstaller>().WithArguments(ipaLogger).OnMonoInstaller<PCAppInit>();
             ZenjectHelper.Register<UIInstaller>().WithArguments(armSpanSliderTag).OnContext("MainMenu", "MenuCore");
-
             ZenjectHelper.Register<HealthWarningInstaller>().OnContext("HealthWarning", "SceneContext");
-            ZenjectHelper.Register<LightingInstaller>().OnContext("HealthWarning", "SceneContext");
-            ZenjectHelper.Register<LightingInstaller>().OnContext("MainMenu", "SceneContext");
-            ZenjectHelper.Register<LightingInstaller>().OnContext("GameCore", "SceneContext");
-
             ZenjectHelper.Register<GameInstaller>().OnMonoInstaller<GameplayCoreInstaller>();
         }
 

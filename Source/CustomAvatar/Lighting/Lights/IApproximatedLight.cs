@@ -14,32 +14,18 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using CustomAvatar.Configuration;
-using CustomAvatar.Lighting;
-using Zenject;
+using UnityEngine;
 
-namespace CustomAvatar.Zenject
+namespace CustomAvatar.Lighting.Lights
 {
-    internal class LightingInstaller : Installer
+    internal interface IApproximatedLight
     {
+        float intensity { get; }
 
-        private readonly Settings _settings;
+        Color color { get; }
 
-        public LightingInstaller(Settings settings)
-        {
-            _settings = settings;
-        }
+        Vector3 brightestPoint { get; }
 
-        public override void InstallBindings()
-        {
-            if (!_settings.lighting.environment.enabled) return;
-
-            switch (_settings.lighting.environment.type)
-            {
-                case EnvironmentLightingType.TwoSided:
-                    Container.Bind<TwoSidedLightingController>().FromNewComponentOnNewGameObject().NonLazy();
-                    break;
-            }
-        }
+        void Update();
     }
 }
