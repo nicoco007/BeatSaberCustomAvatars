@@ -19,8 +19,10 @@ extern alias BeatSaberDynamicBone;
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using BeatSaberFinalIK::RootMotion.FinalIK;
 using CustomAvatar.Logging;
+using CustomAvatar.Scripts;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
 using IPA.Utilities;
@@ -55,18 +57,13 @@ namespace CustomAvatar.Avatar
         private VRIK _vrik;
         private VRIKManager _vrikManager;
 
-        private bool _fixTransforms;
-
         private readonly List<BeatSaberDynamicBone::DynamicBone> _dynamicBones = new List<BeatSaberDynamicBone::DynamicBone>();
-        private readonly List<TwistRelaxer> _twistRelaxers = new List<TwistRelaxer>();
 
         // create delegates for dynamic bones private methods (more efficient than continuously calling Invoke)
         private static readonly Action<BeatSaberDynamicBone::DynamicBone> kDynamicBoneOnEnableDelegate = MethodAccessor<BeatSaberDynamicBone::DynamicBone, Action<BeatSaberDynamicBone::DynamicBone>>.GetDelegate("OnEnable");
         private static readonly Action<BeatSaberDynamicBone::DynamicBone> kDynamicBoneStartDelegate = MethodAccessor<BeatSaberDynamicBone::DynamicBone, Action<BeatSaberDynamicBone::DynamicBone>>.GetDelegate("Start");
         private static readonly Action<BeatSaberDynamicBone::DynamicBone> kDynamicBonePreUpdateDelegate = MethodAccessor<BeatSaberDynamicBone::DynamicBone, Action<BeatSaberDynamicBone::DynamicBone>>.GetDelegate("PreUpdate");
         private static readonly Action<BeatSaberDynamicBone::DynamicBone> kDynamicBoneLateUpdateDelegate = MethodAccessor<BeatSaberDynamicBone::DynamicBone, Action<BeatSaberDynamicBone::DynamicBone>>.GetDelegate("LateUpdate");
-
-        private Action<TwistRelaxer> _twistRelaxerStartDelegate;
 
         private IAvatarInput _input;
         private SpawnedAvatar _avatar;
@@ -82,17 +79,6 @@ namespace CustomAvatar.Avatar
 
         private void Awake()
         {
-            _twistRelaxerStartDelegate = MethodAccessor<TwistRelaxer, Action<TwistRelaxer>>.GetDelegate("Start");
-
-            foreach (TwistRelaxer twistRelaxer in GetComponentsInChildren<TwistRelaxer>())
-            {
-                if (!twistRelaxer.enabled) continue;
-
-                twistRelaxer.enabled = false;
-
-                _twistRelaxers.Add(twistRelaxer);
-            }
-
             foreach (BeatSaberDynamicBone::DynamicBone dynamicBone in GetComponentsInChildren<BeatSaberDynamicBone::DynamicBone>())
             {
                 if (!dynamicBone.enabled) continue;
@@ -119,9 +105,25 @@ namespace CustomAvatar.Avatar
             _vrikManager = GetComponentInChildren<VRIKManager>();
 
             _vrik = _ikHelper.InitializeVRIK(_vrikManager, transform);
+            IKSolver solver = _vrik.GetIKSolver();
 
-            _fixTransforms = _vrikManager.fixTransforms;
-            _vrik.fixTransforms = false; // FixTransforms is manually called in Update
+            MethodInfo onPostUpdate = typeof(TwistRelaxer).GetMethod("OnPostUpdate", BindingFlags.Instance | BindingFlags.NonPublic);
+
+            foreach (TwistRelaxer twistRelaxer in GetComponentsInChildren<TwistRelaxer>())
+            {
+                twistRelaxer.ik = _vrik;
+                solver.OnPostUpdate += (IKSolver.UpdateDelegate)onPostUpdate.CreateDelegate(typeof(IKSolver.UpdateDelegate), twistRelaxer);
+            }
+
+            foreach (UpperArmRelaxer upperArmRelaxer in GetComponentsInChildren<UpperArmRelaxer>())
+            {
+                upperArmRelaxer.ik = _vrik;
+                solver.OnPreUpdate += upperArmRelaxer.OnPreUpdate;
+                solver.OnPostUpdate += upperArmRelaxer.OnPostUpdate;
+            }
+
+            solver.OnPreUpdate += OnPreUpdate;
+            solver.OnPostUpdate += OnPostUpdate;
 
             if (_vrikManager.solver_spine_maintainPelvisPosition > 0 && !_input.allowMaintainPelvisPosition)
             {
@@ -134,8 +136,6 @@ namespace CustomAvatar.Avatar
             UpdateLocomotion();
             UpdateSolverTargets();
 
-            foreach (TwistRelaxer twistRelaxer in _twistRelaxers) _twistRelaxerStartDelegate(twistRelaxer);
-
             foreach (BeatSaberDynamicBone::DynamicBone dynamicBone in _dynamicBones)
             {
                 kDynamicBoneOnEnableDelegate(dynamicBone);
@@ -146,39 +146,14 @@ namespace CustomAvatar.Avatar
         private void Update()
         {
             ApplyPlatformMotion();
-
-            if (_fixTransforms)
-            {
-                _vrik.solver.FixTransforms();
-            }
-
-            // DynamicBones PreUpdate
-            foreach (BeatSaberDynamicBone::DynamicBone dynamicBone in _dynamicBones)
-            {
-                kDynamicBonePreUpdateDelegate(dynamicBone);
-            }
-        }
-
-        private void LateUpdate()
-        {
-            // VRIK must run before dynamic bones
-            _vrik.UpdateSolverExternal();
-
-            // relax after VRIK update
-            foreach (TwistRelaxer twistRelaxer in _twistRelaxers)
-            {
-                twistRelaxer.Relax();
-            }
-
-            // update dynamic bones
-            foreach (BeatSaberDynamicBone::DynamicBone dynamicBone in _dynamicBones)
-            {
-                kDynamicBoneLateUpdateDelegate(dynamicBone);
-            }
         }
 
         private void OnDestroy()
         {
+            IKSolver solver = _vrik.GetIKSolver();
+            solver.OnPreUpdate -= OnPreUpdate;
+            solver.OnPostUpdate -= OnPostUpdate;
+
             _input.inputChanged -= OnInputChanged;
         }
 
@@ -201,6 +176,22 @@ namespace CustomAvatar.Avatar
 
             _vrik.solver.AddPlatformMotion(deltaPosition, deltaRotation, parent.position);
             _previousParentPose = new Pose(parent.position, parent.rotation);
+        }
+
+        private void OnPreUpdate()
+        {
+            foreach (BeatSaberDynamicBone::DynamicBone dynamicBone in _dynamicBones)
+            {
+                kDynamicBonePreUpdateDelegate(dynamicBone);
+            }
+        }
+
+        private void OnPostUpdate()
+        {
+            foreach (BeatSaberDynamicBone::DynamicBone dynamicBone in _dynamicBones)
+            {
+                kDynamicBoneLateUpdateDelegate(dynamicBone);
+            }
         }
 
         private void UpdateLocomotion()
