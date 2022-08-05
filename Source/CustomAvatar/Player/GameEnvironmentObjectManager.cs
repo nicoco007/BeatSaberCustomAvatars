@@ -15,7 +15,6 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Rendering;
@@ -87,7 +86,6 @@ namespace CustomAvatar.Player
                 Transform avatarParentTransform = avatarParent.transform;
                 avatarParentTransform.localRotation = _beatSaberUtilities.roomRotation;
                 avatarParentTransform.SetParent(spectatorParent.transform, false);
-                _container.InstantiateComponent<AvatarCenterAdjust>(avatarParent);
 
                 Camera spectatorCamera = spectatorParent.GetComponentInChildren<Camera>();
 

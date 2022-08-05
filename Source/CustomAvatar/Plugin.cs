@@ -15,7 +15,6 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using BeatSaberMarkupLanguage;
-using CustomAvatar.Avatar;
 using CustomAvatar.Lighting;
 using CustomAvatar.Logging;
 using CustomAvatar.Player;
@@ -54,7 +53,6 @@ namespace CustomAvatar
 
             ZenjectHelper.AddComponentAlongsideExisting<MainCamera, CustomAvatarsMainCameraController>();
             ZenjectHelper.AddComponentAlongsideExisting<SmoothCamera, CustomAvatarsSmoothCameraController>();
-            ZenjectHelper.AddComponentAlongsideExisting<VRCenterAdjust, AvatarCenterAdjust>(null, go => go.name == "Origin" && go.scene.name != "Tutorial"); // don't add on tutorial - temporary fix to avoid Counters+ disabling the avatar
 
             ZenjectHelper.AddComponentAlongsideExisting<BloomFogEnvironment, EnvironmentObject>();
             ZenjectHelper.AddComponentAlongsideExisting<MenuEnvironmentManager, EnvironmentObject>();

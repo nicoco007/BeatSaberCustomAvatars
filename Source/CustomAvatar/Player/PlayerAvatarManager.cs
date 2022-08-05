@@ -87,16 +87,16 @@ namespace CustomAvatar.Player
         private readonly Settings _settings;
         private readonly AvatarSpawner _spawner;
         private readonly BeatSaberUtilities _beatSaberUtilities;
+        private readonly ActivePlayerSpaceManager _activePlayerSpaceManager;
 
         private readonly Dictionary<string, AvatarInfo> _avatarInfos = new Dictionary<string, AvatarInfo>();
-        private readonly Stack<Transform> _parentHistory = new Stack<Transform>();
 
         private string _switchingToPath;
         private Settings.AvatarSpecificSettings _currentAvatarSettings;
         private GameObject _avatarContainer;
         private CancellationTokenSource _avatarLoadCancellationTokenSource;
 
-        internal PlayerAvatarManager(DiContainer container, ILogger<PlayerAvatarManager> logger, AvatarLoader avatarLoader, Settings settings, AvatarSpawner spawner, BeatSaberUtilities beatSaberUtilities)
+        internal PlayerAvatarManager(DiContainer container, ILogger<PlayerAvatarManager> logger, AvatarLoader avatarLoader, Settings settings, AvatarSpawner spawner, BeatSaberUtilities beatSaberUtilities, ActivePlayerSpaceManager activePlayerSpaceManager)
         {
             _container = container;
             _logger = logger;
@@ -104,6 +104,7 @@ namespace CustomAvatar.Player
             _settings = settings;
             _spawner = spawner;
             _beatSaberUtilities = beatSaberUtilities;
+            _activePlayerSpaceManager = activePlayerSpaceManager;
         }
 
         public void Initialize()
@@ -129,6 +130,8 @@ namespace CustomAvatar.Player
             _settings.enableLocomotion.changed += OnEnableLocomotionChanged;
 
             _beatSaberUtilities.roomAdjustChanged += OnRoomAdjustChanged;
+
+            _activePlayerSpaceManager.activePlayerSpaceChanged += OnActivePlayerSpaceChanged;
 
             PlayerData_playerSpecificSettings.playerHeightChanged += OnPlayerHeightChanged;
 
@@ -347,52 +350,6 @@ namespace CustomAvatar.Player
             await SwitchToAvatarAsync(files[index], null);
         }
 
-        internal void ParentTo(Transform parent)
-        {
-            if (!parent) throw new ArgumentNullException(nameof(parent));
-
-            _parentHistory.Push(parent);
-            _avatarContainer.transform.SetParent(parent, false);
-            _logger.LogTrace($"Parented avatar container to '{parent.name}' (scene '{parent.gameObject.scene.name}')");
-        }
-
-        internal void UnparentFrom(Transform parent)
-        {
-            if (!parent) throw new ArgumentNullException(nameof(parent));
-
-            if (_avatarContainer.transform.parent != parent)
-            {
-                return;
-            }
-
-            Transform newParent = _parentHistory.Pop();
-
-            while (!newParent || newParent == parent)
-            {
-                if (_parentHistory.Count > 0)
-                {
-                    newParent = _parentHistory.Pop();
-                }
-                else
-                {
-                    newParent = null;
-                    break;
-                }
-            }
-
-            _avatarContainer.transform.SetParent(newParent, false);
-
-            if (newParent)
-            {
-                _logger.LogTrace($"Parented avatar container to '{parent.name}' (scene '{parent.gameObject.scene.name}')");
-            }
-            else
-            {
-                _logger.LogWarning($"Parented avatar container to nothing!");
-                Object.DontDestroyOnLoad(_avatarContainer);
-            }
-        }
-
         internal float GetFloorOffset()
         {
             if (_settings.floorHeightAdjust == FloorHeightAdjustMode.Off || !currentlySpawnedAvatar) return 0;
@@ -405,6 +362,16 @@ namespace CustomAvatar.Player
             if (!Directory.Exists(kCustomAvatarsPath)) return new List<string>();
 
             return Directory.GetFiles(kCustomAvatarsPath, "*.avatar", SearchOption.TopDirectoryOnly).Select(f => Path.GetFileName(f)).OrderBy(f => f).ToList();
+        }
+
+        private void OnActivePlayerSpaceChanged(Transform playerSpace)
+        {
+            _avatarContainer.transform.SetParent(playerSpace, false);
+
+            if (playerSpace == null)
+            {
+                Object.DontDestroyOnLoad(_avatarContainer);
+            }
         }
 
         private void OnResizeModeChanged(AvatarResizeMode resizeMode)

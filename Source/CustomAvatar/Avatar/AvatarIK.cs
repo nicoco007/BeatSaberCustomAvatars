@@ -160,11 +160,6 @@ namespace CustomAvatar.Avatar
 #pragma warning restore IDE0051
         #endregion
 
-        internal void AddPlatformMotion(Vector3 deltaPosition, Quaternion deltaRotation, Vector3 platformPivot)
-        {
-            _vrik.solver.AddPlatformMotion(deltaPosition, deltaRotation, platformPivot);
-        }
-
         private void ApplyPlatformMotion()
         {
             Transform parent = transform.parent;

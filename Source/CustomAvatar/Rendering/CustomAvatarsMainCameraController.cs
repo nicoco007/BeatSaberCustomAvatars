@@ -15,10 +15,12 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
+using CustomAvatar.Player;
 using UnityEngine;
 using Zenject;
 
@@ -28,25 +30,29 @@ namespace CustomAvatar.Rendering
     {
         private ILogger<CustomAvatarsMainCameraController> _logger;
         private Settings _settings;
+        private ActivePlayerSpaceManager _activePlayerSpaceManager;
+        private Transform _parent;
 
         private Camera _camera;
 
-        public void Awake()
+        private void Awake()
         {
             _camera = GetComponent<Camera>();
         }
 
         [Inject]
-        public void Construct(ILogger<CustomAvatarsMainCameraController> logger, Settings settings)
+        [SuppressMessage("CodeQuality", "IDE0051", Justification = "Used by Zenject")]
+        private void Construct(ILogger<CustomAvatarsMainCameraController> logger, Settings settings, ActivePlayerSpaceManager activeCameraManager)
         {
             _logger = logger;
             _settings = settings;
+            _activePlayerSpaceManager = activeCameraManager;
         }
 
-        public void Start()
+        private void Start()
         {
             // prevent errors if this is instantiated via Object.Instantiate
-            if (_logger == null || _settings == null)
+            if (_logger == null || _settings == null || _activePlayerSpaceManager == null)
             {
                 Destroy(this);
                 return;
@@ -55,11 +61,18 @@ namespace CustomAvatar.Rendering
             _settings.cameraNearClipPlane.changed += OnCameraNearClipPlaneChanged;
 
             UpdateCameraMask();
+
+            AddToPlayerSpaceManager();
         }
 
-        public void OnDestroy()
+        private void OnDestroy()
         {
-            if (_settings != null) _settings.cameraNearClipPlane.changed -= OnCameraNearClipPlaneChanged;
+            if (_settings != null)
+            {
+                _settings.cameraNearClipPlane.changed -= OnCameraNearClipPlaneChanged;
+            }
+
+            RemoveFromPlayerSpaceManager();
         }
 
         private void OnCameraNearClipPlaneChanged(float value)
@@ -85,6 +98,24 @@ namespace CustomAvatar.Rendering
 
             _camera.cullingMask = mask;
             _camera.nearClipPlane = _settings.cameraNearClipPlane;
+        }
+
+        private void AddToPlayerSpaceManager()
+        {
+            _parent = transform.parent;
+
+            // this is simply to avoid the model flying around with the FPFC
+            if (_parent != null && Environment.GetCommandLineArgs().Contains("fpfc"))
+            {
+                _parent = _parent.parent;
+            }
+
+            _activePlayerSpaceManager?.Add(_parent);
+        }
+
+        private void RemoveFromPlayerSpaceManager()
+        {
+            _activePlayerSpaceManager?.Remove(_parent);
         }
     }
 }
