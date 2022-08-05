@@ -86,7 +86,7 @@ namespace CustomAvatar.Avatar
                 yield break;
             }
 
-            _logger.Info($"Loading avatar from '{fullPath}'");
+            _logger.LogInformation($"Loading avatar from '{fullPath}'");
 
             AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(fullPath);
 
@@ -161,7 +161,7 @@ namespace CustomAvatar.Avatar
                 return task;
             }
 
-            _logger.Info($"Loading avatar from '{fullPath}'");
+            _logger.LogInformation($"Loading avatar from '{fullPath}'");
 
             task = LoadAssetBundle(fullPath, progress, cancellationToken);
             _tasks.Add(fullPath, task);
@@ -224,7 +224,7 @@ namespace CustomAvatar.Avatar
         [Obsolete]
         private void HandleSuccess(string fullPath, AvatarPrefab avatarPrefab)
         {
-            _logger.Info($"Successfully loaded avatar '{avatarPrefab.descriptor.name}' by '{avatarPrefab.descriptor.author}' from '{fullPath}'");
+            _logger.LogInformation($"Successfully loaded avatar '{avatarPrefab.descriptor.name}' by '{avatarPrefab.descriptor.author}' from '{fullPath}'");
 
             foreach (LoadHandlers handler in _handlers[fullPath])
             {
@@ -237,8 +237,8 @@ namespace CustomAvatar.Avatar
         [Obsolete]
         private void HandleException(string fullPath, Exception exception)
         {
-            _logger.Error($"Failed to load avatar at '{fullPath}'");
-            _logger.Error(exception);
+            _logger.LogError($"Failed to load avatar at '{fullPath}'");
+            _logger.LogError(exception);
 
             foreach (LoadHandlers handler in _handlers[fullPath])
             {

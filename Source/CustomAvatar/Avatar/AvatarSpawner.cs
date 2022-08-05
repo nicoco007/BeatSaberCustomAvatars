@@ -82,11 +82,11 @@ namespace CustomAvatar.Avatar
 
             if (parent)
             {
-                _logger.Info($"Spawning avatar '{avatar.descriptor.name}' into '{parent.name}'");
+                _logger.LogInformation($"Spawning avatar '{avatar.descriptor.name}' into '{parent.name}'");
             }
             else
             {
-                _logger.Info($"Spawning avatar '{avatar.descriptor.name}'");
+                _logger.LogInformation($"Spawning avatar '{avatar.descriptor.name}'");
             }
 
             var subContainer = new DiContainer(_container);
@@ -106,7 +106,7 @@ namespace CustomAvatar.Avatar
             {
                 if (condition == null || condition(avatar))
                 {
-                    _logger.Info($"Adding component '{type.FullName}'");
+                    _logger.LogInformation($"Adding component '{type.FullName}'");
                     subContainer.InstantiateComponent(type, avatarInstance);
                 }
             }

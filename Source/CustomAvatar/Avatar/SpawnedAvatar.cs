@@ -58,7 +58,7 @@ namespace CustomAvatar.Avatar
                 if (float.IsInfinity(value)) throw new InvalidOperationException("Scale cannot be infinity");
 
                 transform.localScale = _initialLocalScale * value;
-                _logger.Info("Avatar resized with scale: " + value);
+                _logger.LogInformation("Avatar resized with scale: " + value);
             }
         }
 
@@ -178,7 +178,7 @@ namespace CustomAvatar.Avatar
 
             if (_initialLocalPosition.sqrMagnitude > 0)
             {
-                _logger.Warning("Avatar root position is not at origin; resizing by height and floor adjust may not work properly.");
+                _logger.LogWarning("Avatar root position is not at origin; resizing by height and floor adjust may not work properly.");
             }
 
             _gameScenesManager.transitionDidFinishEvent += OnTransitionDidFinish;
@@ -220,7 +220,7 @@ namespace CustomAvatar.Avatar
                 {
                     if (!gameObj) continue;
 
-                    _logger.Trace($"Excluding '{gameObj.name}' from first person view");
+                    _logger.LogTrace($"Excluding '{gameObj.name}' from first person view");
                     gameObj.layer = AvatarLayers.kOnlyInThirdPerson;
                 }
             }

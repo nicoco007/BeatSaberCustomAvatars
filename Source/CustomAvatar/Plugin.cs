@@ -45,7 +45,7 @@ namespace CustomAvatar
             // can't inject at this point so just create it
             ILogger<Plugin> logger = new IPALogger<Plugin>(ipaLogger);
 
-            logger.Info("Initializing Custom Avatars");
+            logger.LogInformation("Initializing Custom Avatars");
 
             ZenjectHelper.Init(ipaLogger);
 

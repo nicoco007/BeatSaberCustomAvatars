@@ -25,34 +25,34 @@ namespace CustomAvatar.Logging
             this.name = name;
         }
 
-        public void Trace(object message) { }
+        public void LogTrace(object message) { }
 
-        public void Debug(object message)
+        public void LogDebug(object message)
         {
             UnityEngine.Debug.Log(FormatMessage("DEBUG", message));
         }
 
-        public void Notice(object message)
+        public void LogNotice(object message)
         {
             UnityEngine.Debug.Log(FormatMessage("NOTICE", message));
         }
 
-        public void Info(object message)
+        public void LogInformation(object message)
         {
             UnityEngine.Debug.Log(FormatMessage("INFO", message));
         }
 
-        public void Warning(object message)
+        public void LogWarning(object message)
         {
             UnityEngine.Debug.LogWarning(FormatMessage("WARNING", message));
         }
 
-        public void Error(object message)
+        public void LogError(object message)
         {
             UnityEngine.Debug.LogError(FormatMessage("ERROR", message));
         }
 
-        public void Critical(object message)
+        public void LogCritical(object message)
         {
             UnityEngine.Debug.LogError(FormatMessage("CRITICAL", message));
         }

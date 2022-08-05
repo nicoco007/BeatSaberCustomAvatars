@@ -20,58 +20,58 @@ namespace CustomAvatar.Logging
 {
     internal class IPALogger<T> : ILogger<T>
     {
-        public string name { get; set; }
+        public string name
+        {
+            set
+            {
+                _childLogger = _parentLogger.GetChildLogger(value);
+            }
+        }
 
-        private readonly Logger _logger;
+        private readonly Logger _parentLogger;
+
+        private Logger _childLogger;
+
+        private Logger _logger => _childLogger ?? _parentLogger;
 
         public IPALogger(Logger logger)
         {
-            _logger = logger;
+            _parentLogger = logger;
         }
 
-        public void Trace(object message)
+        public void LogTrace(object message)
         {
-            _logger.Trace(FormatMessage(message));
+            _logger.Trace(message?.ToString());
         }
 
-        public void Debug(object message)
+        public void LogDebug(object message)
         {
-            _logger.Debug(FormatMessage(message));
+            _logger.Debug(message?.ToString());
         }
 
-        public void Notice(object message)
+        public void LogNotice(object message)
         {
-            _logger.Notice(FormatMessage(message));
+            _logger.Notice(message?.ToString());
         }
 
-        public void Info(object message)
+        public void LogInformation(object message)
         {
-            _logger.Info(FormatMessage(message));
+            _logger.Info(message?.ToString());
         }
 
-        public void Warning(object message)
+        public void LogWarning(object message)
         {
-            _logger.Warn(FormatMessage(message));
+            _logger.Warn(message?.ToString());
         }
 
-        public void Error(object message)
+        public void LogError(object message)
         {
-            _logger.Error(FormatMessage(message));
+            _logger.Error(message?.ToString());
         }
 
-        public void Critical(object message)
+        public void LogCritical(object message)
         {
-            _logger.Critical(FormatMessage(message));
-        }
-
-        private string FormatMessage(object message)
-        {
-            if (string.IsNullOrEmpty(name))
-            {
-                return $"[{typeof(T).Name}] {message}";
-            }
-
-            return $"[{typeof(T).Name}({name})] {message}";
+            _logger.Critical(message?.ToString());
         }
     }
 }

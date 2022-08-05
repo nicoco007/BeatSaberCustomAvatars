@@ -102,7 +102,7 @@ namespace CustomAvatar.Avatar
             }
             catch (Exception e)
             {
-                _logger.Error($"{e.Message}\n{e.StackTrace}");
+                _logger.LogError($"{e.Message}\n{e.StackTrace}");
             }
         }
 

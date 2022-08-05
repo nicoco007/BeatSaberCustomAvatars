@@ -66,7 +66,7 @@ namespace CustomAvatar.Player
                         }
                         else
                         {
-                            _logger.Warning($"PlayersPlace not found!");
+                            _logger.LogWarning($"PlayersPlace not found!");
                         }
 
                         break;
@@ -74,7 +74,7 @@ namespace CustomAvatar.Player
             }
             else
             {
-                _logger.Warning($"{environment.name} not found!");
+                _logger.LogWarning($"{environment.name} not found!");
             }
 
             // ScoreSaber replay spectator camera
@@ -97,7 +97,7 @@ namespace CustomAvatar.Player
                 }
                 else
                 {
-                    _logger.Warning($"Spectator camera not found!");
+                    _logger.LogWarning($"Spectator camera not found!");
                 }
             }
         }

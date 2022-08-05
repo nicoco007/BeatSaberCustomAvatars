@@ -67,7 +67,7 @@ namespace CustomAvatar.Player
 
             foreach (Mirror mirror in GetComponentsInChildren<Mirror>())
             {
-                _logger.Trace($"Replacing {nameof(MirrorRendererSO)} on '{mirror.name}'");
+                _logger.LogTrace($"Replacing {nameof(MirrorRendererSO)} on '{mirror.name}'");
 
                 MirrorRendererSO original = mirror.GetField<MirrorRendererSO, Mirror>("_mirrorRenderer");
                 MirrorRendererSO renderer = Instantiate(original);

@@ -121,12 +121,12 @@ namespace CustomAvatar.UI
 
                 _fileSystemWatcher.EnableRaisingEvents = true;
 
-                _logger.Trace($"Watching files in '{_fileSystemWatcher.Path}' ({_fileSystemWatcher.Filter})");
+                _logger.LogTrace($"Watching files in '{_fileSystemWatcher.Path}' ({_fileSystemWatcher.Filter})");
             }
             catch (Exception ex)
             {
-                _logger.Error("Failed to create FileSystemWatcher");
-                _logger.Error(ex);
+                _logger.LogError("Failed to create FileSystemWatcher");
+                _logger.LogError(ex);
             }
 
             await ReloadAvatars();
@@ -278,7 +278,7 @@ namespace CustomAvatar.UI
         private async void OnAvatarFileCreatedOrChanged(object sender, FileSystemEventArgs e)
         {
             string fileName = Path.GetFileName(e.FullPath);
-            _logger.Trace($"File {e.ChangeType}: '{fileName}'");
+            _logger.LogTrace($"File {e.ChangeType}: '{fileName}'");
 
             await UnityMainThreadTaskScheduler.Factory.StartNew(async () =>
             {
@@ -310,7 +310,7 @@ namespace CustomAvatar.UI
         private async void OnAvatarFileDeleted(object sender, FileSystemEventArgs e)
         {
             string fileName = Path.GetFileName(e.FullPath);
-            _logger.Trace($"File Deleted: '{fileName}'");
+            _logger.LogTrace($"File Deleted: '{fileName}'");
 
             await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
             {
@@ -387,8 +387,8 @@ namespace CustomAvatar.UI
             }
             catch (Exception ex)
             {
-                _logger.Error($"Failed to load avatar '{avatar.fileName}'");
-                _logger.Error(ex);
+                _logger.LogError($"Failed to load avatar '{avatar.fileName}'");
+                _logger.LogError(ex);
 
                 avatar.SetException(ex, _loadErrorSprite);
             }

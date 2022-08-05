@@ -27,6 +27,7 @@ using CustomAvatar.Tracking;
 using CustomAvatar.Tracking.OpenVR;
 using CustomAvatar.Tracking.UnityXR;
 using CustomAvatar.Utilities;
+using IPA.Logging;
 using IPA.Utilities;
 using UnityEngine.XR;
 using Valve.VR;
@@ -116,7 +117,7 @@ namespace CustomAvatar.Zenject
             Type genericType = context.MemberType.GenericTypeArguments[0];
 
             return genericType.IsAssignableFrom(context.ObjectType)
-                ? Activator.CreateInstance(typeof(IPALogger<>).MakeGenericType(genericType), _ipaLogger)
+                ? Activator.CreateInstance(typeof(IPALogger<>).MakeGenericType(genericType), _ipaLogger.GetChildLogger(genericType.Name))
                 : throw new InvalidOperationException($"Cannot create logger with generic type '{genericType}' for type '{context.ObjectType}'");
         }
 
@@ -124,13 +125,13 @@ namespace CustomAvatar.Zenject
         {
             try
             {
-                _logger.Info($"Reading settings from '{Settings.kSettingsPath}'");
+                _logger.LogInformation($"Reading settings from '{Settings.kSettingsPath}'");
                 return Settings.Load();
             }
             catch (Exception ex)
             {
-                _logger.Error("Failed to read settings from file");
-                _logger.Error(ex);
+                _logger.LogError("Failed to read settings from file");
+                _logger.LogError(ex);
 
                 return new Settings();
             }

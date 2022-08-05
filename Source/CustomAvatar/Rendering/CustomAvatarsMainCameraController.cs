@@ -69,7 +69,7 @@ namespace CustomAvatar.Rendering
 
         private void UpdateCameraMask()
         {
-            _logger.Info($"Setting avatar culling mask and near clip plane on '{_camera.name}'");
+            _logger.LogInformation($"Setting avatar culling mask and near clip plane on '{_camera.name}'");
 
             int mask = _camera.cullingMask | AvatarLayers.kAlwaysVisibleMask;
 

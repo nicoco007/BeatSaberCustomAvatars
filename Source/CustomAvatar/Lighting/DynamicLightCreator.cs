@@ -84,7 +84,7 @@ namespace CustomAvatar.Lighting
                         break;
 
                     default:
-                        _logger.Error($"Unexpected shader '{shaderName}'");
+                        _logger.LogError($"Unexpected shader '{shaderName}'");
                         shaderIntensity = 0f;
                         break;
                 }
@@ -98,7 +98,7 @@ namespace CustomAvatar.Lighting
 
                 if (meshRenderer == null || meshRenderer.material == null || !meshRenderer.material.HasProperty(kMainTexNameId) || meshRenderer.material.mainTexture == null)
                 {
-                    _logger.Warning($"{nameof(Parametric3SliceSpriteController)} has no {kMainTexName}");
+                    _logger.LogWarning($"{nameof(Parametric3SliceSpriteController)} has no {kMainTexName}");
                     return;
                 }
 
@@ -129,7 +129,7 @@ namespace CustomAvatar.Lighting
                         break;
 
                     default:
-                        _logger.Error($"Unexpected main texture '{mainTextureName}'");
+                        _logger.LogError($"Unexpected main texture '{mainTextureName}'");
                         materialIntensity = 0f;
                         break;
                 }

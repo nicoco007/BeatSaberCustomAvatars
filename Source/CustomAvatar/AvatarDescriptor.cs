@@ -190,7 +190,7 @@ namespace CustomAvatar
                 CoverImage ||
                 Cover)
             {
-                logger.Warning("Avatar is using a deprecated field; please re-export this avatar using the latest version of Custom Avatars");
+                logger.LogWarning("Avatar is using a deprecated field; please re-export this avatar using the latest version of Custom Avatars");
             }
         }
 #endif

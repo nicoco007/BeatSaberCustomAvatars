@@ -48,8 +48,8 @@ namespace CustomAvatar.Utilities
             }
             catch (Exception ex)
             {
-                _logger.Error("Failed to load shaders");
-                _logger.Error(ex);
+                _logger.LogError("Failed to load shaders");
+                _logger.LogError(ex);
             }
         }
 
@@ -92,11 +92,11 @@ namespace CustomAvatar.Utilities
         {
             if (shader)
             {
-                _logger.Info($"{name} shader loaded");
+                _logger.LogInformation($"{name} shader loaded");
             }
             else
             {
-                _logger.Error($"{name} shader not found");
+                _logger.LogError($"{name} shader not found");
             }
         }
     }

@@ -81,7 +81,7 @@ namespace CustomAvatar.UI
             }
             else
             {
-                _logger.Error("Unlit shader not loaded; manual calibration points may not be visible");
+                _logger.LogError("Unlit shader not loaded; manual calibration points may not be visible");
             }
         }
 

@@ -67,11 +67,11 @@ namespace CustomAvatar.Tracking.OpenVR
                         modelName = _openVRFacade.GetStringTrackedDeviceProperty(i, ETrackedDeviceProperty.Prop_ModelNumber_String);
                         id = string.Concat(modelName ?? "Unknown", " ", (uint)serialNumber?.GetHashCode(), "@", i);
 
-                        _logger.Info($"Device '{id}' connected");
+                        _logger.LogInformation($"Device '{id}' connected");
                     }
                     else
                     {
-                        _logger.Info($"Device '{id}' disconnected");
+                        _logger.LogInformation($"Device '{id}' disconnected");
 
                         id = null;
                         modelName = null;
@@ -92,14 +92,14 @@ namespace CustomAvatar.Tracking.OpenVR
 
                 if (deviceClass != device.deviceClass)
                 {
-                    _logger.Trace($"Device '{id}' class changed from '{device.deviceClass}' to '{deviceClass}'");
+                    _logger.LogTrace($"Device '{id}' class changed from '{device.deviceClass}' to '{deviceClass}'");
 
                     changeDetected = true;
                 }
 
                 if (controllerRole != device.controllerRole)
                 {
-                    _logger.Trace($"Device '{id}' controller role changed from '{device.controllerRole}' to '{controllerRole}'");
+                    _logger.LogTrace($"Device '{id}' controller role changed from '{device.controllerRole}' to '{controllerRole}'");
 
                     changeDetected = true;
                 }
@@ -108,15 +108,15 @@ namespace CustomAvatar.Tracking.OpenVR
                 {
                     if (role == null)
                     {
-                        _logger.Trace($"Device '{id}' role unset from '{device.role}'");
+                        _logger.LogTrace($"Device '{id}' role unset from '{device.role}'");
                     }
                     else if (device.role == null)
                     {
-                        _logger.Trace($"Device '{id}' role set to '{role}'");
+                        _logger.LogTrace($"Device '{id}' role set to '{role}'");
                     }
                     else
                     {
-                        _logger.Trace($"Device '{id}' role changed from '{device.role}' to '{role}'");
+                        _logger.LogTrace($"Device '{id}' role changed from '{device.role}' to '{role}'");
                     }
 
                     changeDetected = true;
@@ -167,11 +167,11 @@ namespace CustomAvatar.Tracking.OpenVR
                 {
                     if (isTracking)
                     {
-                        _logger.Info($"Acquired tracking of device '{id}'");
+                        _logger.LogInformation($"Acquired tracking of device '{id}'");
                     }
                     else
                     {
-                        _logger.Info($"Lost tracking of device '{id}'");
+                        _logger.LogInformation($"Lost tracking of device '{id}'");
                     }
 
                     changeDetected = true;

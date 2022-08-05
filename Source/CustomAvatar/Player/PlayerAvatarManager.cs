@@ -117,8 +117,8 @@ namespace CustomAvatar.Player
             }
             catch (Exception ex)
             {
-                _logger.Error($"Failed to create folder '{kCustomAvatarsPath}'");
-                _logger.Error(ex);
+                _logger.LogError($"Failed to create folder '{kCustomAvatarsPath}'");
+                _logger.LogError(ex);
             }
 
             _settings.moveFloorWithRoomAdjust.changed += OnMoveFloorWithRoomAdjustChanged;
@@ -169,7 +169,7 @@ namespace CustomAvatar.Player
 
             if (!forceReload && _avatarInfos.ContainsKey(fileName) && _avatarInfos[fileName].IsForFile(fullPath))
             {
-                _logger.Trace($"Using cached information for '{fileName}'");
+                _logger.LogTrace($"Using cached information for '{fileName}'");
                 progress.Report(1);
             }
             else
@@ -191,7 +191,7 @@ namespace CustomAvatar.Player
 
             if (!File.Exists(Path.Combine(kCustomAvatarsPath, previousAvatarFileName)))
             {
-                _logger.Warning("Previously loaded avatar no longer exists");
+                _logger.LogWarning("Previously loaded avatar no longer exists");
                 return Task.CompletedTask;
             }
 
@@ -235,12 +235,12 @@ namespace CustomAvatar.Player
             }
             catch (OperationCanceledException)
             {
-                _logger.Trace($"Canceled loading of '{fullPath}'");
+                _logger.LogTrace($"Canceled loading of '{fullPath}'");
             }
             catch (Exception ex)
             {
-                _logger.Error($"Failed to load '{fullPath}'");
-                _logger.Error(ex);
+                _logger.LogError($"Failed to load '{fullPath}'");
+                _logger.LogError(ex);
 
                 avatarLoadFailed?.Invoke(ex);
             }
@@ -278,7 +278,7 @@ namespace CustomAvatar.Player
         {
             if (!avatar)
             {
-                _logger.Info("No avatar selected");
+                _logger.LogInformation("No avatar selected");
                 if (_currentAvatarSettings != null) _currentAvatarSettings.ignoreExclusions.changed -= OnIgnoreFirstPersonExclusionsChanged;
                 _currentAvatarSettings = null;
                 avatarChanged?.Invoke(null);
@@ -353,7 +353,7 @@ namespace CustomAvatar.Player
 
             _parentHistory.Push(parent);
             _avatarContainer.transform.SetParent(parent, false);
-            _logger.Trace($"Parented avatar container to '{parent.name}' (scene '{parent.gameObject.scene.name}')");
+            _logger.LogTrace($"Parented avatar container to '{parent.name}' (scene '{parent.gameObject.scene.name}')");
         }
 
         internal void UnparentFrom(Transform parent)
@@ -384,11 +384,11 @@ namespace CustomAvatar.Player
 
             if (newParent)
             {
-                _logger.Trace($"Parented avatar container to '{parent.name}' (scene '{parent.gameObject.scene.name}')");
+                _logger.LogTrace($"Parented avatar container to '{parent.name}' (scene '{parent.gameObject.scene.name}')");
             }
             else
             {
-                _logger.Warning($"Parented avatar container to nothing!");
+                _logger.LogWarning($"Parented avatar container to nothing!");
                 Object.DontDestroyOnLoad(_avatarContainer);
             }
         }
@@ -478,7 +478,7 @@ namespace CustomAvatar.Player
 
             if (scale <= 0)
             {
-                _logger.Warning("Calculated scale is <= 0; reverting to 1");
+                _logger.LogWarning("Calculated scale is <= 0; reverting to 1");
                 scale = 1.0f;
             }
 
@@ -532,7 +532,7 @@ namespace CustomAvatar.Player
 
         private void OnPlayerHeightChanged(float height)
         {
-            _logger.Info($"Player height set to {height} m");
+            _logger.LogInformation($"Player height set to {height} m");
 
             ResizeCurrentAvatar();
         }
@@ -564,26 +564,26 @@ namespace CustomAvatar.Player
 
             try
             {
-                _logger.Info($"Loading cached avatar info from '{kAvatarInfoCacheFilePath}'");
+                _logger.LogInformation($"Loading cached avatar info from '{kAvatarInfoCacheFilePath}'");
 
                 using (var stream = new FileStream(kAvatarInfoCacheFilePath, FileMode.Open, FileAccess.Read))
                 using (var reader = new BinaryReader(stream, Encoding.UTF8))
                 {
                     if (!reader.ReadBytes(kCacheFileSignature.Length).SequenceEqual(kCacheFileSignature))
                     {
-                        _logger.Warning($"Invalid cache file magic");
+                        _logger.LogWarning($"Invalid cache file magic");
                         return;
                     }
 
                     if (reader.ReadByte() != kCacheFileVersion)
                     {
-                        _logger.Warning($"Invalid cache file version");
+                        _logger.LogWarning($"Invalid cache file version");
                         return;
                     }
 
                     int count = reader.ReadInt32();
 
-                    _logger.Trace($"Reading {count} cached infos");
+                    _logger.LogTrace($"Reading {count} cached infos");
 
                     for (int i = 0; i < count; i++)
                     {
@@ -600,7 +600,7 @@ namespace CustomAvatar.Player
 
                         if (string.IsNullOrWhiteSpace(avatarInfo.fileName) || Path.GetInvalidFileNameChars().Any(c => avatarInfo.fileName.Contains(c)))
                         {
-                            _logger.Error($"Invalid avatar file name '{avatarInfo.fileName}'");
+                            _logger.LogError($"Invalid avatar file name '{avatarInfo.fileName}'");
                             continue;
                         }
 
@@ -608,23 +608,23 @@ namespace CustomAvatar.Player
 
                         if (!File.Exists(fullPath))
                         {
-                            _logger.Notice($"File '{avatarInfo.fileName}' no longer exists; skipped");
+                            _logger.LogNotice($"File '{avatarInfo.fileName}' no longer exists; skipped");
                             continue;
                         }
 
                         if (!avatarInfo.IsForFile(fullPath))
                         {
-                            _logger.Notice($"Info for '{avatarInfo.fileName}' is outdated; skipped");
+                            _logger.LogNotice($"Info for '{avatarInfo.fileName}' is outdated; skipped");
                             continue;
                         }
 
-                        _logger.Trace($"Got cached info for '{avatarInfo.fileName}'");
+                        _logger.LogTrace($"Got cached info for '{avatarInfo.fileName}'");
 
                         if (_avatarInfos.ContainsKey(avatarInfo.fileName))
                         {
                             if (_avatarInfos[avatarInfo.fileName].timestamp > avatarInfo.timestamp)
                             {
-                                _logger.Notice($"Current info for '{avatarInfo.fileName}' is more recent; skipped");
+                                _logger.LogNotice($"Current info for '{avatarInfo.fileName}' is more recent; skipped");
                             }
                             else
                             {
@@ -640,8 +640,8 @@ namespace CustomAvatar.Player
             }
             catch (Exception ex)
             {
-                _logger.Error("Failed to load cached avatar info");
-                _logger.Error(ex);
+                _logger.LogError("Failed to load cached avatar info");
+                _logger.LogError(ex);
             }
         }
 
@@ -658,7 +658,7 @@ namespace CustomAvatar.Player
 
             try
             {
-                _logger.Info($"Saving avatar info cache to '{kAvatarInfoCacheFilePath}'");
+                _logger.LogInformation($"Saving avatar info cache to '{kAvatarInfoCacheFilePath}'");
 
                 using (var stream = new FileStream(kAvatarInfoCacheFilePath, FileMode.OpenOrCreate, FileAccess.Write))
                 {
@@ -688,8 +688,8 @@ namespace CustomAvatar.Player
             }
             catch (Exception ex)
             {
-                _logger.Error("Failed to save avatar info cache");
-                _logger.Error(ex);
+                _logger.LogError("Failed to save avatar info cache");
+                _logger.LogError(ex);
             }
         }
     }

@@ -84,7 +84,7 @@ namespace CustomAvatar.Tracking.UnityXR
 
                     if (inputDevice.characteristics != existingDevice.characteristics)
                     {
-                        _logger.Info($"Characteristics of device '{existingDevice.id}' changed from {existingDevice.characteristics} to {inputDevice.characteristics}");
+                        _logger.LogInformation($"Characteristics of device '{existingDevice.id}' changed from {existingDevice.characteristics} to {inputDevice.characteristics}");
                         changeDetected = true;
                     }
 
@@ -92,11 +92,11 @@ namespace CustomAvatar.Tracking.UnityXR
                     {
                         if (isTracked)
                         {
-                            _logger.Info($"Acquired tracking of device '{existingDevice.id}'");
+                            _logger.LogInformation($"Acquired tracking of device '{existingDevice.id}'");
                         }
                         else
                         {
-                            _logger.Info($"Lost tracking of device '{existingDevice.id}'");
+                            _logger.LogInformation($"Lost tracking of device '{existingDevice.id}'");
                         }
 
                         changeDetected = true;
@@ -117,7 +117,7 @@ namespace CustomAvatar.Tracking.UnityXR
                         id = inputDevice.name;
                     }
 
-                    _logger.Info($"Device '{id}' connected with characteristics {inputDevice.characteristics}");
+                    _logger.LogInformation($"Device '{id}' connected with characteristics {inputDevice.characteristics}");
 
                     _devices.Add(inputDevice.name, new UnityXRDevice(id, true, isTracked, inputDevice.characteristics));
 
@@ -141,7 +141,7 @@ namespace CustomAvatar.Tracking.UnityXR
         {
             if (_devices.TryGetValue(device.name, out UnityXRDevice existingDevice))
             {
-                _logger.Info($"Device '{existingDevice.id}' disconnected");
+                _logger.LogInformation($"Device '{existingDevice.id}' disconnected");
                 _devices.Remove(device.name);
 
                 _deviceRemovedSinceLastCall = true;

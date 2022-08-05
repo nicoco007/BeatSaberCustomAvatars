@@ -49,7 +49,7 @@ namespace CustomAvatar.Zenject
             }
             else
             {
-                _logger.Error($"GameObject '{name}' does not exist!");
+                _logger.LogError($"GameObject '{name}' does not exist!");
             }
         }
     }

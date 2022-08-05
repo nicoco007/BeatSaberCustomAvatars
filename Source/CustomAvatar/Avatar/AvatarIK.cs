@@ -127,7 +127,7 @@ namespace CustomAvatar.Avatar
 
             if (_vrikManager.solver_spine_maintainPelvisPosition > 0 && !_input.allowMaintainPelvisPosition)
             {
-                _logger.Warning("solver.spine.maintainPelvisPosition > 0 is not recommended because it can cause strange pelvis rotation issues. To allow maintainPelvisPosition > 0, please set allowMaintainPelvisPosition to true for your avatar in the configuration file.");
+                _logger.LogWarning("solver.spine.maintainPelvisPosition > 0 is not recommended because it can cause strange pelvis rotation issues. To allow maintainPelvisPosition > 0, please set allowMaintainPelvisPosition to true for your avatar in the configuration file.");
                 _vrik.solver.spine.maintainPelvisPosition = 0;
             }
 
@@ -215,7 +215,7 @@ namespace CustomAvatar.Avatar
         {
             if (!_vrik || !_vrikManager) return;
 
-            _logger.Info("Updating solver targets");
+            _logger.LogInformation("Updating solver targets");
 
             _vrik.solver.spine.headTarget = _vrikManager.solver_spine_headTarget;
             _vrik.solver.leftArm.target = _vrikManager.solver_leftArm_target;

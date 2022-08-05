@@ -49,8 +49,8 @@ namespace CustomAvatar.Configuration
             }
             catch (Exception ex)
             {
-                _logger.Error("Failed to load calibration data");
-                _logger.Error(ex);
+                _logger.LogError("Failed to load calibration data");
+                _logger.LogError(ex);
             }
         }
 
@@ -62,8 +62,8 @@ namespace CustomAvatar.Configuration
             }
             catch (Exception ex)
             {
-                _logger.Error("Failed to save calibration data");
-                _logger.Error(ex);
+                _logger.LogError("Failed to save calibration data");
+                _logger.LogError(ex);
             }
         }
 
@@ -83,7 +83,7 @@ namespace CustomAvatar.Configuration
         {
             if (!File.Exists(kCalibrationDataFilePath)) return;
 
-            _logger.Info($"Reading calibration data from '{kCalibrationDataFilePath}'");
+            _logger.LogInformation($"Reading calibration data from '{kCalibrationDataFilePath}'");
 
             using (var fileStream = new FileStream(kCalibrationDataFilePath, FileMode.Open, FileAccess.Read))
             using (var reader = new BinaryReader(fileStream, Encoding.UTF8))
@@ -92,7 +92,7 @@ namespace CustomAvatar.Configuration
 
                 if (reader.ReadByte() != kCalibrationDataFileVersion)
                 {
-                    _logger.Warning("Invalid file version");
+                    _logger.LogWarning("Invalid file version");
                     return;
                 }
 
@@ -102,7 +102,7 @@ namespace CustomAvatar.Configuration
 
                 int count = reader.ReadInt32();
 
-                _logger.Trace($"Reading {count} calibrations");
+                _logger.LogTrace($"Reading {count} calibrations");
 
                 for (int i = 0; i < count; i++)
                 {
@@ -110,7 +110,7 @@ namespace CustomAvatar.Configuration
 
                     if (!IsValidFileName(fileName))
                     {
-                        _logger.Warning($"'{fileName}' is not a valid file name; skipped");
+                        _logger.LogWarning($"'{fileName}' is not a valid file name; skipped");
                         continue;
                     }
 
@@ -118,11 +118,11 @@ namespace CustomAvatar.Configuration
 
                     if (!File.Exists(fullPath))
                     {
-                        _logger.Warning($"'{fullPath}' no longer exists; skipped");
+                        _logger.LogWarning($"'{fullPath}' no longer exists; skipped");
                         continue;
                     }
 
-                    _logger.Trace($"Got calibration data for '{fileName}'");
+                    _logger.LogTrace($"Got calibration data for '{fileName}'");
 
                     if (!_manualCalibration.ContainsKey(fileName))
                     {
@@ -138,7 +138,7 @@ namespace CustomAvatar.Configuration
 
         private void Save()
         {
-            _logger.Info($"Saving calibration data to '{kCalibrationDataFilePath}'");
+            _logger.LogInformation($"Saving calibration data to '{kCalibrationDataFilePath}'");
 
             using (var fileStream = new FileStream(kCalibrationDataFilePath, FileMode.OpenOrCreate, FileAccess.Write))
             {

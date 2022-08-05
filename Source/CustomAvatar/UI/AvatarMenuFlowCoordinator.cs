@@ -85,13 +85,13 @@ namespace CustomAvatar.UI
         {
             try
             {
-                _logger.Info($"Writing settings to '{Settings.kSettingsPath}'");
+                _logger.LogInformation($"Writing settings to '{Settings.kSettingsPath}'");
                 _settings.Save();
             }
             catch (Exception ex)
             {
-                _logger.Error("Failed to write settings to file");
-                _logger.Error(ex);
+                _logger.LogError("Failed to write settings to file");
+                _logger.LogError(ex);
             }
 
             BeatSaberUI.MainFlowCoordinator.DismissFlowCoordinator(this);

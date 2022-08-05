@@ -214,7 +214,7 @@ namespace CustomAvatar.Player
 
         internal void CalibrateFullBodyTrackingManual(SpawnedAvatar spawnedAvatar)
         {
-            _logger.Info("Applying manual full body tracking calibration");
+            _logger.LogInformation("Applying manual full body tracking calibration");
 
             CalibrationData.FullBodyCalibration fullBodyCalibration = _calibrationData.GetAvatarManualCalibration(spawnedAvatar.prefab.fileName);
 
@@ -227,7 +227,7 @@ namespace CustomAvatar.Player
 
         internal void CalibrateFullBodyTrackingAuto()
         {
-            _logger.Info("Applying automatic full body tracking calibration");
+            _logger.LogInformation("Applying automatic full body tracking calibration");
 
             CalibrationData.FullBodyCalibration fullBodyCalibration = _calibrationData.automaticCalibration;
 
@@ -241,7 +241,7 @@ namespace CustomAvatar.Player
                 Quaternion leftRotationCorrection = Quaternion.Inverse(leftFoot.rotation) * Quaternion.LookRotation(Vector3.up, leftFootStraightForward); // get difference between world rotation and flat forward rotation
 
                 fullBodyCalibration.leftFoot = new Pose(leftFootPositionCorrection, leftRotationCorrection);
-                _logger.Trace("Set left foot pose correction " + fullBodyCalibration.leftFoot);
+                _logger.LogTrace("Set left foot pose correction " + fullBodyCalibration.leftFoot);
             }
 
             if (TryGetRawPose(DeviceUse.RightFoot, out Pose rightFoot))
@@ -252,7 +252,7 @@ namespace CustomAvatar.Player
                 Quaternion rightRotationCorrection = Quaternion.Inverse(rightFoot.rotation) * Quaternion.LookRotation(Vector3.up, rightFootStraightForward);
 
                 fullBodyCalibration.rightFoot = new Pose(rightFootPositionCorrection, rightRotationCorrection);
-                _logger.Trace("Set right foot pose correction " + fullBodyCalibration.rightFoot);
+                _logger.LogTrace("Set right foot pose correction " + fullBodyCalibration.rightFoot);
             }
 
             if (TryGetRawPose(DeviceUse.Head, out Pose head) && TryGetRawPose(DeviceUse.Waist, out Pose waist))
@@ -272,7 +272,7 @@ namespace CustomAvatar.Player
                 Quaternion waistRotationCorrection = Quaternion.Inverse(waist.rotation) * Quaternion.LookRotation(waistStraightForward, Vector3.up);
 
                 fullBodyCalibration.waist = new Pose(waistPositionCorrection, waistRotationCorrection);
-                _logger.Trace("Set waist pose correction " + fullBodyCalibration.waist);
+                _logger.LogTrace("Set waist pose correction " + fullBodyCalibration.waist);
             }
 
             inputChanged?.Invoke();
@@ -311,7 +311,7 @@ namespace CustomAvatar.Player
 
             calibration = new Pose(positionOffset, rotationOffset);
 
-            _logger.Trace($"Set {use} pose correction: " + calibration);
+            _logger.LogTrace($"Set {use} pose correction: " + calibration);
         }
 
         private Pose GetUnscaledAvatarTargetPose(SpawnedAvatar spawnedAvatar, Transform target)

@@ -38,7 +38,7 @@ namespace CustomAvatar.Rendering
         {
             if (!_shaderLoader.stereoMirrorShader)
             {
-                _logger.Error("Stereo Mirror shader not loaded; mirror will not be created");
+                _logger.LogError("Stereo Mirror shader not loaded; mirror will not be created");
                 return null;
             }
 

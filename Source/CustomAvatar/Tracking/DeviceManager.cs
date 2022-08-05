@@ -94,7 +94,7 @@ namespace CustomAvatar.Tracking
 
         private void AssignDevices()
         {
-            _logger.Info("Device change detected, updating device assignments");
+            _logger.LogInformation("Device change detected, updating device assignments");
 
             string head = null;
             string leftHand = null;
@@ -105,7 +105,7 @@ namespace CustomAvatar.Tracking
 
             foreach (TrackedDevice device in _devices.Values)
             {
-                _logger.Trace($"Got device '{device.id}'");
+                _logger.LogTrace($"Got device '{device.id}'");
 
                 switch (device.deviceUse)
                 {
@@ -149,7 +149,7 @@ namespace CustomAvatar.Tracking
 
             if (string.IsNullOrEmpty(potential))
             {
-                _logger.Info($"Lost device '{current}' that was used as {use}");
+                _logger.LogInformation($"Lost device '{current}' that was used as {use}");
 
                 current = null;
             }
@@ -157,11 +157,11 @@ namespace CustomAvatar.Tracking
             {
                 if (current != null)
                 {
-                    _logger.Info($"Replacing device '{current}' with '{potential}' as {use}");
+                    _logger.LogInformation($"Replacing device '{current}' with '{potential}' as {use}");
                 }
                 else
                 {
-                    _logger.Info($"Using device '{potential}' as {use}");
+                    _logger.LogInformation($"Using device '{potential}' as {use}");
                 }
 
                 current = potential;

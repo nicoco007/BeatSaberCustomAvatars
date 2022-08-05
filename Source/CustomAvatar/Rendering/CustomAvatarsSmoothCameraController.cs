@@ -93,7 +93,7 @@ namespace CustomAvatar.Rendering
         {
             bool thirdPersonEnabled = kThirdPersonEnabledAccessor(ref _smoothCamera);
 
-            _logger.Info($"Setting avatar culling mask and near clip plane on '{_camera.name}'");
+            _logger.LogInformation($"Setting avatar culling mask and near clip plane on '{_camera.name}'");
 
             if (!_settings.showAvatarInSmoothCamera)
             {

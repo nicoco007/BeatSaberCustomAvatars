@@ -91,7 +91,7 @@ namespace CustomAvatar
 
             if (animator == null || !animator.isHuman)
             {
-                _logger.Error("VRIK needs a Humanoid Animator to auto-detect biped references. Please assign references manually.");
+                _logger.LogError("VRIK needs a Humanoid Animator to auto-detect biped references. Please assign references manually.");
                 return;
             }
 
