@@ -58,10 +58,6 @@ namespace CustomAvatar.Player
 
         private bool _isCalibrationModeEnabled;
 
-        private Pose _previousWaistPose;
-        private Pose _previousLeftFootPose;
-        private Pose _previousRightFootPose;
-
         private bool _shouldTrackFullBody =>
             _avatarSettings != null &&
                 (_avatarSettings.bypassCalibration ||
@@ -385,13 +381,7 @@ namespace CustomAvatar.Player
                 correction = _manualCalibration.waist;
             }
 
-            if (!TryGetTrackerPose(DeviceUse.Waist, _previousWaistPose, correction, _settings.fullBodyMotionSmoothing.waist, out pose))
-            {
-                return false;
-            }
-
-            _previousWaistPose = pose;
-            return true;
+            return TryGetTrackerPose(DeviceUse.Waist, correction, out pose);
         }
 
         private bool TryGetCalibratedLeftFootPose(out Pose pose)
@@ -408,13 +398,7 @@ namespace CustomAvatar.Player
                 correction = _manualCalibration.leftFoot;
             }
 
-            if (!TryGetTrackerPose(DeviceUse.LeftFoot, _previousLeftFootPose, correction, _settings.fullBodyMotionSmoothing.feet, out pose))
-            {
-                return false;
-            }
-
-            _previousLeftFootPose = pose;
-            return true;
+            return TryGetTrackerPose(DeviceUse.LeftFoot, correction, out pose);
         }
 
         private bool TryGetCalibratedRightFootPose(out Pose pose)
@@ -431,16 +415,10 @@ namespace CustomAvatar.Player
                 correction = _manualCalibration.rightFoot;
             }
 
-            if (!TryGetTrackerPose(DeviceUse.RightFoot, _previousRightFootPose, correction, _settings.fullBodyMotionSmoothing.feet, out pose))
-            {
-                return false;
-            }
-
-            _previousRightFootPose = pose;
-            return true;
+            return TryGetTrackerPose(DeviceUse.RightFoot, correction, out pose);
         }
 
-        private bool TryGetTrackerPose(DeviceUse use, Pose previousPose, Pose correction, Settings.TrackedPointSmoothing smoothing, out Pose pose)
+        private bool TryGetTrackerPose(DeviceUse use, Pose correction, out Pose pose)
         {
             if (!_shouldTrackFullBody || !_deviceManager.TryGetDeviceState(use, out TrackedDevice device) || !device.isTracking)
             {
@@ -453,7 +431,7 @@ namespace CustomAvatar.Player
 
             _trackingHelper.ApplyFloorScaling(_avatarManager.currentlySpawnedAvatar, ref position);
 
-            pose = new Pose(Vector3.Lerp(previousPose.position, position, smoothing.position), Quaternion.Slerp(previousPose.rotation, rotation, smoothing.rotation));
+            pose = new Pose(position, rotation);
 
             return true;
         }

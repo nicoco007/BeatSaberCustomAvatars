@@ -48,7 +48,6 @@ namespace CustomAvatar.Configuration
         public Lighting lighting { get; } = new Lighting();
         public Mirror mirror { get; } = new Mirror();
         public AutomaticFullBodyCalibration automaticCalibration { get; } = new AutomaticFullBodyCalibration();
-        public FullBodyMotionSmoothing fullBodyMotionSmoothing { get; } = new FullBodyMotionSmoothing();
 
         [JsonProperty(PropertyName = "avatarSpecificSettings", Order = int.MaxValue)] private readonly Dictionary<string, AvatarSpecificSettings> _avatarSpecificSettings = new Dictionary<string, AvatarSpecificSettings>();
 
@@ -137,12 +136,6 @@ namespace CustomAvatar.Configuration
         {
             public ObservableValue<float> renderScale { get; } = new ObservableValue<float>(1);
             public ObservableValue<int> antiAliasingLevel { get; } = new ObservableValue<int>(1);
-        }
-
-        public class FullBodyMotionSmoothing
-        {
-            public TrackedPointSmoothing waist { get; } = new TrackedPointSmoothing { position = 0.5f, rotation = 0.2f };
-            public TrackedPointSmoothing feet { get; } = new TrackedPointSmoothing { position = 0.5f, rotation = 0.2f };
         }
 
         public class TrackedPointSmoothing
