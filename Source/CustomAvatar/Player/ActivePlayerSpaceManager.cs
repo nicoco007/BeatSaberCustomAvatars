@@ -22,7 +22,9 @@ namespace CustomAvatar.Player
         public void Add(Transform playerSpace)
         {
             if (activePlayerSpace == playerSpace)
+            {
                 return;
+            }
 
             _playerSpaces.Remove(playerSpace);
             _playerSpaces.AddLast(playerSpace);
@@ -35,12 +37,16 @@ namespace CustomAvatar.Player
             bool notify = false;
 
             if (activePlayerSpace == playerSpace)
+            {
                 notify = true;
+            }
 
             _playerSpaces.Remove(playerSpace);
 
             if (notify)
+            {
                 InvokeActivePlayerSpaceChanged();
+            }
         }
 
         private void InvokeActivePlayerSpaceChanged()
