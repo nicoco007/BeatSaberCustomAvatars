@@ -40,6 +40,11 @@ namespace CustomAvatar.Rendering
             _camera = GetComponent<Camera>();
         }
 
+        private void OnEnable()
+        {
+            AddToPlayerSpaceManager();
+        }
+
         [Inject]
         [SuppressMessage("CodeQuality", "IDE0051", Justification = "Used by Zenject")]
         private void Construct(ILogger<CustomAvatarsMainCameraController> logger, Settings settings, ActivePlayerSpaceManager activeCameraManager)
