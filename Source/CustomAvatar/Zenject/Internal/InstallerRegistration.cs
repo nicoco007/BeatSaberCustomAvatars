@@ -65,6 +65,15 @@ namespace CustomAvatar.Zenject.Internal
             return target;
         }
 
+        public InstallerRegistrationOnDecoratorContext OnDecoratorContext(string decoratedContractName)
+        {
+            var target = new InstallerRegistrationOnDecoratorContext(decoratedContractName);
+
+            _target = target;
+
+            return target;
+        }
+
         internal bool TryInstallInto(Context context)
         {
             if (!_target.ShouldInstall(context)) return false;

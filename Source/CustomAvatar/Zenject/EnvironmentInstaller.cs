@@ -14,33 +14,38 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Diagnostics.CodeAnalysis;
-using IPA.Utilities;
-using UnityEngine;
+using CustomAvatar.Configuration;
+using CustomAvatar.Lighting;
 using Zenject;
 
-namespace CustomAvatar.Lighting.Lights
+namespace CustomAvatar.Zenject
 {
-    internal class MagicalNonexistentLightBecauseLightmappingIsBasedOnALightThatDoesNotExists : RuntimeLightWithIds
+    internal class EnvironmentInstaller : Installer
     {
-        private Light _light;
+        private readonly Settings _settings;
 
-        protected override void ColorWasSet(Color color)
+        public EnvironmentInstaller(Settings settings)
         {
-            _light.color = color;
-            _light.intensity = color.a;
+            _settings = settings;
         }
 
-        [Inject]
-        [SuppressMessage("CodeQuality", "IDE0051", Justification = "Used by Zenject")]
-        private void Construct(Light light, LightIntensitiesWithId[] lightIntensitiesWithIds, float intensity)
+        public override void InstallBindings()
         {
-            _light = light;
+            if (!_settings.lighting.environment.enabled)
+            {
+                return;
+            }
 
-            this.SetField<RuntimeLightWithIds, float>("_intensity", intensity);
-            this.SetField<RuntimeLightWithIds, LightIntensitiesWithId[]>("_lightIntensityData", lightIntensitiesWithIds);
+            switch (_settings.lighting.environment.type)
+            {
+                case EnvironmentLightingType.TwoSided:
+                    Container.Bind<TwoSidedLightingController>().FromNewComponentOnNewGameObject().NonLazy();
+                    break;
 
-            SetNewLightsWithIds(lightIntensitiesWithIds);
+                case EnvironmentLightingType.Dynamic:
+                    Container.Bind<AdditionalEnvironmentLightingController>().FromNewComponentOnNewGameObject().NonLazy();
+                    break;
+            }
         }
     }
 }

@@ -14,32 +14,25 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using CustomAvatar.Configuration;
-using CustomAvatar.Lighting;
+using ModestTree;
 using Zenject;
 
-namespace CustomAvatar.Zenject
+namespace CustomAvatar.Zenject.Internal
 {
-    internal class LightingInstaller : Installer
+    internal class InstallerRegistrationOnDecoratorContext : InstallerRegistrationOnTarget
     {
+        private readonly string _decoratedContractName;
 
-        private readonly Settings _settings;
-
-        public LightingInstaller(Settings settings)
+        internal InstallerRegistrationOnDecoratorContext(string decoratedContractName)
         {
-            _settings = settings;
+            Assert.IsNotEmpty(decoratedContractName);
+
+            _decoratedContractName = decoratedContractName;
         }
 
-        public override void InstallBindings()
+        internal override bool ShouldInstall(Context context)
         {
-            if (!_settings.lighting.environment.enabled) return;
-
-            switch (_settings.lighting.environment.type)
-            {
-                case EnvironmentLightingType.TwoSided:
-                    Container.Bind<TwoSidedLightingController>().FromNewComponentOnNewGameObject().NonLazy();
-                    break;
-            }
+            return context is SceneDecoratorContext sceneDecoratorContext && sceneDecoratorContext.DecoratedContractName == _decoratedContractName;
         }
     }
 }
