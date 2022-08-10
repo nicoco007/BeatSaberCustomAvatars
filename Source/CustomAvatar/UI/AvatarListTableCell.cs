@@ -156,6 +156,14 @@ namespace CustomAvatar.UI
             RefreshVisuals();
         }
 
+        private void OnDestroy()
+        {
+            if (_listItem != null)
+            {
+                _listItem.PropertyChanged -= OnPropertyChanged;
+            }
+        }
+
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
         {
             UpdateData();
