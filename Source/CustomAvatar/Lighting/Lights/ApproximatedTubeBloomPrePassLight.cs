@@ -48,6 +48,8 @@ namespace CustomAvatar.Lighting.Lights
 
         protected override float center => _tubeBloomPrePassLight.center;
 
+        protected override float alphaMultiplier => _tubeBloomPrePassLight.colorAlphaMultiplier;
+
         protected override Behaviour reference => _tubeBloomPrePassLight;
 
         [Inject]

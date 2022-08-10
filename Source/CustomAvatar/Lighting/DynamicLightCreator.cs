@@ -17,6 +17,7 @@
 using CustomAvatar.Configuration;
 using CustomAvatar.Lighting.Lights;
 using CustomAvatar.Logging;
+using CustomAvatar.Utilities;
 using IPA.Utilities;
 using UnityEngine;
 using Zenject;
@@ -27,6 +28,11 @@ namespace CustomAvatar.Lighting
     internal class DynamicLightCreator
     {
         private const string kMainTexName = "_MainTex";
+        private const string kWorldNoiseKeyword = "ENABLE_WORLD_NOISE";
+
+        // the shader doesn't just reduce the intensity when ENABLE_WORLD_NOISE is present
+        // so this is an approximation of the average relative intensity reduction
+        private const float kWorldNoiseIntensityMultiplier = 0.3f;
 
         private static readonly int kMainTexNameId = Shader.PropertyToID(kMainTexName);
 
@@ -71,7 +77,8 @@ namespace CustomAvatar.Lighting
                 MeshRenderer meshRenderer = parametricBoxController.GetField<MeshRenderer, ParametricBoxController>("_meshRenderer");
                 float shaderIntensity;
 
-                string shaderName = meshRenderer.material.shader.name;
+                Material material = meshRenderer.material;
+                string shaderName = material.shader.name;
 
                 switch (shaderName)
                 {
@@ -80,7 +87,7 @@ namespace CustomAvatar.Lighting
                         break;
 
                     case "Custom/TransparentNeonLight":
-                        shaderIntensity = 0.7f;
+                        shaderIntensity = material.HasKeyword(kWorldNoiseKeyword) ? kWorldNoiseIntensityMultiplier : 1f;
                         break;
 
                     default:
@@ -102,36 +109,43 @@ namespace CustomAvatar.Lighting
                     return;
                 }
 
-                string mainTextureName = meshRenderer.material.mainTexture.name;
+                Material material = meshRenderer.material;
+                string mainTextureName = material.mainTexture.name;
                 float materialIntensity;
 
                 switch (mainTextureName)
                 {
                     case "LaserGlowSprite1":
-                        materialIntensity = 1f;
+                        materialIntensity = 1.5f;
                         break;
 
                     case "LaserGlowSprite":
                     case "LaserGlowSpritePyro":
-                        materialIntensity = 0.8f;
+                        materialIntensity = 1.2f;
                         break;
 
                     case "LaserGlowSpriteWithCore":
-                        materialIntensity = 0.5f;
+                        materialIntensity = 0.6f;
                         break;
 
                     case "LaserGlowSprite0":
-                        materialIntensity = 0.2f;
+                        materialIntensity = 0.3f;
                         break;
 
                     case "LaserGlowSpriteHalf":
-                        materialIntensity = 0.1f;
+                        materialIntensity = 0.15f;
                         break;
 
                     default:
                         _logger.LogError($"Unexpected main texture '{mainTextureName}'");
                         materialIntensity = 0f;
                         break;
+                }
+
+                if (material.HasKeyword(kWorldNoiseKeyword))
+                {
+                    _logger.LogTrace($"{material.name} has {kWorldNoiseKeyword}");
+                    materialIntensity *= kWorldNoiseIntensityMultiplier;
                 }
 
                 dynamicLight.lights.Add(new ApproximatedParametric3SliceSpriteLight(parametric3SliceSpriteController, _settings.lighting.environment.intensity * _lightIntensityData.parametric3SliceSprite * materialIntensity));
@@ -145,7 +159,10 @@ namespace CustomAvatar.Lighting
                 return;
             }
 
-            DynamicDirectionalLight directionalUnityLight = _container.InstantiateComponent<DynamicDirectionalLight>(new GameObject(nameof(DynamicDirectionalLight)), new object[] { directionalLight, _settings.lighting.environment.intensity * _lightIntensityData.directionalLight });
+            DynamicDirectionalLight directionalUnityLight = _container.InstantiateComponent<DynamicDirectionalLight>(
+                new GameObject(nameof(DynamicDirectionalLight)),
+                new object[] { directionalLight, _settings.lighting.environment.intensity * _lightIntensityData.directionalLight });
+
             directionalUnityLight.transform.SetParent(directionalLight.transform, false);
         }
 

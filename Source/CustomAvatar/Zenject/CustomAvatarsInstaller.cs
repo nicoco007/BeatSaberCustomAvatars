@@ -43,7 +43,7 @@ namespace CustomAvatar.Zenject
         {
             directionalLight = 0.4f,
             parametric3SliceSprite = 1f,
-            parametricBoxLight = 5f,
+            parametricBoxLight = 12f,
             tubeBloomPrePassLight = 0.5f,
         };
 

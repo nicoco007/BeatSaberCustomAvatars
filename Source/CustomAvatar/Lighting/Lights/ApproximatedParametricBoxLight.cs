@@ -26,7 +26,7 @@ namespace CustomAvatar.Lighting.Lights
 
         public override Color color => _parametricBoxController.color;
 
-        protected override float lightIntensityMultiplier => _lightIntensityMultiplier * Mathf.Pow(_parametricBoxController.alphaMultiplier, 0.1f);
+        protected override float lightIntensityMultiplier => _lightIntensityMultiplier;
 
         protected override float startAlpha => _parametricBoxController.alphaStart;
 
@@ -43,6 +43,8 @@ namespace CustomAvatar.Lighting.Lights
         protected override float center => _parametricBoxController.heightCenter;
 
         protected override float minAlpha => _parametricBoxController.minAlpha;
+
+        protected override float alphaMultiplier => _parametricBoxController.alphaMultiplier;
 
         protected override Behaviour reference => _parametricBoxController;
 

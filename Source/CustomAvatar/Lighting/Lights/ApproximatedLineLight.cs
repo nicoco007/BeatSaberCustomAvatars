@@ -65,6 +65,8 @@ namespace CustomAvatar.Lighting.Lights
 
         protected virtual float minAlpha => 0;
 
+        protected virtual float alphaMultiplier => 1;
+
         protected abstract Behaviour reference { get; }
 
         protected virtual Transform origin => reference.transform;
@@ -142,7 +144,7 @@ namespace CustomAvatar.Lighting.Lights
             float distanceIntensity = IntensitySquareFalloff(xEnd, sqrMinimumDistance, xStart, xEnd) - IntensitySquareFalloff(xStart, sqrMinimumDistance, xStart, xEnd);
 
             this.brightestPoint = originToProjection + brightestPoint * lightUp;
-            this.intensity = distanceIntensity * Mathf.Max(color.a, minAlpha) * lightIntensityMultiplier * origin.TransformVector(width * Vector3.right).magnitude;
+            this.intensity = distanceIntensity * Mathf.Min(Mathf.Max(color.a, minAlpha) * alphaMultiplier, 1) * lightIntensityMultiplier * origin.TransformVector(width * Vector3.right).magnitude;
 
 #if DEBUG
             if (_debugLighting)

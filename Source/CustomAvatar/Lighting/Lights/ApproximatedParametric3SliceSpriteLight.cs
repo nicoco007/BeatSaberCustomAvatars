@@ -28,7 +28,7 @@ namespace CustomAvatar.Lighting.Lights
 
         public override Color color => _parametric3SliceSpriteController.color;
 
-        protected override float lightIntensityMultiplier => _lightIntensityMultiplier * _widthMultiplier * Mathf.Pow(_parametric3SliceSpriteController.alphaMultiplier, 0.1f);
+        protected override float lightIntensityMultiplier => _lightIntensityMultiplier * _widthMultiplier;
 
         protected override float startAlpha => _parametric3SliceSpriteController.alphaStart;
 
@@ -45,6 +45,8 @@ namespace CustomAvatar.Lighting.Lights
         protected override float center => _parametric3SliceSpriteController.center;
 
         protected override float minAlpha => _parametric3SliceSpriteController.minAlpha;
+
+        protected override float alphaMultiplier => _parametric3SliceSpriteController.alphaMultiplier;
 
         protected override Behaviour reference => _parametric3SliceSpriteController;
 
