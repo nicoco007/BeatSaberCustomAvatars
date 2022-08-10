@@ -15,6 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
@@ -30,6 +31,8 @@ namespace CustomAvatar.Player
     {
         // found this property through UnityExplorer, hopefully it doesn't disappear in future versions of Unity
         private static readonly Action<Renderer, Transform> kStaticBatchRootTransformSetter = ReflectionExtensions.CreatePropertySetter<Renderer, Transform>("staticBatchRootTransform");
+
+        private static readonly Dictionary<Plane, MirrorRendererSO> kReplacedMirrorRenderers = new Dictionary<Plane, MirrorRendererSO>();
 
         private ILogger<EnvironmentObject> _logger;
         private float _originalY;
@@ -65,17 +68,8 @@ namespace CustomAvatar.Player
             playerAvatarManager.avatarScaleChanged += OnAvatarScaleChanged;
             settings.floorHeightAdjust.changed += OnFloorHeightAdjustChanged;
 
-            foreach (Mirror mirror in GetComponentsInChildren<Mirror>())
-            {
-                _logger.LogTrace($"Replacing {nameof(MirrorRendererSO)} on '{mirror.name}'");
-
-                MirrorRendererSO original = mirror.GetField<MirrorRendererSO, Mirror>("_mirrorRenderer");
-                MirrorRendererSO renderer = Instantiate(original);
-                renderer.name = original.name + " (Moved Floor Instance)";
-                mirror.SetField("_mirrorRenderer", renderer);
-            }
-
             UpdateOffset();
+            CreateMirrors();
         }
 
         internal virtual void OnDestroy()
@@ -95,6 +89,43 @@ namespace CustomAvatar.Player
             }
 
             transform.position = new Vector3(transform.position.x, _originalY + floorOffset, transform.position.z);
+        }
+
+        // TODO: this should be re-run when offset is changed; there are
+        // no mirrors in the menu so this isn't currently a real problem
+        private void CreateMirrors()
+        {
+            if (playerAvatarManager.GetFloorOffset() == 0)
+            {
+                return;
+            }
+
+            foreach (Mirror mirror in GetComponentsInChildren<Mirror>())
+            {
+                _logger.LogTrace($"Replacing {nameof(MirrorRendererSO)} on '{mirror.name}'");
+
+                MirrorRendererSO original = mirror.GetField<MirrorRendererSO, Mirror>("_mirrorRenderer");
+                Transform t = mirror.transform;
+
+                var plane = new Plane(t.up, t.position);
+                plane.distance = Mathf.Round(plane.distance / 1000) * 1000;
+
+                if (!kReplacedMirrorRenderers.TryGetValue(plane, out MirrorRendererSO renderer) || renderer == null)
+                {
+                    kReplacedMirrorRenderers.Remove(plane);
+
+                    _logger.LogTrace($"Creating new {nameof(MirrorRendererSO)} for '{mirror.name}'");
+
+                    // TODO: these should be destroyed when they are no longer used; they shouldn't
+                    // cause performance issues by sticking around but should be cleaned up eventually
+                    renderer = Instantiate(original);
+
+                    kReplacedMirrorRenderers.Add(plane, renderer);
+                }
+
+                renderer.name = original.name + " (Moved Floor Instance)";
+                mirror.SetField("_mirrorRenderer", renderer);
+            }
         }
 
         private void OnAvatarChanged(SpawnedAvatar avatar)
