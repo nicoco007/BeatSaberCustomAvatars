@@ -39,7 +39,7 @@ namespace CustomAvatar.Avatar
             _poseManager = GetComponentInChildren<PoseManager>();
         }
 
-        private void Update()
+        private void LateUpdate()
         {
             ApplyFingerTracking();
         }
