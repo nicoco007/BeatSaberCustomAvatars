@@ -14,6 +14,7 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using CustomAvatar.Lighting;
 using CustomAvatar.Logging;
 using CustomAvatar.Player;
@@ -36,7 +37,7 @@ namespace CustomAvatar.Zenject
             TryAddEnvironmentObject("/BasicMenuGround");
             TryAddEnvironmentObject("/MenuFogRing (1)");
 
-            Container.BindInterfacesAndSelfTo<MenuLightingCreator>().AsSingle().NonLazy();
+            Container.Bind(typeof(IInitializable), typeof(IDisposable)).To<MenuLightingCreator>().AsSingle().NonLazy();
         }
 
         private void TryAddEnvironmentObject(string name)

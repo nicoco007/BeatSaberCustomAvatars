@@ -67,7 +67,7 @@ namespace CustomAvatar.Zenject
 
             Container.Bind<SettingsManager>().FromInstance(settingsManager).AsSingle();
             Container.Bind<Settings>().FromMethod((ctx) => ctx.Container.Resolve<SettingsManager>().settings).AsTransient();
-            Container.BindInterfacesAndSelfTo<CalibrationData>().AsSingle();
+            Container.Bind(typeof(CalibrationData), typeof(IDisposable)).To<CalibrationData>().AsSingle();
 
             if (XRSettings.loadedDeviceName.Equals("openvr", StringComparison.InvariantCultureIgnoreCase) &&
                 OpenVR.IsRuntimeInstalled() &&
@@ -75,17 +75,17 @@ namespace CustomAvatar.Zenject
                 !Environment.GetCommandLineArgs().Contains("--force-xr"))
             {
                 Container.Bind<OpenVRFacade>().AsTransient();
-                Container.BindInterfacesAndSelfTo<OpenVRDeviceProvider>().AsSingle();
+                Container.Bind(typeof(IDeviceProvider)).To<OpenVRDeviceProvider>().AsSingle();
             }
             else
             {
-                Container.BindInterfacesTo<UnityXRDeviceProvider>().AsSingle();
+                Container.Bind(typeof(IDeviceProvider), typeof(IInitializable), typeof(IDisposable)).To<UnityXRDeviceProvider>().AsSingle();
             }
 
             // managers
-            Container.BindInterfacesAndSelfTo<PlayerAvatarManager>().AsSingle().NonLazy();
-            Container.BindInterfacesAndSelfTo<ShaderLoader>().AsSingle().NonLazy();
-            Container.BindInterfacesAndSelfTo<DeviceManager>().AsSingle().NonLazy();
+            Container.Bind(typeof(PlayerAvatarManager), typeof(IInitializable), typeof(IDisposable)).To<PlayerAvatarManager>().AsSingle().NonLazy();
+            Container.Bind(typeof(ShaderLoader), typeof(IInitializable)).To<ShaderLoader>().AsSingle().NonLazy();
+            Container.Bind(typeof(DeviceManager), typeof(ITickable)).To<DeviceManager>().AsSingle().NonLazy();
 
             // this prevents a race condition when registering components in AvatarSpawner
             Container.BindExecutionOrder<PlayerAvatarManager>(kPlayerAvatarManagerExecutionOrder);
@@ -93,13 +93,13 @@ namespace CustomAvatar.Zenject
             Container.Bind<AvatarLoader>().AsSingle();
             Container.Bind<AvatarSpawner>().AsSingle();
             Container.Bind<ActivePlayerSpaceManager>().AsSingle();
-            Container.BindInterfacesAndSelfTo<VRPlayerInput>().AsSingle();
+            Container.Bind(typeof(VRPlayerInput), typeof(IInitializable), typeof(IDisposable)).To<VRPlayerInput>().AsSingle();
             Container.Bind(typeof(VRPlayerInputInternal), typeof(IInitializable), typeof(IDisposable)).To<VRPlayerInputInternal>().AsSingle();
-            Container.BindInterfacesAndSelfTo<LightingQualityController>().AsSingle();
+            Container.Bind(typeof(IInitializable)).To<LightingQualityController>().AsSingle();
             Container.Bind(typeof(BeatSaberUtilities), typeof(IInitializable), typeof(IDisposable), typeof(IAffinity)).To<BeatSaberUtilities>().AsSingle();
 
 #pragma warning disable CS0612
-            Container.BindInterfacesAndSelfTo<FloorController>().AsSingle();
+            Container.Bind(typeof(FloorController), typeof(IInitializable), typeof(IDisposable)).To<FloorController>().AsSingle();
 #pragma warning restore CS0612
 
             // helper classes

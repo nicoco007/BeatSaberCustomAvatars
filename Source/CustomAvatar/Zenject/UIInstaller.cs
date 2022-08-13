@@ -14,6 +14,7 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using CustomAvatar.Lighting;
 using CustomAvatar.Player;
 using CustomAvatar.UI;
@@ -39,7 +40,7 @@ namespace CustomAvatar.Zenject
 
         public override void InstallBindings()
         {
-            Container.BindInterfacesAndSelfTo<KeyboardInputHandler>().AsSingle().NonLazy();
+            Container.Bind(typeof(ITickable)).To<KeyboardInputHandler>().AsSingle().NonLazy();
 
             CreateAndBindViewController<AvatarListViewController>(kSideViewControllerWidth);
             CreateAndBindViewController<MirrorViewController>(kCenterViewControllerWidth);
@@ -53,9 +54,9 @@ namespace CustomAvatar.Zenject
             Container.Bind<ArmSpanMeasurer>().FromNewComponentOn(settingsViewController.gameObject).AsSingle();
             Container.Bind<ManualCalibrationHelper>().FromNewComponentOn(settingsViewController.gameObject).AsSingle();
 
-            Container.BindInterfacesAndSelfTo<AvatarMenuFlowCoordinator>().FromNewComponentOnNewGameObject();
+            Container.Bind(typeof(IInitializable), typeof(IDisposable)).To<AvatarMenuFlowCoordinator>().FromNewComponentOnNewGameObject();
 
-            Container.BindInterfacesAndSelfTo<MenuLightingCreator>().AsSingle().NonLazy();
+            Container.Bind(typeof(IInitializable), typeof(IDisposable)).To<MenuLightingCreator>().AsSingle().NonLazy();
 
             _armSpanSliderTag.Init(Container);
         }
