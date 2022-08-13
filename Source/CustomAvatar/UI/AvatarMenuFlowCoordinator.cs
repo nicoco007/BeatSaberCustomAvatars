@@ -31,7 +31,7 @@ namespace CustomAvatar.UI
         private AvatarListViewController _avatarListViewController;
         private MirrorViewController _mirrorViewController;
         private SettingsViewController _settingsViewController;
-        private Settings _settings;
+        private SettingsManager _settingsManager;
 
         private MenuButton _menuButton;
 
@@ -56,14 +56,20 @@ namespace CustomAvatar.UI
         }
 
         [Inject]
-        private void Construct(ILogger<AvatarMenuFlowCoordinator> logger, MainFlowCoordinator mainFlowCoordinator, AvatarListViewController avatarListViewController, MirrorViewController mirrorViewController, SettingsViewController settingsViewController, Settings settings)
+        private void Construct(
+            ILogger<AvatarMenuFlowCoordinator> logger,
+            MainFlowCoordinator mainFlowCoordinator,
+            AvatarListViewController avatarListViewController,
+            MirrorViewController mirrorViewController,
+            SettingsViewController settingsViewController,
+            SettingsManager settingsManager)
         {
             _logger = logger;
             _mainFlowCoordinator = mainFlowCoordinator;
             _avatarListViewController = avatarListViewController;
             _mirrorViewController = mirrorViewController;
             _settingsViewController = settingsViewController;
-            _settings = settings;
+            _settingsManager = settingsManager;
         }
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
@@ -85,8 +91,7 @@ namespace CustomAvatar.UI
         {
             try
             {
-                _logger.LogInformation($"Writing settings to '{Settings.kSettingsPath}'");
-                _settings.Save();
+                _settingsManager.Save();
             }
             catch (Exception ex)
             {

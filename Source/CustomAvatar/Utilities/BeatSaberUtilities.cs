@@ -15,15 +15,17 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using CustomAvatar.Configuration;
-using CustomAvatar.HarmonyPatches;
+using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
+using SiraUtil.Affinity;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 using Zenject;
 
 namespace CustomAvatar.Utilities
 {
-    internal class BeatSaberUtilities : IInitializable, IDisposable
+    internal class BeatSaberUtilities : IInitializable, IDisposable, IAffinity
     {
         public static readonly float kDefaultPlayerEyeHeight = MainSettingsModelSO.kDefaultPlayerHeight - MainSettingsModelSO.kHeadPosToPlayerHeightOffset;
         public static readonly float kDefaultPlayerArmSpan = MainSettingsModelSO.kDefaultPlayerHeight;
@@ -38,13 +40,15 @@ namespace CustomAvatar.Utilities
         public event Action<Vector3, Quaternion> roomAdjustChanged;
         public event Action<float> playerHeightChanged;
 
+        private readonly ILogger<BeatSaberUtilities> _logger;
         private readonly MainSettingsModelSO _mainSettingsModel;
         private readonly PlayerDataModel _playerDataModel;
         private readonly Settings _settings;
         private readonly IVRPlatformHelper _vrPlatformHelper;
 
-        internal BeatSaberUtilities(MainSettingsModelSO mainSettingsModel, PlayerDataModel playerDataModel, Settings settings, IVRPlatformHelper vrPlatformHelper)
+        internal BeatSaberUtilities(ILogger<BeatSaberUtilities> logger, MainSettingsModelSO mainSettingsModel, PlayerDataModel playerDataModel, Settings settings, IVRPlatformHelper vrPlatformHelper)
         {
+            _logger = logger;
             _mainSettingsModel = mainSettingsModel;
             _playerDataModel = playerDataModel;
             _settings = settings;
@@ -55,16 +59,12 @@ namespace CustomAvatar.Utilities
         {
             _mainSettingsModel.roomCenter.didChangeEvent += OnRoomCenterChanged;
             _mainSettingsModel.roomRotation.didChangeEvent += OnRoomRotationChanged;
-
-            PlayerData_playerSpecificSettings.playerHeightChanged += OnPlayerHeightChanged;
         }
 
         public void Dispose()
         {
             _mainSettingsModel.roomCenter.didChangeEvent -= OnRoomCenterChanged;
             _mainSettingsModel.roomRotation.didChangeEvent -= OnRoomRotationChanged;
-
-            PlayerData_playerSpecificSettings.playerHeightChanged -= OnPlayerHeightChanged;
         }
 
         /// <summary>
@@ -138,8 +138,15 @@ namespace CustomAvatar.Utilities
             roomAdjustChanged?.Invoke(roomCenter, roomRotation);
         }
 
-        private void OnPlayerHeightChanged(float playerHeight)
+        [AffinityPatch(typeof(PlayerData), nameof(PlayerData.playerSpecificSettings), AffinityMethodType.Setter)]
+        [AffinityPostfix]
+        [SuppressMessage("CodeQuality", "IDE0051", Justification = "Affinity patch")]
+        private void OnPlayerSpecificSettingsChanged(PlayerSpecificSettings value)
         {
+            float height = value.playerHeight;
+
+            _logger.LogInformation($"Player height set to {playerHeight} m");
+
             playerHeightChanged?.Invoke(playerHeight);
         }
     }

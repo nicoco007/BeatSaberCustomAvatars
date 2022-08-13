@@ -18,7 +18,6 @@ using System;
 using System.Linq;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
-using CustomAvatar.HarmonyPatches;
 using CustomAvatar.Lighting;
 using CustomAvatar.Logging;
 using CustomAvatar.Player;
@@ -29,6 +28,7 @@ using CustomAvatar.Tracking.UnityXR;
 using CustomAvatar.Utilities;
 using IPA.Logging;
 using IPA.Utilities;
+using SiraUtil.Affinity;
 using UnityEngine.XR;
 using Valve.VR;
 using Zenject;
@@ -47,13 +47,11 @@ namespace CustomAvatar.Zenject
             tubeBloomPrePassLight = 0.5f,
         };
 
-        private readonly ILogger<CustomAvatarsInstaller> _logger;
         private readonly Logger _ipaLogger;
         private readonly PCAppInit _pcAppInit;
 
         public CustomAvatarsInstaller(Logger ipaLogger, PCAppInit pcAppInit)
         {
-            _logger = new IPALogger<CustomAvatarsInstaller>(ipaLogger);
             _ipaLogger = ipaLogger;
             _pcAppInit = pcAppInit;
         }
@@ -64,9 +62,11 @@ namespace CustomAvatar.Zenject
             Container.Bind(typeof(ILogger<>)).FromMethodUntyped(CreateLogger).AsTransient();
 
             // settings
-            Settings settings = LoadSettings();
-            MirrorRendererSO_CreateOrUpdateMirrorCamera.settings = settings;
-            Container.Bind<Settings>().FromInstance(settings);
+            SettingsManager settingsManager = Container.Instantiate<SettingsManager>();
+            settingsManager.Load();
+
+            Container.Bind<SettingsManager>().FromInstance(settingsManager).AsSingle();
+            Container.Bind<Settings>().FromMethod((ctx) => ctx.Container.Resolve<SettingsManager>().settings).AsTransient();
             Container.BindInterfacesAndSelfTo<CalibrationData>().AsSingle();
 
             if (XRSettings.loadedDeviceName.Equals("openvr", StringComparison.InvariantCultureIgnoreCase) &&
@@ -96,7 +96,7 @@ namespace CustomAvatar.Zenject
             Container.BindInterfacesAndSelfTo<VRPlayerInput>().AsSingle();
             Container.Bind(typeof(VRPlayerInputInternal), typeof(IInitializable), typeof(IDisposable)).To<VRPlayerInputInternal>().AsSingle();
             Container.BindInterfacesAndSelfTo<LightingQualityController>().AsSingle();
-            Container.BindInterfacesAndSelfTo<BeatSaberUtilities>().AsSingle();
+            Container.Bind(typeof(BeatSaberUtilities), typeof(IInitializable), typeof(IDisposable), typeof(IAffinity)).To<BeatSaberUtilities>().AsSingle();
 
 #pragma warning disable CS0612
             Container.BindInterfacesAndSelfTo<FloorController>().AsSingle();
@@ -111,6 +111,8 @@ namespace CustomAvatar.Zenject
 
             Container.Bind<DynamicLightCreator>().AsCached();
             Container.Bind<LightIntensityData>().FromInstance(kLightIntensityData);
+
+            Container.Bind(typeof(IAffinity)).To<Patches.MirrorRendererSO>().AsSingle();
         }
 
         private object CreateLogger(InjectContext context)
@@ -120,22 +122,6 @@ namespace CustomAvatar.Zenject
             return genericType.IsAssignableFrom(context.ObjectType)
                 ? Activator.CreateInstance(typeof(IPALogger<>).MakeGenericType(genericType), _ipaLogger.GetChildLogger(genericType.Name))
                 : throw new InvalidOperationException($"Cannot create logger with generic type '{genericType}' for type '{context.ObjectType}'");
-        }
-
-        private Settings LoadSettings()
-        {
-            try
-            {
-                _logger.LogInformation($"Reading settings from '{Settings.kSettingsPath}'");
-                return Settings.Load();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("Failed to read settings from file");
-                _logger.LogError(ex);
-
-                return new Settings();
-            }
         }
     }
 }

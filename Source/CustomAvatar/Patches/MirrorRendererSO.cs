@@ -16,19 +16,25 @@
 
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
-using HarmonyLib;
+using SiraUtil.Affinity;
 using UnityEngine;
 
-namespace CustomAvatar.HarmonyPatches
+namespace CustomAvatar.Patches
 {
-    [HarmonyPatch(typeof(MirrorRendererSO), "CreateOrUpdateMirrorCamera")]
-    internal static class MirrorRendererSO_CreateOrUpdateMirrorCamera
+    internal class MirrorRendererSO : IAffinity
     {
-        internal static Settings settings { get; set; }
+        private readonly Settings _settings;
 
-        public static void Postfix(Camera ____mirrorCamera)
+        internal MirrorRendererSO(Settings settings)
         {
-            if (settings.showAvatarInMirrors)
+            _settings = settings;
+        }
+
+        [AffinityPatch(typeof(global::MirrorRendererSO), "CreateOrUpdateMirrorCamera")]
+        [AffinityPostfix]
+        public void CreateOrUpdateMirrorCamera_Postfix(Camera ____mirrorCamera)
+        {
+            if (_settings.showAvatarInMirrors)
             {
                 ____mirrorCamera.cullingMask |= AvatarLayers.kAllLayersMask;
             }

@@ -23,7 +23,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
-using CustomAvatar.HarmonyPatches;
 using CustomAvatar.Logging;
 using CustomAvatar.Utilities;
 using IPA.Utilities;
@@ -130,10 +129,9 @@ namespace CustomAvatar.Player
             _settings.enableLocomotion.changed += OnEnableLocomotionChanged;
 
             _beatSaberUtilities.roomAdjustChanged += OnRoomAdjustChanged;
+            _beatSaberUtilities.playerHeightChanged += OnPlayerHeightChanged;
 
             _activePlayerSpaceManager.activePlayerSpaceChanged += OnActivePlayerSpaceChanged;
-
-            PlayerData_playerSpecificSettings.playerHeightChanged += OnPlayerHeightChanged;
 
             _avatarContainer = new GameObject("Avatar Container");
             Object.DontDestroyOnLoad(_avatarContainer);
@@ -155,8 +153,9 @@ namespace CustomAvatar.Player
             _settings.enableLocomotion.changed -= OnEnableLocomotionChanged;
 
             _beatSaberUtilities.roomAdjustChanged -= OnRoomAdjustChanged;
+            _beatSaberUtilities.playerHeightChanged -= OnPlayerHeightChanged;
 
-            PlayerData_playerSpecificSettings.playerHeightChanged -= OnPlayerHeightChanged;
+            _activePlayerSpaceManager.activePlayerSpaceChanged -= OnActivePlayerSpaceChanged;
 
             SaveAvatarInfosToFile();
         }
@@ -499,8 +498,6 @@ namespace CustomAvatar.Player
 
         private void OnPlayerHeightChanged(float height)
         {
-            _logger.LogInformation($"Player height set to {height} m");
-
             ResizeCurrentAvatar();
         }
 

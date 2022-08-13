@@ -58,6 +58,9 @@
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\HMUI.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="SiraUtil">
+      <HintPath>..\..\Libraries\SiraUtil.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
       <Private>false</Private>

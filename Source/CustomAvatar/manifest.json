@@ -11,7 +11,7 @@
     "BSIPA": "^4.2.1",
     "BeatSaberMarkupLanguage": "^1.6.0",
     "DynamicOpenVR": ">=0.3.2 <=0.4.0",
-    "SiraUtil": "^3.0.0-rc1"
+    "SiraUtil": "^3.0.4"
   },
   "files": [
     "DynamicOpenVR\\Actions\\customavatars.json",
