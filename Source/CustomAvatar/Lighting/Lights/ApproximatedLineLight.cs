@@ -22,7 +22,7 @@ using UnityEngine;
 
 namespace CustomAvatar.Lighting.Lights
 {
-    internal abstract class ApproximatedLineLight : IApproximatedLight
+    internal abstract class ApproximatedLineLight
     {
         private static readonly Vector3 kOrigin = new Vector3(0, 1.5f, 0);
 

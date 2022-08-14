@@ -46,11 +46,10 @@ namespace CustomAvatar.Lighting
 
             _light = lightObject.AddComponent<Light>();
             _light.type = LightType.Directional;
-            _light.intensity = 1;
             _light.cullingMask = AvatarLayers.kAllLayersMask;
             _light.shadows = LightShadows.Soft;
             _light.shadowStrength = 1;
-            _light.renderMode = LightRenderMode.ForcePixel;
+            _light.renderMode = LightRenderMode.Auto;
 
             _lightWithIdManager.didChangeSomeColorsThisFrameEvent += UpdateLightColor;
 
@@ -67,11 +66,11 @@ namespace CustomAvatar.Lighting
             Color color = DirectionalLight.lights.Aggregate(new Color(0, 0, 0, 0), (acc, l) => acc + l.color * l.intensity) / DirectionalLight.lights.Sum(l => l.intensity);
 
             _light.color = color;
-            _light.intensity = color.a;
+            _light.intensity = color.a * 1.5f;
 
-            RenderSettings.ambientSkyColor = color * 0.2f;
-            RenderSettings.ambientEquatorColor = color * 0.5f;
-            RenderSettings.ambientGroundColor = color * 0.1f;
+            RenderSettings.ambientSkyColor = color * 0.1f;
+            RenderSettings.ambientEquatorColor = color * 0.3f;
+            RenderSettings.ambientGroundColor = color * 0.05f;
         }
     }
 }

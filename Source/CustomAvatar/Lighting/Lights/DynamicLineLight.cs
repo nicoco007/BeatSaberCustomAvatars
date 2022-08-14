@@ -23,16 +23,27 @@ using Zenject;
 
 namespace CustomAvatar.Lighting.Lights
 {
-    internal class DynamicLineLight : MonoBehaviour
+    internal class DynamicTubeBloomPrePassLight : MonoBehaviour, ISerializationCallbackReceiver
     {
         private Settings _settings;
-        private Light _light;
 
 #if DEBUG
         private ShaderLoader _shaderLoader;
 #endif
 
-        public List<IApproximatedLight> lights { get; } = new List<IApproximatedLight>();
+        [SerializeField]
+        private Light _light;
+
+        [SerializeField]
+        private ApproximatedTubeBloomPrePassLight _tubeBloomPrePassLight;
+
+        [SerializeField]
+        private ApproximatedParametric3SliceSpriteLight _parametric3SliceSpriteLight;
+
+        [SerializeField]
+        private ApproximatedParametricBoxLight _parametricBoxLight;
+
+        private readonly List<ApproximatedLineLight> _approximatedLineLights = new List<ApproximatedLineLight>(3);
 
         [Inject]
         public void Construct(Settings settings, ShaderLoader shaderLoader)
@@ -44,32 +55,38 @@ namespace CustomAvatar.Lighting.Lights
 #endif
         }
 
-        private void Start()
+        public void Init(ApproximatedTubeBloomPrePassLight tubeBloomPrePassLight, ApproximatedParametric3SliceSpriteLight parametric3SliceSpriteLight, ApproximatedParametricBoxLight parametricBoxLight)
         {
-            _light = gameObject.AddComponent<Light>();
+            _light = GetComponent<Light>();
+            _tubeBloomPrePassLight = tubeBloomPrePassLight;
+            _parametric3SliceSpriteLight = parametric3SliceSpriteLight;
+            _parametricBoxLight = parametricBoxLight;
 
-            _light.type = LightType.Directional;
-            _light.cullingMask = AvatarLayers.kAllLayersMask;
-            _light.shadows = LightShadows.None;
-            _light.intensity = 0;
+            PopulateList();
+        }
 
 #if DEBUG
-            foreach (ApproximatedLineLight light in lights)
+        private void Start()
+        {
+            foreach (ApproximatedLineLight light in _approximatedLineLights)
             {
                 light.SetUp(_shaderLoader);
             }
-#endif
         }
+#endif
 
         private void Update()
         {
-            if (lights.Count == 0) return;
+            if (_approximatedLineLights.Count == 0)
+            {
+                return;
+            }
 
             float intensity = 0;
             var color = new Color();
             Vector3 brightestPoint = Vector3.zero;
 
-            foreach (IApproximatedLight light in lights)
+            foreach (ApproximatedLineLight light in _approximatedLineLights)
             {
                 light.Update();
                 intensity += light.intensity;
@@ -77,15 +94,45 @@ namespace CustomAvatar.Lighting.Lights
                 brightestPoint += light.brightestPoint * light.intensity;
             }
 
-            _light.intensity = Mathf.Sqrt(intensity / lights.Count * _settings.lighting.environment.intensity);
+            _light.intensity = Mathf.Sqrt(intensity / _approximatedLineLights.Count * _settings.lighting.environment.intensity);
             _light.enabled = _light.intensity > 0.0001f;
-            _light.color = color / lights.Count;
+            _light.color = color / _approximatedLineLights.Count;
 
             Vector3 position = brightestPoint / intensity;
 
             if (Mathf.Abs(position.sqrMagnitude) > 1e-3)
             {
                 transform.rotation = Quaternion.LookRotation(-position);
+            }
+        }
+
+        public void OnBeforeSerialize()
+        {
+            // nothing to do here
+        }
+
+        public void OnAfterDeserialize()
+        {
+            PopulateList();
+        }
+
+        private void PopulateList()
+        {
+            _approximatedLineLights.Clear();
+
+            if (_tubeBloomPrePassLight != null)
+            {
+                _approximatedLineLights.Add(_tubeBloomPrePassLight);
+            }
+
+            if (_parametric3SliceSpriteLight != null)
+            {
+                _approximatedLineLights.Add(_parametric3SliceSpriteLight);
+            }
+
+            if (_parametricBoxLight != null)
+            {
+                _approximatedLineLights.Add(_parametricBoxLight);
             }
         }
     }

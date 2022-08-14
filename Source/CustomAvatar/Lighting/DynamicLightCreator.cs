@@ -14,6 +14,7 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Lighting.Lights;
 using CustomAvatar.Logging;
@@ -21,7 +22,6 @@ using CustomAvatar.Utilities;
 using IPA.Utilities;
 using UnityEngine;
 using Zenject;
-using static RuntimeLightWithIds;
 
 namespace CustomAvatar.Lighting
 {
@@ -49,15 +49,6 @@ namespace CustomAvatar.Lighting
             _container = container;
         }
 
-        public void CreateExtraLight(Quaternion rotation, LightIntensitiesWithId[] lightIntensitiesWithIds, float intensity)
-        {
-            var go = new GameObject(nameof(MagicalNonexistentLightBecauseLightmappingIsBasedOnALightThatDoesNotExists));
-
-            go.transform.rotation = rotation;
-
-            _container.InstantiateComponent<MagicalNonexistentLightBecauseLightmappingIsBasedOnALightThatDoesNotExists>(go, new object[] { lightIntensitiesWithIds, intensity });
-        }
-
         public void ConfigureTubeBloomPrePassLight(TubeBloomPrePassLight tubeBloomPrePassLight)
         {
             if (!_settings.lighting.environment.enabled)
@@ -65,91 +56,104 @@ namespace CustomAvatar.Lighting
                 return;
             }
 
-            DynamicLineLight dynamicLight = _container.InstantiateComponent<DynamicLineLight>(new GameObject(nameof(DynamicLineLight)));
-            dynamicLight.transform.SetParent(tubeBloomPrePassLight.transform, false);
-            dynamicLight.lights.Add(new ApproximatedTubeBloomPrePassLight(tubeBloomPrePassLight, _settings.lighting.environment.intensity * _lightIntensityData.tubeBloomPrePassLight));
-
             Parametric3SliceSpriteController parametric3SliceSpriteController = tubeBloomPrePassLight.GetField<Parametric3SliceSpriteController, TubeBloomPrePassLight>("_dynamic3SliceSprite");
             ParametricBoxController parametricBoxController = tubeBloomPrePassLight.GetField<ParametricBoxController, TubeBloomPrePassLight>("_parametricBoxController");
 
-            if (parametricBoxController)
+            DynamicTubeBloomPrePassLight dynamicLight = _container.InstantiateComponent<DynamicTubeBloomPrePassLight>(CreateLightObject(nameof(DynamicTubeBloomPrePassLight)));
+            dynamicLight.transform.SetParent(tubeBloomPrePassLight.transform, false);
+            dynamicLight.Init(
+                new ApproximatedTubeBloomPrePassLight(tubeBloomPrePassLight, _settings.lighting.environment.intensity * _lightIntensityData.tubeBloomPrePassLight),
+                ConfigureParametric3SliceSpriteLight(parametric3SliceSpriteController),
+                ConfigureParametricBoxLight(parametricBoxController));
+        }
+
+        private ApproximatedParametric3SliceSpriteLight ConfigureParametric3SliceSpriteLight(Parametric3SliceSpriteController parametric3SliceSpriteController)
+        {
+            if (parametric3SliceSpriteController == null)
             {
-                MeshRenderer meshRenderer = parametricBoxController.GetField<MeshRenderer, ParametricBoxController>("_meshRenderer");
-                float shaderIntensity;
-
-                Material material = meshRenderer.material;
-                string shaderName = material.shader.name;
-
-                switch (shaderName)
-                {
-                    case "Custom/OpaqueNeonLight":
-                        shaderIntensity = 1f;
-                        break;
-
-                    case "Custom/TransparentNeonLight":
-                        shaderIntensity = material.HasKeyword(kWorldNoiseKeyword) ? kWorldNoiseIntensityMultiplier : 1f;
-                        break;
-
-                    default:
-                        _logger.LogError($"Unexpected shader '{shaderName}'");
-                        shaderIntensity = 0f;
-                        break;
-                }
-
-                dynamicLight.lights.Add(new ApproximatedParametricBoxLight(parametricBoxController, _settings.lighting.environment.intensity * _lightIntensityData.parametricBoxLight * shaderIntensity));
+                return null;
             }
 
-            if (parametric3SliceSpriteController)
+            MeshRenderer meshRenderer = parametric3SliceSpriteController.GetField<MeshRenderer, Parametric3SliceSpriteController>("_meshRenderer");
+
+            if (meshRenderer == null || meshRenderer.material == null || !meshRenderer.material.HasProperty(kMainTexNameId) || meshRenderer.material.mainTexture == null)
             {
-                MeshRenderer meshRenderer = parametric3SliceSpriteController.GetField<MeshRenderer, Parametric3SliceSpriteController>("_meshRenderer");
-
-                if (meshRenderer == null || meshRenderer.material == null || !meshRenderer.material.HasProperty(kMainTexNameId) || meshRenderer.material.mainTexture == null)
-                {
-                    _logger.LogWarning($"{nameof(Parametric3SliceSpriteController)} has no {kMainTexName}");
-                    return;
-                }
-
-                Material material = meshRenderer.material;
-                string mainTextureName = material.mainTexture.name;
-                float materialIntensity;
-
-                switch (mainTextureName)
-                {
-                    case "LaserGlowSprite1":
-                        materialIntensity = 1.5f;
-                        break;
-
-                    case "LaserGlowSprite":
-                    case "LaserGlowSpritePyro":
-                        materialIntensity = 1.2f;
-                        break;
-
-                    case "LaserGlowSpriteWithCore":
-                        materialIntensity = 0.6f;
-                        break;
-
-                    case "LaserGlowSprite0":
-                        materialIntensity = 0.3f;
-                        break;
-
-                    case "LaserGlowSpriteHalf":
-                        materialIntensity = 0.15f;
-                        break;
-
-                    default:
-                        _logger.LogError($"Unexpected main texture '{mainTextureName}'");
-                        materialIntensity = 0f;
-                        break;
-                }
-
-                if (material.HasKeyword(kWorldNoiseKeyword))
-                {
-                    _logger.LogTrace($"{material.name} has {kWorldNoiseKeyword}");
-                    materialIntensity *= kWorldNoiseIntensityMultiplier;
-                }
-
-                dynamicLight.lights.Add(new ApproximatedParametric3SliceSpriteLight(parametric3SliceSpriteController, _settings.lighting.environment.intensity * _lightIntensityData.parametric3SliceSprite * materialIntensity));
+                _logger.LogWarning($"{nameof(Parametric3SliceSpriteController)} has no {kMainTexName}");
+                return null;
             }
+
+            Material material = meshRenderer.material;
+            string mainTextureName = material.mainTexture.name;
+            float materialIntensity;
+
+            switch (mainTextureName)
+            {
+                case "LaserGlowSprite1":
+                    materialIntensity = 1.2f;
+                    break;
+
+                case "LaserGlowSprite":
+                case "LaserGlowSpritePyro":
+                    materialIntensity = 1f;
+                    break;
+
+                case "LaserGlowSpriteWithCore":
+                    materialIntensity = 0.6f;
+                    break;
+
+                case "LaserGlowSprite0":
+                    materialIntensity = 0.3f;
+                    break;
+
+                case "LaserGlowSpriteHalf":
+                    materialIntensity = 0.15f;
+                    break;
+
+                default:
+                    _logger.LogError($"Unexpected main texture '{mainTextureName}'");
+                    materialIntensity = 0f;
+                    break;
+            }
+
+            if (material.HasKeyword(kWorldNoiseKeyword))
+            {
+                _logger.LogTrace($"{material.name} has {kWorldNoiseKeyword}");
+                materialIntensity *= kWorldNoiseIntensityMultiplier;
+            }
+
+            return new ApproximatedParametric3SliceSpriteLight(parametric3SliceSpriteController, _settings.lighting.environment.intensity * _lightIntensityData.parametric3SliceSprite * materialIntensity);
+        }
+
+        private ApproximatedParametricBoxLight ConfigureParametricBoxLight(ParametricBoxController parametricBoxController)
+        {
+            if (parametricBoxController == null)
+            {
+                return null;
+            }
+
+            MeshRenderer meshRenderer = parametricBoxController.GetField<MeshRenderer, ParametricBoxController>("_meshRenderer");
+            float shaderIntensity;
+
+            Material material = meshRenderer.material;
+            string shaderName = material.shader.name;
+
+            switch (shaderName)
+            {
+                case "Custom/OpaqueNeonLight":
+                    shaderIntensity = 1f;
+                    break;
+
+                case "Custom/TransparentNeonLight":
+                    shaderIntensity = material.HasKeyword(kWorldNoiseKeyword) ? kWorldNoiseIntensityMultiplier : 1f;
+                    break;
+
+                default:
+                    _logger.LogError($"Unexpected shader '{shaderName}'");
+                    shaderIntensity = 0f;
+                    break;
+            }
+
+            return new ApproximatedParametricBoxLight(parametricBoxController, _settings.lighting.environment.intensity * _lightIntensityData.parametricBoxLight * shaderIntensity);
         }
 
         public void ConfigureDirectionalLight(DirectionalLight directionalLight)
@@ -159,11 +163,9 @@ namespace CustomAvatar.Lighting
                 return;
             }
 
-            DynamicDirectionalLight directionalUnityLight = _container.InstantiateComponent<DynamicDirectionalLight>(
-                new GameObject(nameof(DynamicDirectionalLight)),
-                new object[] { directionalLight, _settings.lighting.environment.intensity * _lightIntensityData.directionalLight });
-
-            directionalUnityLight.transform.SetParent(directionalLight.transform, false);
+            DynamicDirectionalLight dynamicDirectionalLight = _container.InstantiateComponent<DynamicDirectionalLight>(CreateLightObject(nameof(DynamicDirectionalLight)));
+            dynamicDirectionalLight.transform.SetParent(directionalLight.transform, false);
+            dynamicDirectionalLight.Init(directionalLight, _settings.lighting.environment.intensity * _lightIntensityData.directionalLight);
         }
 
         public void ConfigureBloomPrePassBackgroundColorsGradient(BloomPrePassBackgroundColorsGradient bloomPrePassBackgroundColorsGradient)
@@ -174,10 +176,23 @@ namespace CustomAvatar.Lighting
             }
 
             DynamicBloomPrePassBackgroundColorsGradient dynamicBloomPrePassBackgroundColorsGradient = _container.InstantiateComponent<DynamicBloomPrePassBackgroundColorsGradient>(
-                new GameObject(nameof(DynamicBloomPrePassBackgroundColorsGradient)),
-                new object[] { bloomPrePassBackgroundColorsGradient, _lightIntensityData.ambient });
+                new GameObject(nameof(DynamicBloomPrePassBackgroundColorsGradient)));
 
             dynamicBloomPrePassBackgroundColorsGradient.transform.SetParent(bloomPrePassBackgroundColorsGradient.transform, false);
+            dynamicBloomPrePassBackgroundColorsGradient.Init(bloomPrePassBackgroundColorsGradient, _lightIntensityData.ambient);
+        }
+
+        private GameObject CreateLightObject(string name)
+        {
+            var gameObject = new GameObject(name);
+            Light light = gameObject.AddComponent<Light>();
+
+            light.type = LightType.Directional;
+            light.cullingMask = AvatarLayers.kAllLayersMask;
+            light.shadows = LightShadows.None;
+            light.intensity = 0;
+
+            return gameObject;
         }
     }
 }

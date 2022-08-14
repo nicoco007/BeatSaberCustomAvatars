@@ -14,14 +14,18 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using UnityEngine;
-using Zenject;
 
 namespace CustomAvatar.Lighting.Lights
 {
+    [Serializable]
     internal class ApproximatedParametricBoxLight : ApproximatedLineLight
     {
+        [SerializeField]
         private readonly ParametricBoxController _parametricBoxController;
+
+        [SerializeField]
         private readonly float _lightIntensityMultiplier;
 
         public override Color color => _parametricBoxController.color;
@@ -50,7 +54,6 @@ namespace CustomAvatar.Lighting.Lights
 
         protected override Transform origin => _parametricBoxController.transform.parent;
 
-        [Inject]
         internal ApproximatedParametricBoxLight(ParametricBoxController parametricBoxController, float lightIntensityMultiplier)
         {
             _parametricBoxController = parametricBoxController;

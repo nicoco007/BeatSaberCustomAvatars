@@ -14,9 +14,7 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using CustomAvatar.Avatar;
 using UnityEngine;
-using Zenject;
 
 namespace CustomAvatar.Lighting.Lights
 {
@@ -24,27 +22,26 @@ namespace CustomAvatar.Lighting.Lights
     {
         private static readonly Vector3 kOrigin = new Vector3(0, 1, 0);
 
+        [SerializeField]
         private DirectionalLight _directionalLight;
+
+        [SerializeField]
         private float _lightIntensityMultiplier;
 
+        [SerializeField]
         private Light _light;
+
         private float _intensityFalloff;
 
-        [Inject]
-        internal void Construct(DirectionalLight directionalLight, float lightIntensityMultiplier)
+        internal void Init(DirectionalLight directionalLight, float lightIntensityMultiplier)
         {
             _directionalLight = directionalLight;
             _lightIntensityMultiplier = lightIntensityMultiplier;
+            _light = GetComponent<Light>();
         }
 
         private void Start()
         {
-            _light = gameObject.AddComponent<Light>();
-
-            _light.type = LightType.Directional;
-            _light.cullingMask = AvatarLayers.kAllLayersMask;
-            _light.shadows = LightShadows.None;
-
             float distance = Vector3.Distance(_directionalLight.transform.position, kOrigin);
             _intensityFalloff = Mathf.Max((_directionalLight.radius - distance) / _directionalLight.radius, 0);
         }

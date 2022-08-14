@@ -42,9 +42,9 @@ namespace CustomAvatar.Zenject
         private static readonly LightIntensityData kLightIntensityData = new LightIntensityData
         {
             directionalLight = 0.4f,
-            parametric3SliceSprite = 1f,
+            parametric3SliceSprite = 2f,
             parametricBoxLight = 12f,
-            tubeBloomPrePassLight = 0.5f,
+            tubeBloomPrePassLight = 0.4f,
         };
 
         private readonly Logger _ipaLogger;

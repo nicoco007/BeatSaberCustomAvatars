@@ -14,18 +14,21 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using UnityEngine;
-using Zenject;
 
 namespace CustomAvatar.Lighting.Lights
 {
+    [Serializable]
     internal class DynamicBloomPrePassBackgroundColorsGradient : MonoBehaviour
     {
+        [SerializeField]
         private BloomPrePassBackgroundColorsGradient _bloomPrePassBackgroundColorsGradient;
+
+        [SerializeField]
         private float _intensity;
 
-        [Inject]
-        internal void Construct(BloomPrePassBackgroundColorsGradient bloomPrePassBackgroundColorsGradient, float intensity)
+        internal void Init(BloomPrePassBackgroundColorsGradient bloomPrePassBackgroundColorsGradient, float intensity)
         {
             _bloomPrePassBackgroundColorsGradient = bloomPrePassBackgroundColorsGradient;
             _intensity = intensity;

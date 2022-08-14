@@ -14,16 +14,22 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using IPA.Utilities;
 using UnityEngine;
-using Zenject;
 
 namespace CustomAvatar.Lighting.Lights
 {
+    [Serializable]
     internal class ApproximatedParametric3SliceSpriteLight : ApproximatedLineLight
     {
+        [SerializeField]
         private readonly Parametric3SliceSpriteController _parametric3SliceSpriteController;
+
+        [SerializeField]
         private readonly float _lightIntensityMultiplier;
+
+        [SerializeField]
         private readonly float _widthMultiplier;
 
         public override Color color => _parametric3SliceSpriteController.color;
@@ -50,7 +56,6 @@ namespace CustomAvatar.Lighting.Lights
 
         protected override Behaviour reference => _parametric3SliceSpriteController;
 
-        [Inject]
         internal ApproximatedParametric3SliceSpriteLight(Parametric3SliceSpriteController parametric3SliceSpriteController, float lightIntensityMultiplier)
         {
             _parametric3SliceSpriteController = parametric3SliceSpriteController;

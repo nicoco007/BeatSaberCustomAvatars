@@ -16,18 +16,27 @@
 
 using IPA.Utilities;
 using UnityEngine;
-using Zenject;
 
 namespace CustomAvatar.Lighting.Lights
 {
     internal class ApproximatedTubeBloomPrePassLight : ApproximatedLineLight
     {
+        [SerializeField]
         private readonly TubeBloomPrePassLight _tubeBloomPrePassLight;
+
+        [SerializeField]
         private readonly float _lightIntensityMultiplier;
 
+        [SerializeField]
         private readonly float _startAlpha;
+
+        [SerializeField]
         private readonly float _endAlpha;
+
+        [SerializeField]
         private readonly float _startWidth;
+
+        [SerializeField]
         private readonly float _endWidth;
 
         public override Color color => _tubeBloomPrePassLight.color;
@@ -52,7 +61,6 @@ namespace CustomAvatar.Lighting.Lights
 
         protected override Behaviour reference => _tubeBloomPrePassLight;
 
-        [Inject]
         internal ApproximatedTubeBloomPrePassLight(TubeBloomPrePassLight tubeBloomPrePassLight, float lightIntensityMultiplier)
         {
             _tubeBloomPrePassLight = tubeBloomPrePassLight;
