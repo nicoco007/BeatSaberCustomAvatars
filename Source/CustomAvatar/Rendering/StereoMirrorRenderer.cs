@@ -45,9 +45,7 @@ namespace CustomAvatar.Rendering
         private int _antiAliasing = 2;
         private readonly Dictionary<Camera, RenderTexture> _renderTextures = new Dictionary<Camera, RenderTexture>();
 
-        public int renderWidth { get; set; } = 1024;
-
-        public int renderHeight { get; set; } = 1024;
+        public float renderScale { get; set; } = 1;
 
         public int antiAliasing
         {
@@ -114,9 +112,15 @@ namespace CustomAvatar.Rendering
         {
             Camera camera = Camera.current;
 
-            if (!camera || camera == _mirrorCamera || renderWidth <= 0 || renderHeight <= 0)
+            if (!camera || camera == _mirrorCamera || renderScale <= 0)
             {
                 return null;
+            }
+
+            // return immediately if we've already rendered for this frame
+            if (_renderTextures.TryGetValue(camera, out RenderTexture renderTexture))
+            {
+                return renderTexture;
             }
 
             Vector3 cameraPosition = camera.transform.position;
@@ -130,11 +134,8 @@ namespace CustomAvatar.Rendering
                 return null;
             }
 
-            // return immediately if we've already rendered for this frame
-            if (_renderTextures.TryGetValue(camera, out RenderTexture renderTexture))
-            {
-                return renderTexture;
-            }
+            int renderWidth = Mathf.RoundToInt(camera.pixelWidth * renderScale);
+            int renderHeight = Mathf.RoundToInt(camera.pixelHeight * renderScale);
 
             renderTexture = RenderTexture.GetTemporary(Mathf.Min(stereoEnabled ? renderWidth * 2 : renderWidth, SystemInfo.maxTextureSize), Mathf.Min(renderHeight, SystemInfo.maxTextureSize), 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default, _antiAliasing);
 

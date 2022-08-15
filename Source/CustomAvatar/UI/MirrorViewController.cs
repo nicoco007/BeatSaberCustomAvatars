@@ -214,22 +214,7 @@ namespace CustomAvatar.UI
         {
             if (!_mirror) return;
 
-            int baseWidth = XRSettings.eyeTextureWidth;
-            int baseHeight = XRSettings.eyeTextureHeight;
-
-            if (baseWidth <= 0)
-            {
-                baseWidth = UnityEngine.Screen.width;
-            }
-
-            if (baseHeight <= 0)
-            {
-                baseHeight = UnityEngine.Screen.height;
-            }
-
-            _mirror.renderWidth = Mathf.RoundToInt(baseWidth * scale * _mainSettingsModel.vrResolutionScale);
-            _mirror.renderHeight = Mathf.RoundToInt(baseHeight * scale * _mainSettingsModel.vrResolutionScale);
-
+            _mirror.renderScale = scale * _mainSettingsModel.vrResolutionScale;
             _mirror.antiAliasing = antiAliasingLevel;
         }
 
