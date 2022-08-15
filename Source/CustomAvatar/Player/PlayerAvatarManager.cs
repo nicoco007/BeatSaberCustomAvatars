@@ -131,7 +131,7 @@ namespace CustomAvatar.Player
             _beatSaberUtilities.roomAdjustChanged += OnRoomAdjustChanged;
             _beatSaberUtilities.playerHeightChanged += OnPlayerHeightChanged;
 
-            _activePlayerSpaceManager.activePlayerSpaceChanged += OnActivePlayerSpaceChanged;
+            _activePlayerSpaceManager.changed += OnActivePlayerSpaceChanged;
 
             _avatarContainer = new GameObject("Avatar Container");
             Object.DontDestroyOnLoad(_avatarContainer);
@@ -155,7 +155,7 @@ namespace CustomAvatar.Player
             _beatSaberUtilities.roomAdjustChanged -= OnRoomAdjustChanged;
             _beatSaberUtilities.playerHeightChanged -= OnPlayerHeightChanged;
 
-            _activePlayerSpaceManager.activePlayerSpaceChanged -= OnActivePlayerSpaceChanged;
+            _activePlayerSpaceManager.changed -= OnActivePlayerSpaceChanged;
 
             SaveAvatarInfosToFile();
         }

@@ -94,6 +94,7 @@ namespace CustomAvatar.Configuration
         {
             public ObservableValue<float> renderScale { get; } = new ObservableValue<float>(1);
             public ObservableValue<int> antiAliasingLevel { get; } = new ObservableValue<int>(1);
+            public bool renderInExternalCameras { get; set; } = false;
         }
 
         public class TrackedPointSmoothing

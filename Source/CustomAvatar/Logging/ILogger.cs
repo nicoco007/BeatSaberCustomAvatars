@@ -16,7 +16,7 @@
 
 namespace CustomAvatar.Logging
 {
-    internal interface ILogger<T>
+    internal interface ILogger<out T>
     {
         string name { set; }
 

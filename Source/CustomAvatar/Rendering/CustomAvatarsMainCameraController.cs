@@ -31,8 +31,9 @@ namespace CustomAvatar.Rendering
         private ILogger<CustomAvatarsMainCameraController> _logger;
         private Settings _settings;
         private ActivePlayerSpaceManager _activePlayerSpaceManager;
-        private Transform _parent;
+        private ActiveCameraManager _activeCameraManager;
 
+        private Transform _parent;
         private Camera _camera;
 
         private void Awake()
@@ -47,11 +48,12 @@ namespace CustomAvatar.Rendering
 
         [Inject]
         [SuppressMessage("CodeQuality", "IDE0051", Justification = "Used by Zenject")]
-        private void Construct(ILogger<CustomAvatarsMainCameraController> logger, Settings settings, ActivePlayerSpaceManager activeCameraManager)
+        private void Construct(ILogger<CustomAvatarsMainCameraController> logger, Settings settings, ActivePlayerSpaceManager activePlayerSpaceManager, ActiveCameraManager activeCameraManager)
         {
             _logger = logger;
             _settings = settings;
-            _activePlayerSpaceManager = activeCameraManager;
+            _activePlayerSpaceManager = activePlayerSpaceManager;
+            _activeCameraManager = activeCameraManager;
         }
 
         private void Start()
@@ -116,11 +118,13 @@ namespace CustomAvatar.Rendering
             }
 
             _activePlayerSpaceManager?.Add(_parent);
+            _activeCameraManager?.Add(_camera);
         }
 
         private void RemoveFromPlayerSpaceManager()
         {
             _activePlayerSpaceManager?.Remove(_parent);
+            _activeCameraManager?.Remove(_camera);
         }
     }
 }

@@ -15,6 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using CustomAvatar.Avatar;
+using CustomAvatar.Configuration;
 using CustomAvatar.Utilities;
 using System;
 using System.Collections.Generic;
@@ -39,6 +40,8 @@ namespace CustomAvatar.Rendering
         private static readonly Rect kFullRect = new Rect(0f, 0f, 1f, 1f);
 
         private ShaderLoader _shaderLoader;
+        private ActiveCameraManager _activeCameraManager;
+        private Settings _settings;
 
         private Renderer _renderer;
         private Camera _mirrorCamera;
@@ -66,15 +69,17 @@ namespace CustomAvatar.Rendering
 #pragma warning disable IDE0051
 
         [Inject]
-        private void Inject(ShaderLoader shaderLoader)
+        private void Inject(ShaderLoader shaderLoader, ActiveCameraManager activeCameraManager, Settings settings)
         {
             _shaderLoader = shaderLoader;
+            _activeCameraManager = activeCameraManager;
+            _settings = settings;
         }
 
         private void Start()
         {
             _renderer = GetComponent<Renderer>();
-            _renderer.sharedMaterial = new Material(_shaderLoader.stereoMirrorShader);
+            _renderer.material = new Material(_shaderLoader.stereoMirrorShader);
         }
 
         private void Update()
@@ -91,7 +96,11 @@ namespace CustomAvatar.Rendering
 
             if (mirrorTexture)
             {
-                _renderer.sharedMaterial.SetTexture(kTexturePropertyId, mirrorTexture);
+                _renderer.material.SetTexture(kTexturePropertyId, mirrorTexture);
+            }
+            else
+            {
+                _renderer.material.SetTexture(kTexturePropertyId, Texture2D.blackTexture);
             }
         }
 
@@ -113,6 +122,11 @@ namespace CustomAvatar.Rendering
             Camera camera = Camera.current;
 
             if (!camera || camera == _mirrorCamera || renderScale <= 0)
+            {
+                return null;
+            }
+
+            if (!_settings.mirror.renderInExternalCameras && camera != _activeCameraManager.current)
             {
                 return null;
             }

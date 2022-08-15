@@ -50,7 +50,7 @@
 
   <tab tags="avatar-tabs" tab-name="Current Avatar" anchor-max-y="0.8">
     <macro.as-host host="avatarSpecificSettingsHost">
-    <loading-indicator active="~isLoaderActive" />
+      <loading-indicator active="~isLoaderActive" />
     
       <settings-container anchor-pos-y="0" size-delta-y="0">
         <toggle-setting text="Ignore first person exclusions" value="ignoreExclusions" bind-value="true" apply-on-change="true" interactable="~isAvatarSpecificSettingsAvailable" hover-hint="Show the entire model in first person, even if some parts were configured to be hidden in first person. This may cause issues on certain avatars."/>
@@ -68,8 +68,12 @@
   <tab tags="avatar-tabs" tab-name="Interface" anchor-max-y="0.8">
     <macro.as-host host="interfaceSettingsHost">
       <settings-container anchor-pos-y="0" size-delta-y="0">
-        <increment-setting text="Mirror Render Scale" value="renderScale" bind-value="true" apply-on-change="true" min="0.5" max="2" increment="0.1" />
-        <list-setting text="Mirror Anti Aliasing" value="antiAliasingLevel" bind-value="true" apply-on-change="true" options="antiAliasingLevelOptions" formatter="AntiAliasingLevelFormatter" />
+        <horizontal pref-width="90" pad-top="2">
+          <text color="#808080" text="Mirror" font-size="4" italics="true" align="Baseline" />
+        </horizontal>
+        <increment-setting text="Render Scale" value="renderScale" bind-value="true" apply-on-change="true" min="0.5" max="2" increment="0.1" />
+        <list-setting text="Anti Aliasing" value="antiAliasingLevel" bind-value="true" apply-on-change="true" options="antiAliasingLevelOptions" formatter="AntiAliasingLevelFormatter" />
+        <toggle-setting text="Show in non-VR cameras" value="renderInExternalCameras" bind-value="true" apply-on-change="true" hover-hint="Disable this setting to improve performance in this menu when multiple cameras are used (e.g. smooth camera or Camera2)."/>
       </settings-container>
     </macro.as-host>
   </tab>

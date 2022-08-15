@@ -92,6 +92,7 @@ namespace CustomAvatar.Zenject
 
             Container.Bind<AvatarLoader>().AsSingle();
             Container.Bind<AvatarSpawner>().AsSingle();
+            Container.Bind<ActiveCameraManager>().AsSingle();
             Container.Bind<ActivePlayerSpaceManager>().AsSingle();
             Container.Bind(typeof(VRPlayerInput), typeof(IInitializable), typeof(IDisposable)).To<VRPlayerInput>().AsSingle();
             Container.Bind(typeof(VRPlayerInputInternal), typeof(IInitializable), typeof(IDisposable)).To<VRPlayerInputInternal>().AsSingle();

@@ -46,6 +46,7 @@ namespace CustomAvatar.Rendering
             var scale = new Vector3(size.x / 10, 1, size.y / 10);
 
             var mirrorPlane = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            mirrorPlane.layer = 5;
             Object.Destroy(mirrorPlane.GetComponent<Collider>());
             mirrorPlane.transform.SetParent(container);
             mirrorPlane.name = "Stereo Mirror";

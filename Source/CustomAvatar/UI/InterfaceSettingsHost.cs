@@ -40,6 +40,12 @@ namespace CustomAvatar.UI
             set => _settings.mirror.antiAliasingLevel.value = value;
         }
 
+        internal bool renderInExternalCameras
+        {
+            get => _settings.mirror.renderInExternalCameras;
+            set => _settings.mirror.renderInExternalCameras = value;
+        }
+
         internal List<object> antiAliasingLevelOptions = new List<object>(new object[] { 1, 2, 4, 8 });
 
         protected string AntiAliasingLevelFormatter(int value)
