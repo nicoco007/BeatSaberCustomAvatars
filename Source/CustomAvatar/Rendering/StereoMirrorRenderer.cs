@@ -94,14 +94,7 @@ namespace CustomAvatar.Rendering
 
             Texture mirrorTexture = GetMirrorTexture(position, up);
 
-            if (mirrorTexture)
-            {
-                _renderer.material.SetTexture(kTexturePropertyId, mirrorTexture);
-            }
-            else
-            {
-                _renderer.material.SetTexture(kTexturePropertyId, Texture2D.blackTexture);
-            }
+            _renderer.material.SetTexture(kTexturePropertyId, mirrorTexture);
         }
 
 #pragma warning restore IDE0051
@@ -123,12 +116,12 @@ namespace CustomAvatar.Rendering
 
             if (!camera || camera == _mirrorCamera || renderScale <= 0)
             {
-                return null;
+                return Texture2D.blackTexture;
             }
 
             if (!_settings.mirror.renderInExternalCameras && camera != _activeCameraManager.current)
             {
-                return null;
+                return Texture2D.blackTexture;
             }
 
             // return immediately if we've already rendered for this frame
@@ -137,17 +130,18 @@ namespace CustomAvatar.Rendering
                 return renderTexture;
             }
 
-            Vector3 cameraPosition = camera.transform.position;
-            Quaternion cameraRotation = camera.transform.rotation;
-            bool stereoEnabled = camera.stereoEnabled;
+            Transform cameraTransform = camera.transform;
+            Vector3 cameraPosition = cameraTransform.position;
+            Quaternion cameraRotation = cameraTransform.rotation;
             var plane = new Plane(reflectionPlaneNormal, reflectionPlanePosition);
 
             // don't render if the camera is too close to the mirror to prevent errors
             if (plane.GetDistanceToPoint(cameraPosition) <= Mathf.Epsilon || (camera.orthographic && Mathf.Abs(Vector3.Dot(camera.transform.forward, reflectionPlaneNormal)) <= Mathf.Epsilon))
             {
-                return null;
+                return Texture2D.blackTexture;
             }
 
+            bool stereoEnabled = camera.stereoEnabled;
             int renderWidth = Mathf.RoundToInt(camera.pixelWidth * renderScale);
             int renderHeight = Mathf.RoundToInt(camera.pixelHeight * renderScale);
 
