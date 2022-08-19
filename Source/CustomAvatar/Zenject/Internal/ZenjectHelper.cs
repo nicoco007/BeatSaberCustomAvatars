@@ -64,9 +64,9 @@ namespace CustomAvatar.Zenject.Internal
             kComponentsToBind.Add(typeof(T));
         }
 
-        public static void AddComponentAlongsideExisting<TExisting, TAdd>(string childTransformName = null, Func<GameObject, bool> condition = null, params object[] extraArgs) where TExisting : MonoBehaviour where TAdd : MonoBehaviour
+        public static void AddComponentAlongsideExisting<TExisting, TAdd>(string childTransformName = null, Func<GameObject, bool> condition = null) where TExisting : MonoBehaviour where TAdd : MonoBehaviour
         {
-            var componentRegistration = new ComponentRegistration(typeof(TAdd), childTransformName, condition, extraArgs);
+            var componentRegistration = new ComponentRegistration(typeof(TAdd), childTransformName, condition);
 
             if (kComponentsToAdd.TryGetValue(typeof(TExisting), out List<ComponentRegistration> types))
             {
@@ -208,7 +208,9 @@ namespace CustomAvatar.Zenject.Internal
                 }
 
                 _logger.LogTrace($"Adding '{componentRegistration.type.FullName}' to GameObject '{target.name}' (for '{monoBehaviourType.FullName}')");
-                context.Container.InstantiateComponent(componentRegistration.type, target, componentRegistration.extraArgs);
+
+                Component component = target.AddComponent(componentRegistration.type);
+                context.Container.QueueForInject(component);
             }
         }
 
@@ -232,14 +234,12 @@ namespace CustomAvatar.Zenject.Internal
             public Type type { get; }
             public string childTransformName { get; }
             public Func<GameObject, bool> condition { get; }
-            public object[] extraArgs { get; }
 
-            public ComponentRegistration(Type type, string childTransformName, Func<GameObject, bool> condition, object[] extraArgs)
+            public ComponentRegistration(Type type, string childTransformName, Func<GameObject, bool> condition)
             {
                 this.type = type;
                 this.childTransformName = childTransformName;
                 this.condition = condition;
-                this.extraArgs = extraArgs;
             }
         }
 
