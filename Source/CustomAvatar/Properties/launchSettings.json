@@ -3,17 +3,17 @@
     "Beat Saber": {
       "commandName": "Executable",
       "executablePath": "$(SteamExecutable)",
-      "commandLineArgs": "-applaunch 620980 --verbose --debug --trace"
+      "commandLineArgs": "-applaunch 620980 --verbose"
     },
     "Beat Saber (FPFC)": {
       "commandName": "Executable",
       "executablePath": "$(SteamExecutable)",
-      "commandLineArgs": "-applaunch 620980 fpfc --verbose --debug --trace"
+      "commandLineArgs": "-applaunch 620980 fpfc --verbose"
     },
     "Beat Saber (Force XR)": {
       "commandName": "Executable",
       "executablePath": "$(SteamExecutable)",
-      "commandLineArgs": "-applaunch 620980 --force-xr --verbose --debug --trace"
+      "commandLineArgs": "-applaunch 620980 --force-xr --verbose"
     }
   }
 }
