@@ -43,9 +43,9 @@ namespace CustomAvatar.Lighting.Lights
         private void Update()
         {
             Color tintColor = _bloomPrePassBackgroundColorsGradient.tintColor;
-            RenderSettings.ambientSkyColor = _bloomPrePassBackgroundColorsGradient.EvaluateColor(0) * tintColor * _intensity;
+            RenderSettings.ambientGroundColor = _bloomPrePassBackgroundColorsGradient.EvaluateColor(0) * tintColor * _intensity;
             RenderSettings.ambientEquatorColor = _bloomPrePassBackgroundColorsGradient.EvaluateColor(0.5f) * tintColor * _intensity;
-            RenderSettings.ambientGroundColor = _bloomPrePassBackgroundColorsGradient.EvaluateColor(1) * tintColor * _intensity;
+            RenderSettings.ambientSkyColor = _bloomPrePassBackgroundColorsGradient.EvaluateColor(1) * tintColor * _intensity;
         }
     }
 }

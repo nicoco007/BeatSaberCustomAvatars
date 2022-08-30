@@ -45,6 +45,7 @@ namespace CustomAvatar.Zenject
             parametric3SliceSprite = 2f,
             parametricBoxLight = 12f,
             tubeBloomPrePassLight = 0.4f,
+            ambient = 0.4f,
         };
 
         private readonly Logger _ipaLogger;
