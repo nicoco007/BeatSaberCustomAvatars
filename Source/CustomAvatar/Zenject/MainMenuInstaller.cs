@@ -18,7 +18,7 @@ using System;
 using CustomAvatar.Lighting;
 using CustomAvatar.Player;
 using CustomAvatar.UI;
-using CustomAvatar.UI.Slider;
+using CustomAvatar.UI.CustomTags;
 using HMUI;
 using UnityEngine;
 using VRUIControls;
@@ -31,9 +31,9 @@ namespace CustomAvatar.Zenject
         private const float kCenterViewControllerWidth = 160;
         private const float kSideViewControllerWidth = 120;
 
-        private readonly ArmSpanSliderTag _armSpanSliderTag;
+        private readonly ValuePickerTag _armSpanSliderTag;
 
-        public MainMenuInstaller(ArmSpanSliderTag armSpanSliderTag)
+        public MainMenuInstaller(ValuePickerTag armSpanSliderTag)
         {
             _armSpanSliderTag = armSpanSliderTag;
         }

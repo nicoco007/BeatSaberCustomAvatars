@@ -22,6 +22,7 @@ using CustomAvatar.Avatar;
 using CustomAvatar.Lighting;
 using CustomAvatar.Player;
 using CustomAvatar.Tracking;
+using CustomAvatar.Utilities;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -34,7 +35,8 @@ namespace CustomAvatar.Configuration
         public ObservableValue<AvatarResizeMode> resizeMode { get; } = new ObservableValue<AvatarResizeMode>(AvatarResizeMode.Height);
         public ObservableValue<FloorHeightAdjustMode> floorHeightAdjust { get; } = new ObservableValue<FloorHeightAdjustMode>(FloorHeightAdjustMode.Off);
         public string previousAvatarPath { get; set; }
-        public ObservableValue<float> playerArmSpan { get; } = new ObservableValue<float>(VRPlayerInput.kDefaultPlayerArmSpan);
+        public ObservableValue<float> playerEyeHeight { get; } = new ObservableValue<float>(BeatSaberUtilities.kDefaultPlayerEyeHeight);
+        public ObservableValue<float> playerArmSpan { get; } = new ObservableValue<float>(BeatSaberUtilities.kDefaultPlayerArmSpan);
         public bool calibrateFullBodyTrackingOnStart { get; set; }
         public ObservableValue<bool> enableLocomotion { get; } = new ObservableValue<bool>(true);
         public ObservableValue<float> cameraNearClipPlane { get; } = new ObservableValue<float>(0.1f);

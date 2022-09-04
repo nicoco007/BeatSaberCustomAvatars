@@ -27,8 +27,6 @@ namespace CustomAvatar.Player
     /// </summary>
     public class VRPlayerInput : IInitializable, IDisposable, IAvatarInput
     {
-        public static readonly float kDefaultPlayerArmSpan = 1.8f;
-
         public bool allowMaintainPelvisPosition => _internalPlayerInput.allowMaintainPelvisPosition;
 
         public event Action inputChanged;

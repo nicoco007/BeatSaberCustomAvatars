@@ -98,7 +98,7 @@ namespace CustomAvatar.Zenject
             Container.Bind(typeof(VRPlayerInput), typeof(IInitializable), typeof(IDisposable)).To<VRPlayerInput>().AsSingle();
             Container.Bind(typeof(VRPlayerInputInternal), typeof(IInitializable), typeof(IDisposable)).To<VRPlayerInputInternal>().AsSingle();
             Container.Bind(typeof(IInitializable)).To<LightingQualityController>().AsSingle();
-            Container.Bind(typeof(BeatSaberUtilities), typeof(IInitializable), typeof(IDisposable), typeof(IAffinity)).To<BeatSaberUtilities>().AsSingle();
+            Container.Bind(typeof(BeatSaberUtilities), typeof(IInitializable), typeof(IDisposable)).To<BeatSaberUtilities>().AsSingle();
 
 #pragma warning disable CS0612
             Container.Bind(typeof(FloorController), typeof(IInitializable), typeof(IDisposable)).To<FloorController>().AsSingle();

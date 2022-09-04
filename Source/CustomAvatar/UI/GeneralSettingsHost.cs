@@ -14,12 +14,14 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using CustomAvatar.Avatar;
-using CustomAvatar.Player;
 using System.Collections.Generic;
-using UnityEngine;
+using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
+using CustomAvatar.Player;
 using CustomAvatar.Tracking;
+using CustomAvatar.Utilities;
+using UnityEngine;
+using UnityEngine.XR;
 
 namespace CustomAvatar.UI
 {
@@ -34,16 +36,14 @@ namespace CustomAvatar.UI
 
         private readonly VRPlayerInputInternal _playerInput;
         private readonly Settings _settings;
-        private readonly PlayerDataModel _playerDataModel;
         private readonly ArmSpanMeasurer _armSpanMeasurer;
 
         private float _armSpan;
 
-        internal GeneralSettingsHost(VRPlayerInputInternal playerInput, Settings settings, PlayerDataModel playerDataModel, ArmSpanMeasurer armSpanMeasurer)
+        internal GeneralSettingsHost(VRPlayerInputInternal playerInput, Settings settings, ArmSpanMeasurer armSpanMeasurer)
         {
             _playerInput = playerInput;
             _settings = settings;
-            _playerDataModel = playerDataModel;
             _armSpanMeasurer = armSpanMeasurer;
         }
 
@@ -84,7 +84,6 @@ namespace CustomAvatar.UI
             {
                 _settings.resizeMode.value = value;
                 NotifyPropertyChanged();
-                NotifyPropertyChanged(nameof(showHeightAdjustWarning));
             }
         }
 
@@ -138,7 +137,17 @@ namespace CustomAvatar.UI
 
         public bool isHeightAdjustInteractable => !_armSpanMeasurer.isMeasuring;
 
-        public bool showHeightAdjustWarning => _settings.resizeMode != AvatarResizeMode.None && _playerDataModel.playerData.playerSpecificSettings.automaticPlayerHeight;
+        public float height
+        {
+            get => _settings.playerEyeHeight;
+            set
+            {
+                _settings.playerEyeHeight.value = value;
+                NotifyPropertyChanged();
+
+                resizeMode = AvatarResizeMode.Height;
+            }
+        }
 
         public float armSpan
         {
@@ -162,7 +171,6 @@ namespace CustomAvatar.UI
             _armSpan = _settings.playerArmSpan;
             NotifyPropertyChanged(nameof(armSpan));
 
-            NotifyPropertyChanged(nameof(showHeightAdjustWarning));
             OnPlayerInputChanged();
         }
 
@@ -227,6 +235,19 @@ namespace CustomAvatar.UI
                     return "Entire Environment";
                 default:
                     return null;
+            }
+        }
+
+        private string HeightFormatter(float value)
+        {
+            return $"{value + BeatSaberUtilities.kHeadPosToPlayerHeightOffset:0.00} m";
+        }
+
+        private void OnMeasureHeightButtonClicked()
+        {
+            if (InputDevices.GetDeviceAtXRNode(XRNode.Head).TryGetFeatureValue(CommonUsages.devicePosition, out Vector3 position))
+            {
+                this.height = Mathf.Round(position.y * 100) / 100;
             }
         }
 

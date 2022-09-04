@@ -125,11 +125,11 @@ namespace CustomAvatar.Player
             _settings.resizeMode.changed += OnResizeModeChanged;
             _settings.floorHeightAdjust.changed += OnFloorHeightAdjustChanged;
             _settings.isAvatarVisibleInFirstPerson.changed += OnAvatarVisibleInFirstPersonChanged;
+            _settings.playerEyeHeight.changed += OnPlayerHeightChanged;
             _settings.playerArmSpan.changed += OnPlayerArmSpanChanged;
             _settings.enableLocomotion.changed += OnEnableLocomotionChanged;
 
             _beatSaberUtilities.roomAdjustChanged += OnRoomAdjustChanged;
-            _beatSaberUtilities.playerHeightChanged += OnPlayerHeightChanged;
 
             _activePlayerSpaceManager.changed += OnActivePlayerSpaceChanged;
 
@@ -149,11 +149,11 @@ namespace CustomAvatar.Player
             _settings.resizeMode.changed -= OnResizeModeChanged;
             _settings.floorHeightAdjust.changed -= OnFloorHeightAdjustChanged;
             _settings.isAvatarVisibleInFirstPerson.changed -= OnAvatarVisibleInFirstPersonChanged;
+            _settings.playerEyeHeight.changed -= OnPlayerHeightChanged;
             _settings.playerArmSpan.changed -= OnPlayerArmSpanChanged;
             _settings.enableLocomotion.changed -= OnEnableLocomotionChanged;
 
             _beatSaberUtilities.roomAdjustChanged -= OnRoomAdjustChanged;
-            _beatSaberUtilities.playerHeightChanged -= OnPlayerHeightChanged;
 
             _activePlayerSpaceManager.changed -= OnActivePlayerSpaceChanged;
 

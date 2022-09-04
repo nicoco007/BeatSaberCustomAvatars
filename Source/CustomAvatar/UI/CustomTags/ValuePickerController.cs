@@ -19,9 +19,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace CustomAvatar.UI.Slider
+namespace CustomAvatar.UI.CustomTags
 {
-    internal class ArmSpanSliderController : MonoBehaviour
+    internal class ValuePickerController : MonoBehaviour
     {
         private float _value;
         private float _minimum = float.MinValue;

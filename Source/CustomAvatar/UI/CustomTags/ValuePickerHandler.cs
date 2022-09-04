@@ -21,12 +21,12 @@ using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Parser;
 using BeatSaberMarkupLanguage.TypeHandlers;
 
-namespace CustomAvatar.UI.Slider
+namespace CustomAvatar.UI.CustomTags
 {
-    [ComponentHandler(typeof(ArmSpanSliderController))]
-    internal class ArmSpanSliderHandler : TypeHandler<ArmSpanSliderController>
+    [ComponentHandler(typeof(ValuePickerController))]
+    internal class ValuePickerHandler : TypeHandler<ValuePickerController>
     {
-        public override Dictionary<string, Action<ArmSpanSliderController, string>> Setters => new Dictionary<string, Action<ArmSpanSliderController, string>>
+        public override Dictionary<string, Action<ValuePickerController, string>> Setters => new Dictionary<string, Action<ValuePickerController, string>>
         {
             { "minimum", (slider, text) => slider.minimum = float.Parse(text, CultureInfo.InvariantCulture) },
             { "maximum", (slider, text) => slider.maximum = float.Parse(text, CultureInfo.InvariantCulture) },
@@ -48,7 +48,7 @@ namespace CustomAvatar.UI.Slider
         {
             base.HandleType(componentType, parserParams);
 
-            var component = (ArmSpanSliderController)componentType.component;
+            var component = (ValuePickerController)componentType.component;
 
             if (componentType.data.TryGetValue("formatter", out string formatterId))
             {

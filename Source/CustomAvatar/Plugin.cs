@@ -19,7 +19,7 @@ using CustomAvatar.Lighting;
 using CustomAvatar.Logging;
 using CustomAvatar.Player;
 using CustomAvatar.Rendering;
-using CustomAvatar.UI.Slider;
+using CustomAvatar.UI.CustomTags;
 using CustomAvatar.Zenject;
 using CustomAvatar.Zenject.Internal;
 using HarmonyLib;
@@ -36,10 +36,10 @@ namespace CustomAvatar
         [Init]
         public Plugin(Logger ipaLogger)
         {
-            var armSpanSliderTag = new ArmSpanSliderTag();
+            var armSpanSliderTag = new ValuePickerTag();
 
             BSMLParser.instance.RegisterTag(armSpanSliderTag);
-            BSMLParser.instance.RegisterTypeHandler(new ArmSpanSliderHandler());
+            BSMLParser.instance.RegisterTypeHandler(new ValuePickerHandler());
 
             // can't inject at this point so just create it
             ILogger<Plugin> logger = new IPALogger<Plugin>(ipaLogger);

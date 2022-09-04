@@ -19,13 +19,13 @@ using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
 
-namespace CustomAvatar.UI.Slider
+namespace CustomAvatar.UI.CustomTags
 {
-    internal class ArmSpanSliderTag : BSMLTag
+    internal class ValuePickerTag : BSMLTag
     {
         private GameObject _valueControllerTemplate;
 
-        public override string[] Aliases => new[] { "slider" };
+        public override string[] Aliases => new[] { "value-picker" };
 
         public void Init(DiContainer container)
         {
@@ -36,14 +36,14 @@ namespace CustomAvatar.UI.Slider
         {
             if (!_valueControllerTemplate)
             {
-                throw new System.Exception($"{nameof(ArmSpanSliderTag)} can only be used after the menu has loaded");
+                throw new System.Exception($"{nameof(ValuePickerTag)} can only be used after the menu has loaded");
             }
 
             GameObject gameObject = Object.Instantiate(_valueControllerTemplate, parent, false);
             Object.Destroy(gameObject.GetComponent<StepValuePicker>());
             gameObject.name = "BSMLSlider";
 
-            gameObject.AddComponent<ArmSpanSliderController>();
+            gameObject.AddComponent<ValuePickerController>();
 
             LayoutElement layoutElement = gameObject.AddComponent<LayoutElement>();
             layoutElement.preferredWidth = 30;

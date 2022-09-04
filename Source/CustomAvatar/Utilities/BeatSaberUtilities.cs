@@ -15,42 +15,34 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using CustomAvatar.Configuration;
-using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
-using SiraUtil.Affinity;
 using System;
-using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 using Zenject;
 
 namespace CustomAvatar.Utilities
 {
-    internal class BeatSaberUtilities : IInitializable, IDisposable, IAffinity
+    internal class BeatSaberUtilities : IInitializable, IDisposable
     {
-        public static readonly float kDefaultPlayerEyeHeight = MainSettingsModelSO.kDefaultPlayerHeight - MainSettingsModelSO.kHeadPosToPlayerHeightOffset;
-        public static readonly float kDefaultPlayerArmSpan = MainSettingsModelSO.kDefaultPlayerHeight;
+        public static readonly float kDefaultPlayerHeight = MainSettingsModelSO.kDefaultPlayerHeight;
+        public static readonly float kHeadPosToPlayerHeightOffset = MainSettingsModelSO.kHeadPosToPlayerHeightOffset;
+        public static readonly float kDefaultPlayerEyeHeight = kDefaultPlayerHeight - kHeadPosToPlayerHeightOffset;
+        public static readonly float kDefaultPlayerArmSpan = kDefaultPlayerHeight;
 
         private static readonly Func<OpenVRHelper, OpenVRHelper.VRControllerManufacturerName> kVrControllerManufacturerNameGetter = ReflectionExtensions.CreatePrivatePropertyGetter<OpenVRHelper, OpenVRHelper.VRControllerManufacturerName>("vrControllerManufacturerName");
 
         public Vector3 roomCenter => _mainSettingsModel.roomCenter;
         public Quaternion roomRotation => Quaternion.Euler(0, _mainSettingsModel.roomRotation, 0);
-        public float playerHeight => _playerDataModel.playerData.playerSpecificSettings.playerHeight;
-        public float playerEyeHeight => playerHeight - MainSettingsModelSO.kHeadPosToPlayerHeightOffset;
 
         public event Action<Vector3, Quaternion> roomAdjustChanged;
-        public event Action<float> playerHeightChanged;
 
-        private readonly ILogger<BeatSaberUtilities> _logger;
         private readonly MainSettingsModelSO _mainSettingsModel;
-        private readonly PlayerDataModel _playerDataModel;
         private readonly Settings _settings;
         private readonly IVRPlatformHelper _vrPlatformHelper;
 
-        internal BeatSaberUtilities(ILogger<BeatSaberUtilities> logger, MainSettingsModelSO mainSettingsModel, PlayerDataModel playerDataModel, Settings settings, IVRPlatformHelper vrPlatformHelper)
+        internal BeatSaberUtilities(MainSettingsModelSO mainSettingsModel, Settings settings, IVRPlatformHelper vrPlatformHelper)
         {
-            _logger = logger;
             _mainSettingsModel = mainSettingsModel;
-            _playerDataModel = playerDataModel;
             _settings = settings;
             _vrPlatformHelper = vrPlatformHelper;
         }
@@ -74,10 +66,10 @@ namespace CustomAvatar.Utilities
         {
             if (_settings.moveFloorWithRoomAdjust)
             {
-                return playerEyeHeight - _mainSettingsModel.roomCenter.value.y;
+                return _settings.playerEyeHeight - _mainSettingsModel.roomCenter.value.y;
             }
 
-            return playerEyeHeight;
+            return _settings.playerEyeHeight;
         }
 
         /// <summary>
@@ -130,18 +122,6 @@ namespace CustomAvatar.Utilities
         private void OnRoomRotationChanged()
         {
             roomAdjustChanged?.Invoke(roomCenter, roomRotation);
-        }
-
-        [AffinityPatch(typeof(PlayerData), nameof(PlayerData.playerSpecificSettings), AffinityMethodType.Setter)]
-        [AffinityPostfix]
-        [SuppressMessage("CodeQuality", "IDE0051", Justification = "Affinity patch")]
-        private void OnPlayerSpecificSettingsChanged(PlayerSpecificSettings value)
-        {
-            float height = value.playerHeight;
-
-            _logger.LogInformation($"Player height set to {playerHeight} m");
-
-            playerHeightChanged?.Invoke(playerHeight);
         }
     }
 }

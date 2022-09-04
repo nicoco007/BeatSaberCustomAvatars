@@ -255,7 +255,7 @@ namespace CustomAvatar.Player
             {
                 // using "ideal" 8 head high body proportions w/ eyes at 1/2 head height for simplicity
                 // reference: https://miro.medium.com/max/3200/1*cqTRyEGl26l4CImEmWz68Q.jpeg
-                float eyeHeight = _beatSaberUtilities.playerEyeHeight;
+                float eyeHeight = _settings.playerEyeHeight;
 
                 // since hips are at 4 2/3, we multiply by 3 to have some nice numbers
                 // hips @ 4 2/3 * 3 = 14
