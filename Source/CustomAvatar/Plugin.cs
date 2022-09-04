@@ -66,7 +66,7 @@ namespace CustomAvatar
             ZenjectHelper.AddComponentCallback<BloomPrePassBackgroundColorsGradient>((container, bloomPrePassBackgroundColorsGradient) => container.Resolve<DynamicLightCreator>().ConfigureBloomPrePassBackgroundColorsGradient(bloomPrePassBackgroundColorsGradient));
 
             ZenjectHelper.Register<CustomAvatarsInstaller>().WithArguments(ipaLogger).OnMonoInstaller<PCAppInit>();
-            ZenjectHelper.Register<UIInstaller>().WithArguments(armSpanSliderTag).OnContext("MainMenu", "MenuCore");
+            ZenjectHelper.Register<MainMenuInstaller>().WithArguments(armSpanSliderTag).OnContext("MainMenu", "MenuCore");
             ZenjectHelper.Register<HealthWarningInstaller>().OnContext("HealthWarning", "SceneContext");
             ZenjectHelper.Register<GameInstaller>().OnMonoInstaller<GameplayCoreInstaller>();
             ZenjectHelper.Register<EnvironmentInstaller>().OnDecoratorContext("Environment");

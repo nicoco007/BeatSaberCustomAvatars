@@ -26,14 +26,14 @@ using Zenject;
 
 namespace CustomAvatar.Zenject
 {
-    internal class UIInstaller : Installer
+    internal class MainMenuInstaller : Installer
     {
         private const float kCenterViewControllerWidth = 160;
         private const float kSideViewControllerWidth = 120;
 
         private readonly ArmSpanSliderTag _armSpanSliderTag;
 
-        public UIInstaller(ArmSpanSliderTag armSpanSliderTag)
+        public MainMenuInstaller(ArmSpanSliderTag armSpanSliderTag)
         {
             _armSpanSliderTag = armSpanSliderTag;
         }
