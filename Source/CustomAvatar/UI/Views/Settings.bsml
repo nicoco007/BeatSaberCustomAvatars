@@ -4,9 +4,6 @@
   <tab tags="avatar-tabs" tab-name="General" anchor-max-y="0.8">
     <settings-container anchor-pos-y="0" size-delta-y="0">
       <macro.as-host host="generalSettingsHost">
-        <toggle-setting text="Show in First Person" value="visibleInFirstPerson" bind-value="true" apply-on-change="true"/>
-        <toggle-setting text="Show in Smooth Camera" value="showAvatarInSmoothCamera" bind-value="true" apply-on-change="true"/>
-        <toggle-setting text="Show in Mirrors" value="showAvatarInMirrors" bind-value="true" apply-on-change="true"/>
         <dropdown-list-setting text="Resize Mode" value="resizeMode" bind-value="true" apply-on-change="true" options="resizeModeOptions" formatter="ResizeModeFormatter"></dropdown-list-setting>
         <dropdown-list-setting text="Floor Height Adjust" hover-hint="Move the floor/environment so the avatar is standing at full height even if it is taller or shorter than the player." value="floorHeightAdjustMode" bind-value="true" apply-on-change="true" options="floorHeightAdjustOptions" formatter="FloorHeightAdjustFormatter"/>
 
@@ -21,6 +18,14 @@
           <value-picker value="armSpan" step="0.01" minimum="0" formatter="ArmSpanFormatter" interactable="~isHeightAdjustInteractable"/>
           <button text="~measureButtonText" interactable="~isMeasureButtonEnabled" hover-hint="~measureButtonHoverHintText" on-click="OnMeasureArmSpanButtonClicked"></button>
         </horizontal>
+
+        <horizontal pref-width="90" pad-top="2">
+          <text color="#808080" text="Visibility" font-size="4" italics="true" align="Baseline" />
+        </horizontal>
+        
+        <toggle-setting text="Show in First Person" value="visibleInFirstPerson" bind-value="true" apply-on-change="true"/>
+        <toggle-setting text="Show in Smooth Camera" value="showAvatarInSmoothCamera" bind-value="true" apply-on-change="true"/>
+        <toggle-setting text="Show in Mirrors" value="showAvatarInMirrors" bind-value="true" apply-on-change="true"/>
 
         <horizontal pref-width="90" pad-top="2">
           <text color="#808080" text="Advanced" font-size="4" italics="true" align="Baseline" />
