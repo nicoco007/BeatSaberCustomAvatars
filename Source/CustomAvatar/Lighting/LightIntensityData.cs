@@ -18,14 +18,16 @@ namespace CustomAvatar.Lighting
 {
     internal class LightIntensityData
     {
-        public float directionalLight { get; set; }
+        public float ambient { get; set; }
 
-        public float tubeBloomPrePassLight { get; set; }
+        public float directionalLight { get; set; }
 
         public float parametric3SliceSprite { get; set; }
 
         public float parametricBoxLight { get; set; }
 
-        public float ambient { get; set; }
+        public float spriteLight { get; set; }
+
+        public float tubeBloomPrePassLight { get; set; }
     }
 }

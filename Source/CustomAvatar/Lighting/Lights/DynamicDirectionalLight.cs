@@ -48,8 +48,11 @@ namespace CustomAvatar.Lighting.Lights
 
         private void Update()
         {
+            float intensity = _intensityFalloff * _directionalLight.intensity * _lightIntensityMultiplier;
+
             _light.color = _directionalLight.color;
-            _light.intensity = _intensityFalloff * _directionalLight.intensity * _lightIntensityMultiplier;
+            _light.intensity = intensity;
+            _light.enabled = intensity > 0.0001f;
         }
     }
 }

@@ -78,7 +78,7 @@ namespace CustomAvatar.Lighting
 
             if (meshRenderer == null || meshRenderer.material == null || !meshRenderer.material.HasProperty(kMainTexNameId) || meshRenderer.material.mainTexture == null)
             {
-                _logger.LogWarning($"{nameof(Parametric3SliceSpriteController)} has no {kMainTexName}");
+                _logger.LogTrace($"{nameof(Parametric3SliceSpriteController)} has no {kMainTexName}");
                 return null;
             }
 
@@ -175,11 +175,23 @@ namespace CustomAvatar.Lighting
                 return;
             }
 
-            DynamicBloomPrePassBackgroundColorsGradient dynamicBloomPrePassBackgroundColorsGradient = _container.InstantiateComponent<DynamicBloomPrePassBackgroundColorsGradient>(
-                new GameObject(nameof(DynamicBloomPrePassBackgroundColorsGradient)));
+            DynamicBloomPrePassBackgroundColorsGradient dynamicBloomPrePassBackgroundColorsGradient =
+                _container.InstantiateComponent<DynamicBloomPrePassBackgroundColorsGradient>(new GameObject(nameof(DynamicBloomPrePassBackgroundColorsGradient)));
 
             dynamicBloomPrePassBackgroundColorsGradient.transform.SetParent(bloomPrePassBackgroundColorsGradient.transform, false);
             dynamicBloomPrePassBackgroundColorsGradient.Init(bloomPrePassBackgroundColorsGradient, _lightIntensityData.ambient);
+        }
+
+        public void ConfigureSpriteLight(SpriteLightWithId spriteLightWithId)
+        {
+            if (!_settings.lighting.environment.enabled)
+            {
+                return;
+            }
+
+            DynamicSpriteLight dynamicSpriteLight = _container.InstantiateComponent<DynamicSpriteLight>(CreateLightObject(nameof(DynamicSpriteLight)));
+            dynamicSpriteLight.transform.SetParent(spriteLightWithId.transform, false);
+            dynamicSpriteLight.Init(spriteLightWithId, _lightIntensityData.spriteLight);
         }
 
         private GameObject CreateLightObject(string name)

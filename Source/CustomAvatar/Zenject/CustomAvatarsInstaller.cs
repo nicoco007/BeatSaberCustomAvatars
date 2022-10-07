@@ -41,11 +41,12 @@ namespace CustomAvatar.Zenject
         public static readonly int kPlayerAvatarManagerExecutionOrder = 1000;
         private static readonly LightIntensityData kLightIntensityData = new LightIntensityData
         {
+            ambient = 0.4f,
             directionalLight = 0.4f,
+            tubeBloomPrePassLight = 0.4f,
             parametric3SliceSprite = 2f,
             parametricBoxLight = 12f,
-            tubeBloomPrePassLight = 0.4f,
-            ambient = 0.4f,
+            spriteLight = 0.5f,
         };
 
         private readonly Logger _ipaLogger;
