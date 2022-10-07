@@ -14,9 +14,7 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#if DEBUG
 using CustomAvatar.Utilities;
-#endif
 
 using UnityEngine;
 
@@ -69,11 +67,19 @@ namespace CustomAvatar.Lighting.Lights
 
         protected abstract Behaviour reference { get; }
 
-        protected virtual Transform origin => reference.transform;
+        protected Transform origin { get; set; }
+
+        private float _distanceIntensity;
+        private Vector3 _lastPosition;
+
+        public void Initialize(ShaderLoader shaderLoader)
+        {
+            if (this.origin == null)
+            {
+                this.origin = reference.transform;
+            }
 
 #if DEBUG
-        public void SetUp(ShaderLoader shaderLoader)
-        {
             if (_debugLighting)
             {
                 _origin = Sphere("Origin", shaderLoader.unlitShader, Color.red);
@@ -81,8 +87,10 @@ namespace CustomAvatar.Lighting.Lights
                 _end = Sphere("End", shaderLoader.unlitShader, Color.blue);
                 _brightest = Sphere("Brightest", shaderLoader.unlitShader, Color.magenta);
             }
+#endif
         }
 
+#if DEBUG
         private Transform Sphere(string name, Shader shader, Color color)
         {
             var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -109,57 +117,64 @@ namespace CustomAvatar.Lighting.Lights
                 return;
             }
 
-            Vector3 lightPosition = origin.position - kOrigin;
-            Vector3 lightUp = origin.up;
+            Vector3 originPosition = origin.position;
 
-            var projectionOfPositionOnLight = Vector3.Project(lightPosition, lightUp);
-            Vector3 originToProjection = lightPosition - projectionOfPositionOnLight;
-            float sqrMinimumDistance = originToProjection.sqrMagnitude;
-
-            Vector3 start = origin.TransformPoint(center * length * Vector3.down) - kOrigin;
-            Vector3 end = origin.TransformPoint((1.0f - center) * length * Vector3.up) - kOrigin;
-
-            Vector3 pStart = start - originToProjection;
-            Vector3 pEnd = end - originToProjection;
-
-            float xStart = Vector3.Dot(lightUp, pStart) >= 0 ? pStart.magnitude : -pStart.magnitude;
-            float xEnd = Vector3.Dot(lightUp, pEnd) >= 0 ? pEnd.magnitude : -pEnd.magnitude;
-
-            float brightestPoint;
-
-            // TODO: figure out what needs to happen if startAlpha and endAlpha aren't 0 & 1
-            if (startAlpha > endAlpha)
+            if (originPosition != _lastPosition)
             {
-                brightestPoint = xStart;
-            }
-            else if (startAlpha < endAlpha)
-            {
-                brightestPoint = xEnd;
-            }
-            else
-            {
-                brightestPoint = Mathf.Clamp(0, Mathf.Min(xStart, xEnd), Mathf.Max(xStart, xEnd));
-            }
+                Vector3 lightPosition = originPosition - kOrigin;
+                Vector3 lightUp = origin.up;
 
-            float distanceIntensity = IntensitySquareFalloff(xEnd, sqrMinimumDistance, xStart, xEnd) - IntensitySquareFalloff(xStart, sqrMinimumDistance, xStart, xEnd);
+                var projectionOfPositionOnLight = Vector3.Project(lightPosition, lightUp);
+                Vector3 originToProjection = lightPosition - projectionOfPositionOnLight;
+                float sqrMinimumDistance = originToProjection.sqrMagnitude;
 
-            this.brightestPoint = originToProjection + brightestPoint * lightUp;
-            this.intensity = distanceIntensity * Mathf.Min(Mathf.Max(color.a, minAlpha) * alphaMultiplier, 1) * lightIntensityMultiplier * origin.TransformVector(width * Vector3.right).magnitude;
+                Vector3 start = origin.TransformPoint(center * length * Vector3.down) - kOrigin;
+                Vector3 end = origin.TransformPoint((1.0f - center) * length * Vector3.up) - kOrigin;
+
+                Vector3 pStart = start - originToProjection;
+                Vector3 pEnd = end - originToProjection;
+
+                float xStart = Vector3.Dot(lightUp, pStart) >= 0 ? pStart.magnitude : -pStart.magnitude;
+                float xEnd = Vector3.Dot(lightUp, pEnd) >= 0 ? pEnd.magnitude : -pEnd.magnitude;
+
+                float brightestPoint;
+
+                // TODO: figure out what needs to happen if startAlpha and endAlpha aren't 0 & 1
+                if (startAlpha > endAlpha)
+                {
+                    brightestPoint = xStart;
+                }
+                else if (startAlpha < endAlpha)
+                {
+                    brightestPoint = xEnd;
+                }
+                else
+                {
+                    brightestPoint = Mathf.Clamp(0, Mathf.Min(xStart, xEnd), Mathf.Max(xStart, xEnd));
+                }
+
+                _distanceIntensity = (IntensitySquareFalloff(xEnd, sqrMinimumDistance, xStart, xEnd) - IntensitySquareFalloff(xStart, sqrMinimumDistance, xStart, xEnd)) * origin.TransformVector(width * Vector3.right).magnitude;
+                this.brightestPoint = originToProjection + brightestPoint * lightUp;
 
 #if DEBUG
-            if (_debugLighting)
-            {
-                _origin.position = origin.position;
-                _start.position = originToProjection + xStart * lightUp + kOrigin;
-                _end.position = originToProjection + xEnd * lightUp + kOrigin;
-                _brightest.position = this.brightestPoint + kOrigin;
+                if (_debugLighting)
+                {
+                    _origin.position = origin.position;
+                    _start.position = originToProjection + xStart * lightUp + kOrigin;
+                    _end.position = originToProjection + xEnd * lightUp + kOrigin;
+                    _brightest.position = this.brightestPoint + kOrigin;
 
-                _origin.gameObject.SetActive(_showOrigin);
-                _start.gameObject.SetActive(_showStart);
-                _end.gameObject.SetActive(_showEnd);
-                _brightest.gameObject.SetActive(_showBrightest);
-            }
+                    _origin.gameObject.SetActive(_showOrigin);
+                    _start.gameObject.SetActive(_showStart);
+                    _end.gameObject.SetActive(_showEnd);
+                    _brightest.gameObject.SetActive(_showBrightest);
+                }
 #endif
+
+                _lastPosition = originPosition;
+            }
+
+            this.intensity = _distanceIntensity * Mathf.Min(Mathf.Max(color.a, minAlpha) * alphaMultiplier, 1) * lightIntensityMultiplier;
         }
 
         private float IntensitySquareFalloff(float x, float h2, float xMax, float xMin)

@@ -32,9 +32,6 @@ namespace CustomAvatar.Lighting.Lights
         private Transform _spriteTransform;
 
         [SerializeField]
-        private float _spriteIntensity;
-
-        [SerializeField]
         private Light _light;
 
         [SerializeField]
@@ -45,20 +42,24 @@ namespace CustomAvatar.Lighting.Lights
             _light = GetComponent<Light>();
             _spriteRenderer = spriteLightWithId.GetField<SpriteRenderer, SpriteLightWithId>("_spriteRenderer");
             _spriteTransform = _spriteRenderer.transform;
-            _spriteIntensity = GetSpriteIntensity(_spriteRenderer.sprite);
-            _intensityMultiplier = intensityMultiplier;
+            _intensityMultiplier = intensityMultiplier * GetSpriteIntensity(_spriteRenderer.sprite);
+        }
+
+        public void Start()
+        {
+            // this is a decent optimization as long as there are no moving sprite lights (I *think* that's currently the case)
+            Vector3 position = _spriteTransform.position - kOrigin;
+            _intensityMultiplier *= 1 / (1 + position.magnitude);
+            transform.rotation = Quaternion.LookRotation(-position);
         }
 
         public void Update()
         {
-            Vector3 position = _spriteTransform.position - kOrigin;
-            float intensity = _spriteIntensity * _intensityMultiplier * _spriteRenderer.color.a * 1 / (1 + position.magnitude);
+            float intensity = _intensityMultiplier * _spriteRenderer.color.a;
 
             _light.color = _spriteRenderer.color;
             _light.intensity = intensity;
             _light.enabled = intensity > 0.0001f;
-
-            transform.rotation = Quaternion.LookRotation(-position);
         }
 
         private float GetSpriteIntensity(Sprite sprite)

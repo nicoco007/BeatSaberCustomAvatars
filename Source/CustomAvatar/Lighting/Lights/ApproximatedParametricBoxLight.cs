@@ -52,12 +52,12 @@ namespace CustomAvatar.Lighting.Lights
 
         protected override Behaviour reference => _parametricBoxController;
 
-        protected override Transform origin => _parametricBoxController.transform.parent;
-
         internal ApproximatedParametricBoxLight(ParametricBoxController parametricBoxController, float lightIntensityMultiplier)
         {
             _parametricBoxController = parametricBoxController;
             _lightIntensityMultiplier = lightIntensityMultiplier;
+
+            this.origin = _parametricBoxController.transform.parent;
         }
     }
 }

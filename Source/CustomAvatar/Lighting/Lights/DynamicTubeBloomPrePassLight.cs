@@ -15,7 +15,6 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Utilities;
 using UnityEngine;
@@ -26,10 +25,7 @@ namespace CustomAvatar.Lighting.Lights
     internal class DynamicTubeBloomPrePassLight : MonoBehaviour, ISerializationCallbackReceiver
     {
         private Settings _settings;
-
-#if DEBUG
         private ShaderLoader _shaderLoader;
-#endif
 
         [SerializeField]
         private Light _light;
@@ -49,10 +45,7 @@ namespace CustomAvatar.Lighting.Lights
         public void Construct(Settings settings, ShaderLoader shaderLoader)
         {
             _settings = settings;
-
-#if DEBUG
             _shaderLoader = shaderLoader;
-#endif
         }
 
         public void Init(ApproximatedTubeBloomPrePassLight tubeBloomPrePassLight, ApproximatedParametric3SliceSpriteLight parametric3SliceSpriteLight, ApproximatedParametricBoxLight parametricBoxLight)
@@ -65,15 +58,13 @@ namespace CustomAvatar.Lighting.Lights
             PopulateList();
         }
 
-#if DEBUG
         private void Start()
         {
             foreach (ApproximatedLineLight light in _approximatedLineLights)
             {
-                light.SetUp(_shaderLoader);
+                light.Initialize(_shaderLoader);
             }
         }
-#endif
 
         private void Update()
         {
