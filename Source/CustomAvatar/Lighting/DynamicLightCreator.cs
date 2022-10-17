@@ -93,6 +93,7 @@ namespace CustomAvatar.Lighting
                     break;
 
                 case "LaserGlowSprite":
+                case "LaserGlowSprite2":
                 case "LaserGlowSpritePyro":
                     materialIntensity = 1f;
                     break;
