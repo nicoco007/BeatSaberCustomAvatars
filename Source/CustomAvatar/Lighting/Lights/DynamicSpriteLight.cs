@@ -14,6 +14,7 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using IPA.Utilities;
 using UnityEngine;
@@ -49,7 +50,7 @@ namespace CustomAvatar.Lighting.Lights
         {
             // this is a decent optimization as long as there are no moving sprite lights (I *think* that's currently the case)
             Vector3 position = _spriteTransform.position - kOrigin;
-            _intensityMultiplier *= 1 / (1 + position.magnitude);
+            _intensityMultiplier *= 1 / (1 + position.magnitude) * _spriteRenderer.bounds.size.x * _spriteRenderer.bounds.size.y;
             transform.rotation = Quaternion.LookRotation(-position);
         }
 
@@ -70,7 +71,6 @@ namespace CustomAvatar.Lighting.Lights
             }
 
             Texture2D texture = sprite.texture;
-            Rect rect = sprite.textureRect;
 
             if (!texture.isReadable)
             {
@@ -84,16 +84,40 @@ namespace CustomAvatar.Lighting.Lights
 
             Color[] pixels = texture.GetPixels();
             float total = 0;
-            int width = (int)rect.width;
-            int height = (int)rect.height;
+            int count = 0;
 
-            for (int x = (int)rect.xMin; x < rect.xMax; x++)
+            if (sprite.packed)
             {
-                for (int y = (int)rect.yMin; y < rect.yMax; y++)
+                var uv = UV.Parse(sprite.uv, sprite.triangles);
+
+                for (int x = 0; x < texture.width; ++x)
                 {
-                    Color color = pixels[x + y * width];
-                    total += (0.2126f * color.r + 0.7152f * color.g + 0.0722f * color.b) * color.a;
+                    for (int y = 0; y < texture.height; ++y)
+                    {
+                        if (uv.ContainsPoint(new Vector2((float)x / texture.width, (float)y / texture.height)))
+                        {
+                            Color color = pixels[x + y * texture.width];
+                            total += (0.2126f * color.r + 0.7152f * color.g + 0.0722f * color.b) * color.a;
+                            ++count;
+                        }
+                    }
                 }
+            }
+            else
+            {
+                Rect rect = sprite.textureRect;
+                int width = (int)rect.width;
+
+                for (int x = (int)rect.xMin; x < rect.xMax; x++)
+                {
+                    for (int y = (int)rect.yMin; y < rect.yMax; y++)
+                    {
+                        Color color = pixels[x + y * width];
+                        total += (0.2126f * color.r + 0.7152f * color.g + 0.0722f * color.b) * color.a;
+                    }
+                }
+
+                count = Mathf.RoundToInt(rect.width * rect.height);
             }
 
             if (texture != sprite.texture)
@@ -101,7 +125,7 @@ namespace CustomAvatar.Lighting.Lights
                 Destroy(texture);
             }
 
-            value = total / (width * height);
+            value = total / count;
 
             kIntensities.Add(sprite, value);
 
