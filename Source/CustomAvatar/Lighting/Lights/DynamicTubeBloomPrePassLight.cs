@@ -14,7 +14,6 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
 using CustomAvatar.Configuration;
 using CustomAvatar.Utilities;
 using UnityEngine;
@@ -22,7 +21,7 @@ using Zenject;
 
 namespace CustomAvatar.Lighting.Lights
 {
-    internal class DynamicTubeBloomPrePassLight : MonoBehaviour, ISerializationCallbackReceiver
+    internal class DynamicTubeBloomPrePassLight : MonoBehaviour
     {
         private Settings _settings;
         private ShaderLoader _shaderLoader;
@@ -39,8 +38,6 @@ namespace CustomAvatar.Lighting.Lights
         [SerializeField]
         private ApproximatedParametricBoxLight _parametricBoxLight;
 
-        private readonly List<ApproximatedLineLight> _approximatedLineLights = new List<ApproximatedLineLight>(3);
-
         [Inject]
         public void Construct(Settings settings, ShaderLoader shaderLoader)
         {
@@ -54,76 +51,49 @@ namespace CustomAvatar.Lighting.Lights
             _tubeBloomPrePassLight = tubeBloomPrePassLight;
             _parametric3SliceSpriteLight = parametric3SliceSpriteLight;
             _parametricBoxLight = parametricBoxLight;
-
-            PopulateList();
         }
 
         private void Start()
         {
-            foreach (ApproximatedLineLight light in _approximatedLineLights)
-            {
-                light.Initialize(_shaderLoader);
-            }
+            _tubeBloomPrePassLight?.Initialize(_shaderLoader);
+            _parametric3SliceSpriteLight?.Initialize(_shaderLoader);
+            _parametricBoxLight?.Initialize(_shaderLoader);
         }
 
         private void Update()
         {
-            if (_approximatedLineLights.Count == 0)
-            {
-                return;
-            }
-
             float intensity = 0;
+            int count = 0;
             var color = new Color();
             Vector3 brightestPoint = Vector3.zero;
 
-            foreach (ApproximatedLineLight light in _approximatedLineLights)
+            void UpdateLight(ApproximatedLineLight light)
             {
+                if (light == null)
+                {
+                    return;
+                }
+
                 light.Update();
                 intensity += light.intensity;
                 color += light.color;
                 brightestPoint += light.brightestPoint * light.intensity;
+                count++;
             }
 
-            _light.intensity = Mathf.Sqrt(intensity / _approximatedLineLights.Count * _settings.lighting.environment.intensity);
+            UpdateLight(_tubeBloomPrePassLight);
+            UpdateLight(_parametric3SliceSpriteLight);
+            UpdateLight(_parametricBoxLight);
+
+            _light.intensity = Mathf.Sqrt(intensity / count * _settings.lighting.environment.intensity);
             _light.enabled = _light.intensity > 0.0001f;
-            _light.color = color / _approximatedLineLights.Count;
+            _light.color = color / count;
 
             Vector3 position = brightestPoint / intensity;
 
             if (Mathf.Abs(position.sqrMagnitude) > 1e-3)
             {
                 transform.rotation = Quaternion.LookRotation(-position);
-            }
-        }
-
-        public void OnBeforeSerialize()
-        {
-            // nothing to do here
-        }
-
-        public void OnAfterDeserialize()
-        {
-            PopulateList();
-        }
-
-        private void PopulateList()
-        {
-            _approximatedLineLights.Clear();
-
-            if (_tubeBloomPrePassLight != null)
-            {
-                _approximatedLineLights.Add(_tubeBloomPrePassLight);
-            }
-
-            if (_parametric3SliceSpriteLight != null)
-            {
-                _approximatedLineLights.Add(_parametric3SliceSpriteLight);
-            }
-
-            if (_parametricBoxLight != null)
-            {
-                _approximatedLineLights.Add(_parametricBoxLight);
             }
         }
     }
