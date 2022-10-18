@@ -14,7 +14,6 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Collections.Generic;
 using IPA.Utilities;
 using UnityEngine;
@@ -38,32 +37,43 @@ namespace CustomAvatar.Lighting.Lights
         [SerializeField]
         private float _intensityMultiplier;
 
-        public void Init(SpriteLightWithId spriteLightWithId, float intensityMultiplier)
+        [SerializeField]
+        private TubeBloomPrePassLight _tubeBloomPrePassLight;
+
+        private float _calculatedIntensity;
+
+        public void Init(SpriteLightWithId spriteLightWithId, TubeBloomPrePassLight tubeBloomPrePassLight, float intensityMultiplier)
         {
             _light = GetComponent<Light>();
             _spriteRenderer = spriteLightWithId.GetField<SpriteRenderer, SpriteLightWithId>("_spriteRenderer");
             _spriteTransform = _spriteRenderer.transform;
-            _intensityMultiplier = intensityMultiplier * GetSpriteIntensity(_spriteRenderer.sprite);
+            _intensityMultiplier = intensityMultiplier;
+            _tubeBloomPrePassLight = tubeBloomPrePassLight;
         }
 
         public void Start()
         {
-            // this is a decent optimization as long as there are no moving sprite lights (I *think* that's currently the case)
+            // this is a decent optimization as long as there are no moving sprite lights (the ones in the Lizzo environment move slightly but I don't think it's worth the extra processing for that)
             Vector3 position = _spriteTransform.position - kOrigin;
-            _intensityMultiplier *= 1 / (1 + position.magnitude) * _spriteRenderer.bounds.size.x * _spriteRenderer.bounds.size.y;
+            float intensity = _spriteRenderer.bounds.size.x * _spriteRenderer.bounds.size.y;
+
+            if (_tubeBloomPrePassLight != null)
+            {
+                Vector3 size = _tubeBloomPrePassLight.transform.TransformVector(new Vector3(_tubeBloomPrePassLight.width, _tubeBloomPrePassLight.length, 0));
+                intensity += size.x * size.y * _tubeBloomPrePassLight.bloomFogIntensityMultiplier;
+            }
+
+            _calculatedIntensity = _intensityMultiplier / (1 + position.magnitude) * intensity * GetSpriteIntensity(_spriteRenderer.sprite);
             transform.rotation = Quaternion.LookRotation(-position);
         }
 
         public void Update()
         {
-            float intensity = _intensityMultiplier * _spriteRenderer.color.a;
-
             _light.color = _spriteRenderer.color;
-            _light.intensity = intensity;
-            _light.enabled = intensity > 0.0001f;
+            _light.intensity = _calculatedIntensity * _spriteRenderer.color.a;
         }
 
-        private float GetSpriteIntensity(Sprite sprite)
+        private static float GetSpriteIntensity(Sprite sprite)
         {
             if (kIntensities.TryGetValue(sprite, out float value))
             {

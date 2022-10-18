@@ -56,6 +56,11 @@ namespace CustomAvatar.Lighting
                 return;
             }
 
+            if (tubeBloomPrePassLight.GetComponentInParent<SpriteLightWithId>() != null)
+            {
+                return;
+            }
+
             Parametric3SliceSpriteController parametric3SliceSpriteController = tubeBloomPrePassLight.GetField<Parametric3SliceSpriteController, TubeBloomPrePassLight>("_dynamic3SliceSprite");
             ParametricBoxController parametricBoxController = tubeBloomPrePassLight.GetField<ParametricBoxController, TubeBloomPrePassLight>("_parametricBoxController");
 
@@ -190,9 +195,11 @@ namespace CustomAvatar.Lighting
                 return;
             }
 
+            TubeBloomPrePassLight tubeBloomPrePassLight = spriteLightWithId.GetComponentInChildren<TubeBloomPrePassLight>();
+
             DynamicSpriteLight dynamicSpriteLight = _container.InstantiateComponent<DynamicSpriteLight>(CreateLightObject(nameof(DynamicSpriteLight)));
             dynamicSpriteLight.transform.SetParent(spriteLightWithId.transform, false);
-            dynamicSpriteLight.Init(spriteLightWithId, _lightIntensityData.spriteLight);
+            dynamicSpriteLight.Init(spriteLightWithId, tubeBloomPrePassLight, _lightIntensityData.spriteLight);
         }
 
         private GameObject CreateLightObject(string name)
