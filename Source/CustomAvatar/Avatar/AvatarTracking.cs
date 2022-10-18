@@ -51,58 +51,51 @@ namespace CustomAvatar.Avatar
 
         private void LateUpdate()
         {
-            try
-            {
-                SetPose(DeviceUse.Head, _spawnedAvatar.head);
-                SetPose(DeviceUse.LeftHand, _spawnedAvatar.leftHand);
-                SetPose(DeviceUse.RightHand, _spawnedAvatar.rightHand);
+            SetPose(DeviceUse.Head, _spawnedAvatar.head);
+            SetPose(DeviceUse.LeftHand, _spawnedAvatar.leftHand);
+            SetPose(DeviceUse.RightHand, _spawnedAvatar.rightHand);
 
 #pragma warning disable CS0612
-                if (isCalibrationModeEnabled)
+            if (isCalibrationModeEnabled)
+            {
+                if (_spawnedAvatar.pelvis)
                 {
-                    if (_spawnedAvatar.pelvis)
-                    {
-                        _trackingHelper.SetLocalPose(_spawnedAvatar.prefab.pelvis.position * _spawnedAvatar.scale, _spawnedAvatar.prefab.pelvis.rotation, _spawnedAvatar.pelvis, transform.parent);
-                    }
-
-                    if (_spawnedAvatar.leftLeg)
-                    {
-                        _trackingHelper.SetLocalPose(_spawnedAvatar.prefab.leftLeg.position * _spawnedAvatar.scale, _spawnedAvatar.prefab.leftLeg.rotation, _spawnedAvatar.leftLeg, transform.parent);
-                    }
-
-                    if (_spawnedAvatar.rightLeg)
-                    {
-                        _trackingHelper.SetLocalPose(_spawnedAvatar.prefab.rightLeg.position * _spawnedAvatar.scale, _spawnedAvatar.prefab.rightLeg.rotation, _spawnedAvatar.rightLeg, transform.parent);
-                    }
-                }
-#pragma warning restore CS0612
-                else
-                {
-                    SetPose(DeviceUse.Waist, _spawnedAvatar.pelvis);
-                    SetPose(DeviceUse.LeftFoot, _spawnedAvatar.leftLeg);
-                    SetPose(DeviceUse.RightFoot, _spawnedAvatar.rightLeg);
+                    _trackingHelper.SetLocalPose(_spawnedAvatar.prefab.pelvis.position * _spawnedAvatar.scale, _spawnedAvatar.prefab.pelvis.rotation, _spawnedAvatar.pelvis, transform.parent);
                 }
 
-                if (_spawnedAvatar.body)
+                if (_spawnedAvatar.leftLeg)
                 {
-                    _spawnedAvatar.body.position = _spawnedAvatar.head.position - _spawnedAvatar.head.up * 0.1f;
+                    _trackingHelper.SetLocalPose(_spawnedAvatar.prefab.leftLeg.position * _spawnedAvatar.scale, _spawnedAvatar.prefab.leftLeg.rotation, _spawnedAvatar.leftLeg, transform.parent);
+                }
 
-                    var vel = new Vector3(_spawnedAvatar.body.localPosition.x - _prevBodyLocalPosition.x, 0.0f,
-                        _spawnedAvatar.body.localPosition.z - _prevBodyLocalPosition.z);
-
-                    var rot = Quaternion.Euler(0.0f, _spawnedAvatar.head.localEulerAngles.y, 0.0f);
-                    var tiltAxis = Vector3.Cross(transform.up, vel);
-
-                    _spawnedAvatar.body.localRotation = Quaternion.Lerp(_spawnedAvatar.body.localRotation,
-                        Quaternion.AngleAxis(vel.magnitude * 1250.0f, tiltAxis) * rot,
-                        Time.deltaTime * 10.0f);
-
-                    _prevBodyLocalPosition = _spawnedAvatar.body.localPosition;
+                if (_spawnedAvatar.rightLeg)
+                {
+                    _trackingHelper.SetLocalPose(_spawnedAvatar.prefab.rightLeg.position * _spawnedAvatar.scale, _spawnedAvatar.prefab.rightLeg.rotation, _spawnedAvatar.rightLeg, transform.parent);
                 }
             }
-            catch (Exception e)
+#pragma warning restore CS0612
+            else
             {
-                _logger.LogError($"{e.Message}\n{e.StackTrace}");
+                SetPose(DeviceUse.Waist, _spawnedAvatar.pelvis);
+                SetPose(DeviceUse.LeftFoot, _spawnedAvatar.leftLeg);
+                SetPose(DeviceUse.RightFoot, _spawnedAvatar.rightLeg);
+            }
+
+            if (_spawnedAvatar.body)
+            {
+                _spawnedAvatar.body.position = _spawnedAvatar.head.position - _spawnedAvatar.head.up * 0.1f;
+
+                var vel = new Vector3(_spawnedAvatar.body.localPosition.x - _prevBodyLocalPosition.x, 0.0f,
+                    _spawnedAvatar.body.localPosition.z - _prevBodyLocalPosition.z);
+
+                var rot = Quaternion.Euler(0.0f, _spawnedAvatar.head.localEulerAngles.y, 0.0f);
+                var tiltAxis = Vector3.Cross(transform.up, vel);
+
+                _spawnedAvatar.body.localRotation = Quaternion.Lerp(_spawnedAvatar.body.localRotation,
+                    Quaternion.AngleAxis(vel.magnitude * 1250.0f, tiltAxis) * rot,
+                    Time.deltaTime * 10.0f);
+
+                _prevBodyLocalPosition = _spawnedAvatar.body.localPosition;
             }
         }
 
