@@ -112,9 +112,8 @@ namespace CustomAvatar.Zenject
 
             Container.Bind<MainSettingsModelSO>().FromInstance(_pcAppInit.GetField<MainSettingsModelSO, PCAppInit>("_mainSettingsModel")).IfNotBound();
 
-            Container.Bind<DynamicLightCreator>().AsCached();
+            Container.Bind(typeof(DynamicLightCreator), typeof(IInitializable), typeof(IDisposable)).To<DynamicLightCreator>().AsSingle().NonLazy();
             Container.Bind<LightIntensityData>().FromInstance(kLightIntensityData);
-
             Container.Bind(typeof(IAffinity)).To<Patches.MirrorRendererSO>().AsSingle();
         }
 

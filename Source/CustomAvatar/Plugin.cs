@@ -61,11 +61,6 @@ namespace CustomAvatar
             ZenjectHelper.AddComponentAlongsideExisting<MultiplayerLocalInactivePlayerFacade, EnvironmentObject>("MultiplayerLocalInactivePlayerPlayerPlace/CirclePlayerPlace");
             ZenjectHelper.AddComponentAlongsideExisting<MultiplayerConnectedPlayerFacade, EnvironmentObject>();
 
-            ZenjectHelper.AddComponentCallback<TubeBloomPrePassLight>((container, tubeBloomPrePassLight) => container.Resolve<DynamicLightCreator>().ConfigureTubeBloomPrePassLight(tubeBloomPrePassLight));
-            ZenjectHelper.AddComponentCallback<DirectionalLight>((container, directionalLight) => container.Resolve<DynamicLightCreator>().ConfigureDirectionalLight(directionalLight));
-            ZenjectHelper.AddComponentCallback<BloomPrePassBackgroundColorsGradient>((container, bloomPrePassBackgroundColorsGradient) => container.Resolve<DynamicLightCreator>().ConfigureBloomPrePassBackgroundColorsGradient(bloomPrePassBackgroundColorsGradient));
-            ZenjectHelper.AddComponentCallback<SpriteLightWithId>((container, spriteLightWithId) => container.Resolve<DynamicLightCreator>().ConfigureSpriteLight(spriteLightWithId));
-
             ZenjectHelper.Register<CustomAvatarsInstaller>().WithArguments(ipaLogger).OnMonoInstaller<PCAppInit>();
             ZenjectHelper.Register<MainMenuInstaller>().WithArguments(armSpanSliderTag).OnContext("MainMenu", "MenuCore");
             ZenjectHelper.Register<HealthWarningInstaller>().OnContext("HealthWarning", "SceneContext");

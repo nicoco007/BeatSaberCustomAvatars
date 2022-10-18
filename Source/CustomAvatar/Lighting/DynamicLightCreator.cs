@@ -14,18 +14,23 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Lighting.Lights;
 using CustomAvatar.Logging;
 using CustomAvatar.Utilities;
+using CustomAvatar.Zenject.Internal;
 using IPA.Utilities;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Zenject;
 
 namespace CustomAvatar.Lighting
 {
-    internal class DynamicLightCreator
+    internal class DynamicLightCreator : IInitializable, IDisposable
     {
         private const string kMainTexName = "_MainTex";
         private const string kWorldNoiseKeyword = "ENABLE_WORLD_NOISE";
@@ -49,14 +54,101 @@ namespace CustomAvatar.Lighting
             _container = container;
         }
 
-        public void ConfigureTubeBloomPrePassLight(TubeBloomPrePassLight tubeBloomPrePassLight)
+        public void Initialize()
         {
-            if (!_settings.lighting.environment.enabled)
+            // we have to do this because there is currently a bug with Affinity patches that prevents targeting a method with no parameters if it has overloads with parameters
+            ZenjectHelper.installInstallers += OnInstallInstallers;
+        }
+
+        public void Dispose()
+        {
+            ZenjectHelper.installInstallers -= OnInstallInstallers;
+        }
+
+        private void OnInstallInstallers(Context context)
+        {
+            int count = 0;
+            var stopwatch = Stopwatch.StartNew();
+
+            switch (context)
             {
-                return;
+                case SceneContext sceneContext:
+                    count = ProcessSceneLights(sceneContext.gameObject.scene);
+                    break;
+
+                case SceneDecoratorContext sceneDecoratorContext:
+                    count = ProcessSceneLights(sceneDecoratorContext.gameObject.scene);
+                    break;
+
+                case GameObjectContext gameObjectContext:
+                    count = ProcessTransform(gameObjectContext.transform);
+                    break;
+
+                default:
+                    _logger.LogWarning("Unexpected context type " + context.GetType().Name);
+                    break;
             }
 
-            if (tubeBloomPrePassLight.GetComponentInParent<SpriteLightWithId>() != null)
+            _logger.LogInformation($"Created {count} lights for context {context.name} ({context.GetType().Name} on {context.gameObject.scene.name}) in {(float)stopwatch.ElapsedTicks / TimeSpan.TicksPerMillisecond:0.000} ms");
+        }
+
+        private int ProcessSceneLights(Scene scene)
+        {
+            int count = 0;
+
+            foreach (GameObject gameObject in scene.GetRootGameObjects())
+            {
+                count += ProcessTransform(gameObject.transform);
+            }
+
+            return count;
+        }
+
+        private int ProcessTransform(Transform transform)
+        {
+            if (transform.TryGetComponent(out TubeBloomPrePassLight tubeBloomPrePassLight))
+            {
+                ConfigureTubeBloomPrePassLight(tubeBloomPrePassLight);
+                return 1;
+            }
+            else if (transform.TryGetComponent(out Parametric3SliceSpriteController parametric3SliceSpriteController))
+            {
+                ConfigureParametric3SliceSpriteLight(parametric3SliceSpriteController);
+                return 1;
+            }
+            else if (transform.TryGetComponent(out DirectionalLight directionalLight))
+            {
+                ConfigureDirectionalLight(directionalLight);
+                return 1;
+            }
+            else if (transform.TryGetComponent(out BloomPrePassBackgroundColorsGradient bloomPrePassBackgroundColorsGradient))
+            {
+                ConfigureBloomPrePassBackgroundColorsGradient(bloomPrePassBackgroundColorsGradient);
+                return 1;
+            }
+            else if (transform.TryGetComponent(out SpriteLightWithId spriteLightWithId))
+            {
+                ConfigureSpriteLight(spriteLightWithId);
+                return 1;
+            }
+            else if (!transform.TryGetComponent(out GameObjectContext _))
+            {
+                int count = 0;
+
+                for (int i = 0; i < transform.childCount; ++i)
+                {
+                    count += ProcessTransform(transform.GetChild(i));
+                }
+
+                return count;
+            }
+
+            return 0;
+        }
+
+        private void ConfigureTubeBloomPrePassLight(TubeBloomPrePassLight tubeBloomPrePassLight)
+        {
+            if (!_settings.lighting.environment.enabled)
             {
                 return;
             }
@@ -72,6 +164,21 @@ namespace CustomAvatar.Lighting
                 ConfigureParametricBoxLight(parametricBoxController));
         }
 
+        private string GetTransformPath(Transform transform)
+        {
+            var parts = new List<string>();
+
+            while (transform != null)
+            {
+                parts.Add(transform.name);
+                transform = transform.parent;
+            }
+
+            parts.Reverse();
+
+            return string.Join("/", parts);
+        }
+
         private ApproximatedParametric3SliceSpriteLight ConfigureParametric3SliceSpriteLight(Parametric3SliceSpriteController parametric3SliceSpriteController)
         {
             if (parametric3SliceSpriteController == null)
@@ -81,9 +188,15 @@ namespace CustomAvatar.Lighting
 
             MeshRenderer meshRenderer = parametric3SliceSpriteController.GetField<MeshRenderer, Parametric3SliceSpriteController>("_meshRenderer");
 
+            if (meshRenderer == null)
+            {
+                _logger.LogTrace($"{nameof(Parametric3SliceSpriteController)} on '{GetTransformPath(parametric3SliceSpriteController.transform)}' has no mesh renderer");
+                return null;
+            }
+
             if (meshRenderer == null || meshRenderer.material == null || !meshRenderer.material.HasProperty(kMainTexNameId) || meshRenderer.material.mainTexture == null)
             {
-                _logger.LogTrace($"{nameof(Parametric3SliceSpriteController)} has no {kMainTexName}");
+                _logger.LogTrace($"{nameof(Parametric3SliceSpriteController)} on '{GetTransformPath(meshRenderer.transform)}' has no {kMainTexName}");
                 return null;
             }
 
@@ -123,7 +236,6 @@ namespace CustomAvatar.Lighting
 
             if (material.HasKeyword(kWorldNoiseKeyword))
             {
-                _logger.LogTrace($"{material.name} has {kWorldNoiseKeyword}");
                 materialIntensity *= kWorldNoiseIntensityMultiplier;
             }
 
@@ -162,7 +274,7 @@ namespace CustomAvatar.Lighting
             return new ApproximatedParametricBoxLight(parametricBoxController, _settings.lighting.environment.intensity * _lightIntensityData.parametricBoxLight * shaderIntensity);
         }
 
-        public void ConfigureDirectionalLight(DirectionalLight directionalLight)
+        private void ConfigureDirectionalLight(DirectionalLight directionalLight)
         {
             if (!_settings.lighting.environment.enabled)
             {
@@ -174,7 +286,7 @@ namespace CustomAvatar.Lighting
             dynamicDirectionalLight.Init(directionalLight, _settings.lighting.environment.intensity * _lightIntensityData.directionalLight);
         }
 
-        public void ConfigureBloomPrePassBackgroundColorsGradient(BloomPrePassBackgroundColorsGradient bloomPrePassBackgroundColorsGradient)
+        private void ConfigureBloomPrePassBackgroundColorsGradient(BloomPrePassBackgroundColorsGradient bloomPrePassBackgroundColorsGradient)
         {
             if (!_settings.lighting.environment.enabled)
             {
@@ -188,7 +300,7 @@ namespace CustomAvatar.Lighting
             dynamicBloomPrePassBackgroundColorsGradient.Init(bloomPrePassBackgroundColorsGradient, _lightIntensityData.ambient);
         }
 
-        public void ConfigureSpriteLight(SpriteLightWithId spriteLightWithId)
+        private void ConfigureSpriteLight(SpriteLightWithId spriteLightWithId)
         {
             if (!_settings.lighting.environment.enabled)
             {
