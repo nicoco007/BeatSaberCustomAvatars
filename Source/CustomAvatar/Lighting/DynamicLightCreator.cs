@@ -148,11 +148,6 @@ namespace CustomAvatar.Lighting
 
         private void ConfigureTubeBloomPrePassLight(TubeBloomPrePassLight tubeBloomPrePassLight)
         {
-            if (!_settings.lighting.environment.enabled)
-            {
-                return;
-            }
-
             Parametric3SliceSpriteController parametric3SliceSpriteController = tubeBloomPrePassLight.GetField<Parametric3SliceSpriteController, TubeBloomPrePassLight>("_dynamic3SliceSprite");
             ParametricBoxController parametricBoxController = tubeBloomPrePassLight.GetField<ParametricBoxController, TubeBloomPrePassLight>("_parametricBoxController");
 
@@ -276,11 +271,6 @@ namespace CustomAvatar.Lighting
 
         private void ConfigureDirectionalLight(DirectionalLight directionalLight)
         {
-            if (!_settings.lighting.environment.enabled)
-            {
-                return;
-            }
-
             DynamicDirectionalLight dynamicDirectionalLight = _container.InstantiateComponent<DynamicDirectionalLight>(CreateLightObject(nameof(DynamicDirectionalLight)));
             dynamicDirectionalLight.transform.SetParent(directionalLight.transform, false);
             dynamicDirectionalLight.Init(directionalLight, _settings.lighting.environment.intensity * _lightIntensityData.directionalLight);
@@ -288,11 +278,6 @@ namespace CustomAvatar.Lighting
 
         private void ConfigureBloomPrePassBackgroundColorsGradient(BloomPrePassBackgroundColorsGradient bloomPrePassBackgroundColorsGradient)
         {
-            if (!_settings.lighting.environment.enabled)
-            {
-                return;
-            }
-
             DynamicBloomPrePassBackgroundColorsGradient dynamicBloomPrePassBackgroundColorsGradient =
                 _container.InstantiateComponent<DynamicBloomPrePassBackgroundColorsGradient>(new GameObject(nameof(DynamicBloomPrePassBackgroundColorsGradient)));
 
@@ -302,11 +287,6 @@ namespace CustomAvatar.Lighting
 
         private void ConfigureSpriteLight(SpriteLightWithId spriteLightWithId)
         {
-            if (!_settings.lighting.environment.enabled)
-            {
-                return;
-            }
-
             TubeBloomPrePassLight tubeBloomPrePassLight = spriteLightWithId.GetComponentInChildren<TubeBloomPrePassLight>();
 
             DynamicSpriteLight dynamicSpriteLight = _container.InstantiateComponent<DynamicSpriteLight>(CreateLightObject(nameof(DynamicSpriteLight)));
