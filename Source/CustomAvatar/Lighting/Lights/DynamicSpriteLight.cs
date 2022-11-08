@@ -53,9 +53,8 @@ namespace CustomAvatar.Lighting.Lights
 
         public void Start()
         {
-            // this is a decent optimization as long as there are no moving sprite lights (the ones in the Lizzo environment move slightly but I don't think it's worth the extra processing for that)
-            Vector3 position = _spriteTransform.position - kOrigin;
-            float intensity = _spriteRenderer.bounds.size.x * _spriteRenderer.bounds.size.y;
+            Sprite sprite = _spriteRenderer.sprite;
+            float intensity = _spriteTransform.TransformVector(Vector3.right * sprite.rect.width / sprite.pixelsPerUnit).magnitude * _spriteTransform.TransformVector(Vector3.up * sprite.rect.height / sprite.pixelsPerUnit).magnitude;
 
             if (_tubeBloomPrePassLight != null)
             {
@@ -63,14 +62,16 @@ namespace CustomAvatar.Lighting.Lights
                 intensity += size.x * size.y * _tubeBloomPrePassLight.bloomFogIntensityMultiplier;
             }
 
-            _calculatedIntensity = _intensityMultiplier / (1 + position.magnitude) * intensity * GetSpriteIntensity(_spriteRenderer.sprite);
-            transform.rotation = Quaternion.LookRotation(-position);
+            _calculatedIntensity = _intensityMultiplier * intensity * GetSpriteIntensity(_spriteRenderer.sprite);
         }
 
         public void Update()
         {
+            Vector3 position = _spriteTransform.position - kOrigin;
+            transform.rotation = Quaternion.LookRotation(-position);
+
             _light.color = _spriteRenderer.color;
-            _light.intensity = _calculatedIntensity * _spriteRenderer.color.a;
+            _light.intensity = _calculatedIntensity * _spriteRenderer.color.a / (1 + position.magnitude);
         }
 
         private static float GetSpriteIntensity(Sprite sprite)
