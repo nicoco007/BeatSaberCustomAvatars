@@ -71,7 +71,7 @@ namespace CustomAvatar.Lighting.Lights
             transform.rotation = Quaternion.LookRotation(-position);
 
             _light.color = _spriteRenderer.color;
-            _light.intensity = _calculatedIntensity * _spriteRenderer.color.a / (1 + position.magnitude);
+            _light.intensity = _calculatedIntensity * Mathf.Min(_spriteRenderer.color.a, 1) / (1 + position.magnitude) * Mathf.Abs(Vector3.Dot(-position.normalized, _spriteTransform.forward));
         }
 
         private static float GetSpriteIntensity(Sprite sprite)
