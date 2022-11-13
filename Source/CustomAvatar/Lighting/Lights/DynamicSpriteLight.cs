@@ -35,43 +35,66 @@ namespace CustomAvatar.Lighting.Lights
         private Light _light;
 
         [SerializeField]
-        private float _intensityMultiplier;
+        private LightIntensityData _lightIntensityData;
 
         [SerializeField]
         private TubeBloomPrePassLight _tubeBloomPrePassLight;
 
+        [SerializeField]
+        private bool _hideIfAlphaOutOfRange;
+
+        [SerializeField]
+        private float _hideAlphaRangeMin;
+
+        [SerializeField]
+        private float _hideAlphaRangeMax;
+
         private float _calculatedIntensity;
 
-        public void Init(SpriteLightWithId spriteLightWithId, TubeBloomPrePassLight tubeBloomPrePassLight, float intensityMultiplier)
+        public void Init(SpriteLightWithId spriteLightWithId, TubeBloomPrePassLight tubeBloomPrePassLight, LightIntensityData lightIntensityData)
         {
             _light = GetComponent<Light>();
             _spriteRenderer = spriteLightWithId.GetField<SpriteRenderer, SpriteLightWithId>("_spriteRenderer");
             _spriteTransform = _spriteRenderer.transform;
-            _intensityMultiplier = intensityMultiplier;
+            _lightIntensityData = lightIntensityData;
             _tubeBloomPrePassLight = tubeBloomPrePassLight;
+            _hideIfAlphaOutOfRange = spriteLightWithId.GetField<bool, SpriteLightWithId>("_hideIfAlphaOutOfRange");
+            _hideAlphaRangeMin = spriteLightWithId.GetField<float, SpriteLightWithId>("_hideAlphaRangeMin");
+            _hideAlphaRangeMax = spriteLightWithId.GetField<float, SpriteLightWithId>("_hideAlphaRangeMax");
         }
 
         public void Start()
         {
             Sprite sprite = _spriteRenderer.sprite;
-            float intensity = _spriteTransform.TransformVector(Vector3.right * sprite.rect.width / sprite.pixelsPerUnit).magnitude * _spriteTransform.TransformVector(Vector3.up * sprite.rect.height / sprite.pixelsPerUnit).magnitude;
+
+            // I don't think this is particularly correct but it looks better than trying to do width * height (seems to scale too much for larger sprites)
+            _calculatedIntensity = _spriteTransform.TransformVector(sprite.rect.width / sprite.pixelsPerUnit, sprite.rect.height / sprite.pixelsPerUnit, 0).magnitude
+                * GetSpriteIntensity(_spriteRenderer.sprite)
+                * _lightIntensityData.spriteLight;
 
             if (_tubeBloomPrePassLight != null)
             {
-                Vector3 size = _tubeBloomPrePassLight.transform.TransformVector(new Vector3(_tubeBloomPrePassLight.width, _tubeBloomPrePassLight.length, 0));
-                intensity += size.x * size.y * _tubeBloomPrePassLight.bloomFogIntensityMultiplier;
+                _calculatedIntensity += _tubeBloomPrePassLight.transform.TransformVector(_tubeBloomPrePassLight.width, _tubeBloomPrePassLight.length, 0).magnitude
+                    * Mathf.Pow(_tubeBloomPrePassLight.bloomFogIntensityMultiplier, 0.1f)
+                    * _lightIntensityData.tubeBloomPrePassLight;
             }
-
-            _calculatedIntensity = _intensityMultiplier * intensity * GetSpriteIntensity(_spriteRenderer.sprite);
         }
 
         public void Update()
         {
+            Color color = _spriteRenderer.color;
             Vector3 position = _spriteTransform.position - kOrigin;
+
             transform.rotation = Quaternion.LookRotation(-position);
 
-            _light.color = _spriteRenderer.color;
+            _light.color = color;
+            // technically should be using position.sqrMagnitude but it doesn't look as good
             _light.intensity = _calculatedIntensity * Mathf.Min(_spriteRenderer.color.a, 1) / (1 + position.magnitude) * Mathf.Abs(Vector3.Dot(-position.normalized, _spriteTransform.forward));
+
+            if (_hideIfAlphaOutOfRange)
+            {
+                _light.enabled = color.a >= _hideAlphaRangeMin && color.a <= _hideAlphaRangeMax;
+            }
         }
 
         private static float GetSpriteIntensity(Sprite sprite)
@@ -95,7 +118,6 @@ namespace CustomAvatar.Lighting.Lights
 
             Color[] pixels = texture.GetPixels();
             float total = 0;
-            int count = 0;
 
             if (sprite.packed)
             {
@@ -109,7 +131,6 @@ namespace CustomAvatar.Lighting.Lights
                         {
                             Color color = pixels[x + y * texture.width];
                             total += (0.2126f * color.r + 0.7152f * color.g + 0.0722f * color.b) * color.a;
-                            ++count;
                         }
                     }
                 }
@@ -127,8 +148,6 @@ namespace CustomAvatar.Lighting.Lights
                         total += (0.2126f * color.r + 0.7152f * color.g + 0.0722f * color.b) * color.a;
                     }
                 }
-
-                count = Mathf.RoundToInt(rect.width * rect.height);
             }
 
             if (texture != sprite.texture)
@@ -136,7 +155,7 @@ namespace CustomAvatar.Lighting.Lights
                 Destroy(texture);
             }
 
-            value = total / count;
+            value = total / (sprite.rect.width * sprite.rect.height);
 
             kIntensities.Add(sprite, value);
 

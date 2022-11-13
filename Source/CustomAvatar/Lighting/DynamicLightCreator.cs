@@ -291,7 +291,7 @@ namespace CustomAvatar.Lighting
 
             DynamicSpriteLight dynamicSpriteLight = _container.InstantiateComponent<DynamicSpriteLight>(CreateLightObject(nameof(DynamicSpriteLight)));
             dynamicSpriteLight.transform.SetParent(spriteLightWithId.transform, false);
-            dynamicSpriteLight.Init(spriteLightWithId, tubeBloomPrePassLight, _lightIntensityData.spriteLight);
+            dynamicSpriteLight.Init(spriteLightWithId, tubeBloomPrePassLight, _lightIntensityData);
         }
 
         private GameObject CreateLightObject(string name)
