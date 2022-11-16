@@ -69,7 +69,7 @@ namespace CustomAvatar.Lighting.Lights
 
             void UpdateLight(ApproximatedLineLight light)
             {
-                if (light == null)
+                if (light == null || !light.reference.isActiveAndEnabled)
                 {
                     return;
                 }

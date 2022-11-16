@@ -54,7 +54,7 @@ namespace CustomAvatar.Lighting.Lights
 
         protected override float alphaMultiplier => _parametric3SliceSpriteController.alphaMultiplier;
 
-        protected override Behaviour reference => _parametric3SliceSpriteController;
+        public override Behaviour reference => _parametric3SliceSpriteController;
 
         internal ApproximatedParametric3SliceSpriteLight(Parametric3SliceSpriteController parametric3SliceSpriteController, float lightIntensityMultiplier)
         {

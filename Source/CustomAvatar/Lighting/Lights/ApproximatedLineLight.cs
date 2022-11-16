@@ -65,7 +65,7 @@ namespace CustomAvatar.Lighting.Lights
 
         protected virtual float alphaMultiplier => 1;
 
-        protected abstract Behaviour reference { get; }
+        public abstract Behaviour reference { get; }
 
         protected Transform origin { get; set; }
 
@@ -107,13 +107,6 @@ namespace CustomAvatar.Lighting.Lights
 
         public void Update()
         {
-            if (!reference.isActiveAndEnabled)
-            {
-                this.brightestPoint = Vector3.zero;
-                intensity = 0;
-                return;
-            }
-
             Vector3 lightPosition = origin.position - kOrigin;
             Vector3 lightUp = origin.up;
 

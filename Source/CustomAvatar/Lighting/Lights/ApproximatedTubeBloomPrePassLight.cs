@@ -59,7 +59,7 @@ namespace CustomAvatar.Lighting.Lights
 
         protected override float alphaMultiplier => _tubeBloomPrePassLight.colorAlphaMultiplier;
 
-        protected override Behaviour reference => _tubeBloomPrePassLight;
+        public override Behaviour reference => _tubeBloomPrePassLight;
 
         internal ApproximatedTubeBloomPrePassLight(TubeBloomPrePassLight tubeBloomPrePassLight, float lightIntensityMultiplier)
         {

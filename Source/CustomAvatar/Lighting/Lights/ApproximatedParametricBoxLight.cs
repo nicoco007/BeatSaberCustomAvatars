@@ -50,7 +50,7 @@ namespace CustomAvatar.Lighting.Lights
 
         protected override float alphaMultiplier => _parametricBoxController.alphaMultiplier;
 
-        protected override Behaviour reference => _parametricBoxController;
+        public override Behaviour reference => _parametricBoxController;
 
         internal ApproximatedParametricBoxLight(ParametricBoxController parametricBoxController, float lightIntensityMultiplier)
         {
