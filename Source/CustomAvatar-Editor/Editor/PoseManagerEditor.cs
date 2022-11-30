@@ -24,6 +24,9 @@ namespace CustomAvatar.Editor
     [CustomEditor(typeof(PoseManager))]
     public class PoseManagerEditor : UnityEditor.Editor
     {
+        private const string kLocalPositionSerializedPropertyName = "m_LocalPosition";
+        private const string kLocalRotationSerializedPropertyName = "m_LocalRotation";
+
         private float _sliderValue;
 
         public override void OnInspectorGUI()
@@ -34,6 +37,7 @@ namespace CustomAvatar.Editor
             };
 
             var poseManager = (PoseManager)target;
+            GameObject poseManagerObject = poseManager.gameObject;
 
             if (!poseManager.animator.isHuman)
             {
@@ -100,7 +104,7 @@ namespace CustomAvatar.Editor
 
             if (sliderValue != _sliderValue)
             {
-                Undo.RegisterFullObjectHierarchyUndo(poseManager.gameObject, "Animate Hands");
+                Undo.RegisterFullObjectHierarchyUndo(poseManagerObject, "Animate Hands");
                 poseManager.InterpolateHandPoses(sliderValue);
                 EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
                 _sliderValue = sliderValue;
@@ -110,14 +114,14 @@ namespace CustomAvatar.Editor
 
             if (GUILayout.Button("Mirror Left Hand Pose"))
             {
-                Undo.RegisterFullObjectHierarchyUndo(poseManager.gameObject, "Mirror Left Hand Poses");
+                Undo.RegisterFullObjectHierarchyUndo(poseManagerObject, "Mirror Left Hand Poses");
                 MirrorLeftHand(poseManager.animator);
                 EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
             }
 
             if (GUILayout.Button("Mirror Right Hand Pose"))
             {
-                Undo.RegisterFullObjectHierarchyUndo(poseManager.gameObject, "Mirror Right Hand Poses");
+                Undo.RegisterFullObjectHierarchyUndo(poseManagerObject, "Mirror Right Hand Poses");
                 MirrorRightHand(poseManager.animator);
                 EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
             }
@@ -126,7 +130,20 @@ namespace CustomAvatar.Editor
 
             if (GUILayout.Button("Reset Hands"))
             {
+                Undo.RegisterFullObjectHierarchyUndo(poseManagerObject, "Reset Hand Poses");
                 ResetHands(poseManager.animator);
+            }
+
+            if (GUILayout.Button("Reset Local Positions"))
+            {
+                Undo.RegisterFullObjectHierarchyUndo(poseManagerObject, "Reset Local Positions");
+                ResetHands(poseManager.animator, rotation: false);
+            }
+
+            if (GUILayout.Button("Reset Local Rotations"))
+            {
+                Undo.RegisterFullObjectHierarchyUndo(poseManagerObject, "Reset Local Rotations");
+                ResetHands(poseManager.animator, position: false);
             }
         }
 
@@ -190,7 +207,7 @@ namespace CustomAvatar.Editor
             toTransform.rotation = Quaternion.AngleAxis(angle, axis); // assign it back
         }
 
-        private void ResetHands(Animator animator)
+        private void ResetHands(Animator animator, bool position = true, bool rotation = true)
         {
             var fingers = new HumanBodyBones[]
             {
@@ -208,7 +225,18 @@ namespace CustomAvatar.Editor
 
             foreach (HumanBodyBones finger in fingers)
             {
-                PrefabUtility.RevertObjectOverride(animator.GetBoneTransform(finger), InteractionMode.UserAction);
+                Transform transform = animator.GetBoneTransform(finger);
+                var serializedObject = new SerializedObject(transform);
+
+                if (position)
+                {
+                    PrefabUtility.RevertPropertyOverride(serializedObject.FindProperty(kLocalPositionSerializedPropertyName), InteractionMode.UserAction);
+                }
+
+                if (rotation)
+                {
+                    PrefabUtility.RevertPropertyOverride(serializedObject.FindProperty(kLocalRotationSerializedPropertyName), InteractionMode.UserAction);
+                }
             }
         }
     }
