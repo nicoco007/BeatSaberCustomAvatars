@@ -14,8 +14,6 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections;
-using System.Linq;
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
@@ -27,10 +25,6 @@ namespace CustomAvatar.Avatar
 {
     public class AvatarTracking : MonoBehaviour
     {
-        private const float kMinBlinkInterval = 60f / 25;
-        private const float kMaxBlinkInterval = 60f / 10;
-        private const float kBlinkDuration = 0.15f;
-
         [System.Obsolete]
         public bool isCalibrationModeEnabled { get; set; }
 
@@ -38,13 +32,6 @@ namespace CustomAvatar.Avatar
         private SpawnedAvatar _spawnedAvatar;
         private ILogger<AvatarTracking> _logger = new UnityDebugLogger<AvatarTracking>();
         private TrackingHelper _trackingHelper;
-        private SkinnedMeshRenderer _skinnedMeshRenderer;
-        private int _blendShapeIndex = -1;
-
-        private readonly AnimationCurve _blinkAnimationCurve = new AnimationCurve(
-            new Keyframe(0, 0),
-            new Keyframe(0.5f, 100),
-            new Keyframe(1, 0));
 
         private Vector3 _prevBodyLocalPosition = Vector3.zero;
 
@@ -59,28 +46,6 @@ namespace CustomAvatar.Avatar
             _trackingHelper = trackingHelper;
 
             _logger.name = spawnedAvatar.prefab.descriptor.name;
-        }
-
-        private void Start()
-        {
-            _skinnedMeshRenderer = _spawnedAvatar.GetComponentsInChildren<SkinnedMeshRenderer>().FirstOrDefault(skm => skm.sharedMesh.GetBlendShapeIndex("Blink") != -1);
-            if (_skinnedMeshRenderer != null)
-            {
-                _logger.LogNotice($"Found blink blendshape on {_skinnedMeshRenderer.name}");
-                _blendShapeIndex = _skinnedMeshRenderer.sharedMesh.GetBlendShapeIndex("Blink");
-            }
-            else
-            {
-                _logger.LogNotice("No blink blend shape!");
-            }
-        }
-
-        private void OnEnable()
-        {
-            if (_skinnedMeshRenderer != null && _blendShapeIndex >= 0)
-            {
-                StartCoroutine(DoBlink());
-            }
         }
 
         private void LateUpdate()
@@ -139,27 +104,6 @@ namespace CustomAvatar.Avatar
             if (!target || !_input.TryGetPose(use, out Pose pose)) return;
 
             _trackingHelper.SetLocalPose(pose.position, pose.rotation, target, transform.parent);
-        }
-
-        private IEnumerator DoBlink()
-        {
-            while (enabled)
-            {
-                yield return new WaitForSecondsRealtime(Random.Range(kMinBlinkInterval, kMaxBlinkInterval));
-
-                float startTime = Time.time;
-                float time;
-
-                do
-                {
-                    time = Time.time - startTime;
-                    _skinnedMeshRenderer.SetBlendShapeWeight(_blendShapeIndex, _blinkAnimationCurve.Evaluate(time / kBlinkDuration));
-                    yield return null;
-                }
-                while (time <= kBlinkDuration);
-
-                _skinnedMeshRenderer.SetBlendShapeWeight(_blendShapeIndex, 0);
-            }
         }
     }
 }
