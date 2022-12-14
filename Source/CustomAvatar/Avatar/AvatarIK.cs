@@ -143,11 +143,6 @@ namespace CustomAvatar.Avatar
             }
         }
 
-        private void Update()
-        {
-            ApplyPlatformMotion();
-        }
-
         private void OnDestroy()
         {
             IKSolver solver = _vrik.GetIKSolver();
@@ -179,6 +174,8 @@ namespace CustomAvatar.Avatar
             {
                 kDynamicBonePreUpdateDelegate(dynamicBone);
             }
+
+            ApplyPlatformMotion();
         }
 
         private void OnPostUpdate()
