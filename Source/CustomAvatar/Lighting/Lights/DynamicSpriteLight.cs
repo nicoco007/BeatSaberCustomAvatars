@@ -34,7 +34,7 @@ namespace CustomAvatar.Lighting.Lights
         [SerializeField]
         private Light _light;
 
-        [SerializeField]
+        [SerializeReference]
         private LightIntensityData _lightIntensityData;
 
         [SerializeField]

@@ -23,7 +23,10 @@ namespace CustomAvatar.Lighting.Lights
 {
     internal class DynamicTubeBloomPrePassLight : MonoBehaviour
     {
+        [SerializeReference]
         private Settings _settings;
+
+        [SerializeReference]
         private ShaderLoader _shaderLoader;
 
         [SerializeField]
