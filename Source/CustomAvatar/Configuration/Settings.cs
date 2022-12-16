@@ -42,6 +42,7 @@ namespace CustomAvatar.Configuration
         public ObservableValue<float> cameraNearClipPlane { get; } = new ObservableValue<float>(0.1f);
         public ObservableValue<bool> showAvatarInSmoothCamera { get; } = new ObservableValue<bool>(true);
         public bool showAvatarInMirrors { get; set; } = true;
+        public ObservableValue<SkinWeights> skinWeights { get; } = new ObservableValue<SkinWeights>(SkinWeights.FourBones);
         public Lighting lighting { get; } = new Lighting();
         public Mirror mirror { get; } = new Mirror();
         public AutomaticFullBodyCalibration automaticCalibration { get; } = new AutomaticFullBodyCalibration();
