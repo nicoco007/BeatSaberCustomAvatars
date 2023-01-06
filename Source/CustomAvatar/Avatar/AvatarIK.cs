@@ -14,8 +14,8 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-extern alias BeatSaberFinalIK;
 extern alias BeatSaberDynamicBone;
+extern alias BeatSaberFinalIK;
 
 using System;
 using System.Collections.Generic;
@@ -26,6 +26,7 @@ using CustomAvatar.Scripts;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
 using IPA.Utilities;
+using JetBrains.Annotations;
 using UnityEngine;
 using Zenject;
 
@@ -65,6 +66,8 @@ namespace CustomAvatar.Avatar
         private static readonly Action<BeatSaberDynamicBone::DynamicBone> kDynamicBonePreUpdateDelegate = MethodAccessor<BeatSaberDynamicBone::DynamicBone, Action<BeatSaberDynamicBone::DynamicBone>>.GetDelegate("PreUpdate");
         private static readonly Action<BeatSaberDynamicBone::DynamicBone> kDynamicBoneLateUpdateDelegate = MethodAccessor<BeatSaberDynamicBone::DynamicBone, Action<BeatSaberDynamicBone::DynamicBone>>.GetDelegate("LateUpdate");
 
+        private static readonly MethodInfo kTwistRelaxerOnPostUpdate = typeof(TwistRelaxer).GetMethod("OnPostUpdate", BindingFlags.Instance | BindingFlags.NonPublic);
+
         private IAvatarInput _input;
         private SpawnedAvatar _avatar;
         private ILogger<AvatarIK> _logger;
@@ -75,7 +78,6 @@ namespace CustomAvatar.Avatar
         private Pose _previousParentPose;
 
         #region Behaviour Lifecycle
-#pragma warning disable IDE0051
 
         private void Awake()
         {
@@ -90,6 +92,7 @@ namespace CustomAvatar.Avatar
         }
 
         [Inject]
+        [UsedImplicitly]
         private void Construct(IAvatarInput input, SpawnedAvatar avatar, ILogger<AvatarIK> logger, IKHelper ikHelper)
         {
             _input = input;
@@ -107,12 +110,10 @@ namespace CustomAvatar.Avatar
             _vrik = _ikHelper.InitializeVRIK(_vrikManager, transform);
             IKSolver solver = _vrik.GetIKSolver();
 
-            MethodInfo onPostUpdate = typeof(TwistRelaxer).GetMethod("OnPostUpdate", BindingFlags.Instance | BindingFlags.NonPublic);
-
             foreach (TwistRelaxer twistRelaxer in GetComponentsInChildren<TwistRelaxer>())
             {
                 twistRelaxer.ik = _vrik;
-                solver.OnPostUpdate += (IKSolver.UpdateDelegate)onPostUpdate.CreateDelegate(typeof(IKSolver.UpdateDelegate), twistRelaxer);
+                solver.OnPostUpdate += (IKSolver.UpdateDelegate)kTwistRelaxerOnPostUpdate.CreateDelegate(typeof(IKSolver.UpdateDelegate), twistRelaxer);
             }
 
             foreach (UpperArmRelaxer upperArmRelaxer in GetComponentsInChildren<UpperArmRelaxer>())
@@ -152,7 +153,6 @@ namespace CustomAvatar.Avatar
             _input.inputChanged -= OnInputChanged;
         }
 
-#pragma warning restore IDE0051
         #endregion
 
         private void ApplyPlatformMotion()
