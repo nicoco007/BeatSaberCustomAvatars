@@ -13,7 +13,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>..\..\Libraries\0Harmony.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Libs\0Harmony.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="BeatmapCore">
@@ -25,7 +25,7 @@
       <Private>false</Private>
     </Reference>
     <Reference Include="BSML">
-      <HintPath>..\..\Libraries\BSML.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Plugins\BSML.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="DynamicBone">
@@ -34,7 +34,7 @@
       <Aliases>BeatSaberDynamicBone</Aliases>
     </Reference>
     <Reference Include="DynamicOpenVR">
-      <HintPath>..\..\Libraries\DynamicOpenVR.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Libs\DynamicOpenVR.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="FinalIK">
@@ -59,18 +59,18 @@
       <Private>false</Private>
     </Reference>
     <Reference Include="SiraUtil">
-      <HintPath>..\..\Libraries\SiraUtil.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Plugins\SiraUtil.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="IPA.Injector">
-      <HintPath>..\..\Libraries\IPA.Injector.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\IPA.Injector.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="IPA.Loader">
-      <HintPath>..\..\Libraries\IPA.Loader.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\IPA.Loader.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="Main">
@@ -78,7 +78,7 @@
       <Private>false</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\Libraries\Newtonsoft.Json.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Libs\Newtonsoft.Json.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="Polyglot">

@@ -1,63 +1,61 @@
-name: build
+name: Build
 
 on:
   push:
-    branches:
-    tags:
-  pull_request:
+    paths:
+    - .github/workflows/build.yml
+    - Libraries/**
+    - Source/**
+    - Unity/**
 
 jobs:
   build:
     runs-on: windows-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+    - name: Check out
+      uses: actions/checkout@v3
 
-    - name: Set up .NET Core
-      uses: actions/setup-dotnet@v1.7.2
-      with:
-        dotnet-version: 5.0.x
-
-    - name: Set manifest version
-      run: ./bsipa_version_hash.ps1 "Source\CustomAvatar\manifest.json"
+    - name: Set up environment
+      run: ${{ github.workspace }}\.github\workflows\set_up_env.ps1 "${{ github.workspace }}\Source\CustomAvatar\manifest.json"
 
     - name: Fetch Beat Saber Bindings
-      uses: actions/checkout@v2
+      run: git clone https://${{ github.actor }}:${{ secrets.PRIVATE_GITHUB_TOKEN }}@github.com/nicoco007/BeatSaberBindings --branch v${{ env.GAME_VERSION }} --single-branch '${{ runner.temp }}\BeatSaberBindings\Beat Saber_Data\Managed'
+
+    - name: Download dependencies
+      uses: nicoco007/download-beatmods-deps@main
       with:
-        repository: nicoco007/BeatSaberBindings
-        ref: v${{ env.GAME_VERSION }}
-        token: ${{ secrets.PRIVATE_GITHUB_TOKEN }}
-        path: BeatSaberBindings\Beat Saber_Data\Managed
+        manifest: ${{ github.workspace }}\Source\CustomAvatar\manifest.json
+        path: ${{ runner.temp }}\BeatSaberBindings
 
     - name: Build Debug
-      run: dotnet build Source\CustomAvatar\CustomAvatar.csproj -c Debug -p:BeatSaberDir=..\..\BeatSaberBindings
+      run: dotnet build Source\CustomAvatar\CustomAvatar.csproj -c Debug -p:BeatSaberDir=${{ runner.temp }}\BeatSaberBindings
 
     - name: Upload Debug
-      uses: actions/upload-artifact@v2.2.0
+      uses: actions/upload-artifact@v3
       with:
         name: BeatSaberCustomAvatars-${{ env.ZIP_VERSION }}-DEBUG
         path: Source\CustomAvatar\bin\Debug\net472\publish
 
     - name: Build Release
-      run: dotnet build Source\CustomAvatar\CustomAvatar.csproj -c Release -p:BeatSaberDir=..\..\BeatSaberBindings
+      run: dotnet build Source\CustomAvatar\CustomAvatar.csproj -c Release -p:BeatSaberDir=${{ runner.temp }}\BeatSaberBindings
 
     - name: Upload Release
-      uses: actions/upload-artifact@v2.2.0
+      uses: actions/upload-artifact@v3
       with:
         name: BeatSaberCustomAvatars-${{ env.ZIP_VERSION }}-RELEASE
         path: Source\CustomAvatar\bin\Release\net472\publish
 
     - name: Build Editor
-      run: dotnet build Source\CustomAvatar-Editor\CustomAvatar-Editor.csproj -c Release -p:BeatSaberDir=..\..\BeatSaberBindings
+      run: dotnet build Source\CustomAvatar-Editor\CustomAvatar-Editor.csproj -c Release -p:BeatSaberDir=${{ runner.temp }}\BeatSaberBindings
 
     - name: Upload Editor
-      uses: actions/upload-artifact@v2.2.0
+      uses: actions/upload-artifact@v3
       with:
         name: BeatSaberCustomAvatars-${{ env.ZIP_VERSION }}-Editor
         path: Source\CustomAvatar-Editor\bin\Release\net472\publish\CustomAvatar.dll
     
     - name: Upload Unity Project
-      uses: actions/upload-artifact@v2.2.0
+      uses: actions/upload-artifact@v3
       with:
         name: BeatSaberCustomAvatars-${{ env.ZIP_VERSION }}-UnityProject
         path: Unity
