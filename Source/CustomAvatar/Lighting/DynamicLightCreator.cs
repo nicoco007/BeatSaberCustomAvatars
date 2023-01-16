@@ -106,44 +106,32 @@ namespace CustomAvatar.Lighting
 
         private int ProcessTransform(Transform transform)
         {
-            if (transform.TryGetComponent(out TubeBloomPrePassLight tubeBloomPrePassLight))
-            {
-                ConfigureTubeBloomPrePassLight(tubeBloomPrePassLight);
-                return 1;
-            }
-            else if (transform.TryGetComponent(out Parametric3SliceSpriteController parametric3SliceSpriteController))
-            {
-                ConfigureParametric3SliceSpriteLight(parametric3SliceSpriteController);
-                return 1;
-            }
-            else if (transform.TryGetComponent(out DirectionalLight directionalLight))
-            {
-                ConfigureDirectionalLight(directionalLight);
-                return 1;
-            }
-            else if (transform.TryGetComponent(out BloomPrePassBackgroundColorsGradient bloomPrePassBackgroundColorsGradient))
-            {
-                ConfigureBloomPrePassBackgroundColorsGradient(bloomPrePassBackgroundColorsGradient);
-                return 1;
-            }
-            else if (transform.TryGetComponent(out SpriteLightWithId spriteLightWithId))
-            {
-                ConfigureSpriteLight(spriteLightWithId);
-                return 1;
-            }
-            else if (!transform.TryGetComponent(out GameObjectContext _))
-            {
-                int count = 0;
+            int count = 0;
 
+            HandleComponent<TubeBloomPrePassLight>(transform, ref count, (tubeBloomPrePassLight) => ConfigureTubeBloomPrePassLight(tubeBloomPrePassLight));
+            HandleComponent<Parametric3SliceSpriteController>(transform, ref count, (parametric3SliceSpriteController) => ConfigureParametric3SliceSpriteLight(parametric3SliceSpriteController));
+            HandleComponent<DirectionalLight>(transform, ref count, (directionalLight) => ConfigureDirectionalLight(directionalLight));
+            HandleComponent<BloomPrePassBackgroundColorsGradient>(transform, ref count, (bloomPrePassBackgroundColorsGradient) => ConfigureBloomPrePassBackgroundColorsGradient(bloomPrePassBackgroundColorsGradient));
+            HandleComponent<SpriteLightWithId>(transform, ref count, (spriteLightWithId) => ConfigureSpriteLight(spriteLightWithId));
+
+            if (count == 0 && !transform.TryGetComponent(out GameObjectContext _))
+            {
                 for (int i = 0; i < transform.childCount; ++i)
                 {
                     count += ProcessTransform(transform.GetChild(i));
                 }
-
-                return count;
             }
 
-            return 0;
+            return count;
+        }
+
+        private void HandleComponent<TComponent>(Transform transform, ref int count, Action<TComponent> handler) where TComponent : Component
+        {
+            foreach (TComponent component in transform.GetComponents<TComponent>())
+            {
+                handler.Invoke(component);
+                ++count;
+            }
         }
 
         private void ConfigureTubeBloomPrePassLight(TubeBloomPrePassLight tubeBloomPrePassLight)
@@ -151,10 +139,18 @@ namespace CustomAvatar.Lighting
             Parametric3SliceSpriteController parametric3SliceSpriteController = tubeBloomPrePassLight.GetField<Parametric3SliceSpriteController, TubeBloomPrePassLight>("_dynamic3SliceSprite");
             ParametricBoxController parametricBoxController = tubeBloomPrePassLight.GetField<ParametricBoxController, TubeBloomPrePassLight>("_parametricBoxController");
 
+            float intensity = _settings.lighting.environment.intensity * _lightIntensityData.tubeBloomPrePassLight;
+
+            // lazy "fix" until I figure out how to properly handle material lights
+            if (tubeBloomPrePassLight.GetComponentInParent<InstancedMaterialLightWithId>() || tubeBloomPrePassLight.GetComponentInParent<MaterialLightWithId>() || tubeBloomPrePassLight.GetComponentInParent<MaterialLightWithIds>())
+            {
+                intensity *= _lightIntensityData.materialLightIntensityMultiplier;
+            }
+
             DynamicTubeBloomPrePassLight dynamicLight = _container.InstantiateComponent<DynamicTubeBloomPrePassLight>(CreateLightObject(nameof(DynamicTubeBloomPrePassLight)));
             dynamicLight.transform.SetParent(tubeBloomPrePassLight.transform, false);
             dynamicLight.Init(
-                new ApproximatedTubeBloomPrePassLight(tubeBloomPrePassLight, _settings.lighting.environment.intensity * _lightIntensityData.tubeBloomPrePassLight),
+                new ApproximatedTubeBloomPrePassLight(tubeBloomPrePassLight, intensity),
                 ConfigureParametric3SliceSpriteLight(parametric3SliceSpriteController),
                 ConfigureParametricBoxLight(parametricBoxController));
         }

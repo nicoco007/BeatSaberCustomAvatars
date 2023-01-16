@@ -20,7 +20,11 @@ namespace CustomAvatar.Lighting
     {
         public float ambient { get; set; }
 
+        public float bloomNonLightRenderer { get; set; }
+
         public float directionalLight { get; set; }
+
+        public float materialLightIntensityMultiplier { get; set; }
 
         public float parametric3SliceSprite { get; set; }
 
