@@ -25,6 +25,7 @@ using System.Reflection;
 using Zenject;
 #endif
 
+// keeping root namespace for compatibility
 namespace CustomAvatar
 {
     /// <summary>

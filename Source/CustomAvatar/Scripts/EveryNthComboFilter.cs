@@ -16,6 +16,7 @@
 
 using UnityEngine.Events;
 
+// keeping root namespace for compatibility
 #pragma warning disable IDE0051, IDE1006
 namespace CustomAvatar
 {

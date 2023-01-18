@@ -16,6 +16,7 @@
 
 using UnityEngine;
 
+// keeping root namespace for compatibility
 #pragma warning disable IDE1006
 namespace CustomAvatar
 {

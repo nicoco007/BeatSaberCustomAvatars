@@ -14,27 +14,35 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.Serialization;
 
-#pragma warning disable IDE1006
+// keeping root namespace for compatibility
+#pragma warning disable IDE0051, IDE1006
 namespace CustomAvatar
 {
-    [RequireComponent(typeof(EventManager))]
-    public class EventFilterBehaviour : MonoBehaviour
+    public class ComboReachedEvent : EventFilterBehaviour
     {
-        protected EventManager EventManager
-        {
-            get
-            {
-                if (_eventManager == null)
-                {
-                    _eventManager = GetComponent<EventManager>();
-                }
+        public int ComboTarget = 50;
+        [FormerlySerializedAs("NthComboReached")]
+        public UnityEvent ComboReached;
 
-                return _eventManager;
-            }
+        private void OnEnable()
+        {
+            EventManager.OnComboChanged.AddListener(OnComboReached);
         }
 
-        private EventManager _eventManager;
+        private void OnDisable()
+        {
+            EventManager.OnComboChanged.RemoveListener(OnComboReached);
+        }
+
+        private void OnComboReached(int combo)
+        {
+            if (combo == ComboTarget)
+            {
+                ComboReached.Invoke();
+            }
+        }
     }
 }

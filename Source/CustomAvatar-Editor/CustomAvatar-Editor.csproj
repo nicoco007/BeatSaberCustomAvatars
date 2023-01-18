@@ -61,17 +61,17 @@
     <None Include="$(ProjectName).csproj.user" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\CustomAvatar\AvatarDescriptor.cs" Link="AvatarDescriptor.cs" />
-    <Compile Include="..\CustomAvatar\ComboReachedEvent.cs" Link="ComboReachedEvent.cs" />
-    <Compile Include="..\CustomAvatar\EventFilterBehaviour.cs" Link="EventFilterBehaviour.cs" />
-    <Compile Include="..\CustomAvatar\EventManager.cs" Link="EventManager.cs" />
-    <Compile Include="..\CustomAvatar\EveryNthComboFilter.cs" Link="EveryNthComboFilter.cs" />
-    <Compile Include="..\CustomAvatar\FirstPersonExclusion.cs" Link="FirstPersonExclusion.cs" />
+    <Compile Include="..\CustomAvatar\Scripts\AvatarDescriptor.cs" Link="Scripts\AvatarDescriptor.cs" />
+    <Compile Include="..\CustomAvatar\Scripts\ComboReachedEvent.cs" Link="Scripts\ComboReachedEvent.cs" />
+    <Compile Include="..\CustomAvatar\Scripts\EventFilterBehaviour.cs" Link="Scripts\EventFilterBehaviour.cs" />
+    <Compile Include="..\CustomAvatar\Scripts\EventManager.cs" Link="Scripts\EventManager.cs" />
+    <Compile Include="..\CustomAvatar\Scripts\EveryNthComboFilter.cs" Link="Scripts\EveryNthComboFilter.cs" />
+    <Compile Include="..\CustomAvatar\Scripts\FirstPersonExclusion.cs" Link="Scripts\FirstPersonExclusion.cs" />
     <Compile Include="..\CustomAvatar\Logging\ILogger.cs" Link="Logging\ILogger.cs" />
     <Compile Include="..\CustomAvatar\Logging\UnityDebugLogger.cs" Link="Logging\UnityDebugLogger.cs" />
-    <Compile Include="..\CustomAvatar\PoseManager.cs" Link="PoseManager.cs" />
+    <Compile Include="..\CustomAvatar\Scripts\PoseManager.cs" Link="Scripts\PoseManager.cs" />
     <Compile Include="..\CustomAvatar\Utilities\IKHelper.cs" Link="Utilities\IKHelper.cs" />
-    <Compile Include="..\CustomAvatar\VRIKManager.cs" Link="VRIKManager.cs" />
+    <Compile Include="..\CustomAvatar\Scripts\VRIKManager.cs" Link="Scripts\VRIKManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <CopyToOutput Include="$(ProjectDir)..\..\Packaging\CustomAvatar-Editor\**\*.*" />

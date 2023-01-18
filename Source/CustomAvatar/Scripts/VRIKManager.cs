@@ -27,6 +27,7 @@ using static BeatSaberFinalIK::RootMotion.FinalIK.IKSolverVR.Arm;
 using Zenject;
 #endif
 
+// keeping root namespace for compatibility
 namespace CustomAvatar
 {
     [Serializable]

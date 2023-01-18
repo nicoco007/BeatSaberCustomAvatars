@@ -16,6 +16,7 @@
 
 using UnityEngine;
 
+// keeping root namespace for compatibility
 namespace CustomAvatar
 {
     [ExecuteAlways]
