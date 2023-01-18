@@ -54,6 +54,8 @@ namespace CustomAvatar.Lighting
             _lightWithIdManager.didChangeSomeColorsThisFrameEvent += UpdateLightColor;
 
             UpdateLightColor();
+
+            HideMenuReflectionProbe();
         }
 
         public void Dispose()
@@ -71,6 +73,23 @@ namespace CustomAvatar.Lighting
             RenderSettings.ambientSkyColor = color * 0.1f;
             RenderSettings.ambientEquatorColor = color * 0.3f;
             RenderSettings.ambientGroundColor = color * 0.05f;
+        }
+
+        private void HideMenuReflectionProbe()
+        {
+            // there unfortunately don't seem to be any injectable components that can get to the ReflectionProbe object more directly
+            var gameObject = GameObject.Find("/Wrapper/MenuEnvironmentCore/ReflectionProbe");
+
+            if (gameObject == null || !gameObject.TryGetComponent(out ReflectionProbe reflectionProbe))
+            {
+                return;
+            }
+
+            // customBakedTexture is set to some weird texture by default
+            // it doesn't seem to be used by anything in-game so devs may have forgotten it?
+            // (not destroying the component just in case something uses it)
+            reflectionProbe.customBakedTexture = null;
+            reflectionProbe.enabled = false;
         }
     }
 }
