@@ -25,6 +25,9 @@ namespace CustomAvatar.Player
 {
     internal class GameEnvironmentObjectManager : IInitializable
     {
+        private const string kEnvironmentObjectPath = "/Environment";
+        private const string kSpectatorObjectPath = "/SpectatorParent";
+
         private readonly DiContainer _container;
         private readonly ILogger<GameEnvironmentObjectManager> _logger;
         private readonly Settings _settings;
@@ -40,9 +43,9 @@ namespace CustomAvatar.Player
 
         public void Initialize()
         {
-            var environment = GameObject.Find("/Environment");
+            var environment = GameObject.Find(kEnvironmentObjectPath);
 
-            if (environment)
+            if (environment != null)
             {
                 switch (_settings.floorHeightAdjust.value)
                 {
@@ -68,13 +71,13 @@ namespace CustomAvatar.Player
             }
             else
             {
-                _logger.LogWarning($"{environment.name} not found!");
+                _logger.LogWarning($"{kEnvironmentObjectPath} not found!");
             }
 
             // ScoreSaber replay spectator camera
-            var spectatorParent = GameObject.Find("/SpectatorParent");
+            var spectatorParent = GameObject.Find(kSpectatorObjectPath);
 
-            if (spectatorParent)
+            if (spectatorParent != null)
             {
                 // "SpectatorParent" has position room adjust applied but not rotation
                 var avatarParent = new GameObject("AvatarParent");
@@ -84,7 +87,7 @@ namespace CustomAvatar.Player
 
                 Camera spectatorCamera = spectatorParent.GetComponentInChildren<Camera>();
 
-                if (spectatorCamera)
+                if (spectatorCamera != null)
                 {
                     _container.InstantiateComponent<CustomAvatarsMainCameraController>(spectatorCamera.gameObject);
                 }
