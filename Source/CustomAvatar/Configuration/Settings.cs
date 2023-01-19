@@ -19,7 +19,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using CustomAvatar.Avatar;
-using CustomAvatar.Lighting;
 using CustomAvatar.Player;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
@@ -43,7 +42,6 @@ namespace CustomAvatar.Configuration
         public ObservableValue<bool> showAvatarInSmoothCamera { get; } = new ObservableValue<bool>(true);
         public bool showAvatarInMirrors { get; set; } = true;
         public ObservableValue<SkinWeights> skinWeights { get; } = new ObservableValue<SkinWeights>(SkinWeights.FourBones);
-        public Lighting lighting { get; } = new Lighting();
         public Mirror mirror { get; } = new Mirror();
         public AutomaticFullBodyCalibration automaticCalibration { get; } = new AutomaticFullBodyCalibration();
 
@@ -72,38 +70,11 @@ namespace CustomAvatar.Configuration
             }
         }
 
-        public class Lighting
-        {
-            public ShadowQuality shadowQuality { get; set; }
-            public ShadowResolution shadowResolution { get; set; }
-            public int pixelLightCount { get; set; } = 2;
-            public EnvironmentLighting environment { get; } = new EnvironmentLighting();
-            public LightingGroup sabers { get; } = new LightingGroup();
-        }
-
-        public class LightingGroup
-        {
-            [JsonProperty(Order = int.MinValue)]
-            public bool enabled { get; set; }
-            public float intensity { get; set; } = 1;
-        }
-
-        public class EnvironmentLighting : LightingGroup
-        {
-            public EnvironmentLightingType type { get; set; } = EnvironmentLightingType.Dynamic;
-        }
-
         public class Mirror
         {
             public ObservableValue<float> renderScale { get; } = new ObservableValue<float>(1);
             public ObservableValue<int> antiAliasingLevel { get; } = new ObservableValue<int>(1);
             public bool renderInExternalCameras { get; set; } = false;
-        }
-
-        public class TrackedPointSmoothing
-        {
-            public float position { get; set; }
-            public float rotation { get; set; }
         }
 
         public class AutomaticFullBodyCalibration

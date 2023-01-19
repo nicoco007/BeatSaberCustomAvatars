@@ -16,8 +16,6 @@
 
 using System;
 using CustomAvatar.Avatar;
-using CustomAvatar.Configuration;
-using CustomAvatar.Lighting;
 using CustomAvatar.Player;
 using Zenject;
 
@@ -27,15 +25,8 @@ namespace CustomAvatar.Zenject
     {
         public override void InstallBindings()
         {
-            Settings.Lighting lightingSettings = Container.Resolve<Settings>().lighting;
-
-            if (lightingSettings.sabers.enabled)
-            {
-                Container.Bind(typeof(IInitializable)).To<SaberLightingController>().AsSingle().NonLazy();
-            }
-
             Container.Bind(typeof(IInitializable), typeof(IDisposable)).To<AvatarGameplayEventsPlayer>().AsSingle().NonLazy();
-            Container.Bind(typeof(IInitializable), typeof(IDisposable)).To<GameEnvironmentObjectManager>().AsSingle().NonLazy();
+            Container.Bind(typeof(IInitializable)).To<GameEnvironmentObjectManager>().AsSingle().NonLazy();
 
             Container.BindExecutionOrder<GameEnvironmentObjectManager>(1000);
         }

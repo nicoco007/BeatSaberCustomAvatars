@@ -15,7 +15,6 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using CustomAvatar.Lighting;
 using CustomAvatar.Player;
 using CustomAvatar.UI;
 using CustomAvatar.UI.CustomTags;
@@ -55,8 +54,6 @@ namespace CustomAvatar.Zenject
             Container.Bind<ManualCalibrationHelper>().FromNewComponentOn(settingsViewController.gameObject).AsSingle();
 
             Container.Bind(typeof(IInitializable), typeof(IDisposable)).To<AvatarMenuFlowCoordinator>().FromNewComponentOnNewGameObject();
-
-            Container.Bind(typeof(IInitializable), typeof(IDisposable)).To<MenuLightingCreator>().AsSingle().NonLazy();
 
             _armSpanSliderTag.Init(Container);
         }

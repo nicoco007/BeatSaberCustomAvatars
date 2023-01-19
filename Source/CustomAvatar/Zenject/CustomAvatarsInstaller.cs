@@ -18,7 +18,6 @@ using System;
 using System.Linq;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
-using CustomAvatar.Lighting;
 using CustomAvatar.Logging;
 using CustomAvatar.Player;
 using CustomAvatar.Rendering;
@@ -39,17 +38,6 @@ namespace CustomAvatar.Zenject
     internal class CustomAvatarsInstaller : Installer
     {
         public static readonly int kPlayerAvatarManagerExecutionOrder = 1000;
-        private static readonly LightIntensityData kLightIntensityData = new LightIntensityData
-        {
-            ambient = 0.4f,
-            bloomNonLightRenderer = 0.5f,
-            directionalLight = 0.25f,
-            materialLightIntensityMultiplier = 2,
-            tubeBloomPrePassLight = 0.4f,
-            parametric3SliceSprite = 2f,
-            parametricBoxLight = 12f,
-            spriteLight = 0.8f,
-        };
 
         private readonly Logger _ipaLogger;
         private readonly PCAppInit _pcAppInit;
@@ -113,12 +101,7 @@ namespace CustomAvatar.Zenject
             Container.Bind<TrackingHelper>().AsTransient();
 
             Container.Bind<MainSettingsModelSO>().FromInstance(_pcAppInit.GetField<MainSettingsModelSO, PCAppInit>("_mainSettingsModel")).IfNotBound();
-
-            if (settingsManager.settings.lighting.environment.enabled)
-            {
-                Container.Bind(typeof(DynamicLightCreator), typeof(IInitializable), typeof(IDisposable)).To<DynamicLightCreator>().AsSingle().NonLazy();
-                Container.Bind<LightIntensityData>().FromInstance(kLightIntensityData);
-            }
+            Container.Bind<MainSettingsModelSO>().FromInstance(_pcAppInit.GetField<MainSettingsModelSO, PCAppInit>("_mainSettingsModel")).IfNotBound();
 
             Container.Bind(typeof(IAffinity)).To<Patches.MirrorRendererSO>().AsSingle();
         }

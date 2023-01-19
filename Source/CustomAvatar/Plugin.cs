@@ -64,7 +64,6 @@ namespace CustomAvatar
             ZenjectHelper.Register<MainMenuInstaller>().WithArguments(armSpanSliderTag).OnContext("MainMenu", "MenuCore");
             ZenjectHelper.Register<HealthWarningInstaller>().OnContext("HealthWarning", "SceneContext");
             ZenjectHelper.Register<GameInstaller>().OnMonoInstaller<GameplayCoreInstaller>();
-            ZenjectHelper.Register<EnvironmentInstaller>().OnDecoratorContext("Environment");
         }
 
         [OnEnable]

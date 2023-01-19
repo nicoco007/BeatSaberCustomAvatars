@@ -15,7 +15,6 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using CustomAvatar.Lighting;
 using CustomAvatar.Logging;
 using CustomAvatar.Player;
 using UnityEngine;
@@ -36,8 +35,6 @@ namespace CustomAvatar.Zenject
         {
             TryAddEnvironmentObject("/BasicMenuGround");
             TryAddEnvironmentObject("/MenuFogRing (1)");
-
-            Container.Bind(typeof(IInitializable), typeof(IDisposable)).To<MenuLightingCreator>().AsSingle().NonLazy();
         }
 
         private void TryAddEnvironmentObject(string name)

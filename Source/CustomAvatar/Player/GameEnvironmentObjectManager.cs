@@ -14,7 +14,6 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Rendering;
@@ -24,11 +23,8 @@ using Zenject;
 
 namespace CustomAvatar.Player
 {
-    internal class GameEnvironmentObjectManager : IInitializable, IDisposable
+    internal class GameEnvironmentObjectManager : IInitializable
     {
-        private static readonly int kReflectionProbeTexture1PropertyId = Shader.PropertyToID("_ReflectionProbeTexture1");
-        private static readonly int kReflectionProbeTexture2PropertyId = Shader.PropertyToID("_ReflectionProbeTexture2");
-
         private readonly DiContainer _container;
         private readonly ILogger<GameEnvironmentObjectManager> _logger;
         private readonly Settings _settings;
@@ -97,13 +93,6 @@ namespace CustomAvatar.Player
                     _logger.LogWarning($"Spectator camera not found!");
                 }
             }
-        }
-
-        public void Dispose()
-        {
-            // TODO: move this to somewhere that makes more sense
-            Shader.SetGlobalTexture(kReflectionProbeTexture1PropertyId, ReflectionProbe.defaultTexture);
-            Shader.SetGlobalTexture(kReflectionProbeTexture2PropertyId, ReflectionProbe.defaultTexture);
         }
     }
 }
