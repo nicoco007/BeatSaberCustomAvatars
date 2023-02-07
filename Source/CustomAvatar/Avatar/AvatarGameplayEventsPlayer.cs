@@ -124,12 +124,12 @@ namespace CustomAvatar.Avatar
 
         private void OnNoteWasCut(NoteController noteController, in NoteCutInfo cutInfo)
         {
-            if (cutInfo.allIsOK)
+            // this is the same logic as MissedNoteEffectSpawner BadNoteCutEffectSpawner
+            if (cutInfo.allIsOK && noteController.noteData.colorType != ColorType.None)
             {
                 _logger.LogTrace($"Invoke {nameof(_eventManager.OnSlice)}");
                 _eventManager.OnSlice?.Invoke();
             }
-            // this is the same logic as MissedNoteEffectSpawner BadNoteCutEffectSpawner
             else if (noteController.noteData.time + 0.5f >= _audioTimeSyncController.songTime)
             {
                 _logger.LogTrace($"Invoke {nameof(_eventManager.OnBadCut)}");
