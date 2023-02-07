@@ -14,9 +14,11 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using CustomAvatar.Logging;
 using CustomAvatar.Player;
-using System;
 using Zenject;
 
 namespace CustomAvatar.Avatar
@@ -32,6 +34,12 @@ namespace CustomAvatar.Avatar
         private readonly IMultiplayerLevelEndActionsPublisher _multiplayerLevelEndActions;
         private readonly ObstacleSaberSparkleEffectManager _sparkleEffectManager;
         private readonly AudioTimeSyncController _audioTimeSyncController;
+        private readonly IReadonlyBeatmapData _beatmapData;
+
+        private readonly List<NoteData> _noteDatas = new List<NoteData>();
+        private readonly HashSet<BeatmapDataItem> _wasAlreadyCut = new HashSet<BeatmapDataItem>();
+        private readonly HashSet<BeatmapDataItem> _wasAlreadyBadCut = new HashSet<BeatmapDataItem>();
+        private readonly HashSet<BeatmapDataItem> _wasAlreadyMissed = new HashSet<BeatmapDataItem>();
 
         private EventManager _eventManager;
 
@@ -49,7 +57,8 @@ namespace CustomAvatar.Avatar
             [InjectOptional] ILevelEndActions levelEndActions,
             [InjectOptional] IMultiplayerLevelEndActionsPublisher multiplayerLevelEndActions,
             ObstacleSaberSparkleEffectManager sparkleEffectManager,
-            AudioTimeSyncController audioTimeSyncController)
+            AudioTimeSyncController audioTimeSyncController,
+            IReadonlyBeatmapData beatmapData)
         {
             _logger = logger;
             _avatarManager = avatarManager;
@@ -60,6 +69,7 @@ namespace CustomAvatar.Avatar
             _multiplayerLevelEndActions = multiplayerLevelEndActions;
             _sparkleEffectManager = sparkleEffectManager;
             _audioTimeSyncController = audioTimeSyncController;
+            _beatmapData = beatmapData;
         }
 
         public void Initialize()
@@ -94,6 +104,18 @@ namespace CustomAvatar.Avatar
             {
                 _multiplayerLevelEndActions.playerDidFinishEvent += OnPlayerDidFinish;
             }
+
+            LinkedListNode<BeatmapDataItem> node = _beatmapData.allBeatmapDataItems.First;
+
+            while (node != null)
+            {
+                if (node.Value is NoteData noteData && noteData.gameplayType == NoteData.GameplayType.BurstSliderHead)
+                {
+                    _noteDatas.Add(noteData);
+                }
+
+                node = node.Next;
+            }
         }
 
         public void Dispose()
@@ -127,11 +149,21 @@ namespace CustomAvatar.Avatar
             // this is the same logic as MissedNoteEffectSpawner BadNoteCutEffectSpawner
             if (cutInfo.allIsOK && noteController.noteData.colorType != ColorType.None)
             {
+                if (ParentWasAlreadyTriggered(noteController, _wasAlreadyCut))
+                {
+                    return;
+                }
+
                 _logger.LogTrace($"Invoke {nameof(_eventManager.OnSlice)}");
                 _eventManager.OnSlice?.Invoke();
             }
             else if (noteController.noteData.time + 0.5f >= _audioTimeSyncController.songTime)
             {
+                if (ParentWasAlreadyTriggered(noteController, _wasAlreadyBadCut))
+                {
+                    return;
+                }
+
                 _logger.LogTrace($"Invoke {nameof(_eventManager.OnBadCut)}");
                 _eventManager.OnBadCut?.Invoke();
             }
@@ -142,6 +174,11 @@ namespace CustomAvatar.Avatar
             // this is the same logic as MissedNoteEffectSpawner
             if (!noteController.hidden && noteController.noteData.time + 0.5f >= _audioTimeSyncController.songTime && noteController.noteData.colorType != ColorType.None)
             {
+                if (ParentWasAlreadyTriggered(noteController, _wasAlreadyMissed))
+                {
+                    return;
+                }
+
                 _logger.LogTrace($"Invoke {nameof(_eventManager.OnMiss)}");
                 _eventManager.OnMiss?.Invoke();
             }
@@ -217,6 +254,23 @@ namespace CustomAvatar.Avatar
                     _eventManager.OnLevelFail?.Invoke();
                     break;
             }
+        }
+
+        private bool ParentWasAlreadyTriggered(NoteController noteController, HashSet<BeatmapDataItem> alreadyTriggeredItems)
+        {
+            if (noteController.noteData.gameplayType != NoteData.GameplayType.BurstSliderHead && noteController.noteData.gameplayType != NoteData.GameplayType.BurstSliderElement && noteController.noteData.gameplayType != NoteData.GameplayType.BurstSliderElementFill)
+            {
+                return false;
+            }
+
+            return !alreadyTriggeredItems.Add(GetHeadNote(noteController));
+        }
+
+        private NoteData GetHeadNote(NoteController noteController)
+        {
+            NoteData noteData = noteController.noteData;
+            // allBeatmapDataItems is backed by a sorted list so we can assume time is increasing as we iterate through the list
+            return _noteDatas.First(nd => noteData.time >= nd.time && nd.colorType == noteData.colorType);
         }
     }
 }
