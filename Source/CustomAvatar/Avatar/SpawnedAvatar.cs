@@ -19,7 +19,6 @@ extern alias BeatSaberFinalIK;
 using System;
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
-using CustomAvatar.Utilities;
 using UnityEngine;
 using Zenject;
 
@@ -80,11 +79,9 @@ namespace CustomAvatar.Avatar
         [Obsolete("Get isLocomotionEnabled on the AvatarIK component instead")] internal bool isLocomotionEnabled { get; private set; }
 
         private ILogger<SpawnedAvatar> _logger;
-        private GameScenesManager _gameScenesManager;
 
         private FirstPersonExclusion[] _firstPersonExclusions;
         private Renderer[] _renderers;
-        private EventManager _eventManager;
 
         private Vector3 _initialLocalPosition;
         private Vector3 _initialLocalScale;
@@ -143,7 +140,6 @@ namespace CustomAvatar.Avatar
             _initialLocalPosition = transform.localPosition;
             _initialLocalScale = transform.localScale;
 
-            _eventManager = GetComponent<EventManager>();
             _firstPersonExclusions = GetComponentsInChildren<FirstPersonExclusion>();
             _renderers = GetComponentsInChildren<Renderer>();
 
@@ -157,7 +153,7 @@ namespace CustomAvatar.Avatar
         }
 
         [Inject]
-        private void Construct(ILoggerFactory loggerFactory, AvatarPrefab avatarPrefab, IAvatarInput avatarInput, GameScenesManager gameScenesManager)
+        private void Construct(ILoggerFactory loggerFactory, AvatarPrefab avatarPrefab, IAvatarInput avatarInput)
         {
             prefab = avatarPrefab;
             input = avatarInput;
@@ -167,7 +163,6 @@ namespace CustomAvatar.Avatar
 #pragma warning restore CS0612, CS0618
 
             _logger = loggerFactory.CreateLogger<SpawnedAvatar>(prefab.descriptor.name);
-            _gameScenesManager = gameScenesManager;
         }
 
         private void Start()
@@ -178,29 +173,15 @@ namespace CustomAvatar.Avatar
             {
                 _logger.LogWarning("Avatar root position is not at origin; resizing by height and floor adjust may not work properly.");
             }
-
-            _gameScenesManager.transitionDidFinishEvent += OnTransitionDidFinish;
         }
 
         private void OnDestroy()
         {
-            _gameScenesManager.transitionDidFinishEvent -= OnTransitionDidFinish;
-
             Destroy(gameObject);
         }
 
 #pragma warning restore IDE0051
         #endregion
-
-        private void OnTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
-        {
-            if (!_eventManager) return;
-
-            if (_gameScenesManager.IsSceneInStackAndActive("MenuCore"))
-            {
-                _eventManager.OnMenuEnter?.Invoke();
-            }
-        }
 
         private void SetChildrenToLayer(int layer)
         {

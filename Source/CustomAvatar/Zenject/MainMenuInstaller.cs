@@ -53,6 +53,8 @@ namespace CustomAvatar.Zenject
             Container.Bind<ArmSpanMeasurer>().FromNewComponentOn(settingsViewController.gameObject).AsSingle();
             Container.Bind<ManualCalibrationHelper>().FromNewComponentOn(settingsViewController.gameObject).AsSingle();
 
+            Container.Bind(typeof(IInitializable), typeof(IDisposable)).To<MenuEnvironmentEventManager>().AsSingle().NonLazy();
+
             Container.Bind(typeof(IInitializable), typeof(IDisposable)).To<AvatarMenuFlowCoordinator>().FromNewComponentOnNewGameObject();
 
             _armSpanSliderTag.Init(Container);
