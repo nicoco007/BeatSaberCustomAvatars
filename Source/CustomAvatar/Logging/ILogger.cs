@@ -18,8 +18,6 @@ namespace CustomAvatar.Logging
 {
     internal interface ILogger<out T>
     {
-        string name { set; }
-
         void LogTrace(object message);
 
         void LogDebug(object message);

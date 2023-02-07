@@ -157,7 +157,7 @@ namespace CustomAvatar.Avatar
         }
 
         [Inject]
-        private void Construct(ILogger<SpawnedAvatar> logger, AvatarPrefab avatarPrefab, IAvatarInput avatarInput, GameScenesManager gameScenesManager)
+        private void Construct(ILoggerFactory loggerFactory, AvatarPrefab avatarPrefab, IAvatarInput avatarInput, GameScenesManager gameScenesManager)
         {
             prefab = avatarPrefab;
             input = avatarInput;
@@ -166,10 +166,8 @@ namespace CustomAvatar.Avatar
             avatar = avatarPrefab.loadedAvatar;
 #pragma warning restore CS0612, CS0618
 
-            _logger = logger;
+            _logger = loggerFactory.CreateLogger<SpawnedAvatar>(prefab.descriptor.name);
             _gameScenesManager = gameScenesManager;
-
-            _logger.name = prefab.descriptor.name;
         }
 
         private void Start()

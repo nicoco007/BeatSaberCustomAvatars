@@ -16,6 +16,7 @@
 
 using System;
 using System.Linq;
+using System.Reflection;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
@@ -25,7 +26,6 @@ using CustomAvatar.Tracking;
 using CustomAvatar.Tracking.OpenVR;
 using CustomAvatar.Tracking.UnityXR;
 using CustomAvatar.Utilities;
-using IPA.Logging;
 using IPA.Utilities;
 using SiraUtil.Affinity;
 using UnityEngine.XR;
@@ -39,6 +39,8 @@ namespace CustomAvatar.Zenject
     {
         public static readonly int kPlayerAvatarManagerExecutionOrder = 1000;
 
+        private static readonly MethodInfo kCreateLoggerMethod = typeof(ILoggerFactory).GetMethod(nameof(ILoggerFactory.CreateLogger), BindingFlags.Public | BindingFlags.Instance);
+
         private readonly Logger _ipaLogger;
         private readonly PCAppInit _pcAppInit;
 
@@ -51,6 +53,7 @@ namespace CustomAvatar.Zenject
         public override void InstallBindings()
         {
             // logging
+            Container.Bind(typeof(ILoggerFactory)).To<IPALoggerFactory>().AsTransient().WithArguments(_ipaLogger);
             Container.Bind(typeof(ILogger<>)).FromMethodUntyped(CreateLogger).AsTransient();
 
             // settings
@@ -110,9 +113,14 @@ namespace CustomAvatar.Zenject
         {
             Type genericType = context.MemberType.GenericTypeArguments[0];
 
-            return genericType.IsAssignableFrom(context.ObjectType)
-                ? Activator.CreateInstance(typeof(IPALogger<>).MakeGenericType(genericType), _ipaLogger.GetChildLogger(genericType.Name))
-                : throw new InvalidOperationException($"Cannot create logger with generic type '{genericType}' for type '{context.ObjectType}'");
+            if (!genericType.IsAssignableFrom(context.ObjectType))
+            {
+                throw new InvalidOperationException($"Cannot create logger with generic type '{genericType}' for type '{context.ObjectType}'");
+            }
+
+            ILoggerFactory instance = context.Container.Resolve<ILoggerFactory>();
+
+            return kCreateLoggerMethod.MakeGenericMethod(context.ObjectType).Invoke(instance, new object[] { null });
         }
     }
 }

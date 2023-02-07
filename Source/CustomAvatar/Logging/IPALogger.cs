@@ -20,23 +20,16 @@ namespace CustomAvatar.Logging
 {
     internal class IPALogger<T> : ILogger<T>
     {
-        public string name
+        private readonly Logger _logger;
+
+        public IPALogger(Logger logger, string name = null)
         {
-            set
+            _logger = logger.GetChildLogger(typeof(T).Name);
+
+            if (!string.IsNullOrEmpty(name))
             {
-                _childLogger = _parentLogger.GetChildLogger(value);
+                _logger = _logger.GetChildLogger(name);
             }
-        }
-
-        private readonly Logger _parentLogger;
-
-        private Logger _childLogger;
-
-        private Logger _logger => _childLogger ?? _parentLogger;
-
-        public IPALogger(Logger logger)
-        {
-            _parentLogger = logger;
         }
 
         public void LogTrace(object message)

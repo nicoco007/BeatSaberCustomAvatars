@@ -93,14 +93,12 @@ namespace CustomAvatar.Avatar
 
         [Inject]
         [UsedImplicitly]
-        private void Construct(IAvatarInput input, SpawnedAvatar avatar, ILogger<AvatarIK> logger, IKHelper ikHelper)
+        private void Construct(IAvatarInput input, SpawnedAvatar avatar, ILoggerFactory loggerFactory, IKHelper ikHelper)
         {
             _input = input;
             _avatar = avatar;
-            _logger = logger;
+            _logger = loggerFactory.CreateLogger<AvatarIK>(_avatar.prefab.descriptor.name);
             _ikHelper = ikHelper;
-
-            _logger.name = _avatar.prefab.descriptor.name;
         }
 
         private void Start()

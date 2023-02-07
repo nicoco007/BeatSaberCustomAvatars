@@ -180,9 +180,9 @@ namespace CustomAvatar
         }
 #else
         [Inject]
-        internal void Construct(ILogger<AvatarDescriptor> logger)
+        internal void Construct(ILoggerFactory loggerFactory)
         {
-            logger.name = name;
+            ILogger<AvatarDescriptor> logger = loggerFactory.CreateLogger<AvatarDescriptor>(name);
 
             if (!string.IsNullOrEmpty(AvatarName) ||
                 !string.IsNullOrEmpty(Name) ||

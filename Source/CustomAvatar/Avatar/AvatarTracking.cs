@@ -14,7 +14,6 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
 using JetBrains.Annotations;
@@ -30,7 +29,6 @@ namespace CustomAvatar.Avatar
 
         private IAvatarInput _input;
         private SpawnedAvatar _spawnedAvatar;
-        private ILogger<AvatarTracking> _logger = new UnityDebugLogger<AvatarTracking>();
         private TrackingHelper _trackingHelper;
 
         private Vector3 _prevBodyLocalPosition = Vector3.zero;
@@ -38,14 +36,11 @@ namespace CustomAvatar.Avatar
 
         [Inject]
         [UsedImplicitly]
-        private void Construct(ILogger<AvatarTracking> logger, IAvatarInput input, SpawnedAvatar spawnedAvatar, TrackingHelper trackingHelper)
+        private void Construct(IAvatarInput input, SpawnedAvatar spawnedAvatar, TrackingHelper trackingHelper)
         {
-            _logger = logger;
             _input = input;
             _spawnedAvatar = spawnedAvatar;
             _trackingHelper = trackingHelper;
-
-            _logger.name = spawnedAvatar.prefab.descriptor.name;
         }
 
         private void LateUpdate()
