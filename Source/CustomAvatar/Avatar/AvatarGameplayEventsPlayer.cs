@@ -15,6 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using CustomAvatar.Logging;
@@ -35,6 +36,7 @@ namespace CustomAvatar.Avatar
         private readonly ObstacleSaberSparkleEffectManager _sparkleEffectManager;
         private readonly AudioTimeSyncController _audioTimeSyncController;
         private readonly IReadonlyBeatmapData _beatmapData;
+        private readonly GameScenesManager _gameScenesManager;
 
         private readonly List<NoteData> _noteDatas = new List<NoteData>();
         private readonly HashSet<BeatmapDataItem> _wasAlreadyCut = new HashSet<BeatmapDataItem>();
@@ -58,7 +60,8 @@ namespace CustomAvatar.Avatar
             [InjectOptional] IMultiplayerLevelEndActionsPublisher multiplayerLevelEndActions,
             ObstacleSaberSparkleEffectManager sparkleEffectManager,
             AudioTimeSyncController audioTimeSyncController,
-            IReadonlyBeatmapData beatmapData)
+            IReadonlyBeatmapData beatmapData,
+            GameScenesManager gameScenesManager)
         {
             _logger = logger;
             _avatarManager = avatarManager;
@@ -70,6 +73,7 @@ namespace CustomAvatar.Avatar
             _sparkleEffectManager = sparkleEffectManager;
             _audioTimeSyncController = audioTimeSyncController;
             _beatmapData = beatmapData;
+            _gameScenesManager = gameScenesManager;
         }
 
         public void Initialize()
@@ -81,8 +85,6 @@ namespace CustomAvatar.Avatar
                 _logger.LogInformation("No EventManager found on current avatar; events will not be triggered");
                 return;
             }
-
-            _eventManager.OnLevelStart?.Invoke();
 
             _beatmapObjectManager.noteWasCutEvent += OnNoteWasCut;
             _beatmapObjectManager.noteWasMissedEvent += OnNoteWasMissed;
@@ -105,17 +107,9 @@ namespace CustomAvatar.Avatar
                 _multiplayerLevelEndActions.playerDidFinishEvent += OnPlayerDidFinish;
             }
 
-            LinkedListNode<BeatmapDataItem> node = _beatmapData.allBeatmapDataItems.First;
+            PopulateSliderHeadNoteDatas();
 
-            while (node != null)
-            {
-                if (node.Value is NoteData noteData && noteData.gameplayType == NoteData.GameplayType.BurstSliderHead)
-                {
-                    _noteDatas.Add(noteData);
-                }
-
-                node = node.Next;
-            }
+            SharedCoroutineStarter.instance.StartCoroutine(TriggerOnLevelStart());
         }
 
         public void Dispose()
@@ -143,6 +137,28 @@ namespace CustomAvatar.Avatar
         }
 
         #endregion
+
+        private void PopulateSliderHeadNoteDatas()
+        {
+            LinkedListNode<BeatmapDataItem> node = _beatmapData.allBeatmapDataItems.First;
+
+            while (node != null)
+            {
+                if (node.Value is NoteData noteData && noteData.gameplayType == NoteData.GameplayType.BurstSliderHead)
+                {
+                    _noteDatas.Add(noteData);
+                }
+
+                node = node.Next;
+            }
+        }
+
+        private IEnumerator TriggerOnLevelStart()
+        {
+            yield return _gameScenesManager.waitUntilSceneTransitionFinish;
+
+            _eventManager.OnLevelStart?.Invoke();
+        }
 
         private void OnNoteWasCut(NoteController noteController, in NoteCutInfo cutInfo)
         {
@@ -245,13 +261,11 @@ namespace CustomAvatar.Avatar
             switch (results.playerLevelEndState)
             {
                 case MultiplayerLevelCompletionResults.MultiplayerPlayerLevelEndState.SongFinished:
-                    _logger.LogTrace($"Invoke {nameof(_eventManager.OnLevelFinish)}");
-                    _eventManager.OnLevelFinish?.Invoke();
+                    OnLevelFinished();
                     break;
 
                 case MultiplayerLevelCompletionResults.MultiplayerPlayerLevelEndState.NotFinished:
-                    _logger.LogTrace($"Invoke {nameof(_eventManager.OnLevelFail)}");
-                    _eventManager.OnLevelFail?.Invoke();
+                    OnLevelFailed();
                     break;
             }
         }
