@@ -157,7 +157,7 @@ namespace CustomAvatar.Avatar
         {
             yield return _gameScenesManager.waitUntilSceneTransitionFinish;
 
-            _eventManager.OnLevelStart?.Invoke();
+            _eventManager.OnLevelStart.Invoke();
         }
 
         private void OnNoteWasCut(NoteController noteController, in NoteCutInfo cutInfo)
@@ -171,7 +171,7 @@ namespace CustomAvatar.Avatar
                 }
 
                 _logger.LogTrace($"Invoke {nameof(_eventManager.OnSlice)}");
-                _eventManager.OnSlice?.Invoke();
+                _eventManager.OnSlice.Invoke();
             }
             else if (noteController.noteData.time + 0.5f >= _audioTimeSyncController.songTime)
             {
@@ -181,7 +181,7 @@ namespace CustomAvatar.Avatar
                 }
 
                 _logger.LogTrace($"Invoke {nameof(_eventManager.OnBadCut)}");
-                _eventManager.OnBadCut?.Invoke();
+                _eventManager.OnBadCut.Invoke();
             }
         }
 
@@ -196,7 +196,7 @@ namespace CustomAvatar.Avatar
                 }
 
                 _logger.LogTrace($"Invoke {nameof(_eventManager.OnMiss)}");
-                _eventManager.OnMiss?.Invoke();
+                _eventManager.OnMiss.Invoke();
             }
         }
 
@@ -205,12 +205,12 @@ namespace CustomAvatar.Avatar
             if (multiplier > _lastMultiplier)
             {
                 _logger.LogTrace($"Invoke {nameof(_eventManager.MultiplierUp)}");
-                _eventManager.MultiplierUp?.Invoke();
+                _eventManager.MultiplierUp.Invoke();
             }
             else if (multiplier < _lastMultiplier)
             {
                 _logger.LogTrace($"Invoke {nameof(_eventManager.MultiplierDown)}");
-                _eventManager.MultiplierDown?.Invoke();
+                _eventManager.MultiplierDown.Invoke();
             }
 
             _lastMultiplier = multiplier;
@@ -221,12 +221,12 @@ namespace CustomAvatar.Avatar
             if (combo > _lastCombo)
             {
                 _logger.LogTrace($"Invoke {nameof(_eventManager.OnComboUp)}");
-                _eventManager.OnComboUp?.Invoke();
+                _eventManager.OnComboUp.Invoke();
             }
             else if (combo < _lastCombo)
             {
                 _logger.LogTrace($"Invoke {nameof(_eventManager.OnComboBreak)}");
-                _eventManager.OnComboBreak?.Invoke();
+                _eventManager.OnComboBreak.Invoke();
             }
 
             _lastCombo = combo;
@@ -235,25 +235,25 @@ namespace CustomAvatar.Avatar
         private void OnSparkleEffectDidStart(SaberType saberType)
         {
             _logger.LogTrace($"Invoke {nameof(_eventManager.SaberStartColliding)}");
-            _eventManager.SaberStartColliding?.Invoke();
+            _eventManager.SaberStartColliding.Invoke();
         }
 
         private void OnSparkleEffectDidEnd(SaberType saberType)
         {
             _logger.LogTrace($"Invoke {nameof(_eventManager.SaberStopColliding)}");
-            _eventManager.SaberStopColliding?.Invoke();
+            _eventManager.SaberStopColliding.Invoke();
         }
 
         private void OnLevelFinished()
         {
             _logger.LogTrace($"Invoke {nameof(_eventManager.OnLevelFinish)}");
-            _eventManager.OnLevelFinish?.Invoke();
+            _eventManager.OnLevelFinish.Invoke();
         }
 
         private void OnLevelFailed()
         {
             _logger.LogTrace($"Invoke {nameof(_eventManager.OnLevelFail)}");
-            _eventManager.OnLevelFail?.Invoke();
+            _eventManager.OnLevelFail.Invoke();
         }
 
         private void OnPlayerDidFinish(MultiplayerLevelCompletionResults results)

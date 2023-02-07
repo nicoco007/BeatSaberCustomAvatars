@@ -47,11 +47,11 @@ namespace CustomAvatar.Player
                 switch (environmentObjects.menuEnvironmentType)
                 {
                     case MenuEnvironmentManager.MenuEnvironmentType.Default:
-                        eventTrigger.Init(_playerAvatarManager, _gameScenesManager, (eventManager) => eventManager.OnMenuEnter?.Invoke());
+                        eventTrigger.Init(_playerAvatarManager, _gameScenesManager, (eventManager) => eventManager.OnMenuEnter.Invoke());
                         break;
 
                     case MenuEnvironmentManager.MenuEnvironmentType.Lobby:
-                        eventTrigger.Init(_playerAvatarManager, _gameScenesManager, (eventManager) => eventManager.OnMultiplayerLobbyEnter?.Invoke());
+                        eventTrigger.Init(_playerAvatarManager, _gameScenesManager, (eventManager) => eventManager.OnMultiplayerLobbyEnter.Invoke());
                         break;
                 }
             }
