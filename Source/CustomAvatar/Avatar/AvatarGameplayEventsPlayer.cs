@@ -31,12 +31,25 @@ namespace CustomAvatar.Avatar
         private readonly ILevelEndActions _levelEndActions;
         private readonly IMultiplayerLevelEndActionsPublisher _multiplayerLevelEndActions;
         private readonly ObstacleSaberSparkleEffectManager _sparkleEffectManager;
+        private readonly AudioTimeSyncController _audioTimeSyncController;
 
         private EventManager _eventManager;
 
+        private int _lastCombo = -1;
+        private int _lastMultiplier = -1;
+
         #region Behaviour Lifecycle
 
-        public AvatarGameplayEventsPlayer(ILogger<AvatarGameplayEventsPlayer> logger, PlayerAvatarManager avatarManager, ScoreController scoreController, ComboController comboController, BeatmapObjectManager beatmapObjectManager, [InjectOptional] ILevelEndActions levelEndActions, [InjectOptional] IMultiplayerLevelEndActionsPublisher multiplayerLevelEndActions, ObstacleSaberSparkleEffectManager sparkleEffectManager)
+        public AvatarGameplayEventsPlayer(
+            ILogger<AvatarGameplayEventsPlayer> logger,
+            PlayerAvatarManager avatarManager,
+            ScoreController scoreController,
+            ComboController comboController,
+            BeatmapObjectManager beatmapObjectManager,
+            [InjectOptional] ILevelEndActions levelEndActions,
+            [InjectOptional] IMultiplayerLevelEndActionsPublisher multiplayerLevelEndActions,
+            ObstacleSaberSparkleEffectManager sparkleEffectManager,
+            AudioTimeSyncController audioTimeSyncController)
         {
             _logger = logger;
             _avatarManager = avatarManager;
@@ -46,13 +59,14 @@ namespace CustomAvatar.Avatar
             _levelEndActions = levelEndActions;
             _multiplayerLevelEndActions = multiplayerLevelEndActions;
             _sparkleEffectManager = sparkleEffectManager;
+            _audioTimeSyncController = audioTimeSyncController;
         }
 
         public void Initialize()
         {
             _eventManager = _avatarManager.currentlySpawnedAvatar ? _avatarManager.currentlySpawnedAvatar.GetComponent<EventManager>() : null;
 
-            if (!_eventManager)
+            if (_eventManager == null)
             {
                 _logger.LogInformation("No EventManager found on current avatar; events will not be triggered");
                 return;
@@ -61,6 +75,7 @@ namespace CustomAvatar.Avatar
             _eventManager.OnLevelStart?.Invoke();
 
             _beatmapObjectManager.noteWasCutEvent += OnNoteWasCut;
+            _beatmapObjectManager.noteWasMissedEvent += OnNoteWasMissed;
 
             _scoreController.multiplierDidChangeEvent += OnMultiplierDidChange;
 
@@ -84,6 +99,7 @@ namespace CustomAvatar.Avatar
         public void Dispose()
         {
             _beatmapObjectManager.noteWasCutEvent -= OnNoteWasCut;
+            _beatmapObjectManager.noteWasMissedEvent -= OnNoteWasMissed;
 
             _scoreController.multiplierDidChangeEvent -= OnMultiplierDidChange;
 
@@ -110,55 +126,80 @@ namespace CustomAvatar.Avatar
         {
             if (cutInfo.allIsOK)
             {
-                _logger.LogTrace("Invoke OnSlice");
+                _logger.LogTrace($"Invoke {nameof(_eventManager.OnSlice)}");
                 _eventManager.OnSlice?.Invoke();
+            }
+            // this is the same logic as MissedNoteEffectSpawner BadNoteCutEffectSpawner
+            else if (noteController.noteData.time + 0.5f >= _audioTimeSyncController.songTime)
+            {
+                _logger.LogTrace($"Invoke {nameof(_eventManager.OnBadCut)}");
+                _eventManager.OnBadCut?.Invoke();
+            }
+        }
+
+        private void OnNoteWasMissed(NoteController noteController)
+        {
+            // this is the same logic as MissedNoteEffectSpawner
+            if (!noteController.hidden && noteController.noteData.time + 0.5f >= _audioTimeSyncController.songTime && noteController.noteData.colorType != ColorType.None)
+            {
+                _logger.LogTrace($"Invoke {nameof(_eventManager.OnMiss)}");
+                _eventManager.OnMiss?.Invoke();
             }
         }
 
         private void OnMultiplierDidChange(int multiplier, float progress)
         {
-            if (multiplier > 1 && progress < 0.1f)
+            if (multiplier > _lastMultiplier)
             {
-                _logger.LogTrace("Invoke MultiplierUp");
+                _logger.LogTrace($"Invoke {nameof(_eventManager.MultiplierUp)}");
                 _eventManager.MultiplierUp?.Invoke();
             }
+            else if (multiplier < _lastMultiplier)
+            {
+                _logger.LogTrace($"Invoke {nameof(_eventManager.MultiplierDown)}");
+                _eventManager.MultiplierDown?.Invoke();
+            }
+
+            _lastMultiplier = multiplier;
         }
 
         private void OnComboDidChange(int combo)
         {
-            if (combo > 0)
+            if (combo > _lastCombo)
             {
-                _logger.LogTrace("Invoke OnComboChanged");
-                _eventManager.OnComboChanged?.Invoke(combo);
+                _logger.LogTrace($"Invoke {nameof(_eventManager.OnComboUp)}");
+                _eventManager.OnComboUp?.Invoke();
             }
-            else
+            else if (combo < _lastCombo)
             {
-                _logger.LogTrace("Invoke OnComboBreak");
+                _logger.LogTrace($"Invoke {nameof(_eventManager.OnComboBreak)}");
                 _eventManager.OnComboBreak?.Invoke();
             }
+
+            _lastCombo = combo;
         }
 
         private void OnSparkleEffectDidStart(SaberType saberType)
         {
-            _logger.LogTrace("Invoke SaberStartColliding");
+            _logger.LogTrace($"Invoke {nameof(_eventManager.SaberStartColliding)}");
             _eventManager.SaberStartColliding?.Invoke();
         }
 
         private void OnSparkleEffectDidEnd(SaberType saberType)
         {
-            _logger.LogTrace("Invoke SaberStopColliding");
+            _logger.LogTrace($"Invoke {nameof(_eventManager.SaberStopColliding)}");
             _eventManager.SaberStopColliding?.Invoke();
         }
 
         private void OnLevelFinished()
         {
-            _logger.LogTrace("Invoke OnLevelFinish");
+            _logger.LogTrace($"Invoke {nameof(_eventManager.OnLevelFinish)}");
             _eventManager.OnLevelFinish?.Invoke();
         }
 
         private void OnLevelFailed()
         {
-            _logger.LogTrace("Invoke OnLevelFail");
+            _logger.LogTrace($"Invoke {nameof(_eventManager.OnLevelFail)}");
             _eventManager.OnLevelFail?.Invoke();
         }
 
@@ -167,12 +208,12 @@ namespace CustomAvatar.Avatar
             switch (results.playerLevelEndState)
             {
                 case MultiplayerLevelCompletionResults.MultiplayerPlayerLevelEndState.SongFinished:
-                    _logger.LogTrace("Invoke OnLevelFinish");
+                    _logger.LogTrace($"Invoke {nameof(_eventManager.OnLevelFinish)}");
                     _eventManager.OnLevelFinish?.Invoke();
                     break;
 
                 case MultiplayerLevelCompletionResults.MultiplayerPlayerLevelEndState.NotFinished:
-                    _logger.LogTrace("Invoke OnLevelFail");
+                    _logger.LogTrace($"Invoke {nameof(_eventManager.OnLevelFail)}");
                     _eventManager.OnLevelFail?.Invoke();
                     break;
             }

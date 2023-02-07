@@ -14,7 +14,7 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using UnityEngine.Events;
+/*using UnityEngine.Events;
 using UnityEngine.Serialization;
 
 // keeping root namespace for compatibility
@@ -46,3 +46,4 @@ namespace CustomAvatar
         }
     }
 }
+*/

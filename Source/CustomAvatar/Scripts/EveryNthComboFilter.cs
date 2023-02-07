@@ -14,7 +14,7 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using UnityEngine.Events;
+/*using UnityEngine.Events;
 
 // keeping root namespace for compatibility
 #pragma warning disable IDE0051, IDE1006
@@ -44,3 +44,4 @@ namespace CustomAvatar
         }
     }
 }
+*/

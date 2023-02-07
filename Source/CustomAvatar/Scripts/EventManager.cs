@@ -14,7 +14,6 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -24,20 +23,18 @@ namespace CustomAvatar
 {
     public class EventManager : MonoBehaviour
     {
-        [Serializable]
-        public class ComboChangedEvent : UnityEvent<int> { }
-
         public UnityEvent OnSlice;
+        public UnityEvent OnMiss;
+        public UnityEvent OnBadCut;
+        public UnityEvent OnComboUp;
         public UnityEvent OnComboBreak;
         public UnityEvent MultiplierUp;
+        public UnityEvent MultiplierDown;
         public UnityEvent SaberStartColliding;
         public UnityEvent SaberStopColliding;
         public UnityEvent OnMenuEnter;
         public UnityEvent OnLevelStart;
         public UnityEvent OnLevelFail;
         public UnityEvent OnLevelFinish;
-        public UnityEvent OnBlueLightOn;
-        public UnityEvent OnRedLightOn;
-        public UnityEvent<int> OnComboChanged = new ComboChangedEvent();
     }
 }
