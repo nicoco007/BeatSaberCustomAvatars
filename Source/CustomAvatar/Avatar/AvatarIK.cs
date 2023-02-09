@@ -121,7 +121,6 @@ namespace CustomAvatar.Avatar
                 solver.OnPostUpdate += upperArmRelaxer.OnPostUpdate;
             }
 
-            solver.OnPreUpdate += OnPreUpdate;
             solver.OnPostUpdate += OnPostUpdate;
 
             if (_vrikManager.solver_spine_maintainPelvisPosition > 0 && !_input.allowMaintainPelvisPosition)
@@ -145,7 +144,6 @@ namespace CustomAvatar.Avatar
         private void OnDestroy()
         {
             IKSolver solver = _vrik.GetIKSolver();
-            solver.OnPreUpdate -= OnPreUpdate;
             solver.OnPostUpdate -= OnPostUpdate;
 
             _input.inputChanged -= OnInputChanged;
@@ -166,7 +164,7 @@ namespace CustomAvatar.Avatar
             _previousParentPose = new Pose(parent.position, parent.rotation);
         }
 
-        private void OnPreUpdate()
+        private void Update()
         {
             foreach (BeatSaberDynamicBone::DynamicBone dynamicBone in _dynamicBones)
             {
