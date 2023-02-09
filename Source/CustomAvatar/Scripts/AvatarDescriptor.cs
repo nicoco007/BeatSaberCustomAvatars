@@ -77,9 +77,22 @@ namespace CustomAvatar
 
         public void OnAfterDeserialize()
         {
-            name = name ?? Name ?? AvatarName;
-            author = author ?? Author ?? AuthorName;
-            cover = cover ?? Cover ?? CoverImage;
+            name ??= Name ?? AvatarName;
+            author ??= Author ?? AuthorName;
+            cover = FirstNonNullUnityObject(cover, Cover, CoverImage);
+        }
+
+        private T FirstNonNullUnityObject<T>(params T[] objects) where T : Object
+        {
+            foreach (T obj in objects)
+            {
+                if (obj != null)
+                {
+                    return obj;
+                }
+            }
+
+            return null;
         }
 
 #if UNITY_EDITOR

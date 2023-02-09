@@ -16,10 +16,9 @@
 
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using CustomAvatar.Logging;
 using CustomAvatar.Player;
+using CustomAvatar.Utilities;
 using Zenject;
 
 namespace CustomAvatar.Avatar
@@ -30,49 +29,36 @@ namespace CustomAvatar.Avatar
         private readonly PlayerAvatarManager _avatarManager;
         private readonly ScoreController _scoreController;
         private readonly ComboController _comboController;
-        private readonly BeatmapObjectManager _beatmapObjectManager;
+        private readonly BeatmapObjectEventFilter _beatmapObjectEventFilter;
         private readonly ILevelEndActions _levelEndActions;
         private readonly IMultiplayerLevelEndActionsPublisher _multiplayerLevelEndActions;
         private readonly ObstacleSaberSparkleEffectManager _sparkleEffectManager;
-        private readonly AudioTimeSyncController _audioTimeSyncController;
-        private readonly IReadonlyBeatmapData _beatmapData;
         private readonly GameScenesManager _gameScenesManager;
-
-        private readonly List<NoteData> _noteDatas = new List<NoteData>();
-        private readonly HashSet<BeatmapDataItem> _wasAlreadyCut = new HashSet<BeatmapDataItem>();
-        private readonly HashSet<BeatmapDataItem> _wasAlreadyBadCut = new HashSet<BeatmapDataItem>();
-        private readonly HashSet<BeatmapDataItem> _wasAlreadyMissed = new HashSet<BeatmapDataItem>();
 
         private EventManager _eventManager;
 
         private int _lastCombo = -1;
         private int _lastMultiplier = -1;
 
-        #region Behaviour Lifecycle
-
         public AvatarGameplayEventsPlayer(
             ILogger<AvatarGameplayEventsPlayer> logger,
             PlayerAvatarManager avatarManager,
             ScoreController scoreController,
             ComboController comboController,
-            BeatmapObjectManager beatmapObjectManager,
+            BeatmapObjectEventFilter beatmapObjectEventFilter,
             [InjectOptional] ILevelEndActions levelEndActions,
             [InjectOptional] IMultiplayerLevelEndActionsPublisher multiplayerLevelEndActions,
             ObstacleSaberSparkleEffectManager sparkleEffectManager,
-            AudioTimeSyncController audioTimeSyncController,
-            IReadonlyBeatmapData beatmapData,
             GameScenesManager gameScenesManager)
         {
             _logger = logger;
             _avatarManager = avatarManager;
             _scoreController = scoreController;
             _comboController = comboController;
-            _beatmapObjectManager = beatmapObjectManager;
+            _beatmapObjectEventFilter = beatmapObjectEventFilter;
             _levelEndActions = levelEndActions;
             _multiplayerLevelEndActions = multiplayerLevelEndActions;
             _sparkleEffectManager = sparkleEffectManager;
-            _audioTimeSyncController = audioTimeSyncController;
-            _beatmapData = beatmapData;
             _gameScenesManager = gameScenesManager;
         }
 
@@ -86,8 +72,9 @@ namespace CustomAvatar.Avatar
                 return;
             }
 
-            _beatmapObjectManager.noteWasCutEvent += OnNoteWasCut;
-            _beatmapObjectManager.noteWasMissedEvent += OnNoteWasMissed;
+            _beatmapObjectEventFilter.noteGoodCut += OnNoteGoodCut;
+            _beatmapObjectEventFilter.noteBadCut += OnNoteBadCut;
+            _beatmapObjectEventFilter.noteMissed += OnNoteMissed;
 
             _scoreController.multiplierDidChangeEvent += OnMultiplierDidChange;
 
@@ -107,15 +94,14 @@ namespace CustomAvatar.Avatar
                 _multiplayerLevelEndActions.playerDidFinishEvent += OnPlayerDidFinish;
             }
 
-            PopulateSliderHeadNoteDatas();
-
             SharedCoroutineStarter.instance.StartCoroutine(TriggerOnLevelStart());
         }
 
         public void Dispose()
         {
-            _beatmapObjectManager.noteWasCutEvent -= OnNoteWasCut;
-            _beatmapObjectManager.noteWasMissedEvent -= OnNoteWasMissed;
+            _beatmapObjectEventFilter.noteGoodCut -= OnNoteGoodCut;
+            _beatmapObjectEventFilter.noteBadCut -= OnNoteBadCut;
+            _beatmapObjectEventFilter.noteMissed -= OnNoteMissed;
 
             _scoreController.multiplierDidChangeEvent -= OnMultiplierDidChange;
 
@@ -136,67 +122,53 @@ namespace CustomAvatar.Avatar
             }
         }
 
-        #endregion
-
-        private void PopulateSliderHeadNoteDatas()
-        {
-            LinkedListNode<BeatmapDataItem> node = _beatmapData.allBeatmapDataItems.First;
-
-            while (node != null)
-            {
-                if (node.Value is NoteData noteData && noteData.gameplayType == NoteData.GameplayType.BurstSliderHead)
-                {
-                    _noteDatas.Add(noteData);
-                }
-
-                node = node.Next;
-            }
-        }
-
         private IEnumerator TriggerOnLevelStart()
         {
             yield return _gameScenesManager.waitUntilSceneTransitionFinish;
 
-            _eventManager.OnLevelStart.Invoke();
+            _logger.LogTrace($"Invoke {nameof(_eventManager.levelStarted)}");
+            _eventManager.levelStarted.Invoke();
         }
 
-        private void OnNoteWasCut(NoteController noteController, in NoteCutInfo cutInfo)
+        private void OnNoteGoodCut(NoteController noteController, in NoteCutInfo noteCutInfo)
         {
-            // this is the same logic as MissedNoteEffectSpawner BadNoteCutEffectSpawner
-            if (cutInfo.allIsOK && noteController.noteData.colorType != ColorType.None)
+            if (IsLeftSaber(noteCutInfo.saberType))
             {
-                if (ParentWasAlreadyTriggered(noteController, _wasAlreadyCut))
-                {
-                    return;
-                }
-
-                _logger.LogTrace($"Invoke {nameof(_eventManager.OnSlice)}");
-                _eventManager.OnSlice.Invoke();
+                _logger.LogTrace($"Invoke {nameof(_eventManager.leftGoodCut)}");
+                _eventManager.leftGoodCut.Invoke();
             }
-            else if (noteController.noteData.time + 0.5f >= _audioTimeSyncController.songTime)
+            else
             {
-                if (ParentWasAlreadyTriggered(noteController, _wasAlreadyBadCut))
-                {
-                    return;
-                }
-
-                _logger.LogTrace($"Invoke {nameof(_eventManager.OnBadCut)}");
-                _eventManager.OnBadCut.Invoke();
+                _logger.LogTrace($"Invoke {nameof(_eventManager.rightGoodCut)}");
+                _eventManager.rightGoodCut.Invoke();
             }
         }
 
-        private void OnNoteWasMissed(NoteController noteController)
+        private void OnNoteBadCut(NoteController noteController, in NoteCutInfo noteCutInfo)
         {
-            // this is the same logic as MissedNoteEffectSpawner
-            if (!noteController.hidden && noteController.noteData.time + 0.5f >= _audioTimeSyncController.songTime && noteController.noteData.colorType != ColorType.None)
+            if (IsLeftSaber(noteCutInfo.saberType))
             {
-                if (ParentWasAlreadyTriggered(noteController, _wasAlreadyMissed))
-                {
-                    return;
-                }
+                _logger.LogTrace($"Invoke {nameof(_eventManager.leftBadCut)}");
+                _eventManager.leftBadCut.Invoke();
+            }
+            else
+            {
+                _logger.LogTrace($"Invoke {nameof(_eventManager.rightBadCut)}");
+                _eventManager.rightBadCut.Invoke();
+            }
+        }
 
-                _logger.LogTrace($"Invoke {nameof(_eventManager.OnMiss)}");
-                _eventManager.OnMiss.Invoke();
+        private void OnNoteMissed(NoteController noteController)
+        {
+            if (IsLeftColor(noteController.noteData.colorType))
+            {
+                _logger.LogTrace($"Invoke {nameof(_eventManager.leftNoteMissed)}");
+                _eventManager.leftNoteMissed.Invoke();
+            }
+            else
+            {
+                _logger.LogTrace($"Invoke {nameof(_eventManager.rightNoteMissed)}");
+                _eventManager.rightNoteMissed.Invoke();
             }
         }
 
@@ -204,13 +176,13 @@ namespace CustomAvatar.Avatar
         {
             if (multiplier > _lastMultiplier)
             {
-                _logger.LogTrace($"Invoke {nameof(_eventManager.MultiplierUp)}");
-                _eventManager.MultiplierUp.Invoke();
+                _logger.LogTrace($"Invoke {nameof(_eventManager.multiplierIncreased)}");
+                _eventManager.multiplierIncreased.Invoke(multiplier);
             }
             else if (multiplier < _lastMultiplier)
             {
-                _logger.LogTrace($"Invoke {nameof(_eventManager.MultiplierDown)}");
-                _eventManager.MultiplierDown.Invoke();
+                _logger.LogTrace($"Invoke {nameof(_eventManager.multiplierDecreased)}");
+                _eventManager.multiplierDecreased.Invoke(multiplier);
             }
 
             _lastMultiplier = multiplier;
@@ -220,13 +192,13 @@ namespace CustomAvatar.Avatar
         {
             if (combo > _lastCombo)
             {
-                _logger.LogTrace($"Invoke {nameof(_eventManager.OnComboUp)}");
-                _eventManager.OnComboUp.Invoke();
+                _logger.LogTrace($"Invoke {nameof(_eventManager.comboIncreased)}");
+                _eventManager.comboIncreased.Invoke(combo);
             }
-            else if (combo < _lastCombo)
+            else if (combo == 0)
             {
-                _logger.LogTrace($"Invoke {nameof(_eventManager.OnComboBreak)}");
-                _eventManager.OnComboBreak.Invoke();
+                _logger.LogTrace($"Invoke {nameof(_eventManager.comboBroken)}");
+                _eventManager.comboBroken.Invoke();
             }
 
             _lastCombo = combo;
@@ -234,26 +206,42 @@ namespace CustomAvatar.Avatar
 
         private void OnSparkleEffectDidStart(SaberType saberType)
         {
-            _logger.LogTrace($"Invoke {nameof(_eventManager.SaberStartColliding)}");
-            _eventManager.SaberStartColliding.Invoke();
+            if (IsLeftSaber(saberType))
+            {
+                _logger.LogTrace($"Invoke {nameof(_eventManager.leftSaberStartedColliding)}");
+                _eventManager.leftSaberStartedColliding.Invoke();
+            }
+            else
+            {
+                _logger.LogTrace($"Invoke {nameof(_eventManager.rightSaberStartedColliding)}");
+                _eventManager.rightSaberStartedColliding.Invoke();
+            }
         }
 
         private void OnSparkleEffectDidEnd(SaberType saberType)
         {
-            _logger.LogTrace($"Invoke {nameof(_eventManager.SaberStopColliding)}");
-            _eventManager.SaberStopColliding.Invoke();
+            if (IsLeftSaber(saberType))
+            {
+                _logger.LogTrace($"Invoke {nameof(_eventManager.leftSaberStoppedColliding)}");
+                _eventManager.leftSaberStoppedColliding.Invoke();
+            }
+            else
+            {
+                _logger.LogTrace($"Invoke {nameof(_eventManager.rightSaberStoppedColliding)}");
+                _eventManager.rightSaberStoppedColliding.Invoke();
+            }
         }
 
         private void OnLevelFinished()
         {
-            _logger.LogTrace($"Invoke {nameof(_eventManager.OnLevelFinish)}");
-            _eventManager.OnLevelFinish.Invoke();
+            _logger.LogTrace($"Invoke {nameof(_eventManager.levelFinished)}");
+            _eventManager.levelFinished.Invoke();
         }
 
         private void OnLevelFailed()
         {
-            _logger.LogTrace($"Invoke {nameof(_eventManager.OnLevelFail)}");
-            _eventManager.OnLevelFail.Invoke();
+            _logger.LogTrace($"Invoke {nameof(_eventManager.levelFailed)}");
+            _eventManager.levelFailed.Invoke();
         }
 
         private void OnPlayerDidFinish(MultiplayerLevelCompletionResults results)
@@ -270,21 +258,8 @@ namespace CustomAvatar.Avatar
             }
         }
 
-        private bool ParentWasAlreadyTriggered(NoteController noteController, HashSet<BeatmapDataItem> alreadyTriggeredItems)
-        {
-            if (noteController.noteData.gameplayType != NoteData.GameplayType.BurstSliderHead && noteController.noteData.gameplayType != NoteData.GameplayType.BurstSliderElement && noteController.noteData.gameplayType != NoteData.GameplayType.BurstSliderElementFill)
-            {
-                return false;
-            }
+        private bool IsLeftSaber(SaberType saberType) => saberType == SaberType.SaberA;
 
-            return !alreadyTriggeredItems.Add(GetHeadNote(noteController));
-        }
-
-        private NoteData GetHeadNote(NoteController noteController)
-        {
-            NoteData noteData = noteController.noteData;
-            // allBeatmapDataItems is backed by a sorted list so we can assume time is increasing as we iterate through the list
-            return _noteDatas.First(nd => noteData.time >= nd.time && nd.colorType == noteData.colorType);
-        }
+        private bool IsLeftColor(ColorType colorType) => colorType == ColorType.ColorA;
     }
 }

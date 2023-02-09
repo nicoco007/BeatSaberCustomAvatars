@@ -15,33 +15,31 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using UnityEngine.Events;
-using UnityEngine.Serialization;
 
 // keeping root namespace for compatibility
-#pragma warning disable IDE0051, IDE1006
+#pragma warning disable IDE1006
 namespace CustomAvatar
 {
-    public class ComboReachedEvent : EventFilterBehaviour
+    public class EveryNthComboFilter : EventFilterBehaviour
     {
-        public int ComboTarget = 50;
-        [FormerlySerializedAs("NthComboReached")]
-        public UnityEvent ComboReached;
+        public int ComboStep = 50;
+        public UnityEvent NthComboReached;
 
         private void OnEnable()
         {
-            eventManager.comboIncreased.AddListener(OnComboReached);
+            eventManager.comboIncreased.AddListener(OnComboStep);
         }
 
         private void OnDisable()
         {
-            eventManager.comboIncreased.RemoveListener(OnComboReached);
+            eventManager.comboIncreased.RemoveListener(OnComboStep);
         }
 
-        private void OnComboReached(int combo)
+        private void OnComboStep(int combo)
         {
-            if (combo == ComboTarget)
+            if (combo % ComboStep == 0 && combo != 0)
             {
-                ComboReached.Invoke();
+                NthComboReached.Invoke();
             }
         }
     }

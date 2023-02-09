@@ -17,6 +17,7 @@
 using System;
 using CustomAvatar.Avatar;
 using CustomAvatar.Player;
+using CustomAvatar.Utilities;
 using Zenject;
 
 namespace CustomAvatar.Zenject
@@ -27,6 +28,8 @@ namespace CustomAvatar.Zenject
         {
             Container.Bind(typeof(IInitializable), typeof(IDisposable)).To<AvatarGameplayEventsPlayer>().AsSingle().NonLazy();
             Container.Bind(typeof(IInitializable)).To<GameEnvironmentObjectManager>().AsSingle().NonLazy();
+
+            Container.Bind(typeof(BeatmapObjectEventFilter), typeof(IInitializable), typeof(IDisposable)).To<BeatmapObjectEventFilter>().AsSingle();
 
             Container.BindExecutionOrder<GameEnvironmentObjectManager>(1000);
         }
