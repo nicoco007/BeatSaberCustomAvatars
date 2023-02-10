@@ -76,14 +76,14 @@ namespace CustomAvatar.Player
                 _playerAvatarManager = playerAvatarManager;
                 _gameScenesManager = gameScenesManager;
                 _callback = callback;
+
+                if (isActiveAndEnabled)
+                {
+                    OnEnable();
+                }
             }
 
             private void OnEnable()
-            {
-                StartCoroutine(TriggerEventCoroutine());
-            }
-
-            private void Start()
             {
                 StartCoroutine(TriggerEventCoroutine());
             }
