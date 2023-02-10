@@ -206,36 +206,34 @@ namespace CustomAvatar.UI
 
         private string ResizeModeFormatter(object value)
         {
-            if (!(value is AvatarResizeMode avatarResizeMode)) return null;
-
-            switch (avatarResizeMode)
+            if (!(value is AvatarResizeMode avatarResizeMode))
             {
-                case AvatarResizeMode.Height:
-                    return "Height";
-                case AvatarResizeMode.ArmSpan:
-                    return "Arm Span";
-                case AvatarResizeMode.None:
-                    return "Don't Resize";
-                default:
-                    return null;
+                return null;
             }
+
+            return avatarResizeMode switch
+            {
+                AvatarResizeMode.Height => "Height",
+                AvatarResizeMode.ArmSpan => "Arm Span",
+                AvatarResizeMode.None => "Don't Resize",
+                _ => null,
+            };
         }
 
         private string FloorHeightAdjustFormatter(object value)
         {
-            if (!(value is FloorHeightAdjustMode floorHeightAdjustMode)) return null;
-
-            switch (floorHeightAdjustMode)
+            if (!(value is FloorHeightAdjustMode floorHeightAdjustMode))
             {
-                case FloorHeightAdjustMode.Off:
-                    return "Off";
-                case FloorHeightAdjustMode.PlayersPlaceOnly:
-                    return "Player's Place Only";
-                case FloorHeightAdjustMode.EntireEnvironment:
-                    return "Entire Environment";
-                default:
-                    return null;
+                return null;
             }
+
+            return floorHeightAdjustMode switch
+            {
+                FloorHeightAdjustMode.Off => "Off",
+                FloorHeightAdjustMode.PlayersPlaceOnly => "Player's Place Only",
+                FloorHeightAdjustMode.EntireEnvironment => "Entire Environment",
+                _ => null,
+            };
         }
 
         private string HeightFormatter(float value)

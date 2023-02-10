@@ -109,7 +109,7 @@ dotnet_remove_unnecessary_suppression_exclusions = none
 # IDE0010: Add missing cases to switch statement
 dotnet_diagnostic.IDE0010.severity = suggestion
 # IDE0072: Add missing cases to switch Expression
-dotnet_diagnostic.IDE0072.severity = warning
+dotnet_diagnostic.IDE0072.severity = suggestion
 # IDE0050: Convert anonymous type to tuple
 dotnet_diagnostic.IDE0050.severity = suggestion
 # IDE0070: Use System.HashCode.Combine

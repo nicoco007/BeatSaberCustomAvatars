@@ -80,21 +80,13 @@ namespace CustomAvatar.Utilities
             }
 
             string fourCC = header.ddsPixelFormat.fourCC;
-            TextureFormat textureFormat;
 
-            switch (fourCC)
+            TextureFormat textureFormat = fourCC switch
             {
-                case "DXT1":
-                    textureFormat = TextureFormat.DXT1;
-                    break;
-
-                case "DXT5":
-                    textureFormat = TextureFormat.DXT5;
-                    break;
-
-                default:
-                    throw new IOException($"Unsupported DDS compression format '{fourCC}'");
-            }
+                "DXT1" => TextureFormat.DXT1,
+                "DXT5" => TextureFormat.DXT5,
+                _ => throw new IOException($"Unsupported DDS compression format '{fourCC}'"),
+            };
 
             var texture = new Texture2D(header.width, header.height, textureFormat, mipMapCount, linear);
 

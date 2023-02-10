@@ -130,21 +130,12 @@ namespace CustomAvatar.Player
 
         public bool TryGetFingerCurl(DeviceUse use, out FingerCurl curl)
         {
-            SkeletalInput handAnim;
-
-            switch (use)
+            SkeletalInput handAnim = use switch
             {
-                case DeviceUse.LeftHand:
-                    handAnim = _leftHandAnimAction;
-                    break;
-
-                case DeviceUse.RightHand:
-                    handAnim = _rightHandAnimAction;
-                    break;
-
-                default:
-                    throw new InvalidOperationException($"{nameof(TryGetFingerCurl)} only supports {nameof(DeviceUse.LeftHand)} and {nameof(DeviceUse.RightHand)}");
-            }
+                DeviceUse.LeftHand => _leftHandAnimAction,
+                DeviceUse.RightHand => _rightHandAnimAction,
+                _ => throw new InvalidOperationException($"{nameof(TryGetFingerCurl)} only supports {nameof(DeviceUse.LeftHand)} and {nameof(DeviceUse.RightHand)}"),
+            };
 
             if (!handAnim.isActive || handAnim.summaryData == null)
             {

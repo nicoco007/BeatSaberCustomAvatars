@@ -151,7 +151,7 @@ namespace CustomAvatar
 #else
         private static readonly FieldInfo kPersistentCallsField = typeof(UnityEventBase).GetField("m_PersistentCalls", BindingFlags.NonPublic | BindingFlags.Instance);
 
-#region Legacy
+        #region Legacy
 #pragma warning disable IDE1006
 
         // these are only present because FormerlySerializedAs does not work in the game
@@ -187,7 +187,7 @@ namespace CustomAvatar
         private UnityEvent OnComboChanged;
 
 #pragma warning restore IDE1006
-#endregion
+        #endregion
 
         [SerializeField]
         private UnityEvent _leftGoodCut;
