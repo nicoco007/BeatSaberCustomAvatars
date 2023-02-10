@@ -126,7 +126,6 @@ namespace CustomAvatar.Avatar
         {
             yield return _gameScenesManager.waitUntilSceneTransitionFinish;
 
-            _logger.LogTrace($"Invoke {nameof(_eventManager.levelStarted)}");
             _eventManager.levelStarted.Invoke();
         }
 
@@ -134,12 +133,10 @@ namespace CustomAvatar.Avatar
         {
             if (IsLeftSaber(noteCutInfo.saberType))
             {
-                _logger.LogTrace($"Invoke {nameof(_eventManager.leftGoodCut)}");
                 _eventManager.leftGoodCut.Invoke();
             }
             else
             {
-                _logger.LogTrace($"Invoke {nameof(_eventManager.rightGoodCut)}");
                 _eventManager.rightGoodCut.Invoke();
             }
         }
@@ -148,12 +145,10 @@ namespace CustomAvatar.Avatar
         {
             if (IsLeftSaber(noteCutInfo.saberType))
             {
-                _logger.LogTrace($"Invoke {nameof(_eventManager.leftBadCut)}");
                 _eventManager.leftBadCut.Invoke();
             }
             else
             {
-                _logger.LogTrace($"Invoke {nameof(_eventManager.rightBadCut)}");
                 _eventManager.rightBadCut.Invoke();
             }
         }
@@ -162,12 +157,10 @@ namespace CustomAvatar.Avatar
         {
             if (IsLeftColor(noteController.noteData.colorType))
             {
-                _logger.LogTrace($"Invoke {nameof(_eventManager.leftNoteMissed)}");
                 _eventManager.leftNoteMissed.Invoke();
             }
             else
             {
-                _logger.LogTrace($"Invoke {nameof(_eventManager.rightNoteMissed)}");
                 _eventManager.rightNoteMissed.Invoke();
             }
         }
@@ -176,12 +169,10 @@ namespace CustomAvatar.Avatar
         {
             if (multiplier > _lastMultiplier)
             {
-                _logger.LogTrace($"Invoke {nameof(_eventManager.multiplierIncreased)}");
                 _eventManager.multiplierIncreased.Invoke(multiplier);
             }
             else if (multiplier < _lastMultiplier)
             {
-                _logger.LogTrace($"Invoke {nameof(_eventManager.multiplierDecreased)}");
                 _eventManager.multiplierDecreased.Invoke(multiplier);
             }
 
@@ -192,12 +183,10 @@ namespace CustomAvatar.Avatar
         {
             if (combo > _lastCombo)
             {
-                _logger.LogTrace($"Invoke {nameof(_eventManager.comboIncreased)}");
                 _eventManager.comboIncreased.Invoke(combo);
             }
             else if (combo == 0)
             {
-                _logger.LogTrace($"Invoke {nameof(_eventManager.comboBroken)}");
                 _eventManager.comboBroken.Invoke();
             }
 
@@ -208,12 +197,10 @@ namespace CustomAvatar.Avatar
         {
             if (IsLeftSaber(saberType))
             {
-                _logger.LogTrace($"Invoke {nameof(_eventManager.leftSaberStartedColliding)}");
                 _eventManager.leftSaberStartedColliding.Invoke();
             }
             else
             {
-                _logger.LogTrace($"Invoke {nameof(_eventManager.rightSaberStartedColliding)}");
                 _eventManager.rightSaberStartedColliding.Invoke();
             }
         }
@@ -222,25 +209,21 @@ namespace CustomAvatar.Avatar
         {
             if (IsLeftSaber(saberType))
             {
-                _logger.LogTrace($"Invoke {nameof(_eventManager.leftSaberStoppedColliding)}");
                 _eventManager.leftSaberStoppedColliding.Invoke();
             }
             else
             {
-                _logger.LogTrace($"Invoke {nameof(_eventManager.rightSaberStoppedColliding)}");
                 _eventManager.rightSaberStoppedColliding.Invoke();
             }
         }
 
         private void OnLevelFinished()
         {
-            _logger.LogTrace($"Invoke {nameof(_eventManager.levelFinished)}");
             _eventManager.levelFinished.Invoke();
         }
 
         private void OnLevelFailed()
         {
-            _logger.LogTrace($"Invoke {nameof(_eventManager.levelFailed)}");
             _eventManager.levelFailed.Invoke();
         }
 

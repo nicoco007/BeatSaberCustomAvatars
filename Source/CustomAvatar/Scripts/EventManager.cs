@@ -22,7 +22,13 @@ using UnityEngine.Events;
 using UnityEngine.Serialization;
 #else
 using System.Reflection;
-#endif
+using CustomAvatar.Logging;
+using JetBrains.Annotations;
+using CustomAvatar.Avatar;
+#if DEBUG
+using Zenject;
+#endif // DEBUG
+#endif // UNITY_EDITOR
 
 // keeping root namespace for compatibility
 namespace CustomAvatar
@@ -145,7 +151,7 @@ namespace CustomAvatar
 #else
         private static readonly FieldInfo kPersistentCallsField = typeof(UnityEventBase).GetField("m_PersistentCalls", BindingFlags.NonPublic | BindingFlags.Instance);
 
-        #region Legacy
+#region Legacy
 #pragma warning disable IDE1006
 
         // these are only present because FormerlySerializedAs does not work in the game
@@ -181,7 +187,7 @@ namespace CustomAvatar
         private UnityEvent OnComboChanged;
 
 #pragma warning restore IDE1006
-        #endregion
+#endregion
 
         [SerializeField]
         private UnityEvent _leftGoodCut;
@@ -290,7 +296,35 @@ namespace CustomAvatar
 
             return events[0];
         }
-#endif
+
+#if DEBUG
+        [Inject]
+        [UsedImplicitly]
+        private void Construct(ILoggerFactory loggerProvider, SpawnedAvatar avatar)
+        {
+            ILogger<EventManager> logger = loggerProvider.CreateLogger<EventManager>(avatar.prefab.descriptor.name);
+            leftGoodCut.AddListener(() => logger.LogTrace($"{nameof(leftGoodCut)} invoked"));
+            rightGoodCut.AddListener(() => logger.LogTrace($"{nameof(rightGoodCut)} invoked"));
+            leftBadCut.AddListener(() => logger.LogTrace($"{nameof(leftBadCut)} invoked"));
+            rightBadCut.AddListener(() => logger.LogTrace($"{nameof(rightBadCut)} invoked"));
+            leftNoteMissed.AddListener(() => logger.LogTrace($"{nameof(leftNoteMissed)} invoked"));
+            rightNoteMissed.AddListener(() => logger.LogTrace($"{nameof(rightNoteMissed)} invoked"));
+            leftSaberStartedColliding.AddListener(() => logger.LogTrace($"{nameof(leftSaberStartedColliding)} invoked"));
+            rightSaberStartedColliding.AddListener(() => logger.LogTrace($"{nameof(rightSaberStartedColliding)} invoked"));
+            leftSaberStoppedColliding.AddListener(() => logger.LogTrace($"{nameof(leftSaberStoppedColliding)} invoked"));
+            rightSaberStoppedColliding.AddListener(() => logger.LogTrace($"{nameof(rightSaberStoppedColliding)} invoked"));
+            comboIncreased.AddListener((_) => logger.LogTrace($"{nameof(comboIncreased)} invoked"));
+            comboBroken.AddListener(() => logger.LogTrace($"{nameof(comboBroken)} invoked"));
+            multiplierIncreased.AddListener((_) => logger.LogTrace($"{nameof(multiplierIncreased)} invoked"));
+            multiplierDecreased.AddListener((_) => logger.LogTrace($"{nameof(multiplierDecreased)} invoked"));
+            levelStarted.AddListener(() => logger.LogTrace($"{nameof(levelStarted)} invoked"));
+            levelFinished.AddListener(() => logger.LogTrace($"{nameof(levelFinished)} invoked"));
+            levelFailed.AddListener(() => logger.LogTrace($"{nameof(levelFailed)} invoked"));
+            menuEntered.AddListener(() => logger.LogTrace($"{nameof(menuEntered)} invoked"));
+            multiplayerLobbyEntered.AddListener(() => logger.LogTrace($"{nameof(multiplayerLobbyEntered)} invoked"));
+        }
+#endif // DEBUG
+#endif // UNITY_EDITOR
 
         [Serializable]
         public class IntUnityEvent : UnityEvent<int> { }

@@ -89,18 +89,16 @@ namespace CustomAvatar.Avatar
                 _logger.LogInformation($"Spawning avatar '{avatar.descriptor.name}'");
             }
 
-            var subContainer = new DiContainer(_container);
-
             GameObject avatarInstance = Object.Instantiate(avatar, parent, false).gameObject;
-            Object.Destroy(avatarInstance.GetComponent<AvatarPrefab>());
-            subContainer.QueueForInject(avatarInstance);
+            Object.DestroyImmediate(avatarInstance.GetComponent<AvatarPrefab>());
 
+            var subContainer = new DiContainer(_container);
             subContainer.Bind<AvatarPrefab>().FromInstance(avatar);
             subContainer.Bind<IAvatarInput>().FromInstance(input);
 
             SpawnedAvatar spawnedAvatar = subContainer.InstantiateComponent<SpawnedAvatar>(avatarInstance);
-
             subContainer.Bind<SpawnedAvatar>().FromInstance(spawnedAvatar);
+            subContainer.InjectGameObject(avatarInstance);
 
             foreach ((Type type, Func<AvatarPrefab, bool> condition) in _componentsToAdd)
             {
