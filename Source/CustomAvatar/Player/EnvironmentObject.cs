@@ -29,10 +29,12 @@ namespace CustomAvatar.Player
 {
     internal class EnvironmentObject : MonoBehaviour
     {
-        // found this property through UnityExplorer, hopefully it doesn't disappear in future versions of Unity
+        // found this property through UnityExplorer - hopefully it doesn't disappear in future versions of Unity
         private static readonly Action<Renderer, Transform> kStaticBatchRootTransformSetter = ReflectionExtensions.CreatePropertySetter<Renderer, Transform>("staticBatchRootTransform");
+        private static readonly Dictionary<MirrorRendererSO, MirrorRendererSO> kReplacedMirrorRenderers = new Dictionary<MirrorRendererSO, MirrorRendererSO>();
 
-        private static readonly Dictionary<Plane, MirrorRendererSO> kReplacedMirrorRenderers = new Dictionary<Plane, MirrorRendererSO>();
+        private SaberBurnMarkSparkles[] _saberBurnMarkSparkles;
+        private SaberBurnMarkArea[] _saberBurnMarkAreas;
 
         private ILogger<EnvironmentObject> _logger;
         private float _originalY;
@@ -51,6 +53,9 @@ namespace CustomAvatar.Player
             {
                 kStaticBatchRootTransformSetter(renderer, transform);
             }
+
+            _saberBurnMarkSparkles = GetComponentsInChildren<SaberBurnMarkSparkles>();
+            _saberBurnMarkAreas = GetComponentsInChildren<SaberBurnMarkArea>();
         }
 
         [Inject]
@@ -89,6 +94,16 @@ namespace CustomAvatar.Player
             }
 
             transform.position = new Vector3(transform.position.x, _originalY + floorOffset, transform.position.z);
+
+            foreach (SaberBurnMarkSparkles saberBurnMarkSparkles in _saberBurnMarkSparkles)
+            {
+                saberBurnMarkSparkles.SetField("_plane", new Plane(saberBurnMarkSparkles.transform.up, saberBurnMarkSparkles.transform.position));
+            }
+
+            foreach (SaberBurnMarkArea saberBurnMarkArea in _saberBurnMarkAreas)
+            {
+                saberBurnMarkArea.SetField("_plane", new Plane(saberBurnMarkArea.transform.up, saberBurnMarkArea.transform.position));
+            }
         }
 
         // TODO: this should be re-run when offset is changed; there are
