@@ -63,7 +63,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\CustomAvatar\Scripts\AvatarDescriptor.cs" Link="Scripts\AvatarDescriptor.cs" />
+    <Compile Include="..\CustomAvatar\Scripts\ComboReachedEvent.cs" Link="Scripts\ComboReachedEvent.cs" />
+    <Compile Include="..\CustomAvatar\Scripts\EventFilterBehaviour.cs" Link="Scripts\EventFilterBehaviour.cs" />
     <Compile Include="..\CustomAvatar\Scripts\EventManager.cs" Link="Scripts\EventManager.cs" />
+    <Compile Include="..\CustomAvatar\Scripts\EveryNthComboFilter.cs" Link="Scripts\EveryNthComboFilter.cs" />
     <Compile Include="..\CustomAvatar\Scripts\FirstPersonExclusion.cs" Link="Scripts\FirstPersonExclusion.cs" />
     <Compile Include="..\CustomAvatar\Scripts\UpperArmRelaxer.cs" Link="Scripts\UpperArmRelaxer.cs" />
     <Compile Include="..\CustomAvatar\Logging\ILogger.cs" Link="Logging\ILogger.cs" />
