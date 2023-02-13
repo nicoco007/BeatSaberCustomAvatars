@@ -120,25 +120,22 @@ namespace CustomAvatar.Player
                 _logger.LogTrace($"Replacing {nameof(MirrorRendererSO)} on '{mirror.name}'");
 
                 MirrorRendererSO original = mirror.GetField<MirrorRendererSO, Mirror>("_mirrorRenderer");
-                Transform t = mirror.transform;
 
-                var plane = new Plane(t.up, t.position);
-                plane.distance = Mathf.Round(plane.distance / 1000) * 1000;
-
-                if (!kReplacedMirrorRenderers.TryGetValue(plane, out MirrorRendererSO renderer) || renderer == null)
+                // Since every EnvironmentObject will move by the same amount, we can assume any mirror under
+                // any EnvironmentObject using a given MirrorRendererSO will be on the same plane.
+                if (!kReplacedMirrorRenderers.TryGetValue(original, out MirrorRendererSO renderer) || renderer == null)
                 {
-                    kReplacedMirrorRenderers.Remove(plane);
+                    kReplacedMirrorRenderers.Remove(original);
 
                     _logger.LogTrace($"Creating new {nameof(MirrorRendererSO)} for '{mirror.name}'");
 
-                    // TODO: these should be destroyed when they are no longer used; they shouldn't
-                    // cause performance issues by sticking around but should be cleaned up eventually
                     renderer = Instantiate(original);
+                    renderer.name = original.name + " (Moved Floor Instance)";
 
-                    kReplacedMirrorRenderers.Add(plane, renderer);
+                    // Since these MirrorRendererSOs are reused and never unloaded, might as well keep them in the dictionary as long as the game is running.
+                    kReplacedMirrorRenderers.Add(original, renderer);
                 }
 
-                renderer.name = original.name + " (Moved Floor Instance)";
                 mirror.SetField("_mirrorRenderer", renderer);
             }
         }
