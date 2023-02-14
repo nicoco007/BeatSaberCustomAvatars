@@ -17,13 +17,16 @@
 extern alias BeatSaberFinalIK;
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using BeatSaberFinalIK::RootMotion;
 using CustomAvatar.Logging;
 using UnityEngine;
 using UnityEngine.Events;
 using static BeatSaberFinalIK::RootMotion.FinalIK.IKSolverVR.Arm;
 
-#if !UNITY_EDITOR
+#if UNITY_EDITOR
+using UnityEditor;
+#else
 using Zenject;
 #endif
 
@@ -411,12 +414,10 @@ namespace CustomAvatar
                                                (references_leftThigh != null && references_leftCalf != null && references_leftFoot != null && references_rightThigh != null && references_rightCalf != null && references_rightFoot != null)
                                            );
 
-        #region Behaviour Lifecycle
-#pragma warning disable IDE0051
-
 #if !UNITY_EDITOR
         [Inject]
 #endif
+        [SuppressMessage("CodeQuality", "IDE0051", Justification = "Used by Zenject")]
         private void Construct(ILogger<VRIKManager> logger)
         {
             _logger = logger;
@@ -427,7 +428,77 @@ namespace CustomAvatar
             AutoDetectReferences();
         }
 
-#pragma warning restore IDE0051
-        #endregion
+#if UNITY_EDITOR
+        private GUIStyle _redLabelStyle;
+        private GUIStyle _greenLabelStyle;
+        private GUIStyle _blueLabelStyle;
+
+        internal void OnDrawGizmosSelected()
+        {
+            if (_redLabelStyle == null)
+            {
+                _redLabelStyle = new GUIStyle(EditorStyles.label);
+                _redLabelStyle.normal.textColor = Color.red;
+            }
+
+            if (_greenLabelStyle == null)
+            {
+                _greenLabelStyle = new GUIStyle(EditorStyles.label);
+                _greenLabelStyle.normal.textColor = Color.green;
+            }
+
+            if (_blueLabelStyle == null)
+            {
+                _blueLabelStyle = new GUIStyle(EditorStyles.label);
+                _blueLabelStyle.normal.textColor = Color.blue;
+            }
+
+            DrawHandAxes(references_leftHand, solver_leftArm_wristToPalmAxis, solver_leftArm_palmToThumbAxis, true);
+            DrawHandAxes(references_rightHand, solver_rightArm_wristToPalmAxis, solver_rightArm_palmToThumbAxis, false);
+        }
+
+        private void DrawHandAxes(Transform reference, Vector3 wristToPalmAxis, Vector3 palmToThumbAxis, bool invertNormal)
+        {
+            if (!reference)
+            {
+                return;
+            }
+
+            Vector3 wristToPalmVector = default;
+            Vector3 palmToThumbVector = default;
+
+            if (wristToPalmAxis.sqrMagnitude > 0)
+            {
+                wristToPalmVector = reference.rotation * wristToPalmAxis.normalized;
+
+                Handles.color = Color.green;
+                Handles.ArrowHandleCap(0, reference.position, Quaternion.LookRotation(wristToPalmVector), 0.1f, EventType.Repaint);
+                Handles.Label(reference.position + wristToPalmVector * 0.12f, "Wrist to Palm Axis", _greenLabelStyle);
+            }
+
+            if (palmToThumbAxis.sqrMagnitude > 0)
+            {
+                palmToThumbVector = reference.rotation * palmToThumbAxis.normalized;
+
+                Handles.color = Color.red;
+                Handles.ArrowHandleCap(0, reference.position, Quaternion.LookRotation(palmToThumbVector), 0.1f, EventType.Repaint);
+                Handles.Label(reference.position + palmToThumbVector * 0.12f, "Palm to Thumb Axis", _redLabelStyle);
+            }
+
+            if (wristToPalmAxis.sqrMagnitude > 0 && palmToThumbAxis.sqrMagnitude > 0)
+            {
+                Vector3 planeNormal = new Plane(reference.position, reference.position + wristToPalmVector, reference.position + palmToThumbVector).normal;
+
+                if (invertNormal)
+                {
+                    planeNormal = -planeNormal;
+                }
+
+                Handles.color = Color.blue;
+                Handles.ArrowHandleCap(0, reference.position, Quaternion.LookRotation(planeNormal), 0.1f, EventType.Repaint);
+                Handles.Label(reference.position + planeNormal * 0.12f, "Palm Inside Axis", _blueLabelStyle);
+            }
+        }
+#endif
     }
 }
