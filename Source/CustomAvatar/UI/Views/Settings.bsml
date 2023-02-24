@@ -85,4 +85,8 @@
       </settings-container>
     </macro.as-host>
   </tab>
+
+  <macro.for-each items="additionalMenuTabs" pass-back-tags="true">
+    <tab tags="avatar-tabs" tab-name="~name" id="plugin-tab" anchor-max-y="0.8" />
+  </macro.for-each>
 </bg>

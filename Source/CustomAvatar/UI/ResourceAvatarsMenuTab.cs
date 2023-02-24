@@ -14,21 +14,23 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
+using System.IO;
 
 namespace CustomAvatar.UI
 {
-    internal abstract class ViewControllerHost : IViewControllerHost, INotifyPropertyChanged
+    public abstract class ResourceAvatarsMenuTab : IAvatarsMenuTab
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+        public abstract string name { get; }
 
-        public abstract void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling);
-        public abstract void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling);
+        public abstract object host { get; }
 
-        protected void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+        public abstract string resourceName { get; }
+
+        public string GetContent()
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            using Stream stream = GetType().Assembly.GetManifestResourceStream(resourceName);
+            using var reader = new StreamReader(stream);
+            return reader.ReadToEnd();
         }
     }
 }
