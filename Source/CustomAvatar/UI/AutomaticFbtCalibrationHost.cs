@@ -14,12 +14,11 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Player;
 using CustomAvatar.Tracking;
-using UnityEngine;
+using JetBrains.Annotations;
 
 namespace CustomAvatar.UI
 {
@@ -27,88 +26,38 @@ namespace CustomAvatar.UI
     {
         #region Values
 
-        protected readonly List<object> waistTrackerOptions = new() { WaistTrackerPosition.Front, WaistTrackerPosition.Left, WaistTrackerPosition.Right, WaistTrackerPosition.Back };
         protected readonly TrackerStatusHost trackerStatusHost;
 
         #endregion
 
         private readonly PlayerAvatarManager _avatarManager;
-        private readonly VRPlayerInputInternal _playerInput;
-        private readonly Settings _settings;
         private readonly CalibrationData _calibrationData;
-        private readonly AvatarSpecificSettingsHost _avatarSpecificSettingsHost;
+        private readonly TrackingRig _trackingRig;
 
-        internal AutomaticFbtCalibrationHost(TrackerStatusHost trackerStatusHost, PlayerAvatarManager avatarManager, VRPlayerInputInternal playerInput, Settings settings, CalibrationData calibrationData, AvatarSpecificSettingsHost avatarSpecificSettingsHost)
+        internal AutomaticFbtCalibrationHost(TrackerStatusHost trackerStatusHost, PlayerAvatarManager avatarManager, CalibrationData calibrationData, TrackingRig trackingRig)
         {
             this.trackerStatusHost = trackerStatusHost;
 
             _avatarManager = avatarManager;
-            _playerInput = playerInput;
-            _settings = settings;
             _calibrationData = calibrationData;
-            _avatarSpecificSettingsHost = avatarSpecificSettingsHost;
+            _trackingRig = trackingRig;
         }
 
-        protected bool calibrateFullBodyTrackingOnStart
-        {
-            get => _settings.calibrateFullBodyTrackingOnStart;
-            set
-            {
-                _settings.calibrateFullBodyTrackingOnStart = value;
-                NotifyPropertyChanged();
-            }
-        }
+        protected bool isCalibrateButtonEnabled => _trackingRig.areAnyFullBodyTrackersTracking && _trackingRig.activeCalibrationMode != CalibrationMode.Automatic;
 
-        protected float pelvisOffset
-        {
-            get => _settings.automaticCalibration.pelvisOffset;
-            set
-            {
-                _settings.automaticCalibration.pelvisOffset = value;
-                NotifyPropertyChanged();
-            }
-        }
-
-        protected float footOffset
-        {
-            get => _settings.automaticCalibration.legOffset;
-            set
-            {
-                _settings.automaticCalibration.legOffset = value;
-                NotifyPropertyChanged();
-            }
-        }
-
-        protected WaistTrackerPosition waistTrackerPosition
-        {
-            get => _settings.automaticCalibration.waistTrackerPosition;
-            set
-            {
-                _settings.automaticCalibration.waistTrackerPosition = value;
-                NotifyPropertyChanged();
-            }
-        }
-
-        protected bool isCalibrateButtonEnabled => _areTrackersDetected && _currentAvatarSupportsAutomaticCalibration;
-
-        protected string calibrateButtonText => _calibrationData.automaticCalibration.isCalibrated ? "Recalibrate" : "Calibrate";
-
-        protected string calibrateButtonHoverHint => _currentAvatarSupportsAutomaticCalibration ? (_areTrackersDetected ? "Calibrate full body tracking automatically" : "No trackers detected") : "Not supported by current avatar";
+        protected string calibrateButtonHoverHint => _trackingRig.areAnyFullBodyTrackersTracking ? "Start full body calibration" : "No trackers detected";
 
         protected bool isClearButtonEnabled => _calibrationData.automaticCalibration.isCalibrated;
-
-        private bool _areTrackersDetected => _playerInput.TryGetUncalibratedPose(DeviceUse.Waist, out Pose _) || _playerInput.TryGetUncalibratedPose(DeviceUse.LeftFoot, out Pose _) || _playerInput.TryGetUncalibratedPose(DeviceUse.RightFoot, out Pose _);
-
-        private bool _currentAvatarSupportsAutomaticCalibration => _avatarManager.currentlySpawnedAvatar && _avatarManager.currentlySpawnedAvatar.prefab.descriptor.supportsAutomaticCalibration;
 
         public override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             _avatarManager.avatarLoading += OnAvatarLoading;
             _avatarManager.avatarChanged += OnAvatarChanged;
-            _playerInput.inputChanged += OnInputChanged;
+            _trackingRig.trackingChanged += OnTrackingChanged;
+            _trackingRig.activeCalibrationModeChanged += OnActiveCalibrationModeChanged;
 
             OnAvatarChanged(_avatarManager.currentlySpawnedAvatar);
-            OnInputChanged();
+            OnTrackingChanged();
 
             trackerStatusHost.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
         }
@@ -117,7 +66,8 @@ namespace CustomAvatar.UI
         {
             _avatarManager.avatarLoading -= OnAvatarLoading;
             _avatarManager.avatarChanged -= OnAvatarChanged;
-            _playerInput.inputChanged -= OnInputChanged;
+            _trackingRig.trackingChanged -= OnTrackingChanged;
+            _trackingRig.activeCalibrationModeChanged -= OnActiveCalibrationModeChanged;
 
             trackerStatusHost.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
         }
@@ -125,43 +75,38 @@ namespace CustomAvatar.UI
         private void OnAvatarLoading(string filePath, string name)
         {
             NotifyPropertyChanged(nameof(isCalibrateButtonEnabled));
-            NotifyPropertyChanged(nameof(calibrateButtonHoverHint));
         }
 
         private void OnAvatarChanged(SpawnedAvatar avatar)
         {
             NotifyPropertyChanged(nameof(isCalibrateButtonEnabled));
-            NotifyPropertyChanged(nameof(calibrateButtonHoverHint));
         }
 
-        private void OnInputChanged()
+        private void OnTrackingChanged()
         {
             NotifyPropertyChanged(nameof(isCalibrateButtonEnabled));
-            NotifyPropertyChanged(nameof(calibrateButtonHoverHint));
+            NotifyPropertyChanged(nameof(isClearButtonEnabled));
         }
 
-        #region Actions
-#pragma warning disable IDE0051
+        private void OnActiveCalibrationModeChanged(CalibrationMode calibrationMode)
+        {
+            NotifyPropertyChanged(nameof(isCalibrateButtonEnabled));
+        }
 
+        [UsedImplicitly]
         private void OnCalibrateAutoFullBodyTrackingClicked()
         {
-            _playerInput.CalibrateFullBodyTrackingAuto();
+            _trackingRig.BeginCalibration(CalibrationMode.Automatic);
 
-            NotifyPropertyChanged(nameof(calibrateButtonText));
             NotifyPropertyChanged(nameof(isClearButtonEnabled));
-
-            _avatarSpecificSettingsHost.useAutomaticCalibration = true;
         }
 
+        [UsedImplicitly]
         private void OnClearAutoFullBodyTrackingCalibrationDataClicked()
         {
-            _playerInput.ClearAutomaticFullBodyTrackingData();
+            _trackingRig.ClearCalibrationData(CalibrationMode.Automatic);
 
-            NotifyPropertyChanged(nameof(calibrateButtonText));
             NotifyPropertyChanged(nameof(isClearButtonEnabled));
         }
-
-#pragma warning restore IDE0051
-        #endregion
     }
 }

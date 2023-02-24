@@ -15,8 +15,9 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using CustomAvatar.Avatar;
+using CustomAvatar.Configuration;
 using CustomAvatar.Tracking;
-using CustomAvatar.Utilities;
 using UnityEngine;
 using Zenject;
 
@@ -25,45 +26,71 @@ namespace CustomAvatar.Player
     /// <summary>
     /// The player's <see cref="IAvatarInput"/> with calibration and other settings applied.
     /// </summary>
-    public class VRPlayerInput : IInitializable, IDisposable, IAvatarInput
+    internal class VRPlayerInput : IInitializable, IDisposable, IAvatarInput
     {
-        public bool allowMaintainPelvisPosition => _internalPlayerInput.allowMaintainPelvisPosition;
-
-        public event Action inputChanged;
-
-        private readonly VRPlayerInputInternal _internalPlayerInput;
-        private readonly TrackingHelper _trackingHelper;
+        private readonly PlayerAvatarManager _avatarManager;
+        private readonly Settings _settings;
+        private readonly TrackingRig _trackingRig;
         private readonly IFingerTrackingProvider _fingerTrackingProvider;
 
+        private Settings.AvatarSpecificSettings _avatarSettings;
+
         internal VRPlayerInput(
-            VRPlayerInputInternal internalPlayerInput,
-            TrackingHelper trackingHelper,
+            PlayerAvatarManager avatarManager,
+            Settings settings,
+            TrackingRig trackingRig,
             IFingerTrackingProvider fingerTrackingProvider)
         {
-            _internalPlayerInput = internalPlayerInput;
-            _trackingHelper = trackingHelper;
+            _avatarManager = avatarManager;
+            _settings = settings;
+            _trackingRig = trackingRig;
             _fingerTrackingProvider = fingerTrackingProvider;
         }
 
+        public event Action inputChanged;
+
+        public bool allowMaintainPelvisPosition => _avatarSettings?.allowMaintainPelvisPosition ?? false;
+
         public void Initialize()
         {
-            _internalPlayerInput.inputChanged += inputChanged;
+            _avatarManager.avatarChanged += OnAvatarChanged;
+            _trackingRig.trackingChanged += OnTrackingRigChanged;
+
+            OnAvatarChanged(_avatarManager.currentlySpawnedAvatar);
         }
 
         public void Dispose()
         {
-            _internalPlayerInput.inputChanged -= inputChanged;
+            _avatarManager.avatarChanged -= OnAvatarChanged;
+            _trackingRig.trackingChanged -= OnTrackingRigChanged;
+        }
+
+        public bool TryGetTransform(DeviceUse use, out Transform transform)
+        {
+            transform = use switch
+            {
+                DeviceUse.Head => _trackingRig.headOffset,
+                DeviceUse.LeftHand => _trackingRig.leftHandOffset,
+                DeviceUse.RightHand => _trackingRig.rightHandOffset,
+                DeviceUse.Waist => _trackingRig.pelvisOffset,
+                DeviceUse.LeftFoot => _trackingRig.leftFootOffset,
+                DeviceUse.RightFoot => _trackingRig.rightFootOffset,
+                _ => throw new InvalidOperationException($"Unexpected device use {use}"),
+            };
+
+            return transform.gameObject.activeInHierarchy;
         }
 
         public bool TryGetFingerCurl(DeviceUse use, out FingerCurl curl) => _fingerTrackingProvider.TryGetFingerCurl(use, out curl);
 
-        public bool TryGetPose(DeviceUse use, out Pose pose)
+        private void OnAvatarChanged(SpawnedAvatar spawnedAvatar)
         {
-            if (!_internalPlayerInput.TryGetPose(use, out pose)) return false;
+            _avatarSettings = spawnedAvatar != null ? _settings.GetAvatarSettings(spawnedAvatar.prefab.fileName) : null;
+        }
 
-            _trackingHelper.ApplyRoomAdjust(ref pose.position, ref pose.rotation);
-
-            return true;
+        private void OnTrackingRigChanged()
+        {
+            inputChanged?.Invoke();
         }
     }
 }

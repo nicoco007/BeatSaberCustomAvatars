@@ -46,7 +46,7 @@ namespace CustomAvatar.UI
         public void MeasureArmSpan()
         {
             if (isMeasuring) return;
-            if (!_playerInput.TryGetPose(DeviceUse.LeftHand, out Pose _) || !_playerInput.TryGetPose(DeviceUse.RightHand, out Pose _)) return;
+            if (!_playerInput.TryGetTransform(DeviceUse.LeftHand, out Transform _) || !_playerInput.TryGetTransform(DeviceUse.RightHand, out Transform _)) return;
 
             isMeasuring = true;
             _lastMeasuredArmSpan = 0;
@@ -66,7 +66,7 @@ namespace CustomAvatar.UI
 
         private void ScanArmSpan()
         {
-            if (Time.timeSinceLevelLoad - _lastUpdateTime < kStableMeasurementTimeout && _playerInput.TryGetPose(DeviceUse.LeftHand, out Pose leftHand) && _playerInput.TryGetPose(DeviceUse.RightHand, out Pose rightHand))
+            if (Time.timeSinceLevelLoad - _lastUpdateTime < kStableMeasurementTimeout && _playerInput.TryGetTransform(DeviceUse.LeftHand, out Transform leftHand) && _playerInput.TryGetTransform(DeviceUse.RightHand, out Transform rightHand))
             {
                 float armSpan = Vector3.Distance(leftHand.position, rightHand.position);
 

@@ -69,7 +69,7 @@ namespace CustomAvatar.Avatar
 
         public void Initialize()
         {
-            _eventManager = _avatarManager.currentlySpawnedAvatar ? _avatarManager.currentlySpawnedAvatar.GetComponent<EventManager>() : null;
+            _eventManager = _avatarManager.currentlySpawnedAvatar != null ? _avatarManager.currentlySpawnedAvatar.eventManager : null;
 
             if (_eventManager == null)
             {

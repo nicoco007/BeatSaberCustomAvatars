@@ -14,19 +14,22 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using UnityEngine;
 
 namespace CustomAvatar.Tracking
 {
-    public interface IAvatarInput
+    internal class TrackedNode
     {
-        bool allowMaintainPelvisPosition { get; }
+        public TrackedNode(GameObject gameObject)
+        {
+            this.transform = gameObject.transform;
+            this.gameObject = gameObject;
+        }
 
-        event Action inputChanged;
+        public GameObject gameObject { get; }
 
-        bool TryGetTransform(DeviceUse use, out Transform transform);
+        public Transform transform { get; }
 
-        bool TryGetFingerCurl(DeviceUse use, out FingerCurl curl);
+        public bool isTracking { get; set; }
     }
 }

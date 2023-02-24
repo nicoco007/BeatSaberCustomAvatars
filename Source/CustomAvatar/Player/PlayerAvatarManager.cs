@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -27,20 +28,22 @@ using CustomAvatar.Logging;
 using CustomAvatar.Utilities;
 using IPA.Utilities;
 using UnityEngine;
+using UnityEngine.Animations;
 using Zenject;
-using Object = UnityEngine.Object;
 
 namespace CustomAvatar.Player
 {
     /// <summary>
     /// Manages the player's local avatar.
     /// </summary>
-    public class PlayerAvatarManager : IInitializable, IDisposable
+    public class PlayerAvatarManager : MonoBehaviour
     {
         public static readonly string kCustomAvatarsPath = Path.Combine(UnityGame.InstallPath, "CustomAvatars");
         public static readonly string kAvatarInfoCacheFilePath = Path.Combine(kCustomAvatarsPath, "cache.dat");
         public static readonly byte[] kCacheFileSignature = { 0x43, 0x41, 0x64, 0x62 }; // Custom Avatars Database (CAdb)
         public static readonly byte kCacheFileVersion = 2;
+
+        private static readonly List<ConstraintSource> kEmptyConstraintSources = new(0);
 
         /// <summary>
         /// Delegate for <see cref="avatarLoading"/>.
@@ -53,12 +56,6 @@ namespace CustomAvatar.Player
         /// The player's currently spawned avatar. This can be null.
         /// </summary>
         public SpawnedAvatar currentlySpawnedAvatar { get; private set; }
-
-        /// <summary>
-        /// Event triggered when the current avatar is deleted an a new one starts loading. Note that the argument may be null if no avatar was selected to replace the previous one.
-        /// </summary>
-        [Obsolete("Use the avatarLoading event instead")]
-        public event Action<string> avatarStartedLoading;
 
         /// <summary>
         /// Event triggered when the current avatar is deleted an a new one starts loading. Note that both arguments may be null if no avatar was selected to replace the previous one.
@@ -80,22 +77,74 @@ namespace CustomAvatar.Player
         /// </summary>
         public event Action<float> avatarScaleChanged;
 
-        private readonly DiContainer _container;
-        private readonly ILogger<PlayerAvatarManager> _logger;
-        private readonly AvatarLoader _avatarLoader;
-        private readonly Settings _settings;
-        private readonly AvatarSpawner _spawner;
-        private readonly BeatSaberUtilities _beatSaberUtilities;
-        private readonly ActivePlayerSpaceManager _activePlayerSpaceManager;
+        internal Settings.AvatarSpecificSettings currentAvatarSettings { get; private set; }
+
+        private DiContainer _container;
+        private ILogger<PlayerAvatarManager> _logger;
+        private AvatarLoader _avatarLoader;
+        private Settings _settings;
+        private AvatarSpawner _spawner;
+        private BeatSaberUtilities _beatSaberUtilities;
+        private ActiveOriginManager _activeOriginManager;
 
         private readonly Dictionary<string, AvatarInfo> _avatarInfos = new();
 
+        private ParentConstraint _parentConstraint;
+        private ScaleConstraint _scaleConstraint;
+
         private string _switchingToPath;
-        private Settings.AvatarSpecificSettings _currentAvatarSettings;
-        private GameObject _avatarContainer;
         private CancellationTokenSource _avatarLoadCancellationTokenSource;
 
-        internal PlayerAvatarManager(DiContainer container, ILogger<PlayerAvatarManager> logger, AvatarLoader avatarLoader, Settings settings, AvatarSpawner spawner, BeatSaberUtilities beatSaberUtilities, ActivePlayerSpaceManager activePlayerSpaceManager)
+        internal bool ignoreFirstPersonExclusions
+        {
+            get => currentAvatarSettings?.ignoreExclusions ?? false;
+            set
+            {
+                if (currentAvatarSettings != null)
+                {
+                    currentAvatarSettings.ignoreExclusions = value;
+                }
+
+                UpdateFirstPersonVisibility();
+            }
+        }
+
+        private void Awake()
+        {
+            _parentConstraint = gameObject.AddComponent<ParentConstraint>();
+            _parentConstraint.weight = 1;
+            _parentConstraint.constraintActive = true;
+
+            _scaleConstraint = gameObject.AddComponent<ScaleConstraint>();
+            _scaleConstraint.weight = 1;
+            _scaleConstraint.constraintActive = true;
+        }
+
+        private void OnEnable()
+        {
+            _settings.moveFloorWithRoomAdjust.changed += OnMoveFloorWithRoomAdjustChanged;
+            _settings.resizeMode.changed += OnResizeModeChanged;
+            _settings.floorHeightAdjust.changed += OnFloorHeightAdjustChanged;
+            _settings.isAvatarVisibleInFirstPerson.changed += OnAvatarVisibleInFirstPersonChanged;
+            _settings.playerEyeHeight.changed += OnPlayerHeightChanged;
+            _settings.playerArmSpan.changed += OnPlayerArmSpanChanged;
+            _settings.enableLocomotion.changed += OnEnableLocomotionChanged;
+
+            _beatSaberUtilities.roomAdjustChanged += OnRoomAdjustChanged;
+
+            _activeOriginManager.changed += OnActiveOriginChanged;
+        }
+
+        [Inject]
+        [SuppressMessage("CodeQuality", "IDE0051", Justification = "Used by Zenject")]
+        private void Construct(
+            DiContainer container,
+            ILogger<PlayerAvatarManager> logger,
+            AvatarLoader avatarLoader,
+            Settings settings,
+            AvatarSpawner spawner,
+            BeatSaberUtilities beatSaberUtilities,
+            ActiveOriginManager activeOriginManager)
         {
             _container = container;
             _logger = logger;
@@ -103,10 +152,10 @@ namespace CustomAvatar.Player
             _settings = settings;
             _spawner = spawner;
             _beatSaberUtilities = beatSaberUtilities;
-            _activePlayerSpaceManager = activePlayerSpaceManager;
+            _activeOriginManager = activeOriginManager;
         }
 
-        public void Initialize()
+        private void Start()
         {
             try
             {
@@ -121,34 +170,13 @@ namespace CustomAvatar.Player
                 _logger.LogError(ex);
             }
 
-            _settings.moveFloorWithRoomAdjust.changed += OnMoveFloorWithRoomAdjustChanged;
-            _settings.resizeMode.changed += OnResizeModeChanged;
-            _settings.floorHeightAdjust.changed += OnFloorHeightAdjustChanged;
-            _settings.isAvatarVisibleInFirstPerson.changed += OnAvatarVisibleInFirstPersonChanged;
-            _settings.playerEyeHeight.changed += OnPlayerHeightChanged;
-            _settings.playerArmSpan.changed += OnPlayerArmSpanChanged;
-            _settings.enableLocomotion.changed += OnEnableLocomotionChanged;
-
-            _beatSaberUtilities.roomAdjustChanged += OnRoomAdjustChanged;
-
-            _activePlayerSpaceManager.changed += OnActivePlayerSpaceChanged;
-
-            _avatarContainer = new GameObject("Avatar Container");
-            Object.DontDestroyOnLoad(_avatarContainer);
-
             LoadAvatarInfosFromFile();
             LoadAvatarFromSettingsAsync();
+            UpdateConstraints();
         }
 
-        public void Dispose()
+        private void OnDisable()
         {
-            if (currentlySpawnedAvatar != null && currentlySpawnedAvatar.prefab != null)
-            {
-                Object.Destroy(currentlySpawnedAvatar.prefab.gameObject);
-            }
-
-            Object.Destroy(_avatarContainer);
-
             _settings.moveFloorWithRoomAdjust.changed -= OnMoveFloorWithRoomAdjustChanged;
             _settings.resizeMode.changed -= OnResizeModeChanged;
             _settings.floorHeightAdjust.changed -= OnFloorHeightAdjustChanged;
@@ -159,8 +187,11 @@ namespace CustomAvatar.Player
 
             _beatSaberUtilities.roomAdjustChanged -= OnRoomAdjustChanged;
 
-            _activePlayerSpaceManager.changed -= OnActivePlayerSpaceChanged;
+            _activeOriginManager.changed -= OnActiveOriginChanged;
+        }
 
+        private void OnDestroy()
+        {
             SaveAvatarInfosToFile();
         }
 
@@ -206,15 +237,14 @@ namespace CustomAvatar.Player
 
         public async Task SwitchToAvatarAsync(string fileName, IProgress<float> progress)
         {
-            if (currentlySpawnedAvatar && currentlySpawnedAvatar.prefab) Object.Destroy(currentlySpawnedAvatar.prefab.gameObject);
-            Object.Destroy(currentlySpawnedAvatar);
+            if (currentlySpawnedAvatar && currentlySpawnedAvatar.prefab) Destroy(currentlySpawnedAvatar.prefab.gameObject);
+            Destroy(currentlySpawnedAvatar);
             currentlySpawnedAvatar = null;
-            _currentAvatarSettings = null;
+            currentAvatarSettings = null;
 
             if (string.IsNullOrEmpty(fileName))
             {
                 _switchingToPath = null;
-                avatarStartedLoading?.Invoke(null);
                 SwitchToAvatar(null);
                 return;
             }
@@ -225,7 +255,6 @@ namespace CustomAvatar.Player
 
             _avatarInfos.TryGetValue(fileName, out AvatarInfo cachedInfo);
 
-            avatarStartedLoading?.Invoke(fullPath);
             avatarLoading?.Invoke(fullPath, !string.IsNullOrWhiteSpace(cachedInfo.name) ? cachedInfo.name : fileName);
 
             try
@@ -270,7 +299,7 @@ namespace CustomAvatar.Player
             }
             else
             {
-                Object.Destroy(avatar.gameObject);
+                Destroy(avatar.gameObject);
             }
 
             return avatar;
@@ -281,8 +310,7 @@ namespace CustomAvatar.Player
             if (!avatar)
             {
                 _logger.LogInformation("No avatar selected");
-                if (_currentAvatarSettings != null) _currentAvatarSettings.ignoreExclusions.changed -= OnIgnoreFirstPersonExclusionsChanged;
-                _currentAvatarSettings = null;
+                currentAvatarSettings = null;
                 avatarChanged?.Invoke(null);
                 _settings.previousAvatarPath = null;
                 UpdateAvatarVerticalPosition();
@@ -290,13 +318,13 @@ namespace CustomAvatar.Player
             }
             else if ((currentlySpawnedAvatar && currentlySpawnedAvatar.prefab == avatar) || avatar.fullPath != _switchingToPath)
             {
-                Object.Destroy(avatar.gameObject);
+                Destroy(avatar.gameObject);
                 return;
             }
 
             if (currentlySpawnedAvatar)
             {
-                Object.Destroy(currentlySpawnedAvatar.gameObject);
+                Destroy(currentlySpawnedAvatar.gameObject);
             }
 
             var avatarInfo = new AvatarInfo(avatar);
@@ -313,10 +341,8 @@ namespace CustomAvatar.Player
                 _avatarInfos.Add(avatarInfo.fileName, avatarInfo);
             }
 
-            if (_currentAvatarSettings != null) _currentAvatarSettings.ignoreExclusions.changed -= OnIgnoreFirstPersonExclusionsChanged;
-            currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, _container.Resolve<VRPlayerInputInternal>(), _avatarContainer.transform);
-            _currentAvatarSettings = _settings.GetAvatarSettings(avatar.fileName);
-            _currentAvatarSettings.ignoreExclusions.changed += OnIgnoreFirstPersonExclusionsChanged;
+            currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, _container.Resolve<VRPlayerInput>(), transform);
+            currentAvatarSettings = _settings.GetAvatarSettings(avatar.fileName);
 
             ResizeCurrentAvatar();
             UpdateFirstPersonVisibility();
@@ -349,11 +375,23 @@ namespace CustomAvatar.Player
             await SwitchToAvatarAsync(files[index], null);
         }
 
-        internal float GetFloorOffset()
-        {
-            if (_settings.floorHeightAdjust == FloorHeightAdjustMode.Off || !currentlySpawnedAvatar) return 0;
+        internal float GetFloorOffset() => GetFloorOffset(_settings.playerEyeHeight);
 
-            return _beatSaberUtilities.GetRoomAdjustedPlayerEyeHeight() - currentlySpawnedAvatar.scaledEyeHeight;
+        internal float GetFloorOffset(float eyeHeight)
+        {
+            if (currentlySpawnedAvatar == null || _settings.floorHeightAdjust == FloorHeightAdjustMode.Off)
+            {
+                return 0;
+            }
+
+            float offset = eyeHeight - currentlySpawnedAvatar.scaledEyeHeight;
+
+            if (_settings.moveFloorWithRoomAdjust)
+            {
+                offset += _beatSaberUtilities.roomCenter.y;
+            }
+
+            return offset;
         }
 
         internal List<string> GetAvatarFileNames()
@@ -363,14 +401,9 @@ namespace CustomAvatar.Player
             return Directory.GetFiles(kCustomAvatarsPath, "*.avatar", SearchOption.TopDirectoryOnly).Select(f => Path.GetFileName(f)).OrderBy(f => f).ToList();
         }
 
-        private void OnActivePlayerSpaceChanged(Transform playerSpace)
+        private void OnActiveOriginChanged(Transform origin)
         {
-            _avatarContainer.transform.SetParent(playerSpace, false);
-
-            if (playerSpace == null)
-            {
-                Object.DontDestroyOnLoad(_avatarContainer);
-            }
+            UpdateConstraints();
         }
 
         private void OnResizeModeChanged(AvatarResizeMode resizeMode)
@@ -388,20 +421,48 @@ namespace CustomAvatar.Player
             UpdateFirstPersonVisibility();
         }
 
-        private void OnIgnoreFirstPersonExclusionsChanged(bool ignore)
+        private void OnRoomAdjustChanged(Vector3 roomCenter, Quaternion roomRotation)
         {
-            UpdateFirstPersonVisibility();
+            UpdateConstraints();
+            UpdateLocomotionEnabled();
         }
 
-        private void OnRoomAdjustChanged(Vector3 roomCenter, Quaternion quaternion)
+        private void UpdateConstraints()
         {
+            _logger.LogTrace("Updating constraints");
+
+            if (_activeOriginManager.current != null)
+            {
+                _parentConstraint.SetSources(new List<ConstraintSource>(1) { new ConstraintSource { sourceTransform = _activeOriginManager.current, weight = 1 } });
+                _scaleConstraint.SetSources(new List<ConstraintSource>(1) { new ConstraintSource { sourceTransform = _activeOriginManager.current, weight = 1 } });
+            }
+            else
+            {
+                _parentConstraint.SetSources(kEmptyConstraintSources);
+                _scaleConstraint.SetSources(kEmptyConstraintSources);
+            }
+
             UpdateAvatarVerticalPosition();
-            UpdateLocomotionEnabled();
         }
 
         private void ResizeCurrentAvatar()
         {
-            if (!currentlySpawnedAvatar || !currentlySpawnedAvatar.prefab.descriptor.allowHeightCalibration) return;
+            if (currentlySpawnedAvatar == null)
+            {
+                return;
+            }
+
+            float scale = ResizeCurrentAvatar(_settings.playerEyeHeight);
+            _logger.LogInformation("Resized avatar with scale: " + scale);
+            avatarScaleChanged?.Invoke(scale);
+        }
+
+        internal float ResizeCurrentAvatar(float playerEyeHeight)
+        {
+            if (currentlySpawnedAvatar == null)
+            {
+                return 1;
+            }
 
             float scale;
             AvatarResizeMode resizeMode = _settings.resizeMode;
@@ -424,7 +485,6 @@ namespace CustomAvatar.Player
 
                 case AvatarResizeMode.Height:
                     float avatarEyeHeight = currentlySpawnedAvatar.prefab.eyeHeight;
-                    float playerEyeHeight = _beatSaberUtilities.GetRoomAdjustedPlayerEyeHeight();
 
                     if (avatarEyeHeight > 0)
                     {
@@ -450,9 +510,9 @@ namespace CustomAvatar.Player
 
             currentlySpawnedAvatar.scale = scale;
 
-            UpdateAvatarVerticalPosition();
+            UpdateAvatarVerticalPosition(playerEyeHeight);
 
-            avatarScaleChanged?.Invoke(scale);
+            return scale;
         }
 
         private void UpdateFirstPersonVisibility()
@@ -463,7 +523,7 @@ namespace CustomAvatar.Player
 
             if (_settings.isAvatarVisibleInFirstPerson)
             {
-                if (_currentAvatarSettings.ignoreExclusions)
+                if (ignoreFirstPersonExclusions)
                 {
                     visibility = FirstPersonVisibility.Visible;
                 }
@@ -483,11 +543,9 @@ namespace CustomAvatar.Player
 
         private void UpdateLocomotionEnabled()
         {
-            if (currentlySpawnedAvatar && currentlySpawnedAvatar.TryGetComponent(out AvatarIK ik))
+            if (currentlySpawnedAvatar != null && currentlySpawnedAvatar.ik != null)
             {
-                ik.isLocomotionEnabled = _settings.enableLocomotion;
-
-                currentlySpawnedAvatar.transform.localPosition = Quaternion.Inverse(_beatSaberUtilities.roomRotation) * -_beatSaberUtilities.roomCenter;
+                currentlySpawnedAvatar.ik.isLocomotionEnabled = _settings.enableLocomotion;
             }
         }
 
@@ -509,17 +567,11 @@ namespace CustomAvatar.Player
             }
         }
 
-        private void UpdateAvatarVerticalPosition()
+        private void UpdateAvatarVerticalPosition() => UpdateAvatarVerticalPosition(_settings.playerEyeHeight);
+
+        private void UpdateAvatarVerticalPosition(float eyeHeight)
         {
-            Vector3 localPosition = _avatarContainer.transform.localPosition;
-            localPosition.y = GetFloorOffset();
-            _avatarContainer.transform.localPosition = localPosition;
-
-            if (!currentlySpawnedAvatar) return;
-
-            Vector3 avatarPosition = currentlySpawnedAvatar.transform.localPosition;
-            avatarPosition.y = _settings.moveFloorWithRoomAdjust ? 0 : -_beatSaberUtilities.roomCenter.y;
-            currentlySpawnedAvatar.transform.localPosition = avatarPosition;
+            _parentConstraint.translationOffsets = new Vector3[] { new Vector3(0, GetFloorOffset(eyeHeight), 0) };
         }
 
         private void LoadAvatarInfosFromFile()

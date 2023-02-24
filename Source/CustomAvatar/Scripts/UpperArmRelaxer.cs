@@ -135,7 +135,7 @@ namespace CustomAvatar.Scripts
                 Relax();
         }
 
-        private void FixTransforms()
+        internal void FixTransforms()
         {
             // this is what FixTransforms does but these bones aren't listed in the references so we do it manually
             for (int i = 0; i < children.Length; i++)

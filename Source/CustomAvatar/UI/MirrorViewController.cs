@@ -21,7 +21,9 @@ using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Player;
 using CustomAvatar.Rendering;
+using CustomAvatar.Tracking;
 using HMUI;
+using JetBrains.Annotations;
 using Polyglot;
 using TMPro;
 using UnityEngine;
@@ -43,6 +45,7 @@ namespace CustomAvatar.UI
         private PlayerAvatarManager _avatarManager;
         private HierarchyManager _hierarchyManager;
         private PlatformLeaderboardViewController _platformLeaderboardViewController;
+        private TrackingRig _trackingRig;
 
         private bool _isLoaderActive;
         private string _errorMessage;
@@ -75,10 +78,27 @@ namespace CustomAvatar.UI
 
         protected bool isErrorMessageVisible => !string.IsNullOrEmpty(errorMessage);
 
+        protected string calibrationMessage => _trackingRig.activeCalibrationMode switch
+        {
+            CalibrationMode.Automatic => "Stand up straight with your whole body and head facing the same direction.\nPress both triggers simultaneously to save.",
+            CalibrationMode.Manual => "Align your body with the avatar and\npress both triggers simultaneously to save.",
+            _ => null,
+        };
+
+        protected bool isCalibrationMessageVisible => _trackingRig.activeCalibrationMode != CalibrationMode.None;
+
         #region Behaviour Lifecycle
 
         [Inject]
-        internal void Construct(DiContainer container, MirrorHelper mirrorHelper, Settings settings, MainSettingsModelSO mainSettingsModel, PlayerAvatarManager avatarManager, HierarchyManager hierarchyManager, PlatformLeaderboardViewController platformLeaderboardViewController)
+        internal void Construct(
+            DiContainer container,
+            MirrorHelper mirrorHelper,
+            Settings settings,
+            MainSettingsModelSO mainSettingsModel,
+            PlayerAvatarManager avatarManager,
+            HierarchyManager hierarchyManager,
+            PlatformLeaderboardViewController platformLeaderboardViewController,
+            TrackingRig trackingRig)
         {
             _container = container;
             _mirrorHelper = mirrorHelper;
@@ -87,6 +107,7 @@ namespace CustomAvatar.UI
             _avatarManager = avatarManager;
             _hierarchyManager = hierarchyManager;
             _platformLeaderboardViewController = platformLeaderboardViewController;
+            _trackingRig = trackingRig;
         }
 
         internal void UpdateProgress(float progress)
@@ -105,6 +126,8 @@ namespace CustomAvatar.UI
 
             _settings.mirror.renderScale.changed += OnMirrorRenderScaleChanged;
             _settings.mirror.antiAliasingLevel.changed += OnMirrorAntiAliasingLevelChanged;
+
+            _trackingRig.activeCalibrationModeChanged += OnActiveCalibrationModeChanged;
 
             if (addedToHierarchy)
             {
@@ -178,6 +201,8 @@ namespace CustomAvatar.UI
 
             _settings.mirror.renderScale.changed -= OnMirrorRenderScaleChanged;
             _settings.mirror.antiAliasingLevel.changed -= OnMirrorAntiAliasingLevelChanged;
+
+            _trackingRig.activeCalibrationModeChanged += OnActiveCalibrationModeChanged;
         }
 
         #endregion
@@ -210,6 +235,12 @@ namespace CustomAvatar.UI
             UpdateMirrorRenderSettings(_settings.mirror.renderScale, antiAliasingLevel);
         }
 
+        private void OnActiveCalibrationModeChanged(CalibrationMode calibrationMode)
+        {
+            NotifyPropertyChanged(nameof(isCalibrationMessageVisible));
+            NotifyPropertyChanged(nameof(calibrationMessage));
+        }
+
         private void UpdateMirrorRenderSettings(float scale, int antiAliasingLevel)
         {
             if (!_mirror) return;
@@ -224,17 +255,17 @@ namespace CustomAvatar.UI
             errorMessage = null;
         }
 
+        [UsedImplicitly]
+        private void OnCancelButtonClicked()
+        {
+            _trackingRig.EndCalibration();
+        }
+
         private class AutoResizeMirror : EnvironmentObject
         {
             protected override void UpdateOffset()
             {
                 float floorOffset = playerAvatarManager.GetFloorOffset();
-
-                if (settings.moveFloorWithRoomAdjust)
-                {
-                    floorOffset += beatSaberUtilities.roomCenter.y;
-                }
-
                 float scale = transform.localPosition.z / 2.6f; // screen system scale
                 float width = 2.5f + scale;
                 float height = 2f + 0.5f * scale - floorOffset;

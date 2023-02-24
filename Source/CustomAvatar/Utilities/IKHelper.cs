@@ -31,13 +31,6 @@ namespace CustomAvatar.Utilities
             _logger = logger;
         }
 
-        public void CreateOffsetTargetsIfMissing(VRIKManager vrikManager, Transform root)
-        {
-            CreateOffsetTargetIfMissing(root, "Pelvis", vrikManager.references_pelvis, ref vrikManager.solver_spine_pelvisPositionWeight, ref vrikManager.solver_spine_pelvisRotationWeight);
-            CreateOffsetTargetIfMissing(root, "LeftLeg", vrikManager.references_leftToes ?? vrikManager.references_leftFoot, ref vrikManager.solver_leftLeg_positionWeight, ref vrikManager.solver_leftLeg_rotationWeight);
-            CreateOffsetTargetIfMissing(root, "RightLeg", vrikManager.references_rightToes ?? vrikManager.references_rightFoot, ref vrikManager.solver_rightLeg_positionWeight, ref vrikManager.solver_rightLeg_rotationWeight);
-        }
-
         public VRIK InitializeVRIK(VRIKManager vrikManager, Transform root)
         {
             VRIK vrik = vrikManager.gameObject.AddComponent<VRIK>();
@@ -46,27 +39,6 @@ namespace CustomAvatar.Utilities
             CopyManagerFieldsToVRIK(vrikManager, vrik);
 
             return vrik;
-        }
-
-        private void CreateOffsetTargetIfMissing(Transform root, string name, Transform reference, ref float positionWeight, ref float rotationWeight)
-        {
-            if (root.Find(name)) return;
-
-            if (!reference)
-            {
-                _logger.LogWarning($"Reference for {name} is missing");
-                return;
-            }
-
-            Transform offsetTarget = new GameObject(name).transform;
-
-            offsetTarget.SetParent(root, false);
-            offsetTarget.SetPositionAndRotation(reference.position, reference.rotation);
-
-            positionWeight = 1;
-            rotationWeight = 1;
-
-            _logger.LogTrace($"Created offset IK target for '{name}'");
         }
 
         private void CreateTargetsIfMissing(VRIKManager vrikManager, Transform root)

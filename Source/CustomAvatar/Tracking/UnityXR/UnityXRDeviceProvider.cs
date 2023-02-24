@@ -32,7 +32,6 @@ namespace CustomAvatar.Tracking.UnityXR
 
         private readonly UnityXRHelper _unityXRHelper;
 
-        private readonly InputAction _userPresenceAction;
         private readonly XRDevice _head;
         private readonly XRDevice _leftHand;
         private readonly XRDevice _rightHand;
@@ -43,7 +42,6 @@ namespace CustomAvatar.Tracking.UnityXR
         internal UnityXRDeviceProvider(IVRPlatformHelper vrPlatformHelper)
         {
             _unityXRHelper = (UnityXRHelper)vrPlatformHelper;
-            _userPresenceAction = _unityXRHelper._userPresenceActionReference.action;
 
             _head = CreateDevice("Head", _unityXRHelper._headPositionActionReference, _unityXRHelper._headOrientationActionReference);
             _leftHand = CreateDevice("LeftHand", _unityXRHelper._leftControllerConfiguration.positionActionReference, _unityXRHelper._leftControllerConfiguration.orientationActionReference);
@@ -57,9 +55,6 @@ namespace CustomAvatar.Tracking.UnityXR
 
         public void Initialize()
         {
-            _userPresenceAction.started += OnInputActionChanged;
-            _userPresenceAction.canceled += OnInputActionChanged;
-
             RegisterCallbacks(_head);
             RegisterCallbacks(_leftHand);
             RegisterCallbacks(_rightHand);
@@ -114,9 +109,6 @@ namespace CustomAvatar.Tracking.UnityXR
 
         public void Dispose()
         {
-            _userPresenceAction.started -= OnInputActionChanged;
-            _userPresenceAction.canceled -= OnInputActionChanged;
-
             DeregisterCallbacks(_head);
             DeregisterCallbacks(_leftHand);
             DeregisterCallbacks(_rightHand);
@@ -137,7 +129,7 @@ namespace CustomAvatar.Tracking.UnityXR
                 isTrackedAction.AddBinding($"{binding.path.Substring(0, binding.path.IndexOf('/'))}/isTracked", groups: binding.groups);
             }
 
-            return new XRDevice(_userPresenceAction, isTrackedAction, positionAction, orientationAction);
+            return new XRDevice(isTrackedAction, positionAction, orientationAction);
         }
 
         private XRDevice CreateDevice(string name, string deviceTypeName, string deviceUsage)
@@ -146,7 +138,7 @@ namespace CustomAvatar.Tracking.UnityXR
             InputAction orientationAction = _inputActions.AddAction($"{name}Orientation", binding: $"<{deviceTypeName}>{{{deviceUsage}}}/deviceRotation", groups: "XR");
             InputAction isTrackedAction = _inputActions.AddAction($"{name}IsTracked", binding: $"<{deviceTypeName}>{{{deviceUsage}}}/isTracked", groups: "XR");
 
-            return new XRDevice(_userPresenceAction, isTrackedAction, positionAction, orientationAction);
+            return new XRDevice(isTrackedAction, positionAction, orientationAction);
         }
 
         private void RegisterCallbacks(XRDevice device)
@@ -169,17 +161,12 @@ namespace CustomAvatar.Tracking.UnityXR
 
         private class XRDevice
         {
-            private TrackedDevice _state;
-
-            internal XRDevice(InputAction userPresenceAction, InputAction isTrackedAction, InputAction positionAction, InputAction orientationAction)
+            internal XRDevice(InputAction isTrackedAction, InputAction positionAction, InputAction orientationAction)
             {
-                this.userPresenceAction = userPresenceAction;
                 this.isTrackedAction = isTrackedAction;
                 this.positionAction = positionAction;
                 this.orientationAction = orientationAction;
             }
-
-            internal InputAction userPresenceAction { get; }
 
             internal InputAction isTrackedAction { get; }
 
@@ -190,7 +177,6 @@ namespace CustomAvatar.Tracking.UnityXR
             public override string ToString()
             {
                 return $"{nameof(XRDevice)}@{GetHashCode()}[" +
-                    $"{nameof(userPresenceAction)}={userPresenceAction.ReadValue<float>()}, " +
                     $"{nameof(isTrackedAction)}={isTrackedAction.ReadValue<float>()}, " +
                     $"{nameof(positionAction)}={positionAction.ReadValue<Vector3>()}, " +
                     $"{nameof(orientationAction)}={orientationAction.ReadValue<Quaternion>()}]";
@@ -198,13 +184,6 @@ namespace CustomAvatar.Tracking.UnityXR
 
             internal TrackedDevice GetDevice()
             {
-                // With SteamVR (and potentially others) Unity freezes all devices except the head when user presence isn't detected.
-                // To avoid inconsistencies, this ensures all tracked devices are frozen in place.
-                if (userPresenceAction.ReadValue<float>() <= 0.5f)
-                {
-                    return _state;
-                }
-
                 bool isTracked = isTrackedAction.ReadValue<float>() > 0.5f;
 
                 // If we don't check isTracked here, positionAction.ReadValue below throws an InvalidOperationException when the OpenXR loader is disabled.
@@ -213,8 +192,7 @@ namespace CustomAvatar.Tracking.UnityXR
                     return default;
                 }
 
-                _state = new TrackedDevice(isTracked, positionAction.ReadValue<Vector3>(), orientationAction.ReadValue<Quaternion>());
-                return _state;
+                return new TrackedDevice(isTracked, positionAction.ReadValue<Vector3>(), orientationAction.ReadValue<Quaternion>());
             }
         }
     }

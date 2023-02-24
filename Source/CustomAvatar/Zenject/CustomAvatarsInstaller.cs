@@ -15,6 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.ComponentModel;
 using System.Reflection;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
@@ -99,31 +100,25 @@ namespace CustomAvatar.Zenject
             }
 
             // managers
-            Container.Bind(typeof(PlayerAvatarManager), typeof(IInitializable), typeof(IDisposable)).To<PlayerAvatarManager>().AsSingle().NonLazy();
+            Container.Bind<PlayerAvatarManager>().FromNewComponentOnNewGameObject().AsSingle();
             Container.Bind(typeof(AssetLoader), typeof(IInitializable), typeof(IDisposable)).To<AssetLoader>().AsSingle().NonLazy();
-
-            // this prevents a race condition when registering components in AvatarSpawner
-            Container.BindExecutionOrder<PlayerAvatarManager>(kPlayerAvatarManagerExecutionOrder);
 
             Container.Bind<AvatarLoader>().AsSingle();
             Container.Bind<AvatarSpawner>().AsSingle();
             Container.Bind<ActiveCameraManager>().AsSingle();
             Container.Bind<ActivePlayerSpaceManager>().AsSingle();
-            Container.Bind(typeof(VRPlayerInput), typeof(IInitializable), typeof(IDisposable)).To<VRPlayerInput>().AsSingle();
-            Container.Bind(typeof(VRPlayerInputInternal), typeof(IInitializable), typeof(IDisposable)).To<VRPlayerInputInternal>().AsSingle();
+            Container.Bind<ActiveOriginManager>().AsSingle();
+            Container.Bind(typeof(VRPlayerInput), typeof(IAvatarInput), typeof(IInitializable), typeof(IDisposable)).To<VRPlayerInput>().AsSingle();
             Container.Bind(typeof(IInitializable), typeof(IDisposable)).To<QualitySettingsController>().AsSingle();
             Container.Bind(typeof(BeatSaberUtilities), typeof(IInitializable), typeof(IDisposable)).To<BeatSaberUtilities>().AsSingle();
-
-#pragma warning disable CS0612
-            Container.Bind(typeof(FloorController), typeof(IInitializable), typeof(IDisposable)).To<FloorController>().AsSingle();
-#pragma warning restore CS0612
 
             // helper classes
             Container.Bind<MirrorHelper>().AsTransient();
             Container.Bind<IKHelper>().AsTransient();
-            Container.Bind<TrackingHelper>().AsTransient();
 
             Container.Bind(typeof(IAffinity)).To<Patches.MirrorRendererSO>().AsSingle();
+
+            Container.Bind<TrackingRig>().FromNewComponentOnNewGameObject().AsSingle();
         }
 
         private bool ShouldUseOpenVR()

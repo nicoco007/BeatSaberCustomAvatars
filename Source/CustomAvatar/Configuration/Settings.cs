@@ -20,7 +20,6 @@ using System.Linq;
 using System.Runtime.Serialization;
 using CustomAvatar.Avatar;
 using CustomAvatar.Player;
-using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -36,14 +35,12 @@ namespace CustomAvatar.Configuration
         public string previousAvatarPath { get; set; }
         public ObservableValue<float> playerEyeHeight { get; } = new ObservableValue<float>(BeatSaberUtilities.kDefaultPlayerEyeHeight);
         public ObservableValue<float> playerArmSpan { get; } = new ObservableValue<float>(BeatSaberUtilities.kDefaultPlayerArmSpan);
-        public bool calibrateFullBodyTrackingOnStart { get; set; }
         public ObservableValue<bool> enableLocomotion { get; } = new ObservableValue<bool>(true);
         public ObservableValue<float> cameraNearClipPlane { get; } = new ObservableValue<float>(0.1f);
         public ObservableValue<bool> showAvatarInSmoothCamera { get; } = new ObservableValue<bool>(true);
         public bool showAvatarInMirrors { get; set; } = true;
         public ObservableValue<SkinWeights> skinWeights { get; } = new ObservableValue<SkinWeights>(SkinWeights.FourBones);
         public Mirror mirror { get; } = new Mirror();
-        public AutomaticFullBodyCalibration automaticCalibration { get; } = new AutomaticFullBodyCalibration();
 
         [JsonProperty(PropertyName = "avatarSpecificSettings", Order = int.MaxValue)]
         private readonly SortedDictionary<string, AvatarSpecificSettings> _avatarSpecificSettings = new();
@@ -78,30 +75,24 @@ namespace CustomAvatar.Configuration
             public bool renderInExternalCameras { get; set; } = false;
         }
 
-        public class AutomaticFullBodyCalibration
-        {
-            public float legOffset { get; set; } = 0.15f;
-            public float pelvisOffset { get; set; } = 0.1f;
-
-            public WaistTrackerPosition waistTrackerPosition { get; set; }
-        }
-
         public class AvatarSpecificSettings
         {
-            public ObservableValue<bool> useAutomaticCalibration { get; } = new ObservableValue<bool>();
-            public ObservableValue<bool> bypassCalibration { get; } = new ObservableValue<bool>();
-            public ObservableValue<bool> ignoreExclusions { get; } = new ObservableValue<bool>(false);
+            public CalibrationMode calibrationMode { get; set; } = CalibrationMode.Automatic;
+
+            public bool ignoreExclusions { get; set; } = false;
+
             public bool allowMaintainPelvisPosition { get; set; } = false;
         }
 
         public AvatarSpecificSettings GetAvatarSettings(string fileName)
         {
-            if (!_avatarSpecificSettings.ContainsKey(fileName))
+            if (!_avatarSpecificSettings.TryGetValue(fileName, out AvatarSpecificSettings value))
             {
-                _avatarSpecificSettings.Add(fileName, new AvatarSpecificSettings());
+                value = new AvatarSpecificSettings();
+                _avatarSpecificSettings.Add(fileName, value);
             }
 
-            return _avatarSpecificSettings[fileName];
+            return value;
         }
     }
 }

@@ -52,7 +52,6 @@ namespace CustomAvatar.Zenject
             Container.Bind<InterfaceSettingsHost>().AsSingle();
 
             Container.Bind<ArmSpanMeasurer>().FromNewComponentOn(settingsViewController.gameObject).AsSingle();
-            Container.Bind<ManualCalibrationHelper>().FromNewComponentOn(settingsViewController.gameObject).AsSingle();
 
             Container.Bind(typeof(IInitializable), typeof(IDisposable)).To<MenuEnvironmentEventManager>().AsSingle().NonLazy();
 

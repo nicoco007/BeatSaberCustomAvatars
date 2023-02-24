@@ -85,11 +85,6 @@ namespace CustomAvatar.Player
         {
             float floorOffset = playerAvatarManager.GetFloorOffset();
 
-            if (settings.moveFloorWithRoomAdjust)
-            {
-                floorOffset += beatSaberUtilities.roomCenter.y;
-            }
-
             transform.position = new Vector3(transform.position.x, _originalY + floorOffset, transform.position.z);
 
             foreach (SaberBurnMarkSparkles saberBurnMarkSparkles in _saberBurnMarkSparkles)

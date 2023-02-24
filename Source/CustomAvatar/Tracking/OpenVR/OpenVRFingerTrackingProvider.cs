@@ -42,7 +42,7 @@ namespace CustomAvatar.Tracking.OpenVR
 
             if (handAnim == null || !handAnim.isActive || handAnim.summaryData == null)
             {
-                curl = null;
+                curl = default;
                 return false;
             }
 

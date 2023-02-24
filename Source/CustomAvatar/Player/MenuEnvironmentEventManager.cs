@@ -97,12 +97,14 @@ namespace CustomAvatar.Player
 
                 yield return _gameScenesManager.waitUntilSceneTransitionFinish;
 
-                if (_playerAvatarManager?.currentlySpawnedAvatar == null)
+                if (_playerAvatarManager == null || _playerAvatarManager.currentlySpawnedAvatar == null)
                 {
                     yield break;
                 }
 
-                if (!_playerAvatarManager.currentlySpawnedAvatar.TryGetComponent(out EventManager eventManager))
+                EventManager eventManager = _playerAvatarManager.currentlySpawnedAvatar.eventManager;
+
+                if (eventManager == null)
                 {
                     yield break;
                 }

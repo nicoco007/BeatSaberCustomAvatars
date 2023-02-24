@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using CustomAvatar.Avatar;
 using CustomAvatar.Logging;
 using CustomAvatar.Player;
 using CustomAvatar.Utilities;
@@ -31,7 +32,7 @@ namespace CustomAvatar.Configuration
     {
         public static readonly string kCalibrationDataFilePath = Path.Combine(UnityGame.UserDataPath, "CustomAvatars.CalibrationData.dat");
         public static readonly byte[] kCalibrationDataFileSignature = { 0x43, 0x41, 0x63, 0x64 }; // Custom Avatars calibration data (CAcd)
-        public static readonly byte kCalibrationDataFileVersion = 1;
+        public static readonly byte kCalibrationDataFileVersion = 2;
 
         public FullBodyCalibration automaticCalibration { get; } = new FullBodyCalibration();
 
@@ -67,6 +68,8 @@ namespace CustomAvatar.Configuration
             }
         }
 
+        public FullBodyCalibration GetAvatarManualCalibration(SpawnedAvatar spawnedAvatar) => GetAvatarManualCalibration(spawnedAvatar.prefab.fileName);
+
         public FullBodyCalibration GetAvatarManualCalibration(string fileName)
         {
             if (!PathHelpers.IsValidFileName(fileName))
@@ -99,6 +102,7 @@ namespace CustomAvatar.Configuration
                     return;
                 }
 
+                automaticCalibration.head = reader.ReadPose();
                 automaticCalibration.waist = reader.ReadPose();
                 automaticCalibration.leftFoot = reader.ReadPose();
                 automaticCalibration.rightFoot = reader.ReadPose();
@@ -132,6 +136,7 @@ namespace CustomAvatar.Configuration
                         _manualCalibration.Add(fileName, new FullBodyCalibration());
                     }
 
+                    _manualCalibration[fileName].head = reader.ReadPose();
                     _manualCalibration[fileName].waist = reader.ReadPose();
                     _manualCalibration[fileName].leftFoot = reader.ReadPose();
                     _manualCalibration[fileName].rightFoot = reader.ReadPose();
@@ -150,6 +155,7 @@ namespace CustomAvatar.Configuration
                     writer.Write(kCalibrationDataFileSignature);
                     writer.Write(kCalibrationDataFileVersion);
 
+                    writer.Write(automaticCalibration.head);
                     writer.Write(automaticCalibration.waist);
                     writer.Write(automaticCalibration.leftFoot);
                     writer.Write(automaticCalibration.rightFoot);
@@ -160,6 +166,7 @@ namespace CustomAvatar.Configuration
                     {
                         writer.Write(kvp.Key); // file name
 
+                        writer.Write(kvp.Value.head);
                         writer.Write(kvp.Value.waist);
                         writer.Write(kvp.Value.leftFoot);
                         writer.Write(kvp.Value.rightFoot);
@@ -174,11 +181,12 @@ namespace CustomAvatar.Configuration
 
         public class FullBodyCalibration
         {
+            public Pose head = Pose.identity;
             public Pose waist = Pose.identity;
             public Pose leftFoot = Pose.identity;
             public Pose rightFoot = Pose.identity;
 
-            public bool isCalibrated => !leftFoot.Equals(Pose.identity) || !rightFoot.Equals(Pose.identity) || !waist.Equals(Pose.identity);
+            public bool isCalibrated => !head.Equals(Pose.identity) || !waist.Equals(Pose.identity) || !leftFoot.Equals(Pose.identity) || !rightFoot.Equals(Pose.identity);
         }
     }
 }

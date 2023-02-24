@@ -16,6 +16,7 @@
 
 using CustomAvatar.Logging;
 using UnityEngine;
+using System.Linq;
 
 #if UNITY_EDITOR
 using CustomAvatar.Utilities;
@@ -47,18 +48,6 @@ namespace CustomAvatar
         public string author;
 
         /// <summary>
-        /// Whether or not to allow height calibration for this avatar.
-        /// </summary>
-        [Tooltip("Whether or not to allow height calibration for this avatar.")]
-        public bool allowHeightCalibration = true;
-
-        /// <summary>
-        /// Whether or not this avatar supports automatic calibration. Note that this requires specific setup of the waist and feet trackers.
-        /// </summary>
-        [Tooltip("Whether or not this avatar supports automatic calibration. Note that this requires specific setup of the waist and feet trackers.")]
-        public bool supportsAutomaticCalibration = false;
-
-        /// <summary>
         /// The image shown in the in-game avatars list.
         /// </summary>
         [Tooltip("The image shown in the in-game avatars list.")]
@@ -83,18 +72,7 @@ namespace CustomAvatar
             cover = FirstNonNullUnityObject(cover, Cover, CoverImage);
         }
 
-        private T FirstNonNullUnityObject<T>(params T[] objects) where T : Object
-        {
-            foreach (T obj in objects)
-            {
-                if (obj != null)
-                {
-                    return obj;
-                }
-            }
-
-            return null;
-        }
+        private T FirstNonNullUnityObject<T>(params T[] objects) where T : Object => objects.FirstOrDefault(o => o != null);
 
 #if UNITY_EDITOR
         private Mesh _saberMesh;

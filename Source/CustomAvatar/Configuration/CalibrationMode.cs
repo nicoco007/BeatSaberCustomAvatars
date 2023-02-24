@@ -14,13 +14,12 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace CustomAvatar.Tracking
+namespace CustomAvatar.Configuration
 {
-    internal enum WaistTrackerPosition
+    public enum CalibrationMode
     {
-        Front = 0,
-        Left = 90,
-        Back = 180,
-        Right = 270
+        None,
+        Automatic,
+        Manual,
     }
 }

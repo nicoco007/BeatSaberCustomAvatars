@@ -22,6 +22,7 @@ using CustomAvatar.Logging;
 using CustomAvatar.Utilities;
 using System;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using Zenject;
 using VRIK = BeatSaberFinalIK::RootMotion.FinalIK.VRIK;
@@ -31,6 +32,8 @@ namespace CustomAvatar.Avatar
     [DisallowMultipleComponent]
     public class AvatarPrefab : MonoBehaviour
     {
+        private const float kEyeHeightToPelvisHeightRatio = 3.5f / 7f;
+
         /// <summary>
         /// The name of the file from which the avatar was loaded.
         /// </summary>
@@ -66,9 +69,6 @@ namespace CustomAvatar.Avatar
         /// </summary>
         public float armSpan { get; private set; }
 
-        [Obsolete]
-        internal LoadedAvatar loadedAvatar { get; private set; }
-
         internal Transform head { get; private set; }
         internal Transform leftHand { get; private set; }
         internal Transform rightHand { get; private set; }
@@ -76,10 +76,30 @@ namespace CustomAvatar.Avatar
         internal Transform rightLeg { get; private set; }
         internal Transform pelvis { get; private set; }
 
+        internal Pose headOffset { get; private set; }
+
+        internal Pose leftHandOffset { get; private set; }
+
+        internal Pose rightHandOffset { get; private set; }
+
+        internal Pose pelvisOffset { get; private set; }
+
+        internal Pose leftLegOffset { get; private set; }
+
+        internal Pose rightLegOffset { get; private set; }
+
+        internal Pose headCalibrationOffset { get; private set; }
+
+        internal Pose pelvisCalibrationOffset { get; private set; }
+
+        internal Pose leftFootCalibrationOffset { get; private set; }
+
+        internal Pose rightFootCalibrationOffset { get; private set; }
+
         private ILogger<AvatarPrefab> _logger;
 
         [Inject]
-        internal void Construct(string fullPath, ILoggerFactory loggerFactory, IKHelper ikHelper, DiContainer container)
+        internal void Construct(string fullPath, ILoggerFactory loggerFactory, DiContainer container)
         {
             this.fullPath = fullPath ?? throw new ArgumentNullException(nameof(fullPath));
             descriptor = GetComponent<AvatarDescriptor>() ?? throw new AvatarLoadException($"Avatar at '{fullPath}' does not have an AvatarDescriptor");
@@ -88,8 +108,8 @@ namespace CustomAvatar.Avatar
 
             _logger = loggerFactory.CreateLogger<AvatarPrefab>(descriptor.name);
 
-#pragma warning disable CS0618
             VRIKManager vrikManager = GetComponentInChildren<VRIKManager>();
+#pragma warning disable CS0618
             IKManager ikManager = GetComponentInChildren<IKManager>();
 #pragma warning restore CS0618
 
@@ -127,16 +147,9 @@ namespace CustomAvatar.Avatar
                 Destroy(existingVrik);
             }
 
-            if (vrikManager)
+            if (vrikManager && !vrikManager.areReferencesFilled)
             {
-                if (vrikManager.areReferencesFilled)
-                {
-                    ikHelper.CreateOffsetTargetsIfMissing(vrikManager, transform);
-                }
-                else
-                {
-                    _logger.LogWarning("VRIKManager references are not filled; avatar will probably not work as expected");
-                }
+                _logger.LogWarning("VRIKManager references are not filled; avatar will probably not work as expected");
             }
 
             head = transform.Find("Head");
@@ -170,9 +183,96 @@ namespace CustomAvatar.Avatar
             eyeHeight = GetEyeHeight();
             armSpan = GetArmSpan(vrikManager);
 
-#pragma warning disable CS0612, CS0618
-            loadedAvatar = new LoadedAvatar(this);
-#pragma warning restore CS0612, CS0618
+            if (vrikManager != null)
+            {
+                headOffset = GetOffset(head, vrikManager.solver_spine_headTarget, vrikManager.references_head);
+                leftHandOffset = GetOffset(leftHand, vrikManager.solver_leftArm_target, vrikManager.references_leftHand);
+                rightHandOffset = GetOffset(rightHand, vrikManager.solver_rightArm_target, vrikManager.references_rightHand);
+                pelvisOffset = GetOffset(pelvis, vrikManager.solver_spine_pelvisTarget, vrikManager.references_pelvis);
+                leftLegOffset = GetOffset(leftLeg, vrikManager.solver_leftLeg_target, vrikManager.references_leftToes, vrikManager.references_leftFoot);
+                rightLegOffset = GetOffset(rightLeg, vrikManager.solver_rightLeg_target, vrikManager.references_rightToes, vrikManager.references_rightFoot);
+
+                // These offsets are in mostly arbitrary positions. The idea is that they should be in predictable
+                // positions so the user can calibrate once and it'll apply to all avatars in the same way.
+                if (vrikManager.references_head != null)
+                {
+                    Vector3 centerLocalPosition = transform.InverseTransformPoint(vrikManager.references_head.position);
+                    float scaledEyeHeight = eyeHeight / transform.localScale.y;
+                    headCalibrationOffset = GetCalibrationOffset(vrikManager.references_head, new Pose(new Vector3(centerLocalPosition.x, scaledEyeHeight, centerLocalPosition.z), Quaternion.identity));
+                    pelvisCalibrationOffset = GetCalibrationOffset(vrikManager.references_pelvis, new Pose(new Vector3(centerLocalPosition.x, scaledEyeHeight * kEyeHeightToPelvisHeightRatio, centerLocalPosition.z), Quaternion.identity));
+                    leftFootCalibrationOffset = GetCalibrationOffset(GetFootReference(vrikManager.references_leftFoot, vrikManager.references_leftToes), GetFootTarget(centerLocalPosition, vrikManager.references_leftFoot, vrikManager.references_leftToes));
+                    rightFootCalibrationOffset = GetCalibrationOffset(GetFootReference(vrikManager.references_rightFoot, vrikManager.references_rightToes), GetFootTarget(centerLocalPosition, vrikManager.references_rightFoot, vrikManager.references_rightToes));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the offset between <paramref name="target"/> and the first non-null <paramref name="references"/> in the prefab root transform's space.
+        /// </summary>
+        /// <param name="target">The target to which the offset should point.</param>
+        /// <param name="references">The reference(s) from which to derive the offset.</param>
+        /// <returns>The offset between <paramref name="target"/> and the first non-null <paramref name="references"/>.</returns>
+        private Pose GetOffset(Transform target, params Transform[] references)
+        {
+            if (target == null)
+            {
+                return Pose.identity;
+            }
+
+            Transform reference = references.FirstOrDefault(r => r != null);
+
+            if (reference == null)
+            {
+                _logger.LogError($"No valid reference found for '{target.name}'");
+                return Pose.identity;
+            }
+
+            return new Pose(
+                transform.InverseTransformVector(Quaternion.Inverse(target.rotation) * (reference.position - target.position)),
+                Quaternion.Inverse(target.rotation) * reference.rotation);
+        }
+
+        private Pose GetCalibrationOffset(Transform reference, Pose targetLocalPose)
+        {
+            if (reference == null)
+            {
+                return Pose.identity;
+            }
+
+            return new Pose(
+                transform.InverseTransformPoint(reference.position - transform.TransformPoint(targetLocalPose.position)),
+                Quaternion.Inverse(transform.rotation * targetLocalPose.rotation) * reference.rotation);
+        }
+
+        private Transform GetFootReference(Transform foot, Transform toes)
+        {
+            return toes ? toes : foot;
+        }
+
+        private Pose GetFootTarget(Vector3 centerLocalPosition, Transform foot, Transform toes)
+        {
+            if (toes != null)
+            {
+                Vector3 localFootPosition = transform.InverseTransformPoint(foot.position);
+                Vector3 localToesPosition = transform.InverseTransformPoint(toes.position);
+
+                float a = localFootPosition.x;
+                float b = localToesPosition.x;
+
+                // find the point on the vector between the foot and the toes that crosses centerLocalPosition.z
+                // centerLocalPosition.z = localFootPosition.z + (localToesPosition.z - localFootPosition.z) * t
+                float t = (centerLocalPosition.z - localFootPosition.z) / (localToesPosition.z - localFootPosition.z);
+
+                return new Pose(
+                    new Vector3(Mathf.Lerp(a, b, t), 0, centerLocalPosition.z),
+                    Quaternion.Inverse(transform.rotation) * Quaternion.LookRotation(Vector3.ProjectOnPlane(toes.position - foot.position, transform.up), transform.up));
+            }
+            else
+            {
+                return new Pose(
+                    new Vector3(centerLocalPosition.x + transform.InverseTransformPoint(foot.position).x, 0, centerLocalPosition.z),
+                    Quaternion.identity);
+            }
         }
 
         private void CheckTargetWeight(string name, Transform target, float positionWeight, float rotationWeight)

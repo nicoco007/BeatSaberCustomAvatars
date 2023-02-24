@@ -3,4 +3,10 @@
   <vertical pref-width="140" anchor-min-y="0.5" anchor-max-y="0.5">
     <text text="~errorMessage" active="~isErrorMessageVisible" color="#FF8080" align="Center" font-size="6" />
   </vertical>
+  <vertical active="~isCalibrationMessageVisible" child-expand-height="false" child-expand-width="false" child-control-height="false" child-control-width="false" child-align="MiddleCenter">
+    <horizontal>
+      <text color="#808080" text="~calibrationMessage" font-size="5" italics="true" auto-size="true" align="Center" />
+    </horizontal>
+    <button text="Cancel" on-click="OnCancelButtonClicked" />
+  </vertical>
 </bg>

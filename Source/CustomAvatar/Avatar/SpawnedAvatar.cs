@@ -31,12 +31,6 @@ namespace CustomAvatar.Avatar
     public class SpawnedAvatar : MonoBehaviour
     {
         /// <summary>
-        /// The <see cref="LoadedAvatar"/> used as a reference.
-        /// </summary>
-        [Obsolete("Use prefab instead")]
-        public LoadedAvatar avatar { get; private set; }
-
-        /// <summary>
         /// The <see cref="AvatarPrefab"/> used to spawn this avatar.
         /// </summary>
         public AvatarPrefab prefab { get; private set; }
@@ -58,11 +52,19 @@ namespace CustomAvatar.Avatar
                 if (float.IsInfinity(value)) throw new InvalidOperationException("Scale cannot be infinity");
 
                 transform.localScale = _initialLocalScale * value;
-                _logger.LogInformation("Avatar resized with scale: " + value);
             }
         }
 
-        public float scaledEyeHeight => prefab.eyeHeight * scale;
+        public float absoluteScale => transform.localScale.y;
+
+        public float scaledEyeHeight
+        {
+            get => prefab.eyeHeight * scale;
+            set
+            {
+                scale = value / prefab.eyeHeight;
+            }
+        }
 
         public Transform head { get; private set; }
         public Transform body { get; private set; }
@@ -72,12 +74,10 @@ namespace CustomAvatar.Avatar
         public Transform rightLeg { get; private set; }
         public Transform pelvis { get; private set; }
 
-        [Obsolete("Use GetComponent<AvatarTracking>() instead")] internal AvatarTracking tracking { get; private set; }
-        [Obsolete("Use GetComponent<AvatarIK>() instead")] internal AvatarIK ik { get; private set; }
-        [Obsolete("Use GetComponent<AvatarFingerTracking>() instead")] internal AvatarFingerTracking fingerTracking { get; private set; }
-
-
-        [Obsolete("Get isLocomotionEnabled on the AvatarIK component instead")] internal bool isLocomotionEnabled { get; private set; }
+        internal AvatarTransformTracking transformTracking { get; private set; }
+        internal AvatarIK ik { get; private set; }
+        internal AvatarFingerTracking fingerTracking { get; private set; }
+        internal EventManager eventManager { get; private set; }
 
         private ILogger<SpawnedAvatar> _logger;
 
@@ -86,33 +86,6 @@ namespace CustomAvatar.Avatar
 
         private Vector3 _initialLocalPosition;
         private Vector3 _initialLocalScale;
-
-        [Obsolete("Get isLocomotionEnabled on the AvatarIK component instead")]
-        public void SetLocomotionEnabled(bool enabled)
-        {
-            if (TryGetComponent(out AvatarIK ik))
-            {
-                ik.isLocomotionEnabled = enabled;
-            }
-        }
-
-        [Obsolete]
-        public void EnableCalibrationMode()
-        {
-            if (!ik) return;
-
-            tracking.isCalibrationModeEnabled = true;
-            ik.isCalibrationModeEnabled = true;
-        }
-
-        [Obsolete]
-        public void DisableCalibrationMode()
-        {
-            if (!ik) return;
-
-            tracking.isCalibrationModeEnabled = false;
-            ik.isCalibrationModeEnabled = false;
-        }
 
         public void SetFirstPersonVisibility(FirstPersonVisibility visibility)
         {
@@ -144,6 +117,8 @@ namespace CustomAvatar.Avatar
             _firstPersonExclusions = GetComponentsInChildren<FirstPersonExclusion>();
             _renderers = GetComponentsInChildren<Renderer>();
 
+            eventManager = GetComponent<EventManager>();
+
             head = transform.Find("Head");
             body = transform.Find("Body");
             leftHand = transform.Find("LeftHand");
@@ -151,6 +126,10 @@ namespace CustomAvatar.Avatar
             pelvis = transform.Find("Pelvis");
             leftLeg = transform.Find("LeftLeg");
             rightLeg = transform.Find("RightLeg");
+
+            transformTracking = GetComponent<AvatarTransformTracking>();
+            ik = GetComponent<AvatarIK>();
+            fingerTracking = GetComponent<AvatarFingerTracking>();
         }
 
         [Inject]
@@ -158,10 +137,6 @@ namespace CustomAvatar.Avatar
         {
             prefab = avatarPrefab;
             input = avatarInput;
-
-#pragma warning disable CS0612, CS0618
-            avatar = avatarPrefab.loadedAvatar;
-#pragma warning restore CS0612, CS0618
 
             _logger = loggerFactory.CreateLogger<SpawnedAvatar>(prefab.descriptor.name);
         }
