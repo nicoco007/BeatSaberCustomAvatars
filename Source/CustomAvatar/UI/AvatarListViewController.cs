@@ -164,6 +164,10 @@ namespace CustomAvatar.UI
             DestroyImmediate(gameObject.transform.Find("SongTime").gameObject);
             DestroyImmediate(gameObject.transform.Find("SongBpm").gameObject);
             DestroyImmediate(gameObject.transform.Find("BpmIcon").gameObject);
+            DestroyImmediate(gameObject.transform.Find("PromoBackground").gameObject);
+            DestroyImmediate(gameObject.transform.Find("AvatarName/PromoBadge").gameObject);
+            DestroyImmediate(gameObject.transform.Find("AvatarName/UpdatedBadge").gameObject);
+            DestroyImmediate(gameObject.transform.Find("AvatarName").GetComponent<LayoutWidthLimiter>());
 
             return tableCell;
         }

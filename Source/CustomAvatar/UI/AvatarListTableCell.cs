@@ -73,6 +73,9 @@ namespace CustomAvatar.UI
             _nameText.name = "AvatarName";
             _authorText.name = "AvatarAuthor";
 
+            _nameText.rectTransform.offsetMax = new Vector2(0, _nameText.rectTransform.offsetMax.y);
+            _authorText.rectTransform.offsetMax = new Vector2(0, _authorText.rectTransform.offsetMax.y);
+
             _wasPressedSignal = originalTableCell.GetField<Signal, SelectableCell>("_wasPressedSignal");
 
             var containerTransform = (RectTransform)Instantiate(platformLeaderboardViewController.transform.Find("Container/LeaderboardTableView/LoadingControl/DownloadingContainer"));
