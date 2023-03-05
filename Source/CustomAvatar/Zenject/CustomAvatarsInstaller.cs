@@ -104,7 +104,6 @@ namespace CustomAvatar.Zenject
             Container.Bind<TrackingHelper>().AsTransient();
 
             Container.Bind<MainSettingsModelSO>().FromInstance(_pcAppInit.GetField<MainSettingsModelSO, PCAppInit>("_mainSettingsModel")).IfNotBound();
-            Container.Bind<MainSettingsModelSO>().FromInstance(_pcAppInit.GetField<MainSettingsModelSO, PCAppInit>("_mainSettingsModel")).IfNotBound();
 
             Container.Bind(typeof(IAffinity)).To<Patches.MirrorRendererSO>().AsSingle();
         }
