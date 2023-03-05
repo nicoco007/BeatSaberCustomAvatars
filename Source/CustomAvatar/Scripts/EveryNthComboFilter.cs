@@ -27,12 +27,12 @@ namespace CustomAvatar
 
         private void OnEnable()
         {
-            eventManager.comboIncreased.AddListener(OnComboStep);
+            EventManager.comboIncreased.AddListener(OnComboStep);
         }
 
         private void OnDisable()
         {
-            eventManager.comboIncreased.RemoveListener(OnComboStep);
+            EventManager.comboIncreased.RemoveListener(OnComboStep);
         }
 
         private void OnComboStep(int combo)

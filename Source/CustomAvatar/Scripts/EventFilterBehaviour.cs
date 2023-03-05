@@ -17,12 +17,13 @@
 using UnityEngine;
 
 // keeping root namespace for compatibility
+#pragma warning disable IDE1006
 namespace CustomAvatar
 {
     [RequireComponent(typeof(EventManager))]
     public class EventFilterBehaviour : MonoBehaviour
     {
-        protected EventManager eventManager
+        protected EventManager EventManager
         {
             get
             {
