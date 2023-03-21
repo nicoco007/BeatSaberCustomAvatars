@@ -126,7 +126,12 @@ namespace CustomAvatar.Tracking.OpenVR
 
             float frameDuration = 1f / displayFrequency;
 
-            return frameDuration - secondsSinceLastVsync + vsyncToPhotons;
+            // secondsSinceLastVsync just keeps increasing forever on AMD 7900 XTX GPUs.
+            // According to the docs, secondsSinceLastVsync should always be <= frameDuration
+            // (see https://github.com/ValveSoftware/openvr/wiki/IVRSystem::GetTimeSinceLastVsync).
+            // This seems to be a bug with SteamVR. The Mathf.Max below reduces the impact of this unexpected
+            // return value since (frameDuration - secondsSinceLastVsync) is usually quite small anyway.
+            return Mathf.Max(frameDuration - secondsSinceLastVsync, 0) + vsyncToPhotons;
         }
 
         private static void CopySign(ref float sizeVal, float signVal)
