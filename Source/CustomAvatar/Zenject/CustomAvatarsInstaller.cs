@@ -26,6 +26,7 @@ using CustomAvatar.Tracking;
 using CustomAvatar.Tracking.OpenVR;
 using CustomAvatar.Tracking.UnityXR;
 using CustomAvatar.Utilities;
+using IPA.Loader;
 using IPA.Utilities;
 using SiraUtil.Affinity;
 using UnityEngine.XR;
@@ -40,13 +41,16 @@ namespace CustomAvatar.Zenject
         public static readonly int kPlayerAvatarManagerExecutionOrder = 1000;
 
         private static readonly MethodInfo kCreateLoggerMethod = typeof(ILoggerFactory).GetMethod(nameof(ILoggerFactory.CreateLogger), BindingFlags.Public | BindingFlags.Instance);
+        private static readonly Assembly kAssembly = Assembly.GetExecutingAssembly();
 
         private readonly Logger _ipaLogger;
+        private readonly PluginMetadata _pluginMetadata;
         private readonly PCAppInit _pcAppInit;
 
-        public CustomAvatarsInstaller(Logger ipaLogger, PCAppInit pcAppInit)
+        public CustomAvatarsInstaller(Logger ipaLogger, PluginMetadata pluginMetadata, PCAppInit pcAppInit)
         {
             _ipaLogger = ipaLogger;
+            _pluginMetadata = pluginMetadata;
             _pcAppInit = pcAppInit;
         }
 
@@ -59,6 +63,8 @@ namespace CustomAvatar.Zenject
             // settings
             SettingsManager settingsManager = Container.Instantiate<SettingsManager>();
             settingsManager.Load();
+
+            Container.Bind<PluginMetadata>().FromInstance(_pluginMetadata).When(InjectedIntoThisAssembly);
 
             Container.Bind<SettingsManager>().FromInstance(settingsManager).AsSingle();
             Container.Bind<Settings>().FromMethod((ctx) => ctx.Container.Resolve<SettingsManager>().settings).AsTransient();
@@ -120,6 +126,11 @@ namespace CustomAvatar.Zenject
             ILoggerFactory instance = context.Container.Resolve<ILoggerFactory>();
 
             return kCreateLoggerMethod.MakeGenericMethod(context.ObjectType).Invoke(instance, new object[] { null });
+        }
+
+        private bool InjectedIntoThisAssembly(InjectContext context)
+        {
+            return context.ObjectType.Assembly == kAssembly;
         }
     }
 }

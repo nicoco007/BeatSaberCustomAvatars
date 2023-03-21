@@ -21,6 +21,7 @@ using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
 using HMUI;
+using IPA.Loader;
 using Polyglot;
 using TMPro;
 using UnityEngine;
@@ -39,16 +40,19 @@ namespace CustomAvatar.UI
         internal AutomaticFbtCalibrationHost automaticFbtCalibrationHost;
         internal InterfaceSettingsHost interfaceSettingsHost;
         internal AdditionalTab[] additionalMenuTabs;
+        internal string versionText;
 
         #endregion
 
         private PlatformLeaderboardViewController _leaderboardViewController;
         private List<IAvatarsMenuTab> _avatarsMenuTabs;
+        private PluginMetadata _pluginMetadata;
 
         [Inject]
         internal void Construct(
             PlatformLeaderboardViewController leaderboardViewController,
             List<IAvatarsMenuTab> avatarsMenuTabs,
+            PluginMetadata pluginMetadata,
             GeneralSettingsHost generalSettingsHost,
             AvatarSpecificSettingsHost avatarSpecificSettingsHost,
             AutomaticFbtCalibrationHost automaticFbtCalibrationHost,
@@ -56,6 +60,7 @@ namespace CustomAvatar.UI
         {
             _leaderboardViewController = leaderboardViewController;
             _avatarsMenuTabs = avatarsMenuTabs;
+            _pluginMetadata = pluginMetadata;
             this.generalSettingsHost = generalSettingsHost;
             this.avatarSpecificSettingsHost = avatarSpecificSettingsHost;
             this.automaticFbtCalibrationHost = automaticFbtCalibrationHost;
@@ -73,6 +78,8 @@ namespace CustomAvatar.UI
                     additionalMenuTabs[i] = new AdditionalTab { name = _avatarsMenuTabs[i].name };
                 }
             }
+
+            versionText = $"Custom Avatars v{_pluginMetadata.HVersion}";
 
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
 
@@ -111,12 +118,9 @@ namespace CustomAvatar.UI
             avatarSpecificSettingsHost.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
             automaticFbtCalibrationHost.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
 
-            foreach (IAvatarsMenuTab tab in _avatarsMenuTabs)
+            foreach (IViewControllerHost viewControllerHost in _avatarsMenuTabs.Select(t => t.host).OfType<IViewControllerHost>())
             {
-                if (tab.host is IViewControllerHost viewControllerHost)
-                {
-                    viewControllerHost.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
-                }
+                viewControllerHost.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
             }
         }
 
@@ -128,12 +132,9 @@ namespace CustomAvatar.UI
             avatarSpecificSettingsHost.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
             automaticFbtCalibrationHost.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
 
-            foreach (IAvatarsMenuTab tab in _avatarsMenuTabs)
+            foreach (IViewControllerHost viewControllerHost in _avatarsMenuTabs.Select(t => t.host).OfType<IViewControllerHost>())
             {
-                if (tab.host is IViewControllerHost viewControllerHost)
-                {
-                    viewControllerHost.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
-                }
+                viewControllerHost.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
             }
         }
 

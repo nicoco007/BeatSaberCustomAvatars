@@ -23,6 +23,7 @@ using CustomAvatar.Zenject;
 using CustomAvatar.Zenject.Internal;
 using HarmonyLib;
 using IPA;
+using IPA.Loader;
 using Logger = IPA.Logging.Logger;
 
 namespace CustomAvatar
@@ -33,7 +34,7 @@ namespace CustomAvatar
         private readonly Harmony _harmony = new Harmony("com.nicoco007.beatsabercustomavatars");
 
         [Init]
-        public Plugin(Logger ipaLogger)
+        public Plugin(Logger ipaLogger, PluginMetadata pluginMetadata)
         {
             var armSpanSliderTag = new ValuePickerTag();
 
@@ -60,7 +61,7 @@ namespace CustomAvatar
             ZenjectHelper.AddComponentAlongsideExisting<MultiplayerLocalInactivePlayerFacade, EnvironmentObject>("MultiplayerLocalInactivePlayerPlayerPlace/CirclePlayerPlace");
             ZenjectHelper.AddComponentAlongsideExisting<MultiplayerConnectedPlayerFacade, EnvironmentObject>();
 
-            ZenjectHelper.Register<CustomAvatarsInstaller>().WithArguments(ipaLogger).OnMonoInstaller<PCAppInit>();
+            ZenjectHelper.Register<CustomAvatarsInstaller>().WithArguments(ipaLogger, pluginMetadata).OnMonoInstaller<PCAppInit>();
             ZenjectHelper.Register<MainMenuInstaller>().WithArguments(armSpanSliderTag).OnContext("MainMenu", "MenuCore");
             ZenjectHelper.Register<HealthWarningInstaller>().OnContext("HealthWarning", "SceneContext");
             ZenjectHelper.Register<GameInstaller>().OnMonoInstaller<GameplayCoreInstaller>();
