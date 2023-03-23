@@ -15,6 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using CustomAvatar.Logging;
+using IPA.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -26,6 +27,7 @@ namespace CustomAvatar.Tracking.UnityXR
 {
     internal class UnityXRDeviceProvider : IInitializable, IDeviceProvider, IDisposable
     {
+        private static readonly PropertyAccessor<InputDevice, ulong>.Getter kDeviceIdAccessor = PropertyAccessor<InputDevice, ulong>.GetGetter("deviceId");
         private static readonly Regex kSerialNumberRegex = new Regex(@"(.*)S/N ([^ ]+)(.*)");
 
         private readonly ILogger<UnityXRDeviceProvider> _logger;
@@ -77,8 +79,9 @@ namespace CustomAvatar.Tracking.UnityXR
                 inputDevice.TryGetFeatureValue(CommonUsages.deviceRotation, out Quaternion rotation);
 
                 string id;
+                string deviceName = GetUniqueDeviceName(inputDevice);
 
-                if (_devices.TryGetValue(inputDevice.name, out UnityXRDevice existingDevice))
+                if (_devices.TryGetValue(deviceName, out UnityXRDevice existingDevice))
                 {
                     id = existingDevice.id;
 
@@ -102,11 +105,11 @@ namespace CustomAvatar.Tracking.UnityXR
                         changeDetected = true;
                     }
 
-                    _devices[inputDevice.name] = new UnityXRDevice(existingDevice.id, true, isTracked, inputDevice.characteristics);
+                    _devices[deviceName] = new UnityXRDevice(existingDevice.id, true, isTracked, inputDevice.characteristics);
                 }
                 else
                 {
-                    Match match = kSerialNumberRegex.Match(inputDevice.name);
+                    Match match = kSerialNumberRegex.Match(deviceName);
 
                     if (match.Success)
                     {
@@ -114,17 +117,17 @@ namespace CustomAvatar.Tracking.UnityXR
                     }
                     else
                     {
-                        id = inputDevice.name;
+                        id = deviceName;
                     }
 
                     _logger.LogInformation($"Device '{id}' connected with characteristics {inputDevice.characteristics}");
 
-                    _devices.Add(inputDevice.name, new UnityXRDevice(id, true, isTracked, inputDevice.characteristics));
+                    _devices.Add(deviceName, new UnityXRDevice(id, true, isTracked, inputDevice.characteristics));
 
                     changeDetected = true;
                 }
 
-                devices.Add(inputDevice.name, new TrackedDevice(id, use, isTracked, position, rotation));
+                devices.Add(deviceName, new TrackedDevice(id, use, isTracked, position, rotation));
             }
 
             _deviceRemovedSinceLastCall = false;
@@ -139,13 +142,20 @@ namespace CustomAvatar.Tracking.UnityXR
 
         private void OnDeviceDisconnected(InputDevice device)
         {
-            if (_devices.TryGetValue(device.name, out UnityXRDevice existingDevice))
+            string deviceName = GetUniqueDeviceName(device);
+
+            if (_devices.TryGetValue(deviceName, out UnityXRDevice existingDevice))
             {
                 _logger.LogInformation($"Device '{existingDevice.id}' disconnected");
-                _devices.Remove(device.name);
+                _devices.Remove(deviceName);
 
                 _deviceRemovedSinceLastCall = true;
             }
+        }
+
+        private static string GetUniqueDeviceName(InputDevice inputDevice)
+        {
+            return $"{inputDevice.name}@{kDeviceIdAccessor(ref inputDevice)}";
         }
 
         private readonly struct UnityXRDevice

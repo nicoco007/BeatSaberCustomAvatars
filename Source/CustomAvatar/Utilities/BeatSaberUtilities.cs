@@ -29,7 +29,7 @@ namespace CustomAvatar.Utilities
         public static readonly float kDefaultPlayerEyeHeight = kDefaultPlayerHeight - kHeadPosToPlayerHeightOffset;
         public static readonly float kDefaultPlayerArmSpan = kDefaultPlayerHeight;
 
-        private static readonly Func<OpenVRHelper, OpenVRHelper.VRControllerManufacturerName> kVrControllerManufacturerNameGetter = ReflectionExtensions.CreatePrivatePropertyGetter<OpenVRHelper, OpenVRHelper.VRControllerManufacturerName>("vrControllerManufacturerName");
+        private static readonly Func<UnityXRHelper.Controller, UnityXRHelper.VRControllerManufacturerName> kVrControllerManufacturerNameGetter = ReflectionExtensions.CreatePrivatePropertyGetter<UnityXRHelper.Controller, UnityXRHelper.VRControllerManufacturerName>("manufacturerName");
 
         public Vector3 roomCenter => _mainSettingsModel.roomCenter;
         public Quaternion roomRotation => Quaternion.Euler(0, _mainSettingsModel.roomRotation, 0);
@@ -87,9 +87,11 @@ namespace CustomAvatar.Utilities
                 rotation += new Vector3(-40f, 0f, 0f);
                 position += new Vector3(0f, 0f, 0.055f);
             }
-            else if (_vrPlatformHelper is OpenVRHelper openVRHelper)
+            else if (_vrPlatformHelper is UnityXRHelper unityXRHelper)
             {
-                if (kVrControllerManufacturerNameGetter(openVRHelper) == OpenVRHelper.VRControllerManufacturerName.Valve)
+                UnityXRHelper.Controller controller = unityXRHelper.ControllerFromNode(use == DeviceUse.LeftHand ? UnityEngine.XR.XRNode.LeftHand : UnityEngine.XR.XRNode.RightHand);
+
+                if (kVrControllerManufacturerNameGetter(controller) == UnityXRHelper.VRControllerManufacturerName.Valve)
                 {
                     rotation += new Vector3(-16.3f, 0f, 0f);
                     position += new Vector3(0f, 0.022f, -0.01f);

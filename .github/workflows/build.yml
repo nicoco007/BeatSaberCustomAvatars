@@ -26,6 +26,7 @@ jobs:
       with:
         manifest: ${{ github.workspace }}\Source\CustomAvatar\manifest.json
         path: ${{ runner.temp }}\BeatSaberBindings
+        game-version: 1.28.0
 
     - name: Build Debug
       run: dotnet build Source\CustomAvatar\CustomAvatar.csproj -c Debug -p:BeatSaberDir=${{ runner.temp }}\BeatSaberBindings

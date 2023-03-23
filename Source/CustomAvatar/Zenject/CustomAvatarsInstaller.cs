@@ -70,7 +70,7 @@ namespace CustomAvatar.Zenject
             Container.Bind<Settings>().FromMethod((ctx) => ctx.Container.Resolve<SettingsManager>().settings).AsTransient();
             Container.Bind(typeof(CalibrationData), typeof(IDisposable)).To<CalibrationData>().AsSingle();
 
-            if (XRSettings.loadedDeviceName.Equals("openvr", StringComparison.InvariantCultureIgnoreCase) &&
+            if (XRSettings.loadedDeviceName.IndexOf("OpenVR", StringComparison.InvariantCultureIgnoreCase) >= 0 &&
                 OpenVR.IsRuntimeInstalled() &&
                 OpenVR.System != null &&
                 !Environment.GetCommandLineArgs().Contains("--force-xr"))
