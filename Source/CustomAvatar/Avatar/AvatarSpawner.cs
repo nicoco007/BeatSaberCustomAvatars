@@ -109,6 +109,8 @@ namespace CustomAvatar.Avatar
                 }
             }
 
+            avatarInstance.SetActive(true);
+
             return spawnedAvatar;
         }
 
