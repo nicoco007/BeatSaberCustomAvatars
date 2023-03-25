@@ -34,6 +34,8 @@ Shader "BeatSaber/Lit Glow Cutout Dithered"
 				float4 vertex : POSITION;
 				float2 uv : TEXCOORD0;
 				float3 normal : NORMAL;
+
+				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
 			struct v2f
@@ -43,6 +45,8 @@ Shader "BeatSaber/Lit Glow Cutout Dithered"
 				float4 worldPos : TEXCOORD1;
 				float3 viewDir : TEXCOORD2;
 				float3 normal : NORMAL;
+				
+                UNITY_VERTEX_OUTPUT_STEREO
 			};
 
 			float4 _Color;
@@ -60,6 +64,11 @@ Shader "BeatSaber/Lit Glow Cutout Dithered"
 			v2f vert (appdata v)
 			{
 				v2f o;
+
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_INITIALIZE_OUTPUT(v2f, o);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+				
 				o.vertex = UnityObjectToClipPos(v.vertex);
 				o.uv = v.uv;
 				o.worldPos = mul(unity_ObjectToWorld, v.vertex);

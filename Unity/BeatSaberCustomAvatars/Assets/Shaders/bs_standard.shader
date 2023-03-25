@@ -87,11 +87,18 @@ Shader "BeatSaber/Standard"
 				float3 normal : NORMAL;
                 float3 viewDir : TEXCOORD3;
 				float3 VSNormal : TEXCOORD4;
+
+				UNITY_VERTEX_OUTPUT_STEREO
             };
  
             v2f vert (appdata_full v)
             {
                 v2f o;
+
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_INITIALIZE_OUTPUT(v2f, o);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+				
                 o.pos = UnityObjectToClipPos(v.vertex);
                 o.uvscreen = ComputeGrabScreenPos(o.pos);
 				o.uv = TRANSFORM_TEX(v.texcoord, _MainTex);
