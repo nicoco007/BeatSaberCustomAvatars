@@ -156,18 +156,15 @@ namespace CustomAvatar.UI
 
             LevelListTableCell originalTableCell = gameObject.GetComponent<LevelListTableCell>();
 
+            DestroyImmediate(originalTableCell.GetField<TextMeshProUGUI, LevelListTableCell>("_songBpmText").gameObject);
+            DestroyImmediate(originalTableCell.GetField<TextMeshProUGUI, LevelListTableCell>("_songDurationText").gameObject);
+            DestroyImmediate(originalTableCell.GetField<GameObject, LevelListTableCell>("_promoBadgeGo"));
+            DestroyImmediate(originalTableCell.GetField<GameObject, LevelListTableCell>("_updatedBadgeGo"));
+            DestroyImmediate(originalTableCell.GetField<Image, LevelListTableCell>("_favoritesBadgeImage").gameObject);
+            DestroyImmediate(originalTableCell.transform.Find("BpmIcon").gameObject);
+
             AvatarListTableCell tableCell = gameObject.AddComponent<AvatarListTableCell>();
             tableCell.Init(originalTableCell, _leaderboardViewController);
-
-            DestroyImmediate(originalTableCell);
-            DestroyImmediate(gameObject.transform.Find("FavoritesIcon").gameObject);
-            DestroyImmediate(gameObject.transform.Find("SongTime").gameObject);
-            DestroyImmediate(gameObject.transform.Find("SongBpm").gameObject);
-            DestroyImmediate(gameObject.transform.Find("BpmIcon").gameObject);
-            DestroyImmediate(gameObject.transform.Find("PromoBackground").gameObject);
-            DestroyImmediate(gameObject.transform.Find("AvatarName/PromoBadge").gameObject);
-            DestroyImmediate(gameObject.transform.Find("AvatarName/UpdatedBadge").gameObject);
-            DestroyImmediate(gameObject.transform.Find("AvatarName").GetComponent<LayoutWidthLimiter>());
 
             return tableCell;
         }
