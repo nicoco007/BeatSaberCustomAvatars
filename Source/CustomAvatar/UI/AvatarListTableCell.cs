@@ -33,6 +33,7 @@ namespace CustomAvatar.UI
         private static readonly Color kRegularTextColor = Color.white;
         private static readonly Color kErrorTextColor = new Color(0.65f, 0.11f, 0.16f);
 
+        [SerializeField] private CanvasGroup _canvasGroup;
         [SerializeField] private ImageView _backgroundImage;
         [SerializeField] private CurvedTextMeshPro _nameText;
         [SerializeField] private CurvedTextMeshPro _authorText;
@@ -62,6 +63,7 @@ namespace CustomAvatar.UI
 
         public void Init(LevelListTableCell originalTableCell, PlatformLeaderboardViewController platformLeaderboardViewController)
         {
+            _canvasGroup = originalTableCell.GetField<CanvasGroup, LevelListTableCell>("_canvasGroup");
             _backgroundImage = transform.Find("Background").GetComponent<ImageView>();
             _nameText = transform.Find("SongName").GetComponent<CurvedTextMeshPro>();
             _authorText = transform.Find("SongAuthor").GetComponent<CurvedTextMeshPro>();
@@ -199,13 +201,14 @@ namespace CustomAvatar.UI
                 _progressText.text = $"{listItem.loadProgress * 100:0}%";
             }
 
-            _authorText.alpha = 0.75f;
-
             RefreshVisuals();
         }
 
         private void RefreshVisuals()
         {
+            _canvasGroup.alpha = 1f;
+            _authorText.alpha = 0.75f;
+
             if (selected && highlighted)
             {
                 _backgroundImage.color = kSelectedAndHighlightedBackgroundColor;

@@ -166,6 +166,8 @@ namespace CustomAvatar.UI
             AvatarListTableCell tableCell = gameObject.AddComponent<AvatarListTableCell>();
             tableCell.Init(originalTableCell, _leaderboardViewController);
 
+            DestroyImmediate(originalTableCell);
+
             return tableCell;
         }
 
