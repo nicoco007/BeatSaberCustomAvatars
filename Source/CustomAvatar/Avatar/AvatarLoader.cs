@@ -213,8 +213,12 @@ namespace CustomAvatar.Avatar
 
             assetBundle.Unload(false);
 
-            AvatarPrefab avatarPrefab = _container.InstantiateComponent<AvatarPrefab>(prefabObject, new object[] { fullPath });
-            avatarPrefab.name = $"AvatarPrefab({avatarPrefab.descriptor.name})";
+            GameObject instance = UnityEngine.Object.Instantiate(prefabObject);
+
+            AvatarPrefab avatarPrefab = _container.InstantiateComponent<AvatarPrefab>(instance, new object[] { fullPath });
+
+            instance.name = $"AvatarPrefab({avatarPrefab.descriptor.name})";
+            instance.SetActive(false);
 
             _tasks.Remove(fullPath);
 
