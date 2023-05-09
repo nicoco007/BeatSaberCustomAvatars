@@ -14,10 +14,11 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using CustomAvatar.Configuration;
 using CustomAvatar.Tracking;
-using System;
 using UnityEngine;
+using UnityEngine.XR;
 using Zenject;
 
 namespace CustomAvatar.Utilities
@@ -28,8 +29,6 @@ namespace CustomAvatar.Utilities
         public static readonly float kHeadPosToPlayerHeightOffset = MainSettingsModelSO.kHeadPosToPlayerHeightOffset;
         public static readonly float kDefaultPlayerEyeHeight = kDefaultPlayerHeight - kHeadPosToPlayerHeightOffset;
         public static readonly float kDefaultPlayerArmSpan = kDefaultPlayerHeight;
-
-        private static readonly Func<UnityXRController, UnityXRHelper.VRControllerManufacturerName> kVrControllerManufacturerNameGetter = ReflectionExtensions.CreatePrivatePropertyGetter<UnityXRController, UnityXRHelper.VRControllerManufacturerName>("manufacturerName");
 
         public Vector3 roomCenter => _mainSettingsModel.roomCenter;
         public Quaternion roomRotation => Quaternion.Euler(0, _mainSettingsModel.roomRotation, 0);
@@ -73,47 +72,27 @@ namespace CustomAvatar.Utilities
         }
 
         /// <summary>
-        /// Similar to the various implementations of <see cref="IVRPlatformHelper.AdjustControllerTransform(UnityEngine.XR.XRNode, Transform, Vector3, Vector3)"/> except it updates a pose instead of adjusting a transform.
+        /// Similar to the various implementations of <see cref="VRController.UpdateAnchorPosition()"/> except it updates a pose instead of adjusting a transform.
         /// </summary>
         public void AdjustPlatformSpecificControllerPose(DeviceUse use, ref Pose pose)
         {
-            if (use != DeviceUse.LeftHand && use != DeviceUse.RightHand) return;
-
-            Vector3 position = _mainSettingsModel.controllerPosition;
-            Vector3 rotation = _mainSettingsModel.controllerRotation;
-
-            if (_vrPlatformHelper is OculusVRHelper)
+            EulerPose controllerOffset = use switch
             {
-                rotation += new Vector3(-40f, 0f, 0f);
-                position += new Vector3(0f, 0f, 0.055f);
-            }
-            else if (_vrPlatformHelper is UnityXRHelper unityXRHelper)
-            {
-                UnityXRController controller = unityXRHelper.ControllerFromNode(use == DeviceUse.LeftHand ? UnityEngine.XR.XRNode.LeftHand : UnityEngine.XR.XRNode.RightHand);
+                DeviceUse.LeftHand => _vrPlatformHelper.GetPoseOffsetForNode(XRNode.LeftHand),
+                DeviceUse.RightHand => _vrPlatformHelper.GetPoseOffsetForNode(XRNode.RightHand),
+                _ => EulerPose.identity,
+            };
 
-                if (kVrControllerManufacturerNameGetter(controller) == UnityXRHelper.VRControllerManufacturerName.Valve)
-                {
-                    rotation += new Vector3(-16.3f, 0f, 0f);
-                    position += new Vector3(0f, 0.022f, -0.01f);
-                }
-                else
-                {
-                    rotation += new Vector3(-4.3f, 0f, 0f);
-                    position += new Vector3(0f, -0.008f, 0f);
-                }
-            }
+            controllerOffset += new EulerPose(_mainSettingsModel.controllerPosition, _mainSettingsModel.controllerRotation);
 
-            // mirror across YZ plane for left hand
             if (use == DeviceUse.LeftHand)
             {
-                rotation.y = -rotation.y;
-                rotation.z = -rotation.z;
-
-                position.x = -position.x;
+                controllerOffset = controllerOffset.MirrorOnYZPlane();
             }
 
-            pose.rotation *= Quaternion.Euler(rotation);
-            pose.position += pose.rotation * position;
+            var rotation = Quaternion.Euler(controllerOffset.rotation);
+            pose.position += pose.rotation * controllerOffset.position;
+            pose.rotation *= rotation;
         }
 
         private void OnRoomCenterChanged()
