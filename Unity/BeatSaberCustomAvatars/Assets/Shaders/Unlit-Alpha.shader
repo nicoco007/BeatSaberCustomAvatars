@@ -6,21 +6,21 @@
 // - no per-material color
 
 Shader "Unlit/Transparent Two Sided" {
-Properties {
-    _MainTex ("Base (RGB) Trans (A)", 2D) = "white" {}
-	[Enum(Off,0,Front,1,Back,2)] _Culling ("Cull", Int) = 1
-}
+    Properties {
+        _MainTex ("Base (RGB) Trans (A)", 2D) = "white" {}
+        [Enum(Off,0,Front,1,Back,2)] _Culling ("Cull", Int) = 1
+    }
 
-SubShader {
-    Tags {"Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent"}
-    LOD 100
+    SubShader {
+        Tags {"Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent"}
+        LOD 100
 
-    ZWrite Off
-	Cull [_Culling]
-    Blend SrcAlpha OneMinusSrcAlpha
+        ZWrite Off
+        Cull [_Culling]
+        Blend SrcAlpha OneMinusSrcAlpha
 
-    Pass {
-        CGPROGRAM
+        Pass {
+            CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
             #pragma target 2.0
@@ -51,7 +51,7 @@ SubShader {
                 v2f o;
 
                 UNITY_SETUP_INSTANCE_ID(v);
-				UNITY_INITIALIZE_OUTPUT(v2f, o);
+                UNITY_INITIALIZE_OUTPUT(v2f, o);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
                 
                 o.vertex = UnityObjectToClipPos(v.vertex);
@@ -66,8 +66,8 @@ SubShader {
                 UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;
             }
-        ENDCG
+            ENDCG
+        }
     }
-}
 
 }
