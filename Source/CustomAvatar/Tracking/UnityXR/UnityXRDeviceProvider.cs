@@ -105,12 +105,12 @@ namespace CustomAvatar.Tracking.UnityXR
         private void OnControllersDidChangeReference()
         {
             UnityXRController leftHandController = _unityXRHelper.ControllerFromNode(XRNode.LeftHand);
-            _leftHand.positionAction = leftHandController.positionAction;
-            _leftHand.rotationAction = leftHandController.rotationAction;
+            _leftHand.positionAction = leftHandController?.positionAction;
+            _leftHand.rotationAction = leftHandController?.rotationAction;
 
             UnityXRController rightHandController = _unityXRHelper.ControllerFromNode(XRNode.RightHand);
-            _rightHand.positionAction = rightHandController.positionAction;
-            _rightHand.rotationAction = rightHandController.rotationAction;
+            _rightHand.positionAction = rightHandController?.positionAction;
+            _rightHand.rotationAction = rightHandController?.rotationAction;
         }
 
         private abstract class XRDevice
