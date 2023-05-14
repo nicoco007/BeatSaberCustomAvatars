@@ -52,9 +52,9 @@ namespace CustomAvatar.Tracking.UnityXR
 
             _unityXRHelper = unityXRHelper;
 
-            _waist.poseAction = CreateAction("Waist Pose", "<XRViveTracker>{Waist}/devicePose");
-            _leftFoot.poseAction = CreateAction("Left Foot Pose", "<XRViveTracker>{Left Foot}/devicePose");
-            _rightFoot.poseAction = CreateAction("Right Foot Pose", "<XRViveTracker>{Right Foot}/devicePose");
+            _waist.poseAction = CreateAction("Waist Pose", "<XRTracker>{Waist}/devicePose");
+            _leftFoot.poseAction = CreateAction("Left Foot Pose", "<XRTracker>{LeftFoot}/devicePose");
+            _rightFoot.poseAction = CreateAction("Right Foot Pose", "<XRTracker>{RightFoot}/devicePose");
 
             _inputActions.Enable();
         }
@@ -98,7 +98,7 @@ namespace CustomAvatar.Tracking.UnityXR
         private InputAction CreateAction(string name, string bindingPath)
         {
             InputAction inputAction = _inputActions.AddAction(name);
-            inputAction.AddBinding(bindingPath, groups: "XR;PSVR2");
+            inputAction.AddBinding(bindingPath, groups: "XR");
             return inputAction;
         }
 
