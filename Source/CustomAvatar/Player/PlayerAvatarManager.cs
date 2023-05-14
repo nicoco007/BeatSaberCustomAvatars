@@ -142,7 +142,11 @@ namespace CustomAvatar.Player
 
         public void Dispose()
         {
-            if (currentlySpawnedAvatar) Object.Destroy(currentlySpawnedAvatar.prefab.gameObject);
+            if (currentlySpawnedAvatar != null && currentlySpawnedAvatar.prefab != null)
+            {
+                Object.Destroy(currentlySpawnedAvatar.prefab.gameObject);
+            }
+
             Object.Destroy(_avatarContainer);
 
             _settings.moveFloorWithRoomAdjust.changed -= OnMoveFloorWithRoomAdjustChanged;
