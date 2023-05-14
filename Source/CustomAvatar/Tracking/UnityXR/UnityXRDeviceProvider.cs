@@ -14,163 +14,159 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using CustomAvatar.Logging;
-using IPA.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
+using CustomAvatar.Logging;
+using IPA.Utilities;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.XR;
 using Zenject;
+using Pose = UnityEngine.XR.OpenXR.Input.Pose;
 
 namespace CustomAvatar.Tracking.UnityXR
 {
     internal class UnityXRDeviceProvider : IInitializable, IDeviceProvider, IDisposable
     {
-        private static readonly PropertyAccessor<InputDevice, ulong>.Getter kDeviceIdAccessor = PropertyAccessor<InputDevice, ulong>.GetGetter("deviceId");
-        private static readonly Regex kSerialNumberRegex = new Regex(@"(.*)S/N ([^ ]+)(.*)");
-
         private readonly ILogger<UnityXRDeviceProvider> _logger;
+        private readonly UnityXRHelper _unityXRHelper;
 
-        private readonly Dictionary<string, UnityXRDevice> _devices = new Dictionary<string, UnityXRDevice>();
+        private readonly PositionAndRotationXRDevice _head = new PositionAndRotationXRDevice(DeviceUse.Head);
+        private readonly PositionAndRotationXRDevice _leftHand = new PositionAndRotationXRDevice(DeviceUse.LeftHand);
+        private readonly PositionAndRotationXRDevice _rightHand = new PositionAndRotationXRDevice(DeviceUse.RightHand);
+        private readonly PoseXRDevice _waist = new PoseXRDevice(DeviceUse.Waist);
+        private readonly PoseXRDevice _leftFoot = new PoseXRDevice(DeviceUse.LeftFoot);
+        private readonly PoseXRDevice _rightFoot = new PoseXRDevice(DeviceUse.RightFoot);
 
-        private bool _deviceRemovedSinceLastCall;
+        private readonly InputActionMap _inputActions = new InputActionMap("Custom Avatars Full Body Tracking");
 
-        internal UnityXRDeviceProvider(ILogger<UnityXRDeviceProvider> logger)
+        internal UnityXRDeviceProvider(ILogger<UnityXRDeviceProvider> logger, IVRPlatformHelper vrPlatformHelper)
         {
             _logger = logger;
+
+            if (!(vrPlatformHelper is UnityXRHelper unityXRHelper))
+            {
+                _logger.LogError($"{nameof(UnityXRDeviceProvider)} expects {nameof(IVRPlatformHelper)} to be {nameof(UnityXRHelper)} but got {vrPlatformHelper.GetType().Name}");
+                return;
+            }
+
+            _unityXRHelper = unityXRHelper;
+
+            _waist.poseAction = CreateAction("Waist Pose", "<XRViveTracker>{Waist}/devicePose");
+            _leftFoot.poseAction = CreateAction("Left Foot Pose", "<XRViveTracker>{Left Foot}/devicePose");
+            _rightFoot.poseAction = CreateAction("Right Foot Pose", "<XRViveTracker>{Right Foot}/devicePose");
+
+            _inputActions.Enable();
         }
 
         public void Initialize()
         {
-            InputDevices.deviceDisconnected += OnDeviceDisconnected;
+            _unityXRHelper.controllersDidChangeReferenceEvent += OnControllersDidChangeReference;
+
+            _head.positionAction = _unityXRHelper.GetField<InputAction, UnityXRHelper>("_headPositionAction");
+            _head.rotationAction = _unityXRHelper.GetField<InputAction, UnityXRHelper>("_headOrientationAction");
+
+            OnControllersDidChangeReference();
         }
 
         public bool GetDevices(Dictionary<string, TrackedDevice> devices)
         {
             devices.Clear();
 
-            var inputDevices = new List<InputDevice>();
-            bool changeDetected = _deviceRemovedSinceLastCall;
+            (bool headChanged, TrackedDevice head) = _head.GetDevice();
+            (bool leftHandChanged, TrackedDevice leftHand) = _leftHand.GetDevice();
+            (bool rightHandChanged, TrackedDevice rightHand) = _rightHand.GetDevice();
+            (bool waistChanged, TrackedDevice waist) = _waist.GetDevice();
+            (bool leftFootChanged, TrackedDevice leftFoot) = _leftFoot.GetDevice();
+            (bool rightFootChanged, TrackedDevice rightFoot) = _rightFoot.GetDevice();
 
-            InputDevices.GetDevices(inputDevices);
+            devices.Add(head.id, head);
+            devices.Add(leftHand.id, leftHand);
+            devices.Add(rightHand.id, rightHand);
+            devices.Add(waist.id, waist);
+            devices.Add(leftFoot.id, leftFoot);
+            devices.Add(rightFoot.id, rightFoot);
 
-            foreach (InputDevice inputDevice in inputDevices)
-            {
-                if (!inputDevice.isValid) continue;
-
-                DeviceUse use = DeviceUse.Unknown;
-
-                if (inputDevice.characteristics.HasFlag(InputDeviceCharacteristics.HeadMounted))
-                {
-                    use = DeviceUse.Head;
-                }
-                else if (inputDevice.characteristics.HasFlag(InputDeviceCharacteristics.HeldInHand | InputDeviceCharacteristics.Left))
-                {
-                    use = DeviceUse.LeftHand;
-                }
-                else if (inputDevice.characteristics.HasFlag(InputDeviceCharacteristics.HeldInHand | InputDeviceCharacteristics.Right))
-                {
-                    use = DeviceUse.RightHand;
-                }
-
-                inputDevice.TryGetFeatureValue(CommonUsages.isTracked, out bool isTracked);
-                inputDevice.TryGetFeatureValue(CommonUsages.devicePosition, out Vector3 position);
-                inputDevice.TryGetFeatureValue(CommonUsages.deviceRotation, out Quaternion rotation);
-
-                string id;
-                string deviceName = GetUniqueDeviceName(inputDevice);
-
-                if (_devices.TryGetValue(deviceName, out UnityXRDevice existingDevice))
-                {
-                    id = existingDevice.id;
-
-                    if (inputDevice.characteristics != existingDevice.characteristics)
-                    {
-                        _logger.LogInformation($"Characteristics of device '{existingDevice.id}' changed from {existingDevice.characteristics} to {inputDevice.characteristics}");
-                        changeDetected = true;
-                    }
-
-                    if (existingDevice.isTracked != isTracked)
-                    {
-                        if (isTracked)
-                        {
-                            _logger.LogInformation($"Acquired tracking of device '{existingDevice.id}'");
-                        }
-                        else
-                        {
-                            _logger.LogInformation($"Lost tracking of device '{existingDevice.id}'");
-                        }
-
-                        changeDetected = true;
-                    }
-
-                    _devices[deviceName] = new UnityXRDevice(existingDevice.id, true, isTracked, inputDevice.characteristics);
-                }
-                else
-                {
-                    Match match = kSerialNumberRegex.Match(deviceName);
-
-                    if (match.Success)
-                    {
-                        id = match.Groups[1].Value + (uint)match.Groups[2].Value.GetHashCode() + match.Groups[3].Value;
-                    }
-                    else
-                    {
-                        id = deviceName;
-                    }
-
-                    _logger.LogInformation($"Device '{id}' connected with characteristics {inputDevice.characteristics}");
-
-                    _devices.Add(deviceName, new UnityXRDevice(id, true, isTracked, inputDevice.characteristics));
-
-                    changeDetected = true;
-                }
-
-                devices.Add(deviceName, new TrackedDevice(id, use, isTracked, position, rotation));
-            }
-
-            _deviceRemovedSinceLastCall = false;
-
-            return changeDetected;
+            return headChanged || leftHandChanged || rightHandChanged || waistChanged || leftFootChanged || rightFootChanged;
         }
 
         public void Dispose()
         {
-            InputDevices.deviceDisconnected -= OnDeviceDisconnected;
+            _unityXRHelper.controllersDidChangeReferenceEvent -= OnControllersDidChangeReference;
         }
 
-        private void OnDeviceDisconnected(InputDevice device)
+        private InputAction CreateAction(string name, string bindingPath)
         {
-            string deviceName = GetUniqueDeviceName(device);
+            InputAction inputAction = _inputActions.AddAction(name);
+            inputAction.AddBinding(bindingPath, groups: "XR;PSVR2");
+            return inputAction;
+        }
 
-            if (_devices.TryGetValue(deviceName, out UnityXRDevice existingDevice))
+        private void OnControllersDidChangeReference()
+        {
+            UnityXRController leftHandController = _unityXRHelper.ControllerFromNode(XRNode.LeftHand);
+            _leftHand.positionAction = leftHandController.positionAction;
+            _leftHand.rotationAction = leftHandController.rotationAction;
+
+            UnityXRController rightHandController = _unityXRHelper.ControllerFromNode(XRNode.RightHand);
+            _rightHand.positionAction = rightHandController.positionAction;
+            _rightHand.rotationAction = rightHandController.rotationAction;
+        }
+
+        private abstract class XRDevice
+        {
+            protected bool wasPreviouslyTracked { get; set; }
+
+            public XRDevice(DeviceUse use)
             {
-                _logger.LogInformation($"Device '{existingDevice.id}' disconnected");
-                _devices.Remove(deviceName);
+                this.use = use;
+            }
 
-                _deviceRemovedSinceLastCall = true;
+            public DeviceUse use { get; }
+
+            public string name => use.ToString();
+
+            public abstract (bool, TrackedDevice) GetDevice();
+        }
+
+        private class PositionAndRotationXRDevice : XRDevice
+        {
+            public PositionAndRotationXRDevice(DeviceUse use)
+                : base(use)
+            {
+            }
+
+            public InputAction positionAction { get; set; }
+
+            public InputAction rotationAction { get; set; }
+
+            public override (bool, TrackedDevice) GetDevice()
+            {
+                bool isTracked = positionAction != null && rotationAction != null;
+                bool changed = wasPreviouslyTracked != isTracked;
+                wasPreviouslyTracked = isTracked;
+
+                return (changed, new TrackedDevice($"OpenXR {name}", use, isTracked, positionAction?.ReadValue<Vector3>() ?? Vector3.zero, rotationAction?.ReadValue<Quaternion>() ?? Quaternion.identity));
             }
         }
 
-        private static string GetUniqueDeviceName(InputDevice inputDevice)
+        private class PoseXRDevice : XRDevice
         {
-            return $"{inputDevice.name}@{kDeviceIdAccessor(ref inputDevice)}";
-        }
+            public InputAction poseAction { get; set; }
 
-        private readonly struct UnityXRDevice
-        {
-            public readonly string id;
-            public readonly bool isConnected;
-            public readonly bool isTracked;
-            public readonly InputDeviceCharacteristics characteristics;
-
-            public UnityXRDevice(string id, bool isConnected, bool isTracked, InputDeviceCharacteristics characteristics)
+            public PoseXRDevice(DeviceUse use)
+                : base(use)
             {
-                this.id = id;
-                this.isConnected = isConnected;
-                this.isTracked = isTracked;
-                this.characteristics = characteristics;
+            }
+
+            public override (bool, TrackedDevice) GetDevice()
+            {
+                Pose pose = poseAction?.ReadValue<Pose>() ?? default(Pose);
+
+                bool changed = wasPreviouslyTracked != pose.isTracked;
+                wasPreviouslyTracked = pose.isTracked;
+
+                return (changed, new TrackedDevice($"OpenXR {name}", use, pose.isTracked, pose.position, pose.rotation));
             }
         }
     }
