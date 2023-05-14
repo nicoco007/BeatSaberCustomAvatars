@@ -63,8 +63,8 @@ namespace CustomAvatar.Tracking.UnityXR
         {
             _unityXRHelper.controllersDidChangeReferenceEvent += OnControllersDidChangeReference;
 
-            _head.positionAction = _unityXRHelper.GetField<InputAction, UnityXRHelper>("_headPositionAction");
-            _head.rotationAction = _unityXRHelper.GetField<InputAction, UnityXRHelper>("_headOrientationAction");
+            _head.positionAction = _unityXRHelper.GetField<InputActionReference, UnityXRHelper>("_headPositionActionReference").action;
+            _head.rotationAction = _unityXRHelper.GetField<InputActionReference, UnityXRHelper>("_headOrientationActionReference").action;
 
             OnControllersDidChangeReference();
         }
