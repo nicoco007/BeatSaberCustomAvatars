@@ -230,11 +230,7 @@ namespace CustomAvatar.Player
 
             try
             {
-                if (_avatarLoadCancellationTokenSource != null)
-                {
-                    _avatarLoadCancellationTokenSource.Cancel();
-                }
-
+                _avatarLoadCancellationTokenSource?.Cancel();
                 _avatarLoadCancellationTokenSource = new CancellationTokenSource();
                 AvatarPrefab avatarPrefab = await _avatarLoader.LoadFromFileAsync(fullPath, progress, _avatarLoadCancellationTokenSource.Token);
                 SwitchToAvatar(avatarPrefab);
