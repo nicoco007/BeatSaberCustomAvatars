@@ -15,14 +15,16 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using CustomAvatar.Logging;
-using System.Collections.Generic;
+using System;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.InputSystem.XR;
 using Valve.VR;
+using Zenject;
 
 namespace CustomAvatar.Tracking.OpenVR
 {
-    internal class OpenVRDeviceProvider : IDeviceProvider
+    internal class OpenVRDeviceProvider : IDeviceProvider, ITickable
     {
         private static readonly ETrackingResult[] kValidTrackingResults = { ETrackingResult.Running_OK, ETrackingResult.Running_OutOfRange, ETrackingResult.Calibrating_OutOfRange };
 
@@ -32,15 +34,57 @@ namespace CustomAvatar.Tracking.OpenVR
         private readonly TrackedDevicePose_t[] _poses = new TrackedDevicePose_t[OpenVRFacade.kMaxTrackedDeviceCount];
         private readonly OpenVRDevice[] _devices = new OpenVRDevice[OpenVRFacade.kMaxTrackedDeviceCount];
 
+        private TrackedDevice _head;
+        private TrackedDevice _leftHand;
+        private TrackedDevice _rightHand;
+        private TrackedDevice _waist;
+        private TrackedDevice _leftFoot;
+        private TrackedDevice _rightFoot;
+
         public OpenVRDeviceProvider(ILogger<OpenVRDeviceProvider> logger, OpenVRFacade openVRFacade)
         {
             _logger = logger;
             _openVRFacade = openVRFacade;
         }
 
-        public bool GetDevices(Dictionary<string, TrackedDevice> devices)
+        public event Action devicesChanged;
+
+        public bool TryGetDevice(DeviceUse use, out TrackedDevice device)
         {
-            devices.Clear();
+            switch (use)
+            {
+                case DeviceUse.Head:
+                    device = _head;
+                    return true;
+
+                case DeviceUse.LeftHand:
+                    device = _leftHand;
+                    return true;
+
+                case DeviceUse.RightHand:
+                    device = _rightHand;
+                    return true;
+
+                case DeviceUse.Waist:
+                    device = _waist;
+                    return true;
+
+                case DeviceUse.LeftFoot:
+                    device = _leftFoot;
+                    return true;
+
+                case DeviceUse.RightFoot:
+                    device = _rightFoot;
+                    return true;
+
+                default:
+                    device = default;
+                    return false;
+            }
+        }
+
+        public void Tick()
+        {
             bool changeDetected = false;
 
             _openVRFacade.GetDeviceToAbsoluteTrackingPose(ETrackingUniverseOrigin.TrackingUniverseStanding, _poses);
@@ -206,10 +250,39 @@ namespace CustomAvatar.Tracking.OpenVR
                 }
 
                 _devices[i] = new OpenVRDevice(id, isConnected, isTracking, controllerRole, deviceClass, modelName, role);
-                devices.Add(id, new TrackedDevice(id, use, isTracking, position, rotation));
+
+                switch (use)
+                {
+                    case DeviceUse.Head:
+                        _head = new TrackedDevice(id, use, isTracking, position, rotation);
+                        break;
+
+                    case DeviceUse.LeftHand:
+                        _leftHand = new TrackedDevice(id, use, isTracking, position, rotation);
+                        break;
+
+                    case DeviceUse.RightHand:
+                        _rightHand = new TrackedDevice(id, use, isTracking, position, rotation);
+                        break;
+
+                    case DeviceUse.Waist:
+                        _waist = new TrackedDevice(id, use, isTracking, position, rotation);
+                        break;
+
+                    case DeviceUse.LeftFoot:
+                        _leftFoot = new TrackedDevice(id, use, isTracking, position, rotation);
+                        break;
+
+                    case DeviceUse.RightFoot:
+                        _rightFoot = new TrackedDevice(id, use, isTracking, position, rotation);
+                        break;
+                }
             }
 
-            return changeDetected;
+            if (changeDetected)
+            {
+                devicesChanged?.Invoke();
+            }
         }
 
         private readonly struct OpenVRDevice

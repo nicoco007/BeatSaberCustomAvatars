@@ -18,10 +18,16 @@ using System;
 
 namespace CustomAvatar.Tracking
 {
-    internal interface IDeviceProvider
+    internal class DevicelessDeviceProvider : IDeviceProvider
     {
+#pragma warning disable CS0067
         public event Action devicesChanged;
+#pragma warning restore CS0067
 
-        bool TryGetDevice(DeviceUse deviceUse, out TrackedDevice trackedDevice);
+        public bool TryGetDevice(DeviceUse deviceUse, out TrackedDevice trackedDevice)
+        {
+            trackedDevice = default;
+            return false;
+        }
     }
 }

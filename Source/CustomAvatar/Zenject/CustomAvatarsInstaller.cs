@@ -15,7 +15,6 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Linq;
 using System.Reflection;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
@@ -30,7 +29,6 @@ using IPA.Loader;
 using IPA.Utilities;
 using SiraUtil.Affinity;
 using UnityEngine.XR;
-using Valve.VR;
 using Zenject;
 using Logger = IPA.Logging.Logger;
 
@@ -70,23 +68,23 @@ namespace CustomAvatar.Zenject
             Container.Bind<Settings>().FromMethod((ctx) => ctx.Container.Resolve<SettingsManager>().settings).AsTransient();
             Container.Bind(typeof(CalibrationData), typeof(IDisposable)).To<CalibrationData>().AsSingle();
 
-            if (XRSettings.loadedDeviceName.IndexOf("OpenVR", StringComparison.InvariantCultureIgnoreCase) >= 0 &&
-                OpenVR.IsRuntimeInstalled() &&
-                OpenVR.System != null &&
-                !Environment.GetCommandLineArgs().Contains("--force-xr"))
+            if (XRSettings.loadedDeviceName.IndexOf("OpenVR", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 Container.Bind<OpenVRFacade>().AsTransient();
-                Container.Bind(typeof(IDeviceProvider)).To<OpenVRDeviceProvider>().AsSingle();
+                Container.Bind(typeof(IDeviceProvider), typeof(ITickable)).To<OpenVRDeviceProvider>().AsSingle();
+            }
+            else if (XRSettings.loadedDeviceName.IndexOf("OpenXR", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                Container.Bind(typeof(IDeviceProvider), typeof(IInitializable), typeof(IDisposable)).To<UnityXRDeviceProvider>().AsSingle();
             }
             else
             {
-                Container.Bind(typeof(IDeviceProvider), typeof(IInitializable), typeof(IDisposable)).To<UnityXRDeviceProvider>().AsSingle();
+                Container.Bind(typeof(IDeviceProvider)).To<DevicelessDeviceProvider>().AsSingle();
             }
 
             // managers
             Container.Bind(typeof(PlayerAvatarManager), typeof(IInitializable), typeof(IDisposable)).To<PlayerAvatarManager>().AsSingle().NonLazy();
             Container.Bind(typeof(ShaderLoader), typeof(IInitializable)).To<ShaderLoader>().AsSingle().NonLazy();
-            Container.Bind(typeof(DeviceManager), typeof(ITickable)).To<DeviceManager>().AsSingle().NonLazy();
 
             // this prevents a race condition when registering components in AvatarSpawner
             Container.BindExecutionOrder<PlayerAvatarManager>(kPlayerAvatarManagerExecutionOrder);

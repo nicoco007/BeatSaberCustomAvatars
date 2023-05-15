@@ -15,12 +15,11 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Collections.Generic;
 using CustomAvatar.Logging;
 using IPA.Utilities;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.XR;
+using UnityEngine.InputSystem.XR;
 using Zenject;
 using Pose = UnityEngine.XR.OpenXR.Input.Pose;
 
@@ -38,7 +37,7 @@ namespace CustomAvatar.Tracking.UnityXR
         private readonly PoseXRDevice _leftFoot = new PoseXRDevice(DeviceUse.LeftFoot);
         private readonly PoseXRDevice _rightFoot = new PoseXRDevice(DeviceUse.RightFoot);
 
-        private readonly InputActionMap _inputActions = new InputActionMap("Custom Avatars Full Body Tracking");
+        private readonly InputActionMap _inputActions = new InputActionMap("Custom Avatars Additional Tracking");
 
         internal UnityXRDeviceProvider(ILogger<UnityXRDeviceProvider> logger, IVRPlatformHelper vrPlatformHelper)
         {
@@ -52,12 +51,21 @@ namespace CustomAvatar.Tracking.UnityXR
 
             _unityXRHelper = unityXRHelper;
 
-            _waist.poseAction = CreateAction("Waist Pose", "<XRTracker>{Waist}/devicePose");
-            _leftFoot.poseAction = CreateAction("Left Foot Pose", "<XRTracker>{LeftFoot}/devicePose");
-            _rightFoot.poseAction = CreateAction("Right Foot Pose", "<XRTracker>{RightFoot}/devicePose");
+            _head.isTrackedAction = CreateActionAndRegisterCallbacks("HeadIsTracked", $"<{nameof(XRHMD)}>/isTracked");
+            _leftHand.isTrackedAction = CreateActionAndRegisterCallbacks("LeftHandIsTracked", $"<{nameof(XRController)}>{{{CommonUsages.LeftHand}}}/isTracked");
+            _rightHand.isTrackedAction = CreateActionAndRegisterCallbacks("RightHandIsTracked", $"<{nameof(XRController)}>{{{CommonUsages.RightHand}}}/isTracked");
+            _waist.isTrackedAction = CreateActionAndRegisterCallbacks("WaistIsTracked", "<XRTracker>{Waist}/isTracked");
+            _leftFoot.isTrackedAction = CreateActionAndRegisterCallbacks("LeftFootIsTracked", "<XRTracker>{LeftFoot}/isTracked");
+            _rightFoot.isTrackedAction = CreateActionAndRegisterCallbacks("RightFootIsTracked", "<XRTracker>{RightFoot}/isTracked");
+
+            _waist.poseAction = CreateAction("WaistPose", "<XRTracker>{Waist}/devicePose");
+            _leftFoot.poseAction = CreateAction("LeftFootPose", "<XRTracker>{LeftFoot}/devicePose");
+            _rightFoot.poseAction = CreateAction("RightFootPose", "<XRTracker>{RightFoot}/devicePose");
 
             _inputActions.Enable();
         }
+
+        public event Action devicesChanged;
 
         public void Initialize()
         {
@@ -69,30 +77,74 @@ namespace CustomAvatar.Tracking.UnityXR
             OnControllersDidChangeReference();
         }
 
-        public bool GetDevices(Dictionary<string, TrackedDevice> devices)
+        public bool TryGetDevice(DeviceUse deviceUse, out TrackedDevice trackedDevice)
         {
-            devices.Clear();
+            switch (deviceUse)
+            {
+                case DeviceUse.Head:
+                    trackedDevice = _head.GetDevice();
+                    break;
 
-            (bool headChanged, TrackedDevice head) = _head.GetDevice();
-            (bool leftHandChanged, TrackedDevice leftHand) = _leftHand.GetDevice();
-            (bool rightHandChanged, TrackedDevice rightHand) = _rightHand.GetDevice();
-            (bool waistChanged, TrackedDevice waist) = _waist.GetDevice();
-            (bool leftFootChanged, TrackedDevice leftFoot) = _leftFoot.GetDevice();
-            (bool rightFootChanged, TrackedDevice rightFoot) = _rightFoot.GetDevice();
+                case DeviceUse.LeftHand:
+                    trackedDevice = _leftHand.GetDevice();
+                    break;
 
-            devices.Add(head.id, head);
-            devices.Add(leftHand.id, leftHand);
-            devices.Add(rightHand.id, rightHand);
-            devices.Add(waist.id, waist);
-            devices.Add(leftFoot.id, leftFoot);
-            devices.Add(rightFoot.id, rightFoot);
+                case DeviceUse.RightHand:
+                    trackedDevice = _rightHand.GetDevice();
+                    break;
 
-            return headChanged || leftHandChanged || rightHandChanged || waistChanged || leftFootChanged || rightFootChanged;
+                case DeviceUse.Waist:
+                    trackedDevice = _waist.GetDevice();
+                    break;
+
+                case DeviceUse.LeftFoot:
+                    trackedDevice = _leftFoot.GetDevice();
+                    break;
+
+                case DeviceUse.RightFoot:
+                    trackedDevice = _rightFoot.GetDevice();
+                    break;
+
+                default:
+                    trackedDevice = default;
+                    return false;
+            }
+
+            return true;
         }
 
         public void Dispose()
         {
             _unityXRHelper.controllersDidChangeReferenceEvent -= OnControllersDidChangeReference;
+
+            DeregisterCallbacks(_head.isTrackedAction);
+            DeregisterCallbacks(_leftHand.isTrackedAction);
+            DeregisterCallbacks(_rightHand.isTrackedAction);
+            DeregisterCallbacks(_waist.isTrackedAction);
+            DeregisterCallbacks(_leftFoot.isTrackedAction);
+            DeregisterCallbacks(_rightFoot.isTrackedAction);
+        }
+
+        private InputAction CreateActionAndRegisterCallbacks(string name, string bindingPath)
+        {
+            InputAction inputAction = CreateAction(name, bindingPath);
+
+            // isTracked is a ButtonControl so "started" is triggered when tracking starts and "canceled" when tracking stops
+            inputAction.started += OnInputActionChanged;
+            inputAction.canceled += OnInputActionChanged;
+
+            return inputAction;
+        }
+
+        private void DeregisterCallbacks(InputAction inputAction)
+        {
+            inputAction.started -= OnInputActionChanged;
+            inputAction.canceled -= OnInputActionChanged;
+        }
+
+        private void OnInputActionChanged(InputAction.CallbackContext context)
+        {
+            devicesChanged?.Invoke();
         }
 
         private InputAction CreateAction(string name, string bindingPath)
@@ -104,18 +156,18 @@ namespace CustomAvatar.Tracking.UnityXR
 
         private void OnControllersDidChangeReference()
         {
-            UnityXRController leftHandController = _unityXRHelper.ControllerFromNode(XRNode.LeftHand);
+            UnityXRController leftHandController = _unityXRHelper.ControllerFromNode(UnityEngine.XR.XRNode.LeftHand);
             _leftHand.positionAction = leftHandController?.positionAction;
             _leftHand.rotationAction = leftHandController?.rotationAction;
 
-            UnityXRController rightHandController = _unityXRHelper.ControllerFromNode(XRNode.RightHand);
+            UnityXRController rightHandController = _unityXRHelper.ControllerFromNode(UnityEngine.XR.XRNode.RightHand);
             _rightHand.positionAction = rightHandController?.positionAction;
             _rightHand.rotationAction = rightHandController?.rotationAction;
         }
 
         private abstract class XRDevice
         {
-            protected bool wasPreviouslyTracked { get; set; }
+            public InputAction isTrackedAction { get; set; }
 
             public XRDevice(DeviceUse use)
             {
@@ -126,7 +178,7 @@ namespace CustomAvatar.Tracking.UnityXR
 
             public string name => use.ToString();
 
-            public abstract (bool, TrackedDevice) GetDevice();
+            public abstract TrackedDevice GetDevice();
         }
 
         private class PositionAndRotationXRDevice : XRDevice
@@ -140,13 +192,9 @@ namespace CustomAvatar.Tracking.UnityXR
 
             public InputAction rotationAction { get; set; }
 
-            public override (bool, TrackedDevice) GetDevice()
+            public override TrackedDevice GetDevice()
             {
-                bool isTracked = positionAction != null && rotationAction != null;
-                bool changed = wasPreviouslyTracked != isTracked;
-                wasPreviouslyTracked = isTracked;
-
-                return (changed, new TrackedDevice($"OpenXR {name}", use, isTracked, positionAction?.ReadValue<Vector3>() ?? Vector3.zero, rotationAction?.ReadValue<Quaternion>() ?? Quaternion.identity));
+                return new TrackedDevice($"OpenXR {name}", use, isTrackedAction?.ReadValue<float>() > 0.5f, positionAction?.ReadValue<Vector3>() ?? Vector3.zero, rotationAction?.ReadValue<Quaternion>() ?? Quaternion.identity);
             }
         }
 
@@ -159,14 +207,10 @@ namespace CustomAvatar.Tracking.UnityXR
             {
             }
 
-            public override (bool, TrackedDevice) GetDevice()
+            public override TrackedDevice GetDevice()
             {
                 Pose pose = poseAction?.ReadValue<Pose>() ?? default(Pose);
-
-                bool changed = wasPreviouslyTracked != pose.isTracked;
-                wasPreviouslyTracked = pose.isTracked;
-
-                return (changed, new TrackedDevice($"OpenXR {name}", use, pose.isTracked, pose.position, pose.rotation));
+                return new TrackedDevice($"OpenXR {name}", use, pose.isTracked, pose.position, pose.rotation);
             }
         }
     }
