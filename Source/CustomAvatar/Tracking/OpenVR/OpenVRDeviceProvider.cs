@@ -15,10 +15,10 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using CustomAvatar.Logging;
+using DynamicOpenVR.IO;
 using System;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.InputSystem.XR;
 using Valve.VR;
 using Zenject;
 
@@ -31,12 +31,14 @@ namespace CustomAvatar.Tracking.OpenVR
         private readonly ILogger<OpenVRDeviceProvider> _logger;
         private readonly OpenVRFacade _openVRFacade;
 
+        // from DynamicOpenVR.BeatSaber
+        private readonly PoseInput _leftHandPose = new PoseInput("/actions/main/in/left_hand_pose");
+        private readonly PoseInput _rightHandPose = new PoseInput("/actions/main/in/right_hand_pose");
+
         private readonly TrackedDevicePose_t[] _poses = new TrackedDevicePose_t[OpenVRFacade.kMaxTrackedDeviceCount];
         private readonly OpenVRDevice[] _devices = new OpenVRDevice[OpenVRFacade.kMaxTrackedDeviceCount];
 
         private TrackedDevice _head;
-        private TrackedDevice _leftHand;
-        private TrackedDevice _rightHand;
         private TrackedDevice _waist;
         private TrackedDevice _leftFoot;
         private TrackedDevice _rightFoot;
@@ -58,11 +60,11 @@ namespace CustomAvatar.Tracking.OpenVR
                     return true;
 
                 case DeviceUse.LeftHand:
-                    device = _leftHand;
+                    device = GetTrackedDeviceFromInput(_leftHandPose, DeviceUse.LeftHand);
                     return true;
 
                 case DeviceUse.RightHand:
-                    device = _rightHand;
+                    device = GetTrackedDeviceFromInput(_rightHandPose, DeviceUse.RightHand);
                     return true;
 
                 case DeviceUse.Waist:
@@ -172,20 +174,6 @@ namespace CustomAvatar.Tracking.OpenVR
                         use = DeviceUse.Head;
                         break;
 
-                    case ETrackedDeviceClass.Controller:
-                        switch (controllerRole)
-                        {
-                            case ETrackedControllerRole.LeftHand:
-                                use = DeviceUse.LeftHand;
-                                break;
-
-                            case ETrackedControllerRole.RightHand:
-                                use = DeviceUse.RightHand;
-                                break;
-                        }
-
-                        break;
-
                     case ETrackedDeviceClass.GenericTracker:
                         switch (role)
                         {
@@ -257,14 +245,6 @@ namespace CustomAvatar.Tracking.OpenVR
                         _head = new TrackedDevice(id, use, isTracking, position, rotation);
                         break;
 
-                    case DeviceUse.LeftHand:
-                        _leftHand = new TrackedDevice(id, use, isTracking, position, rotation);
-                        break;
-
-                    case DeviceUse.RightHand:
-                        _rightHand = new TrackedDevice(id, use, isTracking, position, rotation);
-                        break;
-
                     case DeviceUse.Waist:
                         _waist = new TrackedDevice(id, use, isTracking, position, rotation);
                         break;
@@ -284,6 +264,8 @@ namespace CustomAvatar.Tracking.OpenVR
                 devicesChanged?.Invoke();
             }
         }
+
+        private TrackedDevice GetTrackedDeviceFromInput(PoseInput poseInput, DeviceUse deviceUse) => new TrackedDevice(poseInput.id, deviceUse, poseInput.isTracking, poseInput.position, poseInput.rotation);
 
         private readonly struct OpenVRDevice
         {
