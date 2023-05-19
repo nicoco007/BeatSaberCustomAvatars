@@ -79,7 +79,7 @@ namespace CustomAvatar.Zenject
             }
             else
             {
-                Container.Bind(typeof(IDeviceProvider)).To<DevicelessDeviceProvider>().AsSingle();
+                Container.Bind(typeof(IDeviceProvider)).To<GenericDeviceProvider>().AsSingle();
             }
 
             // managers

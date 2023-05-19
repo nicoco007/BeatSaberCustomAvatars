@@ -100,30 +100,13 @@ namespace CustomAvatar.Tracking.OpenVR
 
                 DeviceUse use = DeviceUse.Unknown;
 
-                string id = device.id;
                 bool isConnected = device.isConnected;
-                string modelName = device.modelName;
 
                 if (pose.bDeviceIsConnected != isConnected)
                 {
                     isConnected = pose.bDeviceIsConnected;
 
-                    if (pose.bDeviceIsConnected)
-                    {
-                        string serialNumber = _openVRFacade.GetStringTrackedDeviceProperty(i, ETrackedDeviceProperty.Prop_SerialNumber_String);
-
-                        modelName = _openVRFacade.GetStringTrackedDeviceProperty(i, ETrackedDeviceProperty.Prop_ModelNumber_String);
-                        id = string.Concat(modelName ?? "Unknown", " ", (uint)serialNumber?.GetHashCode(), "@", i);
-
-                        _logger.LogInformation($"Device '{id}' connected");
-                    }
-                    else
-                    {
-                        _logger.LogInformation($"Device '{id}' disconnected");
-
-                        id = null;
-                        modelName = null;
-                    }
+                    _logger.LogInformation(isConnected ? $"Device {i} connected" : $"Device {i} disconnected");
 
                     changeDetected = true;
                 }
@@ -140,14 +123,14 @@ namespace CustomAvatar.Tracking.OpenVR
 
                 if (deviceClass != device.deviceClass)
                 {
-                    _logger.LogTrace($"Device '{id}' class changed from '{device.deviceClass}' to '{deviceClass}'");
+                    _logger.LogTrace($"Device {i} class changed from '{device.deviceClass}' to '{deviceClass}'");
 
                     changeDetected = true;
                 }
 
                 if (controllerRole != device.controllerRole)
                 {
-                    _logger.LogTrace($"Device '{id}' controller role changed from '{device.controllerRole}' to '{controllerRole}'");
+                    _logger.LogTrace($"Device {i} controller role changed from '{device.controllerRole}' to '{controllerRole}'");
 
                     changeDetected = true;
                 }
@@ -156,15 +139,15 @@ namespace CustomAvatar.Tracking.OpenVR
                 {
                     if (role == null)
                     {
-                        _logger.LogTrace($"Device '{id}' role unset from '{device.role}'");
+                        _logger.LogTrace($"Device {i} role unset from '{device.role}'");
                     }
                     else if (device.role == null)
                     {
-                        _logger.LogTrace($"Device '{id}' role set to '{role}'");
+                        _logger.LogTrace($"Device {i} role set to '{role}'");
                     }
                     else
                     {
-                        _logger.LogTrace($"Device '{id}' role changed from '{device.role}' to '{role}'");
+                        _logger.LogTrace($"Device {i} role changed from '{device.role}' to '{role}'");
                     }
 
                     changeDetected = true;
@@ -201,11 +184,11 @@ namespace CustomAvatar.Tracking.OpenVR
                 {
                     if (isTracking)
                     {
-                        _logger.LogInformation($"Acquired tracking of device '{id}'");
+                        _logger.LogInformation($"Acquired tracking of device {i}");
                     }
                     else
                     {
-                        _logger.LogInformation($"Lost tracking of device '{id}'");
+                        _logger.LogInformation($"Lost tracking of device {i}");
                     }
 
                     changeDetected = true;
@@ -239,24 +222,24 @@ namespace CustomAvatar.Tracking.OpenVR
                     }
                 }
 
-                _devices[i] = new OpenVRDevice(id, isConnected, isTracking, controllerRole, deviceClass, modelName, role);
+                _devices[i] = new OpenVRDevice(i, isConnected, isTracking, controllerRole, deviceClass, role);
 
                 switch (use)
                 {
                     case DeviceUse.Head:
-                        _head = new TrackedDevice(id, use, isTracking, position, rotation);
+                        _head = new TrackedDevice(use, isTracking, position, rotation);
                         break;
 
                     case DeviceUse.Waist:
-                        _waist = new TrackedDevice(id, use, isTracking, position, rotation);
+                        _waist = new TrackedDevice(use, isTracking, position, rotation);
                         break;
 
                     case DeviceUse.LeftFoot:
-                        _leftFoot = new TrackedDevice(id, use, isTracking, position, rotation);
+                        _leftFoot = new TrackedDevice(use, isTracking, position, rotation);
                         break;
 
                     case DeviceUse.RightFoot:
-                        _rightFoot = new TrackedDevice(id, use, isTracking, position, rotation);
+                        _rightFoot = new TrackedDevice(use, isTracking, position, rotation);
                         break;
                 }
             }
@@ -283,26 +266,24 @@ namespace CustomAvatar.Tracking.OpenVR
             prevTrackedDevice = trackedDevice;
         }
 
-        private TrackedDevice GetTrackedDeviceFromInput(PoseInput poseInput, DeviceUse deviceUse) => new TrackedDevice(poseInput.id, deviceUse, poseInput.isTracking, poseInput.position, poseInput.rotation);
+        private TrackedDevice GetTrackedDeviceFromInput(PoseInput poseInput, DeviceUse deviceUse) => new TrackedDevice(deviceUse, poseInput.isTracking, poseInput.position, poseInput.rotation);
 
         private readonly struct OpenVRDevice
         {
-            public readonly string id;
+            public readonly uint index;
             public readonly bool isConnected;
             public readonly bool isTracking;
             public readonly ETrackedControllerRole controllerRole;
             public readonly ETrackedDeviceClass deviceClass;
-            public readonly string modelName;
             public readonly string role;
 
-            public OpenVRDevice(string id, bool isConnected, bool isTracking, ETrackedControllerRole controllerRole, ETrackedDeviceClass deviceClass, string modelName, string role)
+            public OpenVRDevice(uint index, bool isConnected, bool isTracking, ETrackedControllerRole controllerRole, ETrackedDeviceClass deviceClass, string role)
             {
-                this.id = id;
+                this.index = index;
                 this.isConnected = isConnected;
                 this.isTracking = isTracking;
                 this.controllerRole = controllerRole;
                 this.deviceClass = deviceClass;
-                this.modelName = modelName;
                 this.role = role;
             }
         }

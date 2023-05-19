@@ -176,8 +176,6 @@ namespace CustomAvatar.Tracking.UnityXR
 
             public DeviceUse use { get; }
 
-            public string name => use.ToString();
-
             public abstract TrackedDevice GetDevice();
         }
 
@@ -194,7 +192,7 @@ namespace CustomAvatar.Tracking.UnityXR
 
             public override TrackedDevice GetDevice()
             {
-                return new TrackedDevice($"OpenXR {name}", use, isTrackedAction?.ReadValue<float>() > 0.5f, positionAction?.ReadValue<Vector3>() ?? Vector3.zero, rotationAction?.ReadValue<Quaternion>() ?? Quaternion.identity);
+                return new TrackedDevice(use, isTrackedAction?.ReadValue<float>() > 0.5f, positionAction?.ReadValue<Vector3>() ?? Vector3.zero, rotationAction?.ReadValue<Quaternion>() ?? Quaternion.identity);
             }
         }
 
@@ -209,8 +207,8 @@ namespace CustomAvatar.Tracking.UnityXR
 
             public override TrackedDevice GetDevice()
             {
-                Pose pose = poseAction?.ReadValue<Pose>() ?? default(Pose);
-                return new TrackedDevice($"OpenXR {name}", use, pose.isTracked, pose.position, pose.rotation);
+                Pose pose = poseAction?.ReadValue<Pose>() ?? default;
+                return new TrackedDevice(use, pose.isTracked, pose.position, pose.rotation);
             }
         }
     }
