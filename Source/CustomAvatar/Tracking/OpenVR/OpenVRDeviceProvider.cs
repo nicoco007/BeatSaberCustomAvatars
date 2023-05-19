@@ -39,6 +39,8 @@ namespace CustomAvatar.Tracking.OpenVR
         private readonly OpenVRDevice[] _devices = new OpenVRDevice[OpenVRFacade.kMaxTrackedDeviceCount];
 
         private TrackedDevice _head;
+        private TrackedDevice _leftHand;
+        private TrackedDevice _rightHand;
         private TrackedDevice _waist;
         private TrackedDevice _leftFoot;
         private TrackedDevice _rightFoot;
@@ -60,11 +62,11 @@ namespace CustomAvatar.Tracking.OpenVR
                     return true;
 
                 case DeviceUse.LeftHand:
-                    device = GetTrackedDeviceFromInput(_leftHandPose, DeviceUse.LeftHand);
+                    device = _leftHand;
                     return true;
 
                 case DeviceUse.RightHand:
-                    device = GetTrackedDeviceFromInput(_rightHandPose, DeviceUse.RightHand);
+                    device = _rightHand;
                     return true;
 
                 case DeviceUse.Waist:
@@ -259,10 +261,26 @@ namespace CustomAvatar.Tracking.OpenVR
                 }
             }
 
+            UpdateFromPoseInput(ref _leftHand, _leftHandPose, DeviceUse.LeftHand, ref changeDetected);
+            UpdateFromPoseInput(ref _rightHand, _rightHandPose, DeviceUse.RightHand, ref changeDetected);
+
             if (changeDetected)
             {
                 devicesChanged?.Invoke();
             }
+        }
+
+        private void UpdateFromPoseInput(ref TrackedDevice prevTrackedDevice, PoseInput poseInput, DeviceUse deviceUse, ref bool changeDetected)
+        {
+            TrackedDevice trackedDevice = GetTrackedDeviceFromInput(poseInput, deviceUse);
+
+            if (trackedDevice.isTracking != prevTrackedDevice.isTracking)
+            {
+                _logger.LogInformation($"Acquired tracking of {deviceUse} ({nameof(PoseInput)} {poseInput.id})");
+                changeDetected = true;
+            }
+
+            prevTrackedDevice = trackedDevice;
         }
 
         private TrackedDevice GetTrackedDeviceFromInput(PoseInput poseInput, DeviceUse deviceUse) => new TrackedDevice(poseInput.id, deviceUse, poseInput.isTracking, poseInput.position, poseInput.rotation);
