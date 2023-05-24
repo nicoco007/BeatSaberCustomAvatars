@@ -25,7 +25,6 @@ using CustomAvatar.Logging;
 using CustomAvatar.Player;
 using CustomAvatar.Utilities;
 using HMUI;
-using IPA.Utilities;
 using IPA.Utilities.Async;
 using Polyglot;
 using TMPro;
@@ -156,11 +155,11 @@ namespace CustomAvatar.UI
 
             LevelListTableCell originalTableCell = gameObject.GetComponent<LevelListTableCell>();
 
-            DestroyImmediate(originalTableCell.GetField<TextMeshProUGUI, LevelListTableCell>("_songBpmText").gameObject);
-            DestroyImmediate(originalTableCell.GetField<TextMeshProUGUI, LevelListTableCell>("_songDurationText").gameObject);
-            DestroyImmediate(originalTableCell.GetField<GameObject, LevelListTableCell>("_promoBadgeGo"));
-            DestroyImmediate(originalTableCell.GetField<GameObject, LevelListTableCell>("_updatedBadgeGo"));
-            DestroyImmediate(originalTableCell.GetField<Image, LevelListTableCell>("_favoritesBadgeImage").gameObject);
+            DestroyImmediate(originalTableCell._songBpmText.gameObject);
+            DestroyImmediate(originalTableCell._songDurationText.gameObject);
+            DestroyImmediate(originalTableCell._promoBadgeGo);
+            DestroyImmediate(originalTableCell._updatedBadgeGo);
+            DestroyImmediate(originalTableCell._favoritesBadgeImage);
             DestroyImmediate(originalTableCell.transform.Find("BpmIcon").gameObject);
 
             AvatarListTableCell tableCell = gameObject.AddComponent<AvatarListTableCell>();
@@ -205,8 +204,8 @@ namespace CustomAvatar.UI
             tableView.GetComponent<ScrollRect>().viewport = viewport;
 
             ScrollView scrollView = _container.InstantiateComponent<ScrollView>(tableView.gameObject);
-            scrollView.SetField("_contentRectTransform", content);
-            scrollView.SetField("_viewport", viewport);
+            scrollView._contentRectTransform = content;
+            scrollView._viewport = viewport;
 
             RectTransform header = Instantiate((RectTransform)_leaderboardViewController.transform.Find("HeaderPanel"), rectTransform, false);
 
@@ -226,14 +225,14 @@ namespace CustomAvatar.UI
             Button downButton = scrollBar.Find("DownButton").GetComponent<Button>();
             VerticalScrollIndicator verticalScrollIndicator = scrollBar.Find("VerticalScrollIndicator").GetComponent<VerticalScrollIndicator>();
 
-            scrollView.SetField("_pageUpButton", upButton);
-            scrollView.SetField("_pageDownButton", downButton);
-            scrollView.SetField("_verticalScrollIndicator", verticalScrollIndicator);
+            scrollView._pageUpButton = upButton;
+            scrollView._pageDownButton = downButton;
+            scrollView._verticalScrollIndicator = verticalScrollIndicator;
 
             _tableView = _container.InstantiateComponent<TableView>(tableView.gameObject);
-            _tableView.SetField("_preallocatedCells", new TableView.CellsGroup[0]);
-            _tableView.SetField("_isInitialized", false);
-            _tableView.SetField("_scrollView", scrollView);
+            _tableView._preallocatedCells = new TableView.CellsGroup[0];
+            _tableView._isInitialized = false;
+            _tableView._scrollView = scrollView;
 
             _tableView.SetDataSource(this, true);
 

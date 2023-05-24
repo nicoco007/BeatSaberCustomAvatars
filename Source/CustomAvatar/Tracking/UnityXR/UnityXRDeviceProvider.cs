@@ -16,7 +16,6 @@
 
 using System;
 using CustomAvatar.Logging;
-using IPA.Utilities;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.XR;
@@ -71,8 +70,8 @@ namespace CustomAvatar.Tracking.UnityXR
         {
             _unityXRHelper.controllersDidChangeReferenceEvent += OnControllersDidChangeReference;
 
-            _head.positionAction = _unityXRHelper.GetField<InputActionReference, UnityXRHelper>("_headPositionActionReference").action;
-            _head.rotationAction = _unityXRHelper.GetField<InputActionReference, UnityXRHelper>("_headOrientationActionReference").action;
+            _head.positionAction = _unityXRHelper._headPositionActionReference.action;
+            _head.rotationAction = _unityXRHelper._headOrientationActionReference.action;
 
             OnControllersDidChangeReference();
         }

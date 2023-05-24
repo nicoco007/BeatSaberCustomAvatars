@@ -17,7 +17,6 @@
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
-using IPA.Utilities;
 using UnityEngine;
 using Zenject;
 
@@ -26,8 +25,6 @@ namespace CustomAvatar.Rendering
     internal class CustomAvatarsSmoothCameraController : MonoBehaviour
     {
         private const float kCameraDefaultNearClipMask = 0.1f;
-
-        private static readonly FieldAccessor<SmoothCamera, bool>.Accessor kThirdPersonEnabledAccessor = FieldAccessor<SmoothCamera, bool>.GetAccessor("_thirdPersonEnabled");
 
         private ILogger<CustomAvatarsSmoothCameraController> _logger;
         private Settings _settings;
@@ -91,8 +88,6 @@ namespace CustomAvatar.Rendering
 
         private void UpdateSmoothCamera()
         {
-            bool thirdPersonEnabled = kThirdPersonEnabledAccessor(ref _smoothCamera);
-
             _logger.LogInformation($"Setting avatar culling mask and near clip plane on '{_camera.name}'");
 
             if (!_settings.showAvatarInSmoothCamera)
@@ -100,7 +95,7 @@ namespace CustomAvatar.Rendering
                 _camera.cullingMask &= ~AvatarLayers.kAllLayersMask;
                 _camera.nearClipPlane = kCameraDefaultNearClipMask;
             }
-            else if (thirdPersonEnabled)
+            else if (_smoothCamera._thirdPersonEnabled)
             {
                 _camera.cullingMask = _camera.cullingMask | AvatarLayers.kOnlyInThirdPersonMask | AvatarLayers.kAlwaysVisibleMask;
                 _camera.nearClipPlane = kCameraDefaultNearClipMask;

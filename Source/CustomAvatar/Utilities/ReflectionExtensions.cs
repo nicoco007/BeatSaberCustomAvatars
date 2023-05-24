@@ -21,42 +21,6 @@ namespace CustomAvatar.Utilities
 {
     internal static class ReflectionExtensions
     {
-        internal static TResult GetStaticField<TResult, TObject>(this TObject obj, string fieldName)
-        {
-            if (obj == null)
-            {
-                throw new ArgumentNullException(nameof(obj));
-            }
-
-            FieldInfo field = typeof(TObject).GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-
-            if (field == null)
-            {
-                throw new InvalidOperationException($"Field '{fieldName}' not found on '{typeof(TObject).FullName}'");
-            }
-
-            return (TResult)field.GetValue(obj);
-        }
-
-        internal static Func<TSubject, TResult> CreatePrivatePropertyGetter<TSubject, TResult>(string propertyName)
-        {
-            PropertyInfo property = typeof(TSubject).GetProperty(propertyName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
-
-            if (property == null)
-            {
-                throw new InvalidOperationException($"Property '{propertyName}' does not exist on '{typeof(TSubject).FullName}'");
-            }
-
-            MethodInfo method = property.GetMethod;
-
-            if (method == null)
-            {
-                throw new InvalidOperationException($"Property '{propertyName}' does not have a getter");
-            }
-
-            return CreateDelegate<Func<TSubject, TResult>>(method);
-        }
-
         internal static Action<TSubject, TValue> CreatePropertySetter<TSubject, TValue>(string propertyName)
         {
             PropertyInfo property = typeof(TSubject).GetProperty(propertyName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);

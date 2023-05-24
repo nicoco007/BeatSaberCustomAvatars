@@ -26,8 +26,10 @@ jobs:
       with:
         manifest: ${{ github.workspace }}\Source\CustomAvatar\manifest.json
         path: ${{ runner.temp }}\BeatSaberBindings
-        game-version: 1.28.0
 
+    - name: Add NuGet source
+      run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text "https://nuget.pkg.github.com/nicoco007/index.json"
+  
     - name: Build Debug
       run: dotnet build Source\CustomAvatar\CustomAvatar.csproj -c Debug -p:BeatSaberDir=${{ runner.temp }}\BeatSaberBindings
 

@@ -18,7 +18,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using IPA.Utilities;
 using UnityEngine;
 using Zenject;
 
@@ -35,7 +34,7 @@ namespace CustomAvatar.Player
         {
             _playerAvatarManager = playerAvatarManager;
             _gameScenesManager = gameScenesManager;
-            _data = menuEnvironmentManager.GetField<MenuEnvironmentManager.MenuEnvironmentObjects[], MenuEnvironmentManager>("_data");
+            _data = menuEnvironmentManager._data;
         }
 
         public void Initialize()

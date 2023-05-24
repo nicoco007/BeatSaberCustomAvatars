@@ -14,14 +14,12 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Utilities;
-using IPA.Utilities;
 using UnityEngine;
 using Zenject;
 
@@ -29,8 +27,6 @@ namespace CustomAvatar.Player
 {
     internal class EnvironmentObject : MonoBehaviour
     {
-        // found this property through UnityExplorer - hopefully it doesn't disappear in future versions of Unity
-        private static readonly Action<Renderer, Transform> kStaticBatchRootTransformSetter = ReflectionExtensions.CreatePropertySetter<Renderer, Transform>("staticBatchRootTransform");
         private static readonly Dictionary<MirrorRendererSO, MirrorRendererSO> kReplacedMirrorRenderers = new Dictionary<MirrorRendererSO, MirrorRendererSO>();
 
         private SaberBurnMarkSparkles[] _saberBurnMarkSparkles;
@@ -49,9 +45,9 @@ namespace CustomAvatar.Player
         {
             _originalY = transform.position.y;
 
-            foreach (MeshRenderer renderer in GetComponentsInChildren<MeshRenderer>().Where(mr => mr.isPartOfStaticBatch))
+            foreach (Renderer renderer in GetComponentsInChildren<Renderer>().Where(mr => mr.isPartOfStaticBatch))
             {
-                kStaticBatchRootTransformSetter(renderer, transform);
+                renderer.SetStaticBatchRootTransform(transform);
             }
 
             _saberBurnMarkSparkles = GetComponentsInChildren<SaberBurnMarkSparkles>();
@@ -97,12 +93,12 @@ namespace CustomAvatar.Player
 
             foreach (SaberBurnMarkSparkles saberBurnMarkSparkles in _saberBurnMarkSparkles)
             {
-                saberBurnMarkSparkles.SetField("_plane", new Plane(saberBurnMarkSparkles.transform.up, saberBurnMarkSparkles.transform.position));
+                saberBurnMarkSparkles._plane = new Plane(saberBurnMarkSparkles.transform.up, saberBurnMarkSparkles.transform.position);
             }
 
             foreach (SaberBurnMarkArea saberBurnMarkArea in _saberBurnMarkAreas)
             {
-                saberBurnMarkArea.SetField("_plane", new Plane(saberBurnMarkArea.transform.up, saberBurnMarkArea.transform.position));
+                saberBurnMarkArea._plane = new Plane(saberBurnMarkArea.transform.up, saberBurnMarkArea.transform.position);
             }
         }
 
@@ -119,7 +115,7 @@ namespace CustomAvatar.Player
             {
                 _logger.LogTrace($"Replacing {nameof(MirrorRendererSO)} on '{mirror.name}'");
 
-                MirrorRendererSO original = mirror.GetField<MirrorRendererSO, Mirror>("_mirrorRenderer");
+                MirrorRendererSO original = mirror._mirrorRenderer;
 
                 // Since every EnvironmentObject will move by the same amount, we can assume any mirror under
                 // any EnvironmentObject using a given MirrorRendererSO will be on the same plane.
@@ -136,7 +132,7 @@ namespace CustomAvatar.Player
                     kReplacedMirrorRenderers.Add(original, renderer);
                 }
 
-                mirror.SetField("_mirrorRenderer", renderer);
+                mirror._mirrorRenderer = renderer;
             }
         }
 

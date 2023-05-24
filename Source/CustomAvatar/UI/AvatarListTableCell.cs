@@ -16,7 +16,6 @@
 
 using System.ComponentModel;
 using HMUI;
-using IPA.Utilities;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -38,7 +37,6 @@ namespace CustomAvatar.UI
         [SerializeField] private CurvedTextMeshPro _nameText;
         [SerializeField] private CurvedTextMeshPro _authorText;
         [SerializeField] private ImageView _cover;
-        [SerializeField] private Signal _wasPressedSignal;
         [SerializeField] private GameObject _progressObject;
         [SerializeField] private Image _progressBar;
         [SerializeField] private TextMeshProUGUI _progressText;
@@ -63,7 +61,7 @@ namespace CustomAvatar.UI
 
         public void Init(LevelListTableCell originalTableCell, PlatformLeaderboardViewController platformLeaderboardViewController)
         {
-            _canvasGroup = originalTableCell.GetField<CanvasGroup, LevelListTableCell>("_canvasGroup");
+            _canvasGroup = originalTableCell._canvasGroup;
             _backgroundImage = transform.Find("Background").GetComponent<ImageView>();
             _nameText = transform.Find("SongName").GetComponent<CurvedTextMeshPro>();
             _authorText = transform.Find("SongAuthor").GetComponent<CurvedTextMeshPro>();
@@ -77,8 +75,6 @@ namespace CustomAvatar.UI
 
             _nameText.rectTransform.offsetMax = new Vector2(0, _nameText.rectTransform.offsetMax.y);
             _authorText.rectTransform.offsetMax = new Vector2(0, _authorText.rectTransform.offsetMax.y);
-
-            _wasPressedSignal = originalTableCell.GetField<Signal, SelectableCell>("_wasPressedSignal");
 
             var containerTransform = (RectTransform)Instantiate(platformLeaderboardViewController.transform.Find("Container/LeaderboardTableView/LoadingControl/DownloadingContainer"));
             containerTransform.SetParent(gameObject.transform, false);

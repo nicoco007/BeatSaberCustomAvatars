@@ -124,6 +124,11 @@ namespace CustomAvatar.UI
             }
         }
 
+        public override void __Init(HMUI.Screen screen, ViewController parentViewController, ContainerViewController containerViewController)
+        {
+            base.__Init(screen, parentViewController, containerViewController);
+        }
+
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
             base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);

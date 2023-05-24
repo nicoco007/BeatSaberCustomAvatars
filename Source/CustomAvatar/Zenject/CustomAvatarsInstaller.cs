@@ -26,7 +26,6 @@ using CustomAvatar.Tracking.OpenVR;
 using CustomAvatar.Tracking.UnityXR;
 using CustomAvatar.Utilities;
 using IPA.Loader;
-using IPA.Utilities;
 using SiraUtil.Affinity;
 using UnityEngine.XR;
 using Zenject;
@@ -107,7 +106,7 @@ namespace CustomAvatar.Zenject
             Container.Bind<IKHelper>().AsTransient();
             Container.Bind<TrackingHelper>().AsTransient();
 
-            Container.Bind<MainSettingsModelSO>().FromInstance(_pcAppInit.GetField<MainSettingsModelSO, PCAppInit>("_mainSettingsModel")).IfNotBound();
+            Container.Bind<MainSettingsModelSO>().FromInstance(_pcAppInit._mainSettingsModel).IfNotBound();
 
             Container.Bind(typeof(IAffinity)).To<Patches.MirrorRendererSO>().AsSingle();
         }

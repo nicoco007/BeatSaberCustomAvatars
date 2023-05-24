@@ -19,7 +19,6 @@ using System.Collections.Generic;
 using System.Linq;
 using CustomAvatar.Logging;
 using HarmonyLib;
-using IPA.Utilities;
 using UnityEngine;
 using Zenject;
 
@@ -32,9 +31,6 @@ namespace CustomAvatar.Zenject.Internal
     internal class ZenjectHelper
     {
         private const string kExpectedFirstSceneContextName = "AppCoreSceneContext";
-
-        private static readonly FieldAccessor<SceneContext, List<SceneDecoratorContext>>.Accessor kDecoratorContextsAccessor = FieldAccessor<SceneContext, List<SceneDecoratorContext>>.GetAccessor("_decoratorContexts");
-        private static readonly FieldAccessor<SceneDecoratorContext, List<MonoBehaviour>>.Accessor kInjectableMonoBehavioursAccessor = FieldAccessor<SceneDecoratorContext, List<MonoBehaviour>>.GetAccessor("_injectableMonoBehaviours");
 
         private static bool _shouldInstall;
 
@@ -132,7 +128,7 @@ namespace CustomAvatar.Zenject.Internal
 
             if (__instance is SceneContext sceneContext)
             {
-                injectableMonoBehaviours.AddRange(kDecoratorContextsAccessor(ref sceneContext).SelectMany(dc => kInjectableMonoBehavioursAccessor(ref dc)));
+                injectableMonoBehaviours.AddRange(sceneContext._decoratorContexts.SelectMany(dc => dc._injectableMonoBehaviours));
             }
 
             foreach (MonoBehaviour monoBehaviour in injectableMonoBehaviours)
