@@ -32,6 +32,7 @@ namespace CustomAvatar.Rendering
         private const int kUserInterfaceLayer = 5;
         private const int kNonReflectedParticlesLayer = 19;
 
+        private static readonly Type[] kCameraComponentsToKeep = { typeof(Camera), typeof(BloomPrePass) };
         private static readonly int kTexturePropertyId = Shader.PropertyToID("_ReflectionTex");
         private static readonly int[] kValidAntiAliasingValues = { 1, 2, 4, 8 };
 
@@ -80,6 +81,8 @@ namespace CustomAvatar.Rendering
         {
             _renderer = GetComponent<Renderer>();
             _renderer.material = new Material(_shaderLoader.stereoMirrorShader);
+
+            CreateMirrorCamera();
         }
 
         private void Update()
@@ -149,7 +152,7 @@ namespace CustomAvatar.Rendering
 
             _renderTextures[camera] = renderTexture;
 
-            CreateOrUpdateMirrorCamera(camera, renderTexture);
+            UpdateMirrorCamera(camera, renderTexture);
 
             bool invertCulling = GL.invertCulling;
             GL.invertCulling = !invertCulling;
@@ -202,25 +205,31 @@ namespace CustomAvatar.Rendering
             _mirrorCamera.Render();
         }
 
-        private void CreateOrUpdateMirrorCamera(Camera currentCamera, RenderTexture renderTexture)
+        private void CreateMirrorCamera()
         {
-            if (!_mirrorCamera)
+            GameObject cameraGameObject = Instantiate(Camera.main.gameObject, transform);
+            cameraGameObject.name = "MirrorCamera";
+
+            foreach (Transform transform in cameraGameObject.transform)
             {
-                GameObject cameraGameObject = Instantiate(Camera.main.gameObject);
-                cameraGameObject.name = "MirrorCamera" + GetInstanceID();
-                cameraGameObject.transform.parent = transform;
-
-                DestroyImmediate(cameraGameObject.GetComponent<MainCamera>());
-                DestroyImmediate(cameraGameObject.GetComponent<AudioListener>());
-                DestroyImmediate(cameraGameObject.GetComponent<VisualEffectsController>());
-                DestroyImmediate(cameraGameObject.GetComponent("LIV.SDK.Unity.LIV"));
-
-                _mirrorCamera = cameraGameObject.GetComponent<Camera>();
-
-                _mirrorCamera.hideFlags = HideFlags.HideAndDontSave;
-                _mirrorCamera.enabled = false;
+                Destroy(transform.gameObject);
             }
 
+            foreach (Behaviour behaviour in cameraGameObject.GetComponents<Behaviour>())
+            {
+                if (!kCameraComponentsToKeep.Contains(behaviour.GetType()))
+                {
+                    Destroy(behaviour);
+                }
+            }
+
+            _mirrorCamera = cameraGameObject.GetComponent<Camera>();
+            _mirrorCamera.hideFlags = HideFlags.HideAndDontSave;
+            _mirrorCamera.enabled = false;
+        }
+
+        private void UpdateMirrorCamera(Camera currentCamera, RenderTexture renderTexture)
+        {
             _mirrorCamera.CopyFrom(currentCamera);
             _mirrorCamera.targetTexture = renderTexture;
             _mirrorCamera.depthTextureMode = DepthTextureMode.None;
