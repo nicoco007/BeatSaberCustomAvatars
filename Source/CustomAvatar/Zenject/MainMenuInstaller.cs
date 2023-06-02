@@ -45,6 +45,7 @@ namespace CustomAvatar.Zenject
             CreateAndBindViewController<MirrorViewController>(kCenterViewControllerWidth);
             SettingsViewController settingsViewController = CreateAndBindViewController<SettingsViewController>(kSideViewControllerWidth);
 
+            Container.Bind<TrackerStatusHost>().AsSingle();
             Container.Bind<GeneralSettingsHost>().AsSingle();
             Container.Bind<AvatarSpecificSettingsHost>().AsSingle();
             Container.Bind<AutomaticFbtCalibrationHost>().AsSingle();

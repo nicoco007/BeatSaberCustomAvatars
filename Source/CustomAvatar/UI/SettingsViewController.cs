@@ -35,12 +35,12 @@ namespace CustomAvatar.UI
 
         #region Values
 
-        internal GeneralSettingsHost generalSettingsHost;
-        internal AvatarSpecificSettingsHost avatarSpecificSettingsHost;
-        internal AutomaticFbtCalibrationHost automaticFbtCalibrationHost;
-        internal InterfaceSettingsHost interfaceSettingsHost;
-        internal AdditionalTab[] additionalMenuTabs;
-        internal string versionText;
+        protected GeneralSettingsHost generalSettingsHost;
+        protected AvatarSpecificSettingsHost avatarSpecificSettingsHost;
+        protected AutomaticFbtCalibrationHost automaticFbtCalibrationHost;
+        protected InterfaceSettingsHost interfaceSettingsHost;
+        protected AdditionalTab[] additionalMenuTabs;
+        protected string versionText;
 
         #endregion
 

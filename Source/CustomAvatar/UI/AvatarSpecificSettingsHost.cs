@@ -24,6 +24,8 @@ namespace CustomAvatar.UI
 {
     internal class AvatarSpecificSettingsHost : ViewControllerHost
     {
+        protected readonly TrackerStatusHost trackerStatusHost;
+
         private readonly PlayerAvatarManager _avatarManager;
         private readonly VRPlayerInputInternal _playerInput;
         private readonly Settings _settings;
@@ -36,8 +38,10 @@ namespace CustomAvatar.UI
         private Settings.AvatarSpecificSettings _currentAvatarSettings;
         private CalibrationData.FullBodyCalibration _currentAvatarManualCalibration;
 
-        internal AvatarSpecificSettingsHost(PlayerAvatarManager avatarManager, VRPlayerInputInternal playerInput, Settings settings, CalibrationData calibrationData, ManualCalibrationHelper manualCalibrationHelper)
+        internal AvatarSpecificSettingsHost(TrackerStatusHost trackerStatusHost, PlayerAvatarManager avatarManager, VRPlayerInputInternal playerInput, Settings settings, CalibrationData calibrationData, ManualCalibrationHelper manualCalibrationHelper)
         {
+            this.trackerStatusHost = trackerStatusHost;
+
             _avatarManager = avatarManager;
             _playerInput = playerInput;
             _settings = settings;
@@ -93,7 +97,7 @@ namespace CustomAvatar.UI
             }
         }
 
-        protected bool isAutomaticCalibrationAvailable => isAvatarSpecificSettingsAvailable && (_currentAvatar?.prefab.descriptor.supportsAutomaticCalibration ?? false);
+        protected bool isAutomaticCalibrationAvailable => isAvatarSpecificSettingsAvailable && _currentAvatar.prefab.descriptor.supportsAutomaticCalibration;
 
         protected string useAutomaticCalibrationHoverHint => isAutomaticCalibrationAvailable ? "Use automatic calibration instead of manual calibration." : "Not supported by current avatar";
 
@@ -119,6 +123,8 @@ namespace CustomAvatar.UI
 
             OnAvatarChanged(_avatarManager.currentlySpawnedAvatar);
             OnInputChanged();
+
+            trackerStatusHost.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
         }
 
         public override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
@@ -128,6 +134,8 @@ namespace CustomAvatar.UI
             _avatarManager.avatarLoading -= OnAvatarLoading;
             _avatarManager.avatarChanged -= OnAvatarChanged;
             _playerInput.inputChanged -= OnInputChanged;
+
+            trackerStatusHost.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
         }
 
         private void OnAvatarLoading(string fullPath, string name)

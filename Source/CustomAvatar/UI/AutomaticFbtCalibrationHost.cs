@@ -27,7 +27,8 @@ namespace CustomAvatar.UI
     {
         #region Values
 
-        internal readonly List<object> waistTrackerOptions = new List<object> { WaistTrackerPosition.Front, WaistTrackerPosition.Left, WaistTrackerPosition.Right, WaistTrackerPosition.Back };
+        protected readonly List<object> waistTrackerOptions = new List<object> { WaistTrackerPosition.Front, WaistTrackerPosition.Left, WaistTrackerPosition.Right, WaistTrackerPosition.Back };
+        protected readonly TrackerStatusHost trackerStatusHost;
 
         #endregion
 
@@ -37,8 +38,10 @@ namespace CustomAvatar.UI
         private readonly CalibrationData _calibrationData;
         private readonly AvatarSpecificSettingsHost _avatarSpecificSettingsHost;
 
-        internal AutomaticFbtCalibrationHost(PlayerAvatarManager avatarManager, VRPlayerInputInternal playerInput, Settings settings, CalibrationData calibrationData, AvatarSpecificSettingsHost avatarSpecificSettingsHost)
+        internal AutomaticFbtCalibrationHost(TrackerStatusHost trackerStatusHost, PlayerAvatarManager avatarManager, VRPlayerInputInternal playerInput, Settings settings, CalibrationData calibrationData, AvatarSpecificSettingsHost avatarSpecificSettingsHost)
         {
+            this.trackerStatusHost = trackerStatusHost;
+
             _avatarManager = avatarManager;
             _playerInput = playerInput;
             _settings = settings;
@@ -106,13 +109,17 @@ namespace CustomAvatar.UI
 
             OnAvatarChanged(_avatarManager.currentlySpawnedAvatar);
             OnInputChanged();
+
+            trackerStatusHost.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
         }
 
-        public override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisalbling)
+        public override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
             _avatarManager.avatarLoading -= OnAvatarLoading;
             _avatarManager.avatarChanged -= OnAvatarChanged;
             _playerInput.inputChanged -= OnInputChanged;
+
+            trackerStatusHost.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
         }
 
         private void OnAvatarLoading(string filePath, string name)
