@@ -15,6 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
@@ -25,15 +26,14 @@ using Polyglot;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.XR;
 using Zenject;
 
 namespace CustomAvatar.UI
 {
-    internal class MirrorViewController : BSMLResourceViewController
+    [ViewDefinition("CustomAvatar.UI.Views.Mirror.bsml")]
+    [HotReload(RelativePathToLayout = "Views/Mirror.bsml")]
+    internal class MirrorViewController : BSMLAutomaticViewController
     {
-        public override string ResourceName => "CustomAvatar.UI.Views.Mirror.bsml";
-
         private StereoMirrorRenderer _mirror;
 
         private DiContainer _container;

@@ -29,10 +29,10 @@ using Zenject;
 
 namespace CustomAvatar.UI
 {
-    internal class SettingsViewController : BSMLResourceViewController
+    [ViewDefinition("CustomAvatar.UI.Views.Settings.bsml")]
+    [HotReload(RelativePathToLayout = "Views/Settings.bsml")]
+    internal class SettingsViewController : BSMLAutomaticViewController
     {
-        public override string ResourceName => "CustomAvatar.UI.Views.Settings.bsml";
-
         #region Values
 
         protected GeneralSettingsHost generalSettingsHost;
