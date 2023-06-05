@@ -54,6 +54,10 @@
           <horizontal active="~noTrackersDetected" pad-top="2">
             <text color="#FFFF80" text="~noTrackersDetectedMessage" font-size="3" italics="true" align="Center" />
           </horizontal>
+
+          <horizontal active="~showOpenXRHint" pad-top="2">
+            <text color="#00BFFF" text="~openXRHint" font-size="3" italics="true" align="Center" />
+          </horizontal>
         </macro.as-host>
 
         <horizontal child-align="MiddleLeft" child-expand-width="true" child-control-width="true" pad-top="1" pad-bottom="1">
@@ -82,6 +86,10 @@
 
           <horizontal active="~noTrackersDetected" pad-top="2">
             <text color="#FFFF80" text="~noTrackersDetectedMessage" font-size="3" italics="true" align="Center" />
+          </horizontal>
+
+          <horizontal active="~showOpenXRHint" pad-top="2">
+            <text color="#00BFFF" text="~openXRHint" font-size="3" italics="true" align="Center" />
           </horizontal>
         </macro.as-host>
 

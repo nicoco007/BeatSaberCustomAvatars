@@ -22,7 +22,7 @@ namespace CustomAvatar.UI
             _playerInput = playerInput;
         }
 
-        protected bool trackersNotSupported => UnityEngine.XR.XRSettings.loadedDeviceName.IndexOf("OpenVR", System.StringComparison.OrdinalIgnoreCase) == -1 && !InputSystem.devices.Any(d => d.usages.Any(u => kFullBodyTrackingUsages.Contains(u)));
+        protected bool trackersNotSupported => _isOpenXR && !InputSystem.devices.Any(d => d.usages.Any(u => kFullBodyTrackingUsages.Contains(u)));
 
         protected bool noTrackersDetected => !trackersNotSupported && !_playerInput.TryGetUncalibratedPose(DeviceUse.Waist, out Pose _) && !_playerInput.TryGetUncalibratedPose(DeviceUse.LeftFoot, out Pose _) && !_playerInput.TryGetUncalibratedPose(DeviceUse.RightFoot, out Pose _);
 
@@ -32,14 +32,20 @@ namespace CustomAvatar.UI
             {
                 string message = "No trackers detected. Did you assign roles to your trackers in SteamVR?";
 
-                if (UnityEngine.XR.XRSettings.loadedDeviceName.IndexOf("OpenXR", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                if (_isOpenXR)
                 {
-                    message += "\nIf you turned your trackers on after launching the game, you will need to restart the game.";
+                    message += "\n" + openXRHint;
                 }
 
                 return message;
             }
         }
+
+        protected bool showOpenXRHint => !noTrackersDetected && _isOpenXR;
+
+        protected string openXRHint { get; } = "If you turned your trackers on after launching the game, you will need to restart the game.";
+
+        private bool _isOpenXR => UnityEngine.XR.XRSettings.loadedDeviceName.IndexOf("OpenVR", System.StringComparison.OrdinalIgnoreCase) == -1;
 
         public override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
@@ -56,6 +62,7 @@ namespace CustomAvatar.UI
         private void OnInputChanged()
         {
             NotifyPropertyChanged(nameof(noTrackersDetected));
+            NotifyPropertyChanged(nameof(showOpenXRHint));
         }
 
         private void OnInputSystemDeviceChange(InputDevice inputDevice, InputDeviceChange inputDeviceChange)
@@ -63,6 +70,7 @@ namespace CustomAvatar.UI
             NotifyPropertyChanged(nameof(trackersNotSupported));
             NotifyPropertyChanged(nameof(noTrackersDetected));
             NotifyPropertyChanged(nameof(noTrackersDetectedMessage));
+            NotifyPropertyChanged(nameof(showOpenXRHint));
         }
     }
 }
