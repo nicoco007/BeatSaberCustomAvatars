@@ -14,10 +14,10 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using CustomAvatar.Logging;
-using DynamicOpenVR.IO;
 using System;
 using System.Linq;
+using CustomAvatar.Logging;
+using DynamicOpenVR.IO;
 using UnityEngine;
 using Valve.VR;
 using Zenject;
@@ -38,12 +38,15 @@ namespace CustomAvatar.Tracking.OpenVR
         private readonly TrackedDevicePose_t[] _poses = new TrackedDevicePose_t[OpenVRFacade.kMaxTrackedDeviceCount];
         private readonly OpenVRDevice[] _devices = new OpenVRDevice[OpenVRFacade.kMaxTrackedDeviceCount];
 
-        private TrackedDevice _head;
-        private TrackedDevice _leftHand;
-        private TrackedDevice _rightHand;
-        private TrackedDevice _waist;
-        private TrackedDevice _leftFoot;
-        private TrackedDevice _rightFoot;
+        private OpenVRDevice _leftHandInput;
+        private OpenVRDevice _rightHandInput;
+
+        private uint? _head;
+        private uint? _leftHand;
+        private uint? _rightHand;
+        private uint? _waist;
+        private uint? _leftFoot;
+        private uint? _rightFoot;
 
         public OpenVRDeviceProvider(ILogger<OpenVRDeviceProvider> logger, OpenVRFacade openVRFacade)
         {
@@ -53,38 +56,66 @@ namespace CustomAvatar.Tracking.OpenVR
 
         public event Action devicesChanged;
 
-        public bool TryGetDevice(DeviceUse use, out TrackedDevice device)
+        public bool TryGetDevice(DeviceUse deviceUse, out TrackedDevice trackedDevice)
         {
-            switch (use)
+            OpenVRDevice device;
+
+            if (deviceUse == DeviceUse.LeftHand || deviceUse == DeviceUse.RightHand)
             {
-                case DeviceUse.Head:
-                    device = _head;
-                    return true;
-
-                case DeviceUse.LeftHand:
-                    device = _leftHand;
-                    return true;
-
-                case DeviceUse.RightHand:
-                    device = _rightHand;
-                    return true;
-
-                case DeviceUse.Waist:
-                    device = _waist;
-                    return true;
-
-                case DeviceUse.LeftFoot:
-                    device = _leftFoot;
-                    return true;
-
-                case DeviceUse.RightFoot:
-                    device = _rightFoot;
-                    return true;
-
-                default:
-                    device = default;
-                    return false;
+                device = deviceUse switch
+                {
+                    DeviceUse.LeftHand => _leftHandInput,
+                    DeviceUse.RightHand => _rightHandInput,
+                };
             }
+            else
+            {
+                uint? deviceIndex = deviceUse switch
+                {
+                    DeviceUse.Head => _head,
+                    DeviceUse.LeftHand => _leftHand,
+                    DeviceUse.RightHand => _rightHand,
+                    DeviceUse.Waist => _waist,
+                    DeviceUse.LeftFoot => _leftFoot,
+                    DeviceUse.RightFoot => _rightFoot,
+                    _ => null,
+                };
+
+                if (!deviceIndex.HasValue)
+                {
+                    trackedDevice = default;
+                    return false;
+                }
+
+                device = _devices[deviceIndex.Value];
+            }
+
+            trackedDevice = new TrackedDevice(deviceUse, device.isTracking, device.position, device.rotation);
+            return true;
+        }
+
+        public bool TryGetRenderModelPose(DeviceUse deviceUse, out TrackedDevice trackedDevice)
+        {
+            uint? deviceIndex = deviceUse switch
+            {
+                DeviceUse.Head => _head,
+                DeviceUse.LeftHand => _leftHand,
+                DeviceUse.RightHand => _rightHand,
+                DeviceUse.Waist => _waist,
+                DeviceUse.LeftFoot => _leftFoot,
+                DeviceUse.RightFoot => _rightFoot,
+                _ => null,
+            };
+
+            if (!deviceIndex.HasValue)
+            {
+                trackedDevice = default;
+                return false;
+            }
+
+            OpenVRDevice device = _devices[deviceIndex.Value];
+            trackedDevice = new TrackedDevice(deviceUse, device.isTracking, device.position, device.rotation);
+            return true;
         }
 
         public void Tick()
@@ -92,6 +123,13 @@ namespace CustomAvatar.Tracking.OpenVR
             bool changeDetected = false;
 
             _openVRFacade.GetDeviceToAbsoluteTrackingPose(ETrackingUniverseOrigin.TrackingUniverseStanding, _poses);
+
+            _head = null;
+            _leftHand = null;
+            _rightHand = null;
+            _waist = null;
+            _leftFoot = null;
+            _rightFoot = null;
 
             for (uint i = 0; i < _poses.Length; i++)
             {
@@ -159,6 +197,20 @@ namespace CustomAvatar.Tracking.OpenVR
                         use = DeviceUse.Head;
                         break;
 
+                    case ETrackedDeviceClass.Controller:
+                        switch (controllerRole)
+                        {
+                            case ETrackedControllerRole.LeftHand:
+                                use = DeviceUse.LeftHand;
+                                break;
+
+                            case ETrackedControllerRole.RightHand:
+                                use = DeviceUse.RightHand;
+                                break;
+                        }
+
+                        break;
+
                     case ETrackedDeviceClass.GenericTracker:
                         switch (role)
                         {
@@ -220,32 +272,40 @@ namespace CustomAvatar.Tracking.OpenVR
                             rotation *= Quaternion.Euler(0, 180, 0);
                         }
                     }
+
+                    switch (use)
+                    {
+                        case DeviceUse.Head:
+                            _head = i;
+                            break;
+
+                        case DeviceUse.LeftHand:
+                            _leftHand = i;
+                            break;
+
+                        case DeviceUse.RightHand:
+                            _rightHand = i;
+                            break;
+
+                        case DeviceUse.Waist:
+                            _waist = i;
+                            break;
+
+                        case DeviceUse.LeftFoot:
+                            _leftFoot = i;
+                            break;
+
+                        case DeviceUse.RightFoot:
+                            _rightFoot = i;
+                            break;
+                    }
                 }
 
-                _devices[i] = new OpenVRDevice(i, isConnected, isTracking, controllerRole, deviceClass, role);
-
-                switch (use)
-                {
-                    case DeviceUse.Head:
-                        _head = new TrackedDevice(use, isTracking, position, rotation);
-                        break;
-
-                    case DeviceUse.Waist:
-                        _waist = new TrackedDevice(use, isTracking, position, rotation);
-                        break;
-
-                    case DeviceUse.LeftFoot:
-                        _leftFoot = new TrackedDevice(use, isTracking, position, rotation);
-                        break;
-
-                    case DeviceUse.RightFoot:
-                        _rightFoot = new TrackedDevice(use, isTracking, position, rotation);
-                        break;
-                }
+                _devices[i] = new OpenVRDevice(i, isConnected, isTracking, controllerRole, deviceClass, role, position, rotation);
             }
 
-            UpdateFromPoseInput(ref _leftHand, _leftHandPose, DeviceUse.LeftHand, ref changeDetected);
-            UpdateFromPoseInput(ref _rightHand, _rightHandPose, DeviceUse.RightHand, ref changeDetected);
+            CheckPoseInputChanged(ref _leftHandInput, _leftHandPose, ref changeDetected);
+            CheckPoseInputChanged(ref _rightHandInput, _rightHandPose, ref changeDetected);
 
             if (changeDetected)
             {
@@ -253,20 +313,18 @@ namespace CustomAvatar.Tracking.OpenVR
             }
         }
 
-        private void UpdateFromPoseInput(ref TrackedDevice prevTrackedDevice, PoseInput poseInput, DeviceUse deviceUse, ref bool changeDetected)
+        private void CheckPoseInputChanged(ref OpenVRDevice prevDevice, PoseInput poseInput, ref bool changeDetected)
         {
-            TrackedDevice trackedDevice = GetTrackedDeviceFromInput(poseInput, deviceUse);
+            var device = new OpenVRDevice(0, poseInput.deviceConnected, poseInput.isTracking, ETrackedControllerRole.Invalid, ETrackedDeviceClass.Controller, null, poseInput.position, poseInput.rotation);
 
-            if (trackedDevice.isTracking != prevTrackedDevice.isTracking)
+            if (prevDevice.isTracking != device.isTracking)
             {
-                _logger.LogInformation($"Acquired tracking of {deviceUse} ({nameof(PoseInput)} {poseInput.id})");
+                _logger.LogInformation($"{(device.isTracking ? "Acquired" : "Lost")} tracking of {nameof(PoseInput)} {poseInput.name}");
                 changeDetected = true;
             }
 
-            prevTrackedDevice = trackedDevice;
+            prevDevice = device;
         }
-
-        private TrackedDevice GetTrackedDeviceFromInput(PoseInput poseInput, DeviceUse deviceUse) => new TrackedDevice(deviceUse, poseInput.isTracking, poseInput.position, poseInput.rotation);
 
         private readonly struct OpenVRDevice
         {
@@ -276,8 +334,10 @@ namespace CustomAvatar.Tracking.OpenVR
             public readonly ETrackedControllerRole controllerRole;
             public readonly ETrackedDeviceClass deviceClass;
             public readonly string role;
+            public readonly Vector3 position;
+            public readonly Quaternion rotation;
 
-            public OpenVRDevice(uint index, bool isConnected, bool isTracking, ETrackedControllerRole controllerRole, ETrackedDeviceClass deviceClass, string role)
+            public OpenVRDevice(uint index, bool isConnected, bool isTracking, ETrackedControllerRole controllerRole, ETrackedDeviceClass deviceClass, string role, Vector3 position, Quaternion rotation)
             {
                 this.index = index;
                 this.isConnected = isConnected;
@@ -285,6 +345,8 @@ namespace CustomAvatar.Tracking.OpenVR
                 this.controllerRole = controllerRole;
                 this.deviceClass = deviceClass;
                 this.role = role;
+                this.position = position;
+                this.rotation = rotation;
             }
         }
     }
