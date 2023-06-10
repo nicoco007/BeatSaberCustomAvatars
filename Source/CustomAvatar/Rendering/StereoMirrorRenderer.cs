@@ -36,9 +36,9 @@ namespace CustomAvatar.Rendering
         private static readonly int kTexturePropertyId = Shader.PropertyToID("_ReflectionTex");
         private static readonly int[] kValidAntiAliasingValues = { 1, 2, 4, 8 };
 
-        private static readonly Rect kLeftRect = new Rect(0f, 0f, 0.5f, 1f);
-        private static readonly Rect kRightRect = new Rect(0.5f, 0f, 0.5f, 1f);
-        private static readonly Rect kFullRect = new Rect(0f, 0f, 1f, 1f);
+        private static readonly Rect kLeftRect = new(0f, 0f, 0.5f, 1f);
+        private static readonly Rect kRightRect = new(0.5f, 0f, 0.5f, 1f);
+        private static readonly Rect kFullRect = new(0f, 0f, 1f, 1f);
 
         private ShaderLoader _shaderLoader;
         private ActiveCameraManager _activeCameraManager;
@@ -47,7 +47,7 @@ namespace CustomAvatar.Rendering
         private Renderer _renderer;
         private Camera _mirrorCamera;
         private int _antiAliasing = 2;
-        private readonly Dictionary<Camera, RenderTexture> _renderTextures = new Dictionary<Camera, RenderTexture>();
+        private readonly Dictionary<Camera, RenderTexture> _renderTextures = new();
 
         public float renderScale { get; set; } = 1;
 
@@ -161,7 +161,7 @@ namespace CustomAvatar.Rendering
             {
                 Quaternion targetRotation = cameraRotation;
 
-                if (camera.stereoTargetEye == StereoTargetEyeMask.Both || camera.stereoTargetEye == StereoTargetEyeMask.Left)
+                if (camera.stereoTargetEye is StereoTargetEyeMask.Both or StereoTargetEyeMask.Left)
                 {
                     Vector3 targetPosition = camera.ViewportToWorldPoint(Vector3.zero, Camera.MonoOrStereoscopicEye.Left);
                     Matrix4x4 stereoProjectionMatrix = camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left);
@@ -169,7 +169,7 @@ namespace CustomAvatar.Rendering
                     RenderMirror(targetPosition, targetRotation, stereoProjectionMatrix, kLeftRect, reflectionPlanePosition, reflectionPlaneNormal);
                 }
 
-                if (camera.stereoTargetEye == StereoTargetEyeMask.Both || camera.stereoTargetEye == StereoTargetEyeMask.Right)
+                if (camera.stereoTargetEye is StereoTargetEyeMask.Both or StereoTargetEyeMask.Right)
                 {
                     Vector3 targetPosition = camera.ViewportToWorldPoint(Vector3.zero, Camera.MonoOrStereoscopicEye.Right);
                     Matrix4x4 stereoProjectionMatrix = camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right);

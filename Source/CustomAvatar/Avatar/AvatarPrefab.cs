@@ -312,7 +312,7 @@ namespace CustomAvatar.Avatar
             vrikManager.solver_leftArm_target = ikManager.LeftHandTarget;
             vrikManager.solver_rightArm_target = ikManager.RightHandTarget;
 
-            if (!(ikManager is IKManagerAdvanced ikManagerAdvanced)) return;
+            if (ikManager is not IKManagerAdvanced ikManagerAdvanced) return;
 
             vrikManager.solver_spine_pelvisTarget = ikManagerAdvanced.Spine_pelvisTarget;
             vrikManager.solver_spine_pelvisPositionWeight = ikManagerAdvanced.Spine_pelvisPositionWeight;

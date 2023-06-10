@@ -27,9 +27,9 @@ namespace CustomAvatar.Editor
     [CustomEditor(typeof(VRIKManager))]
     public class VRIKManagerEditor : UnityEditor.Editor
     {
-        private static readonly Regex kRegex = new Regex("(?<!^)(?=[A-Z])");
+        private static readonly Regex kRegex = new("(?<!^)(?=[A-Z])");
 
-        private readonly Dictionary<string, bool> _foldouts = new Dictionary<string, bool>();
+        private readonly Dictionary<string, bool> _foldouts = new();
 
         public override void OnInspectorGUI()
         {

@@ -30,7 +30,7 @@ namespace CustomAvatar.Tracking.UnityXR
         private static readonly float[] kOpenFingerCurls = { -17f, 7f, 11f, 13f, 10f };
         private static readonly float[] kClosedFingerCurls = { 136f, 291f, 291f, 292f, 287f };
 
-        private readonly List<XRHandSubsystem> _subsystems = new List<XRHandSubsystem>();
+        private readonly List<XRHandSubsystem> _subsystems = new();
 
         private readonly float[] _leftHandFingerCurls = new float[5];
         private readonly float[] _rightHandFingerCurls = new float[5];

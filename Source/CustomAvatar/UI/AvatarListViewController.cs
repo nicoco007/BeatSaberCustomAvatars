@@ -50,7 +50,7 @@ namespace CustomAvatar.UI
         private FileSystemWatcher _fileSystemWatcher;
         private TableView _tableView;
 
-        private readonly List<AvatarListItem> _avatars = new List<AvatarListItem>();
+        private readonly List<AvatarListItem> _avatars = new();
         private AvatarListTableCell _tableCellPrefab;
 
         private Texture2D _atlas;

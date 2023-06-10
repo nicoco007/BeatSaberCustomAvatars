@@ -35,7 +35,7 @@ namespace CustomAvatar.Configuration
 
         public FullBodyCalibration automaticCalibration { get; } = new FullBodyCalibration();
 
-        private readonly Dictionary<string, FullBodyCalibration> _manualCalibration = new Dictionary<string, FullBodyCalibration>();
+        private readonly Dictionary<string, FullBodyCalibration> _manualCalibration = new();
 
         private readonly ILogger<CalibrationData> _logger;
 

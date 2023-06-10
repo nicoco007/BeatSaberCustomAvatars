@@ -7,7 +7,8 @@
     <DefineConstants>UNITY_EDITOR</DefineConstants>
     <UnityProjectDir>$(ProjectDir)..\..\Unity\BeatSaberCustomAvatars</UnityProjectDir>
     <PathMap>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)=$(MSBuildProjectName)</PathMap>
-    <LangVersion>8</LangVersion>
+    <LangVersion>11</LangVersion>
+    <Nullable>disable</Nullable>
   <Platforms>x64</Platforms>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration) == 'Release'">

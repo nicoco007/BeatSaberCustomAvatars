@@ -34,9 +34,9 @@ namespace CustomAvatar.Zenject.Internal
 
         private static bool _shouldInstall;
 
-        private static readonly HashSet<InstallerRegistration> kInstallerRegistrations = new HashSet<InstallerRegistration>();
-        private static readonly HashSet<Type> kComponentsToBind = new HashSet<Type>();
-        private static readonly Dictionary<Type, List<ComponentRegistration>> kComponentsToAdd = new Dictionary<Type, List<ComponentRegistration>>();
+        private static readonly HashSet<InstallerRegistration> kInstallerRegistrations = new();
+        private static readonly HashSet<Type> kComponentsToBind = new();
+        private static readonly Dictionary<Type, List<ComponentRegistration>> kComponentsToAdd = new();
 
         private static ILogger<ZenjectHelper> _logger;
 
@@ -89,7 +89,7 @@ namespace CustomAvatar.Zenject.Internal
                 }
                 else
                 {
-                    if (!(__instance is ProjectContext))
+                    if (__instance is not ProjectContext)
                     {
                         _logger.LogWarning($"Ignoring {__instance.GetType().Name} '{__instance.name}' since SceneContext '{kExpectedFirstSceneContextName}' hasn't loaded yet");
                     }

@@ -26,7 +26,7 @@ namespace CustomAvatar.UI.CustomTags
     [ComponentHandler(typeof(ValuePickerController))]
     internal class ValuePickerHandler : TypeHandler<ValuePickerController>
     {
-        public override Dictionary<string, Action<ValuePickerController, string>> Setters => new Dictionary<string, Action<ValuePickerController, string>>
+        public override Dictionary<string, Action<ValuePickerController, string>> Setters => new()
         {
             { "minimum", (slider, text) => slider.minimum = float.Parse(text, CultureInfo.InvariantCulture) },
             { "maximum", (slider, text) => slider.maximum = float.Parse(text, CultureInfo.InvariantCulture) },
@@ -34,7 +34,7 @@ namespace CustomAvatar.UI.CustomTags
             { "interactable", (slider, text) => slider.interactable = bool.Parse(text) },
         };
 
-        public override Dictionary<string, string[]> Props => new Dictionary<string, string[]>
+        public override Dictionary<string, string[]> Props => new()
         {
             { "value", new[] { "value" } },
             { "minimum", new[] { "minimum" } },

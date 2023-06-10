@@ -250,9 +250,9 @@ namespace AvatarScriptPack
         public Vector3 Locomotion_offset;
 
         [Tooltip("Called when the left foot has finished a step.")]
-        public UnityEvent Locomotion_onLeftFootstep = new UnityEvent();
+        public UnityEvent Locomotion_onLeftFootstep = new();
 
         [Tooltip("Called when the right foot has finished a step")]
-        public UnityEvent Locomotion_onRightFootstep = new UnityEvent();
+        public UnityEvent Locomotion_onRightFootstep = new();
     }
 }

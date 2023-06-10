@@ -31,7 +31,7 @@ namespace CustomAvatar
     [Plugin(RuntimeOptions.DynamicInit)]
     internal class Plugin
     {
-        private readonly Harmony _harmony = new Harmony("com.nicoco007.beatsabercustomavatars");
+        private readonly Harmony _harmony = new("com.nicoco007.beatsabercustomavatars");
 
         [Init]
         public Plugin(Logger ipaLogger, PluginMetadata pluginMetadata)

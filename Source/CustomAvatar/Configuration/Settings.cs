@@ -46,7 +46,7 @@ namespace CustomAvatar.Configuration
         public AutomaticFullBodyCalibration automaticCalibration { get; } = new AutomaticFullBodyCalibration();
 
         [JsonProperty(PropertyName = "avatarSpecificSettings", Order = int.MaxValue)]
-        private readonly SortedDictionary<string, AvatarSpecificSettings> _avatarSpecificSettings = new SortedDictionary<string, AvatarSpecificSettings>();
+        private readonly SortedDictionary<string, AvatarSpecificSettings> _avatarSpecificSettings = new();
 
         [OnSerializing]
         private void OnSerializing(StreamingContext context)

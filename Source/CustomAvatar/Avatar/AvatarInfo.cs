@@ -103,7 +103,7 @@ namespace CustomAvatar.Avatar
 
         public override bool Equals(object obj)
         {
-            if (!(obj is AvatarInfo other)) return false;
+            if (obj is not AvatarInfo other) return false;
 
             return name == other.name && author == other.author && fileName == other.fileName && fileSize == other.fileSize && created == other.created && lastModified == other.lastModified && other.timestamp == timestamp;
         }

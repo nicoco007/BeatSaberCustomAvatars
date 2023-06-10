@@ -27,7 +27,7 @@ namespace CustomAvatar.UI
     {
         #region Values
 
-        protected readonly List<object> waistTrackerOptions = new List<object> { WaistTrackerPosition.Front, WaistTrackerPosition.Left, WaistTrackerPosition.Right, WaistTrackerPosition.Back };
+        protected readonly List<object> waistTrackerOptions = new() { WaistTrackerPosition.Front, WaistTrackerPosition.Left, WaistTrackerPosition.Right, WaistTrackerPosition.Back };
         protected readonly TrackerStatusHost trackerStatusHost;
 
         #endregion

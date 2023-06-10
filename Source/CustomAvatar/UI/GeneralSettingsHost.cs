@@ -29,8 +29,8 @@ namespace CustomAvatar.UI
     {
         #region Values
 
-        internal readonly List<object> resizeModeOptions = new List<object> { AvatarResizeMode.None, AvatarResizeMode.Height, AvatarResizeMode.ArmSpan };
-        internal readonly List<object> floorHeightAdjustOptions = new List<object> { FloorHeightAdjustMode.Off, FloorHeightAdjustMode.PlayersPlaceOnly, FloorHeightAdjustMode.EntireEnvironment };
+        internal readonly List<object> resizeModeOptions = new() { AvatarResizeMode.None, AvatarResizeMode.Height, AvatarResizeMode.ArmSpan };
+        internal readonly List<object> floorHeightAdjustOptions = new() { FloorHeightAdjustMode.Off, FloorHeightAdjustMode.PlayersPlaceOnly, FloorHeightAdjustMode.EntireEnvironment };
 
         #endregion
 
@@ -206,7 +206,7 @@ namespace CustomAvatar.UI
 
         private string ResizeModeFormatter(object value)
         {
-            if (!(value is AvatarResizeMode avatarResizeMode))
+            if (value is not AvatarResizeMode avatarResizeMode)
             {
                 return null;
             }
@@ -222,7 +222,7 @@ namespace CustomAvatar.UI
 
         private string FloorHeightAdjustFormatter(object value)
         {
-            if (!(value is FloorHeightAdjustMode floorHeightAdjustMode))
+            if (value is not FloorHeightAdjustMode floorHeightAdjustMode)
             {
                 return null;
             }

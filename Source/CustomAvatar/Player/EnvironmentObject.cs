@@ -27,7 +27,7 @@ namespace CustomAvatar.Player
 {
     internal class EnvironmentObject : MonoBehaviour
     {
-        private static readonly Dictionary<MirrorRendererSO, MirrorRendererSO> kReplacedMirrorRenderers = new Dictionary<MirrorRendererSO, MirrorRendererSO>();
+        private static readonly Dictionary<MirrorRendererSO, MirrorRendererSO> kReplacedMirrorRenderers = new();
 
         private SaberBurnMarkSparkles[] _saberBurnMarkSparkles;
         private SaberBurnMarkArea[] _saberBurnMarkAreas;

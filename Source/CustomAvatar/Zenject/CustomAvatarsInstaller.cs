@@ -38,8 +38,8 @@ namespace CustomAvatar.Zenject
     {
         public static readonly int kPlayerAvatarManagerExecutionOrder = 1000;
 
-        private static readonly VersionRange kDynamicOpenVRVersionRange = new VersionRange("^0.5.0");
-        private static readonly VersionRange kOpenXRHandsVersionRange = new VersionRange("^1.1.0");
+        private static readonly VersionRange kDynamicOpenVRVersionRange = new("^0.5.0");
+        private static readonly VersionRange kOpenXRHandsVersionRange = new("^1.1.0");
 
         private static readonly MethodInfo kCreateLoggerMethod = typeof(ILoggerFactory).GetMethod(nameof(ILoggerFactory.CreateLogger), BindingFlags.Public | BindingFlags.Instance);
         private static readonly Assembly kAssembly = Assembly.GetExecutingAssembly();

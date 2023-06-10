@@ -8,7 +8,7 @@ namespace CustomAvatar.Utilities
     internal class ActiveObjectManager<T> where T : Component
     {
         private readonly ILogger<ActiveObjectManager<T>> _logger;
-        private readonly LinkedList<T> _objects = new LinkedList<T>();
+        private readonly LinkedList<T> _objects = new();
 
         public T current => _objects.Last?.Value;
 

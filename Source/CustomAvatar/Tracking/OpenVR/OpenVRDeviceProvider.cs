@@ -32,8 +32,8 @@ namespace CustomAvatar.Tracking.OpenVR
         private readonly OpenVRFacade _openVRFacade;
 
         // from DynamicOpenVR.BeatSaber
-        private readonly PoseInput _leftHandPose = new PoseInput("/actions/main/in/left_hand_pose");
-        private readonly PoseInput _rightHandPose = new PoseInput("/actions/main/in/right_hand_pose");
+        private readonly PoseInput _leftHandPose = new("/actions/main/in/left_hand_pose");
+        private readonly PoseInput _rightHandPose = new("/actions/main/in/right_hand_pose");
 
         private readonly TrackedDevicePose_t[] _poses = new TrackedDevicePose_t[OpenVRFacade.kMaxTrackedDeviceCount];
         private readonly OpenVRDevice[] _devices = new OpenVRDevice[OpenVRFacade.kMaxTrackedDeviceCount];
@@ -60,13 +60,13 @@ namespace CustomAvatar.Tracking.OpenVR
         {
             OpenVRDevice device;
 
-            if (deviceUse == DeviceUse.LeftHand || deviceUse == DeviceUse.RightHand)
+            if (deviceUse == DeviceUse.LeftHand)
             {
-                device = deviceUse switch
-                {
-                    DeviceUse.LeftHand => _leftHandInput,
-                    DeviceUse.RightHand => _rightHandInput,
-                };
+                device = _leftHandInput;
+            }
+            else if (deviceUse == DeviceUse.RightHand)
+            {
+                device = _rightHandInput;
             }
             else
             {
@@ -267,7 +267,7 @@ namespace CustomAvatar.Tracking.OpenVR
                             rotation *= Quaternion.Euler(-90, 180, 0);
                         }
 
-                        if (use == DeviceUse.LeftFoot || use == DeviceUse.RightFoot)
+                        if (use is DeviceUse.LeftFoot or DeviceUse.RightFoot)
                         {
                             rotation *= Quaternion.Euler(0, 180, 0);
                         }

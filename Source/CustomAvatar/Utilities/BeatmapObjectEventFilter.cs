@@ -12,8 +12,8 @@ namespace CustomAvatar.Utilities
         private readonly IReadonlyBeatmapData _beatmapData;
         private readonly AudioTimeSyncController _audioTimeSyncController;
 
-        private readonly List<NoteData> _burstSliderHeadNoteDatas = new List<NoteData>();
-        private readonly Dictionary<NoteData, NoteCutResult> _noteCutResults = new Dictionary<NoteData, NoteCutResult>();
+        private readonly List<NoteData> _burstSliderHeadNoteDatas = new();
+        private readonly Dictionary<NoteData, NoteCutResult> _noteCutResults = new();
 
         public event BeatmapObjectManager.NoteWasCutDelegate noteGoodCut;
 
@@ -102,7 +102,7 @@ namespace CustomAvatar.Utilities
         {
             NoteData noteData = noteController.noteData;
 
-            if (noteData.gameplayType != NoteData.GameplayType.BurstSliderHead && noteData.gameplayType != NoteData.GameplayType.BurstSliderElement && noteData.gameplayType != NoteData.GameplayType.BurstSliderElementFill)
+            if (noteData.gameplayType is not NoteData.GameplayType.BurstSliderHead and not NoteData.GameplayType.BurstSliderElement and not NoteData.GameplayType.BurstSliderElementFill)
             {
                 return false;
             }

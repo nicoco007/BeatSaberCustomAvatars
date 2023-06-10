@@ -88,7 +88,7 @@ namespace CustomAvatar.Player
         private readonly BeatSaberUtilities _beatSaberUtilities;
         private readonly ActivePlayerSpaceManager _activePlayerSpaceManager;
 
-        private readonly Dictionary<string, AvatarInfo> _avatarInfos = new Dictionary<string, AvatarInfo>();
+        private readonly Dictionary<string, AvatarInfo> _avatarInfos = new();
 
         private string _switchingToPath;
         private Settings.AvatarSpecificSettings _currentAvatarSettings;

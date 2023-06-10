@@ -6,7 +6,8 @@
     <TargetFramework>net472</TargetFramework>
     <PathMap>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)=$(MSBuildProjectName)</PathMap>
     <Platforms>x64</Platforms>
-    <LangVersion>8</LangVersion>
+    <LangVersion>11</LangVersion>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration) == 'Release'">
     <DebugType>none</DebugType>

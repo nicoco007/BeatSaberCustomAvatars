@@ -28,20 +28,20 @@ namespace CustomAvatar.Tracking.UnityXR
         private readonly ILogger<UnityXRDeviceProvider> _logger;
         private readonly UnityXRHelper _unityXRHelper;
 
-        private readonly PositionAndRotationXRDevice _head = new PositionAndRotationXRDevice(DeviceUse.Head);
-        private readonly PositionAndRotationXRDevice _leftHand = new PositionAndRotationXRDevice(DeviceUse.LeftHand);
-        private readonly PositionAndRotationXRDevice _rightHand = new PositionAndRotationXRDevice(DeviceUse.RightHand);
-        private readonly PoseXRDevice _waist = new PoseXRDevice(DeviceUse.Waist);
-        private readonly PoseXRDevice _leftFoot = new PoseXRDevice(DeviceUse.LeftFoot);
-        private readonly PoseXRDevice _rightFoot = new PoseXRDevice(DeviceUse.RightFoot);
+        private readonly PositionAndRotationXRDevice _head = new(DeviceUse.Head);
+        private readonly PositionAndRotationXRDevice _leftHand = new(DeviceUse.LeftHand);
+        private readonly PositionAndRotationXRDevice _rightHand = new(DeviceUse.RightHand);
+        private readonly PoseXRDevice _waist = new(DeviceUse.Waist);
+        private readonly PoseXRDevice _leftFoot = new(DeviceUse.LeftFoot);
+        private readonly PoseXRDevice _rightFoot = new(DeviceUse.RightFoot);
 
-        private readonly InputActionMap _inputActions = new InputActionMap("Custom Avatars Additional Tracking");
+        private readonly InputActionMap _inputActions = new("Custom Avatars Additional Tracking");
 
         internal UnityXRDeviceProvider(ILogger<UnityXRDeviceProvider> logger, IVRPlatformHelper vrPlatformHelper)
         {
             _logger = logger;
 
-            if (!(vrPlatformHelper is UnityXRHelper unityXRHelper))
+            if (vrPlatformHelper is not UnityXRHelper unityXRHelper)
             {
                 throw new InvalidOperationException($"{nameof(UnityXRDeviceProvider)} expects {nameof(IVRPlatformHelper)} to be {nameof(UnityXRHelper)} but got {vrPlatformHelper.GetType().Name}");
             }

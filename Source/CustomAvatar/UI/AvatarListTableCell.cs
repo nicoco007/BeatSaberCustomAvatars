@@ -25,12 +25,12 @@ namespace CustomAvatar.UI
 {
     internal class AvatarListTableCell : TableCell
     {
-        private static readonly Color kSelectedBackgroundColor = new Color(0, 0.75f, 1, 1);
-        private static readonly Color kHighlightedBackgroundColor = new Color(1, 1, 1, 0.2f);
-        private static readonly Color kSelectedAndHighlightedBackgroundColor = new Color(0, 0.75f, 1, 0.75f);
+        private static readonly Color kSelectedBackgroundColor = new(0, 0.75f, 1, 1);
+        private static readonly Color kHighlightedBackgroundColor = new(1, 1, 1, 0.2f);
+        private static readonly Color kSelectedAndHighlightedBackgroundColor = new(0, 0.75f, 1, 0.75f);
 
         private static readonly Color kRegularTextColor = Color.white;
-        private static readonly Color kErrorTextColor = new Color(0.65f, 0.11f, 0.16f);
+        private static readonly Color kErrorTextColor = new(0.65f, 0.11f, 0.16f);
 
         [SerializeField] private CanvasGroup _canvasGroup;
         [SerializeField] private ImageView _backgroundImage;

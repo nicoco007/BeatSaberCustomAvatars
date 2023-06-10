@@ -56,7 +56,7 @@ namespace CustomAvatar.Tracking.OpenVR
                 return null;
             }
 
-            if (error != ETrackedPropertyError.TrackedProp_Success && error != ETrackedPropertyError.TrackedProp_BufferTooSmall)
+            if (error is not ETrackedPropertyError.TrackedProp_Success and not ETrackedPropertyError.TrackedProp_BufferTooSmall)
             {
                 throw new OpenVRException($"Failed to get property '{property}' for device at index {deviceIndex}: {error}", property, error);
             }

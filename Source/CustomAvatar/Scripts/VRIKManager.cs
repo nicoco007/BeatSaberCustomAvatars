@@ -226,7 +226,7 @@ namespace CustomAvatar
         public float solver_leftArm_armLengthMlp = 1f;
 
         [Tooltip("Evaluates stretching of the arm by target distance relative to arm length. Value at time 1 represents stretching amount at the point where distance to the target is equal to arm length. Value at time 2 represents stretching amount at the point where distance to the target is double the arm length. Value represents the amount of stretching. Linear stretching would be achieved with a linear curve going up by 45 degrees. Increase the range of stretching by moving the last key up and right at the same amount. Smoothing in the curve can help reduce elbow snapping (start stretching the arm slightly before target distance reaches arm length).")]
-        public AnimationCurve solver_leftArm_stretchCurve = new AnimationCurve();
+        public AnimationCurve solver_leftArm_stretchCurve = new();
 
         #endregion
 
@@ -270,7 +270,7 @@ namespace CustomAvatar
         public float solver_rightArm_armLengthMlp = 1f;
 
         [Tooltip("Evaluates stretching of the arm by target distance relative to arm length. Value at time 1 represents stretching amount at the point where distance to the target is equal to arm length. Value at time 2 represents stretching amount at the point where distance to the target is double the arm length. Value represents the amount of stretching. Linear stretching would be achieved with a linear curve going up by 45 degrees. Increase the range of stretching by moving the last key up and right at the same amount. Smoothing in the curve can help reduce elbow snapping (start stretching the arm slightly before target distance reaches arm length).")]
-        public AnimationCurve solver_rightArm_stretchCurve = new AnimationCurve();
+        public AnimationCurve solver_rightArm_stretchCurve = new();
 
         #endregion
 
@@ -302,7 +302,7 @@ namespace CustomAvatar
         public float solver_leftLeg_legLengthMlp = 1f;
 
         [Tooltip("Evaluates stretching of the leg by target distance relative to leg length. Value at time 1 represents stretching amount at the point where distance to the target is equal to leg length. Value at time 1 represents stretching amount at the point where distance to the target is double the leg length. Value represents the amount of stretching. Linear stretching would be achieved with a linear curve going up by 45 degrees. Increase the range of stretching by moving the last key up and right at the same amount. Smoothing in the curve can help reduce knee snapping (start stretching the arm slightly before target distance reaches leg length).")]
-        public AnimationCurve solver_leftLeg_stretchCurve = new AnimationCurve();
+        public AnimationCurve solver_leftLeg_stretchCurve = new();
 
         #endregion
 
@@ -334,7 +334,7 @@ namespace CustomAvatar
         public float solver_rightLeg_legLengthMlp = 1f;
 
         [Tooltip("Evaluates stretching of the leg by target distance relative to leg length. Value at time 1 represents stretching amount at the point where distance to the target is equal to leg length. Value at time 1 represents stretching amount at the point where distance to the target is double the leg length. Value represents the amount of stretching. Linear stretching would be achieved with a linear curve going up by 45 degrees. Increase the range of stretching by moving the last key up and right at the same amount. Smoothing in the curve can help reduce knee snapping (start stretching the arm slightly before target distance reaches leg length).")]
-        public AnimationCurve solver_rightLeg_stretchCurve = new AnimationCurve();
+        public AnimationCurve solver_rightLeg_stretchCurve = new();
 
         #endregion
 
@@ -372,10 +372,10 @@ namespace CustomAvatar
         public float solver_locomotion_stepSpeed = 3f;
 
         [Tooltip("The height of the foot by normalized step progress (0 - 1).")]
-        public AnimationCurve solver_locomotion_stepHeight = new AnimationCurve();
+        public AnimationCurve solver_locomotion_stepHeight = new();
 
         [Tooltip("The height offset of the heel by normalized step progress (0 - 1).")]
-        public AnimationCurve solver_locomotion_heelHeight = new AnimationCurve();
+        public AnimationCurve solver_locomotion_heelHeight = new();
 
         [Tooltip("Rotates the foot while the leg is not stepping to relax the twist rotation of the leg if ideal rotation is past this angle.")]
         [Range(0f, 180f)] public float solver_locomotion_relaxLegTwistMinAngle = 20f;
@@ -390,10 +390,10 @@ namespace CustomAvatar
         public Vector3 solver_locomotion_offset;
 
         [Tooltip("Called when the left foot has finished a step.")]
-        public UnityEvent solver_locomotion_onLeftFootstep = new UnityEvent();
+        public UnityEvent solver_locomotion_onLeftFootstep = new();
 
         [Tooltip("Called when the right foot has finished a step")]
-        public UnityEvent solver_locomotion_onRightFootstep = new UnityEvent();
+        public UnityEvent solver_locomotion_onRightFootstep = new();
 
         #endregion
 
