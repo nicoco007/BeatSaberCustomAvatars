@@ -41,11 +41,11 @@ namespace CustomAvatar.UI
             }
         }
 
-        protected bool showOpenXRHint => !noTrackersDetected && _isOpenXR;
+        protected bool showOpenXRHint => _isOpenXR && !trackersNotSupported && !noTrackersDetected;
 
-        protected string openXRHint { get; } = "If you turned your trackers on after launching the game, you will need to restart the game.";
+        protected string openXRHint { get; } = "If you turned on your tracker(s) after launching the game, you will need to restart the game.";
 
-        private bool _isOpenXR => UnityEngine.XR.XRSettings.loadedDeviceName.IndexOf("OpenVR", System.StringComparison.OrdinalIgnoreCase) == -1;
+        private bool _isOpenXR => UnityEngine.XR.XRSettings.loadedDeviceName.IndexOf("OpenXR", System.StringComparison.OrdinalIgnoreCase) != -1;
 
         public override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
