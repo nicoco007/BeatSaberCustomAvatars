@@ -14,9 +14,9 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
-using System;
 using UnityEngine;
 using Zenject;
 
@@ -33,11 +33,16 @@ namespace CustomAvatar.Player
 
         private readonly VRPlayerInputInternal _internalPlayerInput;
         private readonly TrackingHelper _trackingHelper;
+        private readonly IFingerTrackingProvider _fingerTrackingProvider;
 
-        internal VRPlayerInput(VRPlayerInputInternal internalPlayerInput, TrackingHelper trackingHelper)
+        internal VRPlayerInput(
+            VRPlayerInputInternal internalPlayerInput,
+            TrackingHelper trackingHelper,
+            IFingerTrackingProvider fingerTrackingProvider)
         {
             _internalPlayerInput = internalPlayerInput;
             _trackingHelper = trackingHelper;
+            _fingerTrackingProvider = fingerTrackingProvider;
         }
 
         public void Initialize()
@@ -50,10 +55,7 @@ namespace CustomAvatar.Player
             _internalPlayerInput.inputChanged -= inputChanged;
         }
 
-        public bool TryGetFingerCurl(DeviceUse use, out FingerCurl curl)
-        {
-            return _internalPlayerInput.TryGetFingerCurl(use, out curl);
-        }
+        public bool TryGetFingerCurl(DeviceUse use, out FingerCurl curl) => _fingerTrackingProvider.TryGetFingerCurl(use, out curl);
 
         public bool TryGetPose(DeviceUse use, out Pose pose)
         {

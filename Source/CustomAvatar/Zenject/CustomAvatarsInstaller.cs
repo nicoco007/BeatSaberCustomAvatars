@@ -25,6 +25,7 @@ using CustomAvatar.Tracking;
 using CustomAvatar.Tracking.OpenVR;
 using CustomAvatar.Tracking.UnityXR;
 using CustomAvatar.Utilities;
+using Hive.Versioning;
 using IPA.Loader;
 using SiraUtil.Affinity;
 using UnityEngine.XR;
@@ -37,16 +38,20 @@ namespace CustomAvatar.Zenject
     {
         public static readonly int kPlayerAvatarManagerExecutionOrder = 1000;
 
+        private static readonly VersionRange kDynamicOpenVRVersionRange = new VersionRange("^0.5.0");
+
         private static readonly MethodInfo kCreateLoggerMethod = typeof(ILoggerFactory).GetMethod(nameof(ILoggerFactory.CreateLogger), BindingFlags.Public | BindingFlags.Instance);
         private static readonly Assembly kAssembly = Assembly.GetExecutingAssembly();
 
         private readonly Logger _ipaLogger;
+        private readonly ILogger<CustomAvatarsInstaller> _logger;
         private readonly PluginMetadata _pluginMetadata;
         private readonly PCAppInit _pcAppInit;
 
         public CustomAvatarsInstaller(Logger ipaLogger, PluginMetadata pluginMetadata, PCAppInit pcAppInit)
         {
             _ipaLogger = ipaLogger;
+            _logger = new IPALogger<CustomAvatarsInstaller>(ipaLogger);
             _pluginMetadata = pluginMetadata;
             _pcAppInit = pcAppInit;
         }
@@ -67,18 +72,23 @@ namespace CustomAvatar.Zenject
             Container.Bind<Settings>().FromMethod((ctx) => ctx.Container.Resolve<SettingsManager>().settings).AsTransient();
             Container.Bind(typeof(CalibrationData), typeof(IDisposable)).To<CalibrationData>().AsSingle();
 
-            if (XRSettings.loadedDeviceName.IndexOf("OpenVR", StringComparison.OrdinalIgnoreCase) >= 0)
+            _logger.LogInformation($"Current Unity XR device: '{XRSettings.loadedDeviceName}'");
+
+            if (ShouldUseOpenVR())
             {
                 Container.Bind<OpenVRFacade>().AsTransient();
                 Container.Bind(typeof(IDeviceProvider), typeof(ITickable)).To<OpenVRDeviceProvider>().AsSingle();
+                Container.Bind(typeof(IFingerTrackingProvider), typeof(IInitializable), typeof(IDisposable)).To<OpenVRFingerTrackingProvider>().AsSingle();
             }
             else if (XRSettings.loadedDeviceName.IndexOf("OpenXR", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 Container.Bind(typeof(IDeviceProvider), typeof(IInitializable), typeof(IDisposable)).To<UnityXRDeviceProvider>().AsSingle();
+                Container.Bind(typeof(IFingerTrackingProvider)).To<DevicelessFingerTrackingProvider>().AsSingle();
             }
             else
             {
-                Container.Bind(typeof(IDeviceProvider)).To<GenericDeviceProvider>().AsSingle();
+                Container.Bind(typeof(IDeviceProvider), typeof(IInitializable), typeof(IDisposable)).To<GenericDeviceProvider>().AsSingle();
+                Container.Bind(typeof(IFingerTrackingProvider)).To<DevicelessFingerTrackingProvider>().AsSingle();
             }
 
             // managers
@@ -109,6 +119,30 @@ namespace CustomAvatar.Zenject
             Container.Bind<MainSettingsModelSO>().FromInstance(_pcAppInit._mainSettingsModel).IfNotBound();
 
             Container.Bind(typeof(IAffinity)).To<Patches.MirrorRendererSO>().AsSingle();
+        }
+
+        private bool ShouldUseOpenVR()
+        {
+            if (XRSettings.loadedDeviceName.IndexOf("OpenVR", StringComparison.OrdinalIgnoreCase) == -1)
+            {
+                return false;
+            }
+
+            PluginMetadata plugin = PluginManager.GetPluginFromId("DynamicOpenVR");
+
+            if (plugin == null)
+            {
+                _logger.LogError("Current XR device is OpenVR but DynamicOpenVR is not loaded! OpenVR will not be used.");
+                return false;
+            }
+
+            if (!kDynamicOpenVRVersionRange.Matches(plugin.HVersion))
+            {
+                _logger.LogError($"Expected DynamicOpenVR version to match '{kDynamicOpenVRVersionRange}'; got '{plugin.HVersion}'. OpenVR will not be used.");
+                return false;
+            }
+
+            return true;
         }
 
         private object CreateLogger(InjectContext context)
