@@ -49,6 +49,14 @@ namespace CustomAvatar.Tracking.UnityXR
             }
 
             _unityXRHelper = unityXRHelper;
+        }
+
+        public event Action devicesChanged;
+
+        public void Initialize()
+        {
+            _head.positionAction = _unityXRHelper._headPositionActionReference.action;
+            _head.rotationAction = _unityXRHelper._headOrientationActionReference.action;
 
             _head.isTrackedAction = CreateActionAndRegisterCallbacks("HeadIsTracked", $"<{nameof(XRHMD)}>/isTracked");
             _leftHand.isTrackedAction = CreateActionAndRegisterCallbacks("LeftHandIsTracked", $"<{nameof(XRController)}>{{{CommonUsages.LeftHand}}}/isTracked");
@@ -62,17 +70,8 @@ namespace CustomAvatar.Tracking.UnityXR
             _rightFoot.poseAction = CreateAction("RightFootPose", "<XRTracker>{RightFoot}/devicePose");
 
             _inputActions.Enable();
-        }
 
-        public event Action devicesChanged;
-
-        public void Initialize()
-        {
             _unityXRHelper.controllersDidChangeReferenceEvent += OnControllersDidChangeReference;
-
-            _head.positionAction = _unityXRHelper._headPositionActionReference.action;
-            _head.rotationAction = _unityXRHelper._headOrientationActionReference.action;
-
             OnControllersDidChangeReference();
         }
 
@@ -122,6 +121,8 @@ namespace CustomAvatar.Tracking.UnityXR
             DeregisterCallbacks(_waist.isTrackedAction);
             DeregisterCallbacks(_leftFoot.isTrackedAction);
             DeregisterCallbacks(_rightFoot.isTrackedAction);
+
+            _inputActions.Disable();
         }
 
         private InputAction CreateActionAndRegisterCallbacks(string name, string bindingPath)
