@@ -44,8 +44,7 @@ namespace CustomAvatar.Tracking.UnityXR
 
             if (!(vrPlatformHelper is UnityXRHelper unityXRHelper))
             {
-                _logger.LogError($"{nameof(UnityXRDeviceProvider)} expects {nameof(IVRPlatformHelper)} to be {nameof(UnityXRHelper)} but got {vrPlatformHelper.GetType().Name}");
-                return;
+                throw new InvalidOperationException($"{nameof(UnityXRDeviceProvider)} expects {nameof(IVRPlatformHelper)} to be {nameof(UnityXRHelper)} but got {vrPlatformHelper.GetType().Name}");
             }
 
             _unityXRHelper = unityXRHelper;
