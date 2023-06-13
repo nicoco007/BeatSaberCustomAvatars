@@ -66,10 +66,6 @@
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\IPA.Loader.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="MathUtils">
-      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\MathUtils.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
     <Reference Include="Main" Publicize="true">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Main.dll</HintPath>
       <Private>false</Private>

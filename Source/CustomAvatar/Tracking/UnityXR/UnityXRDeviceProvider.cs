@@ -20,7 +20,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.XR;
 using Zenject;
-using Pose = UnityEngine.XR.OpenXR.Input.Pose;
 
 namespace CustomAvatar.Tracking.UnityXR
 {
@@ -206,7 +205,7 @@ namespace CustomAvatar.Tracking.UnityXR
 
             public override TrackedDevice GetDevice()
             {
-                Pose pose = poseAction?.ReadValue<Pose>() ?? default;
+                PoseState pose = poseAction?.ReadValue<PoseState>() ?? default;
                 return new TrackedDevice(use, pose.isTracked, pose.position, pose.rotation);
             }
         }

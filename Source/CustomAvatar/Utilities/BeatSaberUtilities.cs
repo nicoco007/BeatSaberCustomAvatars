@@ -76,23 +76,22 @@ namespace CustomAvatar.Utilities
         /// </summary>
         public void AdjustPlatformSpecificControllerPose(DeviceUse use, ref Pose pose)
         {
-            EulerPose controllerOffset = use switch
+            Pose controllerOffset = use switch
             {
                 DeviceUse.LeftHand => _vrPlatformHelper.GetPoseOffsetForNode(XRNode.LeftHand),
                 DeviceUse.RightHand => _vrPlatformHelper.GetPoseOffsetForNode(XRNode.RightHand),
-                _ => EulerPose.identity,
+                _ => Pose.identity,
             };
 
-            controllerOffset += new EulerPose(_mainSettingsModel.controllerPosition, _mainSettingsModel.controllerRotation);
+            controllerOffset = VRController.AdjustPose(controllerOffset, new Pose(_mainSettingsModel.controllerPosition, Quaternion.Euler(_mainSettingsModel.controllerRotation)));
 
             if (use == DeviceUse.LeftHand)
             {
-                controllerOffset = controllerOffset.MirrorOnYZPlane();
+                pose = VRController.InvertControllerPose(pose);
             }
 
-            var rotation = Quaternion.Euler(controllerOffset.rotation);
             pose.position += pose.rotation * controllerOffset.position;
-            pose.rotation *= rotation;
+            pose.rotation *= pose.rotation;
         }
 
         private void OnRoomCenterChanged()
