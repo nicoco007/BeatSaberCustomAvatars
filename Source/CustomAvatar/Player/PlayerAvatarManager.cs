@@ -562,7 +562,7 @@ namespace CustomAvatar.Player
                             reader.ReadDateTime()
                         );
 
-                        if (string.IsNullOrWhiteSpace(avatarInfo.fileName) || Path.GetInvalidFileNameChars().Any(c => avatarInfo.fileName.Contains(c)))
+                        if (!PathHelpers.IsValidFileName(avatarInfo.fileName))
                         {
                             _logger.LogError($"Invalid avatar file name '{avatarInfo.fileName}'");
                             continue;

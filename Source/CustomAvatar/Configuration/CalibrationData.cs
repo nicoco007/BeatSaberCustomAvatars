@@ -69,7 +69,10 @@ namespace CustomAvatar.Configuration
 
         public FullBodyCalibration GetAvatarManualCalibration(string fileName)
         {
-            if (!IsValidFileName(fileName)) throw new ArgumentException("Invalid file name", nameof(fileName));
+            if (!PathHelpers.IsValidFileName(fileName))
+            {
+                throw new ArgumentException("Invalid file name", nameof(fileName));
+            }
 
             if (!_manualCalibration.ContainsKey(fileName))
             {
@@ -108,7 +111,7 @@ namespace CustomAvatar.Configuration
                 {
                     string fileName = reader.ReadString();
 
-                    if (!IsValidFileName(fileName))
+                    if (!PathHelpers.IsValidFileName(fileName))
                     {
                         _logger.LogWarning($"'{fileName}' is not a valid file name; skipped");
                         continue;
@@ -167,11 +170,6 @@ namespace CustomAvatar.Configuration
             }
 
             File.SetAttributes(kCalibrationDataFilePath, FileAttributes.Hidden);
-        }
-
-        private bool IsValidFileName(string str)
-        {
-            return !string.IsNullOrEmpty(str) && !str.Any(c => Path.GetInvalidFileNameChars().Contains(c));
         }
 
         public class FullBodyCalibration
