@@ -8,6 +8,7 @@
   "name": "Custom Avatars",
   "version": "5.4.0+dev",
   "dependsOn": {
+    "AssetBundleLoadingTools": "^1.0.0",
     "BSIPA": "^4.3.0",
     "BeatSaberMarkupLanguage": "^1.7.0",
     "SiraUtil": "^3.1.3"

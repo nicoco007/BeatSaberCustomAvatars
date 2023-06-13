@@ -45,7 +45,8 @@ namespace CustomAvatar.Configuration
         public Mirror mirror { get; } = new Mirror();
         public AutomaticFullBodyCalibration automaticCalibration { get; } = new AutomaticFullBodyCalibration();
 
-        [JsonProperty(PropertyName = "avatarSpecificSettings", Order = int.MaxValue)] private readonly Dictionary<string, AvatarSpecificSettings> _avatarSpecificSettings = new Dictionary<string, AvatarSpecificSettings>();
+        [JsonProperty(PropertyName = "avatarSpecificSettings", Order = int.MaxValue)]
+        private readonly SortedDictionary<string, AvatarSpecificSettings> _avatarSpecificSettings = new SortedDictionary<string, AvatarSpecificSettings>();
 
         [OnSerializing]
         private void OnSerializing(StreamingContext context)
@@ -91,6 +92,8 @@ namespace CustomAvatar.Configuration
             public ObservableValue<bool> bypassCalibration { get; } = new ObservableValue<bool>();
             public ObservableValue<bool> ignoreExclusions { get; } = new ObservableValue<bool>(false);
             public bool allowMaintainPelvisPosition { get; set; } = false;
+
+            public bool enableLegacyShaderRepair { get; set; } = true;
         }
 
         public AvatarSpecificSettings GetAvatarSettings(string fileName)
