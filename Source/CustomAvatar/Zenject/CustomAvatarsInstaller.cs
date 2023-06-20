@@ -39,6 +39,7 @@ namespace CustomAvatar.Zenject
         public static readonly int kPlayerAvatarManagerExecutionOrder = 1000;
 
         private static readonly VersionRange kDynamicOpenVRVersionRange = new VersionRange("^0.5.0");
+        private static readonly VersionRange kOpenXRHandsVersionRange = new VersionRange("^1.1.0");
 
         private static readonly MethodInfo kCreateLoggerMethod = typeof(ILoggerFactory).GetMethod(nameof(ILoggerFactory.CreateLogger), BindingFlags.Public | BindingFlags.Instance);
         private static readonly Assembly kAssembly = Assembly.GetExecutingAssembly();
@@ -83,7 +84,15 @@ namespace CustomAvatar.Zenject
             else if (XRSettings.loadedDeviceName.IndexOf("OpenXR", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 Container.Bind(typeof(IDeviceProvider), typeof(IInitializable), typeof(IDisposable)).To<UnityXRDeviceProvider>().AsSingle();
-                Container.Bind(typeof(IFingerTrackingProvider)).To<DevicelessFingerTrackingProvider>().AsSingle();
+
+                if (IsPluginLoadedAndMatchesVersion("Unity.XR.Hands", kOpenXRHandsVersionRange))
+                {
+                    Container.Bind(typeof(IFingerTrackingProvider), typeof(ITickable)).To<UnityXRFingerTrackingProvider>().AsSingle();
+                }
+                else
+                {
+                    Container.Bind(typeof(IFingerTrackingProvider)).To<DevicelessFingerTrackingProvider>().AsSingle();
+                }
             }
             else
             {
@@ -128,21 +137,19 @@ namespace CustomAvatar.Zenject
                 return false;
             }
 
-            PluginMetadata plugin = PluginManager.GetPluginFromId("DynamicOpenVR");
-
-            if (plugin == null)
+            if (!IsPluginLoadedAndMatchesVersion("DynamicOpenVR", kDynamicOpenVRVersionRange))
             {
-                _logger.LogError("Current XR device is OpenVR but DynamicOpenVR is not loaded! OpenVR will not be used.");
-                return false;
-            }
-
-            if (!kDynamicOpenVRVersionRange.Matches(plugin.HVersion))
-            {
-                _logger.LogError($"Expected DynamicOpenVR version to match '{kDynamicOpenVRVersionRange}'; got '{plugin.HVersion}'. OpenVR will not be used.");
+                _logger.LogError($"DynamicOpenVR is not installed or does not match expected version range '{kDynamicOpenVRVersionRange}'. OpenVR will not be used.");
                 return false;
             }
 
             return true;
+        }
+
+        private bool IsPluginLoadedAndMatchesVersion(string id, VersionRange versionRange)
+        {
+            PluginMetadata plugin = PluginManager.GetPluginFromId(id);
+            return plugin != null && versionRange.Matches(plugin.HVersion);
         }
 
         private object CreateLogger(InjectContext context)

@@ -78,6 +78,10 @@
       <HintPath>$(BeatSaberDir)\Libs\Newtonsoft.Json.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="Unity.XR.Hands" Publicize="true">
+      <HintPath>$(BeatSaberDir)\Libs\Unity.XR.Hands.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="Polyglot">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Polyglot.dll</HintPath>
       <Private>false</Private>
@@ -132,6 +136,10 @@
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.SubsystemsModule">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.SubsystemsModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
