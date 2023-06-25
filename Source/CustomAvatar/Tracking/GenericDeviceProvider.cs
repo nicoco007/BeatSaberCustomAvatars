@@ -73,7 +73,7 @@ namespace CustomAvatar.Tracking
                 return false;
             }
 
-            trackedDevice = new TrackedDevice(deviceUse, true, position, rotation);
+            trackedDevice = new TrackedDevice(true, position, rotation);
             return true;
         }
 

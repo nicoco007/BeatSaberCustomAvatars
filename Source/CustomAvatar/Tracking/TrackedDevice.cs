@@ -20,17 +20,20 @@ namespace CustomAvatar.Tracking
 {
     internal readonly struct TrackedDevice
     {
-        public readonly DeviceUse deviceUse;
         public readonly bool isTracking;
         public readonly Vector3 position;
         public readonly Quaternion rotation;
 
-        public TrackedDevice(DeviceUse deviceUse, bool isTracking, Vector3 position, Quaternion rotation)
+        public TrackedDevice(bool isTracking, Vector3 position, Quaternion rotation)
         {
-            this.deviceUse = deviceUse;
             this.isTracking = isTracking;
             this.position = position;
             this.rotation = rotation;
+        }
+
+        public override string ToString()
+        {
+            return $"{nameof(TrackedDevice)}@{GetHashCode()}[{nameof(isTracking)}={isTracking}, {nameof(position)}={position}, {nameof(rotation)}={rotation}]";
         }
     }
 }

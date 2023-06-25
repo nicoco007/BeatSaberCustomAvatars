@@ -90,7 +90,7 @@ namespace CustomAvatar.Tracking.OpenVR
                 device = _devices[deviceIndex.Value];
             }
 
-            trackedDevice = new TrackedDevice(deviceUse, device.isTracking, device.position, device.rotation);
+            trackedDevice = new TrackedDevice(device.isTracking, device.position, device.rotation);
             return true;
         }
 
@@ -114,7 +114,7 @@ namespace CustomAvatar.Tracking.OpenVR
             }
 
             OpenVRDevice device = _devices[deviceIndex.Value];
-            trackedDevice = new TrackedDevice(deviceUse, device.isTracking, device.position, device.rotation);
+            trackedDevice = new TrackedDevice(device.isTracking, device.position, device.rotation);
             return true;
         }
 
