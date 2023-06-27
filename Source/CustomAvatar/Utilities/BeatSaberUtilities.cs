@@ -87,11 +87,11 @@ namespace CustomAvatar.Utilities
 
             if (use == DeviceUse.LeftHand)
             {
-                pose = VRController.InvertControllerPose(pose);
+                controllerOffset = VRController.InvertControllerPose(controllerOffset);
             }
 
             pose.position += pose.rotation * controllerOffset.position;
-            pose.rotation *= pose.rotation;
+            pose.rotation *= controllerOffset.rotation;
         }
 
         private void OnRoomCenterChanged()
