@@ -62,6 +62,7 @@ namespace CustomAvatar.UI
         public void Init(LevelListTableCell originalTableCell, PlatformLeaderboardViewController platformLeaderboardViewController)
         {
             _canvasGroup = originalTableCell._canvasGroup;
+            _wasPressedSignal = originalTableCell._wasPressedSignal;
             _backgroundImage = transform.Find("Background").GetComponent<ImageView>();
             _nameText = transform.Find("SongName").GetComponent<CurvedTextMeshPro>();
             _authorText = transform.Find("SongAuthor").GetComponent<CurvedTextMeshPro>();
