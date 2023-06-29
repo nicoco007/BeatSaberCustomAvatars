@@ -34,6 +34,7 @@ namespace CustomAvatar.Avatar
         private readonly IMultiplayerLevelEndActionsPublisher _multiplayerLevelEndActions;
         private readonly ObstacleSaberSparkleEffectManager _sparkleEffectManager;
         private readonly GameScenesManager _gameScenesManager;
+        private readonly ICoroutineStarter _coroutineStarter;
 
         private EventManager _eventManager;
 
@@ -49,7 +50,8 @@ namespace CustomAvatar.Avatar
             [InjectOptional] ILevelEndActions levelEndActions,
             [InjectOptional] IMultiplayerLevelEndActionsPublisher multiplayerLevelEndActions,
             ObstacleSaberSparkleEffectManager sparkleEffectManager,
-            GameScenesManager gameScenesManager)
+            GameScenesManager gameScenesManager,
+            ICoroutineStarter coroutineStarter)
         {
             _logger = logger;
             _avatarManager = avatarManager;
@@ -60,6 +62,7 @@ namespace CustomAvatar.Avatar
             _multiplayerLevelEndActions = multiplayerLevelEndActions;
             _sparkleEffectManager = sparkleEffectManager;
             _gameScenesManager = gameScenesManager;
+            _coroutineStarter = coroutineStarter;
         }
 
         public void Initialize()
@@ -94,7 +97,7 @@ namespace CustomAvatar.Avatar
                 _multiplayerLevelEndActions.playerDidFinishEvent += OnPlayerDidFinish;
             }
 
-            SharedCoroutineStarter.instance.StartCoroutine(TriggerOnLevelStart());
+            _coroutineStarter.StartCoroutine(TriggerOnLevelStart());
         }
 
         public void Dispose()

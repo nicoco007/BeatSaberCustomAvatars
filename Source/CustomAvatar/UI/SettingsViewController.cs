@@ -47,6 +47,7 @@ namespace CustomAvatar.UI
         private PlatformLeaderboardViewController _leaderboardViewController;
         private List<IAvatarsMenuTab> _avatarsMenuTabs;
         private PluginMetadata _pluginMetadata;
+        private BSMLParser _bsmlParser;
 
         [Inject]
         internal void Construct(
@@ -56,11 +57,13 @@ namespace CustomAvatar.UI
             GeneralSettingsHost generalSettingsHost,
             AvatarSpecificSettingsHost avatarSpecificSettingsHost,
             AutomaticFbtCalibrationHost automaticFbtCalibrationHost,
-            InterfaceSettingsHost interfaceSettingsHost)
+            InterfaceSettingsHost interfaceSettingsHost,
+            BSMLParser bsmlParser)
         {
             _leaderboardViewController = leaderboardViewController;
             _avatarsMenuTabs = avatarsMenuTabs;
             _pluginMetadata = pluginMetadata;
+            _bsmlParser = bsmlParser;
             this.generalSettingsHost = generalSettingsHost;
             this.avatarSpecificSettingsHost = avatarSpecificSettingsHost;
             this.automaticFbtCalibrationHost = automaticFbtCalibrationHost;
@@ -105,7 +108,7 @@ namespace CustomAvatar.UI
                         IAvatarsMenuTab tab = _avatarsMenuTabs[i];
                         AdditionalTab menuTab = additionalMenuTabs[i];
                         menuTab.name = tab.name;
-                        BSMLParser.instance.Parse(tab.GetContent(), menuTab.gameObject, tab.host);
+                        _bsmlParser.Parse(tab.GetContent(), menuTab.gameObject, tab.host);
                     }
                     catch (Exception ex)
                     {

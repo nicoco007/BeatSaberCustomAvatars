@@ -32,6 +32,7 @@ namespace CustomAvatar.UI
         private MirrorViewController _mirrorViewController;
         private SettingsViewController _settingsViewController;
         private SettingsManager _settingsManager;
+        private MenuButtons _menuButtons;
 
         private MenuButton _menuButton;
 
@@ -44,15 +45,12 @@ namespace CustomAvatar.UI
                 _mainFlowCoordinator.PresentFlowCoordinator(this);
             });
 
-            MenuButtons.instance.RegisterButton(_menuButton);
+            _menuButtons.RegisterButton(_menuButton);
         }
 
         public void Dispose()
         {
-            if (MenuButtons.IsSingletonAvailable && BSMLParser.IsSingletonAvailable)
-            {
-                MenuButtons.instance.UnregisterButton(_menuButton);
-            }
+            _menuButtons.UnregisterButton(_menuButton);
         }
 
         [Inject]
@@ -62,7 +60,8 @@ namespace CustomAvatar.UI
             AvatarListViewController avatarListViewController,
             MirrorViewController mirrorViewController,
             SettingsViewController settingsViewController,
-            SettingsManager settingsManager)
+            SettingsManager settingsManager,
+            MenuButtons menuButtons)
         {
             _logger = logger;
             _mainFlowCoordinator = mainFlowCoordinator;
@@ -70,6 +69,7 @@ namespace CustomAvatar.UI
             _mirrorViewController = mirrorViewController;
             _settingsViewController = settingsViewController;
             _settingsManager = settingsManager;
+            _menuButtons = menuButtons;
         }
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
