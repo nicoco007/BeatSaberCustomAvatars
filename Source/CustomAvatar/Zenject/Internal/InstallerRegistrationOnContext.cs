@@ -19,7 +19,7 @@ using Zenject;
 
 namespace CustomAvatar.Zenject.Internal
 {
-    internal class InstallerRegistrationOnContext : InstallerRegistrationOnTarget
+    internal class InstallerRegistrationOnContext<T> : InstallerRegistrationOnTarget
     {
         private readonly string _sceneName;
         private readonly string _contextName;
@@ -35,7 +35,7 @@ namespace CustomAvatar.Zenject.Internal
 
         internal override bool ShouldInstall(Context context)
         {
-            return context.name == _contextName && context.gameObject.scene.name == _sceneName;
+            return context is T && context.name == _contextName && context.gameObject.scene.name == _sceneName;
         }
     }
 }

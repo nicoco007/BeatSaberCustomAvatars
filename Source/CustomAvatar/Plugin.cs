@@ -24,6 +24,7 @@ using CustomAvatar.Zenject.Internal;
 using HarmonyLib;
 using IPA;
 using IPA.Loader;
+using Zenject;
 using Logger = IPA.Logging.Logger;
 
 namespace CustomAvatar
@@ -62,8 +63,8 @@ namespace CustomAvatar
             ZenjectHelper.AddComponentAlongsideExisting<MultiplayerConnectedPlayerFacade, EnvironmentObject>();
 
             ZenjectHelper.Register<CustomAvatarsInstaller>().WithArguments(ipaLogger, pluginMetadata).OnMonoInstaller<PCAppInit>();
-            ZenjectHelper.Register<MainMenuInstaller>().WithArguments(armSpanSliderTag).OnContext("MainMenu", "MenuCore");
-            ZenjectHelper.Register<HealthWarningInstaller>().OnContext("HealthWarning", "SceneContext");
+            ZenjectHelper.Register<MainMenuInstaller>().WithArguments(armSpanSliderTag).OnContext<SceneContext>("MainMenu", "SceneContext");
+            ZenjectHelper.Register<HealthWarningInstaller>().OnContext<SceneContext>("HealthWarning", "SceneContext");
             ZenjectHelper.Register<GameInstaller>().OnMonoInstaller<GameplayCoreInstaller>();
         }
 

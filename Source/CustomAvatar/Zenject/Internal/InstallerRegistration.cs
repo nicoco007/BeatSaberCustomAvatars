@@ -47,9 +47,9 @@ namespace CustomAvatar.Zenject.Internal
             return this;
         }
 
-        public InstallerRegistrationOnContext OnContext(string sceneName, string contextName)
+        public InstallerRegistrationOnContext<T> OnContext<T>(string sceneName, string contextName)
         {
-            var target = new InstallerRegistrationOnContext(sceneName, contextName);
+            var target = new InstallerRegistrationOnContext<T>(sceneName, contextName);
 
             _target = target;
 
