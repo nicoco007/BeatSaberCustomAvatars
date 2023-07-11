@@ -56,7 +56,7 @@ namespace CustomAvatar.Zenject
 
             Container.Bind(typeof(IInitializable), typeof(IDisposable)).To<MenuEnvironmentEventManager>().AsSingle().NonLazy();
 
-            Container.Bind(typeof(IInitializable), typeof(IDisposable)).To<AvatarMenuFlowCoordinator>().FromNewComponentOnNewGameObject();
+            Container.Bind(typeof(IInitializable), typeof(IDisposable)).To<AvatarMenuFlowCoordinator>().FromNewComponentOnNewGameObject().AsSingle();
 
             _armSpanSliderTag.Init(Container);
         }
