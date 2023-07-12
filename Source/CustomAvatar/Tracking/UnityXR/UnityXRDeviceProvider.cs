@@ -32,28 +32,35 @@ namespace CustomAvatar.Tracking.UnityXR
 
         private readonly UnityXRHelper _unityXRHelper;
 
-        private XRDevice _head;
-        private XRDevice _leftHand;
-        private XRDevice _rightHand;
-        private XRDevice _waist;
-        private XRDevice _leftFoot;
-        private XRDevice _rightFoot;
+        private readonly XRDevice _head;
+        private readonly XRDevice _leftHand;
+        private readonly XRDevice _rightHand;
+        private readonly XRDevice _waist;
+        private readonly XRDevice _leftFoot;
+        private readonly XRDevice _rightFoot;
 
         internal UnityXRDeviceProvider(IVRPlatformHelper vrPlatformHelper)
         {
             _unityXRHelper = (UnityXRHelper)vrPlatformHelper;
-        }
 
-        public event Action devicesChanged;
-
-        public void Initialize()
-        {
             _head = CreateDevice("Head", _unityXRHelper._headPositionActionReference, _unityXRHelper._headOrientationActionReference);
             _leftHand = CreateDevice("LeftHand", _unityXRHelper._leftControllerConfiguration.positionActionReference, _unityXRHelper._leftControllerConfiguration.orientationActionReference);
             _rightHand = CreateDevice("RightHand", _unityXRHelper._rightControllerConfiguration.positionActionReference, _unityXRHelper._rightControllerConfiguration.orientationActionReference);
             _waist = CreateDevice("Waist", kTrackerDeviceTypeName, kWaistUsage);
             _leftFoot = CreateDevice("LeftFoot", kTrackerDeviceTypeName, kLeftFootUsage);
             _rightFoot = CreateDevice("RightFoot", kTrackerDeviceTypeName, kRightFootUsage);
+        }
+
+        public event Action devicesChanged;
+
+        public void Initialize()
+        {
+            RegisterCallbacks(_head);
+            RegisterCallbacks(_leftHand);
+            RegisterCallbacks(_rightHand);
+            RegisterCallbacks(_waist);
+            RegisterCallbacks(_leftFoot);
+            RegisterCallbacks(_rightFoot);
 
             _inputActions.Enable();
         }
@@ -116,32 +123,23 @@ namespace CustomAvatar.Tracking.UnityXR
                 isTrackedAction.AddBinding($"{binding.path.Substring(0, binding.path.IndexOf('/'))}/isTracked", groups: binding.groups);
             }
 
-            return CreateDevice(isTrackedAction, positionAction, orientationAction);
+            return new XRDevice(isTrackedAction, positionAction, orientationAction);
         }
 
         private XRDevice CreateDevice(string name, string deviceTypeName, string deviceUsage)
         {
-            InputAction positionAction = CreateAction($"{name}Position", $"<{deviceTypeName}>{{{deviceUsage}}}/devicePosition");
-            InputAction orientationAction = CreateAction($"{name}Orientation", $"<{deviceTypeName}>{{{deviceUsage}}}/deviceRotation");
-            InputAction isTrackedAction = CreateAction($"{name}IsTracked", $"<{deviceTypeName}>{{{deviceUsage}}}/isTracked");
-
-            return CreateDevice(isTrackedAction, positionAction, orientationAction);
-        }
-
-        private XRDevice CreateDevice(InputAction isTrackedAction, InputAction positionAction, InputAction orientationAction)
-        {
-            // isTracked is a ButtonControl so "started" is triggered when tracking starts and "canceled" when tracking stops
-            isTrackedAction.started += OnInputActionChanged;
-            isTrackedAction.canceled += OnInputActionChanged;
+            InputAction positionAction = _inputActions.AddAction($"{name}Position", binding: $"<{deviceTypeName}>{{{deviceUsage}}}/devicePosition", groups: "XR");
+            InputAction orientationAction = _inputActions.AddAction($"{name}Orientation", binding: $"<{deviceTypeName}>{{{deviceUsage}}}/deviceRotation", groups: "XR");
+            InputAction isTrackedAction = _inputActions.AddAction($"{name}IsTracked", binding: $"<{deviceTypeName}>{{{deviceUsage}}}/isTracked", groups: "XR");
 
             return new XRDevice(isTrackedAction, positionAction, orientationAction);
         }
 
-        private InputAction CreateAction(string name, string bindingPath)
+        private void RegisterCallbacks(XRDevice device)
         {
-            InputAction inputAction = _inputActions.AddAction(name);
-            inputAction.AddBinding(bindingPath, groups: "XR");
-            return inputAction;
+            // isTracked is a ButtonControl so "started" is triggered when tracking starts and "canceled" when tracking stops
+            device.isTrackedAction.started += OnInputActionChanged;
+            device.isTrackedAction.canceled += OnInputActionChanged;
         }
 
         private void DeregisterCallbacks(XRDevice device)
