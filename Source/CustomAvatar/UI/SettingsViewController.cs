@@ -20,6 +20,7 @@ using System.Linq;
 using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
+using CustomAvatar.Tracking;
 using HMUI;
 using IPA.Loader;
 using Polyglot;
@@ -47,6 +48,7 @@ namespace CustomAvatar.UI
         private PlatformLeaderboardViewController _leaderboardViewController;
         private List<IAvatarsMenuTab> _avatarsMenuTabs;
         private PluginMetadata _pluginMetadata;
+        private TrackingRig _trackingRig;
         private BSMLParser _bsmlParser;
 
         [Inject]
@@ -54,6 +56,7 @@ namespace CustomAvatar.UI
             PlatformLeaderboardViewController leaderboardViewController,
             List<IAvatarsMenuTab> avatarsMenuTabs,
             PluginMetadata pluginMetadata,
+            TrackingRig trackingRig,
             GeneralSettingsHost generalSettingsHost,
             AvatarSpecificSettingsHost avatarSpecificSettingsHost,
             AutomaticFbtCalibrationHost automaticFbtCalibrationHost,
@@ -63,6 +66,7 @@ namespace CustomAvatar.UI
             _leaderboardViewController = leaderboardViewController;
             _avatarsMenuTabs = avatarsMenuTabs;
             _pluginMetadata = pluginMetadata;
+            _trackingRig = trackingRig;
             _bsmlParser = bsmlParser;
             this.generalSettingsHost = generalSettingsHost;
             this.avatarSpecificSettingsHost = avatarSpecificSettingsHost;
@@ -125,6 +129,8 @@ namespace CustomAvatar.UI
             {
                 viewControllerHost.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
             }
+
+            _trackingRig.showRenderModels = true;
         }
 
         public override void __Init(HMUI.Screen screen, ViewController parentViewController, ContainerViewController containerViewController)
@@ -144,6 +150,8 @@ namespace CustomAvatar.UI
             {
                 viewControllerHost.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
             }
+
+            _trackingRig.showRenderModels = false;
         }
 
         public class AdditionalTab

@@ -19,10 +19,12 @@ extern alias BeatSaberFinalIK;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Player;
+using CustomAvatar.Rendering;
 using SiraUtil.Tools.FPFC;
 using UnityEngine;
 using UnityEngine.Animations;
@@ -37,12 +39,14 @@ namespace CustomAvatar.Tracking
 
         private ILogger<TrackingRig> _logger;
         private IDeviceProvider _deviceProvider;
+        private IRenderModelProvider _renderModelProvider;
         private PlayerAvatarManager _playerAvatarManager;
         private ActivePlayerSpaceManager _activePlayerSpaceManager;
         private ActiveOriginManager _activeOriginManager;
         private Settings _settings;
         private MainSettingsModelSO _mainSettingsModel;
         private CalibrationData _calibrationData;
+        private VRControllerVisualsManager _vrControllerVisualsManager;
         private IVRPlatformHelper _vrPlatformHelper;
         private IFPFCSettings _fpfcSettings;
         private HumanoidCalibrator _humanoidCalibrator;
@@ -53,6 +57,13 @@ namespace CustomAvatar.Tracking
 
         private VRController _leftController;
         private VRController _rightController;
+
+        private bool _showRenderModels;
+        private TrackedRenderModel _leftHandRenderModel;
+        private TrackedRenderModel _rightHandRenderModel;
+        private TrackedRenderModel _pelvisRenderModel;
+        private TrackedRenderModel _leftFootRenderModel;
+        private TrackedRenderModel _rightFootRenderModel;
 
         internal event Action trackingChanged;
 
@@ -124,6 +135,18 @@ namespace CustomAvatar.Tracking
                 UpdateOffsets();
                 UpdateActiveTransforms();
                 calibrationModeChanged?.Invoke(value);
+            }
+        }
+
+        internal bool areRenderModelsAvailable => _renderModelProvider != null;
+
+        internal bool showRenderModels
+        {
+            get => _showRenderModels;
+            set
+            {
+                _showRenderModels = value;
+                UpdateRenderModelsVisibility();
             }
         }
 
@@ -211,6 +234,21 @@ namespace CustomAvatar.Tracking
             _leftController = SetUpVRController(leftHand.gameObject, XRNode.LeftHand, leftHandControllerOffset, localPlayerControllerOffset);
             _rightController = SetUpVRController(rightHand.gameObject, XRNode.RightHand, rightHandControllerOffset, localPlayerControllerOffset);
 
+            if (_renderModelProvider != null)
+            {
+                _leftHandRenderModel = CreateRenderModelObject("Left Hand Render Model");
+                _rightHandRenderModel = CreateRenderModelObject("Right Hand Render Model");
+                _pelvisRenderModel = CreateRenderModelObject("Pelvis Render Model");
+                _leftFootRenderModel = CreateRenderModelObject("Left Foot Render Model");
+                _rightFootRenderModel = CreateRenderModelObject("Right Foot Render Model");
+
+                _leftHandRenderModel.transform.SetParent(leftHand.transform, false);
+                _rightHandRenderModel.transform.SetParent(rightHand.transform, false);
+                _pelvisRenderModel.transform.SetParent(pelvis.transform, false);
+                _leftFootRenderModel.transform.SetParent(leftFoot.transform, false);
+                _rightFootRenderModel.transform.SetParent(rightFoot.transform, false);
+            }
+
             headCalibration = new GameObject("Head Calibration").transform;
             pelvisCalibration = new GameObject("Pelvis Calibration").transform;
             leftFootCalibration = new GameObject("Left Foot Calibration").transform;
@@ -252,6 +290,7 @@ namespace CustomAvatar.Tracking
             if (_settings != null)
             {
                 _settings.playerEyeHeight.changed += OnPlayerEyeHeightChanged;
+                _settings.showRenderModels.changed += OnShowRenderModelsChanged;
             }
 
             if (_mainSettingsModel != null)
@@ -273,6 +312,8 @@ namespace CustomAvatar.Tracking
             UpdateOffsets();
             UpdateControllerOffsets();
             UpdateActiveTransforms();
+            UpdateRenderModels();
+            UpdateRenderModelsVisibility();
         }
 
         private void Start()
@@ -291,23 +332,27 @@ namespace CustomAvatar.Tracking
         private void Construct(
             ILogger<TrackingRig> logger,
             IDeviceProvider deviceProvider,
+            [InjectOptional] IRenderModelProvider renderModelProvider,
             PlayerAvatarManager playerAvatarManager,
             ActivePlayerSpaceManager activePlayerSpaceManager,
             ActiveOriginManager activeOriginManager,
             Settings settings,
             MainSettingsModelSO mainSettingsModel,
             CalibrationData calibrationData,
+            VRControllerVisualsManager vrControllerVisualsManager,
             IVRPlatformHelper vrPlatformHelper,
             IFPFCSettings fpfcSettings)
         {
             _logger = logger;
             _deviceProvider = deviceProvider;
+            _renderModelProvider = renderModelProvider;
             _playerAvatarManager = playerAvatarManager;
             _activePlayerSpaceManager = activePlayerSpaceManager;
             _activeOriginManager = activeOriginManager;
             _settings = settings;
             _mainSettingsModel = mainSettingsModel;
             _calibrationData = calibrationData;
+            _vrControllerVisualsManager = vrControllerVisualsManager;
             _vrPlatformHelper = vrPlatformHelper;
             _fpfcSettings = fpfcSettings;
             _humanoidCalibrator = new HumanoidCalibrator(this, calibrationData, settings, activeOriginManager, mainSettingsModel);
@@ -365,6 +410,7 @@ namespace CustomAvatar.Tracking
             if (_settings != null)
             {
                 _settings.playerEyeHeight.changed -= OnPlayerEyeHeightChanged;
+                _settings.showRenderModels.changed -= OnShowRenderModelsChanged;
             }
 
             if (_mainSettingsModel != null)
@@ -427,6 +473,11 @@ namespace CustomAvatar.Tracking
             UpdateOffsets();
         }
 
+        private void OnShowRenderModelsChanged(bool show)
+        {
+            UpdateRenderModelsVisibility();
+        }
+
         private void OnRoomAdjustChanged()
         {
             UpdateOffsets();
@@ -435,6 +486,8 @@ namespace CustomAvatar.Tracking
         private void OnDevicesChanged()
         {
             UpdateActiveTransforms();
+            UpdateRenderModels();
+            trackingChanged?.Invoke();
         }
 
         private void OnControllersDidChangeReference()
@@ -647,6 +700,60 @@ namespace CustomAvatar.Tracking
             };
 
             return !pose.Equals(Pose.identity);
+        }
+
+        private TrackedRenderModel CreateRenderModelObject(string name)
+        {
+            GameObject renderModelGo = new(name);
+            renderModelGo.SetActive(false);
+            return new TrackedRenderModel(renderModelGo, renderModelGo.AddComponent<MeshFilter>(), renderModelGo.AddComponent<MeshRenderer>());
+        }
+
+        private void UpdateRenderModelsVisibility()
+        {
+            if (_renderModelProvider == null)
+            {
+                return;
+            }
+
+            bool show = _showRenderModels && _settings.showRenderModels && _vrPlatformHelper.hasInputFocus;
+            _leftHandRenderModel?.SetActive(show);
+            _rightHandRenderModel?.SetActive(show);
+            _pelvisRenderModel?.SetActive(show);
+            _leftFootRenderModel?.SetActive(show);
+            _rightFootRenderModel?.SetActive(show);
+            _vrControllerVisualsManager.SetHandlesActive(!show);
+        }
+
+        private void UpdateRenderModels()
+        {
+            if (_renderModelProvider == null)
+            {
+                return;
+            }
+
+            _ = UpdateRenderModelsAsync().ContinueWith((task) => _logger.LogError(task.Exception), TaskContinuationOptions.OnlyOnFaulted);
+        }
+
+        private Task UpdateRenderModelsAsync()
+        {
+            _logger.LogTrace("Updating render models");
+
+            return Task.WhenAll(
+                UpdateRenderModelAsync(DeviceUse.LeftHand, _leftHandRenderModel),
+                UpdateRenderModelAsync(DeviceUse.RightHand, _rightHandRenderModel),
+                UpdateRenderModelAsync(DeviceUse.Waist, _pelvisRenderModel),
+                UpdateRenderModelAsync(DeviceUse.LeftFoot, _leftFootRenderModel),
+                UpdateRenderModelAsync(DeviceUse.RightFoot, _rightFootRenderModel));
+        }
+
+        private async Task UpdateRenderModelAsync(DeviceUse deviceUse, TrackedRenderModel trackedRenderModel)
+        {
+            RenderModel renderModel = await _renderModelProvider.GetRenderModelAsync(deviceUse);
+
+            trackedRenderModel.transform.SetLocalPositionAndRotation(renderModel.localOrigin.position, renderModel.localOrigin.rotation);
+            trackedRenderModel.meshFilter.mesh = renderModel?.mesh;
+            trackedRenderModel.meshRenderer.material = renderModel?.material;
         }
 
         // why isn't VRControllerTransformOffset an interface :(

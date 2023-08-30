@@ -75,6 +75,18 @@ namespace CustomAvatar.UI
             }
         }
 
+        public bool showRenderModelsOption => _trackingRig.areRenderModelsAvailable;
+
+        public bool showRenderModels
+        {
+            get => _settings.showRenderModels;
+            set
+            {
+                _settings.showRenderModels.value = value;
+                NotifyPropertyChanged();
+            }
+        }
+
         public AvatarResizeMode resizeMode
         {
             get => _settings.resizeMode;

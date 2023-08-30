@@ -38,6 +38,7 @@ namespace CustomAvatar.Configuration
         public ObservableValue<bool> enableLocomotion { get; } = new ObservableValue<bool>(true);
         public ObservableValue<float> cameraNearClipPlane { get; } = new ObservableValue<float>(0.1f);
         public ObservableValue<bool> showAvatarInSmoothCamera { get; } = new ObservableValue<bool>(true);
+        public ObservableValue<bool> showRenderModels { get; } = new ObservableValue<bool>(true);
         public bool showAvatarInMirrors { get; set; } = true;
         public ObservableValue<SkinWeights> skinWeights { get; } = new ObservableValue<SkinWeights>(SkinWeights.FourBones);
         public Mirror mirror { get; } = new Mirror();

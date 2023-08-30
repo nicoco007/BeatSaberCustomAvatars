@@ -26,6 +26,7 @@
         <toggle-setting text="Show in First Person" value="visibleInFirstPerson" bind-value="true" apply-on-change="true"/>
         <toggle-setting text="Show in Smooth Camera" value="showAvatarInSmoothCamera" bind-value="true" apply-on-change="true"/>
         <toggle-setting text="Show in Mirrors" value="showAvatarInMirrors" bind-value="true" apply-on-change="true"/>
+        <toggle-setting text="Show Controllers/Trackers" active="~showRenderModelsOption" hover-hint="Show controllers/trackers while in this menu" value="showRenderModels" bind-value="true" apply-on-change="true"/>
 
         <horizontal pref-width="90" pad-top="2">
           <text color="#808080" text="Advanced" font-size="4" italics="true" align="Baseline" />

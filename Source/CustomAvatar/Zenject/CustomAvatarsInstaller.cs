@@ -30,6 +30,7 @@ using Hive.Versioning;
 using IPA.Loader;
 using SiraUtil.Affinity;
 using UnityEngine.XR;
+using Valve.VR;
 using Zenject;
 using Logger = IPA.Logging.Logger;
 
@@ -92,6 +93,14 @@ namespace CustomAvatar.Zenject
                 {
                     Container.Bind(typeof(IFingerTrackingProvider)).To<DevicelessFingerTrackingProvider>().AsSingle();
                 }
+
+                // SteamVR doesn't yet support render models through OpenXR so we need this workaround
+                if (InitOpenVROverlay())
+                {
+                    Container.Bind<OpenVRFacade>().AsTransient();
+                    Container.Bind(typeof(OpenVRRenderModelLoader), typeof(IDisposable)).To<OpenVRRenderModelLoader>().AsSingle();
+                    Container.Bind(typeof(IRenderModelProvider), typeof(IInitializable)).To<OpenVRRenderModelProvider>().AsSingle();
+                }
             }
             else
             {
@@ -108,6 +117,7 @@ namespace CustomAvatar.Zenject
             Container.Bind<ActiveCameraManager>().AsSingle();
             Container.Bind<ActivePlayerSpaceManager>().AsSingle();
             Container.Bind<ActiveOriginManager>().AsSingle();
+            Container.Bind<VRControllerVisualsManager>().AsSingle();
             Container.Bind(typeof(VRPlayerInput), typeof(IAvatarInput), typeof(IInitializable), typeof(IDisposable)).To<VRPlayerInput>().AsSingle();
             Container.Bind(typeof(IInitializable), typeof(IDisposable)).To<QualitySettingsController>().AsSingle();
             Container.Bind(typeof(BeatSaberUtilities), typeof(IInitializable), typeof(IDisposable)).To<BeatSaberUtilities>().AsSingle();
@@ -160,6 +170,40 @@ namespace CustomAvatar.Zenject
         private bool InjectedIntoThisAssembly(InjectContext context)
         {
             return context.ObjectType.Assembly == kAssembly;
+        }
+
+        private bool InitOpenVROverlay()
+        {
+            try
+            {
+                if (!OpenVR.IsRuntimeInstalled())
+                {
+                    return false;
+                }
+
+                _logger.LogInformation("Starting OpenVR in Overlay mode");
+
+                EVRInitError error = EVRInitError.None;
+                CVRSystem system = OpenVR.Init(ref error, EVRApplicationType.VRApplication_Overlay);
+
+                if (error != EVRInitError.None)
+                {
+                    _logger.LogError("Failed to start OpenVR in Overlay mode: " + error);
+                    return false;
+                }
+
+                if (system == null)
+                {
+                    _logger.LogError("Failed to start OpenVR in Overlay mode: System is null");
+                    return false;
+                }
+
+                return true;
+            }
+            catch (DllNotFoundException)
+            {
+                return false;
+            }
         }
     }
 }

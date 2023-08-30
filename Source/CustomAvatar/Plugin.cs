@@ -59,6 +59,7 @@ namespace CustomAvatar
             ZenjectHelper.AddComponentAlongsideExisting<MultiplayerLocalActivePlayerFacade, EnvironmentObject>("IsActiveObjects/CenterRings");
             ZenjectHelper.AddComponentAlongsideExisting<MultiplayerLocalInactivePlayerFacade, EnvironmentObject>("MultiplayerLocalInactivePlayerPlayerPlace/CirclePlayerPlace");
             ZenjectHelper.AddComponentAlongsideExisting<MultiplayerConnectedPlayerFacade, EnvironmentObject>();
+            ZenjectHelper.AddComponentAlongsideExisting<VRController, VRControllerVisuals>();
 
             zenjector.Expose<ObstacleSaberSparkleEffectManager>("Gameplay");
 

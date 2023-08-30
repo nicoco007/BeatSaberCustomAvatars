@@ -28,7 +28,10 @@ namespace CustomAvatar.Utilities
 {
     internal class AssetLoader : IInitializable, IDisposable
     {
+        private struct VoidResult { }
+
         private readonly ILogger<AssetLoader> _logger;
+        private readonly TaskCompletionSource<VoidResult> _taskCompletionSource = new();
 
         internal AssetLoader(ILogger<AssetLoader> logger)
         {
@@ -41,9 +44,20 @@ namespace CustomAvatar.Utilities
 
         internal SpriteAtlas uiSpriteAtlas { get; private set; }
 
-        public void Initialize()
+        public Task WaitForAssetsLoadedAsync() => _taskCompletionSource.Task;
+
+        public async void Initialize()
         {
-            LoadAssetsAsync().ContinueWith((task) => _logger.LogCritical(task.Exception), TaskContinuationOptions.OnlyOnFaulted);
+            try
+            {
+                await LoadAssetsAsync();
+                _taskCompletionSource.SetResult(default);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to load assets\n{ex}");
+                _taskCompletionSource.SetException(ex);
+            }
         }
 
         public void Dispose()

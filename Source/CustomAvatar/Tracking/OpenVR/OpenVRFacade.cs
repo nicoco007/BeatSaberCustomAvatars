@@ -48,6 +48,11 @@ namespace CustomAvatar.Tracking.OpenVR
 
         public string GetStringTrackedDeviceProperty(uint deviceIndex, ETrackedDeviceProperty property)
         {
+            if (OpenVR.System == null)
+            {
+                throw new System.InvalidOperationException("OpenVR is not running");
+            }
+
             ETrackedPropertyError error = ETrackedPropertyError.TrackedProp_Success;
             uint length = OpenVR.System.GetStringTrackedDeviceProperty(deviceIndex, property, null, 0, ref error);
 
