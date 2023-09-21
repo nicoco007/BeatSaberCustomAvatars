@@ -17,7 +17,7 @@ Install [BeatSaberMarkupLanguage](https://github.com/monkeymanboy/BeatSaberMarku
 
 ## Usage Notes
 ### Full-Body Tracking
-Full-body tracking requires setting up tracker roles in SteamVR. For instructions, check out [OpenXRTrackerProfiles' instructions](https://github.com/nicoco007/BeatSaber-OpenXRTrackerProfiles#assigning-steamvr-tracker-roles).
+Full-body tracking requires setting up tracker roles in SteamVR. For instructions, check out [OpenXRTrackerProfiles' instructions](https://github.com/nicoco007/BeatSaber-ExtraOpenXRFeatures/tree/main/OpenXRTrackerProfiles#assigning-steamvr-tracker-roles).
 
 ## Contributing
 To resolve references and automatically copy the compiled DLL into Beat Saber's installation directory, first create files called `CustomAvatar.csproj.user` and `CustomAvatar-Editor.csproj.user` next to `Source\CustomAvatar\CustomAvatar.csproj` and `Source\CustomAvatar-Editor\CustomAvatar-Editor.csproj` respectively. Then paste in the following contents:
