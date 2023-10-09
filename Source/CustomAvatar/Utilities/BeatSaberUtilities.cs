@@ -78,8 +78,8 @@ namespace CustomAvatar.Utilities
         {
             Pose controllerOffset = use switch
             {
-                DeviceUse.LeftHand => _vrPlatformHelper.GetPoseOffsetForNode(XRNode.LeftHand),
-                DeviceUse.RightHand => _vrPlatformHelper.GetPoseOffsetForNode(XRNode.RightHand),
+                DeviceUse.LeftHand => _vrPlatformHelper.TryGetPoseOffsetForNode(XRNode.LeftHand, out Pose poseOffset) ? poseOffset : Pose.identity,
+                DeviceUse.RightHand => _vrPlatformHelper.TryGetPoseOffsetForNode(XRNode.RightHand, out Pose poseOffset) ? poseOffset : Pose.identity,
                 _ => Pose.identity,
             };
 

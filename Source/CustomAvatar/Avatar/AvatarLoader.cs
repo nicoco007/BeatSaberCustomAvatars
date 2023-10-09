@@ -136,7 +136,7 @@ namespace CustomAvatar.Avatar
                 throw new AvatarLoadException("Could not load asset from asset bundle");
             }
 
-            assetBundle.Unload(false);
+            await assetBundle.UnloadAsync(false);
 
             GameObject instance = UnityEngine.Object.Instantiate(prefabObject);
 
