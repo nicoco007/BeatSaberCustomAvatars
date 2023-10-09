@@ -72,6 +72,12 @@ namespace CustomAvatar.Tracking.UnityXR
 
         public bool TryGetDevice(DeviceUse deviceUse, out TrackedDevice trackedDevice)
         {
+            if (!_inputActions.enabled)
+            {
+                trackedDevice = default;
+                return false;
+            }
+
             switch (deviceUse)
             {
                 case DeviceUse.Head:
