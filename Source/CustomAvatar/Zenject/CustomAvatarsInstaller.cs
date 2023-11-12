@@ -40,7 +40,6 @@ namespace CustomAvatar.Zenject
     {
         public static readonly int kPlayerAvatarManagerExecutionOrder = 1000;
 
-        private static readonly VersionRange kDynamicOpenVRVersionRange = new("^0.5.0");
         private static readonly VersionRange kOpenXRHandsVersionRange = new("^1.1.0");
 
         private static readonly MethodInfo kCreateLoggerMethod = typeof(ILoggerFactory).GetMethod(nameof(ILoggerFactory.CreateLogger), BindingFlags.Public | BindingFlags.Instance);
@@ -75,13 +74,7 @@ namespace CustomAvatar.Zenject
 
             _logger.LogInformation($"Current Unity XR device: '{XRSettings.loadedDeviceName}'");
 
-            if (ShouldUseOpenVR())
-            {
-                Container.Bind<OpenVRFacade>().AsTransient();
-                Container.Bind(typeof(IDeviceProvider), typeof(ITickable)).To<OpenVRDeviceProvider>().AsSingle();
-                Container.Bind(typeof(IFingerTrackingProvider), typeof(IInitializable), typeof(IDisposable)).To<OpenVRFingerTrackingProvider>().AsSingle();
-            }
-            else if (XRSettings.loadedDeviceName.IndexOf("OpenXR", StringComparison.OrdinalIgnoreCase) >= 0)
+            if (XRSettings.loadedDeviceName.IndexOf("OpenXR", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 Container.Bind(typeof(IDeviceProvider), typeof(IInitializable), typeof(IDisposable)).To<UnityXRDeviceProvider>().AsSingle();
 
@@ -97,7 +90,6 @@ namespace CustomAvatar.Zenject
                 // SteamVR doesn't yet support render models through OpenXR so we need this workaround
                 if (InitOpenVROverlay())
                 {
-                    Container.Bind<OpenVRFacade>().AsTransient();
                     Container.Bind(typeof(OpenVRRenderModelLoader), typeof(IDisposable)).To<OpenVRRenderModelLoader>().AsSingle();
                     Container.Bind(typeof(IRenderModelProvider), typeof(IInitializable)).To<OpenVRRenderModelProvider>().AsSingle();
                 }
@@ -129,22 +121,6 @@ namespace CustomAvatar.Zenject
             Container.Bind(typeof(IAffinity)).To<Patches.MirrorRendererSO>().AsSingle();
 
             Container.Bind<TrackingRig>().FromNewComponentOnNewGameObject().AsSingle();
-        }
-
-        private bool ShouldUseOpenVR()
-        {
-            if (XRSettings.loadedDeviceName.IndexOf("OpenVR", StringComparison.OrdinalIgnoreCase) == -1)
-            {
-                return false;
-            }
-
-            if (!IsPluginLoadedAndMatchesVersion("DynamicOpenVR", kDynamicOpenVRVersionRange))
-            {
-                _logger.LogError($"DynamicOpenVR is not installed or does not match expected version range '{kDynamicOpenVRVersionRange}'. OpenVR will not be used.");
-                return false;
-            }
-
-            return true;
         }
 
         private bool IsPluginLoadedAndMatchesVersion(string id, VersionRange versionRange)

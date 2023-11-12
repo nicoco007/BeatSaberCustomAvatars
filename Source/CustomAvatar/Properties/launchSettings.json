@@ -17,15 +17,6 @@
       "environmentVariables": {
         "SteamAppId": "620980"
       }
-    },
-    "Beat Saber (Force XR)": {
-      "commandName": "Executable",
-      "executablePath": "$(BeatSaberDir)\\Beat Saber.exe",
-      "commandLineArgs": "--force-xr --verbose --debug",
-      "workingDirectory": "$(BeatSaberDir)",
-      "environmentVariables": {
-        "SteamAppId": "620980"
-      }
     }
   }
 }

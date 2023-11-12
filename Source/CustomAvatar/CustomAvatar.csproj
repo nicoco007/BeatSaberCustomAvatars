@@ -9,6 +9,7 @@
     <Platforms>x64</Platforms>
     <LangVersion>11</LangVersion>
     <Nullable>disable</Nullable>
+    <DefineConstants>$(DefineConstants);UNITY_5_3_OR_NEWER</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration) == 'Release'">
     <DebugType>none</DebugType>
@@ -47,10 +48,6 @@
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\DynamicBone.dll</HintPath>
       <Private>false</Private>
       <Aliases>BeatSaberDynamicBone</Aliases>
-    </Reference>
-    <Reference Include="DynamicOpenVR">
-      <HintPath>$(BeatSaberDir)\Libs\DynamicOpenVR.dll</HintPath>
-      <Private>false</Private>
     </Reference>
     <Reference Include="FinalIK" Publicize="true">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\FinalIK.dll</HintPath>

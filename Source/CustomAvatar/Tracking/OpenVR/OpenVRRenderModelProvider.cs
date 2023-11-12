@@ -15,6 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
 using CustomAvatar.Logging;
 using Valve.VR;
@@ -31,15 +32,13 @@ namespace CustomAvatar.Tracking.OpenVR
         private static readonly uint kInputOriginInfoStructSize = (uint)Marshal.SizeOf(typeof(InputOriginInfo_t));
 
         private readonly ILogger<OpenVRRenderModelProvider> _logger;
-        private readonly OpenVRFacade _openVRFacade;
         private readonly OpenVRRenderModelLoader _openVRRenderModelLoader;
 
         private readonly ulong[] _handles = new ulong[6];
 
-        public OpenVRRenderModelProvider(ILogger<OpenVRRenderModelProvider> logger, OpenVRFacade openVRFacade, OpenVRRenderModelLoader openVRRenderModelLoader)
+        public OpenVRRenderModelProvider(ILogger<OpenVRRenderModelProvider> logger, OpenVRRenderModelLoader openVRRenderModelLoader)
         {
             _logger = logger;
-            _openVRFacade = openVRFacade;
             _openVRRenderModelLoader = openVRRenderModelLoader;
         }
 
@@ -56,7 +55,7 @@ namespace CustomAvatar.Tracking.OpenVR
         public Task<RenderModel> GetRenderModelAsync(DeviceUse deviceUse)
         {
             InputOriginInfo_t originInfo = GetOriginInfo(deviceUse);
-            string renderModelName = _openVRFacade.GetStringTrackedDeviceProperty(originInfo.trackedDeviceIndex, ETrackedDeviceProperty.Prop_RenderModelName_String);
+            string renderModelName = GetStringTrackedDeviceProperty(originInfo.trackedDeviceIndex, ETrackedDeviceProperty.Prop_RenderModelName_String);
 
             if (string.IsNullOrEmpty(renderModelName))
             {
@@ -103,6 +102,42 @@ namespace CustomAvatar.Tracking.OpenVR
             }
 
             return originInfo;
+        }
+
+        private static string GetStringTrackedDeviceProperty(uint deviceIndex, ETrackedDeviceProperty property)
+        {
+            if (OpenVR.System == null)
+            {
+                throw new System.InvalidOperationException("OpenVR is not running");
+            }
+
+            ETrackedPropertyError error = ETrackedPropertyError.TrackedProp_Success;
+            uint length = OpenVR.System.GetStringTrackedDeviceProperty(deviceIndex, property, null, 0, ref error);
+
+            if (error == ETrackedPropertyError.TrackedProp_UnknownProperty)
+            {
+                return null;
+            }
+
+            if (error is not ETrackedPropertyError.TrackedProp_Success and not ETrackedPropertyError.TrackedProp_BufferTooSmall)
+            {
+                throw new OpenVRException($"Failed to get property '{property}' for device at index {deviceIndex}: {error}", property, error);
+            }
+
+            if (length > 0)
+            {
+                var stringBuilder = new StringBuilder((int)length);
+                OpenVR.System.GetStringTrackedDeviceProperty(deviceIndex, property, stringBuilder, length, ref error);
+
+                if (error != ETrackedPropertyError.TrackedProp_Success)
+                {
+                    throw new OpenVRException($"Failed to get property '{property}' for device at index {deviceIndex}: {error}", property, error);
+                }
+
+                return stringBuilder.ToString();
+            }
+
+            return null;
         }
     }
 }
