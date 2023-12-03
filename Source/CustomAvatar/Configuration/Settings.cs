@@ -92,8 +92,6 @@ namespace CustomAvatar.Configuration
             public ObservableValue<bool> bypassCalibration { get; } = new ObservableValue<bool>();
             public ObservableValue<bool> ignoreExclusions { get; } = new ObservableValue<bool>(false);
             public bool allowMaintainPelvisPosition { get; set; } = false;
-
-            public bool enableLegacyShaderRepair { get; set; } = true;
         }
 
         public AvatarSpecificSettings GetAvatarSettings(string fileName)

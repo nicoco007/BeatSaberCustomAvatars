@@ -145,10 +145,7 @@ namespace CustomAvatar.Avatar
             instance.name = $"AvatarPrefab({avatarPrefab.descriptor.name})";
             instance.SetActive(false);
 
-            if (_settings.GetAvatarSettings(avatarPrefab.fileName).enableLegacyShaderRepair)
-            {
-                await ShaderRepair.FixShadersOnGameObjectAsync(instance);
-            }
+            await ShaderRepair.FixShadersOnGameObjectAsync(instance);
 
             _tasks.Remove(fullPath);
 
