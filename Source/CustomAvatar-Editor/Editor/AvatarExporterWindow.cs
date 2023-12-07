@@ -93,27 +93,33 @@ namespace CustomAvatar.Editor
             string prefabPath = Path.Combine("Assets", "_CustomAvatar.prefab");
 
             PrefabUtility.SaveAsPrefabAsset(avatar.gameObject, prefabPath);
+            AssetBundleManifest manifest;
 
-            var assetBundleBuild = new AssetBundleBuild
+            try
             {
-                assetBundleName = destinationFileName,
-                assetNames = new[] { prefabPath }
-            };
+                var assetBundleBuild = new AssetBundleBuild
+                {
+                    assetBundleName = destinationFileName,
+                    assetNames = new[] { prefabPath }
+                };
 
-            assetBundleBuild.assetBundleName = destinationFileName;
+                assetBundleBuild.assetBundleName = destinationFileName;
 
-            BuildTargetGroup selectedBuildTargetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
-            BuildTarget activeBuildTarget = EditorUserBuildSettings.activeBuildTarget;
+                BuildTargetGroup selectedBuildTargetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
+                BuildTarget activeBuildTarget = EditorUserBuildSettings.activeBuildTarget;
 
-            AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(tempFolder, new[] { assetBundleBuild }, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
+                manifest = BuildPipeline.BuildAssetBundles(tempFolder, new[] { assetBundleBuild }, BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.StandaloneWindows64);
 
-            // switch back to what it was before creating the asset bundle
-            EditorUserBuildSettings.SwitchActiveBuildTarget(selectedBuildTargetGroup, activeBuildTarget);
+                // switch back to what it was before creating the asset bundle
+                EditorUserBuildSettings.SwitchActiveBuildTarget(selectedBuildTargetGroup, activeBuildTarget);
+            }
+            finally
+            {
+                AssetDatabase.DeleteAsset(prefabPath);
+                AssetDatabase.Refresh();
+            }
 
-            AssetDatabase.DeleteAsset(prefabPath);
-            AssetDatabase.Refresh();
-
-            if (!manifest)
+            if (manifest == null)
             {
                 EditorUtility.DisplayDialog("Export Failed", "Failed to create asset bundle! Please check the Unity console for more information.", "OK");
                 return;
