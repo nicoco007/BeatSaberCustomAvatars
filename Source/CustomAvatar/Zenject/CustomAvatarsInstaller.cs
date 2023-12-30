@@ -47,14 +47,12 @@ namespace CustomAvatar.Zenject
         private readonly Logger _ipaLogger;
         private readonly ILogger<CustomAvatarsInstaller> _logger;
         private readonly PluginMetadata _pluginMetadata;
-        private readonly PCAppInit _pcAppInit;
 
-        public CustomAvatarsInstaller(Logger ipaLogger, PluginMetadata pluginMetadata, PCAppInit pcAppInit)
+        public CustomAvatarsInstaller(Logger ipaLogger, PluginMetadata pluginMetadata)
         {
             _ipaLogger = ipaLogger;
             _logger = new IPALogger<CustomAvatarsInstaller>(ipaLogger);
             _pluginMetadata = pluginMetadata;
-            _pcAppInit = pcAppInit;
         }
 
         public override void InstallBindings()
@@ -124,8 +122,6 @@ namespace CustomAvatar.Zenject
             Container.Bind<MirrorHelper>().AsTransient();
             Container.Bind<IKHelper>().AsTransient();
             Container.Bind<TrackingHelper>().AsTransient();
-
-            Container.Bind<MainSettingsModelSO>().FromInstance(_pcAppInit._mainSettingsModel).IfNotBound();
 
             Container.Bind(typeof(IAffinity)).To<Patches.MirrorRendererSO>().AsSingle();
         }
