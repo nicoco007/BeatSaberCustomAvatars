@@ -17,7 +17,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using CustomAvatar.Avatar;
@@ -29,6 +28,7 @@ using IPA.Utilities.Async;
 using Polyglot;
 using TMPro;
 using UnityEngine;
+using UnityEngine.U2D;
 using UnityEngine.UI;
 using Zenject;
 
@@ -46,6 +46,7 @@ namespace CustomAvatar.UI
         private PlayerOptionsViewController _playerOptionsViewController;
         private LevelCollectionViewController _levelCollectionViewController;
         private PlatformLeaderboardViewController _leaderboardViewController;
+        private AssetLoader _assetLoader;
 
         private FileSystemWatcher _fileSystemWatcher;
         private TableView _tableView;
@@ -53,14 +54,13 @@ namespace CustomAvatar.UI
         private readonly List<AvatarListItem> _avatars = new();
         private AvatarListTableCell _tableCellPrefab;
 
-        private Texture2D _atlas;
         private Sprite _blankAvatarSprite;
         private Sprite _noAvatarSprite;
         private Sprite _reloadSprite;
         private Sprite _loadErrorSprite;
 
         [Inject]
-        internal void Construct(ILogger<AvatarListViewController> logger, PlayerAvatarManager avatarManager, DiContainer container, MirrorViewController mirrorViewController, PlayerOptionsViewController playerOptionsViewController, LevelCollectionViewController levelCollectionViewController, PlatformLeaderboardViewController leaderboardViewController)
+        internal void Construct(ILogger<AvatarListViewController> logger, PlayerAvatarManager avatarManager, DiContainer container, MirrorViewController mirrorViewController, PlayerOptionsViewController playerOptionsViewController, LevelCollectionViewController levelCollectionViewController, PlatformLeaderboardViewController leaderboardViewController, AssetLoader assetLoader)
         {
             _logger = logger;
             _avatarManager = avatarManager;
@@ -69,28 +69,16 @@ namespace CustomAvatar.UI
             _playerOptionsViewController = playerOptionsViewController;
             _levelCollectionViewController = levelCollectionViewController;
             _leaderboardViewController = leaderboardViewController;
+            _assetLoader = assetLoader;
         }
 
         protected void Start()
         {
-            using (Stream fileStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("CustomAvatar.Resources.ui.dds"))
-            {
-                _atlas = SimpleDdsLoader.LoadImage(fileStream);
-                _noAvatarSprite = Sprite.Create(_atlas, new Rect(0, 0, 256, 256), new Vector2(0.5f, 0.5f));
-                _blankAvatarSprite = Sprite.Create(_atlas, new Rect(256, 0, 256, 256), new Vector2(0.5f, 0.5f));
-                _reloadSprite = Sprite.Create(_atlas, new Rect(0, 256, 128, 128), new Vector2(0.5f, 0.5f));
-                _loadErrorSprite = Sprite.Create(_atlas, new Rect(256, 256, 256, 256), new Vector2(0.5f, 0.5f));
-            }
-        }
-
-        protected override void OnDestroy()
-        {
-            Destroy(_noAvatarSprite);
-            Destroy(_blankAvatarSprite);
-            Destroy(_reloadSprite);
-            Destroy(_atlas);
-
-            base.OnDestroy();
+            SpriteAtlas atlas = _assetLoader.uiSpriteAtlas;
+            _noAvatarSprite = atlas.GetSprite("NoAvatarIcon");
+            _blankAvatarSprite = atlas.GetSprite("BlankAvatarIcon");
+            _reloadSprite = atlas.GetSprite("ReloadButtonIcon");
+            _loadErrorSprite = atlas.GetSprite("LoadErrorIcon");
         }
 
         protected override async void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)

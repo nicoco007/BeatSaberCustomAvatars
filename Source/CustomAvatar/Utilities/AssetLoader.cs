@@ -20,6 +20,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using CustomAvatar.Logging;
 using UnityEngine;
+using UnityEngine.U2D;
 using Zenject;
 using Object = UnityEngine.Object;
 
@@ -38,6 +39,8 @@ namespace CustomAvatar.Utilities
 
         internal Shader unlitShader { get; private set; }
 
+        internal SpriteAtlas uiSpriteAtlas { get; private set; }
+
         public void Initialize()
         {
             LoadAssetsAsync().ContinueWith((task) => _logger.LogCritical(task.Exception), TaskContinuationOptions.OnlyOnFaulted);
@@ -47,6 +50,7 @@ namespace CustomAvatar.Utilities
         {
             Object.Destroy(stereoMirrorShader);
             Object.Destroy(unlitShader);
+            Object.Destroy(uiSpriteAtlas);
         }
 
         private async Task LoadAssetsAsync()
@@ -78,6 +82,10 @@ namespace CustomAvatar.Utilities
 
                     case "assets/shaders/unlitoverlay.shader":
                         unlitShader = (Shader)asset;
+                        break;
+
+                    case "assets/sprites/ui.spriteatlasv2":
+                        uiSpriteAtlas = (SpriteAtlas)asset;
                         break;
 
                     default:

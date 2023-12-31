@@ -21,6 +21,7 @@ public class ExportCustomAvatarsAssetBundle
             assetNames = new[] {
                 "Assets/Shaders/StereoRender.shader",
                 "Assets/Shaders/UnlitOverlay.shader",
+                "Assets/Sprites/UI.spriteatlasv2",
             },
         };
 
