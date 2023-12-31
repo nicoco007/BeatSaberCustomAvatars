@@ -52,7 +52,10 @@ namespace CustomAvatar.Utilities
         {
             if (bytes.Length == 0) return null;
 
-            var texture = new Texture2D(width, height, graphicsFormat, mipCount, TextureCreationFlags.MipChain);
+            var texture = new Texture2D(width, height, graphicsFormat, mipCount, TextureCreationFlags.MipChain)
+            {
+                wrapMode = TextureWrapMode.Clamp,
+            };
 
             texture.LoadRawTextureData(bytes);
             texture.Apply();
