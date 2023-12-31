@@ -100,7 +100,7 @@ namespace CustomAvatar.Zenject
 
             // managers
             Container.Bind(typeof(PlayerAvatarManager), typeof(IInitializable), typeof(IDisposable)).To<PlayerAvatarManager>().AsSingle().NonLazy();
-            Container.Bind(typeof(AssetLoader), typeof(IInitializable)).To<AssetLoader>().AsSingle().NonLazy();
+            Container.Bind(typeof(AssetLoader), typeof(IInitializable), typeof(IDisposable)).To<AssetLoader>().AsSingle().NonLazy();
 
             // this prevents a race condition when registering components in AvatarSpawner
             Container.BindExecutionOrder<PlayerAvatarManager>(kPlayerAvatarManagerExecutionOrder);
