@@ -15,9 +15,9 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
-using CustomAvatar.Exceptions;
 using CustomAvatar.Logging;
 using UnityEngine;
 using Zenject;
@@ -25,79 +25,68 @@ using Object = UnityEngine.Object;
 
 namespace CustomAvatar.Utilities
 {
-    internal class AssetLoader : IInitializable
+    internal class AssetLoader : IInitializable, IDisposable
     {
-        public Shader stereoMirrorShader { get; private set; }
-        public Shader unlitShader { get; private set; }
-
         private readonly ILogger<AssetLoader> _logger;
 
-        public AssetLoader(ILogger<AssetLoader> logger)
+        internal AssetLoader(ILogger<AssetLoader> logger)
         {
             _logger = logger;
         }
 
-        public async void Initialize()
-        {
-            try
-            {
-                await LoadShaders();
+        internal Shader stereoMirrorShader { get; private set; }
 
-                CheckShaderLoaded(unlitShader, "Glow Overlay");
-                CheckShaderLoaded(stereoMirrorShader, "Stereo Render");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("Failed to load shaders");
-                _logger.LogError(ex);
-            }
+        internal Shader unlitShader { get; private set; }
+
+        public void Initialize()
+        {
+            LoadAssetsAsync().ContinueWith((task) => _logger.LogCritical(task.Exception), TaskContinuationOptions.OnlyOnFaulted);
         }
 
-        private async Task LoadShaders()
+        public void Dispose()
         {
-            AssetBundleCreateRequest shadersBundleCreateRequest = await AssetBundle.LoadFromStreamAsync(Assembly.GetExecutingAssembly().GetManifestResourceStream("CustomAvatar.Resources.Assets"));
-            AssetBundle assetBundle = shadersBundleCreateRequest.assetBundle;
+            Object.Destroy(stereoMirrorShader);
+            Object.Destroy(unlitShader);
+        }
 
-            if (!assetBundle)
+        private async Task LoadAssetsAsync()
+        {
+            using Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("CustomAvatar.Resources.Assets");
+            AssetBundleCreateRequest assetBundleCreateRequest = await AssetBundle.LoadFromStreamAsync(stream);
+            AssetBundle assetBundle = assetBundleCreateRequest.assetBundle;
+
+            if (assetBundle == null)
             {
-                throw new ShaderLoadException("Failed to load asset bundle");
+                _logger.LogError("Failed to load asset bundle");
+                return;
             }
 
-            AssetBundleRequest assetBundleRequest = await assetBundle.LoadAllAssetsAsync<Shader>();
+            AssetBundleRequest assetsRequest = await assetBundle.LoadAllAssetsAsync();
+            Object[] assets = assetsRequest.allAssets;
+            string[] assetNames = assetBundle.GetAllAssetNames();
 
-            if (assetBundleRequest.allAssets.Length == 0)
+            for (int i = 0; i < assets.Length; i++)
             {
-                assetBundle.Unload(true);
-                throw new ShaderLoadException("No assets found");
-            }
+                Object asset = assets[i];
+                string name = assetNames[i];
 
-            foreach (Object asset in assetBundleRequest.allAssets)
-            {
-                switch (asset.name)
+                switch (name)
                 {
-                    case "Beat Saber Custom Avatars/Glow Overlay":
+                    case "assets/shaders/stereorender.shader":
+                        stereoMirrorShader = (Shader)asset;
+                        break;
+
+                    case "assets/shaders/unlitoverlay.shader":
                         unlitShader = (Shader)asset;
                         break;
 
-                    case "Beat Saber Custom Avatars/Stereo Render":
-                        stereoMirrorShader = (Shader)asset;
+                    default:
+                        _logger.LogError($"Unexpected asset '{name}'");
                         break;
                 }
             }
 
-            assetBundle.Unload(false);
-        }
-
-        private void CheckShaderLoaded(Shader shader, string name)
-        {
-            if (shader)
-            {
-                _logger.LogInformation($"{name} shader loaded");
-            }
-            else
-            {
-                _logger.LogError($"{name} shader not found");
-            }
+            await assetBundle.UnloadAsync(false);
         }
     }
 }
