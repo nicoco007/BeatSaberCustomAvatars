@@ -31,7 +31,7 @@ namespace CustomAvatar.UI
         private bool _loaded;
 
         private ILogger<ManualCalibrationHelper> _logger;
-        private ShaderLoader _shaderLoader;
+        private AssetLoader _assetLoader;
         private VRPlayerInputInternal _playerInput;
         private PlayerAvatarManager _avatarManager;
 
@@ -52,20 +52,20 @@ namespace CustomAvatar.UI
         }
 
         [Inject]
-        internal void Construct(ILogger<ManualCalibrationHelper> logger, ShaderLoader shaderLoader, VRPlayerInputInternal playerInput, PlayerAvatarManager avatarManager)
+        internal void Construct(ILogger<ManualCalibrationHelper> logger, AssetLoader assetLoader, VRPlayerInputInternal playerInput, PlayerAvatarManager avatarManager)
         {
             _logger = logger;
-            _shaderLoader = shaderLoader;
+            _assetLoader = assetLoader;
             _playerInput = playerInput;
             _avatarManager = avatarManager;
         }
 
         internal void Start()
         {
-            if (_shaderLoader.unlitShader)
+            if (_assetLoader.unlitShader)
             {
-                _sphereMaterial = new Material(_shaderLoader.unlitShader);
-                _rodMaterial = new Material(_shaderLoader.unlitShader);
+                _sphereMaterial = new Material(_assetLoader.unlitShader);
+                _rodMaterial = new Material(_assetLoader.unlitShader);
 
                 _rodMaterial.SetColor(kColor, new Color(0, 1f, 0, 1));
 

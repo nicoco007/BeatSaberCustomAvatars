@@ -189,8 +189,8 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="manifest.json" />
-    <EmbeddedResource Include="UI\Views\**\*.*" />
-    <EmbeddedResource Include="Resources\**\*.*" />
+    <EmbeddedResource Include="UI\Views\**\*.bsml" />
+    <EmbeddedResource Include="Resources\**\*" />
   </ItemGroup>
   <ItemGroup>
     <CopyToOutput Include="$(ProjectDir)..\..\Packaging\CustomAvatar\**\*.*" />

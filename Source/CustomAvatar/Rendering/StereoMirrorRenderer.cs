@@ -41,7 +41,7 @@ namespace CustomAvatar.Rendering
         private static readonly Rect kRightRect = new(0.5f, 0f, 0.5f, 1f);
         private static readonly Rect kFullRect = new(0f, 0f, 1f, 1f);
 
-        private ShaderLoader _shaderLoader;
+        private AssetLoader _assetLoader;
         private ActiveCameraManager _activeCameraManager;
         private Settings _settings;
 
@@ -70,9 +70,9 @@ namespace CustomAvatar.Rendering
 #pragma warning disable IDE0051
 
         [Inject]
-        private void Inject(ShaderLoader shaderLoader, ActiveCameraManager activeCameraManager, Settings settings)
+        private void Inject(AssetLoader assetLoader, ActiveCameraManager activeCameraManager, Settings settings)
         {
-            _shaderLoader = shaderLoader;
+            _assetLoader = assetLoader;
             _activeCameraManager = activeCameraManager;
             _settings = settings;
         }
@@ -80,7 +80,7 @@ namespace CustomAvatar.Rendering
         private void Start()
         {
             _renderer = GetComponent<Renderer>();
-            _renderer.material = new Material(_shaderLoader.stereoMirrorShader);
+            _renderer.material = new Material(_assetLoader.stereoMirrorShader);
 
             CreateMirrorCamera();
         }

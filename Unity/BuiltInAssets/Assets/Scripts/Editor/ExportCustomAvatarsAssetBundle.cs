@@ -8,7 +8,7 @@ public class ExportCustomAvatarsAssetBundle
     public static void BuildAssetBundle()
     {
         string resourcesPath = Path.GetFullPath(Path.Combine(Application.dataPath, "..", "..", "..", "Source", "CustomAvatar", "Resources"));
-        string targetPath = EditorUtility.SaveFilePanel("Export Custom Avatars Asset Bundle", resourcesPath, "shaders.assets", "assets");
+        string targetPath = EditorUtility.SaveFilePanel("Export Custom Avatars Asset Bundle", resourcesPath, "Assets", string.Empty);
 
         if (string.IsNullOrEmpty(targetPath))
         {

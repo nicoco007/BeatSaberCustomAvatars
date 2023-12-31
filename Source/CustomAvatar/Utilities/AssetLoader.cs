@@ -25,14 +25,14 @@ using Object = UnityEngine.Object;
 
 namespace CustomAvatar.Utilities
 {
-    internal class ShaderLoader : IInitializable
+    internal class AssetLoader : IInitializable
     {
         public Shader stereoMirrorShader { get; private set; }
         public Shader unlitShader { get; private set; }
 
-        private readonly ILogger<ShaderLoader> _logger;
+        private readonly ILogger<AssetLoader> _logger;
 
-        public ShaderLoader(ILogger<ShaderLoader> logger)
+        public AssetLoader(ILogger<AssetLoader> logger)
         {
             _logger = logger;
         }
@@ -55,7 +55,7 @@ namespace CustomAvatar.Utilities
 
         private async Task LoadShaders()
         {
-            AssetBundleCreateRequest shadersBundleCreateRequest = await AssetBundle.LoadFromStreamAsync(Assembly.GetExecutingAssembly().GetManifestResourceStream("CustomAvatar.Resources.shaders.assets"));
+            AssetBundleCreateRequest shadersBundleCreateRequest = await AssetBundle.LoadFromStreamAsync(Assembly.GetExecutingAssembly().GetManifestResourceStream("CustomAvatar.Resources.Assets"));
             AssetBundle assetBundle = shadersBundleCreateRequest.assetBundle;
 
             if (!assetBundle)
