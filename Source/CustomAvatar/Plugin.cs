@@ -24,6 +24,7 @@ using CustomAvatar.Zenject.Internal;
 using HarmonyLib;
 using IPA;
 using IPA.Loader;
+using SiraUtil.Zenject;
 using Zenject;
 using Logger = IPA.Logging.Logger;
 
@@ -35,7 +36,7 @@ namespace CustomAvatar
         private readonly Harmony _harmony = new("com.nicoco007.beatsabercustomavatars");
 
         [Init]
-        public Plugin(Logger ipaLogger, PluginMetadata pluginMetadata)
+        public Plugin(Logger ipaLogger, PluginMetadata pluginMetadata, Zenjector zenjector)
         {
             var armSpanSliderTag = new ValuePickerTag();
 
@@ -49,9 +50,6 @@ namespace CustomAvatar
 
             ZenjectHelper.Init(ipaLogger);
 
-            ZenjectHelper.BindSceneComponent<PCAppInit>();
-            ZenjectHelper.BindSceneComponent<ObstacleSaberSparkleEffectManager>();
-
             ZenjectHelper.AddComponentAlongsideExisting<MainCamera, CustomAvatarsMainCameraController>();
             ZenjectHelper.AddComponentAlongsideExisting<SmoothCamera, CustomAvatarsSmoothCameraController>();
 
@@ -62,10 +60,12 @@ namespace CustomAvatar
             ZenjectHelper.AddComponentAlongsideExisting<MultiplayerLocalInactivePlayerFacade, EnvironmentObject>("MultiplayerLocalInactivePlayerPlayerPlace/CirclePlayerPlace");
             ZenjectHelper.AddComponentAlongsideExisting<MultiplayerConnectedPlayerFacade, EnvironmentObject>();
 
-            ZenjectHelper.Register<CustomAvatarsInstaller>().WithArguments(ipaLogger, pluginMetadata).OnMonoInstaller<PCAppInit>();
-            ZenjectHelper.Register<MainMenuInstaller>().WithArguments(armSpanSliderTag).OnContext<SceneContext>("MainMenu", "SceneContext");
-            ZenjectHelper.Register<HealthWarningInstaller>().OnContext<SceneContext>("HealthWarning", "SceneContext");
-            ZenjectHelper.Register<GameInstaller>().OnMonoInstaller<GameplayCoreInstaller>();
+            zenjector.Expose<ObstacleSaberSparkleEffectManager>("Gameplay");
+
+            zenjector.Install<CustomAvatarsInstaller>(Location.App, ipaLogger, pluginMetadata);
+            zenjector.Install<MainMenuInstaller>(Location.Menu, armSpanSliderTag);
+            zenjector.Install<HealthWarningInstaller, HealthWarningSceneSetup>();
+            zenjector.Install<GameInstaller>(Location.Player);
         }
 
         [OnEnable]

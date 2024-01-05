@@ -30,35 +30,13 @@ namespace CustomAvatar.Zenject.Internal
 {
     internal class ZenjectHelper
     {
-        private const string kExpectedFirstSceneContextName = "AppCoreSceneContext";
-
-        private static bool _shouldInstall;
-
-        private static readonly HashSet<InstallerRegistration> kInstallerRegistrations = new();
-        private static readonly HashSet<Type> kComponentsToBind = new();
         private static readonly Dictionary<Type, List<ComponentRegistration>> kComponentsToAdd = new();
 
         private static ILogger<ZenjectHelper> _logger;
 
-        internal static event Action<Context> installInstallers;
-
         internal static void Init(IPA.Logging.Logger logger)
         {
             _logger = new IPALogger<ZenjectHelper>(logger);
-        }
-
-        public static InstallerRegistration Register<TInstaller>() where TInstaller : Installer
-        {
-            var registration = new InstallerRegistration(typeof(TInstaller));
-
-            kInstallerRegistrations.Add(registration);
-
-            return registration;
-        }
-
-        public static void BindSceneComponent<T>() where T : MonoBehaviour
-        {
-            kComponentsToBind.Add(typeof(T));
         }
 
         public static void AddComponentAlongsideExisting<TExisting, TAdd>(string childTransformName = null, Func<GameObject, bool> condition = null) where TExisting : MonoBehaviour where TAdd : MonoBehaviour
@@ -75,53 +53,8 @@ namespace CustomAvatar.Zenject.Internal
             }
         }
 
-        private static void InstallInstallers(Context __instance)
-        {
-#if DEBUG
-            var stopwatch = Stopwatch.StartNew();
-#endif
-
-            if (!_shouldInstall)
-            {
-                if (__instance.name == kExpectedFirstSceneContextName)
-                {
-                    _shouldInstall = true;
-                }
-                else
-                {
-                    if (__instance is not ProjectContext)
-                    {
-                        _logger.LogWarning($"Ignoring {__instance.GetType().Name} '{__instance.name}' since SceneContext '{kExpectedFirstSceneContextName}' hasn't loaded yet");
-                    }
-
-                    return;
-                }
-            }
-
-            _logger.LogTrace($"Handling {__instance.GetType().Name} '{__instance.name}' (scene '{__instance.gameObject.scene.name}')");
-
-            foreach (MonoInstaller installer in __instance.Installers)
-            {
-                BindIfNeeded(__instance, installer);
-            }
-
-            foreach (InstallerRegistration installerRegistration in kInstallerRegistrations)
-            {
-                if (installerRegistration.TryInstallInto(__instance))
-                {
-                    _logger.LogTrace($"Installed {installerRegistration.installer.FullName}");
-                }
-            }
-
-#if DEBUG
-            _logger.LogTrace($"InstallInstallers: {stopwatch.ElapsedTicks / (TimeSpan.TicksPerMillisecond / 1000)} us");
-#endif
-        }
-
         private static void InstallBindings(Context __instance, List<MonoBehaviour> injectableMonoBehaviours)
         {
-            if (!_shouldInstall) return;
-
 #if DEBUG
             var stopwatch = Stopwatch.StartNew();
 #endif
@@ -133,31 +66,12 @@ namespace CustomAvatar.Zenject.Internal
 
             foreach (MonoBehaviour monoBehaviour in injectableMonoBehaviours)
             {
-                BindIfNeeded(__instance, monoBehaviour);
                 AddComponents(__instance, monoBehaviour);
             }
 
 #if DEBUG
             _logger.LogTrace($"InstallBindings: {stopwatch.ElapsedTicks / (TimeSpan.TicksPerMillisecond / 1000)} us");
 #endif
-        }
-
-        private static void BindIfNeeded(Context context, MonoBehaviour monoBehaviour)
-        {
-            Type type = monoBehaviour.GetType();
-
-            if (!kComponentsToBind.Contains(type)) return;
-
-            if (!context.Container.HasBinding(type))
-            {
-                _logger.LogTrace($"Binding '{type.FullName}' from {context.GetType().Name} '{context.name}' (scene '{context.gameObject.scene.name}')");
-
-                context.Container.Bind(type).FromInstance(monoBehaviour).AsSingle().IfNotBound();
-            }
-            else
-            {
-                _logger.LogTrace($"'{type.FullName}' is already bound on {context.GetType().Name} '{context.name}' (scene '{context.gameObject.scene.name}')");
-            }
         }
 
         private static void AddComponents(Context context, MonoBehaviour monoBehaviour)
@@ -210,17 +124,7 @@ namespace CustomAvatar.Zenject.Internal
             }
         }
 
-        [HarmonyPatch(typeof(Context), "InstallInstallers", new Type[0])]
-        internal static class Context_InstallInstallers
-        {
-            public static void Postfix(Context __instance)
-            {
-                InstallInstallers(__instance);
-                installInstallers?.Invoke(__instance);
-            }
-        }
-
-        [HarmonyPatch(typeof(ProjectContext), "InstallBindings")]
+        [HarmonyPatch(typeof(ProjectContext), nameof(ProjectContext.InstallBindings))]
         private static class ProjectContext_InstallBindings
         {
             public static void Postfix(ProjectContext __instance, List<MonoBehaviour> injectableMonoBehaviours)
@@ -229,7 +133,7 @@ namespace CustomAvatar.Zenject.Internal
             }
         }
 
-        [HarmonyPatch(typeof(SceneContext), "InstallBindings")]
+        [HarmonyPatch(typeof(SceneContext), nameof(SceneContext.InstallBindings))]
         private static class SceneContext_InstallBindings
         {
             public static void Postfix(SceneContext __instance, List<MonoBehaviour> injectableMonoBehaviours)
@@ -238,7 +142,7 @@ namespace CustomAvatar.Zenject.Internal
             }
         }
 
-        [HarmonyPatch(typeof(GameObjectContext), "InstallBindings")]
+        [HarmonyPatch(typeof(GameObjectContext), nameof(GameObjectContext.InstallBindings))]
         private static class GameObjectContext_InstallBindings
         {
             public static void Postfix(GameObjectContext __instance, List<MonoBehaviour> injectableMonoBehaviours)
