@@ -28,6 +28,7 @@ using VRIK = BeatSaberFinalIK::RootMotion.FinalIK.VRIK;
 
 namespace CustomAvatar.Avatar
 {
+    [DisallowMultipleComponent]
     public class AvatarPrefab : MonoBehaviour
     {
         /// <summary>

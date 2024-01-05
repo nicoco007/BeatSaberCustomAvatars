@@ -25,6 +25,7 @@ using Zenject;
 
 namespace CustomAvatar.Player
 {
+    [DisallowMultipleComponent]
     internal class EnvironmentObject : MonoBehaviour
     {
         private static readonly Dictionary<MirrorRendererSO, MirrorRendererSO> kReplacedMirrorRenderers = new();

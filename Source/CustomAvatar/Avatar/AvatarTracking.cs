@@ -22,6 +22,7 @@ using Zenject;
 
 namespace CustomAvatar.Avatar
 {
+    [DisallowMultipleComponent]
     public class AvatarTracking : MonoBehaviour
     {
         [System.Obsolete]

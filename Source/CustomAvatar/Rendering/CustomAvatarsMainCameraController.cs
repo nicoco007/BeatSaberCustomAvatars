@@ -26,6 +26,7 @@ using Zenject;
 
 namespace CustomAvatar.Rendering
 {
+    [DisallowMultipleComponent]
     internal class CustomAvatarsMainCameraController : MonoBehaviour
     {
         private ILogger<CustomAvatarsMainCameraController> _logger;

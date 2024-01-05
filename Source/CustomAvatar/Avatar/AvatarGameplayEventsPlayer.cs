@@ -19,10 +19,12 @@ using System.Collections;
 using CustomAvatar.Logging;
 using CustomAvatar.Player;
 using CustomAvatar.Utilities;
+using UnityEngine;
 using Zenject;
 
 namespace CustomAvatar.Avatar
 {
+    [DisallowMultipleComponent]
     internal class AvatarGameplayEventsPlayer : IInitializable, IDisposable
     {
         private readonly ILogger<AvatarGameplayEventsPlayer> _logger;

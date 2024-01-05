@@ -31,6 +31,7 @@ namespace CustomAvatar
     /// <summary>
     /// Container for an avatar's name and other information configured before exportation.
     /// </summary>
+    [DisallowMultipleComponent]
     public class AvatarDescriptor : MonoBehaviour, ISerializationCallbackReceiver
     {
         /// <summary>

@@ -64,6 +64,7 @@ namespace CustomAvatar.Player
             }
         }
 
+        [DisallowMultipleComponent]
         private class EventTrigger : MonoBehaviour
         {
             private PlayerAvatarManager _playerAvatarManager;

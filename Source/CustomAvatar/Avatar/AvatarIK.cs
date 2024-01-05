@@ -30,6 +30,7 @@ using Zenject;
 
 namespace CustomAvatar.Avatar
 {
+    [DisallowMultipleComponent]
     public class AvatarIK : MonoBehaviour
     {
         public bool isLocomotionEnabled

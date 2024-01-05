@@ -20,6 +20,7 @@ using Zenject;
 
 namespace CustomAvatar.Avatar
 {
+    [DisallowMultipleComponent]
     public class AvatarFingerTracking : MonoBehaviour
     {
         private PoseManager _poseManager;

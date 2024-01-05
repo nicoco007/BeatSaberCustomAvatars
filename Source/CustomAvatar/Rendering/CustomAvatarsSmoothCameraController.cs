@@ -22,6 +22,7 @@ using Zenject;
 
 namespace CustomAvatar.Rendering
 {
+    [DisallowMultipleComponent]
     internal class CustomAvatarsSmoothCameraController : MonoBehaviour
     {
         private const float kCameraDefaultNearClipMask = 0.1f;

@@ -27,6 +27,7 @@ namespace CustomAvatar.Avatar
     /// <summary>
     /// Represents a <see cref="AvatarPrefab"/> that has been spawned into the game.
     /// </summary>
+    [DisallowMultipleComponent]
     public class SpawnedAvatar : MonoBehaviour
     {
         /// <summary>
