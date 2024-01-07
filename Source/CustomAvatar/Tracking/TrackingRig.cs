@@ -325,6 +325,9 @@ namespace CustomAvatar.Tracking
             }
 
             this.enabled = this._shouldBeEnabled;
+
+            UpdateOffsets();
+            UpdateControllerOffsets();
         }
 
         [Inject]

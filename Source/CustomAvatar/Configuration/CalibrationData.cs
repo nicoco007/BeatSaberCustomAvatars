@@ -18,32 +18,40 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using CustomAvatar.Avatar;
 using CustomAvatar.Logging;
 using CustomAvatar.Player;
 using CustomAvatar.Utilities;
 using IPA.Utilities;
+using ProtoBuf;
+using ProtoBuf.Meta;
 using UnityEngine;
+using Zenject;
 
 namespace CustomAvatar.Configuration
 {
-    internal class CalibrationData : IDisposable
+    internal class CalibrationData : IInitializable, IDisposable
     {
         public static readonly string kCalibrationDataFilePath = Path.Combine(UnityGame.UserDataPath, "CustomAvatars.CalibrationData.dat");
-        public static readonly byte[] kCalibrationDataFileSignature = { 0x43, 0x41, 0x63, 0x64 }; // Custom Avatars calibration data (CAcd)
-        public static readonly byte kCalibrationDataFileVersion = 2;
-
-        public FullBodyCalibration automaticCalibration { get; } = new FullBodyCalibration();
-
-        private readonly Dictionary<string, FullBodyCalibration> _manualCalibration = new();
 
         private readonly ILogger<CalibrationData> _logger;
+        private readonly RuntimeTypeModel _runtimeTypeModel;
 
-        public CalibrationData(ILogger<CalibrationData> logger)
+        private CalibrationState _calibrationState = new();
+
+        public FullBodyCalibration automaticCalibration => _calibrationState.automaticCalibration;
+
+        private CalibrationData(ILogger<CalibrationData> logger)
         {
             _logger = logger;
+            _runtimeTypeModel = RuntimeTypeModel.Create(nameof(CalibrationData));
+            _runtimeTypeModel.Add<Pose>().Add(nameof(Pose.position), nameof(Pose.rotation));
+            _runtimeTypeModel.Add<Vector3>().Add(nameof(Vector3.x), nameof(Vector3.y), nameof(Vector3.z));
+            _runtimeTypeModel.Add<Quaternion>().Add(nameof(Quaternion.x), nameof(Quaternion.y), nameof(Quaternion.z), nameof(Quaternion.w));
+        }
 
+        public void Initialize()
+        {
             try
             {
                 Load();
@@ -77,12 +85,13 @@ namespace CustomAvatar.Configuration
                 throw new ArgumentException("Invalid file name", nameof(fileName));
             }
 
-            if (!_manualCalibration.ContainsKey(fileName))
+            if (!_calibrationState.manualCalibrations.TryGetValue(fileName, out FullBodyCalibration fullBodyCalibration))
             {
-                _manualCalibration.Add(fileName, new FullBodyCalibration());
+                fullBodyCalibration = new FullBodyCalibration();
+                _calibrationState.manualCalibrations.Add(fileName, fullBodyCalibration);
             }
 
-            return _manualCalibration[fileName];
+            return fullBodyCalibration;
         }
 
         private void Load()
@@ -91,102 +100,75 @@ namespace CustomAvatar.Configuration
 
             _logger.LogInformation($"Reading calibration data from '{kCalibrationDataFilePath}'");
 
-            using (var fileStream = new FileStream(kCalibrationDataFilePath, FileMode.Open, FileAccess.Read))
-            using (var reader = new BinaryReader(fileStream, Encoding.UTF8))
+            using (FileStream fileStream = File.OpenRead(kCalibrationDataFilePath))
             {
-                if (!reader.ReadBytes(kCalibrationDataFileSignature.Length).SequenceEqual(kCalibrationDataFileSignature)) throw new IOException("Invalid file signature");
-
-                if (reader.ReadByte() != kCalibrationDataFileVersion)
-                {
-                    _logger.LogWarning("Invalid file version");
-                    return;
-                }
-
-                automaticCalibration.head = reader.ReadPose();
-                automaticCalibration.waist = reader.ReadPose();
-                automaticCalibration.leftFoot = reader.ReadPose();
-                automaticCalibration.rightFoot = reader.ReadPose();
-
-                int count = reader.ReadInt32();
-
-                _logger.LogTrace($"Reading {count} calibrations");
-
-                for (int i = 0; i < count; i++)
-                {
-                    string fileName = reader.ReadString();
-
-                    if (!PathHelpers.IsValidFileName(fileName))
-                    {
-                        _logger.LogWarning($"'{fileName}' is not a valid file name; skipped");
-                        continue;
-                    }
-
-                    string fullPath = Path.Combine(PlayerAvatarManager.kCustomAvatarsPath, fileName);
-
-                    if (!File.Exists(fullPath))
-                    {
-                        _logger.LogWarning($"'{fullPath}' no longer exists; skipped");
-                        continue;
-                    }
-
-                    _logger.LogTrace($"Got calibration data for '{fileName}'");
-
-                    if (!_manualCalibration.ContainsKey(fileName))
-                    {
-                        _manualCalibration.Add(fileName, new FullBodyCalibration());
-                    }
-
-                    _manualCalibration[fileName].head = reader.ReadPose();
-                    _manualCalibration[fileName].waist = reader.ReadPose();
-                    _manualCalibration[fileName].leftFoot = reader.ReadPose();
-                    _manualCalibration[fileName].rightFoot = reader.ReadPose();
-                }
+                _calibrationState = _runtimeTypeModel.Deserialize<CalibrationState>(fileStream);
             }
+
+            Prune();
         }
 
         private void Save()
         {
             _logger.LogInformation($"Saving calibration data to '{kCalibrationDataFilePath}'");
 
-            using (var fileStream = new FileStream(kCalibrationDataFilePath, FileMode.OpenOrCreate, FileAccess.Write))
+            Prune();
+
+            using (FileStream fileStream = File.OpenWrite(kCalibrationDataFilePath))
             {
-                using (var writer = new BinaryWriter(fileStream, Encoding.UTF8, true))
-                {
-                    writer.Write(kCalibrationDataFileSignature);
-                    writer.Write(kCalibrationDataFileVersion);
-
-                    writer.Write(automaticCalibration.head);
-                    writer.Write(automaticCalibration.waist);
-                    writer.Write(automaticCalibration.leftFoot);
-                    writer.Write(automaticCalibration.rightFoot);
-
-                    writer.Write(_manualCalibration.Count);
-
-                    foreach (KeyValuePair<string, FullBodyCalibration> kvp in _manualCalibration)
-                    {
-                        writer.Write(kvp.Key); // file name
-
-                        writer.Write(kvp.Value.head);
-                        writer.Write(kvp.Value.waist);
-                        writer.Write(kvp.Value.leftFoot);
-                        writer.Write(kvp.Value.rightFoot);
-                    }
-                }
-
+                _runtimeTypeModel.Serialize(fileStream, _calibrationState);
                 fileStream.SetLength(fileStream.Position);
             }
 
             File.SetAttributes(kCalibrationDataFilePath, FileAttributes.Hidden);
         }
 
-        public class FullBodyCalibration
+        private void Prune()
         {
-            public Pose head = Pose.identity;
-            public Pose waist = Pose.identity;
-            public Pose leftFoot = Pose.identity;
-            public Pose rightFoot = Pose.identity;
+            foreach (string fileName in _calibrationState.manualCalibrations.Keys.ToList())
+            {
+                if (!PathHelpers.IsValidFileName(fileName))
+                {
+                    _logger.LogTrace($"'{fileName}' is not a valid file name");
+                    _calibrationState.manualCalibrations.Remove(fileName);
+                }
 
-            public bool isCalibrated => !head.Equals(Pose.identity) || !waist.Equals(Pose.identity) || !leftFoot.Equals(Pose.identity) || !rightFoot.Equals(Pose.identity);
+                string fullPath = Path.Combine(PlayerAvatarManager.kCustomAvatarsPath, fileName);
+
+                if (!File.Exists(fullPath))
+                {
+                    _logger.LogTrace($"'{fileName}' no longer exists");
+                    _calibrationState.manualCalibrations.Remove(fileName);
+                }
+            }
+        }
+
+        [ProtoContract]
+        internal class CalibrationState
+        {
+            [ProtoMember(1)]
+            internal FullBodyCalibration automaticCalibration { get; } = new FullBodyCalibration();
+
+            [ProtoMember(2)]
+            internal Dictionary<string, FullBodyCalibration> manualCalibrations { get; set; } = new();
+        }
+
+        [ProtoContract]
+        internal class FullBodyCalibration
+        {
+            [ProtoMember(1)]
+            internal Pose head { get; set; } = Pose.identity;
+
+            [ProtoMember(2)]
+            internal Pose waist { get; set; } = Pose.identity;
+
+            [ProtoMember(3)]
+            internal Pose leftFoot { get; set; } = Pose.identity;
+
+            [ProtoMember(4)]
+            internal Pose rightFoot { get; set; } = Pose.identity;
+
+            internal bool isCalibrated => !head.Equals(Pose.identity) || !waist.Equals(Pose.identity) || !leftFoot.Equals(Pose.identity) || !rightFoot.Equals(Pose.identity);
         }
     }
 }

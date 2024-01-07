@@ -15,7 +15,6 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.ComponentModel;
 using System.Reflection;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
@@ -70,7 +69,7 @@ namespace CustomAvatar.Zenject
 
             Container.Bind<SettingsManager>().FromInstance(settingsManager).AsSingle();
             Container.Bind<Settings>().FromMethod((ctx) => ctx.Container.Resolve<SettingsManager>().settings).AsTransient();
-            Container.Bind(typeof(CalibrationData), typeof(IDisposable)).To<CalibrationData>().AsSingle();
+            Container.Bind(typeof(CalibrationData), typeof(IInitializable), typeof(IDisposable)).To<CalibrationData>().AsSingle();
 
             _logger.LogInformation($"Current Unity XR device: '{XRSettings.loadedDeviceName}'");
 
