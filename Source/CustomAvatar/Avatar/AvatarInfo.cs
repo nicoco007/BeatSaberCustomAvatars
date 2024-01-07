@@ -16,65 +16,61 @@
 
 using System;
 using System.IO;
+using ProtoBuf;
 using UnityEngine;
 
 namespace CustomAvatar.Avatar
 {
+    [ProtoContract]
     internal readonly struct AvatarInfo
     {
         /// <summary>
         /// Name of the avatar.
         /// </summary>
-        public readonly string name;
+        [ProtoMember(1)]
+        public string name { get; }
 
         /// <summary>
         /// Avatar author's name.
         /// </summary>
-        public readonly string author;
+        [ProtoMember(2)]
+        public string author { get; }
 
         /// <summary>
         /// Avatar icon.
         /// </summary>
-        public readonly Sprite icon;
+        [ProtoMember(3)]
+        public Sprite icon { get; }
 
         /// <summary>
         /// File name of the avatar.
         /// </summary>
-        public readonly string fileName;
+        [ProtoMember(4)]
+        public string fileName { get; }
 
         /// <summary>
         /// File size of the avatar.
         /// </summary>
-        public readonly long fileSize;
+        [ProtoMember(5)]
+        public long fileSize { get; }
 
         /// <summary>
         /// Date/time at which the avatar file was created.
         /// </summary>
-        public readonly DateTime created;
+        [ProtoMember(6)]
+        public DateTime created { get; }
 
         /// <summary>
         /// Date/time at which the avatar file was last modified.
         /// </summary>
-        public readonly DateTime lastModified;
+        [ProtoMember(7)]
+        public DateTime lastModified { get; }
 
         /// <summary>
         /// Date/time at which this information was read from disk.
         /// </summary>
-        public readonly DateTime timestamp;
-
-        internal AvatarInfo(string name, string author, Texture2D icon, string fileName, long fileSize, DateTime created, DateTime lastModified, DateTime timestamp)
-        {
-            if (string.IsNullOrWhiteSpace(fileName)) throw new ArgumentNullException(nameof(fileName));
-
-            this.name = name;
-            this.author = author;
-            this.icon = CreateSprite(icon);
-            this.fileName = fileName;
-            this.fileSize = fileSize;
-            this.created = created;
-            this.lastModified = lastModified;
-            this.timestamp = timestamp;
-        }
+        [ProtoMember(8)]
+        public DateTime timestamp { get; }
 
         public AvatarInfo(AvatarPrefab avatar)
         {
@@ -82,6 +78,7 @@ namespace CustomAvatar.Avatar
             author = avatar.descriptor.author ?? "Unknown";
             icon = avatar.descriptor.cover ? avatar.descriptor.cover : null;
 
+            // TODO: this should probably be created and stored in AvatarPrefab when the avatar is loaded
             var fileInfo = new FileInfo(avatar.fullPath);
 
             fileName = fileInfo.Name;
@@ -111,13 +108,6 @@ namespace CustomAvatar.Avatar
         public override int GetHashCode()
         {
             return (name, author, icon, fileName, fileSize, created, lastModified, timestamp).GetHashCode();
-        }
-
-        private static Sprite CreateSprite(Texture2D texture)
-        {
-            if (!texture) return null;
-
-            return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
         }
     }
 }

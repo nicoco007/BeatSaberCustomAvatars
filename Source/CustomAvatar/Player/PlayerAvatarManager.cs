@@ -19,7 +19,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CustomAvatar.Avatar;
@@ -39,9 +38,6 @@ namespace CustomAvatar.Player
     public class PlayerAvatarManager : MonoBehaviour
     {
         public static readonly string kCustomAvatarsPath = Path.Combine(UnityGame.InstallPath, "CustomAvatars");
-        public static readonly string kAvatarInfoCacheFilePath = Path.Combine(kCustomAvatarsPath, "cache.dat");
-        public static readonly byte[] kCacheFileSignature = { 0x43, 0x41, 0x64, 0x62 }; // Custom Avatars Database (CAdb)
-        public static readonly byte kCacheFileVersion = 2;
 
         private static readonly List<ConstraintSource> kEmptyConstraintSources = new(0);
 
@@ -79,6 +75,8 @@ namespace CustomAvatar.Player
 
         internal Settings.AvatarSpecificSettings currentAvatarSettings { get; private set; }
 
+        private readonly AvatarCacheStore _avatarCacheStore = new(kCustomAvatarsPath);
+
         private DiContainer _container;
         private ILogger<PlayerAvatarManager> _logger;
         private AvatarLoader _avatarLoader;
@@ -86,8 +84,6 @@ namespace CustomAvatar.Player
         private AvatarSpawner _spawner;
         private BeatSaberUtilities _beatSaberUtilities;
         private ActiveOriginManager _activeOriginManager;
-
-        private readonly Dictionary<string, AvatarInfo> _avatarInfos = new();
 
         private ParentConstraint _parentConstraint;
         private ScaleConstraint _scaleConstraint;
@@ -170,7 +166,16 @@ namespace CustomAvatar.Player
                 _logger.LogError(ex);
             }
 
-            LoadAvatarInfosFromFile();
+            try
+            {
+                _logger.LogInformation("Reading cache from " + _avatarCacheStore.cacheFilePath);
+                _avatarCacheStore.Load();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex);
+            }
+
             LoadAvatarFromSettingsAsync();
             UpdateConstraints();
         }
@@ -192,19 +197,27 @@ namespace CustomAvatar.Player
 
         private void OnDestroy()
         {
-            SaveAvatarInfosToFile();
+            try
+            {
+                _logger.LogInformation("Writing cache to " + _avatarCacheStore.cacheFilePath);
+                _avatarCacheStore.Save();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex);
+            }
         }
 
         internal bool TryGetCachedAvatarInfo(string fileName, out AvatarInfo avatarInfo)
         {
-            return _avatarInfos.TryGetValue(fileName, out avatarInfo);
+            return _avatarCacheStore.TryGetValue(fileName, out avatarInfo);
         }
 
         internal async Task<AvatarInfo> GetAvatarInfo(string fileName, IProgress<float> progress, bool forceReload)
         {
             string fullPath = Path.Combine(kCustomAvatarsPath, fileName);
 
-            if (!forceReload && _avatarInfos.ContainsKey(fileName) && _avatarInfos[fileName].IsForFile(fullPath))
+            if (!forceReload && TryGetCachedAvatarInfo(fileName, out AvatarInfo avatarInfo) && avatarInfo.IsForFile(fullPath))
             {
                 _logger.LogTrace($"Using cached information for '{fileName}'");
                 progress.Report(1);
@@ -214,7 +227,7 @@ namespace CustomAvatar.Player
                 await LoadAndCacheAvatarAsync(fullPath, progress, CancellationToken.None);
             }
 
-            return _avatarInfos[fileName];
+            return _avatarCacheStore[fileName];
         }
 
         public Task LoadAvatarFromSettingsAsync()
@@ -253,9 +266,7 @@ namespace CustomAvatar.Player
 
             _switchingToPath = fullPath;
 
-            _avatarInfos.TryGetValue(fileName, out AvatarInfo cachedInfo);
-
-            avatarLoading?.Invoke(fullPath, !string.IsNullOrWhiteSpace(cachedInfo.name) ? cachedInfo.name : fileName);
+            avatarLoading?.Invoke(fullPath, TryGetCachedAvatarInfo(fileName, out AvatarInfo cachedInfo) ? cachedInfo.name : fileName);
 
             try
             {
@@ -282,16 +293,8 @@ namespace CustomAvatar.Player
             AvatarPrefab avatar = await _avatarLoader.LoadFromFileAsync(fullPath, progress, cancellationToken);
 
             var info = new AvatarInfo(avatar);
-            string fileName = info.fileName;
 
-            if (_avatarInfos.ContainsKey(fileName))
-            {
-                _avatarInfos[fileName] = info;
-            }
-            else
-            {
-                _avatarInfos.Add(fileName, info);
-            }
+            _avatarCacheStore[info.fileName] = info;
 
             if (avatar.fullPath == _switchingToPath)
             {
@@ -332,14 +335,7 @@ namespace CustomAvatar.Player
             _settings.previousAvatarPath = avatarInfo.fileName;
 
             // cache avatar info since loading asset bundles is expensive
-            if (_avatarInfos.ContainsKey(avatarInfo.fileName))
-            {
-                _avatarInfos[avatarInfo.fileName] = avatarInfo;
-            }
-            else
-            {
-                _avatarInfos.Add(avatarInfo.fileName, avatarInfo);
-            }
+            _avatarCacheStore[avatarInfo.fileName] = avatarInfo;
 
             currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, _container.Resolve<VRPlayerInput>(), transform);
             currentAvatarSettings = _settings.GetAvatarSettings(avatar.fileName);
@@ -572,141 +568,6 @@ namespace CustomAvatar.Player
         private void UpdateAvatarVerticalPosition(float eyeHeight)
         {
             _parentConstraint.translationOffsets = new Vector3[] { new Vector3(0, GetFloorOffset(eyeHeight), 0) };
-        }
-
-        private void LoadAvatarInfosFromFile()
-        {
-            if (!File.Exists(kAvatarInfoCacheFilePath)) return;
-
-            try
-            {
-                _logger.LogInformation($"Loading cached avatar info from '{kAvatarInfoCacheFilePath}'");
-
-                using (var stream = new FileStream(kAvatarInfoCacheFilePath, FileMode.Open, FileAccess.Read))
-                using (var reader = new BinaryReader(stream, Encoding.UTF8))
-                {
-                    if (!reader.ReadBytes(kCacheFileSignature.Length).SequenceEqual(kCacheFileSignature))
-                    {
-                        _logger.LogWarning($"Invalid cache file magic");
-                        return;
-                    }
-
-                    if (reader.ReadByte() != kCacheFileVersion)
-                    {
-                        _logger.LogWarning($"Invalid cache file version");
-                        return;
-                    }
-
-                    int count = reader.ReadInt32();
-
-                    _logger.LogTrace($"Reading {count} cached infos");
-
-                    for (int i = 0; i < count; i++)
-                    {
-                        var avatarInfo = new AvatarInfo(
-                            reader.ReadString(),
-                            reader.ReadString(),
-                            reader.ReadTexture2D(),
-                            reader.ReadString(),
-                            reader.ReadInt64(),
-                            reader.ReadDateTime(),
-                            reader.ReadDateTime(),
-                            reader.ReadDateTime()
-                        );
-
-                        if (!PathHelpers.IsValidFileName(avatarInfo.fileName))
-                        {
-                            _logger.LogError($"Invalid avatar file name '{avatarInfo.fileName}'");
-                            continue;
-                        }
-
-                        string fullPath = Path.Combine(kCustomAvatarsPath, avatarInfo.fileName);
-
-                        if (!File.Exists(fullPath))
-                        {
-                            _logger.LogNotice($"File '{avatarInfo.fileName}' no longer exists; skipped");
-                            continue;
-                        }
-
-                        if (!avatarInfo.IsForFile(fullPath))
-                        {
-                            _logger.LogNotice($"Info for '{avatarInfo.fileName}' is outdated; skipped");
-                            continue;
-                        }
-
-                        _logger.LogTrace($"Got cached info for '{avatarInfo.fileName}'");
-
-                        if (_avatarInfos.ContainsKey(avatarInfo.fileName))
-                        {
-                            if (_avatarInfos[avatarInfo.fileName].timestamp > avatarInfo.timestamp)
-                            {
-                                _logger.LogNotice($"Current info for '{avatarInfo.fileName}' is more recent; skipped");
-                            }
-                            else
-                            {
-                                _avatarInfos[avatarInfo.fileName] = avatarInfo;
-                            }
-                        }
-                        else
-                        {
-                            _avatarInfos.Add(avatarInfo.fileName, avatarInfo);
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("Failed to load cached avatar info");
-                _logger.LogError(ex);
-            }
-        }
-
-        private void SaveAvatarInfosToFile()
-        {
-            // remove files that no longer exist
-            foreach (string fileName in _avatarInfos.Keys.ToList())
-            {
-                if (!File.Exists(Path.Combine(kCustomAvatarsPath, fileName)))
-                {
-                    _avatarInfos.Remove(fileName);
-                }
-            }
-
-            try
-            {
-                _logger.LogInformation($"Saving avatar info cache to '{kAvatarInfoCacheFilePath}'");
-
-                using (var stream = new FileStream(kAvatarInfoCacheFilePath, FileMode.OpenOrCreate, FileAccess.Write))
-                {
-                    using (var writer = new BinaryWriter(stream, Encoding.UTF8, true))
-                    {
-                        writer.Write(kCacheFileSignature);
-                        writer.Write(kCacheFileVersion);
-                        writer.Write(_avatarInfos.Count);
-
-                        foreach (AvatarInfo avatarInfo in _avatarInfos.Values)
-                        {
-                            writer.Write(avatarInfo.name);
-                            writer.Write(avatarInfo.author);
-                            writer.Write(avatarInfo.icon ? avatarInfo.icon.texture : null, true);
-                            writer.Write(avatarInfo.fileName);
-                            writer.Write(avatarInfo.fileSize);
-                            writer.Write(avatarInfo.created);
-                            writer.Write(avatarInfo.lastModified);
-                            writer.Write(avatarInfo.timestamp);
-                        }
-                    }
-
-                    stream.SetLength(stream.Position);
-                }
-
-                File.SetAttributes(kAvatarInfoCacheFilePath, FileAttributes.Hidden);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("Failed to save avatar info cache");
-                _logger.LogError(ex);
-            }
         }
     }
 }

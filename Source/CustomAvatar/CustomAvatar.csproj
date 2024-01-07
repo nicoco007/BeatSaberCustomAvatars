@@ -97,6 +97,10 @@
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Polyglot.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="protobuf-net">
+      <HintPath>$(BeatSaberDir)\Libs\protobuf-net.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="Rendering" Publicize="true">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Rendering.dll</HintPath>
       <Private>false</Private>
