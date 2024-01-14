@@ -644,12 +644,12 @@ namespace CustomAvatar.Tracking
 
             _logger.LogTrace("Updating active transforms");
 
-            UpdateActiveTransform(head, DeviceUse.Head);
-            UpdateActiveTransform(leftHand, DeviceUse.LeftHand);
-            UpdateActiveTransform(rightHand, DeviceUse.RightHand);
-            UpdateActiveTransform(pelvis, DeviceUse.Waist);
-            UpdateActiveTransform(leftFoot, DeviceUse.LeftFoot);
-            UpdateActiveTransform(rightFoot, DeviceUse.RightFoot);
+            UpdateActiveTransform(head, headOffset, DeviceUse.Head);
+            UpdateActiveTransform(leftHand, leftHandOffset, DeviceUse.LeftHand);
+            UpdateActiveTransform(rightHand, rightHandOffset, DeviceUse.RightHand);
+            UpdateActiveTransform(pelvis, pelvisOffset, DeviceUse.Waist);
+            UpdateActiveTransform(leftFoot, leftFootOffset, DeviceUse.LeftFoot);
+            UpdateActiveTransform(rightFoot, rightFootOffset, DeviceUse.RightFoot);
 
             areBothHandsTracking = leftHand.isTracking && rightHand.isTracking;
             areAnyFullBodyTrackersTracking = pelvis.isTracking || leftFoot.isTracking || rightFoot.isTracking;
@@ -657,17 +657,19 @@ namespace CustomAvatar.Tracking
             trackingChanged?.Invoke();
         }
 
-        private void UpdateActiveTransform(TrackedNode trackedNode, DeviceUse deviceUse)
+        private void UpdateActiveTransform(TrackedNode trackedNode, Transform offset, DeviceUse deviceUse)
         {
             if (_deviceProvider.TryGetDevice(deviceUse, out TrackedDevice trackedDevice))
             {
                 trackedNode.isTracking = trackedDevice.isTracking;
-                trackedNode.gameObject.SetActive(trackedDevice.isTracking && IsCurrentlyCalibrated(deviceUse));
+                trackedNode.gameObject.SetActive(trackedDevice.isTracking);
+                offset.gameObject.SetActive(trackedDevice.isTracking && IsCurrentlyCalibrated(deviceUse));
             }
             else
             {
                 trackedNode.isTracking = false;
                 trackedNode.gameObject.SetActive(false);
+                offset.gameObject.SetActive(false);
             }
         }
 
