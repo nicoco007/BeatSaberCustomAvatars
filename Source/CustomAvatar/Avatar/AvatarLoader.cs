@@ -131,7 +131,7 @@ namespace CustomAvatar.Avatar
 
             if (!prefabObject)
             {
-                assetBundle.Unload(true);
+                await assetBundle.UnloadAsync(true);
 
                 throw new AvatarLoadException("Could not load asset from asset bundle");
             }
