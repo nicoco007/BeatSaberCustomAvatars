@@ -95,61 +95,66 @@ namespace CustomAvatar.Avatar
 
         private async Task<AvatarPrefab> LoadAssetBundle(string fullPath, IProgress<float> progress, CancellationToken cancellationToken)
         {
-            AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(fullPath);
+            AssetBundle assetBundle = null;
+            AvatarPrefab avatarPrefab = null;
 
-            if (progress != null)
+            try
             {
-                // this isn't amazing, but since there's no progress event and Unity expects the progress
-                // property will be accessed in an Update() loop, this should *hopefully* be fine
-                _ = UnityMainThreadTaskScheduler.Factory.StartNew(async () =>
+                AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(fullPath);
+
+                if (progress != null)
                 {
-                    while (assetBundleCreateRequest.progress < 1f)
+                    // this isn't amazing, but since there's no progress event and Unity expects the progress
+                    // property will be accessed in an Update() loop, this should *hopefully* be fine
+                    _ = UnityMainThreadTaskScheduler.Factory.StartNew(async () =>
                     {
-                        cancellationToken.ThrowIfCancellationRequested();
-                        progress.Report(assetBundleCreateRequest.progress);
-                        await Task.Yield();
-                    }
+                        while (assetBundleCreateRequest.progress < 1f)
+                        {
+                            cancellationToken.ThrowIfCancellationRequested();
+                            progress.Report(assetBundleCreateRequest.progress);
+                            await Task.Yield();
+                        }
 
-                    progress.Report(1);
-                }, cancellationToken);
+                        progress.Report(1);
+                    }, cancellationToken);
+                }
+
+                // for the time being, we don't allow cancelling the actual loading because of the possibility of multiple places
+                // waiting for the same task to complete due to the task reuse in LoadFromFileAsync - some kind of cancellation
+                // token merging would be required to avoid cancelling the task if it is being awaited from somewhere else
+
+                await assetBundleCreateRequest;
+                assetBundle = assetBundleCreateRequest.assetBundle;
+
+                if (!assetBundle)
+                {
+                    throw new AvatarLoadException("Could not load asset bundle");
+                }
+
+                AssetBundleRequest assetBundleRequest = await assetBundle.LoadAssetWithSubAssetsAsync<GameObject>(kGameObjectName);
+                var prefabObject = (GameObject)assetBundleRequest.asset;
+
+                if (!prefabObject)
+                {
+                    throw new AvatarLoadException("Could not load asset from asset bundle");
+                }
+
+                GameObject instance = UnityEngine.Object.Instantiate(prefabObject);
+
+                avatarPrefab = _container.InstantiateComponent<AvatarPrefab>(instance, new object[] { fullPath });
+
+                instance.name = $"AvatarPrefab({avatarPrefab.descriptor.name})";
+                instance.SetActive(false);
+
+                await ShaderRepair.FixShadersOnGameObjectAsync(instance);
+
+                return avatarPrefab;
             }
-
-            // for the time being, we don't allow cancelling the actual loading because of the possibility of multiple places
-            // waiting for the same task to complete due to the task reuse in LoadFromFileAsync - some kind of cancellation
-            // token merging would be required to avoid cancelling the task if it is being awaited from somewhere else
-
-            await assetBundleCreateRequest;
-            AssetBundle assetBundle = assetBundleCreateRequest.assetBundle;
-
-            if (!assetBundle)
+            finally
             {
-                throw new AvatarLoadException("Could not load asset bundle");
+                await assetBundle.UnloadAsync(avatarPrefab == null);
+                _tasks.Remove(fullPath);
             }
-
-            AssetBundleRequest assetBundleRequest = await assetBundle.LoadAssetWithSubAssetsAsync<GameObject>(kGameObjectName);
-            var prefabObject = (GameObject)assetBundleRequest.asset;
-
-            if (!prefabObject)
-            {
-                await assetBundle.UnloadAsync(true);
-
-                throw new AvatarLoadException("Could not load asset from asset bundle");
-            }
-
-            await assetBundle.UnloadAsync(false);
-
-            GameObject instance = UnityEngine.Object.Instantiate(prefabObject);
-
-            AvatarPrefab avatarPrefab = _container.InstantiateComponent<AvatarPrefab>(instance, new object[] { fullPath });
-
-            instance.name = $"AvatarPrefab({avatarPrefab.descriptor.name})";
-            instance.SetActive(false);
-
-            await ShaderRepair.FixShadersOnGameObjectAsync(instance);
-
-            _tasks.Remove(fullPath);
-
-            return avatarPrefab;
         }
     }
 }
