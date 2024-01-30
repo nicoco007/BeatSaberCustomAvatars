@@ -93,6 +93,7 @@ namespace CustomAvatar.Utilities.Protobuf
         {
             int width = value.width;
             int height = value.height;
+            int mipmapCount = value.mipmapCount;
             GraphicsFormat graphicsFormat = value.graphicsFormat;
             byte[] textureBytes;
 
@@ -108,13 +109,13 @@ namespace CustomAvatar.Utilities.Protobuf
                     float scale = Mathf.Min(1, (float)kMaxTextureSize / value.width, (float)kMaxTextureSize / value.height);
                     width = Mathf.RoundToInt(value.width * scale);
                     height = Mathf.RoundToInt(value.height * scale);
-
+                    mipmapCount = Math.Min(value.mipmapCount, (int)Math.Ceiling(Log2(Math.Max(width, height))) + 1);
                     graphicsFormat = SystemInfo.GetCompatibleFormat(value.graphicsFormat, FormatUsage.Render);
 
                     RenderTextureDescriptor renderTextureDescriptor = new(width, height)
                     {
                         graphicsFormat = graphicsFormat,
-                        mipCount = value.mipmapCount,
+                        mipCount = mipmapCount,
                         useMipMap = value.mipmapCount > 1,
                     };
 
@@ -146,7 +147,7 @@ namespace CustomAvatar.Utilities.Protobuf
             state.WriteInt32((int)graphicsFormat);
 
             state.WriteFieldHeader(4, WireType.Varint);
-            state.WriteInt32(value.mipmapCount);
+            state.WriteInt32(mipmapCount);
 
             state.WriteFieldHeader(5, WireType.String);
             state.WriteBytes(textureBytes);
@@ -187,5 +188,7 @@ namespace CustomAvatar.Utilities.Protobuf
 
             return textureBytes;
         }
+
+        private double Log2(double d) => Math.Log(d) / Math.Log(2);
     }
 }
