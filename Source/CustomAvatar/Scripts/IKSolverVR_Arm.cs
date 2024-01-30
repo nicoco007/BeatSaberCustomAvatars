@@ -18,7 +18,7 @@ extern alias BeatSaberFinalIK;
 
 using BeatSaberFinalIK::RootMotion.FinalIK;
 
-namespace CustomAvatar
+namespace CustomAvatar.Scripts
 {
     internal class IKSolverVR_Arm : IKSolverVR.Arm
     {

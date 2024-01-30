@@ -18,6 +18,7 @@ extern alias BeatSaberFinalIK;
 
 using BeatSaberFinalIK::RootMotion.FinalIK;
 using CustomAvatar.Logging;
+using CustomAvatar.Scripts;
 using UnityEngine;
 
 namespace CustomAvatar.Utilities

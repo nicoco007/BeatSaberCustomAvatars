@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using BeatSaberFinalIK::RootMotion.FinalIK;
+using CustomAvatar.Scripts;
 using CustomAvatar.Utilities;
 using HarmonyLib;
 
