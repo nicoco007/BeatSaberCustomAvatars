@@ -109,32 +109,47 @@ namespace CustomAvatar.Utilities
             vrik.solver.spine.moveBodyBackWhenCrouching = vrikManager.solver_spine_moveBodyBackWhenCrouching;
             vrik.solver.spine.maintainPelvisPosition = vrikManager.solver_spine_maintainPelvisPosition;
             vrik.solver.spine.maxRootAngle = vrikManager.solver_spine_maxRootAngle;
-            vrik.solver.leftArm.target = vrikManager.solver_leftArm_target;
-            vrik.solver.leftArm.bendGoal = vrikManager.solver_leftArm_bendGoal;
-            vrik.solver.leftArm.positionWeight = vrikManager.solver_leftArm_positionWeight;
-            vrik.solver.leftArm.rotationWeight = vrikManager.solver_leftArm_rotationWeight;
-            vrik.solver.leftArm.shoulderRotationMode = vrikManager.solver_leftArm_shoulderRotationMode;
-            vrik.solver.leftArm.shoulderRotationWeight = vrikManager.solver_leftArm_shoulderRotationWeight;
-            vrik.solver.leftArm.shoulderTwistWeight = vrikManager.solver_leftArm_shoulderTwistWeight;
-            vrik.solver.leftArm.bendGoalWeight = vrikManager.solver_leftArm_bendGoalWeight;
-            vrik.solver.leftArm.swivelOffset = vrikManager.solver_leftArm_swivelOffset;
-            vrik.solver.leftArm.wristToPalmAxis = vrikManager.solver_leftArm_wristToPalmAxis;
-            vrik.solver.leftArm.palmToThumbAxis = vrikManager.solver_leftArm_palmToThumbAxis;
-            vrik.solver.leftArm.armLengthMlp = vrikManager.solver_leftArm_armLengthMlp;
-            vrik.solver.leftArm.stretchCurve = vrikManager.solver_leftArm_stretchCurve;
-            vrik.solver.rightArm.target = vrikManager.solver_rightArm_target;
-            vrik.solver.rightArm.bendGoal = vrikManager.solver_rightArm_bendGoal;
-            vrik.solver.rightArm.positionWeight = vrikManager.solver_rightArm_positionWeight;
-            vrik.solver.rightArm.rotationWeight = vrikManager.solver_rightArm_rotationWeight;
-            vrik.solver.rightArm.shoulderRotationMode = vrikManager.solver_rightArm_shoulderRotationMode;
-            vrik.solver.rightArm.shoulderRotationWeight = vrikManager.solver_rightArm_shoulderRotationWeight;
-            vrik.solver.rightArm.shoulderTwistWeight = vrikManager.solver_rightArm_shoulderTwistWeight;
-            vrik.solver.rightArm.bendGoalWeight = vrikManager.solver_rightArm_bendGoalWeight;
-            vrik.solver.rightArm.swivelOffset = vrikManager.solver_rightArm_swivelOffset;
-            vrik.solver.rightArm.wristToPalmAxis = vrikManager.solver_rightArm_wristToPalmAxis;
-            vrik.solver.rightArm.palmToThumbAxis = vrikManager.solver_rightArm_palmToThumbAxis;
-            vrik.solver.rightArm.armLengthMlp = vrikManager.solver_rightArm_armLengthMlp;
-            vrik.solver.rightArm.stretchCurve = vrikManager.solver_rightArm_stretchCurve;
+
+#if UNITY_EDITOR
+            IKSolverVR.Arm leftArm = vrik.solver.leftArm;
+#else
+            var leftArm = (IKSolverVR_Arm)vrik.solver.leftArm;
+            leftArm.shoulderPitchOffset = CalculatePitchOffset(true, vrik.references.root, vrik.references.leftShoulder, vrik.references.leftUpperArm);
+#endif
+            leftArm.target = vrikManager.solver_leftArm_target;
+            leftArm.bendGoal = vrikManager.solver_leftArm_bendGoal;
+            leftArm.positionWeight = vrikManager.solver_leftArm_positionWeight;
+            leftArm.rotationWeight = vrikManager.solver_leftArm_rotationWeight;
+            leftArm.shoulderRotationMode = vrikManager.solver_leftArm_shoulderRotationMode;
+            leftArm.shoulderRotationWeight = vrikManager.solver_leftArm_shoulderRotationWeight;
+            leftArm.shoulderTwistWeight = vrikManager.solver_leftArm_shoulderTwistWeight;
+            leftArm.bendGoalWeight = vrikManager.solver_leftArm_bendGoalWeight;
+            leftArm.swivelOffset = vrikManager.solver_leftArm_swivelOffset;
+            leftArm.wristToPalmAxis = vrikManager.solver_leftArm_wristToPalmAxis;
+            leftArm.palmToThumbAxis = vrikManager.solver_leftArm_palmToThumbAxis;
+            leftArm.armLengthMlp = vrikManager.solver_leftArm_armLengthMlp;
+            leftArm.stretchCurve = vrikManager.solver_leftArm_stretchCurve;
+
+#if UNITY_EDITOR
+            IKSolverVR.Arm rightArm = vrik.solver.rightArm;
+#else
+            var rightArm = (IKSolverVR_Arm)vrik.solver.rightArm;
+            rightArm.shoulderPitchOffset = CalculatePitchOffset(false, vrik.references.root, vrik.references.rightShoulder, vrik.references.rightUpperArm);
+#endif
+            rightArm.target = vrikManager.solver_rightArm_target;
+            rightArm.bendGoal = vrikManager.solver_rightArm_bendGoal;
+            rightArm.positionWeight = vrikManager.solver_rightArm_positionWeight;
+            rightArm.rotationWeight = vrikManager.solver_rightArm_rotationWeight;
+            rightArm.shoulderRotationMode = vrikManager.solver_rightArm_shoulderRotationMode;
+            rightArm.shoulderRotationWeight = vrikManager.solver_rightArm_shoulderRotationWeight;
+            rightArm.shoulderTwistWeight = vrikManager.solver_rightArm_shoulderTwistWeight;
+            rightArm.bendGoalWeight = vrikManager.solver_rightArm_bendGoalWeight;
+            rightArm.swivelOffset = vrikManager.solver_rightArm_swivelOffset;
+            rightArm.wristToPalmAxis = vrikManager.solver_rightArm_wristToPalmAxis;
+            rightArm.palmToThumbAxis = vrikManager.solver_rightArm_palmToThumbAxis;
+            rightArm.armLengthMlp = vrikManager.solver_rightArm_armLengthMlp;
+            rightArm.stretchCurve = vrikManager.solver_rightArm_stretchCurve;
+
             vrik.solver.leftLeg.target = vrikManager.solver_leftLeg_target;
             vrik.solver.leftLeg.bendGoal = vrikManager.solver_leftLeg_bendGoal;
             vrik.solver.leftLeg.positionWeight = vrikManager.solver_leftLeg_positionWeight;
@@ -172,5 +187,18 @@ namespace CustomAvatar.Utilities
             vrik.solver.locomotion.onLeftFootstep = vrikManager.solver_locomotion_onLeftFootstep;
             vrik.solver.locomotion.onRightFootstep = vrikManager.solver_locomotion_onRightFootstep;
         }
+
+#if !UNITY_EDITOR
+        private static float CalculatePitchOffset(bool isLeft, Transform root, Transform shoulder, Transform upperArm)
+        {
+            // Reading IKSolverVR.Arm's Shoulder Pitch section, it looks like:
+            // - chestForward is essentially just the root forward
+            // - pitch is always (90 degrees to either side of chestUp) * chestRotation, so effectively left and right of the chest.
+            Vector3 forward = root.forward;
+            Vector3 right = root.right;
+
+            return Vector3.SignedAngle(isLeft ? -right : right, upperArm.position - shoulder.position, isLeft ? forward : -forward) - 45f;
+        }
+#endif
     }
 }
