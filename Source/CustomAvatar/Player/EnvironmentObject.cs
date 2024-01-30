@@ -48,7 +48,7 @@ namespace CustomAvatar.Player
 
             foreach (Renderer renderer in GetComponentsInChildren<Renderer>().Where(mr => mr.isPartOfStaticBatch))
             {
-                renderer.SetStaticBatchRootTransform(transform);
+                renderer.staticBatchRootTransform = transform;
             }
 
             _saberBurnMarkSparkles = GetComponentsInChildren<SaberBurnMarkSparkles>();
