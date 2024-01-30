@@ -137,7 +137,7 @@
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="UnityEngine.CoreModule">
+    <Reference Include="UnityEngine.CoreModule" Publicize="true">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
