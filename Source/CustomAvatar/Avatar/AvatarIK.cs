@@ -48,7 +48,7 @@ namespace CustomAvatar.Avatar
 
         private readonly List<BeatSaberDynamicBone::DynamicBone> _dynamicBones = new();
         private TwistRelaxer[] _twistRelaxers;
-        private UpperArmRelaxer[] _upperArmRelaxers;
+        private TwistRelaxerV2[] _twistRelaxersV2;
 
         private IAvatarInput _input;
         private SpawnedAvatar _avatar;
@@ -73,7 +73,7 @@ namespace CustomAvatar.Avatar
             }
 
             _twistRelaxers = GetComponentsInChildren<TwistRelaxer>();
-            _upperArmRelaxers = GetComponentsInChildren<UpperArmRelaxer>();
+            _twistRelaxersV2 = GetComponentsInChildren<TwistRelaxerV2>();
         }
 
         private void OnEnable()
@@ -117,14 +117,14 @@ namespace CustomAvatar.Avatar
                 }
             }
 
-            foreach (UpperArmRelaxer upperArmRelaxer in _upperArmRelaxers)
+            foreach (TwistRelaxerV2 twistRelaxer in _twistRelaxersV2)
             {
-                upperArmRelaxer.ik = _vrik;
+                twistRelaxer.ik = _vrik;
 
-                if (upperArmRelaxer.enabled)
+                if (twistRelaxer.enabled)
                 {
-                    solver.OnPreUpdate += upperArmRelaxer.OnPreUpdate;
-                    solver.OnPostUpdate += upperArmRelaxer.OnPostUpdate;
+                    solver.OnPreUpdate += twistRelaxer.OnPreUpdate;
+                    solver.OnPostUpdate += twistRelaxer.OnPostUpdate;
                 }
             }
 
@@ -155,9 +155,9 @@ namespace CustomAvatar.Avatar
             _vrik.references.root.localRotation = _defaultRootPose.rotation;
             _vrik.solver.FixTransforms();
 
-            foreach (UpperArmRelaxer relaxer in _upperArmRelaxers)
+            foreach (TwistRelaxerV2 twistRelaxer in _twistRelaxersV2)
             {
-                relaxer.FixTransforms();
+                twistRelaxer.FixTransforms();
             }
 
             foreach (BeatSaberDynamicBone::DynamicBone dynamicBone in _dynamicBones)
