@@ -103,8 +103,6 @@ namespace CustomAvatar.Editor
                     assetNames = new[] { prefabPath }
                 };
 
-                assetBundleBuild.assetBundleName = destinationFileName;
-
                 BuildTargetGroup selectedBuildTargetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
                 BuildTarget activeBuildTarget = EditorUserBuildSettings.activeBuildTarget;
 
