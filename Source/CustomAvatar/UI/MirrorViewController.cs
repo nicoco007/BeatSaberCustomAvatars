@@ -17,6 +17,7 @@
 using System;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
+using BGLib.Polyglot;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Player;
@@ -24,7 +25,6 @@ using CustomAvatar.Rendering;
 using CustomAvatar.Tracking;
 using HMUI;
 using JetBrains.Annotations;
-using Polyglot;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
