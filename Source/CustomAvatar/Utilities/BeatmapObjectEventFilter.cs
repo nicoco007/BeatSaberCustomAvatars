@@ -118,7 +118,7 @@ namespace CustomAvatar.Utilities
         {
             NoteData noteData = noteController.noteData;
 
-            if (noteData.gameplayType is not NoteData.GameplayType.BurstSliderHead and not NoteData.GameplayType.BurstSliderElement and not NoteData.GameplayType.BurstSliderElementFill)
+            if (noteData.gameplayType is not NoteData.GameplayType.BurstSliderHead and not NoteData.GameplayType.BurstSliderElement)
             {
                 return false;
             }

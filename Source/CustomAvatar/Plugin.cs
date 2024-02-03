@@ -25,7 +25,6 @@ using HarmonyLib;
 using IPA;
 using IPA.Loader;
 using SiraUtil.Zenject;
-using Zenject;
 using Logger = IPA.Logging.Logger;
 
 namespace CustomAvatar
