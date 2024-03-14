@@ -150,7 +150,7 @@ namespace CustomAvatar.Tracking
             }
         }
 
-        private bool _shouldBeEnabled => _vrPlatformHelper != null && _vrPlatformHelper.hasInputFocus && _vrPlatformHelper.hasVrFocus && !_fpfcSettings.Enabled;
+        private bool _shouldBeEnabled => _vrPlatformHelper != null && _vrPlatformHelper.hasInputFocus && _vrPlatformHelper.hasVrFocus;
 
         internal void BeginCalibration(CalibrationMode calibrationMode)
         {
@@ -325,6 +325,7 @@ namespace CustomAvatar.Tracking
             }
 
             this.enabled = this._shouldBeEnabled;
+            _parentConstraint.enabled = _scaleConstraint.enabled = !_fpfcSettings.Enabled;
 
             UpdateOffsets();
             UpdateControllerOffsets();
@@ -501,6 +502,7 @@ namespace CustomAvatar.Tracking
         private void OnInputFocusWasChanged()
         {
             this.enabled = _shouldBeEnabled;
+            _parentConstraint.enabled = _scaleConstraint.enabled = !_fpfcSettings.Enabled;
         }
 
         private void UpdateOffsets()
