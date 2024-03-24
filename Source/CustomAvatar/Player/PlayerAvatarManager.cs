@@ -441,7 +441,7 @@ namespace CustomAvatar.Player
             UpdateAvatarVerticalPosition();
         }
 
-        private void ResizeCurrentAvatar()
+        internal void ResizeCurrentAvatar()
         {
             if (currentlySpawnedAvatar == null)
             {

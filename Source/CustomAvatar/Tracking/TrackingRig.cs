@@ -170,6 +170,8 @@ namespace CustomAvatar.Tracking
 
             activeCalibrationMode = CalibrationMode.None;
 
+            _playerAvatarManager.ResizeCurrentAvatar();
+
             trackingChanged?.Invoke();
         }
 
