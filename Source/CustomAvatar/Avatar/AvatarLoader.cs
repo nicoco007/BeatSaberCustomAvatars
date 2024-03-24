@@ -152,7 +152,11 @@ namespace CustomAvatar.Avatar
             }
             finally
             {
-                await assetBundle.UnloadAsync(avatarPrefab == null);
+                if (assetBundle != null)
+                {
+                    await assetBundle.UnloadAsync(avatarPrefab == null);
+                }
+
                 _tasks.Remove(fullPath);
             }
         }
