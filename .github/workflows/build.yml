@@ -26,7 +26,7 @@ jobs:
       with:
         manifest: ${{ github.workspace }}\Source\CustomAvatar\manifest.json
         path: ${{ runner.temp }}\BeatSaberBindings
-        additional-dependencies: '{ "Unity.XR.Hands": "^1.1.0" }'
+        additional-dependencies: '{ "Unity.XR.Hands": "^1.1.0", "OpenVR API": "^2.0.0" }'
 
     - name: Add NuGet source
       run: dotnet nuget update source "nicoco007 GitHub Packages" --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text
