@@ -1,0 +1,91 @@
+﻿<Project>
+  <PropertyGroup>
+    <ManifestPath>$(ProjectDir)manifest.json</ManifestPath>
+    <ManifestPath Condition="'$(BeatSaberOutputType)' == 'Library'">$(ProjectDir)$(TargetName).manifest</ManifestPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="$(ManifestPath)" Condition="'$(BeatSaberOutputType)' != 'Library'" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(ManifestPath)" CopyToOutputDirectory="Always" Condition="'$(BeatSaberOutputType)' == 'Library'" />
+  </ItemGroup>
+
+  <!--Get info about the project used by later targets -->
+  <Target Name="GetProjectInfo" AfterTargets="BeforeBuild">
+    <GetManifestInfo ManifestPath="$(ManifestPath)">
+      <Output TaskParameter="PluginVersion" PropertyName="PluginVersion" />
+      <Output TaskParameter="GameVersion" PropertyName="GameVersion" />
+      <Output TaskParameter="BasePluginVersion" PropertyName="BasePluginVersion" />
+    </GetManifestInfo>
+    
+    <PropertyGroup>
+      <Version>$(BasePluginVersion)</Version>
+      <FileVersion>$(BasePluginVersion)</FileVersion>
+      <InformationalVersion>$(PluginVersion)</InformationalVersion>
+    </PropertyGroup>
+  </Target>
+
+  <!-- Set shared properties that can't be set in a top-level PropertyGroup (too early) -->
+  <Target Name="GetProperties">
+    <PropertyGroup>
+      <ArtifactDir>$(TargetDir)Artifact\</ArtifactDir>
+      <ArtifactTargetDir>$(ArtifactDir)Plugins</ArtifactTargetDir>
+    </PropertyGroup>
+    
+    <PropertyGroup Condition="'$(BeatSaberOutputType)' == 'Library'">
+      <ArtifactTargetDir>$(ArtifactDir)Libs</ArtifactTargetDir>
+    </PropertyGroup>
+  </Target>
+
+  <!-- Copy the assembly and PDB to the Artifact folder -->
+  <Target Name="CopyToArtifact" AfterTargets="AfterBuild" DependsOnTargets="GetProperties">
+    <Message Text="$(MSBuildProjectName) -&gt; $(ArtifactDir)" Importance="high" />
+
+    <MakeDir Directories="$(ArtifactDir)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ArtifactTargetDir)" />
+    <Copy SourceFiles="$(TargetDir)$(TargetName).pdb" DestinationFolder="$(ArtifactTargetDir)" Condition="Exists('$(TargetDir)$(TargetName).pdb')" />
+    <Copy SourceFiles="$(TargetDir)$(TargetName).xml" DestinationFolder="$(ArtifactTargetDir)" Condition="Exists('$(TargetDir)$(TargetName).xml')" />
+    <Copy SourceFiles="$(TargetDir)$(TargetName).manifest" DestinationFolder="$(ArtifactDir)Plugins" Condition="Exists('$(TargetDir)$(TargetName).manifest')" />
+
+    <!-- copy static files -->
+    <ItemGroup>
+      <FilesToCopy Include="$(ProjectDir)..\..\Packaging\CustomAvatar\**\*.*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(FilesToCopy)" DestinationFiles="@(FilesToCopy->'$(ArtifactDir)\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
+  <Target Name="SetGitHubActionsOutput" AfterTargets="CopyToArtifact" Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <Message Text="Writing to GitHub output" Importance="high" />
+
+    <PropertyGroup>
+      <ArtifactName>$(ProjectName)-v$(PluginVersion)</ArtifactName>
+      <ArtifactName Condition="'$(Configuration)' != 'Release'">$(ArtifactName)-$(Configuration)</ArtifactName>
+    </PropertyGroup>
+    
+    <ItemGroup>
+      <LinesToWrite Include="artifact-name=$(ArtifactName)" />
+      <LinesToWrite Include="artifact-path=$(ArtifactDir)" />
+    </ItemGroup>
+
+    <WriteLinesToFile File="$(GITHUB_OUTPUT)" Lines="@(LinesToWrite)" />
+  </Target>
+
+  <!-- Copy the assembly and PDB to the Beat Saber folder -->
+  <Target Name="CopyToPlugins" AfterTargets="CopyToArtifact" Condition="'$(BeatSaberDir)' != '' AND '$(CI)' == '' AND '$(NCrunch)' != '1'">
+    <Message Text="$(MSBuildProjectName) -&gt; $(BeatSaberDir)" Importance="high" />
+
+    <ItemGroup>
+      <FilesToCopy Include="$(ArtifactDir)\**\*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(BeatSaberDir)\%(RecursiveDir)" />
+  </Target>
+
+  <!-- Clean up artifact files -->
+  <Target Name="CleanArtifact" AfterTargets="Clean" DependsOnTargets="GetProperties">
+    <RemoveDir Directories="$(ArtifactDir)" />
+  </Target>
+</Project>

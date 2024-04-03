@@ -1,6 +1,6 @@
 root = true
 
-[*.{bsml,csproj,csproj.user}]
+[*.{bsml,csproj,csproj.user,props,targets}]
 indent_size = 2
 indent_style = space
 trim_trailing_whitespace = true

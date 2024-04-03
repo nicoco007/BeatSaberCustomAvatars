@@ -13,53 +13,40 @@ jobs:
     runs-on: windows-latest
     steps:
     - name: Check out
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
-    - name: Set up environment
-      run: ${{ github.workspace }}\.github\workflows\set_up_env.ps1 "${{ github.workspace }}\Source\CustomAvatar\manifest.json"
-
-    - name: Fetch Beat Saber Bindings
-      run: git clone https://${{ github.actor }}:${{ secrets.PRIVATE_GITHUB_TOKEN }}@github.com/nicoco007/BeatSaberBindings --branch v${{ env.GAME_VERSION }} --single-branch '${{ runner.temp }}\BeatSaberBindings\Beat Saber_Data\Managed'
-
-    - name: Download dependencies
-      uses: nicoco007/download-beatmods-deps@main
+    - name: Set up Beat Saber
+      uses: nicoco007/setup-beat-saber@main
       with:
-        manifest: ${{ github.workspace }}\Source\CustomAvatar\manifest.json
-        path: ${{ runner.temp }}\BeatSaberBindings
+        access-token: ${{ secrets.PRIVATE_GITHUB_TOKEN }}
         additional-dependencies: '{ "XR Hands": "^1.1.0", "OpenVR API": "^2.0.0" }'
+        manifest: ${{ github.workspace }}\Source\CustomAvatar\manifest.json
 
     - name: Add NuGet source
       run: dotnet nuget update source "nicoco007 GitHub Packages" --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text
-  
-    - name: Build Debug
-      run: dotnet build Source\CustomAvatar\CustomAvatar.csproj -c Debug -p:BeatSaberDir=${{ runner.temp }}\BeatSaberBindings
-
-    - name: Upload Debug
-      uses: actions/upload-artifact@v3
-      with:
-        name: BeatSaberCustomAvatars-${{ env.ZIP_VERSION }}-DEBUG
-        path: Source\CustomAvatar\bin\Debug\net472\publish
 
     - name: Build Release
-      run: dotnet build Source\CustomAvatar\CustomAvatar.csproj -c Release -p:BeatSaberDir=${{ runner.temp }}\BeatSaberBindings
+      id: build-release
+      run: dotnet build Source\CustomAvatar\CustomAvatar.csproj -c Release
 
     - name: Upload Release
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: BeatSaberCustomAvatars-${{ env.ZIP_VERSION }}-RELEASE
-        path: Source\CustomAvatar\bin\Release\net472\publish
+        name: ${{ steps.build-release.outputs.artifact-name }}
+        path: ${{ steps.build-release.outputs.artifact-path }}
 
     - name: Build Editor
-      run: dotnet build Source\CustomAvatar-Editor\CustomAvatar-Editor.csproj -c Release -p:BeatSaberDir=${{ runner.temp }}\BeatSaberBindings
+      id: build-editor
+      run: dotnet build Source\CustomAvatar-Editor\CustomAvatar-Editor.csproj -c Release
 
     - name: Upload Editor
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: BeatSaberCustomAvatars-${{ env.ZIP_VERSION }}-Editor
-        path: Source\CustomAvatar-Editor\bin\Release\net472\publish\CustomAvatar.dll
+        name: ${{ steps.build-editor.outputs.artifact-name }}
+        path: ${{ steps.build-editor.outputs.artifact-path }}
     
     - name: Upload Unity Project
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: BeatSaberCustomAvatars-${{ env.ZIP_VERSION }}-UnityProject
-        path: Unity
+        name: ${{ steps.build-editor.outputs.unity-project-name }}
+        path: Unity\BeatSaberCustomAvatars

@@ -1,0 +1,68 @@
+﻿<Project>
+  <PropertyGroup>
+    <ManifestPath>$(ProjectDir)..\CustomAvatar\manifest.json</ManifestPath>
+  </PropertyGroup>
+  
+  <!--Get info about the project used by later targets -->
+  <Target Name="GetProjectInfo" AfterTargets="BeforeBuild">
+    <GetManifestInfo ManifestPath="$(ManifestPath)">
+      <Output TaskParameter="PluginVersion" PropertyName="PluginVersion" />
+      <Output TaskParameter="GameVersion" PropertyName="GameVersion" />
+      <Output TaskParameter="BasePluginVersion" PropertyName="BasePluginVersion" />
+    </GetManifestInfo>
+    
+    <PropertyGroup>
+      <Version>$(BasePluginVersion)</Version>
+      <FileVersion>$(BasePluginVersion)</FileVersion>
+      <InformationalVersion>$(PluginVersion)</InformationalVersion>
+    </PropertyGroup>
+  </Target>
+
+  <!-- Set shared properties that can't be set in a top-level PropertyGroup (too early) -->
+  <Target Name="GetProperties">
+    <PropertyGroup>
+      <ArtifactDir>$(TargetDir)Artifact\</ArtifactDir>
+    </PropertyGroup>
+  </Target>
+
+  <!-- Copy the assembly and PDB to the Artifact folder -->
+  <Target Name="CopyToArtifact" AfterTargets="AfterBuild" DependsOnTargets="GetProperties">
+    <Message Text="$(MSBuildProjectName) -&gt; $(ArtifactDir)" Importance="high" />
+
+    <MakeDir Directories="$(ArtifactDir)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ArtifactDir)" />
+  </Target>
+
+  <Target Name="SetGitHubActionsOutput" AfterTargets="CopyToArtifact" Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <Message Text="Writing to GitHub output" Importance="high" />
+
+    <PropertyGroup>
+      <ArtifactName>$(ProjectName)-v$(PluginVersion)</ArtifactName>
+      <ArtifactName Condition="'$(Configuration)' != 'Release'">$(ArtifactName)-$(Configuration)</ArtifactName>
+    </PropertyGroup>
+    
+    <ItemGroup>
+      <LinesToWrite Include="artifact-name=$(ArtifactName)" />
+      <LinesToWrite Include="artifact-path=$(ArtifactDir)" />
+      <LinesToWrite Include="unity-project-name=$(ArtifactName.Replace('Editor', 'UnityProject'))" />
+    </ItemGroup>
+
+    <WriteLinesToFile File="$(GITHUB_OUTPUT)" Lines="@(LinesToWrite)" />
+  </Target>
+
+  <!-- Copy the assembly and PDB to the Unity Project's folder -->
+  <Target Name="CopyToUnityProject" AfterTargets="CopyToArtifact" Condition="'$(UnityProjectDir)' != ''">
+    <Message Text="$(MSBuildProjectName) -&gt; $(UnityProjectDir)" Importance="high" />
+
+    <ItemGroup>
+      <FilesToCopy Include="$(ArtifactDir)\**\*" />
+    </ItemGroup>
+
+	  <Copy SourceFiles="@(FilesToCopy)" DestinationFiles="@(FilesToCopy->'$(UnityProjectDir)\Assets\Libraries\%(RecursiveDir)%(Filename)%(Extension)')" Condition="!Exists('$(UnityProjectDir)\Assets\Libraries\%(RecursiveDir)%(Filename)%(Extension)') OR '%(Extension)' != '.meta'" />
+  </Target>
+
+  <!-- Clean up artifact files -->
+  <Target Name="CleanArtifact" AfterTargets="Clean" DependsOnTargets="GetProperties">
+    <RemoveDir Directories="$(ArtifactDir)" />
+  </Target>
+</Project>

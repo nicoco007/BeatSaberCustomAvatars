@@ -82,43 +82,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\**\*.*" />
   </ItemGroup>
-  <Target Name="CheckBSMTInstalled" AfterTargets="BeforeBuild" Condition="'$(BSMTTaskAssembly)' == ''">
-    <Error Text="The BeatSaberModdingTools.Tasks NuGet package doesn't seem to be installed. Please restore NuGet packages before building the project." />
-  </Target>
-  <Target Name="SetAssemblyVersion" AfterTargets="CheckBSMTInstalled">
-    <GetManifestInfo ManifestPath="../CustomAvatar/manifest.json">
-      <Output TaskParameter="BasePluginVersion" PropertyName="BasePluginVersion" />
-    </GetManifestInfo>
-
-    <PropertyGroup>
-      <Version>$(BasePluginVersion)</Version>
-    </PropertyGroup>
-  </Target>
-  <Target Name="Organize" AfterTargets="AfterBuild">
-    <!-- remove deps.json file since it's not used -->
-    <Delete Files="$(TargetDir)$(TargetName).deps.json" />
-
-    <!-- make sure we have a clean slate -->
-    <RemoveDir Directories="$(PublishDir)" />
-    
-    <MakeDir Directories="$(PublishDir)" />
-    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PublishDir)" />
-    
-    <!-- copy static files -->
-    <Copy SourceFiles="@(CopyToOutput)" DestinationFiles="@(CopyToOutput->'$(PublishDir)\%(RecursiveDir)%(Filename)%(Extension)')" />
-  </Target>
-  <Target Name="CopyUnityProjectFiles" AfterTargets="AfterBuild" Condition="$(UnityProjectDir) != ''">
-    <ItemGroup>
-      <CopyToUnityProjectFolder Include="$(PublishDir)**\*.*" />
-    </ItemGroup>
-
-    <Copy SourceFiles="@(CopyToUnityProjectFolder)" DestinationFiles="@(CopyToUnityProjectFolder->'$(UnityProjectDir)\Assets\Libraries\%(RecursiveDir)%(Filename)%(Extension)')" Condition="!Exists('$(UnityProjectDir)\Assets\Libraries\%(RecursiveDir)%(Filename)%(Extension)') OR '%(Extension)' != '.meta'" />
-  </Target>
   <ItemGroup>
-    <PackageReference Include="BeatSaberModdingTools.Tasks" Version="1.4.3">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="BSIPA.AssemblyPublicizer.MSBuild" Version="0.5.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
