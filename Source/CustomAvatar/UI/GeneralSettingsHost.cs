@@ -139,7 +139,8 @@ namespace CustomAvatar.UI
 
         public bool isMeasureButtonEnabled => _trackingRig.areBothHandsTracking;
 
-        public string measureButtonText => _armSpanMeasurer.isMeasuring ? "Cancel" : "Measure";
+        // TODO: find or create a better cancel icon
+        public string measureButtonIcon => _armSpanMeasurer.isMeasuring ? "#ResetIcon" : "#MeasureIcon";
 
         public string measureButtonHoverHintText => isMeasureButtonEnabled
             ? "For optimal results, hold your arms out to either side of your body and point the ends of the controllers outwards as far as possible (turn your hands if necessary)."
@@ -212,7 +213,7 @@ namespace CustomAvatar.UI
         {
             this.armSpan = armSpan;
             NotifyPropertyChanged(nameof(isHeightAdjustInteractable));
-            NotifyPropertyChanged(nameof(measureButtonText));
+            NotifyPropertyChanged(nameof(measureButtonIcon));
         }
 
         private void OnPlayerEyeHeightChanged(float eyeHeight)
@@ -290,7 +291,7 @@ namespace CustomAvatar.UI
             }
 
             NotifyPropertyChanged(nameof(isHeightAdjustInteractable));
-            NotifyPropertyChanged(nameof(measureButtonText));
+            NotifyPropertyChanged(nameof(measureButtonIcon));
         }
 
 #pragma warning restore IDE0051

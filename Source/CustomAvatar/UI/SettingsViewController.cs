@@ -20,11 +20,9 @@ using System.Linq;
 using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
-using BGLib.Polyglot;
 using CustomAvatar.Tracking;
 using HMUI;
 using IPA.Loader;
-using TMPro;
 using UnityEngine;
 using Zenject;
 
@@ -45,7 +43,6 @@ namespace CustomAvatar.UI
 
         #endregion
 
-        private PlatformLeaderboardViewController _leaderboardViewController;
         private List<IAvatarsMenuTab> _avatarsMenuTabs;
         private PluginMetadata _pluginMetadata;
         private TrackingRig _trackingRig;
@@ -53,7 +50,6 @@ namespace CustomAvatar.UI
 
         [Inject]
         internal void Construct(
-            PlatformLeaderboardViewController leaderboardViewController,
             List<IAvatarsMenuTab> avatarsMenuTabs,
             PluginMetadata pluginMetadata,
             TrackingRig trackingRig,
@@ -63,7 +59,6 @@ namespace CustomAvatar.UI
             InterfaceSettingsHost interfaceSettingsHost,
             BSMLParser bsmlParser)
         {
-            _leaderboardViewController = leaderboardViewController;
             _avatarsMenuTabs = avatarsMenuTabs;
             _pluginMetadata = pluginMetadata;
             _trackingRig = trackingRig;
@@ -92,19 +87,6 @@ namespace CustomAvatar.UI
 
             if (firstActivation)
             {
-                RectTransform header = Instantiate((RectTransform)_leaderboardViewController.transform.Find("HeaderPanel"), rectTransform, false);
-
-                header.name = "HeaderPanel";
-
-                Destroy(header.GetComponentInChildren<LocalizedTextMeshProUGUI>());
-
-                TextMeshProUGUI textMesh = header.Find("Text").GetComponent<TextMeshProUGUI>();
-                textMesh.text = "Settings";
-
-                ImageView bg = header.Find("BG").GetComponent<ImageView>();
-                bg.color0 = new Color(1, 1, 1, 0);
-                bg.color1 = new Color(1, 1, 1, 1);
-
                 for (int i = 0; i < _avatarsMenuTabs.Count; ++i)
                 {
                     try

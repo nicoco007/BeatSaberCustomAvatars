@@ -1,40 +1,44 @@
-<bg id="container">  
-  <tab-selector tab-tag="avatar-tabs" size-delta-x="0" size-delta-y="7" anchor-pos-x="0" anchor-pos-y="-10" />
+<bg id="container" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://monkeymanboy.github.io/BSML-Docs/ https://monkeymanboy.github.io/BSML-Docs/BSMLSchema.xsd">
+  <bg background="title-gradient" size-delta="90 8" anchor-min="0.5 1" anchor-max="0.5 1" background-color0="#FFF0" background-color1="#FFF3" pivot="0.5 1">
+    <text text="Settings" anchor-min="0 0" anchor-max="1 1" size-delta="0 0" font-size="6" italics="true" all-uppercase="true" align="Midline" />
+  </bg>
+  
+  <tab-selector tab-tag="avatar-tabs" size-delta="0 7" anchored-position="0 -10" />
 
-  <tab tags="avatar-tabs" tab-name="General" anchor-max-y="0.8">
-    <settings-container anchor-pos-y="0" size-delta-y="0">
+  <tab tags="avatar-tabs" tab-name="General" size-delta-y="-16" anchored-position-y="-8">
+    <settings-container size-delta-x="-20" anchored-position-x="4">
       <macro.as-host host="generalSettingsHost">
-        <dropdown-list-setting text="Resize Mode" value="resizeMode" bind-value="true" apply-on-change="true" options="resizeModeOptions" formatter="ResizeModeFormatter"></dropdown-list-setting>
-        <dropdown-list-setting text="Floor Height Adjust" hover-hint="Move the floor/environment so the avatar is standing at full height even if it is taller or shorter than the player." value="floorHeightAdjustMode" bind-value="true" apply-on-change="true" options="floorHeightAdjustOptions" formatter="FloorHeightAdjustFormatter"/>
+        <dropdown-list-setting text="Resize Mode" value="resizeMode" bind-value="true" apply-on-change="true" options="resizeModeOptions" formatter="ResizeModeFormatter" />
+        <dropdown-list-setting text="Floor Height Adjust" hover-hint="Move the floor/environment so the avatar is standing at full height even if it is taller or shorter than the player." value="floorHeightAdjustMode" bind-value="true" apply-on-change="true" options="floorHeightAdjustOptions" formatter="FloorHeightAdjustFormatter" />
 
-        <horizontal pref-height="7">
-          <text text="Height" font-size="4" align="Left" italics="true"/>
-          <value-picker value="height" step="0.01" minimum="0" formatter="HeightFormatter"/>
-          <button text="Measure" hover-hint="Measure player height" on-click="OnMeasureHeightButtonClicked"/>
-        </horizontal>
-        
-        <horizontal pref-height="7">
-          <text text="Arm Span" font-size="4" align="Left" italics="true"></text>
-          <value-picker value="armSpan" step="0.01" minimum="0" formatter="ArmSpanFormatter" interactable="~isHeightAdjustInteractable"/>
-          <button text="~measureButtonText" interactable="~isMeasureButtonEnabled" hover-hint="~measureButtonHoverHintText" on-click="OnMeasureArmSpanButtonClicked"></button>
-        </horizontal>
+        <bg size-delta-y="7">
+          <text size-delta-x="-50" anchored-position-x="-25" anchor-min="0 0.5" anchor-max="1 0.5" text="Height" font-size="4" align="Left" italics="true" />
+          <value-picker size-delta="40 0" anchor-min="1 0" anchor-max="1 1" pivot="1 0.5" anchored-position="-7 0" value="height" step="0.01" minimum="0" formatter="HeightFormatter" />
+          <icon-button hover-hint="Measure player height" on-click="OnMeasureHeightButtonClicked" icon="#MeasureIcon" show-underline="false" anchor-min="1 0.5" anchor-max="1 0.5" pivot="1 0.5" anchored-position="0 0" size-delta="6 8" padding="1" horizontal-fit="Unconstrained" vertical-fit="Unconstrained" />
+        </bg>
+
+        <bg size-delta-y="7">
+          <text size-delta-x="-50" anchored-position-x="-25" anchor-min="0 0.5" anchor-max="1 0.5" text="Arm Span" font-size="4" align="Left" italics="true" />
+          <value-picker size-delta="40 0" anchor-min="1 0" anchor-max="1 1" pivot="1 0.5" anchored-position="-7 0" value="armSpan" step="0.01" minimum="0" formatter="ArmSpanFormatter" interactable="~isHeightAdjustInteractable" />
+          <icon-button hover-hint="~measureButtonHoverHintText" on-click="OnMeasureArmSpanButtonClicked" icon="~measureButtonIcon" interactable="~isMeasureButtonEnabled" show-underline="false" anchor-min="1 0.5" anchor-max="1 0.5" pivot="1 0.5" anchored-position="0 0" size-delta="6 8" padding="1" horizontal-fit="Unconstrained" vertical-fit="Unconstrained" />
+        </bg>
 
         <horizontal pref-width="90" pad-top="2">
           <text color="#808080" text="Visibility" font-size="4" italics="true" align="Baseline" />
         </horizontal>
         
-        <toggle-setting text="Show in First Person" value="visibleInFirstPerson" bind-value="true" apply-on-change="true"/>
-        <toggle-setting text="Show in Smooth Camera" value="showAvatarInSmoothCamera" bind-value="true" apply-on-change="true"/>
-        <toggle-setting text="Show in Mirrors" value="showAvatarInMirrors" bind-value="true" apply-on-change="true"/>
-        <toggle-setting text="Show Controllers/Trackers" active="~showRenderModelsOption" hover-hint="Show controllers/trackers while in this menu" value="showRenderModels" bind-value="true" apply-on-change="true"/>
+        <toggle-setting text="Show in First Person" value="visibleInFirstPerson" bind-value="true" apply-on-change="true" />
+        <toggle-setting text="Show in Smooth Camera" value="showAvatarInSmoothCamera" bind-value="true" apply-on-change="true" />
+        <toggle-setting text="Show in Mirrors" value="showAvatarInMirrors" bind-value="true" apply-on-change="true" />
+        <toggle-setting text="Show Controllers/Trackers" active="~showRenderModelsOption" hover-hint="Show controllers/trackers while in this menu" value="showRenderModels" bind-value="true" apply-on-change="true" />
 
         <horizontal pref-width="90" pad-top="2">
           <text color="#808080" text="Advanced" font-size="4" italics="true" align="Baseline" />
         </horizontal>
 
-      <toggle-setting value="moveFloorWithRoomAdjust" bind-value="true" apply-on-change="true" text="Move Floor with Room Adjust" hover-hint="Move the floor/environment along with the game's built-in vertical room adjust."/>
-        <toggle-setting value="enableLocomotion" bind-value="true" apply-on-change="true" text="Enable locomotion" hover-hint="Allow feet and waist to be moved automatically to follow your head/body when not using dedicated trackers. Only affects full body avatars."/>
-        <increment-setting value="cameraNearClipPlane" bind-value="true" apply-on-change="true" text="Camera Near Clip Plane" hover-hint="Distance from the eyes at which objets start being visible." min="0.01" max="0.3" increment="0.01"/>
+        <toggle-setting value="moveFloorWithRoomAdjust" bind-value="true" apply-on-change="true" text="Move Floor with Room Adjust" hover-hint="Move the floor/environment along with the game's built-in vertical room adjust." />
+        <toggle-setting value="enableLocomotion" bind-value="true" apply-on-change="true" text="Enable locomotion" hover-hint="Allow feet and waist to be moved automatically to follow your head/body when not using dedicated trackers. Only affects full body avatars." />
+        <increment-setting value="cameraNearClipPlane" bind-value="true" apply-on-change="true" text="Camera Near Clip Plane" hover-hint="Distance from the eyes at which objets start being visible." min="0.01" max="0.3" increment="0.01" />
       </macro.as-host>
 
       <horizontal pref-width="90" pad-top="2">
@@ -43,75 +47,63 @@
 
       <macro.as-host host="automaticFbtCalibrationHost">
         <macro.as-host host="trackerStatusHost">
-          <horizontal active="~trackersNotSupported" pad-top="2">
-            <text color="#FF8080" text="Tracker support is not available. Please install OpenXRTrackerProfiles." font-size="3" italics="true" align="Center" />
-          </horizontal>
-
-          <horizontal active="~noTrackersDetected" pad-top="2">
-            <text color="#FFFF80" text="~noTrackersDetectedMessage" font-size="3" italics="true" align="Center" />
-          </horizontal>
-
-          <horizontal active="~showOpenXRHint" pad-top="2">
-            <text color="#00BFFF" text="~openXRHint" font-size="3" italics="true" align="Center" />
+          <horizontal pad-top="2">
+            <text active="~trackersNotSupported" color="#FF8080" text="Tracker support is not available. Please install OpenXRTrackerProfiles." font-size="3" italics="true" align="Center" />
+            <text active="~noTrackersDetected" color="#FFFF80" text="~noTrackersDetectedMessage" font-size="3" italics="true" align="Center" />
+            <text active="~showOpenXRHint" color="#00BFFF" text="~openXRHint" font-size="3" italics="true" align="Center" />
           </horizontal>
         </macro.as-host>
 
         <horizontal child-align="MiddleLeft" child-expand-width="true" child-control-width="true" pad-top="1" pad-bottom="1">
-          <button text="Calibrate" hover-hint="~calibrateButtonHoverHint" interactable="~isCalibrateButtonEnabled" on-click="OnCalibrateAutoFullBodyTrackingClicked"></button>
-          <button text="Reset" interactable="~isClearButtonEnabled" on-click="OnClearAutoFullBodyTrackingCalibrationDataClicked"></button>
+          <button text="Calibrate" hover-hint="~calibrateButtonHoverHint" interactable="~isCalibrateButtonEnabled" on-click="OnCalibrateAutoFullBodyTrackingClicked" />
+          <button text="Reset" interactable="~isClearButtonEnabled" on-click="OnClearAutoFullBodyTrackingCalibrationDataClicked" />
         </horizontal>
       </macro.as-host>
     </settings-container>
   </tab>
 
-  <tab tags="avatar-tabs" tab-name="Current Avatar" anchor-max-y="0.8">
+  <tab tags="avatar-tabs" tab-name="Current Avatar" size-delta-y="-16" anchored-position-y="-8">
     <macro.as-host host="avatarSpecificSettingsHost">
       <loading-indicator active="~isLoaderActive" />
     
-      <settings-container anchor-pos-y="0" size-delta-y="0">
-        <dropdown-list-setting text="Calibration Mode" value="calibrationMode" bind-value="true" apply-on-change="true" interactable="~areCurrentAvatarSettingsLoaded" options="calibrationModeOptions" formatter="CalibrationModeFormatter"/>
-        <toggle-setting text="Ignore first person exclusions" value="ignoreExclusions" bind-value="true" apply-on-change="true" interactable="~areCurrentAvatarSettingsLoaded" hover-hint="Show the entire model in first person, even if some parts were configured to be hidden in first person. This may cause issues on certain avatars."/>
+      <settings-container size-delta-x="-20" anchored-position-x="4">
+        <dropdown-list-setting text="Calibration Mode" value="calibrationMode" bind-value="true" apply-on-change="true" interactable="~areCurrentAvatarSettingsLoaded" options="calibrationModeOptions" formatter="CalibrationModeFormatter" />
+        <toggle-setting text="Ignore first person exclusions" value="ignoreExclusions" bind-value="true" apply-on-change="true" interactable="~areCurrentAvatarSettingsLoaded" hover-hint="Show the entire model in first person, even if some parts were configured to be hidden in first person. This may cause issues on certain avatars." />
 
         <macro.as-host host="trackerStatusHost">
-          <horizontal active="~trackersNotSupported" pad-top="2">
-            <text color="#FF8080" text="Tracker support is not available. Please install OpenXRTrackerProfiles." font-size="3" italics="true" align="Center" />
-          </horizontal>
-
-          <horizontal active="~noTrackersDetected" pad-top="2">
-            <text color="#FFFF80" text="~noTrackersDetectedMessage" font-size="3" italics="true" align="Center" />
-          </horizontal>
-
-          <horizontal active="~showOpenXRHint" pad-top="2">
-            <text color="#00BFFF" text="~openXRHint" font-size="3" italics="true" align="Center" />
+          <horizontal pad-top="2">
+            <text active="~trackersNotSupported" color="#FF8080" text="Tracker support is not available. Please install OpenXRTrackerProfiles." font-size="3" italics="true" align="Center" />
+            <text active="~noTrackersDetected" color="#FFFF80" text="~noTrackersDetectedMessage" font-size="3" italics="true" align="Center" />
+            <text active="~showOpenXRHint" color="#00BFFF" text="~openXRHint" font-size="3" italics="true" align="Center" />
           </horizontal>
         </macro.as-host>
 
         <horizontal child-align="MiddleLeft" child-expand-width="true" child-control-width="true" pad-top="1" pad-bottom="1">
-          <button text="Calibrate" interactable="~isCalibrateButtonEnabled" hover-hint="~calibrateButtonHoverHint" on-click="OnCalibrateFullBodyTrackingClicked"></button>
-          <button text="Reset" interactable="~isClearButtonEnabled" hover-hint="Clear calibration data" on-click="OnClearFullBodyTrackingCalibrationDataClicked"></button>
+          <button text="Calibrate" interactable="~isCalibrateButtonEnabled" hover-hint="~calibrateButtonHoverHint" on-click="OnCalibrateFullBodyTrackingClicked" />
+          <button text="Reset" interactable="~isClearButtonEnabled" hover-hint="Clear calibration data" on-click="OnClearFullBodyTrackingCalibrationDataClicked" />
         </horizontal>
       </settings-container>
     </macro.as-host>
   </tab>
 
-  <tab tags="avatar-tabs" tab-name="Interface" anchor-max-y="0.8">
+  <tab tags="avatar-tabs" tab-name="Interface" size-delta-y="-16" anchored-position-y="-8">
     <macro.as-host host="interfaceSettingsHost">
-      <settings-container anchor-pos-y="0" size-delta-y="0">
+      <settings-container size-delta-x="-20" anchored-position-x="4">
         <horizontal pref-width="90" pad-top="2">
           <text color="#808080" text="Mirror" font-size="4" italics="true" align="Baseline" />
         </horizontal>
         <increment-setting text="Render Scale" value="renderScale" bind-value="true" apply-on-change="true" min="0.5" max="2" increment="0.1" />
         <list-setting text="Anti Aliasing" value="antiAliasingLevel" bind-value="true" apply-on-change="true" options="antiAliasingLevelOptions" formatter="AntiAliasingLevelFormatter" />
-        <toggle-setting text="Show in non-VR cameras" value="renderInExternalCameras" bind-value="true" apply-on-change="true" hover-hint="Disable this setting to improve performance in this menu when multiple cameras are used (e.g. smooth camera or Camera2)."/>
+        <toggle-setting text="Show in non-VR cameras" value="renderInExternalCameras" bind-value="true" apply-on-change="true" hover-hint="Disable this setting to improve performance in this menu when multiple cameras are used (e.g. smooth camera or Camera2)." />
       </settings-container>
     </macro.as-host>
   </tab>
 
   <macro.for-each items="additionalMenuTabs" pass-back-tags="true">
-    <tab tags="avatar-tabs" tab-name="~name" id="plugin-tab" anchor-max-y="0.8" />
+    <tab tags="avatar-tabs" tab-name="~name" id="plugin-tab" size-delta-y="-6" anchored-position-y="-3" />
   </macro.for-each>
 
-  <horizontal anchor-max-y="-0.03" child-expand-width="true" pad-right="2">
-    <text color="#808080" text="~versionText" italics="true" align="BaselineRight" font-size="3" />
-  </horizontal>
+  <bg horizontal-fit="PreferredSize" vertical-fit="PreferredSize" anchor-min="1 0" anchor-max="1 0" pivot="1 0" anchored-position="-13 -1">
+    <text color="#FFFFFF80" text="~versionText" italics="true" align="BaselineRight" font-size="3" size-delta="0 0" />
+  </bg>
 </bg>
