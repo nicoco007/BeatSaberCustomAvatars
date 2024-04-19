@@ -53,13 +53,13 @@
       <Private>false</Private>
     </Reference>
     <Reference Include="DynamicBone">
-      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\DynamicBone.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Libs\DynamicBone.dll</HintPath>
       <Private>false</Private>
       <Publicize>true</Publicize>
       <Aliases>BeatSaberDynamicBone</Aliases>
     </Reference>
     <Reference Include="FinalIK">
-      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\FinalIK.dll</HintPath>
+      <HintPath>$(BeatSaberDir)\Libs\FinalIK.dll</HintPath>
       <Private>false</Private>
       <Publicize>true</Publicize>
       <Aliases>BeatSaberFinalIK</Aliases>
