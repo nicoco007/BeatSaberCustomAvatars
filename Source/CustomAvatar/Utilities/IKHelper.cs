@@ -195,6 +195,11 @@ namespace CustomAvatar.Utilities
 #if !UNITY_EDITOR
         private static float CalculatePitchOffset(bool isLeft, Transform root, Transform shoulder, Transform upperArm)
         {
+            if (root == null || shoulder == null || upperArm == null)
+            {
+                return -30f;
+            }
+
             // Reading IKSolverVR.Arm's Shoulder Pitch section, it looks like:
             // - chestForward is essentially just the root forward
             // - pitch is always (90 degrees to either side of chestUp) * chestRotation, so effectively left and right of the chest.
