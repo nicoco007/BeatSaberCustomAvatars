@@ -29,17 +29,15 @@ namespace CustomAvatar.Rendering
 
         private ILogger<CustomAvatarsSmoothCameraController> _logger;
         private Settings _settings;
-        private MainSettingsModelSO _mainSettingsModel;
 
         private SmoothCamera _smoothCamera;
         private Camera _camera;
 
         [Inject]
-        public void Construct(ILogger<CustomAvatarsSmoothCameraController> logger, Settings settings, MainSettingsModelSO mainSettingsModel)
+        public void Construct(ILogger<CustomAvatarsSmoothCameraController> logger, Settings settings)
         {
             _logger = logger;
             _settings = settings;
-            _mainSettingsModel = mainSettingsModel;
 
             _smoothCamera = GetComponent<SmoothCamera>();
             _camera = GetComponent<Camera>();
@@ -48,7 +46,7 @@ namespace CustomAvatar.Rendering
         public void Start()
         {
             // prevent errors if this is instantiated via Object.Instantiate
-            if (_logger == null || _settings == null || _mainSettingsModel == null)
+            if (_logger == null || _settings == null)
             {
                 Destroy(this);
                 return;
@@ -56,7 +54,6 @@ namespace CustomAvatar.Rendering
 
             _settings.cameraNearClipPlane.changed += OnCameraNearClipPlaneChanged;
             _settings.showAvatarInSmoothCamera.changed += OnShowAvatarInSmoothCameraChanged;
-            _mainSettingsModel.smoothCameraThirdPersonEnabled.didChangeEvent += OnSmoothCameraThirdPersonEnabled;
 
             UpdateSmoothCamera();
         }
@@ -68,8 +65,6 @@ namespace CustomAvatar.Rendering
                 _settings.cameraNearClipPlane.changed -= OnCameraNearClipPlaneChanged;
                 _settings.showAvatarInSmoothCamera.changed -= OnShowAvatarInSmoothCameraChanged;
             }
-
-            if (_mainSettingsModel) _mainSettingsModel.smoothCameraThirdPersonEnabled.didChangeEvent -= OnSmoothCameraThirdPersonEnabled;
         }
 
         private void OnCameraNearClipPlaneChanged(float value)
@@ -78,11 +73,6 @@ namespace CustomAvatar.Rendering
         }
 
         private void OnShowAvatarInSmoothCameraChanged(bool value)
-        {
-            UpdateSmoothCamera();
-        }
-
-        private void OnSmoothCameraThirdPersonEnabled()
         {
             UpdateSmoothCamera();
         }

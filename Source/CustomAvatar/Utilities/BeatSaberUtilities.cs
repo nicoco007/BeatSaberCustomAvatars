@@ -15,6 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using BeatSaber.GameSettings;
 using UnityEngine;
 using Zenject;
 
@@ -22,34 +23,34 @@ namespace CustomAvatar.Utilities
 {
     internal class BeatSaberUtilities : IInitializable, IDisposable
     {
-        public static readonly float kDefaultPlayerHeight = MainSettingsModelSO.kDefaultPlayerHeight;
-        public static readonly float kHeadPosToPlayerHeightOffset = MainSettingsModelSO.kHeadPosToPlayerHeightOffset;
+        public static readonly float kDefaultPlayerHeight = PredefinedSettings.kDefaultPlayerHeight;
+        public static readonly float kHeadPosToPlayerHeightOffset = PredefinedSettings.kHeadPosToPlayerHeightOffset;
         public static readonly float kDefaultPlayerEyeHeight = kDefaultPlayerHeight - kHeadPosToPlayerHeightOffset;
         public static readonly float kDefaultPlayerArmSpan = kDefaultPlayerHeight;
 
-        private readonly MainSettingsModelSO _mainSettingsModel;
+        private readonly MainSettingsHandler _mainSettingsHandler;
 
-        internal BeatSaberUtilities(MainSettingsModelSO mainSettingsModel)
+        internal BeatSaberUtilities(MainSettingsHandler mainSettingsHandler)
         {
-            _mainSettingsModel = mainSettingsModel;
+            _mainSettingsHandler = mainSettingsHandler;
         }
 
-        public Vector3 roomCenter => _mainSettingsModel.roomCenter;
+        public Vector3 roomCenter => _mainSettingsHandler.instance.roomCenter;
 
-        public Quaternion roomRotation => Quaternion.Euler(0, _mainSettingsModel.roomRotation, 0);
+        public Quaternion roomRotation => Quaternion.Euler(0, _mainSettingsHandler.instance.roomRotation, 0);
 
         public event Action<Vector3, Quaternion> roomAdjustChanged;
 
         public void Initialize()
         {
-            _mainSettingsModel.roomCenter.didChangeEvent += OnRoomCenterChanged;
-            _mainSettingsModel.roomRotation.didChangeEvent += OnRoomRotationChanged;
+            _mainSettingsHandler.instance.roomCenterDidChange += OnRoomCenterChanged;
+            _mainSettingsHandler.instance.roomRotationDidChange += OnRoomRotationChanged;
         }
 
         public void Dispose()
         {
-            _mainSettingsModel.roomCenter.didChangeEvent -= OnRoomCenterChanged;
-            _mainSettingsModel.roomRotation.didChangeEvent -= OnRoomRotationChanged;
+            _mainSettingsHandler.instance.roomCenterDidChange -= OnRoomCenterChanged;
+            _mainSettingsHandler.instance.roomRotationDidChange -= OnRoomRotationChanged;
         }
 
         private void OnRoomCenterChanged()

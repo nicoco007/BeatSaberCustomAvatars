@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
+using BeatSaber.GameSettings;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
@@ -44,7 +45,7 @@ namespace CustomAvatar.Tracking
         private ActivePlayerSpaceManager _activePlayerSpaceManager;
         private ActiveOriginManager _activeOriginManager;
         private Settings _settings;
-        private MainSettingsModelSO _mainSettingsModel;
+        private MainSettingsHandler _mainSettingsHandler;
         private CalibrationData _calibrationData;
         private VRControllerVisualsManager _vrControllerVisualsManager;
         private IVRPlatformHelper _vrPlatformHelper;
@@ -76,7 +77,7 @@ namespace CustomAvatar.Tracking
         internal bool areAnyFullBodyTrackersTracking { get; private set; }
 
         // local to the current active origin (parent of VRCenterAdjust or world if no parent)
-        internal float eyeHeight => (_activeOriginManager.current != null ? _activeOriginManager.current.InverseTransformPoint(head.transform.position).y : head.transform.position.y) - (_settings.moveFloorWithRoomAdjust ? _mainSettingsModel.roomCenter.value.y : 0);
+        internal float eyeHeight => (_activeOriginManager.current != null ? _activeOriginManager.current.InverseTransformPoint(head.transform.position).y : head.transform.position.y) - (_settings.moveFloorWithRoomAdjust ? _mainSettingsHandler.instance.roomCenter.y : 0);
 
         internal TrackedNode head { get; private set; }
 
@@ -231,7 +232,7 @@ namespace CustomAvatar.Tracking
             rightHandControllerOffset.SetParent(rightHand.transform, false);
 
             LocalPlayerControllerOffset localPlayerControllerOffset = gameObject.AddComponent<LocalPlayerControllerOffset>();
-            localPlayerControllerOffset.Init(_mainSettingsModel.controllerPosition, _mainSettingsModel.controllerRotation);
+            localPlayerControllerOffset.Init(_mainSettingsHandler.instance.controllerSettings.positionOffset, _mainSettingsHandler.instance.controllerSettings.rotationOffset);
 
             _leftController = SetUpVRController(leftHand.gameObject, XRNode.LeftHand, leftHandControllerOffset, localPlayerControllerOffset);
             _rightController = SetUpVRController(rightHand.gameObject, XRNode.RightHand, rightHandControllerOffset, localPlayerControllerOffset);
@@ -295,10 +296,10 @@ namespace CustomAvatar.Tracking
                 _settings.showRenderModels.changed += OnShowRenderModelsChanged;
             }
 
-            if (_mainSettingsModel != null)
+            if (_mainSettingsHandler != null)
             {
-                _mainSettingsModel.roomCenter.didChangeEvent += OnRoomAdjustChanged;
-                _mainSettingsModel.roomRotation.didChangeEvent += OnRoomAdjustChanged;
+                _mainSettingsHandler.instance.roomCenterDidChange += OnRoomAdjustChanged;
+                _mainSettingsHandler.instance.roomRotationDidChange += OnRoomAdjustChanged;
             }
 
             if (_deviceProvider != null)
@@ -343,7 +344,7 @@ namespace CustomAvatar.Tracking
             ActivePlayerSpaceManager activePlayerSpaceManager,
             ActiveOriginManager activeOriginManager,
             Settings settings,
-            MainSettingsModelSO mainSettingsModel,
+            MainSettingsHandler mainSettingsModel,
             CalibrationData calibrationData,
             VRControllerVisualsManager vrControllerVisualsManager,
             IVRPlatformHelper vrPlatformHelper,
@@ -356,7 +357,7 @@ namespace CustomAvatar.Tracking
             _activePlayerSpaceManager = activePlayerSpaceManager;
             _activeOriginManager = activeOriginManager;
             _settings = settings;
-            _mainSettingsModel = mainSettingsModel;
+            _mainSettingsHandler = mainSettingsModel;
             _calibrationData = calibrationData;
             _vrControllerVisualsManager = vrControllerVisualsManager;
             _vrPlatformHelper = vrPlatformHelper;
@@ -419,10 +420,10 @@ namespace CustomAvatar.Tracking
                 _settings.showRenderModels.changed -= OnShowRenderModelsChanged;
             }
 
-            if (_mainSettingsModel != null)
+            if (_mainSettingsHandler != null)
             {
-                _mainSettingsModel.roomCenter.didChangeEvent -= OnRoomAdjustChanged;
-                _mainSettingsModel.roomRotation.didChangeEvent -= OnRoomAdjustChanged;
+                _mainSettingsHandler.instance.roomCenterDidChange -= OnRoomAdjustChanged;
+                _mainSettingsHandler.instance.roomRotationDidChange -= OnRoomAdjustChanged;
             }
 
             if (_deviceProvider != null)
@@ -768,14 +769,14 @@ namespace CustomAvatar.Tracking
         // why isn't VRControllerTransformOffset an interface :(
         private class LocalPlayerControllerOffset : VRControllerTransformOffset
         {
-            private Vector3SO _positionOffset;
-            private Vector3SO _rotationOffset;
+            private Vector3 _positionOffset;
+            private Vector3 _rotationOffset;
 
             public override Vector3 positionOffset => _positionOffset;
 
             public override Vector3 rotationOffset => _rotationOffset;
 
-            public void Init(Vector3SO positionOffset, Vector3SO rotationOffset)
+            public void Init(Vector3 positionOffset, Vector3 rotationOffset)
             {
                 _positionOffset = positionOffset;
                 _rotationOffset = rotationOffset;

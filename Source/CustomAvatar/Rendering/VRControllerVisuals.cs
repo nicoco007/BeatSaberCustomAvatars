@@ -28,7 +28,9 @@ namespace CustomAvatar.Rendering
         private VRControllerVisualsManager _vrControllerVisualsManager;
 
         private GameObject[] _gameObjects;
+#pragma warning disable CS0612
         private ConditionalActivation[] _conditionalActivations;
+#pragma warning restore CS0612
 
         internal void SetHandleActive(bool active)
         {
@@ -39,10 +41,12 @@ namespace CustomAvatar.Rendering
 
             if (active)
             {
+#pragma warning disable CS0612
                 foreach (ConditionalActivation conditionalActivation in _conditionalActivations)
                 {
                     conditionalActivation.Awake();
                 }
+#pragma warning restore CS0612
             }
         }
 
@@ -57,7 +61,9 @@ namespace CustomAvatar.Rendering
         {
             VRController vrController = GetComponent<VRController>();
             List<GameObject> gameObjects = new(kHandleTransforms.Length);
+#pragma warning disable CS0612
             List<ConditionalActivation> conditionalActivations = new(kHandleTransforms.Length);
+#pragma warning restore CS0612
 
             foreach (string name in kHandleTransforms)
             {
@@ -71,10 +77,12 @@ namespace CustomAvatar.Rendering
                 GameObject gameObject = transform.gameObject;
                 gameObjects.Add(gameObject);
 
+#pragma warning disable CS0612
                 if (gameObject.TryGetComponent(out ConditionalActivation conditionalActivation))
                 {
                     conditionalActivations.Add(conditionalActivation);
                 }
+#pragma warning restore CS0612
             }
 
             _gameObjects = gameObjects.ToArray();
