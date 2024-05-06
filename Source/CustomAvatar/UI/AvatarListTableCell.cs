@@ -18,7 +18,6 @@ using System.ComponentModel;
 using HMUI;
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace CustomAvatar.UI
@@ -61,6 +60,13 @@ namespace CustomAvatar.UI
 
         public void Init(LevelListTableCell originalTableCell, PlatformLeaderboardViewController platformLeaderboardViewController)
         {
+            DestroyImmediate(originalTableCell._songBpmText.gameObject);
+            DestroyImmediate(originalTableCell._songDurationText.gameObject);
+            DestroyImmediate(originalTableCell._promoBadgeGo);
+            DestroyImmediate(originalTableCell._updatedBadgeGo);
+            DestroyImmediate(originalTableCell._favoritesBadgeImage);
+            DestroyImmediate(originalTableCell.transform.Find("BpmIcon").gameObject);
+
             _canvasGroup = originalTableCell._canvasGroup;
             _wasPressedSignal = originalTableCell._wasPressedSignal;
             _backgroundImage = transform.Find("Background").GetComponent<ImageView>();
@@ -130,22 +136,6 @@ namespace CustomAvatar.UI
             // this is needed because TMPro sometimes forgets the font size after instantiating
             _nameText.fontSize = 4;
             _authorText.fontSize = 3;
-        }
-
-        public override void OnPointerClick(PointerEventData eventData)
-        {
-            if (interactable)
-            {
-                _wasPressedSignal?.Raise();
-            }
-
-            base.OnPointerClick(eventData);
-        }
-
-        public override void OnSubmit(BaseEventData eventData)
-        {
-            base.OnSubmit(eventData);
-            _wasPressedSignal?.Raise();
         }
 
         protected override void HighlightDidChange(TransitionType transitionType)

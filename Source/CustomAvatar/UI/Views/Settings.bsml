@@ -1,5 +1,5 @@
 <bg id="container" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://monkeymanboy.github.io/BSML-Docs/ https://monkeymanboy.github.io/BSML-Docs/BSMLSchema.xsd">
-  <bg background="title-gradient" size-delta="90 8" anchor-min="0.5 1" anchor-max="0.5 1" background-color0="#FFF0" background-color1="#FFF3" pivot="0.5 1">
+  <bg background="title-gradient" size-delta="90 8" anchor-min="0.5 1" anchor-max="0.5 1" background-color="#FFF3" background-color0="#FFF0" background-color1="#FFFF" pivot="0.5 1">
     <text text="Settings" anchor-min="0 0" anchor-max="1 1" size-delta="0 0" font-size="6" italics="true" all-uppercase="true" align="Midline" />
   </bg>
   

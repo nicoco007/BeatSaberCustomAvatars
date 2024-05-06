@@ -19,54 +19,58 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using BGLib.Polyglot;
+using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberMarkupLanguage.Components;
+using BeatSaberMarkupLanguage.ViewControllers;
 using CustomAvatar.Avatar;
 using CustomAvatar.Logging;
 using CustomAvatar.Player;
 using CustomAvatar.Utilities;
 using HMUI;
 using IPA.Utilities.Async;
-using TMPro;
 using UnityEngine;
 using UnityEngine.U2D;
-using UnityEngine.UI;
 using Zenject;
 
 namespace CustomAvatar.UI
 {
-    internal class AvatarListViewController : ViewController, TableView.IDataSource
+    [ViewDefinition("CustomAvatar.UI.Views.AvatarList.bsml")]
+    [HotReload(RelativePathToLayout = "Views/AvatarList.bsml")]
+    internal class AvatarListViewController : BSMLAutomaticViewController, TableView.IDataSource
     {
         private const int kMaxNumberOfConcurrentLoadingTasks = 4;
         private const string kTableCellReuseIdentifier = "AvatarListTableCell";
 
         private ILogger<AvatarListViewController> _logger;
         private PlayerAvatarManager _avatarManager;
-        private DiContainer _container;
         private MirrorViewController _mirrorViewController;
-        private PlayerOptionsViewController _playerOptionsViewController;
         private LevelCollectionViewController _levelCollectionViewController;
         private PlatformLeaderboardViewController _leaderboardViewController;
         private AssetLoader _assetLoader;
 
         private FileSystemWatcher _fileSystemWatcher;
         private TableView _tableView;
-
-        private readonly List<AvatarListItem> _avatars = new();
         private AvatarListTableCell _tableCellPrefab;
 
         private Sprite _blankAvatarSprite;
         private Sprite _noAvatarSprite;
-        private Sprite _reloadSprite;
         private Sprite _loadErrorSprite;
 
+#pragma warning disable CS0649, IDE0044
+        [UIComponent("avatar-list")]
+        private CustomCellListTableData _tableData;
+#pragma warning restore CS0649, IDE0044
+
+        protected List<AvatarListItem> avatars { get; } = new();
+
+        protected Sprite reloadSprite { get; set; }
+
         [Inject]
-        internal void Construct(ILogger<AvatarListViewController> logger, PlayerAvatarManager avatarManager, DiContainer container, MirrorViewController mirrorViewController, PlayerOptionsViewController playerOptionsViewController, LevelCollectionViewController levelCollectionViewController, PlatformLeaderboardViewController leaderboardViewController, AssetLoader assetLoader)
+        internal void Construct(ILogger<AvatarListViewController> logger, PlayerAvatarManager avatarManager, MirrorViewController mirrorViewController, LevelCollectionViewController levelCollectionViewController, PlatformLeaderboardViewController leaderboardViewController, AssetLoader assetLoader)
         {
             _logger = logger;
             _avatarManager = avatarManager;
-            _container = container;
             _mirrorViewController = mirrorViewController;
-            _playerOptionsViewController = playerOptionsViewController;
             _levelCollectionViewController = levelCollectionViewController;
             _leaderboardViewController = leaderboardViewController;
             _assetLoader = assetLoader;
@@ -77,8 +81,8 @@ namespace CustomAvatar.UI
             SpriteAtlas atlas = _assetLoader.uiSpriteAtlas;
             _noAvatarSprite = atlas.GetSprite("NoAvatarIcon");
             _blankAvatarSprite = atlas.GetSprite("BlankAvatarIcon");
-            _reloadSprite = atlas.GetSprite("ReloadButtonIcon");
             _loadErrorSprite = atlas.GetSprite("LoadErrorIcon");
+            reloadSprite = atlas.GetSprite("ReloadButtonIcon");
         }
 
         protected override async void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
@@ -88,9 +92,6 @@ namespace CustomAvatar.UI
             if (firstActivation)
             {
                 _tableCellPrefab = CreateTableCellPrefab();
-
-                CreateTableView();
-                CreateRefreshButton();
             }
 
             _avatarManager.avatarChanged += OnAvatarChanged;
@@ -136,20 +137,22 @@ namespace CustomAvatar.UI
             }
         }
 
+        [UIAction("#post-parse")]
+        protected void PostParse()
+        {
+            // TODO: this is a temporary workaround until BSML has a way to specify a data source or something
+            _tableView = _tableData.tableView;
+            Destroy(_tableData);
+            _tableView.SetDataSource(this, true);
+            _tableView.didSelectCellWithIdxEvent += OnAvatarClicked;
+        }
+
         private AvatarListTableCell CreateTableCellPrefab()
         {
             GameObject gameObject = Instantiate(_levelCollectionViewController.transform.Find("LevelsTableView/TableView/Viewport/Content/LevelListTableCell").gameObject);
             gameObject.name = "AvatarListTableCell";
 
             LevelListTableCell originalTableCell = gameObject.GetComponent<LevelListTableCell>();
-
-            DestroyImmediate(originalTableCell._songBpmText.gameObject);
-            DestroyImmediate(originalTableCell._songDurationText.gameObject);
-            DestroyImmediate(originalTableCell._promoBadgeGo);
-            DestroyImmediate(originalTableCell._updatedBadgeGo);
-            DestroyImmediate(originalTableCell._favoritesBadgeImage);
-            DestroyImmediate(originalTableCell.transform.Find("BpmIcon").gameObject);
-
             AvatarListTableCell tableCell = gameObject.AddComponent<AvatarListTableCell>();
             tableCell.Init(originalTableCell, _leaderboardViewController);
 
@@ -158,106 +161,9 @@ namespace CustomAvatar.UI
             return tableCell;
         }
 
-        // temporary while BSML doesn't support the new scroll buttons & indicator
-        private void CreateTableView()
-        {
-            var tableViewContainer = (RectTransform)new GameObject("AvatarsTableView", typeof(RectTransform)).transform;
-            var tableView = (RectTransform)new GameObject("AvatarsTableView", typeof(RectTransform), typeof(ScrollRect), typeof(Touchable), typeof(EventSystemListener)).transform;
-            var viewport = (RectTransform)new GameObject("Viewport", typeof(RectTransform), typeof(RectMask2D)).transform;
-            var content = (RectTransform)new GameObject("Content", typeof(RectTransform)).transform;
-
-            tableViewContainer.gameObject.SetActive(false);
-
-            tableViewContainer.anchorMin = new Vector2(0.1f, 0f);
-            tableViewContainer.anchorMax = new Vector2(0.9f, 0.85f);
-            tableViewContainer.sizeDelta = new Vector2(-10, 0);
-            tableViewContainer.offsetMin = new Vector2(0, 0);
-            tableViewContainer.offsetMax = new Vector2(-10, 0);
-
-            tableView.anchorMin = Vector2.zero;
-            tableView.anchorMax = Vector2.one;
-            tableView.sizeDelta = Vector2.zero;
-            tableView.anchoredPosition = Vector2.zero;
-
-            viewport.anchorMin = Vector2.zero;
-            viewport.anchorMax = Vector2.one;
-            viewport.sizeDelta = Vector2.zero;
-            viewport.anchoredPosition = Vector2.zero;
-
-            tableViewContainer.SetParent(rectTransform, false);
-            tableView.SetParent(tableViewContainer, false);
-            viewport.SetParent(tableView, false);
-            content.SetParent(viewport, false);
-
-            tableView.GetComponent<ScrollRect>().viewport = viewport;
-
-            ScrollView scrollView = _container.InstantiateComponent<ScrollView>(tableView.gameObject);
-            scrollView._contentRectTransform = content;
-            scrollView._viewport = viewport;
-
-            RectTransform header = Instantiate((RectTransform)_leaderboardViewController.transform.Find("HeaderPanel"), rectTransform, false);
-
-            header.name = "HeaderPanel";
-
-            Destroy(header.GetComponentInChildren<LocalizedTextMeshProUGUI>());
-
-            TextMeshProUGUI textMesh = header.Find("Text").GetComponent<TextMeshProUGUI>();
-            textMesh.text = "Avatars";
-
-            // buttons and indicator have images so it's easier to just copy from an existing component
-            Transform scrollBar = Instantiate(_levelCollectionViewController.transform.Find("LevelsTableView/ScrollBar"), tableViewContainer, false);
-
-            scrollBar.name = "ScrollBar";
-
-            Button upButton = scrollBar.Find("UpButton").GetComponent<Button>();
-            Button downButton = scrollBar.Find("DownButton").GetComponent<Button>();
-            VerticalScrollIndicator verticalScrollIndicator = scrollBar.Find("VerticalScrollIndicator").GetComponent<VerticalScrollIndicator>();
-
-            scrollView._pageUpButton = upButton;
-            scrollView._pageDownButton = downButton;
-            scrollView._verticalScrollIndicator = verticalScrollIndicator;
-
-            _tableView = _container.InstantiateComponent<TableView>(tableView.gameObject);
-            _tableView._preallocatedCells = new TableView.CellsGroup[0];
-            _tableView._isInitialized = false;
-            _tableView._scrollView = scrollView;
-
-            _tableView.SetDataSource(this, true);
-
-            _tableView.didSelectCellWithIdxEvent += OnAvatarClicked;
-
-            tableViewContainer.gameObject.SetActive(true);
-        }
-
-        private void CreateRefreshButton()
-        {
-            GameObject gameObject = _container.InstantiatePrefab(_playerOptionsViewController.transform.Find("PlayerOptions/ViewPort/Content/CommonSection/PlayerHeight/MeassureButton").gameObject, transform);
-            GameObject iconObject = gameObject.transform.Find("Icon").gameObject;
-
-            gameObject.name = "RefreshButton";
-
-            var rectTransform = (RectTransform)gameObject.transform;
-            rectTransform.anchorMin = new Vector2(1, 0);
-            rectTransform.anchorMax = new Vector2(1, 0);
-            rectTransform.offsetMin = new Vector2(-12, 2);
-            rectTransform.offsetMax = new Vector2(-2, 10);
-
-            Button button = gameObject.GetComponent<Button>();
-            button.onClick.AddListener(OnRefreshButtonPressed);
-            button.transform.SetParent(transform);
-
-            ImageView image = iconObject.GetComponent<ImageView>();
-            image.sprite = _reloadSprite;
-
-            HoverHint hoverHint = _container.InstantiateComponent<HoverHint>(gameObject);
-            hoverHint.text = "Force reload all avatars, including the one currently spawned. This will most likely lag your game for a few seconds if you have many avatars loaded.";
-
-            Destroy(gameObject.GetComponent<LocalizedHoverHint>());
-        }
-
         private async void OnAvatarClicked(TableView table, int row)
         {
-            await _avatarManager.SwitchToAvatarAsync(_avatars[row].fileName, new Progress<float>(_mirrorViewController.UpdateProgress));
+            await _avatarManager.SwitchToAvatarAsync(avatars[row].fileName, new Progress<float>(_mirrorViewController.UpdateProgress));
         }
 
         private void OnAvatarChanged(SpawnedAvatar avatar)
@@ -272,7 +178,7 @@ namespace CustomAvatar.UI
 
             await UnityMainThreadTaskScheduler.Factory.StartNew(async () =>
             {
-                AvatarListItem item = _avatars.Find(a => a.fileName == fileName);
+                AvatarListItem item = avatars.Find(a => a.fileName == fileName);
 
                 if (item != null)
                 {
@@ -289,7 +195,7 @@ namespace CustomAvatar.UI
                         item = new AvatarListItem(Path.GetFileNameWithoutExtension(fileName), _blankAvatarSprite, fileName, false);
                     }
 
-                    _avatars.Add(item);
+                    avatars.Add(item);
                     ReloadData();
                 }
 
@@ -304,20 +210,20 @@ namespace CustomAvatar.UI
 
             await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
             {
-                _avatars.RemoveAll(a => a.fileName == fileName);
+                avatars.RemoveAll(a => a.fileName == fileName);
                 ReloadData();
             });
         }
 
-        private async void OnRefreshButtonPressed()
+        protected void OnRefreshButtonPressed()
         {
-            await ReloadAvatars(true);
+            ReloadAvatars(true).ContinueWith((task) => _logger.LogError($"Failed to reload avatars\n{task.Exception}"), TaskContinuationOptions.OnlyOnFaulted);
         }
 
         private async Task ReloadAvatars(bool force = false)
         {
-            _avatars.Clear();
-            _avatars.Add(new AvatarListItem("No Avatar", _noAvatarSprite, null, true));
+            avatars.Clear();
+            avatars.Add(new AvatarListItem("No Avatar", _noAvatarSprite, null, true));
 
             List<string> fileNames = _avatarManager.GetAvatarFileNames();
             var avatarsToLoad = new List<AvatarListItem>();
@@ -327,7 +233,7 @@ namespace CustomAvatar.UI
                 if (_avatarManager.TryGetCachedAvatarInfo(fileName, out AvatarInfo avatarInfo))
                 {
                     var item = new AvatarListItem(avatarInfo, !force, _blankAvatarSprite);
-                    _avatars.Add(item);
+                    avatars.Add(item);
 
                     if (force)
                     {
@@ -337,7 +243,7 @@ namespace CustomAvatar.UI
                 else
                 {
                     var item = new AvatarListItem(Path.GetFileNameWithoutExtension(fileName), _blankAvatarSprite, fileName, false);
-                    _avatars.Add(item);
+                    avatars.Add(item);
                     avatarsToLoad.Add(item);
                 }
             }
@@ -386,7 +292,7 @@ namespace CustomAvatar.UI
 
         private void ReloadData()
         {
-            _avatars.Sort((a, b) =>
+            avatars.Sort((a, b) =>
             {
                 if (string.IsNullOrEmpty(a.fileName)) return -1;
                 if (string.IsNullOrEmpty(b.fileName)) return 1;
@@ -399,7 +305,7 @@ namespace CustomAvatar.UI
 
         private void UpdateSelectedRow(bool scroll = false)
         {
-            int currentRow = _avatarManager.currentlySpawnedAvatar ? _avatars.FindIndex(a => a.fileName == _avatarManager.currentlySpawnedAvatar.prefab.fileName) : 0;
+            int currentRow = _avatarManager.currentlySpawnedAvatar ? avatars.FindIndex(a => a.fileName == _avatarManager.currentlySpawnedAvatar.prefab.fileName) : 0;
 
             if (scroll) _tableView.ScrollToCellWithIdx(currentRow, TableView.ScrollPositionType.Center, false);
 
@@ -413,7 +319,7 @@ namespace CustomAvatar.UI
 
         public int NumberOfCells()
         {
-            return _avatars.Count;
+            return avatars.Count;
         }
 
         public TableCell CellForIdx(TableView tableView, int idx)
@@ -426,7 +332,7 @@ namespace CustomAvatar.UI
                 tableCell.reuseIdentifier = kTableCellReuseIdentifier;
             }
 
-            AvatarListItem avatar = _avatars[idx];
+            AvatarListItem avatar = avatars[idx];
             tableCell.listItem = avatar;
 
             return tableCell;
