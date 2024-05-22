@@ -14,6 +14,8 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Reflection;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Rendering;
@@ -27,6 +29,10 @@ namespace CustomAvatar.Player
     {
         private const string kEnvironmentObjectPath = "/Environment";
         private const string kSpectatorObjectPath = "/SpectatorParent";
+
+        internal static readonly Type kBeatLeaderCameraControllerType = Type.GetType("BeatLeader.Replayer.ReplayerCameraController, BeatLeader");
+        internal static readonly Type kBeatLeaderOriginComponentType = Type.GetType("BeatLeader.Replayer.ReplayerExtraObjectsProvider, BeatLeader");
+        internal static readonly FieldInfo kBeatLeaderCameraField = kBeatLeaderCameraControllerType?.GetField("_camera", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
         private readonly DiContainer _container;
         private readonly ILogger<GameEnvironmentObjectManager> _logger;
@@ -74,28 +80,58 @@ namespace CustomAvatar.Player
                 _logger.LogWarning($"{kEnvironmentObjectPath} not found!");
             }
 
-            // ScoreSaber replay spectator camera
+            HandleScoreSaberSpectatorCamera();
+            HandleBeatLeaderSpectatorCamera();
+        }
+
+        private void HandleScoreSaberSpectatorCamera()
+        {
             var spectatorParent = GameObject.Find(kSpectatorObjectPath);
 
-            if (spectatorParent != null)
+            if (spectatorParent == null)
             {
-                // "SpectatorParent" has position room adjust applied but not rotation
-                var avatarParent = new GameObject("AvatarParent");
-                Transform avatarParentTransform = avatarParent.transform;
-                avatarParentTransform.localRotation = _beatSaberUtilities.roomRotation;
-                avatarParentTransform.SetParent(spectatorParent.transform, false);
-
-                Camera spectatorCamera = spectatorParent.GetComponentInChildren<Camera>();
-
-                if (spectatorCamera != null)
-                {
-                    _container.InstantiateComponent<CustomAvatarsMainCameraController>(spectatorCamera.gameObject);
-                }
-                else
-                {
-                    _logger.LogWarning($"Spectator camera not found!");
-                }
+                return;
             }
+
+            Camera spectatorCamera = spectatorParent.GetComponentInChildren<Camera>();
+
+            if (spectatorCamera == null)
+            {
+                return;
+            }
+
+            Transform origin = new GameObject("Origin").transform;
+            Transform playerSpace = spectatorParent.transform;
+
+            // assuming roomCenter and roomRotation won't change while spectating
+            var inverseRotation = Quaternion.Inverse(_beatSaberUtilities.roomRotation);
+            origin.SetLocalPositionAndRotation(inverseRotation * -_beatSaberUtilities.roomCenter, inverseRotation);
+            origin.SetParent(playerSpace, false);
+
+            SpectatorCameraController spectatorCameraController = _container.InstantiateComponent<SpectatorCameraController>(spectatorCamera.gameObject);
+            spectatorCameraController.origin = origin;
+            spectatorCameraController.playerSpace = playerSpace;
+        }
+
+        private void HandleBeatLeaderSpectatorCamera()
+        {
+            if (kBeatLeaderCameraControllerType == null || kBeatLeaderOriginComponentType == null || kBeatLeaderCameraField == null)
+            {
+                return;
+            }
+
+            var controller = (Component)_container.TryResolve(kBeatLeaderCameraControllerType);
+            var originComponent = (Component)_container.TryResolve(kBeatLeaderOriginComponentType);
+
+            if (controller == null || originComponent == null)
+            {
+                return;
+            }
+
+            var camera = (Camera)kBeatLeaderCameraField.GetValue(controller);
+            SpectatorCameraController spectatorCameraController = _container.InstantiateComponent<SpectatorCameraController>(camera.gameObject);
+            spectatorCameraController.origin = originComponent.transform;
+            spectatorCameraController.playerSpace = spectatorCameraController.origin.Find("CenterAdjust");
         }
     }
 }
