@@ -16,7 +16,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using CustomAvatar.Logging;
 using HarmonyLib;
 using UnityEngine;
@@ -53,61 +52,57 @@ namespace CustomAvatar.Zenject.Internal
             }
         }
 
-        private static void InstallBindings(Context __instance, List<MonoBehaviour> injectableMonoBehaviours)
+        private static void GetInjectableMonoBehaviours(List<MonoBehaviour> injectableMonoBehaviours)
         {
 #if DEBUG
             var stopwatch = Stopwatch.StartNew();
 #endif
 
-            if (__instance is SceneContext sceneContext)
-            {
-                injectableMonoBehaviours.AddRange(sceneContext._decoratorContexts.SelectMany(dc => dc._injectableMonoBehaviours));
-            }
+            List<MonoBehaviour> newMonoBehaviours = new();
 
             foreach (MonoBehaviour monoBehaviour in injectableMonoBehaviours)
             {
-                AddComponents(__instance, monoBehaviour);
+                Type monoBehaviourType = monoBehaviour.GetType();
+
+                if (!kComponentsToAdd.TryGetValue(monoBehaviourType, out List<ComponentRegistration> componentsToAdd))
+                {
+                    continue;
+                }
+
+                foreach (ComponentRegistration componentRegistration in componentsToAdd)
+                {
+                    GameObject target = monoBehaviour.gameObject;
+
+                    if (!string.IsNullOrEmpty(componentRegistration.childTransformName))
+                    {
+                        Transform transform = target.transform.Find(componentRegistration.childTransformName);
+
+                        if (!transform)
+                        {
+                            _logger.LogWarning($"Could not find transform '{componentRegistration.childTransformName}' under '{target.name}'");
+                            continue;
+                        }
+
+                        target = transform.gameObject;
+                    }
+
+                    if (componentRegistration.condition != null && !componentRegistration.condition(target))
+                    {
+                        _logger.LogTrace($"Condition not met for putting '{componentRegistration.type.FullName}' onto '{target.name}'");
+                        continue;
+                    }
+
+                    _logger.LogTrace($"Adding '{componentRegistration.type.FullName}' to GameObject '{target.name}' (for '{monoBehaviourType.FullName}')");
+
+                    newMonoBehaviours.Add((MonoBehaviour)target.AddComponent(componentRegistration.type));
+                }
             }
+
+            injectableMonoBehaviours.AddRange(newMonoBehaviours);
 
 #if DEBUG
             _logger.LogTrace($"InstallBindings: {stopwatch.ElapsedTicks / (TimeSpan.TicksPerMillisecond / 1000)} us");
 #endif
-        }
-
-        private static void AddComponents(Context context, MonoBehaviour monoBehaviour)
-        {
-            Type monoBehaviourType = monoBehaviour.GetType();
-
-            if (!kComponentsToAdd.TryGetValue(monoBehaviourType, out List<ComponentRegistration> componentsToAdd)) return;
-
-            foreach (ComponentRegistration componentRegistration in componentsToAdd)
-            {
-                GameObject target = monoBehaviour.gameObject;
-
-                if (!string.IsNullOrEmpty(componentRegistration.childTransformName))
-                {
-                    Transform transform = target.transform.Find(componentRegistration.childTransformName);
-
-                    if (!transform)
-                    {
-                        _logger.LogWarning($"Could not find transform '{componentRegistration.childTransformName}' under '{target.name}'");
-                        continue;
-                    }
-
-                    target = transform.gameObject;
-                }
-
-                if (componentRegistration.condition != null && !componentRegistration.condition(target))
-                {
-                    _logger.LogTrace($"Condition not met for putting '{componentRegistration.type.FullName}' onto '{target.name}'");
-                    continue;
-                }
-
-                _logger.LogTrace($"Adding '{componentRegistration.type.FullName}' to GameObject '{target.name}' (for '{monoBehaviourType.FullName}')");
-
-                Component component = target.AddComponent(componentRegistration.type);
-                context.Container.QueueForInject(component);
-            }
         }
 
         private class ComponentRegistration
@@ -124,30 +119,39 @@ namespace CustomAvatar.Zenject.Internal
             }
         }
 
-        [HarmonyPatch(typeof(ProjectContext), nameof(ProjectContext.InstallBindings))]
-        private static class ProjectContext_InstallBindings
-        {
-            public static void Postfix(ProjectContext __instance, List<MonoBehaviour> injectableMonoBehaviours)
-            {
-                InstallBindings(__instance, injectableMonoBehaviours);
-            }
-        }
-
-        [HarmonyPatch(typeof(SceneContext), nameof(SceneContext.InstallBindings))]
-        private static class SceneContext_InstallBindings
-        {
-            public static void Postfix(SceneContext __instance, List<MonoBehaviour> injectableMonoBehaviours)
-            {
-                InstallBindings(__instance, injectableMonoBehaviours);
-            }
-        }
-
-        [HarmonyPatch(typeof(GameObjectContext), nameof(GameObjectContext.InstallBindings))]
+        [HarmonyPatch(typeof(GameObjectContext), "GetInjectableMonoBehaviours")]
         private static class GameObjectContext_InstallBindings
         {
-            public static void Postfix(GameObjectContext __instance, List<MonoBehaviour> injectableMonoBehaviours)
+            public static void Postfix(List<MonoBehaviour> monoBehaviours)
             {
-                InstallBindings(__instance, injectableMonoBehaviours);
+                GetInjectableMonoBehaviours(monoBehaviours);
+            }
+        }
+
+        [HarmonyPatch(typeof(ProjectContext), "GetInjectableMonoBehaviours")]
+        private static class ProjectContext_InstallBindings
+        {
+            public static void Postfix(List<MonoBehaviour> monoBehaviours)
+            {
+                GetInjectableMonoBehaviours(monoBehaviours);
+            }
+        }
+
+        [HarmonyPatch(typeof(SceneContext), "GetInjectableMonoBehaviours")]
+        private static class SceneContext_InstallBindings
+        {
+            public static void Postfix(List<MonoBehaviour> monoBehaviours)
+            {
+                GetInjectableMonoBehaviours(monoBehaviours);
+            }
+        }
+
+        [HarmonyPatch(typeof(SceneDecoratorContext), "GetInjectableMonoBehaviours")]
+        private static class SceneDecoratorContext_InstallBindings
+        {
+            public static void Postfix(List<MonoBehaviour> monoBehaviours)
+            {
+                GetInjectableMonoBehaviours(monoBehaviours);
             }
         }
     }
