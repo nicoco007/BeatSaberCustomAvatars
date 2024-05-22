@@ -6,12 +6,11 @@
 ## Getting Started
 The easiest way to get Custom Avatars up and running is to use [ModAssistant](https://github.com/Assistant/ModAssistant). The latest version of Custom Avatars will always be posted in the [releases](https://github.com/nicoco007/BeatSaberCustomAvatars/releases) here, and then become available on ModAssistant a few days later. If you want to install it manually by using the releases available here or are looking for the files to create an avatar yourself, you can follow the instructions below.
 
-### Installing manually
-Install [BeatSaberMarkupLanguage](https://github.com/monkeymanboy/BeatSaberMarkupLanguage) and [DynamicOpenVR](https://github.com/nicoco007/DynamicOpenVR/releases) (the required versions are listed in Custom Avatars' release notes). Download [the latest release of Custom Avatars](https://github.com/nicoco007/BeatSaberCustomAvatars/releases/latest) and extract **the entire contents** of the ZIP file into your Beat Saber folder and **overwrite any existing files**. By default, your Beat Saber install folder should be `C:\Program Files (x86)\Steam\steamapps\common\Beat Saber` for Steam and `C:\Program Files\Oculus\Software\Software\hyperbolic-magnetism-beat-saber` for Oculus.
-
-## Usage Notes
 ### Full-Body Tracking
 Full-body tracking requires setting up tracker roles in SteamVR. For instructions, check out [OpenXRTrackerProfiles' instructions](https://github.com/nicoco007/BeatSaber-ExtraOpenXRFeatures/tree/main/OpenXRTrackerProfiles#assigning-steamvr-tracker-roles).
+
+### Creating your own avatar
+To get started, check out [the avatars guide on the BSMG wiki](https://bsmg.wiki/models/avatars-guide.html). If you have questions, join the [the BSMG Discord server](https://discord.gg/beatsabermods) and ask in the [#pc-3d-modeling](https://discord.com/channels/441805394323439646/468249466865057802) channel.
 
 ## Contributing
 To resolve references and automatically copy the compiled DLL into Beat Saber's installation directory, first create files called `CustomAvatar.csproj.user` and `CustomAvatar-Editor.csproj.user` next to `Source\CustomAvatar\CustomAvatar.csproj` and `Source\CustomAvatar-Editor\CustomAvatar-Editor.csproj` respectively. Then paste in the following contents:
