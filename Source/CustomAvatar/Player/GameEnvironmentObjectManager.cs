@@ -108,7 +108,7 @@ namespace CustomAvatar.Player
             origin.SetLocalPositionAndRotation(inverseRotation * -_beatSaberUtilities.roomCenter, inverseRotation);
             origin.SetParent(playerSpace, false);
 
-            SpectatorCameraController spectatorCameraController = _container.InstantiateComponent<SpectatorCameraController>(spectatorCamera.gameObject);
+            SpectatorCamera spectatorCameraController = _container.InstantiateComponent<SpectatorCamera>(spectatorCamera.gameObject);
             spectatorCameraController.origin = origin;
             spectatorCameraController.playerSpace = playerSpace;
         }
@@ -129,7 +129,7 @@ namespace CustomAvatar.Player
             }
 
             var camera = (Camera)kBeatLeaderCameraField.GetValue(controller);
-            SpectatorCameraController spectatorCameraController = _container.InstantiateComponent<SpectatorCameraController>(camera.gameObject);
+            SpectatorCamera spectatorCameraController = _container.InstantiateComponent<SpectatorCamera>(camera.gameObject);
             spectatorCameraController.origin = originComponent.transform;
             spectatorCameraController.playerSpace = spectatorCameraController.origin.Find("CenterAdjust");
         }

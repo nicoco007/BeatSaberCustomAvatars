@@ -23,23 +23,23 @@ using Zenject;
 namespace CustomAvatar.Rendering
 {
     [DisallowMultipleComponent]
-    internal class CustomAvatarsSmoothCameraController : MonoBehaviour
+    internal class SmoothCamera : MonoBehaviour
     {
         private const float kCameraDefaultNearClipMask = 0.1f;
 
-        private ILogger<CustomAvatarsSmoothCameraController> _logger;
+        private ILogger<SmoothCamera> _logger;
         private Settings _settings;
 
-        private SmoothCamera _smoothCamera;
+        private global::SmoothCamera _smoothCamera;
         private Camera _camera;
 
         [Inject]
-        public void Construct(ILogger<CustomAvatarsSmoothCameraController> logger, Settings settings)
+        public void Construct(ILogger<SmoothCamera> logger, Settings settings)
         {
             _logger = logger;
             _settings = settings;
 
-            _smoothCamera = GetComponent<SmoothCamera>();
+            _smoothCamera = GetComponent<global::SmoothCamera>();
             _camera = GetComponent<Camera>();
         }
 

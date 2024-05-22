@@ -49,9 +49,8 @@ namespace CustomAvatar
 
             ZenjectHelper.Init(ipaLogger);
 
-            ZenjectHelper.AddComponentAlongsideExisting<MainCamera, CustomAvatarsMainCameraController>();
-            ZenjectHelper.AddComponentAlongsideExisting<SmoothCamera, CustomAvatarsSmoothCameraController>();
-
+            ZenjectHelper.AddComponentAlongsideExisting<MainCamera, Rendering.MainCamera>();
+            ZenjectHelper.AddComponentAlongsideExisting<SmoothCamera, Rendering.SmoothCamera>();
             ZenjectHelper.AddComponentAlongsideExisting<MenuEnvironmentManager, EnvironmentObject>();
             ZenjectHelper.AddComponentAlongsideExisting<MultiplayerLocalActivePlayerFacade, EnvironmentObject>("IsActiveObjects/Lasers");
             ZenjectHelper.AddComponentAlongsideExisting<MultiplayerLocalActivePlayerFacade, EnvironmentObject>("IsActiveObjects/Construction");

@@ -26,17 +26,18 @@ using Zenject;
 namespace CustomAvatar.Rendering
 {
     [DisallowMultipleComponent]
-    internal class CustomAvatarsMainCameraController : MonoBehaviour
+    internal class SpectatorCamera : MonoBehaviour
     {
-        private ILogger<CustomAvatarsMainCameraController> _logger;
+        internal Transform playerSpace;
+        internal Transform origin;
+
+        private ILogger<SpectatorCamera> _logger;
         private Settings _settings;
         private ActivePlayerSpaceManager _activePlayerSpaceManager;
         private ActiveOriginManager _activeOriginManager;
         private ActiveCameraManager _activeCameraManager;
         private IFPFCSettings _fpfcSettings;
 
-        private Transform _playerSpace;
-        private Transform _origin;
         private Camera _camera;
 
         private void Awake()
@@ -46,7 +47,7 @@ namespace CustomAvatar.Rendering
 
         [Inject]
         [SuppressMessage("CodeQuality", "IDE0051", Justification = "Used by Zenject")]
-        private void Construct(ILogger<CustomAvatarsMainCameraController> logger, Settings settings, ActivePlayerSpaceManager activePlayerSpaceManager, ActiveOriginManager activeOriginManager, ActiveCameraManager activeCameraManager, IFPFCSettings fpfcSettings)
+        private void Construct(ILogger<SpectatorCamera> logger, Settings settings, ActivePlayerSpaceManager activePlayerSpaceManager, ActiveOriginManager activeOriginManager, ActiveCameraManager activeCameraManager, IFPFCSettings fpfcSettings)
         {
             _logger = logger;
             _settings = settings;
@@ -98,6 +99,7 @@ namespace CustomAvatar.Rendering
             UpdateCameraMask();
         }
 
+        // TODO: add a setting to show/hide player avatar in replays
         private void UpdateCameraMask()
         {
             _logger.LogInformation($"Setting avatar culling mask and near clip plane on '{_camera.name}'");
@@ -120,27 +122,15 @@ namespace CustomAvatar.Rendering
 
         private void AddToPlayerSpaceManager()
         {
-            VRCenterAdjust center = transform.GetComponentInParent<VRCenterAdjust>();
-
-            if (center != null)
-            {
-                _playerSpace = center.transform;
-                _origin = _playerSpace.parent;
-            }
-            else
-            {
-                _origin = _playerSpace = transform.parent;
-            }
-
-            _activePlayerSpaceManager?.Add(_playerSpace);
-            _activeOriginManager?.Add(_origin);
+            _activePlayerSpaceManager?.Add(playerSpace);
+            _activeOriginManager?.Add(origin);
             _activeCameraManager?.Add(_camera);
         }
 
         private void RemoveFromPlayerSpaceManager()
         {
-            _activePlayerSpaceManager?.Remove(_playerSpace);
-            _activeOriginManager?.Remove(_origin);
+            _activePlayerSpaceManager?.Remove(playerSpace);
+            _activeOriginManager?.Remove(origin);
             _activeCameraManager?.Remove(_camera);
         }
     }
