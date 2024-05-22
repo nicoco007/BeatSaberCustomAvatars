@@ -23,6 +23,7 @@ using Zenject;
 
 namespace CustomAvatar.Avatar
 {
+    [DisallowMultipleComponent]
     internal class AvatarTransformTracking : MonoBehaviour
     {
         private static readonly List<ConstraintSource> kEmptyConstraintSources = new(0);

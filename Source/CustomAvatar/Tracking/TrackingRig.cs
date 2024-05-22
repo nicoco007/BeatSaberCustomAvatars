@@ -34,6 +34,7 @@ using Zenject;
 
 namespace CustomAvatar.Tracking
 {
+    [DisallowMultipleComponent]
     internal class TrackingRig : MonoBehaviour
     {
         private static readonly List<ConstraintSource> kEmptyConstraintSources = new(0);

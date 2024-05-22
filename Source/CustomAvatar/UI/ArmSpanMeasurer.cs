@@ -22,6 +22,7 @@ using Zenject;
 
 namespace CustomAvatar.UI
 {
+    [DisallowMultipleComponent]
     internal class ArmSpanMeasurer : MonoBehaviour
     {
         private const float kStableMeasurementTimeout = 3f;

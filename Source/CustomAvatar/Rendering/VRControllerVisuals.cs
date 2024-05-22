@@ -21,6 +21,7 @@ using Zenject;
 
 namespace CustomAvatar.Rendering
 {
+    [DisallowMultipleComponent]
     internal class VRControllerVisuals : MonoBehaviour
     {
         private static readonly string[] kHandleTransforms = { "Glowing", "Normal", "FakeGlow0", "FakeGlow1" };

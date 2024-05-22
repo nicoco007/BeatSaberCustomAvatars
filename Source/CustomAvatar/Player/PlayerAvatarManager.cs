@@ -35,6 +35,7 @@ namespace CustomAvatar.Player
     /// <summary>
     /// Manages the player's local avatar.
     /// </summary>
+    [DisallowMultipleComponent]
     public class PlayerAvatarManager : MonoBehaviour
     {
         public static readonly string kCustomAvatarsPath = Path.Combine(UnityGame.InstallPath, "CustomAvatars");
