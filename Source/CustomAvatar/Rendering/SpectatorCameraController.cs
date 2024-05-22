@@ -14,13 +14,12 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Player;
+using SiraUtil.Tools.FPFC;
 using UnityEngine;
 using Zenject;
 
@@ -37,6 +36,7 @@ namespace CustomAvatar.Rendering
         private ActivePlayerSpaceManager _activePlayerSpaceManager;
         private ActiveOriginManager _activeOriginManager;
         private ActiveCameraManager _activeCameraManager;
+        private IFPFCSettings _fpfcSettings;
 
         private Camera _camera;
 
@@ -45,20 +45,16 @@ namespace CustomAvatar.Rendering
             _camera = GetComponent<Camera>();
         }
 
-        private void OnEnable()
-        {
-            AddToPlayerSpaceManager();
-        }
-
         [Inject]
         [SuppressMessage("CodeQuality", "IDE0051", Justification = "Used by Zenject")]
-        private void Construct(ILogger<SpectatorCameraController> logger, Settings settings, ActivePlayerSpaceManager activePlayerSpaceManager, ActiveOriginManager activeOriginManager, ActiveCameraManager activeCameraManager)
+        private void Construct(ILogger<SpectatorCameraController> logger, Settings settings, ActivePlayerSpaceManager activePlayerSpaceManager, ActiveOriginManager activeOriginManager, ActiveCameraManager activeCameraManager, IFPFCSettings fpfcSettings)
         {
             _logger = logger;
             _settings = settings;
             _activePlayerSpaceManager = activePlayerSpaceManager;
             _activeOriginManager = activeOriginManager;
             _activeCameraManager = activeCameraManager;
+            _fpfcSettings = fpfcSettings;
         }
 
         private void Start()
@@ -71,6 +67,7 @@ namespace CustomAvatar.Rendering
             }
 
             _settings.cameraNearClipPlane.changed += OnCameraNearClipPlaneChanged;
+            _fpfcSettings.Changed += OnFpfcSettingsChanged;
 
             UpdateCameraMask();
 
@@ -84,10 +81,20 @@ namespace CustomAvatar.Rendering
                 _settings.cameraNearClipPlane.changed -= OnCameraNearClipPlaneChanged;
             }
 
+            if (_fpfcSettings != null)
+            {
+                _fpfcSettings.Changed -= OnFpfcSettingsChanged;
+            }
+
             RemoveFromPlayerSpaceManager();
         }
 
         private void OnCameraNearClipPlaneChanged(float value)
+        {
+            UpdateCameraMask();
+        }
+
+        private void OnFpfcSettingsChanged(IFPFCSettings fpfcSettings)
         {
             UpdateCameraMask();
         }
@@ -100,7 +107,7 @@ namespace CustomAvatar.Rendering
             int mask = _camera.cullingMask | AvatarLayers.kAlwaysVisibleMask;
 
             // FPFC basically ends up being a 3rd person camera
-            if (Environment.GetCommandLineArgs().Contains("fpfc"))
+            if (_fpfcSettings.Enabled)
             {
                 mask |= AvatarLayers.kOnlyInThirdPersonMask;
             }
