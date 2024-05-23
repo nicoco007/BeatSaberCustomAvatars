@@ -26,7 +26,9 @@ namespace CustomAvatar.Scripts
         [Tooltip("Rotation offset around the twist axis.")]
         [Range(-180f, 180f)] public float twistAngleOffset;
 
+#pragma warning disable CS0649
         internal IK ik;
+#pragma warning restore CS0649
 
         private Vector3 _twistAxis = Vector3.right;
         private Vector3 _axis = Vector3.forward;
