@@ -29,28 +29,44 @@ namespace CustomAvatar.Utilities
         public static readonly float kDefaultPlayerArmSpan = kDefaultPlayerHeight;
 
         private readonly MainSettingsHandler _mainSettingsHandler;
+        private readonly IVRPlatformHelper _vrPlatformHelper;
 
-        internal BeatSaberUtilities(MainSettingsHandler mainSettingsHandler)
+        internal BeatSaberUtilities(MainSettingsHandler mainSettingsHandler, IVRPlatformHelper vrPlatformHelper)
         {
             _mainSettingsHandler = mainSettingsHandler;
+            _vrPlatformHelper = vrPlatformHelper;
         }
 
         public Vector3 roomCenter => _mainSettingsHandler.instance.roomCenter;
 
         public Quaternion roomRotation => Quaternion.Euler(0, _mainSettingsHandler.instance.roomRotation, 0);
 
+        public bool hasFocus => _vrPlatformHelper.hasInputFocus && _vrPlatformHelper.hasVrFocus;
+
         public event Action<Vector3, Quaternion> roomAdjustChanged;
+
+        public event Action<bool> focusChanged;
 
         public void Initialize()
         {
             _mainSettingsHandler.instance.roomCenterDidChange += OnRoomCenterChanged;
             _mainSettingsHandler.instance.roomRotationDidChange += OnRoomRotationChanged;
+
+            _vrPlatformHelper.inputFocusWasCapturedEvent += OnFocusWasChanged;
+            _vrPlatformHelper.inputFocusWasReleasedEvent += OnFocusWasChanged;
+            _vrPlatformHelper.vrFocusWasCapturedEvent += OnFocusWasChanged;
+            _vrPlatformHelper.vrFocusWasReleasedEvent += OnFocusWasChanged;
         }
 
         public void Dispose()
         {
             _mainSettingsHandler.instance.roomCenterDidChange -= OnRoomCenterChanged;
             _mainSettingsHandler.instance.roomRotationDidChange -= OnRoomRotationChanged;
+
+            _vrPlatformHelper.inputFocusWasCapturedEvent -= OnFocusWasChanged;
+            _vrPlatformHelper.inputFocusWasReleasedEvent -= OnFocusWasChanged;
+            _vrPlatformHelper.vrFocusWasCapturedEvent -= OnFocusWasChanged;
+            _vrPlatformHelper.vrFocusWasReleasedEvent -= OnFocusWasChanged;
         }
 
         private void OnRoomCenterChanged()
@@ -61,6 +77,11 @@ namespace CustomAvatar.Utilities
         private void OnRoomRotationChanged()
         {
             roomAdjustChanged?.Invoke(roomCenter, roomRotation);
+        }
+
+        private void OnFocusWasChanged()
+        {
+            focusChanged?.Invoke(hasFocus);
         }
     }
 }

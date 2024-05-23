@@ -128,6 +128,7 @@ namespace CustomAvatar.Player
             _settings.enableLocomotion.changed += OnEnableLocomotionChanged;
 
             _beatSaberUtilities.roomAdjustChanged += OnRoomAdjustChanged;
+            _beatSaberUtilities.focusChanged += OnFocusChanged;
 
             _activeOriginManager.changed += OnActiveOriginChanged;
         }
@@ -192,6 +193,7 @@ namespace CustomAvatar.Player
             _settings.enableLocomotion.changed -= OnEnableLocomotionChanged;
 
             _beatSaberUtilities.roomAdjustChanged -= OnRoomAdjustChanged;
+            _beatSaberUtilities.focusChanged -= OnFocusChanged;
 
             _activeOriginManager.changed -= OnActiveOriginChanged;
         }
@@ -420,8 +422,12 @@ namespace CustomAvatar.Player
 
         private void OnRoomAdjustChanged(Vector3 roomCenter, Quaternion roomRotation)
         {
-            UpdateConstraints();
-            UpdateLocomotionEnabled();
+            ResizeCurrentAvatar();
+        }
+
+        private void OnFocusChanged(bool hasFocus)
+        {
+            UpdateFirstPersonVisibility();
         }
 
         private void UpdateConstraints()
@@ -514,20 +520,20 @@ namespace CustomAvatar.Player
 
         private void UpdateFirstPersonVisibility()
         {
-            if (!currentlySpawnedAvatar) return;
+            if (!currentlySpawnedAvatar)
+            {
+                return;
+            }
 
             FirstPersonVisibility visibility = FirstPersonVisibility.Hidden;
 
-            if (_settings.isAvatarVisibleInFirstPerson)
+            if (!_beatSaberUtilities.hasFocus)
             {
-                if (ignoreFirstPersonExclusions)
-                {
-                    visibility = FirstPersonVisibility.Visible;
-                }
-                else
-                {
-                    visibility = FirstPersonVisibility.VisibleWithExclusionsApplied;
-                }
+                visibility = FirstPersonVisibility.Visible;
+            }
+            else if (_settings.isAvatarVisibleInFirstPerson)
+            {
+                visibility = ignoreFirstPersonExclusions ? FirstPersonVisibility.Visible : FirstPersonVisibility.VisibleWithExclusionsApplied;
             }
 
             currentlySpawnedAvatar.SetFirstPersonVisibility(visibility);

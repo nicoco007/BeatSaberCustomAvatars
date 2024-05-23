@@ -19,8 +19,10 @@ using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Player;
+using CustomAvatar.Utilities;
 using SiraUtil.Tools.FPFC;
 using UnityEngine;
+using UnityEngine.SpatialTracking;
 using Zenject;
 
 namespace CustomAvatar.Rendering
@@ -34,19 +36,50 @@ namespace CustomAvatar.Rendering
         private ActiveOriginManager _activeOriginManager;
         private ActiveCameraManager _activeCameraManager;
         private IFPFCSettings _fpfcSettings;
+        private BeatSaberUtilities _beatSaberUtilities;
 
         private Transform _playerSpace;
         private Transform _origin;
         private Camera _camera;
+        private TrackedPoseDriver _trackedPoseDriver;
 
         private void Awake()
         {
             _camera = GetComponent<Camera>();
+            _trackedPoseDriver = GetComponent<TrackedPoseDriver>();
+        }
+
+        private void OnEnable()
+        {
+            if (_settings != null)
+            {
+                _settings.cameraNearClipPlane.changed += OnCameraNearClipPlaneChanged;
+            }
+
+            if (_fpfcSettings != null)
+            {
+                _fpfcSettings.Changed += OnFpfcSettingsChanged;
+            }
+
+            if (_beatSaberUtilities != null)
+            {
+                _beatSaberUtilities.focusChanged += OnFocusChanged;
+                OnFocusChanged(_beatSaberUtilities.hasFocus);
+            }
+
+            UpdateCameraMask();
         }
 
         [Inject]
         [SuppressMessage("CodeQuality", "IDE0051", Justification = "Used by Zenject")]
-        private void Construct(ILogger<MainCamera> logger, Settings settings, ActivePlayerSpaceManager activePlayerSpaceManager, ActiveOriginManager activeOriginManager, ActiveCameraManager activeCameraManager, IFPFCSettings fpfcSettings)
+        private void Construct(
+            ILogger<MainCamera> logger,
+            Settings settings,
+            ActivePlayerSpaceManager activePlayerSpaceManager,
+            ActiveOriginManager activeOriginManager,
+            ActiveCameraManager activeCameraManager,
+            IFPFCSettings fpfcSettings,
+            BeatSaberUtilities beatSaberUtilities)
         {
             _logger = logger;
             _settings = settings;
@@ -54,6 +87,7 @@ namespace CustomAvatar.Rendering
             _activeOriginManager = activeOriginManager;
             _activeCameraManager = activeCameraManager;
             _fpfcSettings = fpfcSettings;
+            _beatSaberUtilities = beatSaberUtilities;
         }
 
         private void Start()
@@ -65,15 +99,11 @@ namespace CustomAvatar.Rendering
                 return;
             }
 
-            _settings.cameraNearClipPlane.changed += OnCameraNearClipPlaneChanged;
-            _fpfcSettings.Changed += OnFpfcSettingsChanged;
-
-            UpdateCameraMask();
-
+            OnEnable();
             AddToPlayerSpaceManager();
         }
 
-        private void OnDestroy()
+        private void OnDisable()
         {
             if (_settings != null)
             {
@@ -85,6 +115,14 @@ namespace CustomAvatar.Rendering
                 _fpfcSettings.Changed -= OnFpfcSettingsChanged;
             }
 
+            if (_beatSaberUtilities != null)
+            {
+                _beatSaberUtilities.focusChanged -= OnFocusChanged;
+            }
+        }
+
+        private void OnDestroy()
+        {
             RemoveFromPlayerSpaceManager();
         }
 
@@ -98,8 +136,21 @@ namespace CustomAvatar.Rendering
             UpdateCameraMask();
         }
 
+        private void OnFocusChanged(bool hasFocus)
+        {
+            _trackedPoseDriver.UseRelativeTransform = !hasFocus;
+            _trackedPoseDriver.originPose = hasFocus ? Pose.identity : new Pose(
+                Vector3.ProjectOnPlane(Quaternion.Euler(0, 180, 0) * -transform.localPosition * 2, Vector3.up) + Vector3.ProjectOnPlane(transform.localRotation * Vector3.forward, Vector3.up).normalized * 1.5f,
+                Quaternion.Euler(0, 180, 0));
+        }
+
         private void UpdateCameraMask()
         {
+            if (_logger == null || _settings == null || _fpfcSettings == null)
+            {
+                return;
+            }
+
             _logger.LogInformation($"Setting avatar culling mask and near clip plane on '{_camera.name}'");
 
             int mask = _camera.cullingMask | AvatarLayers.kAlwaysVisibleMask;

@@ -26,6 +26,7 @@ using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Player;
 using CustomAvatar.Rendering;
+using CustomAvatar.Utilities;
 using SiraUtil.Tools.FPFC;
 using UnityEngine;
 using UnityEngine.Animations;
@@ -50,6 +51,7 @@ namespace CustomAvatar.Tracking
         private CalibrationData _calibrationData;
         private VRControllerVisualsManager _vrControllerVisualsManager;
         private IVRPlatformHelper _vrPlatformHelper;
+        private BeatSaberUtilities _beatSaberUtilities;
         private IFPFCSettings _fpfcSettings;
         private HumanoidCalibrator _humanoidCalibrator;
 
@@ -151,8 +153,6 @@ namespace CustomAvatar.Tracking
                 UpdateRenderModelsVisibility();
             }
         }
-
-        private bool _shouldBeEnabled => _vrPlatformHelper != null && _vrPlatformHelper.hasInputFocus && _vrPlatformHelper.hasVrFocus;
 
         internal void BeginCalibration(CalibrationMode calibrationMode)
         {
@@ -322,14 +322,17 @@ namespace CustomAvatar.Tracking
 
         private void Start()
         {
-            if (_vrPlatformHelper != null)
+            if (_beatSaberUtilities != null)
             {
-                _vrPlatformHelper.inputFocusWasCapturedEvent += OnInputFocusWasChanged;
-                _vrPlatformHelper.inputFocusWasReleasedEvent += OnInputFocusWasChanged;
+                _beatSaberUtilities.focusChanged += OnFocusChanged;
+                OnFocusChanged(_beatSaberUtilities.hasFocus);
             }
 
-            this.enabled = this._shouldBeEnabled;
-            _parentConstraint.enabled = _scaleConstraint.enabled = !_fpfcSettings.Enabled;
+            if (_fpfcSettings != null)
+            {
+                _fpfcSettings.Changed += OnFpfcSettingsChanged;
+                OnFpfcSettingsChanged(_fpfcSettings);
+            }
 
             UpdateOffsets();
             UpdateControllerOffsets();
@@ -349,6 +352,7 @@ namespace CustomAvatar.Tracking
             CalibrationData calibrationData,
             VRControllerVisualsManager vrControllerVisualsManager,
             IVRPlatformHelper vrPlatformHelper,
+            BeatSaberUtilities beatSaberUtilities,
             IFPFCSettings fpfcSettings)
         {
             _logger = logger;
@@ -362,6 +366,7 @@ namespace CustomAvatar.Tracking
             _calibrationData = calibrationData;
             _vrControllerVisualsManager = vrControllerVisualsManager;
             _vrPlatformHelper = vrPlatformHelper;
+            _beatSaberUtilities = beatSaberUtilities;
             _fpfcSettings = fpfcSettings;
             _humanoidCalibrator = new HumanoidCalibrator(this, calibrationData, settings, activeOriginManager, mainSettingsModel);
         }
@@ -440,10 +445,9 @@ namespace CustomAvatar.Tracking
 
         private void OnDestroy()
         {
-            if (_vrPlatformHelper != null)
+            if (_beatSaberUtilities != null)
             {
-                _vrPlatformHelper.inputFocusWasCapturedEvent -= OnInputFocusWasChanged;
-                _vrPlatformHelper.inputFocusWasReleasedEvent -= OnInputFocusWasChanged;
+                _beatSaberUtilities.focusChanged -= OnFocusChanged;
             }
         }
 
@@ -503,10 +507,14 @@ namespace CustomAvatar.Tracking
             UpdateControllerOffsets();
         }
 
-        private void OnInputFocusWasChanged()
+        private void OnFpfcSettingsChanged(IFPFCSettings fpfcSettings)
         {
-            this.enabled = _shouldBeEnabled;
-            _parentConstraint.enabled = _scaleConstraint.enabled = !_fpfcSettings.Enabled;
+            _parentConstraint.enabled = _scaleConstraint.enabled = !fpfcSettings.Enabled;
+        }
+
+        private void OnFocusChanged(bool hasFocus)
+        {
+            enabled = hasFocus;
         }
 
         private void UpdateOffsets()
@@ -727,7 +735,7 @@ namespace CustomAvatar.Tracking
                 return;
             }
 
-            bool show = _showRenderModels && _settings.showRenderModels && _vrPlatformHelper.hasInputFocus;
+            bool show = _showRenderModels && _settings.showRenderModels && _beatSaberUtilities.hasFocus;
             _leftHandRenderModel?.SetActive(show);
             _rightHandRenderModel?.SetActive(show);
             _pelvisRenderModel?.SetActive(show);
