@@ -509,12 +509,12 @@ namespace CustomAvatar.Tracking
 
         private void OnFpfcSettingsChanged(IFPFCSettings fpfcSettings)
         {
-            _parentConstraint.enabled = _scaleConstraint.enabled = !fpfcSettings.Enabled;
+            enabled = _beatSaberUtilities.hasFocus && !fpfcSettings.Enabled;
         }
 
         private void OnFocusChanged(bool hasFocus)
         {
-            enabled = hasFocus;
+            enabled = hasFocus && !_fpfcSettings.Enabled;
         }
 
         private void UpdateOffsets()
