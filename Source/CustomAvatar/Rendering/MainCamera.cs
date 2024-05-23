@@ -43,6 +43,21 @@ namespace CustomAvatar.Rendering
         private Camera _camera;
         private TrackedPoseDriver _trackedPoseDriver;
 
+        protected virtual (Transform playerSpace, Transform origin) GetPlayerSpaceAndOrigin()
+        {
+            VRCenterAdjust center = transform.GetComponentInParent<VRCenterAdjust>();
+
+            if (center != null)
+            {
+                Transform centerTransform = center.transform;
+                return (centerTransform, centerTransform.parent);
+            }
+            else
+            {
+                return (transform.parent, transform.parent);
+            }
+        }
+
         private void Awake()
         {
             _camera = GetComponent<Camera>();
@@ -153,7 +168,7 @@ namespace CustomAvatar.Rendering
                 return;
             }
 
-            _logger.LogInformation($"Setting avatar culling mask and near clip plane on '{_camera.name}'");
+            _logger.LogTrace($"Setting avatar culling mask and near clip plane on '{_camera.name}'");
 
             int mask = _camera.cullingMask | AvatarLayers.kAlwaysVisibleMask;
 
@@ -173,18 +188,7 @@ namespace CustomAvatar.Rendering
 
         private void AddToPlayerSpaceManager()
         {
-            VRCenterAdjust center = transform.GetComponentInParent<VRCenterAdjust>();
-
-            if (center != null)
-            {
-                _playerSpace = center.transform;
-                _origin = _playerSpace.parent;
-            }
-            else
-            {
-                _origin = _playerSpace = transform.parent;
-            }
-
+            (_playerSpace, _origin) = GetPlayerSpaceAndOrigin();
             _activePlayerSpaceManager?.Add(_playerSpace);
             _activeOriginManager?.Add(_origin);
             _activeCameraManager?.Add(_camera);

@@ -14,124 +14,20 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Diagnostics.CodeAnalysis;
-using CustomAvatar.Avatar;
-using CustomAvatar.Configuration;
-using CustomAvatar.Logging;
-using CustomAvatar.Player;
-using SiraUtil.Tools.FPFC;
 using UnityEngine;
-using Zenject;
 
 namespace CustomAvatar.Rendering
 {
     [DisallowMultipleComponent]
-    internal class SpectatorCamera : MonoBehaviour
+    internal class SpectatorCamera : MainCamera
     {
-        internal Transform playerSpace;
-        internal Transform origin;
+        internal Transform playerSpace { get; set; }
 
-        private ILogger<SpectatorCamera> _logger;
-        private Settings _settings;
-        private ActivePlayerSpaceManager _activePlayerSpaceManager;
-        private ActiveOriginManager _activeOriginManager;
-        private ActiveCameraManager _activeCameraManager;
-        private IFPFCSettings _fpfcSettings;
+        internal Transform origin { get; set; }
 
-        private Camera _camera;
-
-        private void Awake()
+        protected override (Transform playerSpace, Transform origin) GetPlayerSpaceAndOrigin()
         {
-            _camera = GetComponent<Camera>();
-        }
-
-        [Inject]
-        [SuppressMessage("CodeQuality", "IDE0051", Justification = "Used by Zenject")]
-        private void Construct(ILogger<SpectatorCamera> logger, Settings settings, ActivePlayerSpaceManager activePlayerSpaceManager, ActiveOriginManager activeOriginManager, ActiveCameraManager activeCameraManager, IFPFCSettings fpfcSettings)
-        {
-            _logger = logger;
-            _settings = settings;
-            _activePlayerSpaceManager = activePlayerSpaceManager;
-            _activeOriginManager = activeOriginManager;
-            _activeCameraManager = activeCameraManager;
-            _fpfcSettings = fpfcSettings;
-        }
-
-        private void Start()
-        {
-            // prevent errors if this is instantiated via Object.Instantiate
-            if (_logger == null)
-            {
-                Destroy(this);
-                return;
-            }
-
-            _settings.cameraNearClipPlane.changed += OnCameraNearClipPlaneChanged;
-            _fpfcSettings.Changed += OnFpfcSettingsChanged;
-
-            UpdateCameraMask();
-
-            AddToPlayerSpaceManager();
-        }
-
-        private void OnDestroy()
-        {
-            if (_settings != null)
-            {
-                _settings.cameraNearClipPlane.changed -= OnCameraNearClipPlaneChanged;
-            }
-
-            if (_fpfcSettings != null)
-            {
-                _fpfcSettings.Changed -= OnFpfcSettingsChanged;
-            }
-
-            RemoveFromPlayerSpaceManager();
-        }
-
-        private void OnCameraNearClipPlaneChanged(float value)
-        {
-            UpdateCameraMask();
-        }
-
-        private void OnFpfcSettingsChanged(IFPFCSettings fpfcSettings)
-        {
-            UpdateCameraMask();
-        }
-
-        // TODO: add a setting to show/hide player avatar in replays
-        private void UpdateCameraMask()
-        {
-            _logger.LogInformation($"Setting avatar culling mask and near clip plane on '{_camera.name}'");
-
-            int mask = _camera.cullingMask | AvatarLayers.kAlwaysVisibleMask;
-
-            // FPFC basically ends up being a 3rd person camera
-            if (_fpfcSettings.Enabled)
-            {
-                mask |= AvatarLayers.kOnlyInThirdPersonMask;
-            }
-            else
-            {
-                mask &= ~AvatarLayers.kOnlyInThirdPersonMask;
-            }
-
-            _camera.cullingMask = mask;
-            _camera.nearClipPlane = _settings.cameraNearClipPlane;
-        }
-
-        private void AddToPlayerSpaceManager()
-        {
-            _activePlayerSpaceManager?.Add(playerSpace);
-            _activeOriginManager?.Add(origin);
-            _activeCameraManager?.Add(_camera);
-        }
-
-        private void RemoveFromPlayerSpaceManager()
-        {
-            _activePlayerSpaceManager?.Remove(playerSpace);
-            _activeOriginManager?.Remove(origin);
-            _activeCameraManager?.Remove(_camera);
+            return (playerSpace, origin);
         }
     }
 }
