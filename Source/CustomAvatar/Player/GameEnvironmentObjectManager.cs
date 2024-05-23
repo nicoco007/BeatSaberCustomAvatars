@@ -15,7 +15,6 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Reflection;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Rendering;
@@ -27,12 +26,19 @@ namespace CustomAvatar.Player
 {
     internal class GameEnvironmentObjectManager : IInitializable
     {
+        internal static class BeatLeaderReflection
+        {
+            internal static readonly Type kCameraControllerType = Type.GetType("BeatLeader.Replayer.ReplayerCameraController, BeatLeader");
+            internal static readonly Type kOriginComponentType = Type.GetType("BeatLeader.Replayer.ReplayerExtraObjectsProvider, BeatLeader");
+            internal static readonly Func<object, Camera> kCameraField = kCameraControllerType?.CreateFieldGetter<Camera>("_camera");
+            internal static readonly Func<object, Transform> kReplayerCoreGetter = kOriginComponentType?.CreatePropertyGetter<Transform>("ReplayerCore");
+            internal static readonly Func<object, Transform> kReplayerCenterAdjustGetter = kOriginComponentType?.CreatePropertyGetter<Transform>("ReplayerCenterAdjust");
+
+            internal static bool kAvailable = kCameraControllerType != null && kOriginComponentType != null && kCameraField != null && kReplayerCoreGetter != null && kReplayerCenterAdjustGetter != null;
+        }
+
         private const string kEnvironmentObjectPath = "/Environment";
         private const string kSpectatorObjectPath = "/SpectatorParent";
-
-        internal static readonly Type kBeatLeaderCameraControllerType = Type.GetType("BeatLeader.Replayer.ReplayerCameraController, BeatLeader");
-        internal static readonly Type kBeatLeaderOriginComponentType = Type.GetType("BeatLeader.Replayer.ReplayerExtraObjectsProvider, BeatLeader");
-        internal static readonly FieldInfo kBeatLeaderCameraField = kBeatLeaderCameraControllerType?.GetField("_camera", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
         private readonly DiContainer _container;
         private readonly ILogger<GameEnvironmentObjectManager> _logger;
@@ -115,23 +121,22 @@ namespace CustomAvatar.Player
 
         private void HandleBeatLeaderSpectatorCamera()
         {
-            if (kBeatLeaderCameraControllerType == null || kBeatLeaderOriginComponentType == null || kBeatLeaderCameraField == null)
+            if (!BeatLeaderReflection.kAvailable)
             {
                 return;
             }
 
-            var controller = (Component)_container.TryResolve(kBeatLeaderCameraControllerType);
-            var originComponent = (Component)_container.TryResolve(kBeatLeaderOriginComponentType);
+            var controller = (Component)_container.TryResolve(BeatLeaderReflection.kCameraControllerType);
+            var originComponent = (Component)_container.TryResolve(BeatLeaderReflection.kOriginComponentType);
 
             if (controller == null || originComponent == null)
             {
                 return;
             }
 
-            var camera = (Camera)kBeatLeaderCameraField.GetValue(controller);
-            SpectatorCamera spectatorCameraController = _container.InstantiateComponent<SpectatorCamera>(camera.gameObject);
-            spectatorCameraController.origin = originComponent.transform;
-            spectatorCameraController.playerSpace = spectatorCameraController.origin.Find("CenterAdjust");
+            SpectatorCamera spectatorCameraController = _container.InstantiateComponent<SpectatorCamera>(BeatLeaderReflection.kCameraField(controller).gameObject);
+            spectatorCameraController.origin = BeatLeaderReflection.kReplayerCoreGetter(originComponent);
+            spectatorCameraController.playerSpace = BeatLeaderReflection.kReplayerCenterAdjustGetter(originComponent);
         }
     }
 }
