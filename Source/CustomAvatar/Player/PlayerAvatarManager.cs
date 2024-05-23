@@ -420,7 +420,8 @@ namespace CustomAvatar.Player
 
         private void OnRoomAdjustChanged(Vector3 roomCenter, Quaternion roomRotation)
         {
-            ResizeCurrentAvatar();
+            UpdateAvatarVerticalPosition();
+            UpdateLocomotionEnabled();
         }
 
         private void UpdateConstraints()
