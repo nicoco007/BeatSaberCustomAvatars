@@ -128,7 +128,6 @@ namespace CustomAvatar.Player
             _settings.enableLocomotion.changed += OnEnableLocomotionChanged;
 
             _beatSaberUtilities.roomAdjustChanged += OnRoomAdjustChanged;
-            _beatSaberUtilities.focusChanged += OnFocusChanged;
 
             _activeOriginManager.changed += OnActiveOriginChanged;
         }
@@ -193,7 +192,6 @@ namespace CustomAvatar.Player
             _settings.enableLocomotion.changed -= OnEnableLocomotionChanged;
 
             _beatSaberUtilities.roomAdjustChanged -= OnRoomAdjustChanged;
-            _beatSaberUtilities.focusChanged -= OnFocusChanged;
 
             _activeOriginManager.changed -= OnActiveOriginChanged;
         }
@@ -425,11 +423,6 @@ namespace CustomAvatar.Player
             ResizeCurrentAvatar();
         }
 
-        private void OnFocusChanged(bool hasFocus)
-        {
-            UpdateFirstPersonVisibility();
-        }
-
         private void UpdateConstraints()
         {
             _logger.LogTrace("Updating constraints");
@@ -527,11 +520,7 @@ namespace CustomAvatar.Player
 
             FirstPersonVisibility visibility = FirstPersonVisibility.Hidden;
 
-            if (!_beatSaberUtilities.hasFocus)
-            {
-                visibility = FirstPersonVisibility.Visible;
-            }
-            else if (_settings.isAvatarVisibleInFirstPerson)
+            if (_settings.isAvatarVisibleInFirstPerson)
             {
                 visibility = ignoreFirstPersonExclusions ? FirstPersonVisibility.Visible : FirstPersonVisibility.VisibleWithExclusionsApplied;
             }

@@ -142,6 +142,8 @@ namespace CustomAvatar.Rendering
             _trackedPoseDriver.originPose = hasFocus ? Pose.identity : new Pose(
                 Vector3.ProjectOnPlane(Quaternion.Euler(0, 180, 0) * -transform.localPosition * 2, Vector3.up) + Vector3.ProjectOnPlane(transform.localRotation * Vector3.forward, Vector3.up).normalized * 1.5f,
                 Quaternion.Euler(0, 180, 0));
+
+            UpdateCameraMask();
         }
 
         private void UpdateCameraMask()
@@ -156,7 +158,7 @@ namespace CustomAvatar.Rendering
             int mask = _camera.cullingMask | AvatarLayers.kAlwaysVisibleMask;
 
             // FPFC basically ends up being a 3rd person camera
-            if (_fpfcSettings.Enabled)
+            if (_fpfcSettings.Enabled || !_beatSaberUtilities.hasFocus)
             {
                 mask |= AvatarLayers.kOnlyInThirdPersonMask;
             }
