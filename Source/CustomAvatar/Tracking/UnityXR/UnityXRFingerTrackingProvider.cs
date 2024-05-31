@@ -15,7 +15,9 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using CustomAvatar.Utilities;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.XR.Hands;
@@ -35,10 +37,18 @@ namespace CustomAvatar.Tracking.UnityXR
         private readonly float[] _leftHandFingerCurls = new float[5];
         private readonly float[] _rightHandFingerCurls = new float[5];
 
+        private readonly BeatSaberUtilities _beatSaberUtilities;
+
         private XRHandSubsystem _subsystem;
 
         private bool _leftJointsTracked;
         private bool _rightJointsTracked;
+
+        [SuppressMessage("CodeQuality", "IDE0051", Justification = "Used by Zenject")]
+        private UnityXRFingerTrackingProvider(BeatSaberUtilities beatSaberUtilities)
+        {
+            _beatSaberUtilities = beatSaberUtilities;
+        }
 
         public void Tick()
         {
@@ -67,6 +77,13 @@ namespace CustomAvatar.Tracking.UnityXR
 
         private void OnUpdatedHands(XRHandSubsystem handSubsystem, XRHandSubsystem.UpdateSuccessFlags updateSuccessFlags, XRHandSubsystem.UpdateType updateType)
         {
+            // TODO: I'm not sure how I feel about putting this here. It's not the same layer of abstraction as TrackingRig,
+            // where it's done for regular tracked devices (I would consider IDeviceProvider to be the same layer).
+            if (!_beatSaberUtilities.hasFocus)
+            {
+                return;
+            }
+
             // We have no game logic depending on the finger transforms, so early out here
             if (updateType == XRHandSubsystem.UpdateType.Dynamic)
             {
