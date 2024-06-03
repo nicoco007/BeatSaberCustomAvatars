@@ -17,10 +17,10 @@
 extern alias BeatSaberFinalIK;
 
 using System.Linq;
-using BeatSaber.GameSettings;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Player;
+using CustomAvatar.Utilities;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -34,15 +34,15 @@ namespace CustomAvatar.Tracking
         private readonly CalibrationData _calibrationData;
         private readonly Settings _settings;
         private readonly ActiveOriginManager _activeOriginManager;
-        private readonly MainSettings _mainSettings;
+        private readonly BeatSaberUtilities _beatSaberUtilities;
 
-        internal HumanoidCalibrator(TrackingRig trackingRig, CalibrationData calibrationData, Settings settings, ActiveOriginManager activeOriginManager, MainSettingsHandler mainSettingsHandler)
+        internal HumanoidCalibrator(TrackingRig trackingRig, CalibrationData calibrationData, Settings settings, ActiveOriginManager activeOriginManager, BeatSaberUtilities beatSaberUtilities)
         {
             _trackingRig = trackingRig;
             _calibrationData = calibrationData;
             _settings = settings;
             _activeOriginManager = activeOriginManager;
-            _mainSettings = mainSettingsHandler.instance;
+            _beatSaberUtilities = beatSaberUtilities;
         }
 
         internal void ApplyAutomaticCalibration()
@@ -76,7 +76,7 @@ namespace CustomAvatar.Tracking
 
             if (_settings.moveFloorWithRoomAdjust)
             {
-                center.position += center.TransformVector(0, _mainSettings.roomCenter.y, 0);
+                center.position += center.TransformVector(0, _beatSaberUtilities.roomCenter.y, 0);
             }
 
             Vector3 leftFootPos = center.InverseTransformPoint(_trackingRig.leftFoot.transform.position);

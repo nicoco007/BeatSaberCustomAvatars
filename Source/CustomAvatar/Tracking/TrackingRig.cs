@@ -20,7 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
-using BeatSaber.GameSettings;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
@@ -41,16 +40,15 @@ namespace CustomAvatar.Tracking
         private static readonly List<ConstraintSource> kEmptyConstraintSources = new(0);
 
         private ILogger<TrackingRig> _logger;
+        private DiContainer _container;
         private IDeviceProvider _deviceProvider;
         private IRenderModelProvider _renderModelProvider;
         private PlayerAvatarManager _playerAvatarManager;
         private ActivePlayerSpaceManager _activePlayerSpaceManager;
         private ActiveOriginManager _activeOriginManager;
         private Settings _settings;
-        private MainSettingsHandler _mainSettingsHandler;
         private CalibrationData _calibrationData;
         private VRControllerVisualsManager _vrControllerVisualsManager;
-        private IVRPlatformHelper _vrPlatformHelper;
         private BeatSaberUtilities _beatSaberUtilities;
         private IFPFCSettings _fpfcSettings;
         private HumanoidCalibrator _humanoidCalibrator;
@@ -80,7 +78,7 @@ namespace CustomAvatar.Tracking
         internal bool areAnyFullBodyTrackersTracking { get; private set; }
 
         // local to the current active origin (parent of VRCenterAdjust or world if no parent)
-        internal float eyeHeight => (_activeOriginManager.current != null ? _activeOriginManager.current.InverseTransformPoint(head.transform.position).y : head.transform.position.y) - (_settings.moveFloorWithRoomAdjust ? _mainSettingsHandler.instance.roomCenter.y : 0);
+        internal float eyeHeight => (_activeOriginManager.current != null ? _activeOriginManager.current.InverseTransformPoint(head.transform.position).y : head.transform.position.y) - (_settings.moveFloorWithRoomAdjust ? _beatSaberUtilities.roomCenter.y : 0);
 
         internal TrackedNode head { get; private set; }
 
@@ -232,8 +230,7 @@ namespace CustomAvatar.Tracking
             leftHandControllerOffset.SetParent(leftHand.transform, false);
             rightHandControllerOffset.SetParent(rightHand.transform, false);
 
-            LocalPlayerControllerOffset localPlayerControllerOffset = gameObject.AddComponent<LocalPlayerControllerOffset>();
-            localPlayerControllerOffset.Init(_mainSettingsHandler.instance.controllerSettings.positionOffset, _mainSettingsHandler.instance.controllerSettings.rotationOffset);
+            VRControllersValueSettingsOffsets localPlayerControllerOffset = _container.InstantiateComponent<VRControllersValueSettingsOffsets>(gameObject);
 
             _leftController = SetUpVRController(leftHand.gameObject, XRNode.LeftHand, leftHandControllerOffset, localPlayerControllerOffset);
             _rightController = SetUpVRController(rightHand.gameObject, XRNode.RightHand, rightHandControllerOffset, localPlayerControllerOffset);
@@ -297,20 +294,15 @@ namespace CustomAvatar.Tracking
                 _settings.showRenderModels.changed += OnShowRenderModelsChanged;
             }
 
-            if (_mainSettingsHandler != null)
+            if (_beatSaberUtilities != null)
             {
-                _mainSettingsHandler.instance.roomCenterDidChange += OnRoomAdjustChanged;
-                _mainSettingsHandler.instance.roomRotationDidChange += OnRoomAdjustChanged;
+                _beatSaberUtilities.controllersChanged += OnControllersDidChangeReference;
+                _beatSaberUtilities.roomAdjustChanged += OnRoomAdjustChanged;
             }
 
             if (_deviceProvider != null)
             {
                 _deviceProvider.devicesChanged += OnDevicesChanged;
-            }
-
-            if (_vrPlatformHelper != null)
-            {
-                _vrPlatformHelper.controllersDidChangeReferenceEvent += OnControllersDidChangeReference;
             }
 
             UpdateOffsets();
@@ -322,18 +314,17 @@ namespace CustomAvatar.Tracking
 
         private void Start()
         {
-            if (_beatSaberUtilities != null)
-            {
-                _beatSaberUtilities.focusChanged += OnFocusChanged;
-                OnFocusChanged(_beatSaberUtilities.hasFocus);
-            }
-
             if (_fpfcSettings != null)
             {
                 _fpfcSettings.Changed += OnFpfcSettingsChanged;
-                OnFpfcSettingsChanged(_fpfcSettings);
             }
 
+            if (_beatSaberUtilities != null)
+            {
+                _beatSaberUtilities.focusChanged += OnFocusChanged;
+            }
+
+            UpdateBehaviourEnabled();
             UpdateOffsets();
             UpdateControllerOffsets();
         }
@@ -342,19 +333,19 @@ namespace CustomAvatar.Tracking
         [SuppressMessage("CodeQuality", "IDE0051", Justification = "Used by Zenject")]
         private void Construct(
             ILogger<TrackingRig> logger,
+            DiContainer container,
             IDeviceProvider deviceProvider,
             [InjectOptional] IRenderModelProvider renderModelProvider,
             PlayerAvatarManager playerAvatarManager,
             ActivePlayerSpaceManager activePlayerSpaceManager,
             ActiveOriginManager activeOriginManager,
             Settings settings,
-            MainSettingsHandler mainSettingsModel,
             CalibrationData calibrationData,
             VRControllerVisualsManager vrControllerVisualsManager,
-            IVRPlatformHelper vrPlatformHelper,
             BeatSaberUtilities beatSaberUtilities,
             IFPFCSettings fpfcSettings)
         {
+            _container = container;
             _logger = logger;
             _deviceProvider = deviceProvider;
             _renderModelProvider = renderModelProvider;
@@ -362,13 +353,11 @@ namespace CustomAvatar.Tracking
             _activePlayerSpaceManager = activePlayerSpaceManager;
             _activeOriginManager = activeOriginManager;
             _settings = settings;
-            _mainSettingsHandler = mainSettingsModel;
             _calibrationData = calibrationData;
             _vrControllerVisualsManager = vrControllerVisualsManager;
-            _vrPlatformHelper = vrPlatformHelper;
             _beatSaberUtilities = beatSaberUtilities;
             _fpfcSettings = fpfcSettings;
-            _humanoidCalibrator = new HumanoidCalibrator(this, calibrationData, settings, activeOriginManager, mainSettingsModel);
+            _humanoidCalibrator = new HumanoidCalibrator(this, calibrationData, settings, activeOriginManager, beatSaberUtilities);
         }
 
         private void Update()
@@ -426,25 +415,25 @@ namespace CustomAvatar.Tracking
                 _settings.showRenderModels.changed -= OnShowRenderModelsChanged;
             }
 
-            if (_mainSettingsHandler != null)
+            if (_beatSaberUtilities != null)
             {
-                _mainSettingsHandler.instance.roomCenterDidChange -= OnRoomAdjustChanged;
-                _mainSettingsHandler.instance.roomRotationDidChange -= OnRoomAdjustChanged;
+                _beatSaberUtilities.controllersChanged -= OnControllersDidChangeReference;
+                _beatSaberUtilities.roomAdjustChanged -= OnRoomAdjustChanged;
             }
 
             if (_deviceProvider != null)
             {
                 _deviceProvider.devicesChanged -= OnDevicesChanged;
             }
-
-            if (_vrPlatformHelper != null)
-            {
-                _vrPlatformHelper.controllersDidChangeReferenceEvent -= OnControllersDidChangeReference;
-            }
         }
 
         private void OnDestroy()
         {
+            if (_fpfcSettings != null)
+            {
+                _fpfcSettings.Changed -= OnFpfcSettingsChanged;
+            }
+
             if (_beatSaberUtilities != null)
             {
                 _beatSaberUtilities.focusChanged -= OnFocusChanged;
@@ -455,12 +444,11 @@ namespace CustomAvatar.Tracking
         {
             trackedNode.SetActive(false);
 
-            VRController vrController = trackedNode.AddComponent<VRController>();
+            VRController vrController = _container.InstantiateComponent<VRController>(trackedNode);
             vrController.enabled = false;
             vrController._node = node;
             vrController._viewAnchorTransform = controllerOffset;
             vrController._transformOffset = transformOffset;
-            vrController.Init(_vrPlatformHelper);
 
             trackedNode.SetActive(true);
 
@@ -490,7 +478,7 @@ namespace CustomAvatar.Tracking
             UpdateRenderModelsVisibility();
         }
 
-        private void OnRoomAdjustChanged()
+        private void OnRoomAdjustChanged(Vector3 position, Quaternion rotation)
         {
             UpdateOffsets();
         }
@@ -509,12 +497,17 @@ namespace CustomAvatar.Tracking
 
         private void OnFpfcSettingsChanged(IFPFCSettings fpfcSettings)
         {
-            enabled = _beatSaberUtilities.hasFocus && !fpfcSettings.Enabled;
+            UpdateBehaviourEnabled();
         }
 
         private void OnFocusChanged(bool hasFocus)
         {
-            enabled = hasFocus && !_fpfcSettings.Enabled;
+            UpdateBehaviourEnabled();
+        }
+
+        private void UpdateBehaviourEnabled()
+        {
+            enabled = _beatSaberUtilities.hasFocus && !_fpfcSettings.Enabled;
         }
 
         private void UpdateOffsets()
@@ -773,23 +766,6 @@ namespace CustomAvatar.Tracking
             trackedRenderModel.transform.SetLocalPositionAndRotation(renderModel.localOrigin.position, renderModel.localOrigin.rotation);
             trackedRenderModel.meshFilter.mesh = renderModel?.mesh;
             trackedRenderModel.meshRenderer.material = renderModel?.material;
-        }
-
-        // why isn't VRControllerTransformOffset an interface :(
-        private class LocalPlayerControllerOffset : VRControllerTransformOffset
-        {
-            private Vector3 _positionOffset;
-            private Vector3 _rotationOffset;
-
-            public override Vector3 positionOffset => _positionOffset;
-
-            public override Vector3 rotationOffset => _rotationOffset;
-
-            public void Init(Vector3 positionOffset, Vector3 rotationOffset)
-            {
-                _positionOffset = positionOffset;
-                _rotationOffset = rotationOffset;
-            }
         }
     }
 }

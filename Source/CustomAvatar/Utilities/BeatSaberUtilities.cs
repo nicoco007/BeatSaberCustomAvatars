@@ -47,6 +47,8 @@ namespace CustomAvatar.Utilities
 
         public event Action<bool> focusChanged;
 
+        public event Action controllersChanged;
+
         public void Initialize()
         {
             _mainSettingsHandler.instance.roomCenterDidChange += OnRoomCenterChanged;
@@ -56,6 +58,8 @@ namespace CustomAvatar.Utilities
             _vrPlatformHelper.inputFocusWasReleasedEvent += OnFocusWasChanged;
             _vrPlatformHelper.vrFocusWasCapturedEvent += OnFocusWasChanged;
             _vrPlatformHelper.vrFocusWasReleasedEvent += OnFocusWasChanged;
+            _vrPlatformHelper.controllersDidChangeReferenceEvent += OnControllersChanged;
+            _vrPlatformHelper.controllersDidDisconnectEvent += OnControllersChanged;
         }
 
         public void Dispose()
@@ -67,6 +71,8 @@ namespace CustomAvatar.Utilities
             _vrPlatformHelper.inputFocusWasReleasedEvent -= OnFocusWasChanged;
             _vrPlatformHelper.vrFocusWasCapturedEvent -= OnFocusWasChanged;
             _vrPlatformHelper.vrFocusWasReleasedEvent -= OnFocusWasChanged;
+            _vrPlatformHelper.controllersDidChangeReferenceEvent -= OnControllersChanged;
+            _vrPlatformHelper.controllersDidDisconnectEvent -= OnControllersChanged;
         }
 
         private void OnRoomCenterChanged()
@@ -82,6 +88,11 @@ namespace CustomAvatar.Utilities
         private void OnFocusWasChanged()
         {
             focusChanged?.Invoke(hasFocus);
+        }
+
+        private void OnControllersChanged()
+        {
+            controllersChanged?.Invoke();
         }
     }
 }
