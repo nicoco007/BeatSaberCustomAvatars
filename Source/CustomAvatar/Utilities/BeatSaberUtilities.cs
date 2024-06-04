@@ -29,11 +29,13 @@ namespace CustomAvatar.Utilities
         public static readonly float kDefaultPlayerArmSpan = kDefaultPlayerHeight;
 
         private readonly MainSettingsHandler _mainSettingsHandler;
+        private readonly SettingsApplicatorSO _settingsApplicator;
         private readonly IVRPlatformHelper _vrPlatformHelper;
 
-        internal BeatSaberUtilities(MainSettingsHandler mainSettingsHandler, IVRPlatformHelper vrPlatformHelper)
+        internal BeatSaberUtilities(MainSettingsHandler mainSettingsHandler, SettingsApplicatorSO settingsApplicator, IVRPlatformHelper vrPlatformHelper)
         {
             _mainSettingsHandler = mainSettingsHandler;
+            _settingsApplicator = settingsApplicator;
             _vrPlatformHelper = vrPlatformHelper;
         }
 
@@ -51,8 +53,7 @@ namespace CustomAvatar.Utilities
 
         public void Initialize()
         {
-            _mainSettingsHandler.instance.roomCenterDidChange += OnRoomCenterChanged;
-            _mainSettingsHandler.instance.roomRotationDidChange += OnRoomRotationChanged;
+            _settingsApplicator.roomTransformOffsetDidUpdateEvent += OnRoomTransformOffsetUpdated;
 
             _vrPlatformHelper.inputFocusWasCapturedEvent += OnFocusWasChanged;
             _vrPlatformHelper.inputFocusWasReleasedEvent += OnFocusWasChanged;
@@ -64,8 +65,7 @@ namespace CustomAvatar.Utilities
 
         public void Dispose()
         {
-            _mainSettingsHandler.instance.roomCenterDidChange -= OnRoomCenterChanged;
-            _mainSettingsHandler.instance.roomRotationDidChange -= OnRoomRotationChanged;
+            _settingsApplicator.roomTransformOffsetDidUpdateEvent -= OnRoomTransformOffsetUpdated;
 
             _vrPlatformHelper.inputFocusWasCapturedEvent -= OnFocusWasChanged;
             _vrPlatformHelper.inputFocusWasReleasedEvent -= OnFocusWasChanged;
@@ -75,12 +75,7 @@ namespace CustomAvatar.Utilities
             _vrPlatformHelper.controllersDidDisconnectEvent -= OnControllersChanged;
         }
 
-        private void OnRoomCenterChanged()
-        {
-            roomAdjustChanged?.Invoke(roomCenter, roomRotation);
-        }
-
-        private void OnRoomRotationChanged()
+        private void OnRoomTransformOffsetUpdated()
         {
             roomAdjustChanged?.Invoke(roomCenter, roomRotation);
         }
