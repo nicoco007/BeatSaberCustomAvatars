@@ -37,6 +37,9 @@ namespace CustomAvatar.Zenject
 {
     internal class CustomAvatarsInstaller : Installer
     {
+        private const string kXRHandsID = "Unity.XR.Hands";
+        private const string kOpenVRID = "OpenVR";
+
         public static readonly int kPlayerAvatarManagerExecutionOrder = 1000;
 
         private static readonly VersionRange kXRHandsVersionRange = new("^1.1.0");
@@ -78,7 +81,7 @@ namespace CustomAvatar.Zenject
             {
                 Container.Bind(typeof(IDeviceProvider), typeof(IInitializable), typeof(IDisposable)).To<UnityXRDeviceProvider>().AsSingle();
 
-                if (IsPluginLoadedAndMatchesVersion("Unity.XR.Hands", kXRHandsVersionRange))
+                if (IsPluginLoadedAndMatchesVersion(kXRHandsID, kXRHandsVersionRange))
                 {
                     Container.Bind(typeof(IFingerTrackingProvider), typeof(ITickable)).To<UnityXRFingerTrackingProvider>().AsSingle();
                 }
@@ -88,10 +91,9 @@ namespace CustomAvatar.Zenject
                 }
 
                 // SteamVR doesn't yet support render models through OpenXR so we need this workaround
-                if (OpenVRHelper.Initialize())
+                if (IsPluginLoadedAndMatchesVersion(kOpenVRID, kOpenVRVersionRange))
                 {
-                    Container.Bind(typeof(OpenVRRenderModelLoader), typeof(IDisposable)).To<OpenVRRenderModelLoader>().AsSingle();
-                    Container.Bind(typeof(IRenderModelProvider), typeof(IInitializable)).To<OpenVRRenderModelProvider>().AsSingle();
+                    BindOpenVR();
                 }
             }
             else
@@ -146,6 +148,15 @@ namespace CustomAvatar.Zenject
         private bool InjectedIntoThisAssembly(InjectContext context)
         {
             return context.ObjectType.Assembly == kAssembly;
+        }
+
+        private void BindOpenVR()
+        {
+            if (OpenVRHelper.Initialize())
+            {
+                Container.Bind(typeof(OpenVRRenderModelLoader), typeof(IDisposable)).To<OpenVRRenderModelLoader>().AsSingle();
+                Container.Bind(typeof(IRenderModelProvider), typeof(IInitializable)).To<OpenVRRenderModelProvider>().AsSingle();
+            }
         }
     }
 }
