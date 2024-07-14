@@ -28,6 +28,7 @@ namespace CustomAvatar.Tracking
 {
     internal class HumanoidCalibrator
     {
+        private const float kEyeToHeadPivotOffset = 0.07f;
         private const float kEyeHeightToPelvisHeightRatio = 3.5f / 7f;
 
         private readonly TrackingRig _trackingRig;
@@ -72,7 +73,7 @@ namespace CustomAvatar.Tracking
             _trackingRig.fullBodyTracking.localScale = Vector3.one;
             _trackingRig.fullBodyTracking.localPosition = Vector3.zero;
 
-            Transform center = CreateCenter(_activeOriginManager.current, playerEyeHeight);
+            Transform center = CreateCenter(_activeOriginManager.current);
 
             if (_settings.moveFloorWithRoomAdjust)
             {
@@ -173,25 +174,20 @@ namespace CustomAvatar.Tracking
             }
         }
 
-        private Transform CreateCenter(Transform parent, float playerEyeHeight)
+        private Transform CreateCenter(Transform parent)
         {
             Transform center = new GameObject("Center").transform;
+            Transform head = _trackingRig.head.transform;
 
             center.SetParent(parent, false);
             center.SetPositionAndRotation(
-                _trackingRig.head.transform.position - _trackingRig.head.transform.TransformVector(new Vector3(0, 0, GetHeadOffsetFromHeight(playerEyeHeight))),
-                Quaternion.LookRotation(Vector3.ProjectOnPlane(_trackingRig.head.transform.forward, parent.up), parent.up));
+                head.TransformPoint(new Vector3(0, 0, -kEyeToHeadPivotOffset)),
+                Quaternion.LookRotation(Vector3.ProjectOnPlane(head.forward, parent.up), parent.up));
 
             // put center on the ground
             center.localPosition = new Vector3(center.localPosition.x, 0, center.localPosition.z);
 
             return center;
-        }
-
-        private float GetHeadOffsetFromHeight(float eyeHeight)
-        {
-            // this is loosely based on height vs head circumference derived from average height & head circumference at different ages
-            return 0.08f + 0.000175f * eyeHeight;
         }
 
         // TODO: shove this into a shared helper
