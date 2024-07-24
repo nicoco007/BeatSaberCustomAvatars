@@ -154,11 +154,13 @@ namespace CustomAvatar.Rendering
 
         private void OnFocusChanged(bool hasFocus)
         {
-            _trackedPoseDriver.UseRelativeTransform = !hasFocus;
-            _trackedPoseDriver.originPose = hasFocus ? Pose.identity : new Pose(
-                Vector3.Project(Quaternion.Euler(0, 180, 0) * -transform.localPosition * 2, Vector3.right) + new Vector3(0, 0, 1.5f),
-                Quaternion.Euler(0, 180, 0));
-
+            if (_trackedPoseDriver != null)
+            {
+                _trackedPoseDriver.UseRelativeTransform = !hasFocus;
+                _trackedPoseDriver.originPose = hasFocus ? Pose.identity : new Pose(
+                    Vector3.Project(Quaternion.Euler(0, 180, 0) * -transform.localPosition * 2, Vector3.right) + new Vector3(0, 0, 1.5f),
+                    Quaternion.Euler(0, 180, 0));
+            }
             UpdateCameraMask();
         }
 
