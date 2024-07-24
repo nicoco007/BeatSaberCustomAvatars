@@ -138,6 +138,7 @@ namespace CustomAvatar.Rendering
 
         private void OnDestroy()
         {
+            OnDisable();
             RemoveFromPlayerSpaceManager();
         }
 
