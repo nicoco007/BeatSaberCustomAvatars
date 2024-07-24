@@ -68,16 +68,19 @@ namespace CustomAvatar.Rendering
         {
             if (_settings != null)
             {
+                _settings.cameraNearClipPlane.changed -= OnCameraNearClipPlaneChanged;
                 _settings.cameraNearClipPlane.changed += OnCameraNearClipPlaneChanged;
             }
 
             if (_fpfcSettings != null)
             {
+                _fpfcSettings.Changed -= OnFpfcSettingsChanged;
                 _fpfcSettings.Changed += OnFpfcSettingsChanged;
             }
 
             if (_beatSaberUtilities != null)
             {
+                _beatSaberUtilities.focusChanged -= OnFocusChanged;
                 _beatSaberUtilities.focusChanged += OnFocusChanged;
                 OnFocusChanged(_beatSaberUtilities.hasFocus);
             }
@@ -153,10 +156,13 @@ namespace CustomAvatar.Rendering
 
         private void OnFocusChanged(bool hasFocus)
         {
-            _trackedPoseDriver.UseRelativeTransform = !hasFocus;
-            _trackedPoseDriver.originPose = hasFocus ? Pose.identity : new Pose(
-                Vector3.Project(Quaternion.Euler(0, 180, 0) * -transform.localPosition * 2, Vector3.right) + new Vector3(0, 0, 1.5f),
-                Quaternion.Euler(0, 180, 0));
+            if (_trackedPoseDriver != null)
+            {
+                _trackedPoseDriver.UseRelativeTransform = !hasFocus;
+                _trackedPoseDriver.originPose = hasFocus ? Pose.identity : new Pose(
+                    Vector3.Project(Quaternion.Euler(0, 180, 0) * -transform.localPosition * 2, Vector3.right) + new Vector3(0, 0, 1.5f),
+                    Quaternion.Euler(0, 180, 0));
+            }
 
             UpdateCameraMask();
         }
