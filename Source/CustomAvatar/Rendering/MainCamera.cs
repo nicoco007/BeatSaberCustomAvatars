@@ -163,6 +163,7 @@ namespace CustomAvatar.Rendering
                     Vector3.Project(Quaternion.Euler(0, 180, 0) * -transform.localPosition * 2, Vector3.right) + new Vector3(0, 0, 1.5f),
                     Quaternion.Euler(0, 180, 0));
             }
+
             UpdateCameraMask();
         }
 

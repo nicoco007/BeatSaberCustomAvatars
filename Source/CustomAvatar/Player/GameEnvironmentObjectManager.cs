@@ -128,13 +128,13 @@ namespace CustomAvatar.Player
 
             var controller = (Component)_container.TryResolve(BeatLeaderReflection.kCameraControllerType);
             var originComponent = (Component)_container.TryResolve(BeatLeaderReflection.kOriginComponentType);
-            var camera = BeatLeaderReflection.kCameraField(controller);
+            Camera camera = BeatLeaderReflection.kCameraField(controller);
 
             if (controller == null || originComponent == null || camera == null)
             {
                 return;
             }
-            
+
             SpectatorCamera spectatorCameraController = _container.InstantiateComponent<SpectatorCamera>(camera.gameObject);
             spectatorCameraController.origin = BeatLeaderReflection.kReplayerCoreGetter(originComponent);
             spectatorCameraController.playerSpace = BeatLeaderReflection.kReplayerCenterAdjustGetter(originComponent);
