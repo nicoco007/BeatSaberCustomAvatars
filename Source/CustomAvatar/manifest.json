@@ -6,7 +6,7 @@
   "id": "CustomAvatar",
   "icon": "CustomAvatar.Resources.icon.png",
   "name": "Custom Avatars",
-  "version": "5.4.0+dev",
+  "version": "5.4.1+dev",
   "dependsOn": {
     "AssetBundleLoadingTools": "^1.0.0",
     "BeatSaberMarkupLanguage": "^1.10.4",
