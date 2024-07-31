@@ -68,16 +68,19 @@ namespace CustomAvatar.Rendering
         {
             if (_settings != null)
             {
+                _settings.cameraNearClipPlane.changed -= OnCameraNearClipPlaneChanged;
                 _settings.cameraNearClipPlane.changed += OnCameraNearClipPlaneChanged;
             }
 
             if (_fpfcSettings != null)
             {
+                _fpfcSettings.Changed -= OnFpfcSettingsChanged;
                 _fpfcSettings.Changed += OnFpfcSettingsChanged;
             }
 
             if (_beatSaberUtilities != null)
             {
+                _beatSaberUtilities.focusChanged -= OnFocusChanged;
                 _beatSaberUtilities.focusChanged += OnFocusChanged;
                 OnFocusChanged(_beatSaberUtilities.hasFocus);
             }
@@ -138,7 +141,6 @@ namespace CustomAvatar.Rendering
 
         private void OnDestroy()
         {
-            OnDisable();
             RemoveFromPlayerSpaceManager();
         }
 
