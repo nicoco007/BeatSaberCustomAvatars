@@ -83,7 +83,7 @@ namespace CustomAvatar.Tracking
             Vector3 leftFootPos = center.InverseTransformPoint(_trackingRig.leftFoot.transform.position);
             Vector3 rightFootPos = center.InverseTransformPoint(_trackingRig.rightFoot.transform.position);
 
-            ApplyCalibration(center, _trackingRig.head, _trackingRig.headCalibration, new Vector3(0, playerEyeHeight, 0), Quaternion.Inverse(center.rotation) * _trackingRig.head.transform.rotation);
+            ApplyCalibration(center, _trackingRig.head, _trackingRig.headCalibration, new Vector3(0, playerEyeHeight, 0), Quaternion.identity);
             ApplyCalibration(center, _trackingRig.pelvis, _trackingRig.pelvisCalibration, new Vector3(0, playerEyeHeight * kEyeHeightToPelvisHeightRatio, 0), Quaternion.identity);
             ApplyCalibration(center, _trackingRig.leftFoot, _trackingRig.leftFootCalibration, new Vector3(leftFootPos.x, 0, 0), Quaternion.Euler(0, -10f, 0));
             ApplyCalibration(center, _trackingRig.rightFoot, _trackingRig.rightFootCalibration, new Vector3(rightFootPos.x, 0, 0), Quaternion.Euler(0, 10f, 0));
@@ -179,10 +179,15 @@ namespace CustomAvatar.Tracking
             Transform center = new GameObject("Center").transform;
             Transform head = _trackingRig.head.transform;
 
+            // We want the user's head rotation to match the avatar's head directly rather than assuming whatever
+            // position they're in is forward. I'm not sure how I feel about doing that, but it's what VRChat does.
+            var rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(head.forward, parent.up), parent.up);
+            head.rotation = rotation;
+
             center.SetParent(parent, false);
             center.SetPositionAndRotation(
                 head.TransformPoint(new Vector3(0, 0, -kEyeToHeadPivotOffset)),
-                Quaternion.LookRotation(Vector3.ProjectOnPlane(head.forward, parent.up), parent.up));
+                rotation);
 
             // put center on the ground
             center.localPosition = new Vector3(center.localPosition.x, 0, center.localPosition.z);
