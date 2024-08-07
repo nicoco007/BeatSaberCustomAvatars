@@ -26,7 +26,7 @@ using Object = UnityEngine.Object;
 namespace CustomAvatar.Avatar
 {
     /// <summary>
-    /// Allows spawning instances of <see cref="LoadedAvatar"/>.
+    /// Allows spawning instances of <see cref="AvatarPrefab"/>.
     /// </summary>
     public class AvatarSpawner
     {
@@ -63,9 +63,9 @@ namespace CustomAvatar.Avatar
         }
 
         /// <summary>
-        /// Spawn a <see cref="LoadedAvatar"/>.
+        /// Spawn a <see cref="AvatarPrefab"/>.
         /// </summary>
-        /// <param name="avatar">The <see cref="LoadedAvatar"/> to spawn</param>
+        /// <param name="avatar">The <see cref="AvatarPrefab"/> to spawn</param>
         /// <param name="input">The <see cref="IAvatarInput"/> to use</param>
         /// <param name="parent">The container in which to spawn the avatar (optional)</param>
         /// <returns><see cref="SpawnedAvatar"/></returns>

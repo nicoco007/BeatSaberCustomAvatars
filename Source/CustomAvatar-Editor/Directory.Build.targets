@@ -1,46 +1,82 @@
 ﻿<Project>
   <PropertyGroup>
-    <ManifestPath>$(ProjectDir)..\CustomAvatar\manifest.json</ManifestPath>
-  </PropertyGroup>
-  
-  <!--Get info about the project used by later targets -->
-  <Target Name="GetProjectInfo" AfterTargets="BeforeBuild">
-    <GetManifestInfo ManifestPath="$(ManifestPath)">
-      <Output TaskParameter="PluginVersion" PropertyName="PluginVersion" />
-      <Output TaskParameter="GameVersion" PropertyName="GameVersion" />
-      <Output TaskParameter="BasePluginVersion" PropertyName="BasePluginVersion" />
-    </GetManifestInfo>
+    <!-- Normalize BeatSaberDir -->
+    <BeatSaberDir Condition="'$(BeatSaberDir)' != '' AND !($(BeatSaberDir.EndsWith('/')) OR $(BeatSaberDir.EndsWith('\')))">$(BeatSaberDir)\</BeatSaberDir>
     
+    <ManifestPath>$(IntermediateOutputPath)manifest.json</ManifestPath>
+    <ManifestPath Condition="'$(BeatSaberOutputType)' == 'Library'">$(TargetDir)$(TargetName).manifest</ManifestPath>
+
+    <!-- Set version to compare against tag (if applicable) -->
+    <GitTagVersion>$([System.String]::Format('$(GitTagFormat)', '$(Version)'))</GitTagVersion>
+
+    <!-- Set SemVer build metadata -->
+    <BuildMetadata Condition="'$(GITHUB_SHA)' == ''">dev</BuildMetadata>
+    <BuildMetadata Condition="'$(GITHUB_SHA)' != ''">bs.$(GameVersion)</BuildMetadata>
+    <BuildMetadata Condition="'$(GITHUB_SHA)' != '' AND '$(GITHUB_REF_TYPE)' != 'tag'">$(BuildMetadata).git.sha.$(GITHUB_SHA)</BuildMetadata>
+    <Version Condition="$(BuildMetadata) != ''">$(Version)+$(BuildMetadata)</Version>
+
+    <ArtifactDir>$(TargetDir)Artifact\</ArtifactDir>
+    <ArtifactTargetDir>$(ArtifactDir)Plugins\</ArtifactTargetDir>
+    <ArtifactTargetDir Condition="'$(BeatSaberOutputType)' == 'Library'">$(ArtifactDir)Libs\</ArtifactTargetDir>
+  </PropertyGroup>
+
+  <!-- If we're building for a tag in CI, make sure it matches the version defined here -->
+  <Target Name="ValidateTag" BeforeTargets="BeforeBuild">
+    <Error Condition="'$(GITHUB_REF_TYPE)' == 'tag' AND '$(GITHUB_REF_NAME)' != '$(GitTagVersion)'" Text="Tag '$(GITHUB_REF_NAME)' does not match version '$(GitTagVersion)'" />
+  </Target>
+
+  <!-- Default targets set TargetFrameworkDirectory to .NET Framework reference assemblies no matter what so we have to manually force it -->
+  <Target Name="OverrideTargetFrameworkDirectory" AfterTargets="GetReferenceAssemblyPaths">
     <PropertyGroup>
-      <Version>$(BasePluginVersion)</Version>
-      <FileVersion>$(BasePluginVersion)</FileVersion>
-      <InformationalVersion>$(PluginVersion)</InformationalVersion>
+      <TargetFrameworkDirectory>$(BeatSaberDir)Beat Saber_Data\Managed\</TargetFrameworkDirectory>
     </PropertyGroup>
   </Target>
 
-  <!-- Set shared properties that can't be set in a top-level PropertyGroup (too early) -->
-  <Target Name="GetProperties">
-    <PropertyGroup>
-      <ArtifactDir>$(TargetDir)Artifact\</ArtifactDir>
-    </PropertyGroup>
+  <Target Name="GenerateManifest" BeforeTargets="BeforeBuild">
+    <GenerateManifest ID="$(PackageId)" Name="$(Title)" Author="$(Authors)" Version="$(Version)" GameVersion="$(GameVersion)"
+                      Description="$(Description)" Icon="$(PluginIcon)" DependsOn="@(DependsOn)" ConflictsWith="@(ConflictsWith)"
+                      Files="@(RequiredFile)" LoadBefore="@(LoadBefore)" LoadAfter="@(LoadAfter)"
+                      ProjectSource="$(RepositoryUrl)" ProjectHome="$(ProjectHome)" Donate="$(DonateUrl)"
+                      Features="$(PluginFeatures)" Misc="$(PluginMisc)" PluginHint="$(PluginHint)"
+                      TargetPath="$(ManifestPath)" />
+    
+    <ItemGroup Condition="'$(BeatSaberOutputType)' != 'Library'">
+      <EmbeddedResource Include="$(IntermediateOutputPath)manifest.json" LogicalName="$(AssemblyName).manifest.json" />
+    </ItemGroup>
   </Target>
 
   <!-- Copy the assembly and PDB to the Artifact folder -->
-  <Target Name="CopyToArtifact" AfterTargets="AfterBuild" DependsOnTargets="GetProperties">
+  <Target Name="CopyToArtifact" AfterTargets="AfterBuild">
     <Message Text="$(MSBuildProjectName) -&gt; $(ArtifactDir)" Importance="high" />
 
     <MakeDir Directories="$(ArtifactDir)" />
-    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ArtifactDir)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ArtifactTargetDir)" />
+    <Copy SourceFiles="$(TargetDir)$(TargetName).pdb" DestinationFolder="$(ArtifactTargetDir)" Condition="Exists('$(TargetDir)$(TargetName).pdb')" />
+    <Copy SourceFiles="$(TargetDir)$(TargetName).xml" DestinationFolder="$(ArtifactTargetDir)" Condition="Exists('$(TargetDir)$(TargetName).xml') AND '$(CopyDocumentationFileToArtifact)' == 'True'" />
+    <Copy SourceFiles="$(TargetDir)$(TargetName).manifest" DestinationFolder="$(ArtifactDir)Plugins" Condition="Exists('$(TargetDir)$(TargetName).manifest')" />
+
+    <Copy SourceFiles="@(AdditionalArtifactFiles)" DestinationFolder="$(ArtifactDir)%(AdditionalArtifactFiles.TargetDir)\%(AdditionalArtifactFiles.RecursiveDir)" />
   </Target>
 
+  <!-- Copy the assembly and PDB to the Beat Saber folder -->
+  <Target Name="CopyToPlugins" AfterTargets="CopyToArtifact" Condition="'$(BeatSaberDir)' != '' AND '$(CI)' == '' AND '$(NCrunch)' != '1'">
+    <Message Text="$(MSBuildProjectName) -&gt; $(BeatSaberDir)" Importance="high" />
+
+    <ItemGroup>
+      <FilesToCopy Include="$(ArtifactDir)\**\*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(BeatSaberDir)%(RecursiveDir)" />
+  </Target>
+
+  <!-- Set GitHub Actions output variables -->
   <Target Name="SetGitHubActionsOutput" AfterTargets="CopyToArtifact" Condition="'$(GITHUB_ACTIONS)' == 'true'">
     <Message Text="Writing to GitHub output" Importance="high" />
 
     <PropertyGroup>
-      <ArtifactName>$(ProjectName)-v$(PluginVersion)</ArtifactName>
-      <ArtifactName Condition="'$(Configuration)' != 'Release'">$(ArtifactName)-$(Configuration)</ArtifactName>
+      <ArtifactName>$(ProjectName)-v$(Version)</ArtifactName>
     </PropertyGroup>
-    
+
     <ItemGroup>
       <LinesToWrite Include="artifact-name=$(ArtifactName)" />
       <LinesToWrite Include="artifact-path=$(ArtifactDir)" />
@@ -50,19 +86,8 @@
     <WriteLinesToFile File="$(GITHUB_OUTPUT)" Lines="@(LinesToWrite)" />
   </Target>
 
-  <!-- Copy the assembly and PDB to the Unity Project's folder -->
-  <Target Name="CopyToUnityProject" AfterTargets="CopyToArtifact" Condition="'$(UnityProjectDir)' != ''">
-    <Message Text="$(MSBuildProjectName) -&gt; $(UnityProjectDir)" Importance="high" />
-
-    <ItemGroup>
-      <FilesToCopy Include="$(ArtifactDir)\**\*" />
-    </ItemGroup>
-
-	  <Copy SourceFiles="@(FilesToCopy)" DestinationFiles="@(FilesToCopy->'$(UnityProjectDir)\Assets\Libraries\%(RecursiveDir)%(Filename)%(Extension)')" Condition="!Exists('$(UnityProjectDir)\Assets\Libraries\%(RecursiveDir)%(Filename)%(Extension)') OR '%(Extension)' != '.meta'" />
-  </Target>
-
   <!-- Clean up artifact files -->
-  <Target Name="CleanArtifact" AfterTargets="Clean" DependsOnTargets="GetProperties">
+  <Target Name="CleanArtifact" AfterTargets="Clean">
     <RemoveDir Directories="$(ArtifactDir)" />
   </Target>
 </Project>

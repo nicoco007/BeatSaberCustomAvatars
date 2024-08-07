@@ -159,7 +159,7 @@ namespace CustomAvatar.Avatar
                 return;
             }
 
-            parentConstraint.SetSources(new List<ConstraintSource>() { new ConstraintSource { sourceTransform = target, weight = 1 } });
+            parentConstraint.SetSources([new ConstraintSource { sourceTransform = target, weight = 1 }]);
         }
     }
 }

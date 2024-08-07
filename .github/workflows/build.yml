@@ -10,25 +10,26 @@ on:
 
 jobs:
   build:
+    name: Build
     runs-on: windows-latest
     steps:
     - name: Check out
       uses: actions/checkout@v4
 
     - name: Set up Beat Saber
-      uses: nicoco007/setup-beat-saber@main
+      uses: nicoco007/setup-beat-saber@v1
       with:
         access-token: ${{ secrets.PRIVATE_GITHUB_TOKEN }}
         additional-dependencies: '{ "XR Hands": "^1.1.0", "OpenVR API": "^2.0.0" }'
         aliases: '{ "DynamicBone": "Dynamic Bone", "FinalIK": "Final IK" }'
-        manifest: ${{ github.workspace }}\Source\CustomAvatar\manifest.json
+        project-path: ${{ github.workspace }}\Source\CustomAvatar\CustomAvatar.csproj
 
     - name: Add NuGet source
       run: dotnet nuget update source "nicoco007 GitHub Packages" --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text
 
     - name: Build Release
       id: build-release
-      run: dotnet build Source\CustomAvatar\CustomAvatar.csproj -c Release
+      run: dotnet build ${{ github.workspace }}\Source\CustomAvatar\CustomAvatar.csproj -c Release
 
     - name: Upload Release
       uses: actions/upload-artifact@v4
@@ -38,7 +39,7 @@ jobs:
 
     - name: Build Editor
       id: build-editor
-      run: dotnet build Source\CustomAvatar-Editor\CustomAvatar-Editor.csproj -c Release
+      run: dotnet build ${{ github.workspace }}\Source\CustomAvatar-Editor\CustomAvatar-Editor.csproj -c Release
 
     - name: Upload Editor
       uses: actions/upload-artifact@v4
@@ -50,4 +51,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: ${{ steps.build-editor.outputs.unity-project-name }}
-        path: Unity\BeatSaberCustomAvatars
+        path: ${{ github.workspace }}\Unity\BeatSaberCustomAvatars

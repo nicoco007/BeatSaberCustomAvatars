@@ -430,8 +430,8 @@ namespace CustomAvatar.Player
 
             if (_activeOriginManager.current != null)
             {
-                _parentConstraint.SetSources(new List<ConstraintSource>(1) { new ConstraintSource { sourceTransform = _activeOriginManager.current, weight = 1 } });
-                _scaleConstraint.SetSources(new List<ConstraintSource>(1) { new ConstraintSource { sourceTransform = _activeOriginManager.current, weight = 1 } });
+                _parentConstraint.SetSources([new ConstraintSource { sourceTransform = _activeOriginManager.current, weight = 1 }]);
+                _scaleConstraint.SetSources([new ConstraintSource { sourceTransform = _activeOriginManager.current, weight = 1 }]);
             }
             else
             {
@@ -564,7 +564,7 @@ namespace CustomAvatar.Player
 
         private void UpdateAvatarVerticalPosition(float eyeHeight)
         {
-            _parentConstraint.translationOffsets = new Vector3[] { new Vector3(0, GetFloorOffset(eyeHeight), 0) };
+            _parentConstraint.translationOffsets = [new Vector3(0, GetFloorOffset(eyeHeight), 0)];
         }
     }
 }
