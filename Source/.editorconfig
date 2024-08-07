@@ -392,3 +392,6 @@ dotnet_style_prefer_conditional_expression_over_assignment = true:suggestion
 
 # Unity analyzers
 dotnet_diagnostic.UNT0030.severity = error
+
+# TODO: re-enable this
+dotnet_diagnostic.CS1591.severity = suggestion

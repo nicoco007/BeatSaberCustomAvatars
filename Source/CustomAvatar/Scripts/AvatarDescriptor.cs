@@ -14,16 +14,14 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using CustomAvatar.Logging;
 using UnityEngine;
 using System.Linq;
 
 #if UNITY_EDITOR
+using CustomAvatar.Logging;
 using CustomAvatar.Utilities;
 using System.IO;
 using System.Reflection;
-#else
-using Zenject;
 #endif
 
 // keeping root namespace for compatibility

@@ -10,6 +10,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{38569516-4FF0-45CF-883C-08E539399F1C}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		Common.props = Common.props
 		..\NuGet.config = ..\NuGet.config
 		..\README.md = ..\README.md
 	EndProjectSection

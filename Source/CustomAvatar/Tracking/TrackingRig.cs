@@ -610,7 +610,7 @@ namespace CustomAvatar.Tracking
 
             if (transform != null)
             {
-                var sources = new List<ConstraintSource>(1) { new ConstraintSource { sourceTransform = transform, weight = 1 } };
+                List<ConstraintSource> sources = [new ConstraintSource { sourceTransform = transform, weight = 1 }];
 
                 _parentConstraint.SetSources(sources);
                 _scaleConstraint.SetSources(sources);

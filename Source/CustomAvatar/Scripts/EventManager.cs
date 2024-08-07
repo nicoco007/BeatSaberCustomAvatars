@@ -22,10 +22,10 @@ using UnityEngine.Events;
 using UnityEngine.Serialization;
 #else
 using System.Reflection;
+#if DEBUG
+using CustomAvatar.Avatar;
 using CustomAvatar.Logging;
 using JetBrains.Annotations;
-using CustomAvatar.Avatar;
-#if DEBUG
 using Zenject;
 #endif // DEBUG
 #endif // UNITY_EDITOR

@@ -25,7 +25,7 @@ namespace CustomAvatar.UI
 {
     internal class TrackerStatusHost : ViewControllerHost
     {
-        private static readonly InternedString[] kFullBodyTrackingUsages = new InternedString[] { new InternedString("Waist"), new InternedString("LeftFoot"), new InternedString("RightFoot") };
+        private static readonly InternedString[] kFullBodyTrackingUsages = [new InternedString("Waist"), new InternedString("LeftFoot"), new InternedString("RightFoot")];
 
         private readonly TrackingRig _trackingRig;
 

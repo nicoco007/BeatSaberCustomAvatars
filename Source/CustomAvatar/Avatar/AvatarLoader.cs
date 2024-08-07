@@ -32,7 +32,7 @@ using Zenject;
 namespace CustomAvatar.Avatar
 {
     /// <summary>
-    /// Allows loading <see cref="LoadedAvatar"/> from various sources.
+    /// Allows loading <see cref="AvatarPrefab"/> from various sources.
     /// </summary>
     public class AvatarLoader
     {
