@@ -6,12 +6,36 @@
     <BeatSaberOutputType>Plugin</BeatSaberOutputType>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>portable</DebugType>
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+    <EnableFrameworkPathOverride>true</EnableFrameworkPathOverride>
+    <FrameworkPathOverride>$(BeatSaberDir)\Beat Saber_Data\Managed</FrameworkPathOverride>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <LangVersion>12</LangVersion>
+    <MarkPackageReferencesAsExternallyResolved>false</MarkPackageReferencesAsExternallyResolved>
+    <NoStdLib>true</NoStdLib>
     <Nullable>disable</Nullable>
     <PathMap>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)=$(MSBuildProjectName)</PathMap>
   </PropertyGroup>
-  
+
+  <ItemGroup>
+    <Reference Include="mscorlib">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\mscorlib.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="netstandard">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\netstandard.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\System.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System.Core">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\System.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
   <ItemGroup>
     <None Include="$(ProjectName).csproj.user" />
   </ItemGroup>
