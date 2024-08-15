@@ -143,6 +143,7 @@ namespace CustomAvatar.Avatar
 
                 prefabObject.hideFlags |= HideFlags.DontUnloadUnusedAsset;
                 prefabObject.name = $"AvatarPrefab({avatarPrefab.descriptor.name})";
+                prefabObject.SetActive(false);
 
                 await ShaderRepair.FixShadersOnGameObjectAsync(prefabObject);
 
