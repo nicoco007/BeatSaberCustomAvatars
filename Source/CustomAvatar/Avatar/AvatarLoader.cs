@@ -139,14 +139,14 @@ namespace CustomAvatar.Avatar
                     throw new AvatarLoadException("Could not load asset from asset bundle");
                 }
 
-                GameObject instance = UnityEngine.Object.Instantiate(prefabObject);
+                avatarPrefab = _container.InstantiateComponent<AvatarPrefab>(prefabObject, [fullPath]);
 
-                avatarPrefab = _container.InstantiateComponent<AvatarPrefab>(instance, new object[] { fullPath });
+                prefabObject.hideFlags |= HideFlags.DontUnloadUnusedAsset;
+                prefabObject.name = $"AvatarPrefab({avatarPrefab.descriptor.name})";
 
-                instance.name = $"AvatarPrefab({avatarPrefab.descriptor.name})";
-                instance.SetActive(false);
+                await ShaderRepair.FixShadersOnGameObjectAsync(prefabObject);
 
-                await ShaderRepair.FixShadersOnGameObjectAsync(instance);
+                prefabObject.hideFlags &= ~HideFlags.DontUnloadUnusedAsset;
 
                 return avatarPrefab;
             }
