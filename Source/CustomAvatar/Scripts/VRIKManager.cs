@@ -423,7 +423,7 @@ namespace CustomAvatar
             _logger = logger;
         }
 
-        private void Reset()
+        protected void Reset()
         {
             AutoDetectReferences();
         }
@@ -433,7 +433,7 @@ namespace CustomAvatar
         private GUIStyle _greenLabelStyle;
         private GUIStyle _blueLabelStyle;
 
-        internal void OnDrawGizmosSelected()
+        protected void OnDrawGizmosSelected()
         {
             if (_redLabelStyle == null)
             {

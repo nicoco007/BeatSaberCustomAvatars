@@ -77,7 +77,7 @@ namespace CustomAvatar.Rendering
             _settings = settings;
         }
 
-        private void Start()
+        protected void Start()
         {
             _renderer = GetComponent<Renderer>();
             _renderer.material = new Material(_assetLoader.stereoMirrorShader);
@@ -85,12 +85,12 @@ namespace CustomAvatar.Rendering
             CreateMirrorCamera();
         }
 
-        private void Update()
+        protected void Update()
         {
             PrepareForNextFrame();
         }
 
-        private void OnWillRenderObject()
+        protected void OnWillRenderObject()
         {
             Vector3 position = transform.position;
             Vector3 up = transform.up;
@@ -128,8 +128,7 @@ namespace CustomAvatar.Rendering
             }
 
             Transform cameraTransform = camera.transform;
-            Vector3 cameraPosition = cameraTransform.position;
-            Quaternion cameraRotation = cameraTransform.rotation;
+            cameraTransform.GetPositionAndRotation(out Vector3 cameraPosition, out Quaternion cameraRotation);
             var plane = new Plane(reflectionPlaneNormal, reflectionPlanePosition);
 
             // don't render if the camera is too close to the mirror to prevent errors

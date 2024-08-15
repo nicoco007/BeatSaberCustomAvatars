@@ -196,7 +196,7 @@ namespace CustomAvatar.Tracking
             UpdateActiveTransforms();
         }
 
-        private void Awake()
+        protected void Awake()
         {
             _parentConstraint = gameObject.AddComponent<ParentConstraint>();
             _parentConstraint.weight = 1;
@@ -274,7 +274,7 @@ namespace CustomAvatar.Tracking
             rightFootOffset.SetParent(rightFootCalibration, false);
         }
 
-        private void OnEnable()
+        protected void OnEnable()
         {
             if (_activePlayerSpaceManager != null)
             {
@@ -312,7 +312,7 @@ namespace CustomAvatar.Tracking
             UpdateRenderModelsVisibility();
         }
 
-        private void Start()
+        protected void Start()
         {
             if (_fpfcSettings != null)
             {
@@ -360,7 +360,7 @@ namespace CustomAvatar.Tracking
             _humanoidCalibrator = new HumanoidCalibrator(this, calibrationData, settings, activeOriginManager, beatSaberUtilities);
         }
 
-        private void Update()
+        protected void Update()
         {
             UpdateTransform(DeviceUse.Head, head);
             UpdateTransform(DeviceUse.LeftHand, leftHand);
@@ -396,7 +396,7 @@ namespace CustomAvatar.Tracking
             }
         }
 
-        private void OnDisable()
+        protected void OnDisable()
         {
             if (_activePlayerSpaceManager != null)
             {
@@ -427,7 +427,7 @@ namespace CustomAvatar.Tracking
             }
         }
 
-        private void OnDestroy()
+        protected void OnDestroy()
         {
             if (_fpfcSettings != null)
             {

@@ -51,9 +51,7 @@ namespace CustomAvatar.Rendering
             mirrorPlane.transform.SetParent(container);
             mirrorPlane.name = "Stereo Mirror";
             mirrorPlane.transform.localScale = scale;
-            mirrorPlane.transform.localPosition = position;
-            mirrorPlane.transform.localRotation = rotation;
-
+            mirrorPlane.transform.SetLocalPositionAndRotation(position, rotation);
             return _container.InstantiateComponent<StereoMirrorRenderer>(mirrorPlane);
         }
     }

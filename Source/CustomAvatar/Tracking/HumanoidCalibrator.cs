@@ -16,7 +16,6 @@
 
 extern alias BeatSaberFinalIK;
 
-using System.Linq;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Player;
@@ -106,8 +105,8 @@ namespace CustomAvatar.Tracking
 
             ApplyManualCalibration(_trackingRig.head, _trackingRig.headCalibration, vrikManager.references_head);
             ApplyManualCalibration(_trackingRig.pelvis, _trackingRig.pelvisCalibration, vrikManager.references_pelvis);
-            ApplyManualCalibration(_trackingRig.leftFoot, _trackingRig.leftFootCalibration, FirstNonNullUnityObject(vrikManager.references_leftToes, vrikManager.references_leftFoot));
-            ApplyManualCalibration(_trackingRig.rightFoot, _trackingRig.rightFootCalibration, FirstNonNullUnityObject(vrikManager.references_rightToes, vrikManager.references_rightFoot));
+            ApplyManualCalibration(_trackingRig.leftFoot, _trackingRig.leftFootCalibration, UnityUtilities.FirstNonNullUnityObject(vrikManager.references_leftToes, vrikManager.references_leftFoot));
+            ApplyManualCalibration(_trackingRig.rightFoot, _trackingRig.rightFootCalibration, UnityUtilities.FirstNonNullUnityObject(vrikManager.references_rightToes, vrikManager.references_rightFoot));
 
             WriteCalibrationTransforms(_calibrationData.GetAvatarManualCalibration(spawnedAvatar));
         }
@@ -194,8 +193,5 @@ namespace CustomAvatar.Tracking
 
             return center;
         }
-
-        // TODO: shove this into a shared helper
-        private T FirstNonNullUnityObject<T>(params T[] objects) where T : Object => objects.FirstOrDefault(o => o != null);
     }
 }

@@ -109,7 +109,7 @@ namespace CustomAvatar.Avatar
         #region Behaviour Lifecycle
 #pragma warning disable IDE0051
 
-        private void Awake()
+        protected void Awake()
         {
             _initialLocalPosition = transform.localPosition;
             _initialLocalScale = transform.localScale;
@@ -141,7 +141,7 @@ namespace CustomAvatar.Avatar
             _logger = loggerFactory.CreateLogger<SpawnedAvatar>(prefab.descriptor.name);
         }
 
-        private void Start()
+        protected void Start()
         {
             name = $"SpawnedAvatar({prefab.descriptor.name})";
 
@@ -151,7 +151,7 @@ namespace CustomAvatar.Avatar
             }
         }
 
-        private void OnDestroy()
+        protected void OnDestroy()
         {
             Destroy(gameObject);
         }

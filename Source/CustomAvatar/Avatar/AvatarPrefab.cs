@@ -102,8 +102,14 @@ namespace CustomAvatar.Avatar
         internal void Construct(string fullPath, ILoggerFactory loggerFactory, DiContainer container)
         {
             this.fullPath = fullPath ?? throw new ArgumentNullException(nameof(fullPath));
-            descriptor = GetComponent<AvatarDescriptor>() ?? throw new AvatarLoadException($"Avatar at '{fullPath}' does not have an AvatarDescriptor");
+            descriptor = GetComponent<AvatarDescriptor>();
 
+            if (descriptor == null)
+            {
+                throw new AvatarLoadException($"Avatar at '{fullPath}' does not have an AvatarDescriptor");
+            }
+
+            // TODO: don't do all of this in Construct
             fileName = Path.GetFileName(fullPath);
 
             _logger = loggerFactory.CreateLogger<AvatarPrefab>(descriptor.name);
@@ -310,8 +316,8 @@ namespace CustomAvatar.Avatar
             FixTrackingReference("Left Hand", leftHand, vrikManager.references_leftHand, vrikManager.solver_leftArm_target);
             FixTrackingReference("Right Hand", rightHand, vrikManager.references_rightHand, vrikManager.solver_rightArm_target);
             FixTrackingReference("Waist", pelvis, vrikManager.references_pelvis, vrikManager.solver_spine_pelvisTarget);
-            FixTrackingReference("Left Foot", leftLeg, vrikManager.references_leftToes ?? vrikManager.references_leftFoot, vrikManager.solver_leftLeg_target);
-            FixTrackingReference("Right Foot", rightLeg, vrikManager.references_rightToes ?? vrikManager.references_rightFoot, vrikManager.solver_rightLeg_target);
+            FixTrackingReference("Left Foot", leftLeg, UnityUtilities.FirstNonNullUnityObject(vrikManager.references_leftToes, vrikManager.references_leftFoot), vrikManager.solver_leftLeg_target);
+            FixTrackingReference("Right Foot", rightLeg, UnityUtilities.FirstNonNullUnityObject(vrikManager.references_rightToes, vrikManager.references_rightFoot), vrikManager.solver_rightLeg_target);
         }
 
         private void FixTrackingReference(string name, Transform tracker, Transform reference, Transform target)

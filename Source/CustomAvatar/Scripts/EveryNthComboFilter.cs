@@ -25,12 +25,12 @@ namespace CustomAvatar
         public int ComboStep = 50;
         public UnityEvent NthComboReached;
 
-        private void OnEnable()
+        protected void OnEnable()
         {
             EventManager.comboIncreased.AddListener(OnComboStep);
         }
 
-        private void OnDisable()
+        protected void OnDisable()
         {
             EventManager.comboIncreased.RemoveListener(OnComboStep);
         }

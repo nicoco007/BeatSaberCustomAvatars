@@ -80,13 +80,13 @@ namespace CustomAvatar
 #if UNITY_EDITOR
         private Mesh _saberMesh;
 
-        public void Start()
+        protected void Start()
         {
             var ikHelper = new IKHelper(new UnityDebugLogger<IKHelper>());
             ikHelper.InitializeVRIK(transform.GetComponentInChildren<VRIKManager>(), transform);
         }
 
-        internal void OnDrawGizmos()
+        protected void OnDrawGizmos()
         {
             if (!isActiveAndEnabled) return;
             if (!_saberMesh) _saberMesh = LoadMesh(Assembly.GetExecutingAssembly().GetManifestResourceStream("CustomAvatar.Resources.saber.dat"));

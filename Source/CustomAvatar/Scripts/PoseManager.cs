@@ -173,12 +173,12 @@ namespace CustomAvatar
 
         public bool isValid => closedHandIsValid && openHandIsValid;
 
-        public void Awake()
+        protected void Awake()
         {
             animator = GetComponent<Animator>();
         }
 
-        public void Reset()
+        protected void Reset()
         {
             Awake();
         }
@@ -246,8 +246,7 @@ namespace CustomAvatar
             if (!boneTransform) return;
             if (openPose.Equals(default) || closedPose.Equals(default)) return;
 
-            boneTransform.localPosition = Vector3.Lerp(openPose.position, closedPose.position, fade);
-            boneTransform.localRotation = Quaternion.Slerp(openPose.rotation, closedPose.rotation, fade);
+            boneTransform.SetLocalPositionAndRotation(Vector3.Lerp(openPose.position, closedPose.position, fade), Quaternion.Slerp(openPose.rotation, closedPose.rotation, fade));
         }
 
         public void SaveOpenHandPoses()

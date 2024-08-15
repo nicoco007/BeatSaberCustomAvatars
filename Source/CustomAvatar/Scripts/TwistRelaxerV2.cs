@@ -62,7 +62,7 @@ namespace CustomAvatar.Scripts
             }
         }
 
-        private void Start()
+        protected void Start()
         {
             if (_inititated)
             {
@@ -129,7 +129,7 @@ namespace CustomAvatar.Scripts
             _inititated = true;
         }
 
-        private void Update()
+        protected void Update()
         {
             if (ik == null)
             {
@@ -137,7 +137,7 @@ namespace CustomAvatar.Scripts
             }
         }
 
-        private void LateUpdate()
+        protected void LateUpdate()
         {
             if (ik == null)
             {
@@ -145,7 +145,7 @@ namespace CustomAvatar.Scripts
             }
         }
 
-        private void OnDestroy()
+        protected void OnDestroy()
         {
             if (ik != null)
             {

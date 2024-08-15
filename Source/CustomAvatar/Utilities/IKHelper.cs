@@ -51,8 +51,8 @@ namespace CustomAvatar.Utilities
             vrikManager.solver_leftArm_target = CreateTargetIfMissing(vrikManager.solver_leftArm_target, vrikManager.references_leftHand, root.Find("LeftHand"));
             vrikManager.solver_rightArm_target = CreateTargetIfMissing(vrikManager.solver_rightArm_target, vrikManager.references_rightHand, root.Find("RightHand"));
             vrikManager.solver_spine_pelvisTarget = CreateTargetIfMissing(vrikManager.solver_spine_pelvisTarget, vrikManager.references_pelvis, root.Find("Pelvis"));
-            vrikManager.solver_leftLeg_target = CreateTargetIfMissing(vrikManager.solver_leftLeg_target, vrikManager.references_leftToes ?? vrikManager.references_leftFoot, root.Find("LeftLeg"));
-            vrikManager.solver_rightLeg_target = CreateTargetIfMissing(vrikManager.solver_rightLeg_target, vrikManager.references_rightToes ?? vrikManager.references_rightFoot, root.Find("RightLeg"));
+            vrikManager.solver_leftLeg_target = CreateTargetIfMissing(vrikManager.solver_leftLeg_target, UnityUtilities.FirstNonNullUnityObject(vrikManager.references_leftToes, vrikManager.references_leftFoot), root.Find("LeftLeg"));
+            vrikManager.solver_rightLeg_target = CreateTargetIfMissing(vrikManager.solver_rightLeg_target, UnityUtilities.FirstNonNullUnityObject(vrikManager.references_rightToes, vrikManager.references_rightFoot), root.Find("RightLeg"));
         }
 
         private Transform CreateTargetIfMissing(Transform target, Transform reference, Transform parent)

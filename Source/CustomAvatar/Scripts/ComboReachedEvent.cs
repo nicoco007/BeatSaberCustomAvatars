@@ -27,12 +27,12 @@ namespace CustomAvatar
         [FormerlySerializedAs("NthComboReached")]
         public UnityEvent ComboReached;
 
-        private void OnEnable()
+        protected void OnEnable()
         {
             EventManager.comboIncreased.AddListener(OnComboReached);
         }
 
-        private void OnDisable()
+        protected void OnDisable()
         {
             EventManager.comboIncreased.RemoveListener(OnComboReached);
         }

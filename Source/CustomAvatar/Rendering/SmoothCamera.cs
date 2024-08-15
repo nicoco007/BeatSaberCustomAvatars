@@ -43,7 +43,7 @@ namespace CustomAvatar.Rendering
             _camera = GetComponent<Camera>();
         }
 
-        public void Start()
+        protected void Start()
         {
             // prevent errors if this is instantiated via Object.Instantiate
             if (_logger == null || _settings == null)
@@ -58,7 +58,7 @@ namespace CustomAvatar.Rendering
             UpdateSmoothCamera();
         }
 
-        public void OnDestroy()
+        protected void OnDestroy()
         {
             if (_settings != null)
             {

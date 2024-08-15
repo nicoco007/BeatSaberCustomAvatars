@@ -61,7 +61,7 @@ namespace CustomAvatar.Avatar
 
         #region Behaviour Lifecycle
 
-        private void Awake()
+        protected void Awake()
         {
             foreach (BeatSaberDynamicBone::DynamicBone dynamicBone in GetComponentsInChildren<BeatSaberDynamicBone::DynamicBone>())
             {
@@ -76,7 +76,7 @@ namespace CustomAvatar.Avatar
             _twistRelaxersV2 = GetComponentsInChildren<TwistRelaxerV2>();
         }
 
-        private void OnEnable()
+        protected void OnEnable()
         {
             if (_vrik != null)
             {
@@ -99,7 +99,7 @@ namespace CustomAvatar.Avatar
             _ikHelper = ikHelper;
         }
 
-        private void Start()
+        protected void Start()
         {
             vrikManager = GetComponentInChildren<VRIKManager>();
             _defaultRootPose = new Pose(vrikManager.references_root.localPosition, vrikManager.references_root.localRotation);
@@ -148,11 +148,10 @@ namespace CustomAvatar.Avatar
             }
         }
 
-        private void OnDisable()
+        protected void OnDisable()
         {
             _vrik.enabled = false;
-            _vrik.references.root.localPosition = _defaultRootPose.position;
-            _vrik.references.root.localRotation = _defaultRootPose.rotation;
+            _vrik.references.root.SetLocalPositionAndRotation(_defaultRootPose.position, _defaultRootPose.rotation);
             _vrik.solver.FixTransforms();
 
             foreach (TwistRelaxerV2 twistRelaxer in _twistRelaxersV2)
@@ -166,7 +165,7 @@ namespace CustomAvatar.Avatar
             }
         }
 
-        private void OnDestroy()
+        protected void OnDestroy()
         {
             IKSolver solver = _vrik.GetIKSolver();
             solver.OnPostUpdate -= OnPostUpdate;
@@ -189,7 +188,7 @@ namespace CustomAvatar.Avatar
             _previousParentPose = new Pose(parent.position, parent.rotation);
         }
 
-        private void Update()
+        protected void Update()
         {
             foreach (BeatSaberDynamicBone::DynamicBone dynamicBone in _dynamicBones)
             {

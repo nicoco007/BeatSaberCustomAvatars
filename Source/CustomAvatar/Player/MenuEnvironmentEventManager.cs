@@ -83,7 +83,7 @@ namespace CustomAvatar.Player
                 }
             }
 
-            private void OnEnable()
+            protected void OnEnable()
             {
                 StartCoroutine(TriggerEventCoroutine());
             }

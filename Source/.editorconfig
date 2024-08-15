@@ -391,7 +391,43 @@ dotnet_style_prefer_simplified_boolean_expressions = true:warning
 dotnet_style_prefer_conditional_expression_over_assignment = true:suggestion
 
 # Unity analyzers
+dotnet_diagnostic.UNT0001.severity = error
+dotnet_diagnostic.UNT0002.severity = error
+dotnet_diagnostic.UNT0003.severity = error
+dotnet_diagnostic.UNT0004.severity = error
+dotnet_diagnostic.UNT0005.severity = error
+dotnet_diagnostic.UNT0006.severity = error
+dotnet_diagnostic.UNT0007.severity = error
+dotnet_diagnostic.UNT0008.severity = error
+dotnet_diagnostic.UNT0009.severity = error
+dotnet_diagnostic.UNT0010.severity = error
+dotnet_diagnostic.UNT0011.severity = error
+dotnet_diagnostic.UNT0012.severity = error
+dotnet_diagnostic.UNT0013.severity = error
+dotnet_diagnostic.UNT0014.severity = error
+dotnet_diagnostic.UNT0015.severity = error
+dotnet_diagnostic.UNT0016.severity = error
+dotnet_diagnostic.UNT0017.severity = error
+dotnet_diagnostic.UNT0018.severity = error
+dotnet_diagnostic.UNT0019.severity = error
+dotnet_diagnostic.UNT0020.severity = error
+dotnet_diagnostic.UNT0021.severity = error
+dotnet_diagnostic.UNT0022.severity = error
+dotnet_diagnostic.UNT0023.severity = error
+dotnet_diagnostic.UNT0024.severity = error
+dotnet_diagnostic.UNT0025.severity = error
+dotnet_diagnostic.UNT0026.severity = error
+dotnet_diagnostic.UNT0027.severity = error
+dotnet_diagnostic.UNT0028.severity = error
+dotnet_diagnostic.UNT0029.severity = error
 dotnet_diagnostic.UNT0030.severity = error
+dotnet_diagnostic.UNT0031.severity = error
+dotnet_diagnostic.UNT0032.severity = error
+dotnet_diagnostic.UNT0033.severity = error
+dotnet_diagnostic.UNT0034.severity = error
+dotnet_diagnostic.UNT0035.severity = error
+dotnet_diagnostic.UNT0036.severity = error
+dotnet_diagnostic.UNT0037.severity = error
 
 # TODO: re-enable this
 dotnet_diagnostic.CS1591.severity = suggestion

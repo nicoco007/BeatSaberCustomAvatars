@@ -106,7 +106,7 @@ namespace CustomAvatar.Player
             }
         }
 
-        private void Awake()
+        protected void Awake()
         {
             _parentConstraint = gameObject.AddComponent<ParentConstraint>();
             _parentConstraint.weight = 1;
@@ -117,7 +117,7 @@ namespace CustomAvatar.Player
             _scaleConstraint.constraintActive = true;
         }
 
-        private void OnEnable()
+        protected void OnEnable()
         {
             _settings.moveFloorWithRoomAdjust.changed += OnMoveFloorWithRoomAdjustChanged;
             _settings.resizeMode.changed += OnResizeModeChanged;
@@ -152,7 +152,7 @@ namespace CustomAvatar.Player
             _activeOriginManager = activeOriginManager;
         }
 
-        private void Start()
+        protected void Start()
         {
             try
             {
@@ -181,7 +181,7 @@ namespace CustomAvatar.Player
             UpdateConstraints();
         }
 
-        private void OnDisable()
+        protected void OnDisable()
         {
             _settings.moveFloorWithRoomAdjust.changed -= OnMoveFloorWithRoomAdjustChanged;
             _settings.resizeMode.changed -= OnResizeModeChanged;
@@ -196,7 +196,7 @@ namespace CustomAvatar.Player
             _activeOriginManager.changed -= OnActiveOriginChanged;
         }
 
-        private void OnDestroy()
+        protected void OnDestroy()
         {
             try
             {

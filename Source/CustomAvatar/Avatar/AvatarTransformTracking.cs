@@ -40,7 +40,7 @@ namespace CustomAvatar.Avatar
 
         private Vector3 _prevBodyLocalPosition;
 
-        private void OnEnable()
+        protected void OnEnable()
         {
             if (_avatarInput != null)
             {
@@ -65,7 +65,7 @@ namespace CustomAvatar.Avatar
             _avatarInput = avatarInput;
         }
 
-        private void Start()
+        protected void Start()
         {
             if (_avatarInput != null)
             {
@@ -82,7 +82,7 @@ namespace CustomAvatar.Avatar
             UpdateConstraints();
         }
 
-        private void Update()
+        protected void Update()
         {
             if (_spawnedAvatar.body)
             {
@@ -102,7 +102,7 @@ namespace CustomAvatar.Avatar
             }
         }
 
-        private void OnDisable()
+        protected void OnDisable()
         {
             if (_head != null) _head.constraintActive = false;
             if (_leftHand != null) _leftHand.constraintActive = false;

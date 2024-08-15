@@ -42,7 +42,7 @@ namespace CustomAvatar.Player
 
         protected BeatSaberUtilities beatSaberUtilities { get; private set; }
 
-        internal void Awake()
+        protected void Awake()
         {
             _originalY = transform.position.y;
 
@@ -64,7 +64,7 @@ namespace CustomAvatar.Player
             this.beatSaberUtilities = beatSaberUtilities;
         }
 
-        internal virtual void Start()
+        protected virtual void Start()
         {
             playerAvatarManager.avatarChanged += OnAvatarChanged;
             playerAvatarManager.avatarScaleChanged += OnAvatarScaleChanged;
@@ -74,7 +74,7 @@ namespace CustomAvatar.Player
             CreateMirrors();
         }
 
-        internal virtual void OnDestroy()
+        protected virtual void OnDestroy()
         {
             playerAvatarManager.avatarChanged -= OnAvatarChanged;
             playerAvatarManager.avatarScaleChanged -= OnAvatarScaleChanged;

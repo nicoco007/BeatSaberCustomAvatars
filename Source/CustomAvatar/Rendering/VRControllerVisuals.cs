@@ -58,7 +58,7 @@ namespace CustomAvatar.Rendering
             _vrControllerVisualsManager = vrControllerVisualsManager;
         }
 
-        private void Awake()
+        protected void Awake()
         {
             VRController vrController = GetComponent<VRController>();
             List<GameObject> gameObjects = new(kHandleTransforms.Length);
@@ -90,12 +90,12 @@ namespace CustomAvatar.Rendering
             _conditionalActivations = conditionalActivations.ToArray();
         }
 
-        private void Start()
+        protected void Start()
         {
             _vrControllerVisualsManager?.Add(this);
         }
 
-        private void OnDestroy()
+        protected void OnDestroy()
         {
             _vrControllerVisualsManager?.Remove(this);
         }

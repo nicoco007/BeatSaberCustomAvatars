@@ -148,7 +148,7 @@ namespace CustomAvatar.UI
             RefreshVisuals();
         }
 
-        private void OnDestroy()
+        protected void OnDestroy()
         {
             if (_listItem != null)
             {

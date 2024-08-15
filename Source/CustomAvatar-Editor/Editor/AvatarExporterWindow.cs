@@ -32,13 +32,13 @@ namespace CustomAvatar.Editor
 
         #region Behaviour Lifecycle
 
-        internal void OnFocus()
+        protected void OnFocus()
         {
             _avatars = FindObjectsOfType<AvatarDescriptor>();
             Repaint();
         }
 
-        internal void OnGUI()
+        protected void OnGUI()
         {
             var titleLabelStyle = new GUIStyle(EditorStyles.largeLabel)
             {

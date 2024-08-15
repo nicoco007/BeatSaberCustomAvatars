@@ -58,13 +58,13 @@ namespace CustomAvatar.Rendering
             }
         }
 
-        private void Awake()
+        protected void Awake()
         {
             _camera = GetComponent<Camera>();
             _trackedPoseDriver = GetComponent<TrackedPoseDriver>();
         }
 
-        private void OnEnable()
+        protected void OnEnable()
         {
             if (_settings != null)
             {
@@ -108,7 +108,7 @@ namespace CustomAvatar.Rendering
             _beatSaberUtilities = beatSaberUtilities;
         }
 
-        private void Start()
+        protected void Start()
         {
             // prevent errors if this is instantiated via Object.Instantiate
             if (_logger == null)
@@ -121,7 +121,7 @@ namespace CustomAvatar.Rendering
             AddToPlayerSpaceManager();
         }
 
-        private void OnDisable()
+        protected void OnDisable()
         {
             if (_settings != null)
             {
@@ -139,7 +139,7 @@ namespace CustomAvatar.Rendering
             }
         }
 
-        private void OnDestroy()
+        protected void OnDestroy()
         {
             RemoveFromPlayerSpaceManager();
         }

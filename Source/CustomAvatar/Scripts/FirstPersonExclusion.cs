@@ -25,7 +25,7 @@ namespace CustomAvatar
         [HideInInspector] public GameObject[] Exclude;
         public GameObject[] exclude;
 
-        public void Awake()
+        protected void Awake()
         {
             if (Exclude != null && Exclude.Length > 0) exclude = Exclude;
         }

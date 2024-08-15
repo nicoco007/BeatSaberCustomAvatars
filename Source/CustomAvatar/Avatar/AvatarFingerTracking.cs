@@ -35,12 +35,12 @@ namespace CustomAvatar.Avatar
             _input = input;
         }
 
-        private void Start()
+        protected void Start()
         {
             _poseManager = GetComponentInChildren<PoseManager>();
         }
 
-        private void LateUpdate()
+        protected void LateUpdate()
         {
             ApplyFingerTracking();
         }

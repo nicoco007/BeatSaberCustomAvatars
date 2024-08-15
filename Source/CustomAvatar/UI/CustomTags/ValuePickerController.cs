@@ -80,7 +80,7 @@ namespace CustomAvatar.UI.CustomTags
             }
         }
 
-        internal void Awake()
+        protected void Awake()
         {
             Transform transform = base.transform;
 
@@ -92,7 +92,7 @@ namespace CustomAvatar.UI.CustomTags
             _decButton.onClick.RemoveAllListeners();
         }
 
-        internal void OnEnable()
+        protected void OnEnable()
         {
             _incButton.onClick.AddListener(OnIncButtonClicked);
             _decButton.onClick.AddListener(OnDecButtonClicked);
@@ -100,7 +100,7 @@ namespace CustomAvatar.UI.CustomTags
             UpdateControl();
         }
 
-        internal void OnDisable()
+        protected void OnDisable()
         {
             _incButton.onClick.RemoveListener(OnIncButtonClicked);
             _decButton.onClick.RemoveListener(OnDecButtonClicked);
