@@ -21,5 +21,7 @@ namespace CustomAvatar.Utilities
     internal static class AsyncOperationExtensions
     {
         public static AsyncOperationAwaiter<T> GetAwaiter<T>(this T asyncOperation) where T : AsyncOperation => new(asyncOperation);
+
+        public static AsyncInstantiateOperationAwaiter<T> GetAwaiter<T>(this AsyncInstantiateOperation<T> asyncOperation) where T : Object => new(asyncOperation);
     }
 }
