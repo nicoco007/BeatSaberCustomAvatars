@@ -15,7 +15,6 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using BeatSaber.GameSettings;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
 using BGLib.Polyglot;
@@ -42,7 +41,7 @@ namespace CustomAvatar.UI
         private DiContainer _container;
         private MirrorHelper _mirrorHelper;
         private Settings _settings;
-        private GraphicSettingsHandler _graphicSettingsHandler;
+        private SettingsManager _settingsManager;
         private PlayerAvatarManager _avatarManager;
         private HierarchyManager _hierarchyManager;
         private PlatformLeaderboardViewController _platformLeaderboardViewController;
@@ -95,7 +94,7 @@ namespace CustomAvatar.UI
             DiContainer container,
             MirrorHelper mirrorHelper,
             Settings settings,
-            GraphicSettingsHandler graphicSettingsHandler,
+            SettingsManager settingsManager,
             PlayerAvatarManager avatarManager,
             HierarchyManager hierarchyManager,
             PlatformLeaderboardViewController platformLeaderboardViewController,
@@ -104,7 +103,7 @@ namespace CustomAvatar.UI
             _container = container;
             _mirrorHelper = mirrorHelper;
             _settings = settings;
-            _graphicSettingsHandler = graphicSettingsHandler;
+            _settingsManager = settingsManager;
             _avatarManager = avatarManager;
             _hierarchyManager = hierarchyManager;
             _platformLeaderboardViewController = platformLeaderboardViewController;
@@ -246,7 +245,7 @@ namespace CustomAvatar.UI
         {
             if (!_mirror) return;
 
-            _mirror.renderScale = scale * _graphicSettingsHandler.instance.customPreset.vrResolutionScale;
+            _mirror.renderScale = scale * _settingsManager.settings.quality.vrResolutionScale;
             _mirror.antiAliasing = antiAliasingLevel;
         }
 

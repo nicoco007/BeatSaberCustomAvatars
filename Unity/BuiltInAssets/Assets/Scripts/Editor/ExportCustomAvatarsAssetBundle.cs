@@ -17,7 +17,7 @@ public class ExportCustomAvatarsAssetBundle
 
         AssetBundleBuild assetBundleBuild = new()
         {
-            assetBundleName = Path.GetFileName(targetPath),
+            assetBundleName = "CustomAvatarsAssets",
             assetNames = new[] {
                 "Assets/Shaders/StereoRender.shader",
                 "Assets/Shaders/UnlitOverlay.shader",

@@ -2,7 +2,6 @@
   <PropertyGroup>
     <RootNamespace>CustomAvatar</RootNamespace>
     <AssemblyName>CustomAvatar</AssemblyName>
-    <Copyright>Copyright © 2018-2024 Nicolas Gnyra and Beat Saber Custom Avatars Contributors</Copyright>
     <Platforms>x64</Platforms>
     <DefineConstants>$(DefineConstants);UNITY_5_3_OR_NEWER</DefineConstants>
   </PropertyGroup>
@@ -13,8 +12,8 @@
     <Authors>Custom Avatars Contributors</Authors>
     <Copyright>Copyright © 2018-2024 Nicolas Gnyra and Beat Saber Custom Avatars Contributors</Copyright>
     <Description>Allows the use of custom player models for body presence.</Description>
-    <GameVersion>1.37.2</GameVersion>
-    <Version>5.4.3</Version>
+    <GameVersion>1.37.3</GameVersion>
+    <Version>5.4.4</Version>
     <RepositoryUrl>https://github.com/nicoco007/BeatSaberCustomAvatars</RepositoryUrl>
   </PropertyGroup>
 

@@ -15,7 +15,6 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using BeatSaber.GameSettings;
 using UnityEngine;
 using Zenject;
 
@@ -28,20 +27,20 @@ namespace CustomAvatar.Utilities
         public static readonly float kDefaultPlayerEyeHeight = kDefaultPlayerHeight - kHeadPosToPlayerHeightOffset;
         public static readonly float kDefaultPlayerArmSpan = kDefaultPlayerHeight;
 
-        private readonly MainSettingsHandler _mainSettingsHandler;
+        private readonly SettingsManager _settingsManager;
         private readonly SettingsApplicatorSO _settingsApplicator;
         private readonly IVRPlatformHelper _vrPlatformHelper;
 
-        internal BeatSaberUtilities(MainSettingsHandler mainSettingsHandler, SettingsApplicatorSO settingsApplicator, IVRPlatformHelper vrPlatformHelper)
+        internal BeatSaberUtilities(SettingsManager settingsManager, SettingsApplicatorSO settingsApplicator, IVRPlatformHelper vrPlatformHelper)
         {
-            _mainSettingsHandler = mainSettingsHandler;
+            _settingsManager = settingsManager;
             _settingsApplicator = settingsApplicator;
             _vrPlatformHelper = vrPlatformHelper;
         }
 
-        public Vector3 roomCenter => _mainSettingsHandler.instance.roomCenter;
+        public Vector3 roomCenter => _settingsManager.settings.room.center;
 
-        public Quaternion roomRotation => Quaternion.Euler(0, _mainSettingsHandler.instance.roomRotation, 0);
+        public Quaternion roomRotation => Quaternion.Euler(0, _settingsManager.settings.room.rotation, 0);
 
         public bool hasFocus => _vrPlatformHelper.hasInputFocus && _vrPlatformHelper.hasVrFocus;
 

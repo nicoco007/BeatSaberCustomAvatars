@@ -15,12 +15,12 @@
       <HintPath>$(BeatSaberDir)Beat Saber_Data\Managed\BeatmapCore.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="BeatSaber.GameSettings">
-      <HintPath>$(BeatSaberDir)Beat Saber_Data\Managed\BeatSaber.GameSettings.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="BeatSaber.PerformancePresets">
       <HintPath>$(BeatSaberDir)Beat Saber_Data\Managed\BeatSaber.PerformancePresets.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="BeatSaber.Settings">
+      <HintPath>$(BeatSaberDir)Beat Saber_Data\Managed\BeatSaber.Settings.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="BGLib.AppFlow">
@@ -127,6 +127,10 @@
     </Reference>
     <Reference Include="Unity.InputSystem">
       <HintPath>$(BeatSaberDir)Beat Saber_Data\Managed\Unity.InputSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.Mathematics">
+      <HintPath>$(BeatSaberDir)Beat Saber_Data\Managed\Unity.Mathematics.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.TextMeshPro">

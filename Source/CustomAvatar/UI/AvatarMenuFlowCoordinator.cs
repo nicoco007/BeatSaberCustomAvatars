@@ -17,7 +17,6 @@
 using System;
 using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.MenuButtons;
-using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using HMUI;
 using Zenject;
@@ -31,7 +30,7 @@ namespace CustomAvatar.UI
         private AvatarListViewController _avatarListViewController;
         private MirrorViewController _mirrorViewController;
         private SettingsViewController _settingsViewController;
-        private SettingsManager _settingsManager;
+        private Configuration.SettingsManager _settingsManager;
         private MenuButtons _menuButtons;
 
         private MenuButton _menuButton;
@@ -60,7 +59,7 @@ namespace CustomAvatar.UI
             AvatarListViewController avatarListViewController,
             MirrorViewController mirrorViewController,
             SettingsViewController settingsViewController,
-            SettingsManager settingsManager,
+            Configuration.SettingsManager settingsManager,
             MenuButtons menuButtons)
         {
             _logger = logger;
