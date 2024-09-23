@@ -17,19 +17,18 @@
 using BeatSaberMarkupLanguage.Tags;
 using UnityEngine;
 using UnityEngine.UI;
-using Zenject;
 
 namespace CustomAvatar.UI.CustomTags
 {
     internal class ValuePickerTag : BSMLTag
     {
-        private GameObject _valueControllerTemplate;
+        private readonly GameObject _valueControllerTemplate;
 
-        public override string[] Aliases => new[] { "value-picker" };
+        public override string[] Aliases => ["value-picker"];
 
-        public void Init(DiContainer container)
+        public ValuePickerTag(SettingsNavigationController settingsNavigationController)
         {
-            _valueControllerTemplate = container.Resolve<SettingsNavigationController>().transform.Find("GraphicSettings/ViewPort/Content/VRRenderingScale/ValuePicker").gameObject;
+            _valueControllerTemplate = settingsNavigationController.transform.Find("GraphicSettings/ViewPort/Content/VRRenderingScale/ValuePicker").gameObject;
         }
 
         public override GameObject CreateObject(Transform parent)

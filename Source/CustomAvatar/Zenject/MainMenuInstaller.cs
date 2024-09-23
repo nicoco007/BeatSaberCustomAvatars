@@ -15,6 +15,8 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using BeatSaberMarkupLanguage.Tags;
+using BeatSaberMarkupLanguage.TypeHandlers;
 using CustomAvatar.Player;
 using CustomAvatar.UI;
 using CustomAvatar.UI.CustomTags;
@@ -29,13 +31,6 @@ namespace CustomAvatar.Zenject
     {
         private const float kCenterViewControllerWidth = 160;
         private const float kSideViewControllerWidth = 120;
-
-        private readonly ValuePickerTag _armSpanSliderTag;
-
-        public MainMenuInstaller(ValuePickerTag armSpanSliderTag)
-        {
-            _armSpanSliderTag = armSpanSliderTag;
-        }
 
         public override void InstallBindings()
         {
@@ -57,7 +52,8 @@ namespace CustomAvatar.Zenject
 
             Container.Bind(typeof(IInitializable), typeof(IDisposable)).To<AvatarMenuFlowCoordinator>().FromNewComponentOnNewGameObject().AsSingle();
 
-            _armSpanSliderTag.Init(Container);
+            Container.Bind<BSMLTag>().To<ValuePickerTag>().AsSingle();
+            Container.Bind<TypeHandler>().To<ValuePickerHandler>().AsSingle();
         }
 
         private T CreateAndBindViewController<T>(float width) where T : ViewController

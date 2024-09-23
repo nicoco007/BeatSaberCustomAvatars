@@ -14,11 +14,9 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using BeatSaberMarkupLanguage;
 using CustomAvatar.Logging;
 using CustomAvatar.Player;
 using CustomAvatar.Rendering;
-using CustomAvatar.UI.CustomTags;
 using CustomAvatar.Zenject;
 using CustomAvatar.Zenject.Internal;
 using HarmonyLib;
@@ -37,11 +35,6 @@ namespace CustomAvatar
         [Init]
         public Plugin(Logger ipaLogger, PluginMetadata pluginMetadata, Zenjector zenjector)
         {
-            var armSpanSliderTag = new ValuePickerTag();
-
-            BSMLParser.instance.RegisterTag(armSpanSliderTag);
-            BSMLParser.instance.RegisterTypeHandler(new ValuePickerHandler());
-
             // can't inject at this point so just create it
             ILogger<Plugin> logger = new IPALogger<Plugin>(ipaLogger);
 
@@ -62,7 +55,7 @@ namespace CustomAvatar
             zenjector.Expose<ObstacleSaberSparkleEffectManager>("Gameplay");
 
             zenjector.Install<CustomAvatarsInstaller>(Location.App, ipaLogger, pluginMetadata);
-            zenjector.Install<MainMenuInstaller>(Location.Menu, armSpanSliderTag);
+            zenjector.Install<MainMenuInstaller>(Location.Menu);
             zenjector.Install<HealthWarningInstaller, HealthWarningSceneSetup>();
             zenjector.Install<GameInstaller>(Location.Player);
         }

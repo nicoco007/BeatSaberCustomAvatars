@@ -48,11 +48,11 @@ namespace CustomAvatar.UI.CustomTags
         {
             base.HandleType(componentType, parserParams);
 
-            var component = (ValuePickerController)componentType.component;
+            var component = (ValuePickerController)componentType.Component;
 
-            if (componentType.data.TryGetValue("formatter", out string formatterId))
+            if (componentType.Data.TryGetValue("formatter", out string formatterId))
             {
-                if (!parserParams.actions.TryGetValue(formatterId, out BSMLAction formatter))
+                if (!parserParams.Actions.TryGetValue(formatterId, out BSMLAction formatter))
                 {
                     throw new Exception($"Formatter action '{formatterId}' not found");
                 }
@@ -60,9 +60,9 @@ namespace CustomAvatar.UI.CustomTags
                 component.formatter = formatter;
             }
 
-            if (componentType.data.TryGetValue("value", out string valueId))
+            if (componentType.Data.TryGetValue("value", out string valueId))
             {
-                if (!parserParams.values.TryGetValue(valueId, out BSMLValue value))
+                if (!parserParams.Values.TryGetValue(valueId, out BSMLValue value))
                 {
                     throw new Exception($"Value '{valueId}' not found");
                 }

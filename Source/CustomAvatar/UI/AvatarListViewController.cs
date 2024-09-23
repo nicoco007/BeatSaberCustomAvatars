@@ -141,7 +141,7 @@ namespace CustomAvatar.UI
         protected void PostParse()
         {
             // TODO: this is a temporary workaround until BSML has a way to specify a data source or something
-            _tableView = _tableData.tableView;
+            _tableView = _tableData.TableView;
             Destroy(_tableData);
             _tableView.SetDataSource(this, true);
             _tableView.didSelectCellWithIdxEvent += OnAvatarClicked;
@@ -312,7 +312,7 @@ namespace CustomAvatar.UI
             _tableView.SelectCellWithIdx(currentRow);
         }
 
-        public float CellSize()
+        public float CellSize(int idx)
         {
             return 8.5f;
         }
