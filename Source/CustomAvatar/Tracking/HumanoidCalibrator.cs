@@ -57,10 +57,10 @@ namespace CustomAvatar.Tracking
 
         internal void ApplyNoCalibration()
         {
-            _trackingRig.headCalibration.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-            _trackingRig.pelvisCalibration.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-            _trackingRig.leftFootCalibration.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-            _trackingRig.rightFootCalibration.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            _trackingRig.head.calibration.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            _trackingRig.pelvis.calibration.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            _trackingRig.leftFoot.calibration.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            _trackingRig.rightFoot.calibration.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
         }
 
         internal void CalibrateAutomatically()
@@ -82,10 +82,10 @@ namespace CustomAvatar.Tracking
             Vector3 leftFootPos = center.InverseTransformPoint(_trackingRig.leftFoot.transform.position);
             Vector3 rightFootPos = center.InverseTransformPoint(_trackingRig.rightFoot.transform.position);
 
-            ApplyCalibration(center, _trackingRig.head, _trackingRig.headCalibration, new Vector3(0, playerEyeHeight, 0), Quaternion.identity);
-            ApplyCalibration(center, _trackingRig.pelvis, _trackingRig.pelvisCalibration, new Vector3(0, playerEyeHeight * kEyeHeightToPelvisHeightRatio, 0), Quaternion.identity);
-            ApplyCalibration(center, _trackingRig.leftFoot, _trackingRig.leftFootCalibration, new Vector3(leftFootPos.x, 0, 0), Quaternion.Euler(0, -10f, 0));
-            ApplyCalibration(center, _trackingRig.rightFoot, _trackingRig.rightFootCalibration, new Vector3(rightFootPos.x, 0, 0), Quaternion.Euler(0, 10f, 0));
+            ApplyCalibration(center, _trackingRig.head, new Vector3(0, playerEyeHeight, 0), Quaternion.identity);
+            ApplyCalibration(center, _trackingRig.pelvis, new Vector3(0, playerEyeHeight * kEyeHeightToPelvisHeightRatio, 0), Quaternion.identity);
+            ApplyCalibration(center, _trackingRig.leftFoot, new Vector3(leftFootPos.x, 0, 0), Quaternion.Euler(0, -10f, 0));
+            ApplyCalibration(center, _trackingRig.rightFoot, new Vector3(rightFootPos.x, 0, 0), Quaternion.Euler(0, 10f, 0));
 
             WriteCalibrationTransforms(_calibrationData.automaticCalibration);
 
@@ -103,10 +103,10 @@ namespace CustomAvatar.Tracking
 
             VRIKManager vrikManager = spawnedAvatar.ik.vrikManager;
 
-            ApplyManualCalibration(_trackingRig.head, _trackingRig.headCalibration, vrikManager.references_head);
-            ApplyManualCalibration(_trackingRig.pelvis, _trackingRig.pelvisCalibration, vrikManager.references_pelvis);
-            ApplyManualCalibration(_trackingRig.leftFoot, _trackingRig.leftFootCalibration, UnityUtilities.FirstNonNullUnityObject(vrikManager.references_leftToes, vrikManager.references_leftFoot));
-            ApplyManualCalibration(_trackingRig.rightFoot, _trackingRig.rightFootCalibration, UnityUtilities.FirstNonNullUnityObject(vrikManager.references_rightToes, vrikManager.references_rightFoot));
+            ApplyManualCalibration(_trackingRig.head, vrikManager.references_head);
+            ApplyManualCalibration(_trackingRig.pelvis, vrikManager.references_pelvis);
+            ApplyManualCalibration(_trackingRig.leftFoot, UnityUtilities.FirstNonNullUnityObject(vrikManager.references_leftToes, vrikManager.references_leftFoot));
+            ApplyManualCalibration(_trackingRig.rightFoot, UnityUtilities.FirstNonNullUnityObject(vrikManager.references_rightToes, vrikManager.references_rightFoot));
 
             WriteCalibrationTransforms(_calibrationData.GetAvatarManualCalibration(spawnedAvatar));
         }
@@ -123,18 +123,18 @@ namespace CustomAvatar.Tracking
 
         internal void ReadCalibrationTransforms(CalibrationData.FullBodyCalibration calibration)
         {
-            _trackingRig.headCalibration.SetLocalPositionAndRotation(calibration.head.position, calibration.head.rotation);
-            _trackingRig.pelvisCalibration.SetLocalPositionAndRotation(calibration.waist.position, calibration.waist.rotation);
-            _trackingRig.leftFootCalibration.SetLocalPositionAndRotation(calibration.leftFoot.position, calibration.leftFoot.rotation);
-            _trackingRig.rightFootCalibration.SetLocalPositionAndRotation(calibration.rightFoot.position, calibration.rightFoot.rotation);
+            _trackingRig.head.calibration.SetLocalPositionAndRotation(calibration.head.position, calibration.head.rotation);
+            _trackingRig.pelvis.calibration.SetLocalPositionAndRotation(calibration.waist.position, calibration.waist.rotation);
+            _trackingRig.leftFoot.calibration.SetLocalPositionAndRotation(calibration.leftFoot.position, calibration.leftFoot.rotation);
+            _trackingRig.rightFoot.calibration.SetLocalPositionAndRotation(calibration.rightFoot.position, calibration.rightFoot.rotation);
         }
 
         private void WriteCalibrationTransforms(CalibrationData.FullBodyCalibration calibration)
         {
-            calibration.head = new Pose(_trackingRig.headCalibration.localPosition, _trackingRig.headCalibration.localRotation);
-            calibration.waist = new Pose(_trackingRig.pelvisCalibration.localPosition, _trackingRig.pelvisCalibration.localRotation);
-            calibration.leftFoot = new Pose(_trackingRig.leftFootCalibration.localPosition, _trackingRig.leftFootCalibration.localRotation);
-            calibration.rightFoot = new Pose(_trackingRig.rightFootCalibration.localPosition, _trackingRig.rightFootCalibration.localRotation);
+            calibration.head = new Pose(_trackingRig.head.calibration.localPosition, _trackingRig.head.calibration.localRotation);
+            calibration.waist = new Pose(_trackingRig.pelvis.calibration.localPosition, _trackingRig.pelvis.calibration.localRotation);
+            calibration.leftFoot = new Pose(_trackingRig.leftFoot.calibration.localPosition, _trackingRig.leftFoot.calibration.localRotation);
+            calibration.rightFoot = new Pose(_trackingRig.rightFoot.calibration.localPosition, _trackingRig.rightFoot.calibration.localRotation);
         }
 
         private void WriteIdentity(CalibrationData.FullBodyCalibration calibration)
@@ -145,31 +145,31 @@ namespace CustomAvatar.Tracking
             calibration.rightFoot = Pose.identity;
         }
 
-        private void ApplyCalibration(Transform center, TrackedNode device, Transform calibration, Vector3 target, Quaternion targetRotation)
+        private void ApplyCalibration(Transform center, TrackedNode device, Vector3 target, Quaternion targetRotation)
         {
             if (device.isTracking)
             {
-                calibration.SetLocalPositionAndRotation(
+                device.calibration.SetLocalPositionAndRotation(
                     device.transform.InverseTransformPoint(center.TransformPoint(target)),
                     Quaternion.Inverse(device.transform.rotation) * (center.rotation * targetRotation));
             }
             else
             {
-                calibration.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+                device.calibration.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             }
         }
 
-        private void ApplyManualCalibration(TrackedNode device, Transform calibration, Transform target)
+        private void ApplyManualCalibration(TrackedNode device, Transform target)
         {
             if (device.isTracking)
             {
-                calibration.SetLocalPositionAndRotation(
+                device.calibration.SetLocalPositionAndRotation(
                     device.transform.InverseTransformPoint(target.position),
                     Quaternion.Inverse(device.transform.rotation) * target.rotation);
             }
             else
             {
-                calibration.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+                device.calibration.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             }
         }
 

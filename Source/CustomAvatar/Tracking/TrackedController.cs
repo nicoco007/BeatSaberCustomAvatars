@@ -18,18 +18,18 @@ using UnityEngine;
 
 namespace CustomAvatar.Tracking
 {
-    internal class TrackedNode : ITrackedNode
+    internal class TrackedController : ITrackedNode
     {
-        public TrackedNode(string name)
+        public TrackedController(string name)
         {
             gameObject = new GameObject(name);
             transform = gameObject.transform;
 
-            calibration = new GameObject($"{name} Calibration").transform;
-            calibration.SetParent(transform, false);
+            controllerOffset = new GameObject($"{name} Controller Offset").transform;
+            controllerOffset.SetParent(transform, false);
 
             offset = new GameObject($"{name} Offset").transform;
-            offset.SetParent(calibration, false);
+            offset.SetParent(controllerOffset, false);
         }
 
         public GameObject gameObject { get; protected set; }
@@ -38,10 +38,13 @@ namespace CustomAvatar.Tracking
 
         public Transform offset { get; protected set; }
 
-        public Transform calibration { get; }
+        public Transform controllerOffset { get; }
 
-        public bool isTracking { get; set; }
+        public VRController controller { get; set; }
 
-        public bool isCalibrated { get; set; }
+        public bool isTracking => true;
+
+        // We don't have to calibrate controllers
+        public bool isCalibrated => true;
     }
 }

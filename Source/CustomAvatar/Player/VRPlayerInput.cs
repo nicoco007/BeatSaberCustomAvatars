@@ -67,18 +67,20 @@ namespace CustomAvatar.Player
 
         public bool TryGetTransform(DeviceUse use, out Transform transform)
         {
-            transform = use switch
+            ITrackedNode node = use switch
             {
-                DeviceUse.Head => _trackingRig.headOffset,
-                DeviceUse.LeftHand => _trackingRig.leftHandOffset,
-                DeviceUse.RightHand => _trackingRig.rightHandOffset,
-                DeviceUse.Waist => _trackingRig.pelvisOffset,
-                DeviceUse.LeftFoot => _trackingRig.leftFootOffset,
-                DeviceUse.RightFoot => _trackingRig.rightFootOffset,
+                DeviceUse.Head => _trackingRig.head,
+                DeviceUse.LeftHand => _trackingRig.leftHand,
+                DeviceUse.RightHand => _trackingRig.rightHand,
+                DeviceUse.Waist => _trackingRig.pelvis,
+                DeviceUse.LeftFoot => _trackingRig.leftFoot,
+                DeviceUse.RightFoot => _trackingRig.rightFoot,
                 _ => throw new InvalidOperationException($"Unexpected device use {use}"),
             };
 
-            return transform.gameObject.activeInHierarchy;
+            transform = node.offset;
+
+            return node.isTracking && node.isCalibrated;
         }
 
         public bool TryGetFingerCurl(DeviceUse use, out FingerCurl curl) => _fingerTrackingProvider.TryGetFingerCurl(use, out curl);

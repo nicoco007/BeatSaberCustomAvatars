@@ -18,30 +18,12 @@ using UnityEngine;
 
 namespace CustomAvatar.Tracking
 {
-    internal class TrackedNode : ITrackedNode
+    internal interface ITrackedNode
     {
-        public TrackedNode(string name)
-        {
-            gameObject = new GameObject(name);
-            transform = gameObject.transform;
+        public Transform offset { get; }
 
-            calibration = new GameObject($"{name} Calibration").transform;
-            calibration.SetParent(transform, false);
+        public bool isTracking { get; }
 
-            offset = new GameObject($"{name} Offset").transform;
-            offset.SetParent(calibration, false);
-        }
-
-        public GameObject gameObject { get; protected set; }
-
-        public Transform transform { get; protected set; }
-
-        public Transform offset { get; protected set; }
-
-        public Transform calibration { get; }
-
-        public bool isTracking { get; set; }
-
-        public bool isCalibrated { get; set; }
+        public bool isCalibrated { get; }
     }
 }

@@ -57,9 +57,6 @@ namespace CustomAvatar.Tracking
         private ScaleConstraint _scaleConstraint;
         private CalibrationMode _activeCalibrationMode;
 
-        private VRController _leftController;
-        private VRController _rightController;
-
         private bool _showRenderModels;
         private TrackedRenderModel _leftHandRenderModel;
         private TrackedRenderModel _rightHandRenderModel;
@@ -82,9 +79,9 @@ namespace CustomAvatar.Tracking
 
         internal TrackedNode head { get; private set; }
 
-        internal TrackedNode leftHand { get; private set; }
+        internal TrackedController leftHand { get; private set; }
 
-        internal TrackedNode rightHand { get; private set; }
+        internal TrackedController rightHand { get; private set; }
 
         internal TrackedNode pelvis { get; private set; }
 
@@ -93,26 +90,6 @@ namespace CustomAvatar.Tracking
         internal TrackedNode rightFoot { get; private set; }
 
         internal Transform fullBodyTracking { get; private set; }
-
-        internal Transform headCalibration { get; private set; }
-
-        internal Transform pelvisCalibration { get; private set; }
-
-        internal Transform leftFootCalibration { get; private set; }
-
-        internal Transform rightFootCalibration { get; private set; }
-
-        internal Transform headOffset { get; private set; }
-
-        internal Transform leftHandOffset { get; private set; }
-
-        internal Transform rightHandOffset { get; private set; }
-
-        internal Transform pelvisOffset { get; private set; }
-
-        internal Transform leftFootOffset { get; private set; }
-
-        internal Transform rightFootOffset { get; private set; }
 
         internal CalibrationMode activeCalibrationMode
         {
@@ -206,9 +183,9 @@ namespace CustomAvatar.Tracking
             _scaleConstraint.weight = 1;
             _scaleConstraint.constraintActive = true;
 
-            head = new TrackedNode(new GameObject("Head"));
-            leftHand = new TrackedNode(new GameObject("Left Hand"));
-            rightHand = new TrackedNode(new GameObject("Right Hand"));
+            head = new("Head");
+            leftHand = new TrackedController("Left Hand");
+            rightHand = new TrackedController("Right Hand");
             fullBodyTracking = new GameObject("Full Body Tracking").transform;
 
             head.transform.SetParent(transform, false);
@@ -216,24 +193,18 @@ namespace CustomAvatar.Tracking
             rightHand.transform.SetParent(transform, false);
             fullBodyTracking.SetParent(transform, false);
 
-            pelvis = new TrackedNode(new GameObject("Pelvis"));
-            leftFoot = new TrackedNode(new GameObject("Left Foot"));
-            rightFoot = new TrackedNode(new GameObject("Right Foot"));
+            pelvis = new("Pelvis");
+            leftFoot = new("Left Foot");
+            rightFoot = new("Right Foot");
 
             pelvis.transform.SetParent(fullBodyTracking, false);
             leftFoot.transform.SetParent(fullBodyTracking, false);
             rightFoot.transform.SetParent(fullBodyTracking, false);
 
-            Transform leftHandControllerOffset = new GameObject("Left Hand Controller Offset").transform;
-            Transform rightHandControllerOffset = new GameObject("Left Hand Controller Offset").transform;
-
-            leftHandControllerOffset.SetParent(leftHand.transform, false);
-            rightHandControllerOffset.SetParent(rightHand.transform, false);
-
             VRControllersValueSettingsOffsets localPlayerControllerOffset = _container.InstantiateComponent<VRControllersValueSettingsOffsets>(gameObject);
 
-            _leftController = SetUpVRController(leftHand.gameObject, XRNode.LeftHand, leftHandControllerOffset, localPlayerControllerOffset);
-            _rightController = SetUpVRController(rightHand.gameObject, XRNode.RightHand, rightHandControllerOffset, localPlayerControllerOffset);
+            SetUpVRController(leftHand, XRNode.LeftHand, localPlayerControllerOffset);
+            SetUpVRController(rightHand, XRNode.RightHand, localPlayerControllerOffset);
 
             if (_renderModelProvider != null)
             {
@@ -249,29 +220,6 @@ namespace CustomAvatar.Tracking
                 _leftFootRenderModel.transform.SetParent(leftFoot.transform, false);
                 _rightFootRenderModel.transform.SetParent(rightFoot.transform, false);
             }
-
-            headCalibration = new GameObject("Head Calibration").transform;
-            pelvisCalibration = new GameObject("Pelvis Calibration").transform;
-            leftFootCalibration = new GameObject("Left Foot Calibration").transform;
-            rightFootCalibration = new GameObject("Right Foot Calibration").transform;
-            headCalibration.SetParent(head.transform, false);
-            pelvisCalibration.SetParent(pelvis.transform, false);
-            leftFootCalibration.SetParent(leftFoot.transform, false);
-            rightFootCalibration.SetParent(rightFoot.transform, false);
-
-            headOffset = new GameObject("Head Offset").transform;
-            leftHandOffset = new GameObject("Left Hand Offset").transform;
-            rightHandOffset = new GameObject("Right Hand Offset").transform;
-            pelvisOffset = new GameObject("Pelvis Offset").transform;
-            leftFootOffset = new GameObject("Left Foot Offset").transform;
-            rightFootOffset = new GameObject("Right Foot Offset").transform;
-
-            headOffset.SetParent(headCalibration, false);
-            leftHandOffset.SetParent(leftHandControllerOffset, false);
-            rightHandOffset.SetParent(rightHandControllerOffset, false);
-            pelvisOffset.SetParent(pelvisCalibration, false);
-            leftFootOffset.SetParent(leftFootCalibration, false);
-            rightFootOffset.SetParent(rightFootCalibration, false);
         }
 
         protected void OnEnable()
@@ -296,7 +244,6 @@ namespace CustomAvatar.Tracking
 
             if (_beatSaberUtilities != null)
             {
-                _beatSaberUtilities.controllersChanged += OnControllersDidChangeReference;
                 _beatSaberUtilities.roomAdjustChanged += OnRoomAdjustChanged;
             }
 
@@ -306,7 +253,6 @@ namespace CustomAvatar.Tracking
             }
 
             UpdateOffsets();
-            UpdateControllerOffsets();
             UpdateActiveTransforms();
             UpdateRenderModels();
             UpdateRenderModelsVisibility();
@@ -326,7 +272,6 @@ namespace CustomAvatar.Tracking
 
             UpdateBehaviourEnabled();
             UpdateOffsets();
-            UpdateControllerOffsets();
         }
 
         [Inject]
@@ -363,8 +308,6 @@ namespace CustomAvatar.Tracking
         protected void Update()
         {
             UpdateTransform(DeviceUse.Head, head);
-            UpdateTransform(DeviceUse.LeftHand, leftHand);
-            UpdateTransform(DeviceUse.RightHand, rightHand);
             UpdateTransform(DeviceUse.Waist, pelvis);
             UpdateTransform(DeviceUse.LeftFoot, leftFoot);
             UpdateTransform(DeviceUse.RightFoot, rightFoot);
@@ -417,7 +360,6 @@ namespace CustomAvatar.Tracking
 
             if (_beatSaberUtilities != null)
             {
-                _beatSaberUtilities.controllersChanged -= OnControllersDidChangeReference;
                 _beatSaberUtilities.roomAdjustChanged -= OnRoomAdjustChanged;
             }
 
@@ -440,17 +382,17 @@ namespace CustomAvatar.Tracking
             }
         }
 
-        private VRController SetUpVRController(GameObject trackedNode, XRNode node, Transform controllerOffset, VRControllerTransformOffset transformOffset)
+        private VRController SetUpVRController(TrackedController trackedNode, XRNode node, VRControllerTransformOffset transformOffset)
         {
-            trackedNode.SetActive(false);
+            trackedNode.gameObject.SetActive(false);
 
-            VRController vrController = _container.InstantiateComponent<VRController>(trackedNode);
-            vrController.enabled = false;
+            VRController vrController = _container.InstantiateComponent<VRController>(trackedNode.gameObject);
             vrController._node = node;
-            vrController._viewAnchorTransform = controllerOffset;
+            vrController._viewAnchorTransform = trackedNode.controllerOffset;
             vrController._transformOffset = transformOffset;
 
-            trackedNode.SetActive(true);
+            trackedNode.controller = vrController;
+            trackedNode.gameObject.SetActive(true);
 
             return vrController;
         }
@@ -490,11 +432,6 @@ namespace CustomAvatar.Tracking
             trackingChanged?.Invoke();
         }
 
-        private void OnControllersDidChangeReference()
-        {
-            UpdateControllerOffsets();
-        }
-
         private void OnFpfcSettingsChanged(IFPFCSettings fpfcSettings)
         {
             UpdateBehaviourEnabled();
@@ -507,7 +444,10 @@ namespace CustomAvatar.Tracking
 
         private void UpdateBehaviourEnabled()
         {
-            enabled = _beatSaberUtilities.hasFocus && !_fpfcSettings.Enabled;
+            bool enabled = _beatSaberUtilities.hasFocus && !_fpfcSettings.Enabled;
+            this.enabled = enabled;
+            this.leftHand.controller.enabled = enabled;
+            this.rightHand.controller.enabled = enabled;
         }
 
         private void UpdateOffsets()
@@ -526,8 +466,8 @@ namespace CustomAvatar.Tracking
 
             _logger.LogTrace("Updating offsets");
 
-            UpdateOffset(leftHandOffset, spawnedAvatar.prefab.leftHandOffset, spawnedAvatar.absoluteScale);
-            UpdateOffset(rightHandOffset, spawnedAvatar.prefab.rightHandOffset, spawnedAvatar.absoluteScale);
+            UpdateOffset(leftHand.offset, spawnedAvatar.prefab.leftHandOffset, spawnedAvatar.absoluteScale);
+            UpdateOffset(rightHand.offset, spawnedAvatar.prefab.rightHandOffset, spawnedAvatar.absoluteScale);
 
             float fullBodyScale = _playerAvatarManager.currentlySpawnedAvatar.scaledEyeHeight / _settings.playerEyeHeight;
             float trackerScale = spawnedAvatar.absoluteScale / fullBodyScale;
@@ -535,10 +475,10 @@ namespace CustomAvatar.Tracking
             CalibrationData.FullBodyCalibration automaticCalibration = _calibrationData.automaticCalibration;
             CalibrationData.FullBodyCalibration manualCalibration = _calibrationData.GetAvatarManualCalibration(spawnedAvatar);
 
-            UpdateOffset(headOffset, spawnedAvatar.prefab.headOffset, spawnedAvatar.prefab.headCalibrationOffset, spawnedAvatar.absoluteScale, manualCalibration.head, automaticCalibration.head);
-            UpdateOffset(pelvisOffset, spawnedAvatar.prefab.pelvisOffset, spawnedAvatar.prefab.pelvisCalibrationOffset, trackerScale, manualCalibration.waist, automaticCalibration.waist);
-            UpdateOffset(leftFootOffset, spawnedAvatar.prefab.leftLegOffset, spawnedAvatar.prefab.leftFootCalibrationOffset, trackerScale, manualCalibration.leftFoot, automaticCalibration.leftFoot);
-            UpdateOffset(rightFootOffset, spawnedAvatar.prefab.rightLegOffset, spawnedAvatar.prefab.rightFootCalibrationOffset, trackerScale, manualCalibration.rightFoot, automaticCalibration.rightFoot);
+            UpdateOffset(head.offset, spawnedAvatar.prefab.headOffset, spawnedAvatar.prefab.headCalibrationOffset, spawnedAvatar.absoluteScale, manualCalibration.head, automaticCalibration.head);
+            UpdateOffset(pelvis.offset, spawnedAvatar.prefab.pelvisOffset, spawnedAvatar.prefab.pelvisCalibrationOffset, trackerScale, manualCalibration.waist, automaticCalibration.waist);
+            UpdateOffset(leftFoot.offset, spawnedAvatar.prefab.leftLegOffset, spawnedAvatar.prefab.leftFootCalibrationOffset, trackerScale, manualCalibration.leftFoot, automaticCalibration.leftFoot);
+            UpdateOffset(rightFoot.offset, spawnedAvatar.prefab.rightLegOffset, spawnedAvatar.prefab.rightFootCalibrationOffset, trackerScale, manualCalibration.rightFoot, automaticCalibration.rightFoot);
 
             switch (calibrationMode)
             {
@@ -557,12 +497,6 @@ namespace CustomAvatar.Tracking
 
             fullBodyTracking.localPosition = new Vector3(0, _settings.playerEyeHeight - _playerAvatarManager.currentlySpawnedAvatar.scaledEyeHeight, 0);
             fullBodyTracking.localScale = new Vector3(1, fullBodyScale, 1);
-        }
-
-        private void UpdateControllerOffsets()
-        {
-            _leftController.UpdateAnchorOffsetPose();
-            _rightController.UpdateAnchorOffsetPose();
         }
 
         private void UpdateOffset(Transform transform, Pose manualOffset, Pose automaticOffset, float scale, Pose manualCalibration, Pose automaticCalibration)
@@ -651,12 +585,10 @@ namespace CustomAvatar.Tracking
 
             _logger.LogTrace("Updating active transforms");
 
-            UpdateActiveTransform(head, headOffset, DeviceUse.Head);
-            UpdateActiveTransform(leftHand, leftHandOffset, DeviceUse.LeftHand);
-            UpdateActiveTransform(rightHand, rightHandOffset, DeviceUse.RightHand);
-            UpdateActiveTransform(pelvis, pelvisOffset, DeviceUse.Waist);
-            UpdateActiveTransform(leftFoot, leftFootOffset, DeviceUse.LeftFoot);
-            UpdateActiveTransform(rightFoot, rightFootOffset, DeviceUse.RightFoot);
+            UpdateActiveTransform(head, DeviceUse.Head);
+            UpdateActiveTransform(pelvis, DeviceUse.Waist);
+            UpdateActiveTransform(leftFoot, DeviceUse.LeftFoot);
+            UpdateActiveTransform(rightFoot, DeviceUse.RightFoot);
 
             areBothHandsTracking = leftHand.isTracking && rightHand.isTracking;
             areAnyFullBodyTrackersTracking = pelvis.isTracking || leftFoot.isTracking || rightFoot.isTracking;
@@ -664,23 +596,13 @@ namespace CustomAvatar.Tracking
             trackingChanged?.Invoke();
         }
 
-        private void UpdateActiveTransform(TrackedNode trackedNode, Transform offset, DeviceUse deviceUse)
+        private void UpdateActiveTransform(TrackedNode trackedNode, DeviceUse deviceUse)
         {
-            if (_deviceProvider.TryGetDevice(deviceUse, out TrackedDevice trackedDevice))
-            {
-                trackedNode.isTracking = trackedDevice.isTracking;
-                trackedNode.gameObject.SetActive(trackedDevice.isTracking);
-                offset.gameObject.SetActive(trackedDevice.isTracking && IsCurrentlyCalibrated(deviceUse));
-            }
-            else
-            {
-                trackedNode.isTracking = false;
-                trackedNode.gameObject.SetActive(false);
-                offset.gameObject.SetActive(false);
-            }
+            trackedNode.isTracking = _deviceProvider.TryGetDevice(deviceUse, out TrackedDevice trackedDevice) && trackedDevice.isTracking;
+            trackedNode.isCalibrated = IsCurrentlyCalibrated(deviceUse);
         }
 
-        internal bool IsCurrentlyCalibrated(DeviceUse deviceUse)
+        private bool IsCurrentlyCalibrated(DeviceUse deviceUse)
         {
             if (deviceUse is not DeviceUse.Waist and not DeviceUse.LeftFoot and not DeviceUse.RightFoot)
             {
