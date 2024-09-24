@@ -44,7 +44,7 @@ namespace CustomAvatar.Tracking
             _platformHelper.controllersDidChangeReferenceEvent -= OnControllersDidChangeReference;
         }
 
-        public bool TryGetDevice(DeviceUse deviceUse, out TrackedDevice trackedDevice)
+        public bool TryGetDeviceState(DeviceUse deviceUse, out DeviceState deviceState)
         {
             XRNode node;
 
@@ -63,17 +63,17 @@ namespace CustomAvatar.Tracking
                     break;
 
                 default:
-                    trackedDevice = default;
+                    deviceState = default;
                     return false;
             }
 
             if (!_platformHelper.GetNodePose(node, 0, out Vector3 position, out Quaternion rotation))
             {
-                trackedDevice = default;
+                deviceState = default;
                 return false;
             }
 
-            trackedDevice = new TrackedDevice(true, true, position, rotation);
+            deviceState = new DeviceState(true, true, position, rotation);
             return true;
         }
 

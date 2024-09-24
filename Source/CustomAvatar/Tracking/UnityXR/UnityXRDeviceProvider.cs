@@ -31,12 +31,12 @@ namespace CustomAvatar.Tracking.UnityXR
 
         private readonly InputActionMap _inputActions = new("Custom Avatars");
 
-        private readonly XRDevice _head;
-        private readonly XRDevice _leftHand;
-        private readonly XRDevice _rightHand;
-        private readonly XRDevice _waist;
-        private readonly XRDevice _leftFoot;
-        private readonly XRDevice _rightFoot;
+        private readonly UnityXRDevice _head;
+        private readonly UnityXRDevice _leftHand;
+        private readonly UnityXRDevice _rightHand;
+        private readonly UnityXRDevice _waist;
+        private readonly UnityXRDevice _leftFoot;
+        private readonly UnityXRDevice _rightFoot;
 
         internal UnityXRDeviceProvider()
         {
@@ -62,42 +62,42 @@ namespace CustomAvatar.Tracking.UnityXR
             _inputActions.Enable();
         }
 
-        public bool TryGetDevice(DeviceUse deviceUse, out TrackedDevice trackedDevice)
+        public bool TryGetDeviceState(DeviceUse deviceUse, out DeviceState deviceState)
         {
             if (!_inputActions.enabled)
             {
-                trackedDevice = default;
+                deviceState = default;
                 return false;
             }
 
             switch (deviceUse)
             {
                 case DeviceUse.Head:
-                    trackedDevice = _head.GetDevice();
+                    deviceState = _head.GetDeviceState();
                     break;
 
                 case DeviceUse.LeftHand:
-                    trackedDevice = _leftHand.GetDevice();
+                    deviceState = _leftHand.GetDeviceState();
                     break;
 
                 case DeviceUse.RightHand:
-                    trackedDevice = _rightHand.GetDevice();
+                    deviceState = _rightHand.GetDeviceState();
                     break;
 
                 case DeviceUse.Waist:
-                    trackedDevice = _waist.GetDevice();
+                    deviceState = _waist.GetDeviceState();
                     break;
 
                 case DeviceUse.LeftFoot:
-                    trackedDevice = _leftFoot.GetDevice();
+                    deviceState = _leftFoot.GetDeviceState();
                     break;
 
                 case DeviceUse.RightFoot:
-                    trackedDevice = _rightFoot.GetDevice();
+                    deviceState = _rightFoot.GetDeviceState();
                     break;
 
                 default:
-                    trackedDevice = default;
+                    deviceState = default;
                     return false;
             }
 
@@ -117,25 +117,25 @@ namespace CustomAvatar.Tracking.UnityXR
             _inputActions.Dispose();
         }
 
-        private XRDevice CreateDevice(string name, string deviceTypeName)
+        private UnityXRDevice CreateDevice(string name, string deviceTypeName)
         {
             InputAction positionAction = _inputActions.AddAction($"{name}Position", binding: $"<{deviceTypeName}>/devicePosition", groups: "XR");
             InputAction orientationAction = _inputActions.AddAction($"{name}Orientation", binding: $"<{deviceTypeName}>/deviceRotation", groups: "XR");
             InputAction isTrackedAction = _inputActions.AddAction($"{name}IsTracked", binding: $"<{deviceTypeName}>/isTracked", groups: "XR");
 
-            return new XRDevice(isTrackedAction, positionAction, orientationAction);
+            return new UnityXRDevice(isTrackedAction, positionAction, orientationAction);
         }
 
-        private XRDevice CreateDevice(string name, string deviceTypeName, string deviceUsage)
+        private UnityXRDevice CreateDevice(string name, string deviceTypeName, string deviceUsage)
         {
             InputAction positionAction = _inputActions.AddAction($"{name}Position", binding: $"<{deviceTypeName}>{{{deviceUsage}}}/devicePosition", groups: "XR");
             InputAction orientationAction = _inputActions.AddAction($"{name}Orientation", binding: $"<{deviceTypeName}>{{{deviceUsage}}}/deviceRotation", groups: "XR");
             InputAction isTrackedAction = _inputActions.AddAction($"{name}IsTracked", binding: $"<{deviceTypeName}>{{{deviceUsage}}}/isTracked", groups: "XR");
 
-            return new XRDevice(isTrackedAction, positionAction, orientationAction);
+            return new UnityXRDevice(isTrackedAction, positionAction, orientationAction);
         }
 
-        private void RegisterCallbacks(XRDevice device)
+        private void RegisterCallbacks(UnityXRDevice device)
         {
             // isTracked is a ButtonControl so "started" is triggered when tracking starts and "canceled" when tracking stops
             device.isTrackedAction.started += OnInputActionChanged;
@@ -146,7 +146,7 @@ namespace CustomAvatar.Tracking.UnityXR
             device.positionAction.canceled += OnInputActionChanged;
         }
 
-        private void DeregisterCallbacks(XRDevice device)
+        private void DeregisterCallbacks(UnityXRDevice device)
         {
             device.isTrackedAction.started -= OnInputActionChanged;
             device.isTrackedAction.canceled -= OnInputActionChanged;
@@ -160,9 +160,9 @@ namespace CustomAvatar.Tracking.UnityXR
             devicesChanged?.Invoke();
         }
 
-        private class XRDevice
+        private class UnityXRDevice
         {
-            internal XRDevice(InputAction isTrackedAction, InputAction positionAction, InputAction orientationAction)
+            internal UnityXRDevice(InputAction isTrackedAction, InputAction positionAction, InputAction orientationAction)
             {
                 this.isTrackedAction = isTrackedAction;
                 this.positionAction = positionAction;
@@ -177,13 +177,13 @@ namespace CustomAvatar.Tracking.UnityXR
 
             public override string ToString()
             {
-                return $"{nameof(XRDevice)}@{GetHashCode()}[" +
+                return $"{nameof(UnityXRDevice)}@{GetHashCode()}[" +
                     $"{nameof(isTrackedAction)}={isTrackedAction.ReadValue<float>()}, " +
                     $"{nameof(positionAction)}={positionAction.ReadValue<Vector3>()}, " +
                     $"{nameof(orientationAction)}={orientationAction.ReadValue<Quaternion>()}]";
             }
 
-            internal TrackedDevice GetDevice()
+            internal DeviceState GetDeviceState()
             {
                 bool isConnected = positionAction.inProgress;
 
@@ -197,10 +197,10 @@ namespace CustomAvatar.Tracking.UnityXR
                 // If we don't check isTracked here, positionAction.ReadValue below throws an InvalidOperationException when the OpenXR loader is disabled.
                 if (!isTracked)
                 {
-                    return new TrackedDevice(isConnected, isTracked, Vector3.zero, Quaternion.identity);
+                    return new DeviceState(isConnected, isTracked, Vector3.zero, Quaternion.identity);
                 }
 
-                return new TrackedDevice(isConnected, isTracked, positionAction.ReadValue<Vector3>(), orientationAction.ReadValue<Quaternion>());
+                return new DeviceState(isConnected, isTracked, positionAction.ReadValue<Vector3>(), orientationAction.ReadValue<Quaternion>());
             }
         }
     }

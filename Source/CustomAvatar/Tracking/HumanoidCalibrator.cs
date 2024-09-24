@@ -149,7 +149,7 @@ namespace CustomAvatar.Tracking
             calibration.rightFoot = Pose.identity;
         }
 
-        private void ApplyCalibration(Transform center, TrackedNode device, Vector3 target, Quaternion targetRotation)
+        private void ApplyCalibration(Transform center, GenericNode device, Vector3 target, Quaternion targetRotation)
         {
             if (device.isTracking)
             {
@@ -163,7 +163,7 @@ namespace CustomAvatar.Tracking
             }
         }
 
-        private void ApplyManualCalibration(TrackedNode device, Transform target)
+        private void ApplyManualCalibration(GenericNode device, Transform target)
         {
             if (device.isTracking)
             {

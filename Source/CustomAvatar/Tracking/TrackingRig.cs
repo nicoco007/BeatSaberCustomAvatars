@@ -77,17 +77,17 @@ namespace CustomAvatar.Tracking
         // local to the current active origin (parent of VRCenterAdjust or world if no parent)
         internal float eyeHeight => (_activeOriginManager.current != null ? _activeOriginManager.current.InverseTransformPoint(head.transform.position).y : head.transform.position.y) - (_settings.moveFloorWithRoomAdjust ? _beatSaberUtilities.roomCenter.y : 0);
 
-        internal TrackedNode head { get; private set; }
+        internal GenericNode head { get; private set; }
 
-        internal TrackedController leftHand { get; private set; }
+        internal ControllerNode leftHand { get; private set; }
 
-        internal TrackedController rightHand { get; private set; }
+        internal ControllerNode rightHand { get; private set; }
 
-        internal TrackedNode pelvis { get; private set; }
+        internal GenericNode pelvis { get; private set; }
 
-        internal TrackedNode leftFoot { get; private set; }
+        internal GenericNode leftFoot { get; private set; }
 
-        internal TrackedNode rightFoot { get; private set; }
+        internal GenericNode rightFoot { get; private set; }
 
         internal Transform fullBodyTracking { get; private set; }
 
@@ -112,7 +112,7 @@ namespace CustomAvatar.Tracking
                 }
 
                 UpdateOffsets();
-                UpdateActiveTransforms();
+                UpdateNodeStates();
                 calibrationModeChanged?.Invoke(value);
             }
         }
@@ -170,7 +170,7 @@ namespace CustomAvatar.Tracking
             }
 
             UpdateOffsets();
-            UpdateActiveTransforms();
+            UpdateNodeStates();
         }
 
         protected void Awake()
@@ -184,8 +184,8 @@ namespace CustomAvatar.Tracking
             _scaleConstraint.constraintActive = true;
 
             head = new("Head");
-            leftHand = new TrackedController("Left Hand");
-            rightHand = new TrackedController("Right Hand");
+            leftHand = new ControllerNode("Left Hand");
+            rightHand = new ControllerNode("Right Hand");
             fullBodyTracking = new GameObject("Full Body Tracking").transform;
 
             head.transform.SetParent(transform, false);
@@ -253,7 +253,7 @@ namespace CustomAvatar.Tracking
             }
 
             UpdateOffsets();
-            UpdateActiveTransforms();
+            UpdateNodeStates();
             UpdateRenderModels();
             UpdateRenderModelsVisibility();
         }
@@ -382,7 +382,7 @@ namespace CustomAvatar.Tracking
             }
         }
 
-        private VRController SetUpVRController(TrackedController trackedNode, XRNode node, VRControllerTransformOffset transformOffset)
+        private VRController SetUpVRController(ControllerNode trackedNode, XRNode node, VRControllerTransformOffset transformOffset)
         {
             trackedNode.gameObject.SetActive(false);
 
@@ -401,7 +401,7 @@ namespace CustomAvatar.Tracking
         {
             EndCalibration();
             UpdateOffsets();
-            UpdateActiveTransforms();
+            UpdateNodeStates();
             calibrationModeChanged?.Invoke(calibrationMode);
         }
 
@@ -427,7 +427,7 @@ namespace CustomAvatar.Tracking
 
         private void OnDevicesChanged()
         {
-            UpdateActiveTransforms();
+            UpdateNodeStates();
             UpdateRenderModels();
             trackingChanged?.Invoke();
         }
@@ -556,11 +556,11 @@ namespace CustomAvatar.Tracking
             }
         }
 
-        private void UpdateTransform(DeviceUse deviceUse, TrackedNode trackedNode)
+        private void UpdateTransform(DeviceUse deviceUse, GenericNode trackedNode)
         {
-            if (_deviceProvider.TryGetDevice(deviceUse, out TrackedDevice device) && device.isTracking)
+            if (_deviceProvider.TryGetDeviceState(deviceUse, out DeviceState deviceState) && deviceState.isTracking)
             {
-                trackedNode.transform.SetLocalPositionAndRotation(device.position, device.rotation);
+                trackedNode.transform.SetLocalPositionAndRotation(deviceState.position, deviceState.rotation);
             }
             else
             {
@@ -576,7 +576,7 @@ namespace CustomAvatar.Tracking
             }
         }
 
-        private void UpdateActiveTransforms()
+        private void UpdateNodeStates()
         {
             if (_deviceProvider == null)
             {
@@ -585,12 +585,12 @@ namespace CustomAvatar.Tracking
 
             _logger.LogTrace("Updating active transforms");
 
-            UpdateActiveTransform(head, DeviceUse.Head);
-            UpdateActiveTransform(leftHand, DeviceUse.LeftHand);
-            UpdateActiveTransform(rightHand, DeviceUse.RightHand);
-            UpdateActiveTransform(pelvis, DeviceUse.Waist);
-            UpdateActiveTransform(leftFoot, DeviceUse.LeftFoot);
-            UpdateActiveTransform(rightFoot, DeviceUse.RightFoot);
+            UpdateNodeState(head, DeviceUse.Head);
+            UpdateNodeState(leftHand, DeviceUse.LeftHand);
+            UpdateNodeState(rightHand, DeviceUse.RightHand);
+            UpdateNodeState(pelvis, DeviceUse.Waist);
+            UpdateNodeState(leftFoot, DeviceUse.LeftFoot);
+            UpdateNodeState(rightFoot, DeviceUse.RightFoot);
 
             areBothHandsTracking = leftHand.isTracking && rightHand.isTracking;
             areAnyFullBodyTrackersTracking = pelvis.isTracking || leftFoot.isTracking || rightFoot.isTracking;
@@ -598,16 +598,16 @@ namespace CustomAvatar.Tracking
             trackingChanged?.Invoke();
         }
 
-        private void UpdateActiveTransform(TrackedNode trackedNode, DeviceUse deviceUse)
+        private void UpdateNodeState(GenericNode trackedNode, DeviceUse deviceUse)
         {
-            trackedNode.isTracking = _deviceProvider.TryGetDevice(deviceUse, out TrackedDevice trackedDevice) && trackedDevice.isTracking;
+            trackedNode.isTracking = _deviceProvider.TryGetDeviceState(deviceUse, out DeviceState deviceState) && deviceState.isTracking;
             trackedNode.isCalibrated = IsCurrentlyCalibrated(deviceUse);
         }
 
-        private void UpdateActiveTransform(TrackedController trackedController, DeviceUse deviceUse)
+        private void UpdateNodeState(ControllerNode trackedController, DeviceUse deviceUse)
         {
             // To mimic what VRController does, we only check if the device is connected.
-            trackedController.isTracking = _deviceProvider.TryGetDevice(deviceUse, out TrackedDevice trackedDevice) && trackedDevice.isConnected;
+            trackedController.isTracking = _deviceProvider.TryGetDeviceState(deviceUse, out DeviceState deviceState) && deviceState.isConnected;
         }
 
         private bool IsCurrentlyCalibrated(DeviceUse deviceUse)

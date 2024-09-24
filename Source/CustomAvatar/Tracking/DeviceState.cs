@@ -18,14 +18,9 @@ using UnityEngine;
 
 namespace CustomAvatar.Tracking
 {
-    internal readonly struct TrackedDevice
+    internal readonly struct DeviceState
     {
-        public bool isConnected { get; }
-        public bool isTracking { get; }
-        public Vector3 position { get; }
-        public Quaternion rotation { get; }
-
-        public TrackedDevice(bool isConnected, bool isTracking, Vector3 position, Quaternion rotation)
+        public DeviceState(bool isConnected, bool isTracking, Vector3 position, Quaternion rotation)
         {
             this.isConnected = isConnected;
             this.isTracking = isTracking;
@@ -33,9 +28,17 @@ namespace CustomAvatar.Tracking
             this.rotation = rotation;
         }
 
+        public bool isConnected { get; }
+
+        public bool isTracking { get; }
+
+        public Vector3 position { get; }
+
+        public Quaternion rotation { get; }
+
         public override string ToString()
         {
-            return $"{nameof(TrackedDevice)}@{GetHashCode()}[{nameof(isConnected)}={isConnected}, {nameof(isTracking)}={isTracking}, {nameof(position)}={position}, {nameof(rotation)}={rotation}]";
+            return $"{nameof(DeviceState)}@{GetHashCode()}[{nameof(isConnected)}={isConnected}, {nameof(isTracking)}={isTracking}, {nameof(position)}={position}, {nameof(rotation)}={rotation}]";
         }
     }
 }

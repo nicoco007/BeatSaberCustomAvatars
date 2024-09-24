@@ -22,6 +22,6 @@ namespace CustomAvatar.Tracking
     {
         public event Action devicesChanged;
 
-        bool TryGetDevice(DeviceUse deviceUse, out TrackedDevice trackedDevice);
+        bool TryGetDeviceState(DeviceUse deviceUse, out DeviceState deviceState);
     }
 }
