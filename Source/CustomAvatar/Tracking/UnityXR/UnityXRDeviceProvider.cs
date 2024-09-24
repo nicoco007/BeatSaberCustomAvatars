@@ -17,6 +17,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.XR;
 using Zenject;
 
 namespace CustomAvatar.Tracking.UnityXR
@@ -28,9 +29,7 @@ namespace CustomAvatar.Tracking.UnityXR
         private const string kLeftFootUsage = "LeftFoot";
         private const string kRightFootUsage = "RightFoot";
 
-        private readonly InputActionMap _inputActions = new("Custom Avatars Additional Tracking");
-
-        private readonly UnityXRHelper _unityXRHelper;
+        private readonly InputActionMap _inputActions = new("Custom Avatars");
 
         private readonly XRDevice _head;
         private readonly XRDevice _leftHand;
@@ -39,13 +38,11 @@ namespace CustomAvatar.Tracking.UnityXR
         private readonly XRDevice _leftFoot;
         private readonly XRDevice _rightFoot;
 
-        internal UnityXRDeviceProvider(IVRPlatformHelper vrPlatformHelper)
+        internal UnityXRDeviceProvider()
         {
-            _unityXRHelper = (UnityXRHelper)vrPlatformHelper;
-
-            _head = CreateDevice("Head", _unityXRHelper._headPositionActionReference, _unityXRHelper._headOrientationActionReference);
-            _leftHand = CreateDevice("LeftHand", _unityXRHelper._leftControllerConfiguration.positionActionReference, _unityXRHelper._leftControllerConfiguration.orientationActionReference);
-            _rightHand = CreateDevice("RightHand", _unityXRHelper._rightControllerConfiguration.positionActionReference, _unityXRHelper._rightControllerConfiguration.orientationActionReference);
+            _head = CreateDevice("Head", nameof(XRHMD));
+            _leftHand = CreateDevice("LeftHand", nameof(XRController), CommonUsages.LeftHand);
+            _rightHand = CreateDevice("RightHand", nameof(XRController), CommonUsages.RightHand);
             _waist = CreateDevice("Waist", kTrackerDeviceTypeName, kWaistUsage);
             _leftFoot = CreateDevice("LeftFoot", kTrackerDeviceTypeName, kLeftFootUsage);
             _rightFoot = CreateDevice("RightFoot", kTrackerDeviceTypeName, kRightFootUsage);
@@ -120,14 +117,11 @@ namespace CustomAvatar.Tracking.UnityXR
             _inputActions.Dispose();
         }
 
-        private XRDevice CreateDevice(string name, InputAction positionAction, InputAction orientationAction)
+        private XRDevice CreateDevice(string name, string deviceTypeName)
         {
-            InputAction isTrackedAction = _inputActions.AddAction($"{name}IsTracked");
-
-            foreach (InputBinding binding in positionAction.bindings)
-            {
-                isTrackedAction.AddBinding($"{binding.path.Substring(0, binding.path.IndexOf('/'))}/isTracked", groups: binding.groups);
-            }
+            InputAction positionAction = _inputActions.AddAction($"{name}Position", binding: $"<{deviceTypeName}>/devicePosition", groups: "XR");
+            InputAction orientationAction = _inputActions.AddAction($"{name}Orientation", binding: $"<{deviceTypeName}>/deviceRotation", groups: "XR");
+            InputAction isTrackedAction = _inputActions.AddAction($"{name}IsTracked", binding: $"<{deviceTypeName}>/isTracked", groups: "XR");
 
             return new XRDevice(isTrackedAction, positionAction, orientationAction);
         }
