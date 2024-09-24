@@ -15,8 +15,6 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using CustomAvatar.Avatar;
-using CustomAvatar.Configuration;
 using CustomAvatar.Tracking;
 using UnityEngine;
 using Zenject;
@@ -29,39 +27,30 @@ namespace CustomAvatar.Player
     internal class VRPlayerInput : IInitializable, IDisposable, IAvatarInput
     {
         private readonly PlayerAvatarManager _avatarManager;
-        private readonly Settings _settings;
         private readonly TrackingRig _trackingRig;
         private readonly IFingerTrackingProvider _fingerTrackingProvider;
 
-        private Settings.AvatarSpecificSettings _avatarSettings;
-
         internal VRPlayerInput(
             PlayerAvatarManager avatarManager,
-            Settings settings,
             TrackingRig trackingRig,
             IFingerTrackingProvider fingerTrackingProvider)
         {
             _avatarManager = avatarManager;
-            _settings = settings;
             _trackingRig = trackingRig;
             _fingerTrackingProvider = fingerTrackingProvider;
         }
 
         public event Action inputChanged;
 
-        public bool allowMaintainPelvisPosition => _avatarSettings?.allowMaintainPelvisPosition ?? false;
+        public bool allowMaintainPelvisPosition => _avatarManager.currentAvatarSettings?.allowMaintainPelvisPosition ?? false;
 
         public void Initialize()
         {
-            _avatarManager.avatarChanged += OnAvatarChanged;
             _trackingRig.trackingChanged += OnTrackingRigChanged;
-
-            OnAvatarChanged(_avatarManager.currentlySpawnedAvatar);
         }
 
         public void Dispose()
         {
-            _avatarManager.avatarChanged -= OnAvatarChanged;
             _trackingRig.trackingChanged -= OnTrackingRigChanged;
         }
 
@@ -84,11 +73,6 @@ namespace CustomAvatar.Player
         }
 
         public bool TryGetFingerCurl(DeviceUse use, out FingerCurl curl) => _fingerTrackingProvider.TryGetFingerCurl(use, out curl);
-
-        private void OnAvatarChanged(SpawnedAvatar spawnedAvatar)
-        {
-            _avatarSettings = spawnedAvatar != null ? _settings.GetAvatarSettings(spawnedAvatar.prefab.fileName) : null;
-        }
 
         private void OnTrackingRigChanged()
         {

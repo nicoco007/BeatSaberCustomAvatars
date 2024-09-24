@@ -35,14 +35,16 @@ namespace CustomAvatar.Tracking
         private readonly Settings _settings;
         private readonly ActiveOriginManager _activeOriginManager;
         private readonly BeatSaberUtilities _beatSaberUtilities;
+        private readonly PlayerAvatarManager _playerAvatarManager;
 
-        internal HumanoidCalibrator(TrackingRig trackingRig, CalibrationData calibrationData, Settings settings, ActiveOriginManager activeOriginManager, BeatSaberUtilities beatSaberUtilities)
+        internal HumanoidCalibrator(TrackingRig trackingRig, CalibrationData calibrationData, Settings settings, ActiveOriginManager activeOriginManager, BeatSaberUtilities beatSaberUtilities, PlayerAvatarManager playerAvatarManager)
         {
             _trackingRig = trackingRig;
             _calibrationData = calibrationData;
             _settings = settings;
             _activeOriginManager = activeOriginManager;
             _beatSaberUtilities = beatSaberUtilities;
+            _playerAvatarManager = playerAvatarManager;
         }
 
         internal void ApplyAutomaticCalibration()
@@ -50,9 +52,9 @@ namespace CustomAvatar.Tracking
             ReadCalibrationTransforms(_calibrationData.automaticCalibration);
         }
 
-        internal void ApplyManualCalibration(SpawnedAvatar spawnedAvatar)
+        internal void ApplyManualCalibration()
         {
-            ReadCalibrationTransforms(_calibrationData.GetAvatarManualCalibration(spawnedAvatar));
+            ReadCalibrationTransforms(_playerAvatarManager.currentManualCalibration);
         }
 
         internal void ApplyNoCalibration()
@@ -92,8 +94,10 @@ namespace CustomAvatar.Tracking
             Object.Destroy(center.gameObject);
         }
 
-        internal void CalibrateManually(SpawnedAvatar spawnedAvatar)
+        internal void CalibrateManually()
         {
+            SpawnedAvatar spawnedAvatar = _playerAvatarManager.currentlySpawnedAvatar;
+
             if (spawnedAvatar == null || spawnedAvatar.ik == null)
             {
                 return;
@@ -108,7 +112,7 @@ namespace CustomAvatar.Tracking
             ApplyManualCalibration(_trackingRig.leftFoot, UnityUtilities.FirstNonNullUnityObject(vrikManager.references_leftToes, vrikManager.references_leftFoot));
             ApplyManualCalibration(_trackingRig.rightFoot, UnityUtilities.FirstNonNullUnityObject(vrikManager.references_rightToes, vrikManager.references_rightFoot));
 
-            WriteCalibrationTransforms(_calibrationData.GetAvatarManualCalibration(spawnedAvatar));
+            WriteCalibrationTransforms(_playerAvatarManager.currentManualCalibration);
         }
 
         internal void ClearAutomaticFullBodyTrackingData()
@@ -116,9 +120,9 @@ namespace CustomAvatar.Tracking
             WriteIdentity(_calibrationData.automaticCalibration);
         }
 
-        internal void ClearManualFullBodyTrackingData(SpawnedAvatar spawnedAvatar)
+        internal void ClearManualFullBodyTrackingData()
         {
-            WriteIdentity(_calibrationData.GetAvatarManualCalibration(spawnedAvatar));
+            WriteIdentity(_playerAvatarManager.currentManualCalibration);
         }
 
         internal void ReadCalibrationTransforms(CalibrationData.FullBodyCalibration calibration)

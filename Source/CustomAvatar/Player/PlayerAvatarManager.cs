@@ -54,6 +54,19 @@ namespace CustomAvatar.Player
         /// </summary>
         public SpawnedAvatar currentlySpawnedAvatar { get; private set; }
 
+        internal Settings.AvatarSpecificSettings currentAvatarSettings { get; private set; }
+
+        internal CalibrationData.FullBodyCalibration currentManualCalibration { get; private set; }
+
+        internal string currentAvatarFileName
+        {
+            get => _settings.previousAvatarPath;
+            private set
+            {
+                _settings.previousAvatarPath = value;
+            }
+        }
+
         /// <summary>
         /// Event triggered when the current avatar is deleted an a new one starts loading. Note that both arguments may be null if no avatar was selected to replace the previous one.
         /// </summary>
@@ -74,14 +87,13 @@ namespace CustomAvatar.Player
         /// </summary>
         public event Action<float> avatarScaleChanged;
 
-        internal Settings.AvatarSpecificSettings currentAvatarSettings { get; private set; }
-
         private readonly AvatarCacheStore _avatarCacheStore = new(kCustomAvatarsPath);
 
         private DiContainer _container;
         private ILogger<PlayerAvatarManager> _logger;
         private AvatarLoader _avatarLoader;
         private Settings _settings;
+        private CalibrationData _calibrationData;
         private AvatarSpawner _spawner;
         private BeatSaberUtilities _beatSaberUtilities;
         private ActiveOriginManager _activeOriginManager;
@@ -89,7 +101,6 @@ namespace CustomAvatar.Player
         private ParentConstraint _parentConstraint;
         private ScaleConstraint _scaleConstraint;
 
-        private string _switchingToPath;
         private CancellationTokenSource _avatarLoadCancellationTokenSource;
 
         internal bool ignoreFirstPersonExclusions
@@ -139,6 +150,7 @@ namespace CustomAvatar.Player
             ILogger<PlayerAvatarManager> logger,
             AvatarLoader avatarLoader,
             Settings settings,
+            CalibrationData calibrationData,
             AvatarSpawner spawner,
             BeatSaberUtilities beatSaberUtilities,
             ActiveOriginManager activeOriginManager)
@@ -147,6 +159,7 @@ namespace CustomAvatar.Player
             _logger = logger;
             _avatarLoader = avatarLoader;
             _settings = settings;
+            _calibrationData = calibrationData;
             _spawner = spawner;
             _beatSaberUtilities = beatSaberUtilities;
             _activeOriginManager = activeOriginManager;
@@ -251,30 +264,38 @@ namespace CustomAvatar.Player
 
         public async Task SwitchToAvatarAsync(string fileName, IProgress<float> progress)
         {
-            if (currentlySpawnedAvatar && currentlySpawnedAvatar.prefab) Destroy(currentlySpawnedAvatar.prefab.gameObject);
-            Destroy(currentlySpawnedAvatar);
+            _avatarLoadCancellationTokenSource?.Cancel();
+
+            if (currentlySpawnedAvatar != null)
+            {
+                if (currentlySpawnedAvatar.prefab != null)
+                {
+                    Destroy(currentlySpawnedAvatar.prefab);
+                }
+
+                Destroy(currentlySpawnedAvatar.gameObject);
+            }
+
             currentlySpawnedAvatar = null;
             currentAvatarSettings = null;
 
             if (string.IsNullOrEmpty(fileName))
             {
-                _switchingToPath = null;
-                SwitchToAvatar(null);
+                currentAvatarFileName = null;
+                SwitchToAvatar(null, null);
                 return;
             }
 
             string fullPath = Path.Combine(kCustomAvatarsPath, fileName);
 
-            _switchingToPath = fullPath;
-
             avatarLoading?.Invoke(fullPath, TryGetCachedAvatarInfo(fileName, out AvatarInfo cachedInfo) ? cachedInfo.name : fileName);
 
             try
             {
-                _avatarLoadCancellationTokenSource?.Cancel();
+                currentAvatarFileName = fileName;
                 _avatarLoadCancellationTokenSource = new CancellationTokenSource();
-                AvatarPrefab avatarPrefab = await _avatarLoader.LoadFromFileAsync(fullPath, progress, _avatarLoadCancellationTokenSource.Token);
-                SwitchToAvatar(avatarPrefab);
+                AvatarPrefab avatar = await LoadAndCacheAvatarAsync(fullPath, progress, _avatarLoadCancellationTokenSource.Token);
+                SwitchToAvatar(avatar, fullPath);
             }
             catch (OperationCanceledException)
             {
@@ -293,53 +314,37 @@ namespace CustomAvatar.Player
         {
             AvatarPrefab avatar = await _avatarLoader.LoadFromFileAsync(fullPath, progress, cancellationToken);
 
-            var info = new AvatarInfo(avatar);
-
-            _avatarCacheStore[info.fileName] = info;
-
-            if (avatar.fullPath == _switchingToPath)
-            {
-                SwitchToAvatar(avatar);
-            }
-            else
+            if (cancellationToken.IsCancellationRequested)
             {
                 Destroy(avatar.gameObject);
+                cancellationToken.ThrowIfCancellationRequested();
             }
+
+            var info = new AvatarInfo(avatar, fullPath);
+
+            _avatarCacheStore[info.fileName] = info;
 
             return avatar;
         }
 
-        private void SwitchToAvatar(AvatarPrefab avatar)
+        private void SwitchToAvatar(AvatarPrefab avatar, string fullPath)
         {
-            if (!avatar)
+            if (avatar == null)
             {
                 _logger.LogInformation("No avatar selected");
-                currentAvatarSettings = null;
                 avatarChanged?.Invoke(null);
-                _settings.previousAvatarPath = null;
                 UpdateAvatarVerticalPosition();
                 return;
             }
-            else if ((currentlySpawnedAvatar && currentlySpawnedAvatar.prefab == avatar) || avatar.fullPath != _switchingToPath)
-            {
-                Destroy(avatar.gameObject);
-                return;
-            }
 
-            if (currentlySpawnedAvatar)
-            {
-                Destroy(currentlySpawnedAvatar.gameObject);
-            }
-
-            var avatarInfo = new AvatarInfo(avatar);
-
-            _settings.previousAvatarPath = avatarInfo.fileName;
+            AvatarInfo avatarInfo = new(avatar, fullPath);
 
             // cache avatar info since loading asset bundles is expensive
             _avatarCacheStore[avatarInfo.fileName] = avatarInfo;
 
             currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, _container.Resolve<VRPlayerInput>(), transform);
-            currentAvatarSettings = _settings.GetAvatarSettings(avatar.fileName);
+            currentAvatarSettings = _settings.GetAvatarSettings(avatarInfo.fileName);
+            currentManualCalibration = _calibrationData.GetAvatarManualCalibration(avatarInfo.fileName);
 
             ResizeCurrentAvatar();
             UpdateFirstPersonVisibility();
@@ -348,24 +353,24 @@ namespace CustomAvatar.Player
             avatarChanged?.Invoke(currentlySpawnedAvatar);
         }
 
-        public async Task SwitchToNextAvatarAsync()
+        internal async Task SwitchToNextAvatarAsync()
         {
             List<string> files = GetAvatarFileNames();
             files.Insert(0, null);
 
-            int index = !string.IsNullOrEmpty(_switchingToPath) ? files.IndexOf(Path.GetFileName(_switchingToPath)) : 0;
+            int index = !string.IsNullOrEmpty(currentAvatarFileName) ? files.IndexOf(currentAvatarFileName) : 0;
 
             index = (index + 1) % files.Count;
 
             await SwitchToAvatarAsync(files[index], null);
         }
 
-        public async Task SwitchToPreviousAvatarAsync()
+        internal async Task SwitchToPreviousAvatarAsync()
         {
             List<string> files = GetAvatarFileNames();
             files.Insert(0, null);
 
-            int index = !string.IsNullOrEmpty(_switchingToPath) ? files.IndexOf(Path.GetFileName(_switchingToPath)) : 0;
+            int index = !string.IsNullOrEmpty(currentAvatarFileName) ? files.IndexOf(currentAvatarFileName) : 0;
 
             index = (index + files.Count - 1) % files.Count;
 

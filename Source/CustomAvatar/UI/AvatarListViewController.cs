@@ -305,7 +305,7 @@ namespace CustomAvatar.UI
 
         private void UpdateSelectedRow(bool scroll = false)
         {
-            int currentRow = _avatarManager.currentlySpawnedAvatar ? avatars.FindIndex(a => a.fileName == _avatarManager.currentlySpawnedAvatar.prefab.fileName) : 0;
+            int currentRow = _avatarManager.currentlySpawnedAvatar ? avatars.FindIndex(a => a.fileName == _avatarManager.currentAvatarFileName) : 0;
 
             if (scroll) _tableView.ScrollToCellWithIdx(currentRow, TableView.ScrollPositionType.Center, false);
 

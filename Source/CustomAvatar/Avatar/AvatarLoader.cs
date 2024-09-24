@@ -139,7 +139,7 @@ namespace CustomAvatar.Avatar
                     throw new AvatarLoadException("Could not load asset from asset bundle");
                 }
 
-                avatarPrefab = _container.InstantiateComponent<AvatarPrefab>(prefabObject, [fullPath]);
+                avatarPrefab = _container.InstantiateComponent<AvatarPrefab>(prefabObject);
 
                 prefabObject.hideFlags |= HideFlags.DontUnloadUnusedAsset;
                 prefabObject.name = $"AvatarPrefab({avatarPrefab.descriptor.name})";

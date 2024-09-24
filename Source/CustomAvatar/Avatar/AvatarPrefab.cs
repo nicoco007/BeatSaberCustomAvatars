@@ -15,14 +15,11 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 extern alias BeatSaberFinalIK;
-
+using System.Linq;
 using AvatarScriptPack;
 using CustomAvatar.Exceptions;
 using CustomAvatar.Logging;
 using CustomAvatar.Utilities;
-using System;
-using System.IO;
-using System.Linq;
 using UnityEngine;
 using Zenject;
 using VRIK = BeatSaberFinalIK::RootMotion.FinalIK.VRIK;
@@ -33,16 +30,6 @@ namespace CustomAvatar.Avatar
     public class AvatarPrefab : MonoBehaviour
     {
         private const float kEyeHeightToPelvisHeightRatio = 3.5f / 7f;
-
-        /// <summary>
-        /// The name of the file from which the avatar was loaded.
-        /// </summary>
-        public string fileName { get; private set; }
-
-        /// <summary>
-        /// The full path of the file from which the avatar was loaded.
-        /// </summary>
-        public string fullPath { get; private set; }
 
         /// <summary>
         /// The <see cref="AvatarDescriptor"/> retrieved from the root object on the prefab.
@@ -99,18 +86,14 @@ namespace CustomAvatar.Avatar
         private ILogger<AvatarPrefab> _logger;
 
         [Inject]
-        internal void Construct(string fullPath, ILoggerFactory loggerFactory, DiContainer container)
+        internal void Construct(ILoggerFactory loggerFactory, DiContainer container)
         {
-            this.fullPath = fullPath ?? throw new ArgumentNullException(nameof(fullPath));
             descriptor = GetComponent<AvatarDescriptor>();
 
             if (descriptor == null)
             {
-                throw new AvatarLoadException($"Avatar at '{fullPath}' does not have an AvatarDescriptor");
+                throw new AvatarLoadException($"Avatar '{descriptor.name}' does not have an AvatarDescriptor");
             }
-
-            // TODO: don't do all of this in Construct
-            fileName = Path.GetFileName(fullPath);
 
             _logger = loggerFactory.CreateLogger<AvatarPrefab>(descriptor.name);
 

@@ -18,7 +18,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using CustomAvatar.Avatar;
 using CustomAvatar.Logging;
 using CustomAvatar.Player;
 using CustomAvatar.Utilities;
@@ -75,8 +74,6 @@ namespace CustomAvatar.Configuration
                 _logger.LogError(ex);
             }
         }
-
-        public FullBodyCalibration GetAvatarManualCalibration(SpawnedAvatar spawnedAvatar) => GetAvatarManualCalibration(spawnedAvatar.prefab.fileName);
 
         public FullBodyCalibration GetAvatarManualCalibration(string fileName)
         {

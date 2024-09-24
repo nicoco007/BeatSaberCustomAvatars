@@ -14,11 +14,11 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using CustomAvatar.Avatar;
-using CustomAvatar.Tracking;
-using CustomAvatar.Player;
-using CustomAvatar.Configuration;
 using System.Collections.Generic;
+using CustomAvatar.Avatar;
+using CustomAvatar.Configuration;
+using CustomAvatar.Player;
+using CustomAvatar.Tracking;
 using JetBrains.Annotations;
 
 namespace CustomAvatar.UI
@@ -34,17 +34,15 @@ namespace CustomAvatar.UI
 
         private readonly PlayerAvatarManager _avatarManager;
         private readonly TrackingRig _trackingRig;
-        private readonly CalibrationData _calibrationData;
 
         private bool _isLoaderActive;
 
-        internal AvatarSpecificSettingsHost(TrackerStatusHost trackerStatusHost, PlayerAvatarManager avatarManager, TrackingRig trackingRig, CalibrationData calibrationData)
+        internal AvatarSpecificSettingsHost(TrackerStatusHost trackerStatusHost, PlayerAvatarManager avatarManager, TrackingRig trackingRig)
         {
             this.trackerStatusHost = trackerStatusHost;
 
             _avatarManager = avatarManager;
             _trackingRig = trackingRig;
-            _calibrationData = calibrationData;
         }
 
         protected bool areCurrentAvatarSettingsLoaded => _avatarManager.currentlySpawnedAvatar != null;
@@ -83,7 +81,7 @@ namespace CustomAvatar.UI
 
         protected string calibrateButtonHoverHint => _avatarManager.currentlySpawnedAvatar != null ? (_trackingRig.areAnyFullBodyTrackersTracking ? "Start full body calibration" : "No trackers detected") : "No avatar selected";
 
-        protected bool isClearButtonEnabled => _avatarManager.currentlySpawnedAvatar != null && _calibrationData.GetAvatarManualCalibration(_avatarManager.currentlySpawnedAvatar).isCalibrated;
+        protected bool isClearButtonEnabled => _avatarManager.currentlySpawnedAvatar != null && _avatarManager.currentManualCalibration.isCalibrated;
 
         public override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {

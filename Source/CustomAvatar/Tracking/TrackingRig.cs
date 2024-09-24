@@ -163,7 +163,7 @@ namespace CustomAvatar.Tracking
                 case CalibrationMode.Manual:
                     if (_playerAvatarManager.currentlySpawnedAvatar != null)
                     {
-                        _humanoidCalibrator.ClearManualFullBodyTrackingData(_playerAvatarManager.currentlySpawnedAvatar);
+                        _humanoidCalibrator.ClearManualFullBodyTrackingData();
                     }
 
                     break;
@@ -302,7 +302,7 @@ namespace CustomAvatar.Tracking
             _vrControllerVisualsManager = vrControllerVisualsManager;
             _beatSaberUtilities = beatSaberUtilities;
             _fpfcSettings = fpfcSettings;
-            _humanoidCalibrator = new HumanoidCalibrator(this, calibrationData, settings, activeOriginManager, beatSaberUtilities);
+            _humanoidCalibrator = new HumanoidCalibrator(this, calibrationData, settings, activeOriginManager, beatSaberUtilities, playerAvatarManager);
         }
 
         protected void Update()
@@ -328,7 +328,7 @@ namespace CustomAvatar.Tracking
                             break;
 
                         case CalibrationMode.Manual:
-                            _humanoidCalibrator.CalibrateManually(_playerAvatarManager.currentlySpawnedAvatar);
+                            _humanoidCalibrator.CalibrateManually();
                             break;
                     }
 
@@ -473,7 +473,7 @@ namespace CustomAvatar.Tracking
             float trackerScale = spawnedAvatar.absoluteScale / fullBodyScale;
 
             CalibrationData.FullBodyCalibration automaticCalibration = _calibrationData.automaticCalibration;
-            CalibrationData.FullBodyCalibration manualCalibration = _calibrationData.GetAvatarManualCalibration(spawnedAvatar);
+            CalibrationData.FullBodyCalibration manualCalibration = _playerAvatarManager.currentManualCalibration;
 
             UpdateOffset(head.offset, spawnedAvatar.prefab.headOffset, spawnedAvatar.prefab.headCalibrationOffset, spawnedAvatar.absoluteScale, manualCalibration.head, automaticCalibration.head);
             UpdateOffset(pelvis.offset, spawnedAvatar.prefab.pelvisOffset, spawnedAvatar.prefab.pelvisCalibrationOffset, trackerScale, manualCalibration.waist, automaticCalibration.waist);
@@ -487,7 +487,7 @@ namespace CustomAvatar.Tracking
                     break;
 
                 case CalibrationMode.Manual:
-                    _humanoidCalibrator.ApplyManualCalibration(spawnedAvatar);
+                    _humanoidCalibrator.ApplyManualCalibration();
                     break;
 
                 case CalibrationMode.Automatic:
@@ -618,7 +618,7 @@ namespace CustomAvatar.Tracking
                     break;
 
                 case CalibrationMode.Manual:
-                    calibration = _calibrationData.GetAvatarManualCalibration(_playerAvatarManager.currentlySpawnedAvatar);
+                    calibration = _playerAvatarManager.currentManualCalibration;
                     break;
 
                 default:

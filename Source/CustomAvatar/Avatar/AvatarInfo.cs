@@ -72,14 +72,14 @@ namespace CustomAvatar.Avatar
         [ProtoMember(8)]
         public DateTime timestamp { get; }
 
-        public AvatarInfo(AvatarPrefab avatar)
+        public AvatarInfo(AvatarPrefab avatar, string fullPath)
         {
             name = avatar.descriptor.name ?? "Unknown";
             author = avatar.descriptor.author ?? "Unknown";
             icon = avatar.descriptor.cover ? avatar.descriptor.cover : null;
 
             // TODO: this should probably be created and stored in AvatarPrefab when the avatar is loaded
-            var fileInfo = new FileInfo(avatar.fullPath);
+            var fileInfo = new FileInfo(fullPath);
 
             fileName = fileInfo.Name;
             fileSize = fileInfo.Length;
