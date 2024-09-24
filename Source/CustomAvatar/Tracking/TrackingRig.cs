@@ -674,7 +674,7 @@ namespace CustomAvatar.Tracking
                 return;
             }
 
-            _ = UpdateRenderModelsAsync().ContinueWith((task) => _logger.LogError(task.Exception), TaskContinuationOptions.OnlyOnFaulted);
+            UpdateRenderModelsAsync().ContinueWith((task) => _logger.LogError(task.Exception), TaskContinuationOptions.OnlyOnFaulted);
         }
 
         private Task UpdateRenderModelsAsync()
@@ -682,20 +682,29 @@ namespace CustomAvatar.Tracking
             _logger.LogTrace("Updating render models");
 
             return Task.WhenAll(
-                UpdateRenderModelAsync(DeviceUse.LeftHand, _leftHandRenderModel),
-                UpdateRenderModelAsync(DeviceUse.RightHand, _rightHandRenderModel),
-                UpdateRenderModelAsync(DeviceUse.Waist, _pelvisRenderModel),
-                UpdateRenderModelAsync(DeviceUse.LeftFoot, _leftFootRenderModel),
-                UpdateRenderModelAsync(DeviceUse.RightFoot, _rightFootRenderModel));
+                UpdateRenderModelAsync(DeviceUse.LeftHand, leftHand, _leftHandRenderModel),
+                UpdateRenderModelAsync(DeviceUse.RightHand, rightHand, _rightHandRenderModel),
+                UpdateRenderModelAsync(DeviceUse.Waist, pelvis, _pelvisRenderModel),
+                UpdateRenderModelAsync(DeviceUse.LeftFoot, leftFoot, _leftFootRenderModel),
+                UpdateRenderModelAsync(DeviceUse.RightFoot, rightFoot, _rightFootRenderModel));
         }
 
-        private async Task UpdateRenderModelAsync(DeviceUse deviceUse, TrackedRenderModel trackedRenderModel)
+        private async Task UpdateRenderModelAsync(DeviceUse deviceUse, ITrackedNode trackedNode, TrackedRenderModel trackedRenderModel)
         {
-            RenderModel renderModel = await _renderModelProvider.GetRenderModelAsync(deviceUse);
+            if (trackedNode.isTracking)
+            {
+                RenderModel renderModel = await _renderModelProvider.GetRenderModelAsync(deviceUse);
 
-            trackedRenderModel.transform.SetLocalPositionAndRotation(renderModel.localOrigin.position, renderModel.localOrigin.rotation);
-            trackedRenderModel.meshFilter.mesh = renderModel?.mesh;
-            trackedRenderModel.meshRenderer.material = renderModel?.material;
+                trackedRenderModel.transform.SetLocalPositionAndRotation(renderModel.localOrigin.position, renderModel.localOrigin.rotation);
+                trackedRenderModel.meshFilter.sharedMesh = renderModel.mesh;
+                trackedRenderModel.meshRenderer.sharedMaterial = renderModel.material;
+            }
+            else
+            {
+                trackedRenderModel.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+                trackedRenderModel.meshFilter.sharedMesh = null;
+                trackedRenderModel.meshRenderer.sharedMaterial = null;
+            }
         }
     }
 }
