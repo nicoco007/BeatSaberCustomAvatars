@@ -62,7 +62,7 @@ namespace CustomAvatar.Configuration
         {
             foreach (string fileName in _avatarSpecificSettings.Keys.ToList())
             {
-                if (!PathHelpers.IsValidFileName(fileName) || !File.Exists(Path.Combine(PlayerAvatarManager.kCustomAvatarsPath, fileName)))
+                if (!PathHelpers.IsValidFileName(fileName) || !File.Exists(Path.Join(PlayerAvatarManager.kCustomAvatarsPath, fileName)))
                 {
                     _avatarSpecificSettings.Remove(fileName);
                 }

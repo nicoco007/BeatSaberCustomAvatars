@@ -90,7 +90,7 @@ namespace CustomAvatar.Editor
 
             string destinationFileName = Path.GetFileName(destinationPath);
             string tempFolder = Application.temporaryCachePath;
-            string prefabPath = Path.Combine("Assets", "_CustomAvatar.prefab");
+            string prefabPath = Path.Join("Assets", "_CustomAvatar.prefab");
 
             PrefabUtility.SaveAsPrefabAsset(avatar.gameObject, prefabPath);
             AssetBundleManifest manifest;
@@ -124,7 +124,7 @@ namespace CustomAvatar.Editor
             }
 
             string[] assetBundleNames = manifest.GetAllAssetBundles();
-            string tempAssetBundlePath = Path.Combine(tempFolder, assetBundleNames[0]);
+            string tempAssetBundlePath = Path.Join(tempFolder, assetBundleNames[0]);
 
             try
             {

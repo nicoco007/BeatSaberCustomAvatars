@@ -41,7 +41,7 @@ namespace CustomAvatar.Player
             _runtimeTypeModel.Add<Sprite>().SerializerType = typeof(SpriteSerializer);
 
             this.directory = directory;
-            this.cacheFilePath = Path.Combine(directory, kCacheFileName);
+            this.cacheFilePath = Path.Join(directory, kCacheFileName);
         }
 
         public AvatarInfo this[string fileName]
@@ -96,7 +96,7 @@ namespace CustomAvatar.Player
                     _avatarInfoCollection.avatarInfos.Remove(kvp.Key);
                 }
 
-                string fullPath = Path.Combine(directory, kvp.Key);
+                string fullPath = Path.Join(directory, kvp.Key);
 
                 if (!File.Exists(fullPath) || !kvp.Value.IsForFile(fullPath))
                 {

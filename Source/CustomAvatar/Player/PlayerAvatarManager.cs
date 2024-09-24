@@ -38,7 +38,7 @@ namespace CustomAvatar.Player
     [DisallowMultipleComponent]
     public class PlayerAvatarManager : MonoBehaviour
     {
-        public static readonly string kCustomAvatarsPath = Path.Combine(UnityGame.InstallPath, "CustomAvatars");
+        public static readonly string kCustomAvatarsPath = Path.Join(UnityGame.InstallPath, "CustomAvatars");
 
         private static readonly List<ConstraintSource> kEmptyConstraintSources = new(0);
 
@@ -229,7 +229,7 @@ namespace CustomAvatar.Player
 
         internal async Task<AvatarInfo> GetAvatarInfo(string fileName, IProgress<float> progress, bool forceReload)
         {
-            string fullPath = Path.Combine(kCustomAvatarsPath, fileName);
+            string fullPath = Path.Join(kCustomAvatarsPath, fileName);
 
             if (!forceReload && TryGetCachedAvatarInfo(fileName, out AvatarInfo avatarInfo) && avatarInfo.IsForFile(fullPath))
             {
@@ -253,7 +253,7 @@ namespace CustomAvatar.Player
                 return Task.CompletedTask;
             }
 
-            if (!File.Exists(Path.Combine(kCustomAvatarsPath, previousAvatarFileName)))
+            if (!File.Exists(Path.Join(kCustomAvatarsPath, previousAvatarFileName)))
             {
                 _logger.LogWarning("Previously loaded avatar no longer exists");
                 return Task.CompletedTask;
@@ -286,7 +286,7 @@ namespace CustomAvatar.Player
                 return;
             }
 
-            string fullPath = Path.Combine(kCustomAvatarsPath, fileName);
+            string fullPath = Path.Join(kCustomAvatarsPath, fileName);
 
             avatarLoading?.Invoke(fullPath, TryGetCachedAvatarInfo(fileName, out AvatarInfo cachedInfo) ? cachedInfo.name : fileName);
 

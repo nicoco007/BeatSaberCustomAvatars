@@ -26,7 +26,7 @@ namespace CustomAvatar.Configuration
 {
     internal class SettingsManager
     {
-        public static readonly string kSettingsPath = Path.Combine(UnityGame.UserDataPath, "CustomAvatars.json");
+        public static readonly string kSettingsPath = Path.Join(UnityGame.UserDataPath, "CustomAvatars.json");
 
         private readonly ILogger<SettingsManager> _logger;
         private readonly JsonSerializer _jsonSerializer;

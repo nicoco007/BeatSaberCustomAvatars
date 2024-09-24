@@ -31,7 +31,7 @@ namespace CustomAvatar.Configuration
 {
     internal class CalibrationData : IInitializable, IDisposable
     {
-        public static readonly string kCalibrationDataFilePath = Path.Combine(UnityGame.UserDataPath, "CustomAvatars.CalibrationData.dat");
+        public static readonly string kCalibrationDataFilePath = Path.Join(UnityGame.UserDataPath, "CustomAvatars.CalibrationData.dat");
 
         private readonly ILogger<CalibrationData> _logger;
         private readonly RuntimeTypeModel _runtimeTypeModel;
@@ -130,7 +130,7 @@ namespace CustomAvatar.Configuration
                     _calibrationState.manualCalibrations.Remove(fileName);
                 }
 
-                string fullPath = Path.Combine(PlayerAvatarManager.kCustomAvatarsPath, fileName);
+                string fullPath = Path.Join(PlayerAvatarManager.kCustomAvatarsPath, fileName);
 
                 if (!File.Exists(fullPath))
                 {
