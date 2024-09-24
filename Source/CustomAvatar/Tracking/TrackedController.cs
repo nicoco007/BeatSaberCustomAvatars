@@ -42,7 +42,7 @@ namespace CustomAvatar.Tracking
 
         public VRController controller { get; set; }
 
-        public bool isTracking => true;
+        public bool isTracking { get; set; }
 
         // We don't have to calibrate controllers
         public bool isCalibrated => true;

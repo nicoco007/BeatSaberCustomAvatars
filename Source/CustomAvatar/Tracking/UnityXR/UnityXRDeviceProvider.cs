@@ -140,12 +140,19 @@ namespace CustomAvatar.Tracking.UnityXR
             // isTracked is a ButtonControl so "started" is triggered when tracking starts and "canceled" when tracking stops
             device.isTrackedAction.started += OnInputActionChanged;
             device.isTrackedAction.canceled += OnInputActionChanged;
+
+            // positionAction is a Vector3Control that is "started" when the device is turned on and "canceled" when it is turned off
+            device.positionAction.started += OnInputActionChanged;
+            device.positionAction.canceled += OnInputActionChanged;
         }
 
         private void DeregisterCallbacks(XRDevice device)
         {
             device.isTrackedAction.started -= OnInputActionChanged;
             device.isTrackedAction.canceled -= OnInputActionChanged;
+
+            device.positionAction.started -= OnInputActionChanged;
+            device.positionAction.canceled -= OnInputActionChanged;
         }
 
         private void OnInputActionChanged(InputAction.CallbackContext context)
@@ -178,15 +185,22 @@ namespace CustomAvatar.Tracking.UnityXR
 
             internal TrackedDevice GetDevice()
             {
+                bool isConnected = positionAction.inProgress;
+
+                if (!isConnected)
+                {
+                    return default;
+                }
+
                 bool isTracked = isTrackedAction.ReadValue<float>() > 0.5f;
 
                 // If we don't check isTracked here, positionAction.ReadValue below throws an InvalidOperationException when the OpenXR loader is disabled.
                 if (!isTracked)
                 {
-                    return default;
+                    return new TrackedDevice(isConnected, isTracked, Vector3.zero, Quaternion.identity);
                 }
 
-                return new TrackedDevice(isTracked, positionAction.ReadValue<Vector3>(), orientationAction.ReadValue<Quaternion>());
+                return new TrackedDevice(isConnected, isTracked, positionAction.ReadValue<Vector3>(), orientationAction.ReadValue<Quaternion>());
             }
         }
     }

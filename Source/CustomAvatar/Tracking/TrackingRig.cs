@@ -586,6 +586,8 @@ namespace CustomAvatar.Tracking
             _logger.LogTrace("Updating active transforms");
 
             UpdateActiveTransform(head, DeviceUse.Head);
+            UpdateActiveTransform(leftHand, DeviceUse.LeftHand);
+            UpdateActiveTransform(rightHand, DeviceUse.RightHand);
             UpdateActiveTransform(pelvis, DeviceUse.Waist);
             UpdateActiveTransform(leftFoot, DeviceUse.LeftFoot);
             UpdateActiveTransform(rightFoot, DeviceUse.RightFoot);
@@ -600,6 +602,12 @@ namespace CustomAvatar.Tracking
         {
             trackedNode.isTracking = _deviceProvider.TryGetDevice(deviceUse, out TrackedDevice trackedDevice) && trackedDevice.isTracking;
             trackedNode.isCalibrated = IsCurrentlyCalibrated(deviceUse);
+        }
+
+        private void UpdateActiveTransform(TrackedController trackedController, DeviceUse deviceUse)
+        {
+            // To mimic what VRController does, we only check if the device is connected.
+            trackedController.isTracking = _deviceProvider.TryGetDevice(deviceUse, out TrackedDevice trackedDevice) && trackedDevice.isConnected;
         }
 
         private bool IsCurrentlyCalibrated(DeviceUse deviceUse)
