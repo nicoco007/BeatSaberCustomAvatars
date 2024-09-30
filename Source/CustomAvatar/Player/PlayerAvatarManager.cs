@@ -99,7 +99,7 @@ namespace CustomAvatar.Player
         private ActiveOriginManager _activeOriginManager;
 
         private ParentConstraint _parentConstraint;
-        private ScaleConstraint _scaleConstraint;
+        private LossyScaleConstraint _scaleConstraint;
 
         private CancellationTokenSource _avatarLoadCancellationTokenSource;
 
@@ -123,9 +123,7 @@ namespace CustomAvatar.Player
             _parentConstraint.weight = 1;
             _parentConstraint.constraintActive = true;
 
-            _scaleConstraint = gameObject.AddComponent<ScaleConstraint>();
-            _scaleConstraint.weight = 1;
-            _scaleConstraint.constraintActive = true;
+            _scaleConstraint = gameObject.AddComponent<LossyScaleConstraint>();
         }
 
         protected void OnEnable()
@@ -436,12 +434,12 @@ namespace CustomAvatar.Player
             if (_activeOriginManager.current != null)
             {
                 _parentConstraint.SetSources([new ConstraintSource { sourceTransform = _activeOriginManager.current, weight = 1 }]);
-                _scaleConstraint.SetSources([new ConstraintSource { sourceTransform = _activeOriginManager.current, weight = 1 }]);
+                _scaleConstraint.sourceTransform = _activeOriginManager.current;
             }
             else
             {
                 _parentConstraint.SetSources(kEmptyConstraintSources);
-                _scaleConstraint.SetSources(kEmptyConstraintSources);
+                _scaleConstraint.sourceTransform = null;
             }
 
             UpdateAvatarVerticalPosition();

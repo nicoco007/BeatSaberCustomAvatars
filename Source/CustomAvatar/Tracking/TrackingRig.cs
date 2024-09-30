@@ -54,7 +54,7 @@ namespace CustomAvatar.Tracking
         private HumanoidCalibrator _humanoidCalibrator;
 
         private ParentConstraint _parentConstraint;
-        private ScaleConstraint _scaleConstraint;
+        private LossyScaleConstraint _scaleConstraint;
         private CalibrationMode _activeCalibrationMode;
 
         private bool _showRenderModels;
@@ -179,9 +179,7 @@ namespace CustomAvatar.Tracking
             _parentConstraint.weight = 1;
             _parentConstraint.constraintActive = true;
 
-            _scaleConstraint = gameObject.AddComponent<ScaleConstraint>();
-            _scaleConstraint.weight = 1;
-            _scaleConstraint.constraintActive = true;
+            _scaleConstraint = gameObject.AddComponent<LossyScaleConstraint>();
 
             head = new("Head");
             leftHand = new ControllerNode("Left Hand");
@@ -544,15 +542,13 @@ namespace CustomAvatar.Tracking
 
             if (transform != null)
             {
-                List<ConstraintSource> sources = [new ConstraintSource { sourceTransform = transform, weight = 1 }];
-
-                _parentConstraint.SetSources(sources);
-                _scaleConstraint.SetSources(sources);
+                _parentConstraint.SetSources([new ConstraintSource { sourceTransform = transform, weight = 1 }]);
+                _scaleConstraint.sourceTransform = transform;
             }
             else
             {
                 _parentConstraint.SetSources(kEmptyConstraintSources);
-                _scaleConstraint.SetSources(kEmptyConstraintSources);
+                _scaleConstraint.sourceTransform = null;
             }
         }
 
