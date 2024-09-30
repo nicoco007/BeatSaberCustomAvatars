@@ -183,14 +183,18 @@ namespace CustomAvatar.Avatar
 
                 // These offsets are in mostly arbitrary positions. The idea is that they should be in predictable
                 // positions so the user can calibrate once and it'll apply to all avatars in the same way.
-                if (vrikManager.references_head != null)
+                if (head != null)
                 {
-                    Vector3 centerLocalPosition = transform.InverseTransformPoint(vrikManager.references_head.position);
-                    float scaledEyeHeight = eyeHeight / transform.localScale.y;
-                    headCalibrationOffset = GetCalibrationOffset(vrikManager.references_head, new Pose(new Vector3(centerLocalPosition.x, scaledEyeHeight, centerLocalPosition.z), Quaternion.identity));
-                    pelvisCalibrationOffset = GetCalibrationOffset(vrikManager.references_pelvis, new Pose(new Vector3(centerLocalPosition.x, scaledEyeHeight * kEyeHeightToPelvisHeightRatio, centerLocalPosition.z), Quaternion.identity));
-                    leftFootCalibrationOffset = GetCalibrationOffset(GetFootReference(vrikManager.references_leftFoot, vrikManager.references_leftToes), GetFootTarget(centerLocalPosition, vrikManager.references_leftFoot, vrikManager.references_leftToes));
-                    rightFootCalibrationOffset = GetCalibrationOffset(GetFootReference(vrikManager.references_rightFoot, vrikManager.references_rightToes), GetFootTarget(centerLocalPosition, vrikManager.references_rightFoot, vrikManager.references_rightToes));
+                    Vector3 centerPosition = head.position;
+                    GameObject targetObj = new("Target");
+                    Transform target = targetObj.transform;
+
+                    headCalibrationOffset = GetCalibrationOffset(target, new Pose(centerPosition, Quaternion.identity), vrikManager.references_head);
+                    pelvisCalibrationOffset = GetCalibrationOffset(target, new Pose(new Vector3(centerPosition.x, head.position.y * kEyeHeightToPelvisHeightRatio, centerPosition.z), Quaternion.identity), vrikManager.references_pelvis);
+                    leftFootCalibrationOffset = GetCalibrationOffset(target, GetFootTarget(centerPosition, vrikManager.references_leftFoot, vrikManager.references_leftToes), vrikManager.references_leftToes, vrikManager.references_leftFoot);
+                    rightFootCalibrationOffset = GetCalibrationOffset(target, GetFootTarget(centerPosition, vrikManager.references_rightFoot, vrikManager.references_rightToes), vrikManager.references_rightToes, vrikManager.references_rightFoot);
+
+                    Destroy(targetObj);
                 }
             }
         }
@@ -217,33 +221,29 @@ namespace CustomAvatar.Avatar
             }
 
             return new Pose(
-                transform.InverseTransformVector(Quaternion.Inverse(target.rotation) * (reference.position - target.position)),
+                target.InverseTransformPoint(reference.position),
                 Quaternion.Inverse(target.rotation) * reference.rotation);
         }
 
-        private Pose GetCalibrationOffset(Transform reference, Pose targetLocalPose)
+        private Pose GetCalibrationOffset(Transform target, Pose targetLocalPose, params Transform[] references)
         {
-            if (reference == null)
-            {
-                return Pose.identity;
-            }
-
-            return new Pose(
-                transform.InverseTransformPoint(reference.position - transform.TransformPoint(targetLocalPose.position)),
-                Quaternion.Inverse(transform.rotation * targetLocalPose.rotation) * reference.rotation);
+            target.SetPositionAndRotation(targetLocalPose.position, targetLocalPose.rotation);
+            return GetOffset(target, references);
         }
 
-        private Transform GetFootReference(Transform foot, Transform toes)
-        {
-            return toes ? toes : foot;
-        }
-
+        /// <summary>
+        /// Gets the pose of the foot target <b>in world space</b>.
+        /// </summary>
+        /// <param name="centerLocalPosition"></param>
+        /// <param name="foot"></param>
+        /// <param name="toes"></param>
+        /// <returns></returns>
         private Pose GetFootTarget(Vector3 centerLocalPosition, Transform foot, Transform toes)
         {
             if (toes != null)
             {
-                Vector3 localFootPosition = transform.InverseTransformPoint(foot.position);
-                Vector3 localToesPosition = transform.InverseTransformPoint(toes.position);
+                Vector3 localFootPosition = foot.position;
+                Vector3 localToesPosition = toes.position;
 
                 float a = localFootPosition.x;
                 float b = localToesPosition.x;
@@ -254,12 +254,12 @@ namespace CustomAvatar.Avatar
 
                 return new Pose(
                     new Vector3(Mathf.Lerp(a, b, t), 0, centerLocalPosition.z),
-                    Quaternion.Inverse(transform.rotation) * Quaternion.LookRotation(Vector3.ProjectOnPlane(toes.position - foot.position, transform.up), transform.up));
+                    Quaternion.LookRotation(Vector3.ProjectOnPlane(toes.position - foot.position, transform.up), transform.up));
             }
             else
             {
                 return new Pose(
-                    new Vector3(centerLocalPosition.x + transform.InverseTransformPoint(foot.position).x, 0, centerLocalPosition.z),
+                    new Vector3(centerLocalPosition.x + foot.position.x, 0, centerLocalPosition.z),
                     Quaternion.identity);
             }
         }

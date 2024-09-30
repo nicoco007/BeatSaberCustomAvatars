@@ -55,8 +55,6 @@ namespace CustomAvatar.Avatar
             }
         }
 
-        public float absoluteScale => transform.localScale.y;
-
         public float scaledEyeHeight
         {
             get => prefab.eyeHeight * scale;

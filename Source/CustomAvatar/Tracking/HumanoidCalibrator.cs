@@ -27,7 +27,6 @@ namespace CustomAvatar.Tracking
 {
     internal class HumanoidCalibrator
     {
-        private const float kEyeToHeadPivotOffset = 0.07f;
         private const float kEyeHeightToPelvisHeightRatio = 3.5f / 7f;
 
         private readonly TrackingRig _trackingRig;
@@ -153,9 +152,7 @@ namespace CustomAvatar.Tracking
         {
             if (device.isTracking)
             {
-                device.calibration.SetLocalPositionAndRotation(
-                    device.transform.InverseTransformPoint(center.TransformPoint(target)),
-                    Quaternion.Inverse(device.transform.rotation) * (center.rotation * targetRotation));
+                device.calibration.SetPositionAndRotation(center.TransformPoint(target), center.rotation * targetRotation);
             }
             else
             {
@@ -167,9 +164,7 @@ namespace CustomAvatar.Tracking
         {
             if (device.isTracking)
             {
-                device.calibration.SetLocalPositionAndRotation(
-                    device.transform.InverseTransformPoint(target.position),
-                    Quaternion.Inverse(device.transform.rotation) * target.rotation);
+                device.calibration.SetPositionAndRotation(target.position, target.rotation);
             }
             else
             {
@@ -188,9 +183,7 @@ namespace CustomAvatar.Tracking
             head.rotation = rotation;
 
             center.SetParent(parent, false);
-            center.SetPositionAndRotation(
-                head.TransformPoint(new Vector3(0, 0, -kEyeToHeadPivotOffset)),
-                rotation);
+            center.SetPositionAndRotation(head.position, rotation);
 
             // put center on the ground
             center.localPosition = new Vector3(center.localPosition.x, 0, center.localPosition.z);
