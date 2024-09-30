@@ -30,6 +30,8 @@ namespace CustomAvatar.Rendering
     [DisallowMultipleComponent]
     internal class MainCamera : MonoBehaviour
     {
+        internal const float kCloseNearClipPlane = 0.001f; // 1 mm
+
         private ILogger<MainCamera> _logger;
         private Settings _settings;
         private ActivePlayerSpaceManager _activePlayerSpaceManager;
@@ -41,6 +43,7 @@ namespace CustomAvatar.Rendering
         private Transform _playerSpace;
         private Transform _origin;
         private Camera _camera;
+        private float _originalNearClipPlane;
         private TrackedPoseDriver _trackedPoseDriver;
 
         protected virtual (Transform playerSpace, Transform origin) GetPlayerSpaceAndOrigin()
@@ -61,6 +64,7 @@ namespace CustomAvatar.Rendering
         protected void Awake()
         {
             _camera = GetComponent<Camera>();
+            _originalNearClipPlane = _camera.nearClipPlane;
             _trackedPoseDriver = GetComponent<TrackedPoseDriver>();
         }
 
@@ -68,8 +72,8 @@ namespace CustomAvatar.Rendering
         {
             if (_settings != null)
             {
-                _settings.cameraNearClipPlane.changed -= OnCameraNearClipPlaneChanged;
-                _settings.cameraNearClipPlane.changed += OnCameraNearClipPlaneChanged;
+                _settings.forceCloseNearClipPlane.changed -= OnCameraNearClipPlaneChanged;
+                _settings.forceCloseNearClipPlane.changed += OnCameraNearClipPlaneChanged;
             }
 
             if (_fpfcSettings != null)
@@ -125,7 +129,7 @@ namespace CustomAvatar.Rendering
         {
             if (_settings != null)
             {
-                _settings.cameraNearClipPlane.changed -= OnCameraNearClipPlaneChanged;
+                _settings.forceCloseNearClipPlane.changed -= OnCameraNearClipPlaneChanged;
             }
 
             if (_fpfcSettings != null)
@@ -144,7 +148,7 @@ namespace CustomAvatar.Rendering
             RemoveFromPlayerSpaceManager();
         }
 
-        private void OnCameraNearClipPlaneChanged(float value)
+        private void OnCameraNearClipPlaneChanged(bool value)
         {
             UpdateCameraMask();
         }
@@ -189,7 +193,7 @@ namespace CustomAvatar.Rendering
             }
 
             _camera.cullingMask = mask;
-            _camera.nearClipPlane = _settings.cameraNearClipPlane;
+            _camera.nearClipPlane = _settings.forceCloseNearClipPlane ? kCloseNearClipPlane : _originalNearClipPlane;
         }
 
         private void AddToPlayerSpaceManager()

@@ -38,7 +38,7 @@
 
         <toggle-setting value="moveFloorWithRoomAdjust" bind-value="true" apply-on-change="true" text="Move Floor with Room Adjust" hover-hint="Move the floor/environment along with the game's built-in vertical room adjust." />
         <toggle-setting value="enableLocomotion" bind-value="true" apply-on-change="true" text="Enable locomotion" hover-hint="Allow feet and waist to be moved automatically to follow your head/body when not using dedicated trackers. Only affects full body avatars." />
-        <increment-setting value="cameraNearClipPlane" bind-value="true" apply-on-change="true" text="Camera Near Clip Plane" hover-hint="Distance from the eyes at which objets start being visible." min="0.01" max="0.3" increment="0.01" />
+        <toggle-setting value="cameraNearClipPlane" bind-value="true" apply-on-change="true" text="Force Near Clip Distance" hover-hint="Force your view's camera to use a shorter clip distance so objects can be closer to your eyes without disappearing." />
       </macro.as-host>
 
       <horizontal pref-width="90" pad-top="2">
