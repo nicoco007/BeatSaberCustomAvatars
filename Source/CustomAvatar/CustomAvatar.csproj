@@ -223,7 +223,6 @@
   <ItemGroup>
     <AdditionalArtifactFiles Include="$(ProjectDir)..\..\Packaging\CustomAvatar\**\*.*" />
   </ItemGroup>
-  <ProjectExtensions><VisualStudio><UserProperties manifest_1json__JsonSchema="https://json-schema.org/draft-04/schema" /></VisualStudio></ProjectExtensions>
   <ItemGroup>
     <PackageReference Include="BSIPA.AssemblyPublicizer.MSBuild" Version="0.5.0">
       <PrivateAssets>all</PrivateAssets>

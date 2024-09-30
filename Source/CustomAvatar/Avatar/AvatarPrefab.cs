@@ -19,6 +19,7 @@ using System.Linq;
 using AvatarScriptPack;
 using CustomAvatar.Exceptions;
 using CustomAvatar.Logging;
+using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
 using UnityEngine;
 using Zenject;
@@ -29,8 +30,6 @@ namespace CustomAvatar.Avatar
     [DisallowMultipleComponent]
     public class AvatarPrefab : MonoBehaviour
     {
-        private const float kEyeHeightToPelvisHeightRatio = 3.5f / 7f;
-
         /// <summary>
         /// The <see cref="AvatarDescriptor"/> retrieved from the root object on the prefab.
         /// </summary>
@@ -190,7 +189,7 @@ namespace CustomAvatar.Avatar
                     Transform target = targetObj.transform;
 
                     headCalibrationOffset = GetCalibrationOffset(target, new Pose(centerPosition, Quaternion.identity), vrikManager.references_head);
-                    pelvisCalibrationOffset = GetCalibrationOffset(target, new Pose(new Vector3(centerPosition.x, head.position.y * kEyeHeightToPelvisHeightRatio, centerPosition.z), Quaternion.identity), vrikManager.references_pelvis);
+                    pelvisCalibrationOffset = GetCalibrationOffset(target, new Pose(new Vector3(centerPosition.x, centerPosition.y * HumanoidCalibrator.kEyeHeightToPelvisHeightRatio, centerPosition.z), Quaternion.identity), vrikManager.references_pelvis);
                     leftFootCalibrationOffset = GetCalibrationOffset(target, GetFootTarget(centerPosition, vrikManager.references_leftFoot, vrikManager.references_leftToes), vrikManager.references_leftToes, vrikManager.references_leftFoot);
                     rightFootCalibrationOffset = GetCalibrationOffset(target, GetFootTarget(centerPosition, vrikManager.references_rightFoot, vrikManager.references_rightToes), vrikManager.references_rightToes, vrikManager.references_rightFoot);
 

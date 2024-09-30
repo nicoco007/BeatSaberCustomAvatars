@@ -27,7 +27,9 @@ namespace CustomAvatar.Tracking
 {
     internal class HumanoidCalibrator
     {
-        private const float kEyeHeightToPelvisHeightRatio = 3.5f / 7f;
+        // Average human is 7.5 heads tall. Eyes are at 7 heads from the floor (middle of the head) and pelvis is at 4 heads from the floor.
+        // Note that the actual value doesn't really matter that much, it's mostly to make the positioning easier to understand.
+        internal const float kEyeHeightToPelvisHeightRatio = 4f / 7f;
 
         private readonly TrackingRig _trackingRig;
         private readonly CalibrationData _calibrationData;
@@ -73,12 +75,7 @@ namespace CustomAvatar.Tracking
             _trackingRig.fullBodyTracking.localScale = Vector3.one;
             _trackingRig.fullBodyTracking.localPosition = Vector3.zero;
 
-            Transform center = CreateCenter(_activeOriginManager.current);
-
-            if (_settings.moveFloorWithRoomAdjust)
-            {
-                center.position += center.TransformVector(0, _beatSaberUtilities.roomCenter.y, 0);
-            }
+            Transform center = CreateCenter();
 
             Vector3 leftFootPos = center.InverseTransformPoint(_trackingRig.leftFoot.transform.position);
             Vector3 rightFootPos = center.InverseTransformPoint(_trackingRig.rightFoot.transform.position);
@@ -172,10 +169,11 @@ namespace CustomAvatar.Tracking
             }
         }
 
-        private Transform CreateCenter(Transform parent)
+        private Transform CreateCenter()
         {
             Transform center = new GameObject("Center").transform;
             Transform head = _trackingRig.head.transform;
+            Transform parent = _activeOriginManager.current;
 
             // We want the user's head rotation to match the avatar's head directly rather than assuming whatever
             // position they're in is forward. I'm not sure how I feel about doing that, but it's what VRChat does.
@@ -187,6 +185,11 @@ namespace CustomAvatar.Tracking
 
             // put center on the ground
             center.localPosition = new Vector3(center.localPosition.x, 0, center.localPosition.z);
+
+            if (_settings.moveFloorWithRoomAdjust)
+            {
+                center.position += center.TransformVector(0, _beatSaberUtilities.roomCenter.y, 0);
+            }
 
             return center;
         }
