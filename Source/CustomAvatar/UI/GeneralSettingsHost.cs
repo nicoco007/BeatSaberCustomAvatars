@@ -14,7 +14,6 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Player;
@@ -27,8 +26,9 @@ namespace CustomAvatar.UI
     {
         #region Values
 
-        internal readonly List<object> resizeModeOptions = new() { AvatarResizeMode.None, AvatarResizeMode.Height, AvatarResizeMode.ArmSpan };
-        internal readonly List<object> floorHeightAdjustOptions = new() { FloorHeightAdjustMode.Off, FloorHeightAdjustMode.PlayersPlaceOnly, FloorHeightAdjustMode.EntireEnvironment };
+        protected readonly AvatarResizeMode[] resizeModeOptions = [AvatarResizeMode.None, AvatarResizeMode.Height, AvatarResizeMode.ArmSpan];
+        protected readonly FloorHeightAdjustMode[] floorHeightAdjustOptions = [FloorHeightAdjustMode.Off, FloorHeightAdjustMode.PlayersPlaceOnly, FloorHeightAdjustMode.EntireEnvironment];
+        protected readonly float[] nearClipPlaneValues = [0.001f, 0.01f, 0.02f, 0.03f, 0.04f, 0.05f, 0.06f, 0.07f, 0.08f, 0.09f, 0.1f];
 
         #endregion
 
@@ -238,6 +238,11 @@ namespace CustomAvatar.UI
                 AvatarResizeMode.None => "Don't Resize",
                 _ => null,
             };
+        }
+
+        private string MillimeterFormatter(object value)
+        {
+            return $"{(float)value * 100:0.#} cm";
         }
 
         private string FloorHeightAdjustFormatter(object value)
