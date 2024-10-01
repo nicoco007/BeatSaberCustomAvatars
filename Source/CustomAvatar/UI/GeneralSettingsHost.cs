@@ -240,11 +240,6 @@ namespace CustomAvatar.UI
             };
         }
 
-        private string MillimeterFormatter(object value)
-        {
-            return $"{(float)value * 100:0.#} cm";
-        }
-
         private string FloorHeightAdjustFormatter(object value)
         {
             if (value is not FloorHeightAdjustMode floorHeightAdjustMode)
@@ -261,26 +256,18 @@ namespace CustomAvatar.UI
             };
         }
 
-        private string HeightFormatter(float value)
+        private string CentimeterFormatter(float value)
         {
-            return $"{value + BeatSaberUtilities.kHeadPosToPlayerHeightOffset:0.00} m";
+            return $"{value * 100:0.#} cm";
         }
+
+        private string HeightFormatter(float value) => CentimeterFormatter(value + BeatSaberUtilities.kHeadPosToPlayerHeightOffset);
+
+        private string ArmSpanFormatter(float value) => _armSpanMeasurer.isMeasuring ? $"Measuring... {CentimeterFormatter(value)}" : CentimeterFormatter(value);
 
         private void OnMeasureHeightButtonClicked()
         {
             this.height = _trackingRig.eyeHeight;
-        }
-
-        private string ArmSpanFormatter(float value)
-        {
-            if (_armSpanMeasurer.isMeasuring)
-            {
-                return $"Measuring... {value:0.00} m";
-            }
-            else
-            {
-                return $"{value:0.00} m";
-            }
         }
 
         private void OnMeasureArmSpanButtonClicked()
