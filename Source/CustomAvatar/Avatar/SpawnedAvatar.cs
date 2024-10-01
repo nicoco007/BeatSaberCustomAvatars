@@ -15,8 +15,6 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 extern alias BeatSaberFinalIK;
-
-using System;
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using UnityEngine;
@@ -40,30 +38,6 @@ namespace CustomAvatar.Avatar
         /// </summary>
         public IAvatarInput input { get; private set; }
 
-        /// <summary>
-        /// The avatar's scale as a ratio of it's exported scale (i.e. it is initially 1 even if the avatar was exported with a different scale).
-        /// </summary>
-        public float scale
-        {
-            get => transform.localScale.y / _initialLocalScale.y;
-            set
-            {
-                if (value <= 0) throw new InvalidOperationException("Scale must be greater than 0");
-                if (float.IsInfinity(value)) throw new InvalidOperationException("Scale cannot be infinity");
-
-                transform.localScale = _initialLocalScale * value;
-            }
-        }
-
-        public float scaledEyeHeight
-        {
-            get => prefab.eyeHeight * scale;
-            set
-            {
-                scale = value / prefab.eyeHeight;
-            }
-        }
-
         public Transform head { get; private set; }
         public Transform body { get; private set; }
         public Transform leftHand { get; private set; }
@@ -81,9 +55,6 @@ namespace CustomAvatar.Avatar
 
         private FirstPersonExclusion[] _firstPersonExclusions;
         private Renderer[] _renderers;
-
-        private Vector3 _initialLocalPosition;
-        private Vector3 _initialLocalScale;
 
         public void SetFirstPersonVisibility(FirstPersonVisibility visibility)
         {
@@ -109,9 +80,6 @@ namespace CustomAvatar.Avatar
 
         protected void Awake()
         {
-            _initialLocalPosition = transform.localPosition;
-            _initialLocalScale = transform.localScale;
-
             _firstPersonExclusions = GetComponentsInChildren<FirstPersonExclusion>();
             _renderers = GetComponentsInChildren<Renderer>();
 
@@ -135,18 +103,9 @@ namespace CustomAvatar.Avatar
         {
             prefab = avatarPrefab;
             input = avatarInput;
-
-            _logger = loggerFactory.CreateLogger<SpawnedAvatar>(prefab.descriptor.name);
-        }
-
-        protected void Start()
-        {
             name = $"SpawnedAvatar({prefab.descriptor.name})";
 
-            if (_initialLocalPosition.sqrMagnitude > 0)
-            {
-                _logger.LogWarning("Avatar root position is not at origin; resizing by height and floor adjust may not work properly.");
-            }
+            _logger = loggerFactory.CreateLogger<SpawnedAvatar>(prefab.descriptor.name);
         }
 
         protected void OnDestroy()

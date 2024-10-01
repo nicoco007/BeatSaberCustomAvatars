@@ -151,7 +151,7 @@ namespace CustomAvatar.Avatar
         protected void OnDisable()
         {
             _vrik.enabled = false;
-            _vrik.references.root.SetLocalPositionAndRotation(_defaultRootPose.position, _defaultRootPose.rotation);
+            _vrik.references.root.SetLocalPose(_defaultRootPose);
             _vrik.solver.FixTransforms();
 
             foreach (TwistRelaxerV2 twistRelaxer in _twistRelaxersV2)
@@ -208,13 +208,16 @@ namespace CustomAvatar.Avatar
 
         private void UpdateLocomotion()
         {
-            if (!_vrik || !vrikManager) return;
+            if (_vrik == null || vrikManager == null)
+            {
+                return;
+            }
 
             _vrik.solver.locomotion.weight = _isLocomotionEnabled ? vrikManager.solver_locomotion_weight : 0;
 
-            if (_vrik.references.root)
+            if (!_isLocomotionEnabled && _vrik.references.root != null)
             {
-                _vrik.references.root.transform.localPosition = Vector3.zero;
+                _vrik.references.root.SetLocalPose(_defaultRootPose);
             }
         }
 

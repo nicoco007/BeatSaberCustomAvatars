@@ -15,6 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 
 namespace CustomAvatar.Configuration
 {
@@ -27,8 +28,11 @@ namespace CustomAvatar.Configuration
             get => _value;
             set
             {
-                _value = value;
-                changed?.Invoke(value);
+                if (!EqualityComparer<T>.Default.Equals(_value, value))
+                {
+                    _value = value;
+                    changed?.Invoke(value);
+                }
             }
         }
 

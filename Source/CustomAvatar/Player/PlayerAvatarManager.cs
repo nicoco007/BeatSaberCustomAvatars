@@ -54,6 +54,21 @@ namespace CustomAvatar.Player
         /// </summary>
         public SpawnedAvatar currentlySpawnedAvatar { get; private set; }
 
+        /// <summary>
+        /// The current avatar's scale.
+        /// </summary>
+
+        public float scale
+        {
+            get => _scaleConstraint.scaleOffset;
+            private set => _scaleConstraint.scaleOffset = value;
+        }
+
+        /// <summary>
+        /// The current avatar's scaled eye height.
+        /// </summary>
+        public float scaledEyeHeight => currentlySpawnedAvatar != null ? scale * currentlySpawnedAvatar.prefab.eyeHeight : BeatSaberUtilities.kDefaultPlayerEyeHeight;
+
         internal Settings.AvatarSpecificSettings currentAvatarSettings { get; private set; }
 
         internal CalibrationData.FullBodyCalibration currentManualCalibration { get; private set; }
@@ -384,7 +399,7 @@ namespace CustomAvatar.Player
                 return 0;
             }
 
-            float offset = eyeHeight - currentlySpawnedAvatar.scaledEyeHeight;
+            float offset = eyeHeight - scaledEyeHeight;
 
             if (_settings.moveFloorWithRoomAdjust)
             {
@@ -452,12 +467,18 @@ namespace CustomAvatar.Player
                 return;
             }
 
-            float scale = ResizeCurrentAvatar(_settings.playerEyeHeight);
+            ResizeCurrentAvatar(_settings.playerEyeHeight);
+        }
+
+        internal void ResizeCurrentAvatar(float playerEyeHeight)
+        {
+            scale = CalculateAvatarScale(playerEyeHeight);
+            UpdateAvatarVerticalPosition(playerEyeHeight);
             _logger.LogInformation("Resized avatar with scale: " + scale);
             avatarScaleChanged?.Invoke(scale);
         }
 
-        internal float ResizeCurrentAvatar(float playerEyeHeight)
+        private float CalculateAvatarScale(float playerEyeHeight)
         {
             if (currentlySpawnedAvatar == null)
             {
@@ -507,10 +528,6 @@ namespace CustomAvatar.Player
                 _logger.LogWarning("Calculated scale is <= 0; reverting to 1");
                 scale = 1.0f;
             }
-
-            currentlySpawnedAvatar.scale = scale;
-
-            UpdateAvatarVerticalPosition(playerEyeHeight);
 
             return scale;
         }
@@ -567,7 +584,10 @@ namespace CustomAvatar.Player
 
         private void UpdateAvatarVerticalPosition(float eyeHeight)
         {
-            _parentConstraint.translationOffsets = [new Vector3(0, GetFloorOffset(eyeHeight), 0)];
+            if (_parentConstraint.sourceCount > 0)
+            {
+                _parentConstraint.SetTranslationOffset(0, new Vector3(0, GetFloorOffset(eyeHeight), 0));
+            }
         }
     }
 }

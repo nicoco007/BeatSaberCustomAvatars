@@ -25,6 +25,15 @@ namespace CustomAvatar.Utilities
     /// </summary>
     internal class LossyScaleConstraint : MonoBehaviour
     {
+        public float scaleOffset
+        {
+            get => _scaleOffset;
+            set => _scaleOffset = value;
+        }
+
+        [SerializeField]
+        private float _scaleOffset = 1;
+
         [SerializeField]
         private Transform _sourceTransform;
 
@@ -49,7 +58,7 @@ namespace CustomAvatar.Utilities
 
         protected void Update()
         {
-            transform.localScale = sourceTransform.lossyScale;
+            transform.localScale = sourceTransform.lossyScale * _scaleOffset;
         }
     }
 }

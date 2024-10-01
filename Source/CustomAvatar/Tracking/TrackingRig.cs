@@ -464,16 +464,16 @@ namespace CustomAvatar.Tracking
 
             _logger.LogTrace("Updating offsets");
 
-            UpdateOffset(leftHand.offset, spawnedAvatar.prefab.leftHandOffset, spawnedAvatar.scale);
-            UpdateOffset(rightHand.offset, spawnedAvatar.prefab.rightHandOffset, spawnedAvatar.scale);
+            UpdateOffset(leftHand.offset, spawnedAvatar.prefab.leftHandOffset, _playerAvatarManager.scale);
+            UpdateOffset(rightHand.offset, spawnedAvatar.prefab.rightHandOffset, _playerAvatarManager.scale);
 
-            float fullBodyScale = _playerAvatarManager.currentlySpawnedAvatar.scaledEyeHeight / _settings.playerEyeHeight;
-            float trackerScale = spawnedAvatar.scale / fullBodyScale;
+            float fullBodyScale = _playerAvatarManager.scaledEyeHeight / _settings.playerEyeHeight;
+            float trackerScale = _playerAvatarManager.scale / fullBodyScale;
 
             CalibrationData.FullBodyCalibration automaticCalibration = _calibrationData.automaticCalibration;
             CalibrationData.FullBodyCalibration manualCalibration = _playerAvatarManager.currentManualCalibration;
 
-            UpdateOffset(head.offset, spawnedAvatar.prefab.headOffset, spawnedAvatar.prefab.headCalibrationOffset, spawnedAvatar.scale, manualCalibration.head, automaticCalibration.head);
+            UpdateOffset(head.offset, spawnedAvatar.prefab.headOffset, spawnedAvatar.prefab.headCalibrationOffset, _playerAvatarManager.scale, manualCalibration.head, automaticCalibration.head);
             UpdateOffset(pelvis.offset, spawnedAvatar.prefab.pelvisOffset, spawnedAvatar.prefab.pelvisCalibrationOffset, trackerScale, manualCalibration.waist, automaticCalibration.waist);
             UpdateOffset(leftFoot.offset, spawnedAvatar.prefab.leftLegOffset, spawnedAvatar.prefab.leftFootCalibrationOffset, trackerScale, manualCalibration.leftFoot, automaticCalibration.leftFoot);
             UpdateOffset(rightFoot.offset, spawnedAvatar.prefab.rightLegOffset, spawnedAvatar.prefab.rightFootCalibrationOffset, trackerScale, manualCalibration.rightFoot, automaticCalibration.rightFoot);
@@ -493,7 +493,7 @@ namespace CustomAvatar.Tracking
                     break;
             }
 
-            fullBodyTracking.localPosition = new Vector3(0, _settings.playerEyeHeight - _playerAvatarManager.currentlySpawnedAvatar.scaledEyeHeight, 0);
+            fullBodyTracking.localPosition = new Vector3(0, _settings.playerEyeHeight - _playerAvatarManager.scaledEyeHeight, 0);
             fullBodyTracking.localScale = new Vector3(1, fullBodyScale, 1);
         }
 
