@@ -127,12 +127,12 @@ namespace CustomAvatar.UI
             }
         }
 
-        public bool cameraNearClipPlane
+        public float cameraNearClipPlane
         {
-            get => _settings.forceCloseNearClipPlane;
+            get => _settings.cameraNearClipPlane;
             set
             {
-                _settings.forceCloseNearClipPlane.value = value;
+                _settings.cameraNearClipPlane.value = value;
                 NotifyPropertyChanged();
             }
         }

@@ -32,7 +32,6 @@ namespace CustomAvatar.Rendering
 
         private global::SmoothCamera _smoothCamera;
         private Camera _camera;
-        private float _originalNearClipPlane;
 
         [Inject]
         public void Construct(ILogger<SmoothCamera> logger, Settings settings)
@@ -42,7 +41,6 @@ namespace CustomAvatar.Rendering
 
             _smoothCamera = GetComponent<global::SmoothCamera>();
             _camera = GetComponent<Camera>();
-            _originalNearClipPlane = _camera.nearClipPlane;
         }
 
         protected void Start()
@@ -54,7 +52,7 @@ namespace CustomAvatar.Rendering
                 return;
             }
 
-            _settings.forceCloseNearClipPlane.changed += OnCameraNearClipPlaneChanged;
+            _settings.cameraNearClipPlane.changed += OnCameraNearClipPlaneChanged;
             _settings.showAvatarInSmoothCamera.changed += OnShowAvatarInSmoothCameraChanged;
 
             UpdateSmoothCamera();
@@ -64,12 +62,12 @@ namespace CustomAvatar.Rendering
         {
             if (_settings != null)
             {
-                _settings.forceCloseNearClipPlane.changed -= OnCameraNearClipPlaneChanged;
+                _settings.cameraNearClipPlane.changed -= OnCameraNearClipPlaneChanged;
                 _settings.showAvatarInSmoothCamera.changed -= OnShowAvatarInSmoothCameraChanged;
             }
         }
 
-        private void OnCameraNearClipPlaneChanged(bool value)
+        private void OnCameraNearClipPlaneChanged(float value)
         {
             UpdateSmoothCamera();
         }
@@ -96,7 +94,7 @@ namespace CustomAvatar.Rendering
             else
             {
                 _camera.cullingMask = (_camera.cullingMask & ~AvatarLayers.kOnlyInThirdPersonMask) | AvatarLayers.kAlwaysVisibleMask;
-                _camera.nearClipPlane = _settings.forceCloseNearClipPlane ? MainCamera.kCloseNearClipPlane : _originalNearClipPlane;
+                _camera.nearClipPlane = _settings.cameraNearClipPlane;
             }
         }
     }
