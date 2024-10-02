@@ -105,7 +105,7 @@ namespace CustomAvatar.Avatar
             _defaultRootPose = new Pose(vrikManager.references_root.localPosition, vrikManager.references_root.localRotation);
 
             _vrik = _ikHelper.InitializeVRIK(vrikManager, transform);
-            IKSolver solver = _vrik.GetIKSolver();
+            IKSolverVR solver = _vrik.solver;
 
             foreach (TwistRelaxer twistRelaxer in _twistRelaxers)
             {
@@ -128,6 +128,7 @@ namespace CustomAvatar.Avatar
                 }
             }
 
+            solver.OnPreUpdate += OnPreUpdate;
             solver.OnPostUpdate += OnPostUpdate;
 
             if (vrikManager.solver_spine_maintainPelvisPosition > 0 && !_input.allowMaintainPelvisPosition)
@@ -167,7 +168,8 @@ namespace CustomAvatar.Avatar
 
         protected void OnDestroy()
         {
-            IKSolver solver = _vrik.GetIKSolver();
+            IKSolverVR solver = _vrik.solver;
+            solver.OnPreUpdate -= OnPreUpdate;
             solver.OnPostUpdate -= OnPostUpdate;
 
             _input.inputChanged -= OnInputChanged;
@@ -175,20 +177,7 @@ namespace CustomAvatar.Avatar
 
         #endregion
 
-        private void ApplyPlatformMotion()
-        {
-            Transform parent = transform.parent;
-
-            if (!parent) return;
-
-            Vector3 deltaPosition = parent.position - _previousParentPose.position;
-            Quaternion deltaRotation = parent.rotation * Quaternion.Inverse(_previousParentPose.rotation);
-
-            _vrik.solver.AddPlatformMotion(deltaPosition, deltaRotation, parent.position);
-            _previousParentPose = new Pose(parent.position, parent.rotation);
-        }
-
-        protected void Update()
+        private void OnPreUpdate()
         {
             foreach (BeatSaberDynamicBone::DynamicBone dynamicBone in _dynamicBones)
             {
@@ -204,6 +193,25 @@ namespace CustomAvatar.Avatar
             {
                 dynamicBone.LateUpdate();
             }
+        }
+
+        private void ApplyPlatformMotion()
+        {
+            Transform parent = _vrik.references.root.parent;
+
+            if (parent == null)
+            {
+                return;
+            }
+
+            parent.GetPositionAndRotation(out Vector3 parentPosition, out Quaternion parentRotation);
+
+            Vector3 deltaPosition = parentPosition - _previousParentPose.position;
+            Quaternion deltaRotation = Quaternion.Inverse(_previousParentPose.rotation) * parentRotation;
+
+            _vrik.solver.AddPlatformMotion(deltaPosition, deltaRotation, parentPosition);
+
+            _previousParentPose = new Pose(parentPosition, parentRotation);
         }
 
         private void UpdateLocomotion()
