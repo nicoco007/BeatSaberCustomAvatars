@@ -35,13 +35,15 @@ namespace CustomAvatar.Rendering
         private ActivePlayerSpaceManager _activePlayerSpaceManager;
         private ActiveOriginManager _activeOriginManager;
         private ActiveCameraManager _activeCameraManager;
-        private IFPFCSettings _fpfcSettings;
-        private BeatSaberUtilities _beatSaberUtilities;
 
         private Transform _playerSpace;
         private Transform _origin;
         private Camera _camera;
         private TrackedPoseDriver _trackedPoseDriver;
+
+        protected IFPFCSettings fpfcSettings { get; private set; }
+
+        protected BeatSaberUtilities beatSaberUtilities { get; private set; }
 
         protected virtual (Transform playerSpace, Transform origin) GetPlayerSpaceAndOrigin()
         {
@@ -58,6 +60,23 @@ namespace CustomAvatar.Rendering
             }
         }
 
+        protected virtual int GetCameraMask(int mask)
+        {
+            mask |= AvatarLayers.kAlwaysVisibleMask;
+
+            // FPFC basically ends up being a 3rd person camera
+            if (fpfcSettings.Enabled || !beatSaberUtilities.hasFocus)
+            {
+                mask |= AvatarLayers.kOnlyInThirdPersonMask;
+            }
+            else
+            {
+                mask &= ~AvatarLayers.kOnlyInThirdPersonMask;
+            }
+
+            return mask;
+        }
+
         protected void Awake()
         {
             _camera = GetComponent<Camera>();
@@ -72,17 +91,17 @@ namespace CustomAvatar.Rendering
                 _settings.cameraNearClipPlane.changed += OnCameraNearClipPlaneChanged;
             }
 
-            if (_fpfcSettings != null)
+            if (fpfcSettings != null)
             {
-                _fpfcSettings.Changed -= OnFpfcSettingsChanged;
-                _fpfcSettings.Changed += OnFpfcSettingsChanged;
+                fpfcSettings.Changed -= OnFpfcSettingsChanged;
+                fpfcSettings.Changed += OnFpfcSettingsChanged;
             }
 
-            if (_beatSaberUtilities != null)
+            if (beatSaberUtilities != null)
             {
-                _beatSaberUtilities.focusChanged -= OnFocusChanged;
-                _beatSaberUtilities.focusChanged += OnFocusChanged;
-                OnFocusChanged(_beatSaberUtilities.hasFocus);
+                beatSaberUtilities.focusChanged -= OnFocusChanged;
+                beatSaberUtilities.focusChanged += OnFocusChanged;
+                OnFocusChanged(beatSaberUtilities.hasFocus);
             }
 
             UpdateCameraMask();
@@ -104,8 +123,8 @@ namespace CustomAvatar.Rendering
             _activePlayerSpaceManager = activePlayerSpaceManager;
             _activeOriginManager = activeOriginManager;
             _activeCameraManager = activeCameraManager;
-            _fpfcSettings = fpfcSettings;
-            _beatSaberUtilities = beatSaberUtilities;
+            this.fpfcSettings = fpfcSettings;
+            this.beatSaberUtilities = beatSaberUtilities;
         }
 
         protected void Start()
@@ -128,14 +147,14 @@ namespace CustomAvatar.Rendering
                 _settings.cameraNearClipPlane.changed -= OnCameraNearClipPlaneChanged;
             }
 
-            if (_fpfcSettings != null)
+            if (fpfcSettings != null)
             {
-                _fpfcSettings.Changed -= OnFpfcSettingsChanged;
+                fpfcSettings.Changed -= OnFpfcSettingsChanged;
             }
 
-            if (_beatSaberUtilities != null)
+            if (beatSaberUtilities != null)
             {
-                _beatSaberUtilities.focusChanged -= OnFocusChanged;
+                beatSaberUtilities.focusChanged -= OnFocusChanged;
             }
         }
 
@@ -169,26 +188,14 @@ namespace CustomAvatar.Rendering
 
         private void UpdateCameraMask()
         {
-            if (_logger == null || _settings == null || _fpfcSettings == null)
+            if (_logger == null || _settings == null || fpfcSettings == null)
             {
                 return;
             }
 
             _logger.LogTrace($"Setting avatar culling mask and near clip plane on '{_camera.name}'");
 
-            int mask = _camera.cullingMask | AvatarLayers.kAlwaysVisibleMask;
-
-            // FPFC basically ends up being a 3rd person camera
-            if (_fpfcSettings.Enabled || !_beatSaberUtilities.hasFocus)
-            {
-                mask |= AvatarLayers.kOnlyInThirdPersonMask;
-            }
-            else
-            {
-                mask &= ~AvatarLayers.kOnlyInThirdPersonMask;
-            }
-
-            _camera.cullingMask = mask;
+            _camera.cullingMask = GetCameraMask(_camera.cullingMask);
             _camera.nearClipPlane = _settings.cameraNearClipPlane;
         }
 

@@ -14,6 +14,7 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using CustomAvatar.Avatar;
 using UnityEngine;
 
 namespace CustomAvatar.Rendering
@@ -28,6 +29,29 @@ namespace CustomAvatar.Rendering
         protected override (Transform playerSpace, Transform origin) GetPlayerSpaceAndOrigin()
         {
             return (playerSpace, origin);
+        }
+
+        protected override int GetCameraMask(int mask)
+        {
+            if (fpfcSettings.Enabled)
+            {
+                mask &= ~AvatarLayers.kAllLayersMask;
+            }
+            else
+            {
+                mask |= AvatarLayers.kAlwaysVisibleMask;
+            }
+
+            if (beatSaberUtilities.hasFocus)
+            {
+                mask &= ~AvatarLayers.kOnlyInThirdPersonMask;
+            }
+            else
+            {
+                mask |= AvatarLayers.kOnlyInThirdPersonMask;
+            }
+
+            return mask;
         }
     }
 }
