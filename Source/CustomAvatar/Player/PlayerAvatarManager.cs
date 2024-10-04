@@ -468,14 +468,14 @@ namespace CustomAvatar.Player
             }
 
             ResizeCurrentAvatar(_settings.playerEyeHeight);
+            _logger.LogInformation("Resized avatar with scale: " + scale);
+            avatarScaleChanged?.Invoke(scale);
         }
 
         internal void ResizeCurrentAvatar(float playerEyeHeight)
         {
             scale = CalculateAvatarScale(playerEyeHeight);
             UpdateAvatarVerticalPosition(playerEyeHeight);
-            _logger.LogInformation("Resized avatar with scale: " + scale);
-            avatarScaleChanged?.Invoke(scale);
         }
 
         private float CalculateAvatarScale(float playerEyeHeight)
