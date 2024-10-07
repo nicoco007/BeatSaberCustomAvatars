@@ -22,7 +22,7 @@ using UnityEngine;
 
 namespace CustomAvatar.UI
 {
-    internal class AvatarListItem : INotifyPropertyChanged
+    internal class AvatarListItem : INotifyPropertyChanged, IProgress<float>
     {
         private bool _isLoaded;
 
@@ -72,10 +72,9 @@ namespace CustomAvatar.UI
 
         public Exception loadException { get; private set; }
 
-        public void UpdateProgress(float progress)
+        public void Report(float value)
         {
-            loadProgress = progress;
-
+            loadProgress = value;
             NotifyPropertyChanged(nameof(loadProgress));
         }
 

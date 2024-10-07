@@ -271,10 +271,7 @@ namespace CustomAvatar.UI
         {
             try
             {
-                AvatarInfo avatarInfo = await _avatarManager.GetAvatarInfo(avatar.fileName, new Progress<float>((p) =>
-                {
-                    avatar.UpdateProgress(p);
-                }), forceReload);
+                AvatarInfo avatarInfo = await _avatarManager.GetAvatarInfo(avatar.fileName, avatar, forceReload);
 
                 avatar.SetLoadedInfo(avatarInfo, _blankAvatarSprite);
 
