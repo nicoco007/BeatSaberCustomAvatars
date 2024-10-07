@@ -82,6 +82,10 @@ namespace CustomAvatar.Avatar
 
         internal Pose rightFootCalibrationOffset { get; private set; }
 
+        internal Vector3 pelvisRootForward { get; private set; }
+
+        internal Vector3 pelvisRootOffset { get; private set; }
+
         private ILogger<AvatarPrefab> _logger;
 
         [Inject]
@@ -195,6 +199,9 @@ namespace CustomAvatar.Avatar
 
                     Destroy(targetObj);
                 }
+
+                pelvisRootForward = Quaternion.Inverse(vrikManager.references_pelvis.rotation) * vrikManager.references_root.forward;
+                pelvisRootOffset = vrikManager.references_root.InverseTransformPoint(vrikManager.references_pelvis.position);
             }
         }
 

@@ -59,6 +59,9 @@ namespace CustomAvatar.Avatar
         private Pose _defaultRootPose;
         private Pose _previousParentPose;
 
+        private bool _hasPelvisTarget;
+        private bool _hasBothLegTargets;
+
         #region Behaviour Lifecycle
 
         protected void Awake()
@@ -139,7 +142,6 @@ namespace CustomAvatar.Avatar
 
             _input.inputChanged += OnInputChanged;
 
-            UpdateLocomotion();
             UpdateSolverTargets();
 
             foreach (BeatSaberDynamicBone::DynamicBone dynamicBone in _dynamicBones)
@@ -179,6 +181,8 @@ namespace CustomAvatar.Avatar
 
         private void OnPreUpdate()
         {
+            ApplyRootPose();
+
             foreach (BeatSaberDynamicBone::DynamicBone dynamicBone in _dynamicBones)
             {
                 dynamicBone.Update();
@@ -193,6 +197,39 @@ namespace CustomAvatar.Avatar
             {
                 dynamicBone.LateUpdate();
             }
+        }
+
+        // adapted from VRIKRootController to work when IK is rotated by parent
+        private void ApplyRootPose()
+        {
+            // don't move the root if locomotion is disabled and both feet aren't being tracked
+            // (i.e. keep previous behaviour of sticking to the origin when locomotion is disabled and we're missing one or more FBT trackers)
+            if (!_isLocomotionEnabled && !_hasBothLegTargets)
+            {
+                return;
+            }
+
+            if (!_hasPelvisTarget)
+            {
+                return;
+            }
+
+            Transform pelvisTarget = _vrik.solver.spine.pelvisTarget;
+            Transform root = _vrik.references.root;
+            Transform parent = root.parent;
+            bool hasParent = parent != null;
+
+            Vector3 up = hasParent ? parent.up : Vector3.up;
+            root.rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(pelvisTarget.rotation * _avatar.prefab.pelvisRootForward, up), up);
+
+            var position = Vector3.ProjectOnPlane(pelvisTarget.position - root.TransformVector(_avatar.prefab.pelvisRootOffset), up);
+
+            if (hasParent)
+            {
+                position = parent.InverseTransformPoint(position);
+            }
+
+            root.localPosition = new Vector3(position.x, root.localPosition.y, position.z);
         }
 
         private void ApplyPlatformMotion()
@@ -221,10 +258,16 @@ namespace CustomAvatar.Avatar
                 return;
             }
 
-            _vrik.solver.locomotion.weight = _isLocomotionEnabled ? vrikManager.solver_locomotion_weight : 0;
+            // don't enable locomotion if FBT is applied
+            bool shouldEnableLocomotion = _isLocomotionEnabled && !(_hasPelvisTarget && _hasBothLegTargets);
 
-            if (!_isLocomotionEnabled && _vrik.references.root != null)
+            if (shouldEnableLocomotion)
             {
+                _vrik.solver.locomotion.weight = vrikManager.solver_locomotion_weight;
+            }
+            else
+            {
+                _vrik.solver.locomotion.weight = 0;
                 _vrik.references.root.SetLocalPose(_defaultRootPose);
             }
         }
@@ -236,17 +279,22 @@ namespace CustomAvatar.Avatar
 
         private void UpdateSolverTargets()
         {
-            if (_vrik == null || vrikManager == null) return;
+            if (_vrik == null || vrikManager == null)
+            {
+                return;
+            }
 
             _logger.LogTrace("Updating solver targets");
 
             UpdateSolverTarget(DeviceUse.Head, ref _vrik.solver.spine.headTarget, ref _vrik.solver.spine.positionWeight, ref _vrik.solver.spine.rotationWeight);
             UpdateSolverTarget(DeviceUse.LeftHand, ref _vrik.solver.leftArm.target, ref _vrik.solver.leftArm.positionWeight, ref _vrik.solver.leftArm.rotationWeight);
             UpdateSolverTarget(DeviceUse.RightHand, ref _vrik.solver.rightArm.target, ref _vrik.solver.rightArm.positionWeight, ref _vrik.solver.rightArm.rotationWeight);
-            UpdateSolverTarget(DeviceUse.LeftFoot, ref _vrik.solver.leftLeg.target, ref _vrik.solver.leftLeg.positionWeight, ref _vrik.solver.leftLeg.rotationWeight);
-            UpdateSolverTarget(DeviceUse.RightFoot, ref _vrik.solver.rightLeg.target, ref _vrik.solver.rightLeg.positionWeight, ref _vrik.solver.rightLeg.rotationWeight);
 
-            if (UpdateSolverTarget(DeviceUse.Waist, ref _vrik.solver.spine.pelvisTarget, ref _vrik.solver.spine.pelvisPositionWeight, ref _vrik.solver.spine.pelvisRotationWeight))
+            _hasBothLegTargets = true;
+            _hasBothLegTargets &= UpdateSolverTarget(DeviceUse.LeftFoot, ref _vrik.solver.leftLeg.target, ref _vrik.solver.leftLeg.positionWeight, ref _vrik.solver.leftLeg.rotationWeight);
+            _hasBothLegTargets &= UpdateSolverTarget(DeviceUse.RightFoot, ref _vrik.solver.rightLeg.target, ref _vrik.solver.rightLeg.positionWeight, ref _vrik.solver.rightLeg.rotationWeight);
+
+            if (_hasPelvisTarget = UpdateSolverTarget(DeviceUse.Waist, ref _vrik.solver.spine.pelvisTarget, ref _vrik.solver.spine.pelvisPositionWeight, ref _vrik.solver.spine.pelvisRotationWeight))
             {
                 _vrik.solver.plantFeet = false;
             }
@@ -254,6 +302,8 @@ namespace CustomAvatar.Avatar
             {
                 _vrik.solver.plantFeet = vrikManager.solver_plantFeet;
             }
+
+            UpdateLocomotion();
         }
 
         private bool UpdateSolverTarget(DeviceUse deviceUse, ref Transform target, ref float positionWeight, ref float rotationWeight)

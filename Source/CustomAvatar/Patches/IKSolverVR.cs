@@ -16,8 +16,8 @@
 
 extern alias BeatSaberFinalIK;
 
-using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using BeatSaberFinalIK::RootMotion.FinalIK;
@@ -27,66 +27,65 @@ using HarmonyLib;
 
 namespace CustomAvatar.Patches
 {
+    /// <summary>
+    /// This patch makes the constructor of <see cref="IKSolverVR"/> instantiate our <see cref="IKSolverVR_Arm"/> in the <see cref="IKSolverVR.leftArm"/> and <see cref="IKSolverVR.rightArm"/> fields.
+    /// </summary>
     [HarmonyPatch(typeof(IKSolverVR), MethodType.Constructor)]
     internal static class IKSolverVR_Constructor
     {
-        public static void Postfix(IKSolverVR __instance)
-        {
-            __instance.leftArm = new IKSolverVR_Arm();
-            __instance.rightArm = new IKSolverVR_Arm();
-        }
-    }
-
-    [HarmonyPatch(typeof(IKSolverVR.Arm), nameof(IKSolverVR.Arm.Solve))]
-    internal static class IKSolverVR_Arm_PitchAngleOffset
-    {
-        private static readonly FieldInfo kPitchOffsetAngleField = AccessTools.DeclaredField(typeof(IKSolverVR_Arm), nameof(IKSolverVR_Arm.shoulderPitchOffset));
+        private static readonly ConstructorInfo kIKSolverVRArmConstructor = typeof(IKSolverVR.Arm).GetConstructors().Single();
+        private static readonly ConstructorInfo kNewIKSolverVRArmConstructor = typeof(IKSolverVR_Arm).GetConstructors().Single();
 
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
-            return new CodeMatcher(instructions)
-                /* Quaternion.AngleAxis(isLeft ? pitchOffsetAngle : -pitchOffsetAngle, chestForward) */
-                .MatchForward(false,
-                    new CodeMatch(i => i.Equals(OpCodes.Ldc_R4, 30f)),
-                    new CodeMatch(i => i.Branches(out Label? _)),
-                    new CodeMatch(i => i.Equals(OpCodes.Ldc_R4, -30f)))
-                .SetAndAdvance(OpCodes.Ldarg_0, null)
-                .InsertAndAdvance(
-                    new CodeInstruction(OpCodes.Ldfld, kPitchOffsetAngleField),
-                    new CodeInstruction(OpCodes.Neg))
-                .Advance(1)
-                .SetAndAdvance(OpCodes.Ldarg_0, null)
-                .InsertAndAdvance(
-                    new CodeInstruction(OpCodes.Ldfld, kPitchOffsetAngleField))
+            foreach (CodeInstruction instruction in instructions)
+            {
+                if (instruction.opcode == OpCodes.Newobj && (ConstructorInfo)instruction.operand == kIKSolverVRArmConstructor)
+                {
+                    instruction.operand = kNewIKSolverVRArmConstructor;
+                }
 
-                /* pitch -= pitchOffsetAngle */
-                .MatchForward(false,
-                    new CodeMatch(i => i.LoadsLocal(11)),
-                    new CodeMatch(i => i.opcode == OpCodes.Ldc_R4 && (float)i.operand == -30f),
-                    new CodeMatch(OpCodes.Sub),
-                    new CodeMatch(i => i.SetsLocal(11)))
-                .ThrowIfInvalid("`pitch -= pitchOffsetAngle` not found")
-                .Advance(1)
-                .SetAndAdvance(OpCodes.Ldarg_0, null)
-                .InsertAndAdvance(
-                    new CodeInstruction(OpCodes.Ldfld, kPitchOffsetAngleField))
+                yield return instruction;
+            }
+        }
+    }
 
-                /* DamperValue(pitch, -45f - pitchOffsetAngle, 45f - pitchOffsetAngle) */
-                .MatchForward(false,
-                    new CodeMatch(i => i.LoadsLocal(11)),
-                    new CodeMatch(i => i.Equals(OpCodes.Ldc_R4, -15f)),
-                    new CodeMatch(i => i.Equals(OpCodes.Ldc_R4, 75f)))
-                .Advance(1)
-                .SetOperandAndAdvance(-45f)
+    /// <summary>
+    /// This patch prevents locomotion from fighting against the position we set in <see cref="Avatar.AvatarIK"/> when the pelvis target exists.
+    /// </summary>
+    [HarmonyPatch(typeof(IKSolverVR), nameof(IKSolverVR.Solve))]
+    internal static class IKSolverVR_Solve
+    {
+        private static readonly MethodInfo kRootBonePropertyGetter = AccessTools.DeclaredPropertyGetter(typeof(IKSolverVR), nameof(IKSolverVR.rootBone));
+        private static readonly FieldInfo kVirtualBoneSolverPositionField = AccessTools.DeclaredField(typeof(IKSolverVR.VirtualBone), nameof(IKSolverVR.VirtualBone.solverPosition));
+        private static readonly FieldInfo kSpineField = AccessTools.DeclaredField(typeof(IKSolverVR), nameof(IKSolverVR.spine));
+        private static readonly FieldInfo kSpinePelvisTargetField = AccessTools.DeclaredField(typeof(IKSolverVR.Spine), nameof(IKSolverVR.Spine.pelvisTarget));
+        private static readonly MethodInfo kUnityObjectEqualsMethod = AccessTools.DeclaredMethod(typeof(UnityEngine.Object), "op_Equality");
+
+        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilGenerator)
+        {
+            return new CodeMatcher(instructions, ilGenerator)
+                .MatchForward(
+                    false,
+                    new CodeMatch(OpCodes.Ldarg_0),
+                    new CodeMatch(i => i.Calls(kRootBonePropertyGetter)),
+                    new CodeMatch(i => i.LoadsLocal(14)),
+                    new CodeMatch(i => i.StoresField(kVirtualBoneSolverPositionField)))
+                .CreateLabelWithOffsets(4, out Label label)
                 .InsertAndAdvance(
-                    new CodeInstruction(OpCodes.Ldarg_0, null),
-                    new CodeInstruction(OpCodes.Ldfld, kPitchOffsetAngleField),
-                    new CodeInstruction(OpCodes.Sub))
-                .SetOperandAndAdvance(45f)
-                .InsertAndAdvance(
-                    new CodeInstruction(OpCodes.Ldarg_0, null),
-                    new CodeInstruction(OpCodes.Ldfld, kPitchOffsetAngleField),
-                    new CodeInstruction(OpCodes.Sub))
+                    new CodeInstruction(OpCodes.Ldarg_0),
+                    new CodeInstruction(OpCodes.Ldfld, kSpineField),
+                    new CodeInstruction(OpCodes.Ldfld, kSpinePelvisTargetField),
+                    new CodeInstruction(OpCodes.Ldnull),
+                    new CodeInstruction(OpCodes.Call, kUnityObjectEqualsMethod),
+                    new CodeInstruction(OpCodes.Brfalse_S, label))
+                .MatchForward(
+                    false,
+                    new CodeMatch(OpCodes.Ldarg_0),
+                    new CodeMatch(i => i.Calls(kRootBonePropertyGetter)),
+                    new CodeMatch(i => i.LoadsField(kVirtualBoneSolverPositionField)))
+                .RemoveInstructions(3)
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldloc_S, 14))
                 .InstructionEnumeration();
         }
     }
