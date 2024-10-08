@@ -438,6 +438,7 @@ namespace CustomAvatar.Tracking
         private void OnFocusChanged(bool hasFocus)
         {
             UpdateBehaviourEnabled();
+            UpdateRenderModelsVisibility();
         }
 
         private void UpdateBehaviourEnabled()
