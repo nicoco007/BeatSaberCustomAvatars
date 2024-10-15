@@ -81,4 +81,12 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
+  <!-- Copy the assembly and PDB to the Unity Project's folder -->
+  <Target Name="CopyToUnityProject" AfterTargets="CopyToArtifact" Condition="'$(UnityProjectDir)' != ''">
+    <Message Text="$(MSBuildProjectName) -&gt; $(UnityProjectDir)" Importance="high" />
+    <ItemGroup>
+      <FilesToCopy Include="$(ArtifactDir)\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(FilesToCopy)" DestinationFiles="@(FilesToCopy->'$(UnityProjectDir)\Assets\Libraries\%(RecursiveDir)%(Filename)%(Extension)')" Condition="!Exists('$(UnityProjectDir)\Assets\Libraries\%(RecursiveDir)%(Filename)%(Extension)') OR '%(Extension)' != '.meta'" />
+  </Target>
 </Project>
