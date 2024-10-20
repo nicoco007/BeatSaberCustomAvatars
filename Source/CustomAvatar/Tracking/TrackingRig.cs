@@ -688,10 +688,10 @@ namespace CustomAvatar.Tracking
 
         private async Task UpdateRenderModelAsync(DeviceUse deviceUse, ITrackedNode trackedNode, TrackedRenderModel trackedRenderModel)
         {
-            if (trackedNode.isTracking)
-            {
-                RenderModel renderModel = await _renderModelProvider.GetRenderModelAsync(deviceUse);
+            RenderModel renderModel;
 
+            if (trackedNode.isTracking && (renderModel = await _renderModelProvider.GetRenderModelAsync(deviceUse)) != null)
+            {
                 trackedRenderModel.transform.SetLocalPositionAndRotation(renderModel.localOrigin.position, renderModel.localOrigin.rotation);
                 trackedRenderModel.meshFilter.sharedMesh = renderModel.mesh;
                 trackedRenderModel.meshRenderer.sharedMaterial = renderModel.material;
