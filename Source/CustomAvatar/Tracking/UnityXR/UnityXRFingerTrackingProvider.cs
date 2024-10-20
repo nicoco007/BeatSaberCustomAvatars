@@ -14,6 +14,7 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -29,17 +30,18 @@ namespace CustomAvatar.Tracking.UnityXR
     internal class UnityXRFingerTrackingProvider : IFingerTrackingProvider, ITickable
     {
         // these values are based on Index controllers and may not work as well with others
-        private static readonly float[] kOpenFingerCurls = { -17f, 7f, 11f, 13f, 10f };
-        private static readonly float[] kClosedFingerCurls = { 136f, 291f, 291f, 292f, 287f };
+        private static readonly float[] kOpenFingerCurls = [-17f, 7f, 11f, 13f, 10f];
+        private static readonly float[] kClosedFingerCurls = [136f, 291f, 291f, 292f, 287f];
 
-        private readonly List<XRHandSubsystem> _subsystems = new();
+        // Can't use XRHandSubsystem for field types since they'll fail to load if Unity.XR.Hands isn't installed.
+        private readonly IList _subsystems = new List<XRHandSubsystem>();
 
         private readonly float[] _leftHandFingerCurls = new float[5];
         private readonly float[] _rightHandFingerCurls = new float[5];
 
         private readonly BeatSaberUtilities _beatSaberUtilities;
 
-        private XRHandSubsystem _subsystem;
+        private ISubsystem _subsystem;
 
         private bool _leftJointsTracked;
         private bool _rightJointsTracked;
@@ -57,8 +59,9 @@ namespace CustomAvatar.Tracking.UnityXR
                 return;
             }
 
-            SubsystemManager.GetSubsystems(_subsystems);
-            XRHandSubsystem subsystem = _subsystems.FirstOrDefault(s => s.running);
+            var subsystems = (List<XRHandSubsystem>)_subsystems;
+            SubsystemManager.GetSubsystems(subsystems);
+            XRHandSubsystem subsystem = subsystems.FirstOrDefault(s => s.running);
 
             if (subsystem == null)
             {
@@ -67,12 +70,12 @@ namespace CustomAvatar.Tracking.UnityXR
 
             if (_subsystem != null)
             {
-                _subsystem.updatedHands -= OnUpdatedHands;
+                ((XRHandSubsystem)_subsystem).updatedHands -= OnUpdatedHands;
             }
 
             _subsystem = subsystem;
 
-            _subsystem.updatedHands += OnUpdatedHands;
+            subsystem.updatedHands += OnUpdatedHands;
         }
 
         private void OnUpdatedHands(XRHandSubsystem handSubsystem, XRHandSubsystem.UpdateSuccessFlags updateSuccessFlags, XRHandSubsystem.UpdateType updateType)
