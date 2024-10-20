@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -53,7 +54,7 @@ namespace CustomAvatar.Tracking.OpenVR
 
             try
             {
-                foreach (RenderModel renderModel in _renderModelCache.Values)
+                foreach (RenderModel renderModel in _renderModelCache.Values.Where(rm => rm != null))
                 {
                     Object.Destroy(renderModel.material.mainTexture);
                     Object.Destroy(renderModel.material);
@@ -77,7 +78,6 @@ namespace CustomAvatar.Tracking.OpenVR
                 if (!_renderModelCache.TryGetValue(renderModelName, out RenderModel renderModel))
                 {
                     renderModel = await LoadRenderModelAsync(renderModelName);
-                    _renderModelCache[renderModelName] = renderModel;
                 }
 
                 return renderModel;
