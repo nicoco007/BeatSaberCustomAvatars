@@ -118,7 +118,6 @@ namespace CustomAvatar.Zenject
 
             // helper classes
             Container.Bind<MirrorHelper>().AsTransient();
-            Container.Bind<IKHelper>().AsTransient();
 
             Container.Bind(typeof(IAffinity)).To<Patches.MirrorRendererSO>().AsSingle();
 

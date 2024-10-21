@@ -169,7 +169,7 @@ namespace CustomAvatar.Avatar
 
             PoseManager poseManager = GetComponentInChildren<PoseManager>();
 
-            isIKAvatar = vrikManager;
+            isIKAvatar = vrikManager != null && vrikManager.areReferencesFilled;
             supportsFingerTracking = poseManager && poseManager.isValid;
 
             eyeHeight = GetEyeHeight();

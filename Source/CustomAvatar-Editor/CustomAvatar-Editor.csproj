@@ -8,11 +8,6 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <Reference Include="DynamicBone">
-      <HintPath>$(BeatSaberDir)\Libs\DynamicBone.dll</HintPath>
-      <Private>false</Private>
-      <Aliases>BeatSaberDynamicBone</Aliases>
-    </Reference>
     <Reference Include="FinalIK">
       <HintPath>$(BeatSaberDir)\Libs\FinalIK.dll</HintPath>
       <Private>false</Private>
@@ -65,7 +60,6 @@
     <Compile Include="..\CustomAvatar\Logging\ILogger.cs" Link="Logging\ILogger.cs" />
     <Compile Include="..\CustomAvatar\Logging\UnityDebugLogger.cs" Link="Logging\UnityDebugLogger.cs" />
     <Compile Include="..\CustomAvatar\Scripts\PoseManager.cs" Link="Scripts\PoseManager.cs" />
-    <Compile Include="..\CustomAvatar\Utilities\IKHelper.cs" Link="Utilities\IKHelper.cs" />
     <Compile Include="..\CustomAvatar\Utilities\UnityUtilities.cs" Link="Utilities\UnityUtilities.cs" />
     <Compile Include="..\CustomAvatar\Scripts\VRIKManager.cs" Link="Scripts\VRIKManager.cs" />
   </ItemGroup>

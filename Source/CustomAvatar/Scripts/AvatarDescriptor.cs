@@ -18,8 +18,6 @@ using UnityEngine;
 using System.Linq;
 
 #if UNITY_EDITOR
-using CustomAvatar.Logging;
-using CustomAvatar.Utilities;
 using System.IO;
 using System.Reflection;
 #endif
@@ -79,12 +77,6 @@ namespace CustomAvatar
 
 #if UNITY_EDITOR
         private Mesh _saberMesh;
-
-        protected void Start()
-        {
-            var ikHelper = new IKHelper(new UnityDebugLogger<IKHelper>());
-            ikHelper.InitializeVRIK(transform.GetComponentInChildren<VRIKManager>(), transform);
-        }
 
         protected void OnDrawGizmos()
         {
