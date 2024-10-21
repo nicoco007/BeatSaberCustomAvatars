@@ -56,10 +56,15 @@ namespace CustomAvatar.Avatar
         public float armSpan { get; private set; }
 
         internal Transform head { get; private set; }
+
         internal Transform leftHand { get; private set; }
+
         internal Transform rightHand { get; private set; }
+
         internal Transform leftLeg { get; private set; }
+
         internal Transform rightLeg { get; private set; }
+
         internal Transform pelvis { get; private set; }
 
         internal Pose headOffset { get; private set; }
@@ -100,50 +105,6 @@ namespace CustomAvatar.Avatar
 
             _logger = loggerFactory.CreateLogger<AvatarPrefab>(descriptor.name);
 
-            VRIKManager vrikManager = GetComponentInChildren<VRIKManager>();
-#pragma warning disable CS0618
-            IKManager ikManager = GetComponentInChildren<IKManager>();
-#pragma warning restore CS0618
-
-            // migrate IKManager/IKManagerAdvanced to VRIKManager
-            if (ikManager)
-            {
-                if (!vrikManager) vrikManager = container.InstantiateComponent<VRIKManager>(gameObject);
-
-                _logger.LogWarning("IKManager and IKManagerAdvanced are deprecated; please migrate to VRIKManager");
-
-                ApplyIKManagerFields(vrikManager, ikManager);
-                Destroy(ikManager);
-            }
-
-            if (vrikManager)
-            {
-                if (!vrikManager.areReferencesFilled)
-                {
-                    _logger.LogWarning($"References are not filled on '{vrikManager.name}'; detecting references automatically");
-                    vrikManager.AutoDetectReferences();
-                }
-            }
-
-            // remove any existing VRIK instances
-            foreach (VRIK existingVrik in GetComponentsInChildren<VRIK>())
-            {
-                _logger.LogWarning($"Found VRIK on '{existingVrik.name}'; manually adding VRIK to an avatar is no longer needed, please remove it");
-
-                if (existingVrik && vrikManager && existingVrik.references.isFilled && !vrikManager.areReferencesFilled)
-                {
-                    _logger.LogWarning($"Copying references from VRIK on '{existingVrik.name}'; this is deprecated behaviour and will be removed in a future release");
-                    CopyReferencesFromExistingVrik(vrikManager, existingVrik.references);
-                }
-
-                Destroy(existingVrik);
-            }
-
-            if (vrikManager && !vrikManager.areReferencesFilled)
-            {
-                _logger.LogWarning("VRIKManager references are not filled; avatar will probably not work as expected");
-            }
-
             head = transform.Find("Head");
             leftHand = transform.Find("LeftHand");
             rightHand = transform.Find("RightHand");
@@ -151,13 +112,44 @@ namespace CustomAvatar.Avatar
             leftLeg = transform.Find("LeftLeg");
             rightLeg = transform.Find("RightLeg");
 
-            if (vrikManager)
+            VRIKManager vrikManager = GetComponentInChildren<VRIKManager>();
+#pragma warning disable CS0618
+            IKManager ikManager = GetComponentInChildren<IKManager>();
+#pragma warning restore CS0618
+
+            // migrate IKManager/IKManagerAdvanced to VRIKManager
+            if (ikManager != null)
             {
-                CheckTargetWeight("Left Arm", leftHand, vrikManager.solver_leftArm_positionWeight, vrikManager.solver_leftArm_rotationWeight);
-                CheckTargetWeight("Right Arm", rightHand, vrikManager.solver_rightArm_positionWeight, vrikManager.solver_rightArm_rotationWeight);
-                CheckTargetWeight("Pelvis", pelvis, vrikManager.solver_spine_pelvisPositionWeight, vrikManager.solver_spine_pelvisRotationWeight);
-                CheckTargetWeight("Left Leg", leftLeg, vrikManager.solver_leftLeg_positionWeight, vrikManager.solver_leftLeg_rotationWeight);
-                CheckTargetWeight("Right Leg", rightLeg, vrikManager.solver_rightLeg_positionWeight, vrikManager.solver_rightLeg_rotationWeight);
+                if (vrikManager == null)
+                {
+                    vrikManager = container.InstantiateComponent<VRIKManager>(ikManager.gameObject);
+                }
+
+                _logger.LogWarning("IKManager and IKManagerAdvanced are deprecated; please migrate to VRIKManager");
+
+                ApplyIKManagerFields(vrikManager, ikManager);
+                Destroy(ikManager);
+            }
+
+            // remove any existing VRIK instances
+            foreach (VRIK existingVrik in GetComponentsInChildren<VRIK>())
+            {
+                _logger.LogWarning($"Found VRIK on '{existingVrik.name}'; VRIK no longer gets deserialized properly, please remove it");
+                Destroy(existingVrik);
+            }
+
+            if (vrikManager != null)
+            {
+                if (!vrikManager.areReferencesFilled)
+                {
+                    _logger.LogWarning($"References are not filled on '{vrikManager.name}'; detecting references automatically");
+                    vrikManager.AutoDetectReferences();
+
+                    if (!vrikManager.areReferencesFilled)
+                    {
+                        _logger.LogWarning($"References are not filled on '{vrikManager.name}'; avatar will probably not work as expected");
+                    }
+                }
 
                 FixTrackingReferences(vrikManager);
             }
@@ -270,14 +262,6 @@ namespace CustomAvatar.Avatar
             }
         }
 
-        private void CheckTargetWeight(string name, Transform target, float positionWeight, float rotationWeight)
-        {
-            if (!target) return;
-
-            if (positionWeight <= 0.1f) _logger.LogWarning($"{name} position weight is very small ({positionWeight:0.00}); is that on purpose?");
-            if (rotationWeight <= 0.1f) _logger.LogWarning($"{name} rotation weight is very small ({rotationWeight:0.00}); is that on purpose?");
-        }
-
         private float GetEyeHeight()
         {
             if (!head)
@@ -373,32 +357,6 @@ namespace CustomAvatar.Avatar
             _logger.LogTrace($"Measured arm span: {totalLength} m");
 
             return totalLength;
-        }
-
-        private void CopyReferencesFromExistingVrik(VRIKManager vrikManager, VRIK.References references)
-        {
-            vrikManager.references_root = references.root;
-            vrikManager.references_pelvis = references.pelvis;
-            vrikManager.references_spine = references.spine;
-            vrikManager.references_chest = references.chest;
-            vrikManager.references_neck = references.neck;
-            vrikManager.references_head = references.head;
-            vrikManager.references_leftShoulder = references.leftShoulder;
-            vrikManager.references_leftUpperArm = references.leftUpperArm;
-            vrikManager.references_leftForearm = references.leftForearm;
-            vrikManager.references_leftHand = references.leftHand;
-            vrikManager.references_rightShoulder = references.rightShoulder;
-            vrikManager.references_rightUpperArm = references.rightUpperArm;
-            vrikManager.references_rightForearm = references.rightForearm;
-            vrikManager.references_rightHand = references.rightHand;
-            vrikManager.references_leftThigh = references.leftThigh;
-            vrikManager.references_leftCalf = references.leftCalf;
-            vrikManager.references_leftFoot = references.leftFoot;
-            vrikManager.references_leftToes = references.leftToes;
-            vrikManager.references_rightThigh = references.rightThigh;
-            vrikManager.references_rightCalf = references.rightCalf;
-            vrikManager.references_rightFoot = references.rightFoot;
-            vrikManager.references_rightToes = references.rightToes;
         }
 
 #pragma warning disable CS0618
