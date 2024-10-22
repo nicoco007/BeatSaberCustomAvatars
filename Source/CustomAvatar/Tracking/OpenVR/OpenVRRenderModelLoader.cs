@@ -78,6 +78,7 @@ namespace CustomAvatar.Tracking.OpenVR
                 if (!_renderModelCache.TryGetValue(renderModelName, out RenderModel renderModel))
                 {
                     renderModel = await LoadRenderModelAsync(renderModelName);
+                    _renderModelCache[renderModelName] = renderModel;
                 }
 
                 return renderModel;
