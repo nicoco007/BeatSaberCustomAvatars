@@ -17,11 +17,6 @@
 using UnityEngine;
 using System.Linq;
 
-#if UNITY_EDITOR
-using System.IO;
-using System.Reflection;
-#endif
-
 // keeping root namespace for compatibility
 namespace CustomAvatar
 {
@@ -29,7 +24,7 @@ namespace CustomAvatar
     /// Container for an avatar's name and other information configured before exportation.
     /// </summary>
     [DisallowMultipleComponent]
-    public class AvatarDescriptor : MonoBehaviour, ISerializationCallbackReceiver
+    public partial class AvatarDescriptor : MonoBehaviour, ISerializationCallbackReceiver
     {
         /// <summary>
         /// Avatar's name.
@@ -74,97 +69,5 @@ namespace CustomAvatar
 
         // Editor calls DoesObjectWithInstanceIDExist which doesn't exist at run time and blows up if not on the main thread, so just check the cached pointer.
         private T FirstNonNullUnityObject<T>(params T[] objects) where T : Object => objects.FirstOrDefault(o => o is not null && o.GetCachedPtr() != System.IntPtr.Zero);
-
-#if UNITY_EDITOR
-        private Mesh _saberMesh;
-
-        protected void OnDrawGizmos()
-        {
-            if (!isActiveAndEnabled) return;
-            if (!_saberMesh) _saberMesh = LoadMesh(Assembly.GetExecutingAssembly().GetManifestResourceStream("CustomAvatar.Resources.saber.dat"));
-
-            DrawSaber(transform.Find("LeftHand"), _saberMesh, new Color(0.78f, 0.08f, 0.08f));
-            DrawSaber(transform.Find("RightHand"), _saberMesh, new Color(0, 0.46f, 0.82f));
-        }
-
-        private Mesh LoadMesh(Stream stream)
-        {
-            var mesh = new Mesh();
-
-            using (var reader = new BinaryReader(stream))
-            {
-                int length = reader.ReadInt32();
-                var vertices = new Vector3[length];
-
-                for (int i = 0; i < length; i++)
-                {
-                    vertices[i] = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-                }
-
-                length = reader.ReadInt32();
-                var normals = new Vector3[length];
-
-                for (int i = 0; i < length; i++)
-                {
-                    normals[i] = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-                }
-
-                length = reader.ReadInt32();
-                int[] triangles = new int[length];
-
-                for (int i = 0; i < length; i++)
-                {
-                    triangles[i] = reader.ReadInt32();
-                }
-
-                mesh.SetVertices(vertices);
-                mesh.SetNormals(normals);
-                mesh.SetTriangles(triangles, 0);
-            }
-
-            return mesh;
-        }
-
-        internal void SaveMesh(Mesh mesh)
-        {
-            using (var writer = new BinaryWriter(File.OpenWrite("mesh.dat")))
-            {
-                writer.Write(mesh.vertices.Length);
-
-                foreach (Vector3 vertex in mesh.vertices)
-                {
-                    writer.Write(vertex.x);
-                    writer.Write(vertex.y);
-                    writer.Write(vertex.z);
-                }
-
-                writer.Write(mesh.normals.Length);
-
-                foreach (Vector3 normal in mesh.normals)
-                {
-                    writer.Write(normal.x);
-                    writer.Write(normal.y);
-                    writer.Write(normal.z);
-                }
-
-                writer.Write(mesh.triangles.Length);
-
-                foreach (int triangle in mesh.triangles)
-                {
-                    writer.Write(triangle);
-                }
-            }
-        }
-
-        private void DrawSaber(Transform transform, Mesh mesh, Color color)
-        {
-            if (!transform) return;
-
-            Color prev = Gizmos.color;
-            Gizmos.color = color;
-            Gizmos.DrawMesh(mesh, transform.position, transform.rotation, Vector3.one);
-            Gizmos.color = prev;
-        }
-#endif
     }
 }
