@@ -111,7 +111,7 @@ namespace CustomAvatar.Avatar
         internal GameObject SpawnBareAvatar(AvatarPrefab avatar, Transform parent = null)
         {
             GameObject avatarInstance = Object.Instantiate(avatar, parent, false).gameObject;
-            avatarInstance.GetComponent<AvatarPrefab>().enabled = false;
+            Object.DestroyImmediate(avatarInstance.GetComponent<AvatarPrefab>());
             return avatarInstance;
         }
 
