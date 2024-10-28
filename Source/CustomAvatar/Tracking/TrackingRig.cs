@@ -342,6 +342,7 @@ namespace CustomAvatar.Tracking
             if (_activePlayerSpaceManager != null)
             {
                 _activePlayerSpaceManager.changed -= OnActivePlayerSpaceChanged;
+                OnActivePlayerSpaceChanged(null);
             }
 
             if (_playerAvatarManager != null)
