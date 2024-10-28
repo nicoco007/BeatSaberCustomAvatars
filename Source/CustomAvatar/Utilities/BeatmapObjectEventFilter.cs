@@ -125,6 +125,12 @@ namespace CustomAvatar.Utilities
 
             NoteData headNote = GetHeadNote(noteData);
 
+            // TODO: handle sliders with no head note properly
+            if (headNote == null)
+            {
+                return true;
+            }
+
             if (_noteCutResults.TryGetValue(headNote, out NoteCutResult existingResult))
             {
                 if (existingResult.HasFlag(noteCutResult))
@@ -145,7 +151,7 @@ namespace CustomAvatar.Utilities
 
         private NoteData GetHeadNote(NoteData noteData)
         {
-            return _burstSliderHeadNoteDatas.First(nd => nd.time <= noteData.time && nd.colorType == noteData.colorType);
+            return _burstSliderHeadNoteDatas.FirstOrDefault(nd => nd.time <= noteData.time && nd.colorType == noteData.colorType);
         }
 
         [Flags]
