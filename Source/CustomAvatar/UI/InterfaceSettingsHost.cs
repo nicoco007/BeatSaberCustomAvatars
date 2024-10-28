@@ -40,6 +40,12 @@ namespace CustomAvatar.UI
             set => _settings.mirror.antiAliasingLevel.value = value;
         }
 
+        internal bool useFakeMirror
+        {
+            get => _settings.mirror.useFakeMirrorBeta;
+            set => _settings.mirror.useFakeMirrorBeta.value = value;
+        }
+
         internal bool renderInExternalCameras
         {
             get => _settings.mirror.renderInExternalCameras;

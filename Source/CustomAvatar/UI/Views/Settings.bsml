@@ -94,6 +94,7 @@
         </horizontal>
         <increment-setting text="Render Scale" value="renderScale" bind-value="true" apply-on-change="true" min="0.5" max="2" increment="0.1" />
         <list-setting text="Anti Aliasing" value="antiAliasingLevel" bind-value="true" apply-on-change="true" options="antiAliasingLevelOptions" formatter="AntiAliasingLevelFormatter" />
+        <toggle-setting text="Use Fake Mirror (beta)" value="useFakeMirror" bind-value="true" apply-on-change="true" hover-hint="Show a mirrored version of the current avatar rather than rendering a full mirror. Improves performance and allows the avatar to be closer to you, but may not accurately reflect all avatar features." />
         <toggle-setting text="Show in non-VR cameras" value="renderInExternalCameras" bind-value="true" apply-on-change="true" hover-hint="Disable this setting to improve performance in this menu when multiple cameras are used (e.g. smooth camera or Camera2)." />
       </settings-container>
     </macro.as-host>

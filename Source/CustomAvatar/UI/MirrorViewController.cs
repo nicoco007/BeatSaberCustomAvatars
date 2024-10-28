@@ -15,6 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Linq;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
 using BGLib.Polyglot;
@@ -23,6 +24,7 @@ using CustomAvatar.Configuration;
 using CustomAvatar.Player;
 using CustomAvatar.Rendering;
 using CustomAvatar.Tracking;
+using CustomAvatar.Utilities;
 using HMUI;
 using JetBrains.Annotations;
 using TMPro;
@@ -45,6 +47,7 @@ namespace CustomAvatar.UI
         private PlayerAvatarManager _avatarManager;
         private HierarchyManager _hierarchyManager;
         private PlatformLeaderboardViewController _platformLeaderboardViewController;
+        private AvatarSpawner _avatarSpawner;
         private TrackingRig _trackingRig;
 
         private bool _isLoaderActive;
@@ -54,6 +57,8 @@ namespace CustomAvatar.UI
         private Image _progressBar;
         private TextMeshProUGUI _progressTitle;
         private TextMeshProUGUI _progressText;
+
+        private GameObject _mirroredAvatarContainer;
 
         protected bool isLoaderActive
         {
@@ -98,6 +103,7 @@ namespace CustomAvatar.UI
             PlayerAvatarManager avatarManager,
             HierarchyManager hierarchyManager,
             PlatformLeaderboardViewController platformLeaderboardViewController,
+            AvatarSpawner avatarSpawner,
             TrackingRig trackingRig)
         {
             _container = container;
@@ -107,6 +113,7 @@ namespace CustomAvatar.UI
             _avatarManager = avatarManager;
             _hierarchyManager = hierarchyManager;
             _platformLeaderboardViewController = platformLeaderboardViewController;
+            _avatarSpawner = avatarSpawner;
             _trackingRig = trackingRig;
         }
 
@@ -126,6 +133,7 @@ namespace CustomAvatar.UI
 
             _settings.mirror.renderScale.changed += OnMirrorRenderScaleChanged;
             _settings.mirror.antiAliasingLevel.changed += OnMirrorAntiAliasingLevelChanged;
+            _settings.mirror.useFakeMirrorBeta.changed += OnUseFakeMirrorChanged;
 
             _trackingRig.activeCalibrationModeChanged += OnActiveCalibrationModeChanged;
 
@@ -136,7 +144,9 @@ namespace CustomAvatar.UI
 
                 if (!_mirror) return;
 
-                _container.InstantiateComponent<AutoResizeMirror>(_mirror.gameObject);
+                GameObject mirrorGameObject = _mirror.gameObject;
+                _container.InstantiateComponent<AutoResizeMirror>(mirrorGameObject);
+                mirrorGameObject.SetActive(!_settings.mirror.useFakeMirrorBeta);
             }
 
             if (firstActivation)
@@ -183,6 +193,7 @@ namespace CustomAvatar.UI
             }
 
             SetLoading(false);
+            ShowMirroredAvatar();
             OnMirrorRenderScaleChanged(_settings.mirror.renderScale);
         }
 
@@ -201,8 +212,11 @@ namespace CustomAvatar.UI
 
             _settings.mirror.renderScale.changed -= OnMirrorRenderScaleChanged;
             _settings.mirror.antiAliasingLevel.changed -= OnMirrorAntiAliasingLevelChanged;
+            _settings.mirror.useFakeMirrorBeta.changed -= OnUseFakeMirrorChanged;
 
             _trackingRig.activeCalibrationModeChanged += OnActiveCalibrationModeChanged;
+
+            Destroy(_mirroredAvatarContainer);
         }
 
         #endregion
@@ -211,11 +225,57 @@ namespace CustomAvatar.UI
         {
             _progressTitle.text = $"Loading {name}";
             SetLoading(true);
+            DestroyMirroredAvatar();
         }
 
         private void OnAvatarChanged(SpawnedAvatar avatar)
         {
             SetLoading(false);
+            ShowMirroredAvatar();
+        }
+
+        private void ShowMirroredAvatar()
+        {
+            DestroyMirroredAvatar();
+
+            if (!_settings.mirror.useFakeMirrorBeta)
+            {
+                return;
+            }
+
+            SpawnedAvatar avatar = _avatarManager.currentlySpawnedAvatar;
+
+            if (avatar == null)
+            {
+                return;
+            }
+
+            _mirroredAvatarContainer = new GameObject("MirroredAvatarContainer");
+            _mirroredAvatarContainer.SetActive(false);
+
+            // mirrored at the line where the player platform usually ends (i.e. mirror plane is 0.75 m in front of the player)
+            Transform mirroredAvatarTransform = _mirroredAvatarContainer.transform;
+            mirroredAvatarTransform.SetPositionAndRotation(new Vector3(0, 0, 1.5f), Quaternion.identity);
+
+            GameObject gameObject = _avatarSpawner.SpawnBareAvatar(avatar.prefab, _mirroredAvatarContainer.transform);
+
+            TransformCopier transformCopier = _mirroredAvatarContainer.AddComponent<TransformCopier>();
+            transformCopier.root = avatar.transform.parent;
+            transformCopier.from = avatar.transform.GetComponentsInChildren<Transform>();
+            transformCopier.to = gameObject.transform.GetComponentsInChildren<Transform>();
+
+            foreach (Transform transform in transformCopier.to)
+            {
+                transform.gameObject.layer = AvatarLayers.kAlwaysVisible;
+            }
+
+            _mirroredAvatarContainer.SetActive(true);
+            gameObject.SetActive(true);
+        }
+
+        private void DestroyMirroredAvatar()
+        {
+            Destroy(_mirroredAvatarContainer);
         }
 
         private void OnAvatarLoadFailed(Exception exception)
@@ -233,6 +293,12 @@ namespace CustomAvatar.UI
         private void OnMirrorAntiAliasingLevelChanged(int antiAliasingLevel)
         {
             UpdateMirrorRenderSettings(_settings.mirror.renderScale, antiAliasingLevel);
+        }
+
+        private void OnUseFakeMirrorChanged(bool value)
+        {
+            ShowMirroredAvatar();
+            _mirror.gameObject.SetActive(!value);
         }
 
         private void OnActiveCalibrationModeChanged(CalibrationMode calibrationMode)
@@ -272,6 +338,37 @@ namespace CustomAvatar.UI
 
                 transform.localPosition = new Vector3(transform.localPosition.x, floorOffset + height / 2, transform.localPosition.z);
                 transform.localScale = new Vector3(width / 10, 1, height / 10);
+            }
+        }
+
+        // TODO: blend shapes and possibly other things
+        private class TransformCopier : MonoBehaviour
+        {
+            public Transform root;
+            public Transform[] from;
+            public Transform[] to;
+
+            protected void OnEnable()
+            {
+                Application.onBeforeRender += OnBeforeRender;
+            }
+
+            protected void OnDisable()
+            {
+                Application.onBeforeRender -= OnBeforeRender;
+            }
+
+            private void OnBeforeRender()
+            {
+                Vector3 scale = root.lossyScale;
+                transform.localScale = new Vector3(scale.x, scale.y, -scale.z); // mirrored across XY plane
+
+                foreach ((Transform from, Transform to) in from.Zip(to))
+                {
+                    from.GetLocalPositionAndRotation(out Vector3 position, out Quaternion rotation);
+                    to.SetLocalPositionAndRotation(position, rotation);
+                    to.localScale = from.localScale;
+                }
             }
         }
     }
