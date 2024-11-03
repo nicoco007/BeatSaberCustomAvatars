@@ -32,10 +32,10 @@ namespace CustomAvatar
         [SerializeField]
         private IntUnityEvent _multiplierDecreased;
 
-        public IntUnityEvent comboIncreased { get; private set; }
+        public IntUnityEvent comboIncreased => _comboIncreased;
 
-        public IntUnityEvent multiplierIncreased { get; private set; }
+        public IntUnityEvent multiplierIncreased => _multiplierIncreased;
 
-        public IntUnityEvent multiplierDecreased { get; private set; }
+        public IntUnityEvent multiplierDecreased => _multiplierDecreased;
     }
 }
