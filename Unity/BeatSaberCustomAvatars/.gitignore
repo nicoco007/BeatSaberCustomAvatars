@@ -71,3 +71,4 @@ crashlytics-build.properties
 /Assets/Libraries/*.dll
 /Assets/Libraries/*.xml
 /Assets/Libraries/*.dll.meta
+/Assets/Libraries/*.xml.meta
