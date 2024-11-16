@@ -43,107 +43,94 @@ namespace CustomAvatar.Patches
 
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
-            CodeMatcher codeMatcher = new(instructions);
+            return new CodeMatcher(instructions)
+                // fully remove VirtualBone.SolveTrigonometric(bones, pelvisIndex, spineIndex, headIndex, headPosition, bendNormal, pelvisPositionWeight * <whatever>);
+                .MatchForward(
+                    false,
+                    new CodeMatch(OpCodes.Ldarg_0),
+                    new CodeMatch(i => i.LoadsField(kBonesField)),
+                    new CodeMatch(OpCodes.Ldarg_0),
+                    new CodeMatch(i => i.LoadsField(kPelvisIndexField)),
+                    new CodeMatch(OpCodes.Ldarg_0),
+                    new CodeMatch(i => i.LoadsField(kSpineIndexField)),
+                    new CodeMatch(OpCodes.Ldarg_0),
+                    new CodeMatch(i => i.LoadsField(kHeadIndexField)),
+                    new CodeMatch(OpCodes.Ldarg_0),
+                    new CodeMatch(i => i.LoadsField(kHeadPositionField)),
+                    new CodeMatch(OpCodes.Ldloc_2),
+                    new CodeMatch(OpCodes.Ldarg_0),
+                    new CodeMatch(i => i.LoadsField(kPelvisPositionWeightField)),
+                    new CodeMatch(OpCodes.Ldc_R4),
+                    new CodeMatch(OpCodes.Mul),
+                    new CodeMatch(i => i.Calls(kSolveTrigonometricMethod)))
+                .Repeat(cm => cm.RemoveInstructions(16))
+                .Start()
 
-            // fully remove VirtualBone.SolveTrigonometric(bones, pelvisIndex, spineIndex, headIndex, headPosition, bendNormal, pelvisPositionWeight * <whatever>);
-            while (codeMatcher.MatchForward(
-                false,
-                new CodeMatch(OpCodes.Ldarg_0),
-                new CodeMatch(i => i.LoadsField(kBonesField)),
-                new CodeMatch(OpCodes.Ldarg_0),
-                new CodeMatch(i => i.LoadsField(kPelvisIndexField)),
-                new CodeMatch(OpCodes.Ldarg_0),
-                new CodeMatch(i => i.LoadsField(kSpineIndexField)),
-                new CodeMatch(OpCodes.Ldarg_0),
-                new CodeMatch(i => i.LoadsField(kHeadIndexField)),
-                new CodeMatch(OpCodes.Ldarg_0),
-                new CodeMatch(i => i.LoadsField(kHeadPositionField)),
-                new CodeMatch(OpCodes.Ldloc_2),
-                new CodeMatch(OpCodes.Ldarg_0),
-                new CodeMatch(i => i.LoadsField(kPelvisPositionWeightField)),
-                new CodeMatch(OpCodes.Ldc_R4),
-                new CodeMatch(OpCodes.Mul),
-                new CodeMatch(i => i.Calls(kSolveTrigonometricMethod))).IsValid)
-            {
-                codeMatcher.RemoveInstructions(16);
-            }
-
-            codeMatcher.Start();
-
-            // replace pelvisIndex with spineIndex (hasChest && hasNeck)
-            codeMatcher
+                // replace pelvisIndex with spineIndex (hasChest && hasNeck)
                 .MatchForward(
                     false,
                     new CodeMatch(OpCodes.Ldarg_0),
                     new CodeMatch(i => i.LoadsField(kPelvisIndexField)))
                 .Advance(1)
-                .SetOperandAndAdvance(kSpineIndexField);
+                .SetOperandAndAdvance(kSpineIndexField)
 
-            // replace `* 0.6f` with `* 0.9f`
-            codeMatcher.MatchForward(false, new CodeMatch(OpCodes.Ldc_R4), new CodeMatch(OpCodes.Mul)).SetOperandAndAdvance(0.9f);
+                // replace `* 0.6f` with `* 0.9f`
+                .MatchForward(false, new CodeMatch(OpCodes.Ldc_R4), new CodeMatch(OpCodes.Mul)).SetOperandAndAdvance(0.9f)
 
-            // call new method
-            codeMatcher
+                // call new method
                 .MatchForward(false, new CodeMatch(i => i.Calls(kSolveTrigonometricMethod)))
-                .SetOperandAndAdvance(kNewSolveTrigonometricMethod);
+                .SetOperandAndAdvance(kNewSolveTrigonometricMethod)
 
-            // replace pelvisIndex with chestIndex (hasChest && hasNeck)
-            codeMatcher
+                // replace pelvisIndex with chestIndex (hasChest && hasNeck)
                 .MatchForward(
                     false,
                     new CodeMatch(OpCodes.Ldarg_0),
                     new CodeMatch(i => i.LoadsField(kPelvisIndexField)))
                 .Advance(1)
-                .SetOperandAndAdvance(kChestIndexField);
+                .SetOperandAndAdvance(kChestIndexField)
 
-            // remove unnecessary multiplication
-            codeMatcher.MatchForward(false, new CodeMatch(OpCodes.Ldc_R4), new CodeMatch(OpCodes.Mul)).RemoveInstructions(2);
+                // remove unnecessary multiplication
+                .MatchForward(false, new CodeMatch(OpCodes.Ldc_R4), new CodeMatch(OpCodes.Mul)).RemoveInstructions(2)
 
-            // call new method
-            codeMatcher
+                // call new method
                 .MatchForward(false, new CodeMatch(i => i.Calls(kSolveTrigonometricMethod)))
-                .SetOperandAndAdvance(kNewSolveTrigonometricMethod);
+                .SetOperandAndAdvance(kNewSolveTrigonometricMethod)
 
-            // replace pelvisIndex with spineIndex (hasChest && !hasNeck)
-            codeMatcher
+                // replace pelvisIndex with spineIndex (hasChest && !hasNeck)
                 .MatchForward(
                     false,
                     new CodeMatch(OpCodes.Ldarg_0),
                     new CodeMatch(i => i.LoadsField(kPelvisIndexField)))
                 .Advance(1)
-                .SetOperandAndAdvance(kSpineIndexField);
+                .SetOperandAndAdvance(kSpineIndexField)
 
-            // remove unnecessary multiplication
-            codeMatcher.MatchForward(false, new CodeMatch(OpCodes.Ldc_R4), new CodeMatch(OpCodes.Mul)).RemoveInstructions(2);
+                // remove unnecessary multiplication
+                .MatchForward(false, new CodeMatch(OpCodes.Ldc_R4), new CodeMatch(OpCodes.Mul)).RemoveInstructions(2)
 
-            // call new method
-            codeMatcher
+                // call new method
                 .MatchForward(false, new CodeMatch(i => i.Calls(kSolveTrigonometricMethod)))
-                .SetOperandAndAdvance(kNewSolveTrigonometricMethod);
+                .SetOperandAndAdvance(kNewSolveTrigonometricMethod)
 
-            // replace pelvisIndex with spineIndex (!hasChest && hasNeck)
-            codeMatcher
+                // replace pelvisIndex with spineIndex (!hasChest && hasNeck)
                 .MatchForward(
                     false,
                     new CodeMatch(OpCodes.Ldarg_0),
                     new CodeMatch(i => i.LoadsField(kPelvisIndexField)))
                 .Advance(1)
-                .SetOperandAndAdvance(kSpineIndexField);
+                .SetOperandAndAdvance(kSpineIndexField)
 
-            // remove unnecessary multiplication
-            codeMatcher.MatchForward(false, new CodeMatch(OpCodes.Ldc_R4), new CodeMatch(OpCodes.Mul)).RemoveInstructions(2);
+                // remove unnecessary multiplication
+                .MatchForward(false, new CodeMatch(OpCodes.Ldc_R4), new CodeMatch(OpCodes.Mul)).RemoveInstructions(2)
 
-            // call new method
-            codeMatcher
+                // call new method
                 .MatchForward(false, new CodeMatch(i => i.Calls(kSolveTrigonometricMethod)))
-                .SetOperandAndAdvance(kNewSolveTrigonometricMethod);
+                .SetOperandAndAdvance(kNewSolveTrigonometricMethod)
 
-            // call new method (!hasNeck && !hasChest)
-            codeMatcher
+                // call new method (!hasNeck && !hasChest)
                 .MatchForward(false, new CodeMatch(i => i.Calls(kSolveTrigonometricMethod)))
-                .SetOperandAndAdvance(kNewSolveTrigonometricMethod);
+                .SetOperandAndAdvance(kNewSolveTrigonometricMethod)
 
-            return codeMatcher.Instructions();
+                .Instructions();
         }
 
         /// <remarks>
