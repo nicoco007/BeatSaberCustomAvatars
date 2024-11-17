@@ -133,54 +133,48 @@ namespace CustomAvatar.Patches
                 .Instructions();
         }
 
-        /// <remarks>
-        /// This is the same as <see cref="IKSolverVR.VirtualBone.SolveTrigonometric" /> except for the additional <see cref="Mathf.Clamp(float, float, float)"/> on the <c>length</c> variable.
-        /// </remarks>
-        public static void SolveTrigonometric(IKSolverVR.VirtualBone[] bones, int first, int second, int third, Vector3 targetPosition, Vector3 bendNormal, float weight)
+        private static readonly MethodInfo kMathfSqrtMethod = AccessTools.DeclaredMethod(typeof(Mathf), nameof(Mathf.Sqrt));
+        private static readonly MethodInfo kMathfClampMethod = AccessTools.DeclaredMethod(typeof(Mathf), nameof(Mathf.Clamp), [typeof(float), typeof(float), typeof(float)]);
+        private static readonly MethodInfo kVector3DistanceMethod = AccessTools.DeclaredMethod(typeof(Vector3), nameof(Vector3.Distance));
+        private static readonly FieldInfo kVirtualBoneSolverPositionField = AccessTools.DeclaredField(typeof(IKSolverVR.VirtualBone), nameof(IKSolverVR.VirtualBone.solverPosition));
+
+        /// <summary>
+        /// A patched version of <see cref="IKSolverVR.VirtualBone.SolveTrigonometric"/> where the
+        /// target distance between the bones is clamped to their resting distance. This prevents the bones from being straightened more than they are in the rest pose.
+        /// </summary>
+        [HarmonyReversePatch]
+        [HarmonyPatch(typeof(IKSolverVR.VirtualBone), nameof(IKSolverVR.VirtualBone.SolveTrigonometric))]
+        private static void SolveTrigonometric(IKSolverVR.VirtualBone[] bones, int first, int second, int third, Vector3 targetPosition, Vector3 bendNormal, float weight)
         {
-            if (weight <= 0f)
+            // Replace `float directionMag = Mathf.Sqrt(sqrMagnitude);`
+            // with `float directionMag = Mathf.Clamp(Mathf.Sqrt(sqrMagnitude), 0, Vector3.Distance(bones[third].solverPosition, bones[first].solverPosition));`
+#pragma warning disable IDE0062, CS8321
+            IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
             {
-                return;
+                return new CodeMatcher(instructions)
+                    .MatchForward(
+                        true,
+                        new CodeMatch(i => i.Calls(kMathfSqrtMethod)))
+                    .Advance(1)
+                    .InsertAndAdvance(
+                        new CodeInstruction(OpCodes.Ldc_R4, 0f),
+                        // bones[first].solverPosition
+                        new CodeInstruction(OpCodes.Ldarg_0),
+                        new CodeInstruction(OpCodes.Ldarg_1),
+                        new CodeInstruction(OpCodes.Ldelem_Ref),
+                        new CodeInstruction(OpCodes.Ldfld, kVirtualBoneSolverPositionField),
+                        // bones[third].solverPosition
+                        new CodeInstruction(OpCodes.Ldarg_0),
+                        new CodeInstruction(OpCodes.Ldarg_3),
+                        new CodeInstruction(OpCodes.Ldelem_Ref),
+                        new CodeInstruction(OpCodes.Ldfld, kVirtualBoneSolverPositionField),
+                        // Vector3.Distance(bones[third].solverPosition, bones[first].solverPosition)
+                        new CodeInstruction(OpCodes.Call, kVector3DistanceMethod),
+                        // Mathf.Clamp(Mathf.Sqrt(sqrMag), 0, Vector3.Distance(bones[third].solverPosition, bones[first].solverPosition));
+                        new CodeInstruction(OpCodes.Call, kMathfClampMethod))
+                    .InstructionEnumeration();
             }
-
-            targetPosition = Vector3.Lerp(bones[third].solverPosition, targetPosition, weight);
-
-            Vector3 dir = targetPosition - bones[first].solverPosition;
-
-            float sqrMag = dir.sqrMagnitude;
-            if (sqrMag == 0f)
-            {
-                return;
-            }
-
-            // This is the only change from the original method: clamp the distance to the distance between the
-            // first and last bones so the spine doesn't get overextended. This isn't perfect because the FABRIK pass
-            // that runs before this can straighten the spine slightly but it makes it significantly less jarring.
-            float length = Mathf.Clamp(Mathf.Sqrt(sqrMag), 0, Vector3.Distance(bones[third].solverPosition, bones[first].solverPosition));
-
-            float sqrMag1 = (bones[second].solverPosition - bones[first].solverPosition).sqrMagnitude;
-            float sqrMag2 = (bones[third].solverPosition - bones[second].solverPosition).sqrMagnitude;
-
-            // Get the general world space bending direction
-            var bendDir = Vector3.Cross(dir, bendNormal);
-
-            Vector3 toBendPoint = IKSolverVR.VirtualBone.GetDirectionToBendPoint(dir, length, bendDir, sqrMag1, sqrMag2);
-
-            var q1 = Quaternion.FromToRotation(bones[second].solverPosition - bones[first].solverPosition, toBendPoint);
-            if (weight < 1f)
-            {
-                q1 = Quaternion.Lerp(Quaternion.identity, q1, weight);
-            }
-
-            IKSolverVR.VirtualBone.RotateAroundPoint(bones, first, bones[first].solverPosition, q1);
-
-            var q2 = Quaternion.FromToRotation(bones[third].solverPosition - bones[second].solverPosition, targetPosition - bones[second].solverPosition);
-            if (weight < 1f)
-            {
-                q2 = Quaternion.Lerp(Quaternion.identity, q2, weight);
-            }
-
-            IKSolverVR.VirtualBone.RotateAroundPoint(bones, second, bones[second].solverPosition, q2);
+#pragma warning restore IDE0062, CS8321
         }
     }
 }
