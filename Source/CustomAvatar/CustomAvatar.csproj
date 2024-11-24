@@ -181,6 +181,8 @@
     <Reference Include="UnityEngine.SpatialTracking">
       <HintPath>$(BeatSaberDir)Beat Saber_Data\Managed\UnityEngine.SpatialTracking.dll</HintPath>
       <Private>False</Private>
+      <Publicize>True</Publicize>
+      <SkipOverridableMethods>False</SkipOverridableMethods>
     </Reference>
     <Reference Include="UnityEngine.SubsystemsModule">
       <HintPath>$(BeatSaberDir)Beat Saber_Data\Managed\UnityEngine.SubsystemsModule.dll</HintPath>
@@ -224,7 +226,7 @@
     <AdditionalArtifactFiles Include="$(ProjectDir)..\..\Packaging\CustomAvatar\**\*.*" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="BSIPA.AssemblyPublicizer.MSBuild" Version="0.5.0">
+    <PackageReference Include="BSIPA.AssemblyPublicizer.MSBuild" Version="0.5.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

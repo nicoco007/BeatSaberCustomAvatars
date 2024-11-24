@@ -163,6 +163,37 @@ namespace CustomAvatar.Rendering
             RemoveFromPlayerSpaceManager();
         }
 
+        protected void OnPreCull()
+        {
+            if (_trackedPoseDriver != null)
+            {
+                _trackedPoseDriver.UseRelativeTransform = !beatSaberUtilities.hasFocus;
+                _trackedPoseDriver.PerformUpdate();
+            }
+
+            UpdateCameraMask();
+        }
+
+        protected void OnPostRender()
+        {
+            if (_trackedPoseDriver != null)
+            {
+                _trackedPoseDriver.UseRelativeTransform = false;
+            }
+        }
+
+        private void OnFocusChanged(bool hasFocus)
+        {
+            if (_trackedPoseDriver != null)
+            {
+                _trackedPoseDriver.originPose = hasFocus ? Pose.identity : new Pose(
+                    Vector3.Project(Quaternion.Euler(0, 180, 0) * -transform.localPosition * 2, Vector3.right) + new Vector3(0, 0, 1.5f),
+                    Quaternion.Euler(0, 180, 0));
+            }
+
+            UpdateCameraMask();
+        }
+
         private void OnCameraNearClipPlaneChanged(float value)
         {
             UpdateCameraMask();
@@ -170,19 +201,6 @@ namespace CustomAvatar.Rendering
 
         private void OnFpfcSettingsChanged(IFPFCSettings fpfcSettings)
         {
-            UpdateCameraMask();
-        }
-
-        private void OnFocusChanged(bool hasFocus)
-        {
-            if (_trackedPoseDriver != null)
-            {
-                _trackedPoseDriver.UseRelativeTransform = !hasFocus;
-                _trackedPoseDriver.originPose = hasFocus ? Pose.identity : new Pose(
-                    Vector3.Project(Quaternion.Euler(0, 180, 0) * -transform.localPosition * 2, Vector3.right) + new Vector3(0, 0, 1.5f),
-                    Quaternion.Euler(0, 180, 0));
-            }
-
             UpdateCameraMask();
         }
 
