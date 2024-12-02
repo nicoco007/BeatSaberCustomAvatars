@@ -169,6 +169,7 @@ namespace CustomAvatar.Rendering
             {
                 _trackedPoseDriver.UseRelativeTransform = !beatSaberUtilities.hasFocus;
                 _trackedPoseDriver.PerformUpdate();
+                _camera.ResetWorldToCameraMatrix();
             }
 
             UpdateCameraMask();
