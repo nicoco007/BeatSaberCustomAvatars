@@ -171,16 +171,25 @@ namespace CustomAvatar.Rendering
                 _trackedPoseDriver.PerformUpdate();
                 _camera.ResetWorldToCameraMatrix();
             }
-
-            UpdateCameraMask();
         }
 
         protected void OnPostRender()
         {
             if (_trackedPoseDriver != null)
             {
+                // the VR camera seems to always be rendered last so we don't need to re-update the camera pose/matrix
                 _trackedPoseDriver.UseRelativeTransform = false;
             }
+        }
+
+        private void OnCameraNearClipPlaneChanged(float value)
+        {
+            UpdateCameraMask();
+        }
+
+        private void OnFpfcSettingsChanged(IFPFCSettings fpfcSettings)
+        {
+            UpdateCameraMask();
         }
 
         private void OnFocusChanged(bool hasFocus)
@@ -192,16 +201,6 @@ namespace CustomAvatar.Rendering
                     Quaternion.Euler(0, 180, 0));
             }
 
-            UpdateCameraMask();
-        }
-
-        private void OnCameraNearClipPlaneChanged(float value)
-        {
-            UpdateCameraMask();
-        }
-
-        private void OnFpfcSettingsChanged(IFPFCSettings fpfcSettings)
-        {
             UpdateCameraMask();
         }
 
