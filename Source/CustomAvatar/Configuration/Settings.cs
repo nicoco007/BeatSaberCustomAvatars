@@ -20,6 +20,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using CustomAvatar.Avatar;
 using CustomAvatar.Player;
+using CustomAvatar.Rendering;
 using CustomAvatar.Utilities;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -40,6 +41,7 @@ namespace CustomAvatar.Configuration
         public ObservableValue<bool> showAvatarInSmoothCamera { get; } = new ObservableValue<bool>(true);
         public ObservableValue<bool> showRenderModels { get; } = new ObservableValue<bool>(true);
         public bool showAvatarInMirrors { get; set; } = true;
+        public ObservableValue<HmdCameraBehaviour> hmdCameraBehaviour { get; } = new ObservableValue<HmdCameraBehaviour>(HmdCameraBehaviour.HmdOnly);
         public ObservableValue<SkinWeights> skinWeights { get; } = new ObservableValue<SkinWeights>(SkinWeights.FourBones);
         public Mirror mirror { get; } = new Mirror();
 

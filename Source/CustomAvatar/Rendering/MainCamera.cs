@@ -27,6 +27,8 @@ using Zenject;
 
 namespace CustomAvatar.Rendering
 {
+    [RequireComponent(typeof(Camera))]
+    [RequireComponent(typeof(TrackedPoseDriver))]
     [DisallowMultipleComponent]
     internal class MainCamera : MonoBehaviour
     {
@@ -65,7 +67,7 @@ namespace CustomAvatar.Rendering
             mask |= AvatarLayers.kAlwaysVisibleMask;
 
             // FPFC basically ends up being a 3rd person camera
-            if (fpfcSettings.Enabled || !beatSaberUtilities.hasFocus)
+            if (fpfcSettings.Enabled || (!beatSaberUtilities.hasFocus && _settings.hmdCameraBehaviour == HmdCameraBehaviour.AllCameras))
             {
                 mask |= AvatarLayers.kOnlyInThirdPersonMask;
             }
@@ -165,20 +167,22 @@ namespace CustomAvatar.Rendering
 
         protected void OnPreCull()
         {
-            if (_trackedPoseDriver != null)
+            if (_settings.hmdCameraBehaviour == HmdCameraBehaviour.HmdOnly && !beatSaberUtilities.hasFocus)
             {
-                _trackedPoseDriver.UseRelativeTransform = !beatSaberUtilities.hasFocus;
+                _trackedPoseDriver.UseRelativeTransform = true;
                 _trackedPoseDriver.PerformUpdate();
                 _camera.ResetWorldToCameraMatrix();
+                _camera.cullingMask |= AvatarLayers.kOnlyInThirdPersonMask;
             }
         }
 
         protected void OnPostRender()
         {
-            if (_trackedPoseDriver != null)
+            if (_settings.hmdCameraBehaviour == HmdCameraBehaviour.HmdOnly && !beatSaberUtilities.hasFocus)
             {
                 // the VR camera seems to always be rendered last so we don't need to re-update the camera pose/matrix
                 _trackedPoseDriver.UseRelativeTransform = false;
+                UpdateCameraMask();
             }
         }
 
@@ -194,12 +198,10 @@ namespace CustomAvatar.Rendering
 
         private void OnFocusChanged(bool hasFocus)
         {
-            if (_trackedPoseDriver != null)
-            {
-                _trackedPoseDriver.originPose = hasFocus ? Pose.identity : new Pose(
-                    Vector3.Project(Quaternion.Euler(0, 180, 0) * -transform.localPosition * 2, Vector3.right) + new Vector3(0, 0, 1.5f),
-                    Quaternion.Euler(0, 180, 0));
-            }
+            _trackedPoseDriver.originPose = hasFocus ? Pose.identity : new Pose(
+                Vector3.Project(Quaternion.Euler(0, 180, 0) * -transform.localPosition * 2, Vector3.right) + new Vector3(0, 0, 1.5f),
+                Quaternion.Euler(0, 180, 0));
+            _trackedPoseDriver.UseRelativeTransform = _settings.hmdCameraBehaviour == HmdCameraBehaviour.AllCameras;
 
             UpdateCameraMask();
         }

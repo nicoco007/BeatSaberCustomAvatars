@@ -17,11 +17,15 @@
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
+using CustomAvatar.Utilities;
+using SiraUtil.Tools.FPFC;
 using UnityEngine;
 using Zenject;
 
 namespace CustomAvatar.Rendering
 {
+    [RequireComponent(typeof(SmoothCamera))]
+    [RequireComponent(typeof(Camera))]
     [DisallowMultipleComponent]
     internal class SmoothCamera : MonoBehaviour
     {
@@ -29,15 +33,19 @@ namespace CustomAvatar.Rendering
 
         private ILogger<SmoothCamera> _logger;
         private Settings _settings;
+        private IFPFCSettings _fpfcSettings;
+        private BeatSaberUtilities _beatSaberUtilities;
 
         private global::SmoothCamera _smoothCamera;
         private Camera _camera;
 
         [Inject]
-        public void Construct(ILogger<SmoothCamera> logger, Settings settings)
+        public void Construct(ILogger<SmoothCamera> logger, Settings settings, IFPFCSettings fpfcSettings, BeatSaberUtilities beatSaberUtilities)
         {
             _logger = logger;
             _settings = settings;
+            _fpfcSettings = fpfcSettings;
+            _beatSaberUtilities = beatSaberUtilities;
 
             _smoothCamera = GetComponent<global::SmoothCamera>();
             _camera = GetComponent<Camera>();
@@ -55,6 +63,10 @@ namespace CustomAvatar.Rendering
             _settings.cameraNearClipPlane.changed += OnCameraNearClipPlaneChanged;
             _settings.showAvatarInSmoothCamera.changed += OnShowAvatarInSmoothCameraChanged;
 
+            _fpfcSettings.Changed += OnFpfcSettingsChanged;
+
+            _beatSaberUtilities.focusChanged += OnFocusChanged;
+
             UpdateSmoothCamera();
         }
 
@@ -64,6 +76,16 @@ namespace CustomAvatar.Rendering
             {
                 _settings.cameraNearClipPlane.changed -= OnCameraNearClipPlaneChanged;
                 _settings.showAvatarInSmoothCamera.changed -= OnShowAvatarInSmoothCameraChanged;
+            }
+
+            if (_fpfcSettings != null)
+            {
+                _fpfcSettings.Changed -= OnFpfcSettingsChanged;
+            }
+
+            if (_beatSaberUtilities != null)
+            {
+                _beatSaberUtilities.focusChanged -= OnFocusChanged;
             }
         }
 
@@ -77,6 +99,16 @@ namespace CustomAvatar.Rendering
             UpdateSmoothCamera();
         }
 
+        private void OnFpfcSettingsChanged(IFPFCSettings fpfcSettings)
+        {
+            UpdateSmoothCamera();
+        }
+
+        private void OnFocusChanged(bool focused)
+        {
+            UpdateSmoothCamera();
+        }
+
         private void UpdateSmoothCamera()
         {
             _logger.LogInformation($"Setting avatar culling mask and near clip plane on '{_camera.name}'");
@@ -86,7 +118,7 @@ namespace CustomAvatar.Rendering
                 _camera.cullingMask &= ~AvatarLayers.kAllLayersMask;
                 _camera.nearClipPlane = kCameraDefaultNearClipMask;
             }
-            else if (_smoothCamera._thirdPersonEnabled)
+            else if (_smoothCamera._thirdPersonEnabled || _fpfcSettings.Enabled || (!_beatSaberUtilities.hasFocus && _settings.hmdCameraBehaviour == HmdCameraBehaviour.AllCameras)) // TODO: consolidate these conditions with the ones in MainCamera
             {
                 _camera.cullingMask = _camera.cullingMask | AvatarLayers.kOnlyInThirdPersonMask | AvatarLayers.kAlwaysVisibleMask;
                 _camera.nearClipPlane = kCameraDefaultNearClipMask;

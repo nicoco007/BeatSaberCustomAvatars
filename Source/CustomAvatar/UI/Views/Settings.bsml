@@ -23,27 +23,21 @@
           <icon-button hover-hint="~measureButtonHoverHintText" on-click="OnMeasureArmSpanButtonClicked" icon="~measureButtonIcon" interactable="~isMeasureButtonEnabled" show-underline="false" anchor-min="1 0.5" anchor-max="1 0.5" pivot="1 0.5" anchored-position="0 0" size-delta="6 8" padding="1" horizontal-fit="Unconstrained" vertical-fit="Unconstrained" />
         </bg>
 
-        <horizontal pref-width="90" pad-top="2">
-          <text color="#808080" text="Visibility" font-size="4" italics="true" align="Baseline" />
-        </horizontal>
+        <text color="#808080" text="Visibility" font-size="4" italics="true" align="Capline" anchor-min="0 0.5" anchor-max="1 0.5" size-delta="0 7" />
         
         <toggle-setting text="Show in First Person" value="visibleInFirstPerson" bind-value="true" apply-on-change="true" />
         <toggle-setting text="Show in Smooth Camera" value="showAvatarInSmoothCamera" bind-value="true" apply-on-change="true" />
         <toggle-setting text="Show in Mirrors" value="showAvatarInMirrors" bind-value="true" apply-on-change="true" />
         <toggle-setting text="Show Controllers/Trackers" active="~showRenderModelsOption" hover-hint="Show controllers/trackers while in this menu" value="showRenderModels" bind-value="true" apply-on-change="true" />
 
-        <horizontal pref-width="90" pad-top="2">
-          <text color="#808080" text="Advanced" font-size="4" italics="true" align="Baseline" />
-        </horizontal>
+        <text color="#808080" text="Advanced" font-size="4" italics="true" align="Capline" anchor-min="0 0.5" anchor-max="1 0.5" size-delta="0 7" />
 
         <toggle-setting value="moveFloorWithRoomAdjust" bind-value="true" apply-on-change="true" text="Move Floor with Room Adjust" hover-hint="Move the floor/environment along with the game's built-in vertical room adjust." />
         <toggle-setting value="enableLocomotion" bind-value="true" apply-on-change="true" text="Enable locomotion" hover-hint="Allow feet and waist to be moved automatically to follow your head/body when not using dedicated trackers. Only affects full body avatars." />
         <list-setting value="cameraNearClipPlane" bind-value="true" apply-on-change="true" text="Camera Near Clip Plane" hover-hint="Distance from your eyes at which objets start being visible." options="nearClipPlaneValues" formatter="CentimeterFormatter" />
       </macro.as-host>
 
-      <horizontal pref-width="90" pad-top="2">
-        <text color="#808080" text="Automatic Calibration (beta)" font-size="4" italics="true" align="Baseline" />
-      </horizontal>
+      <text color="#808080" text="Automatic Calibration (beta)" font-size="4" italics="true" align="Capline" anchor-min="0 0.5" anchor-max="1 0.5" size-delta="0 7" />
 
       <macro.as-host host="automaticFbtCalibrationHost">
         <macro.as-host host="trackerStatusHost">
@@ -89,13 +83,14 @@
   <tab tags="avatar-tabs" tab-name="Interface" size-delta-y="-16" anchored-position-y="-8">
     <macro.as-host host="interfaceSettingsHost">
       <settings-container size-delta-x="-20" anchored-position-x="4">
-        <horizontal pref-width="90" pad-top="2">
-          <text color="#808080" text="Mirror" font-size="4" italics="true" align="Baseline" />
-        </horizontal>
+        <text color="#808080" text="Mirror" font-size="4" italics="true" align="Capline" anchor-min="0 0.5" anchor-max="1 0.5" size-delta="0 7" />
         <increment-setting text="Render Scale" value="renderScale" bind-value="true" apply-on-change="true" min="0.5" max="2" increment="0.1" />
         <list-setting text="Anti Aliasing" value="antiAliasingLevel" bind-value="true" apply-on-change="true" options="antiAliasingLevelOptions" formatter="AntiAliasingLevelFormatter" />
         <toggle-setting text="Use Fake Mirror (beta)" value="useFakeMirror" bind-value="true" apply-on-change="true" hover-hint="Show a mirrored version of the current avatar rather than rendering a full mirror. Improves performance and allows the avatar to be closer to you, but may not accurately reflect all avatar features." />
         <toggle-setting text="Show in non-VR cameras" value="renderInExternalCameras" bind-value="true" apply-on-change="true" hover-hint="Disable this setting to improve performance in this menu when multiple cameras are used (e.g. smooth camera or Camera2)." />
+
+        <text color="#808080" text="Other" font-size="4" italics="true" align="Capline" anchor-min="0 0.5" anchor-max="1 0.5" size-delta="0 7" />
+        <dropdown-list-setting text="Flip camera when focus is lost" value="hmdCameraBehaviour" bind-value="true" apply-on-change="true" options="hmdCameraBehaviourOptions" formatter="HmdCameraBehaviourFormatter" hover-hint="Flip the camera to face your avatar when the system (SteamVR, Oculus, etc.) dashboard is opened or when you remove your headset." />
       </settings-container>
     </macro.as-host>
   </tab>

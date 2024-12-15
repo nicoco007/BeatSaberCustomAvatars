@@ -14,8 +14,8 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
 using CustomAvatar.Configuration;
+using CustomAvatar.Rendering;
 
 namespace CustomAvatar.UI
 {
@@ -52,7 +52,15 @@ namespace CustomAvatar.UI
             set => _settings.mirror.renderInExternalCameras = value;
         }
 
-        internal List<object> antiAliasingLevelOptions = new(new object[] { 1, 2, 4, 8 });
+        internal HmdCameraBehaviour hmdCameraBehaviour
+        {
+            get => _settings.hmdCameraBehaviour;
+            set => _settings.hmdCameraBehaviour.value = value;
+        }
+
+        internal int[] antiAliasingLevelOptions = [1, 2, 4, 8];
+
+        internal HmdCameraBehaviour[] hmdCameraBehaviourOptions = [HmdCameraBehaviour.Off, HmdCameraBehaviour.HmdOnly, HmdCameraBehaviour.AllCameras];
 
         protected string AntiAliasingLevelFormatter(int value)
         {
@@ -64,6 +72,17 @@ namespace CustomAvatar.UI
             {
                 return "Off";
             }
+        }
+
+        protected string HmdCameraBehaviourFormatter(HmdCameraBehaviour value)
+        {
+            return value switch
+            {
+                HmdCameraBehaviour.Off => "Off",
+                HmdCameraBehaviour.HmdOnly => "Inside HMD Only",
+                HmdCameraBehaviour.AllCameras => "All HMD Cameras",
+                _ => "?",
+            };
         }
     }
 }
