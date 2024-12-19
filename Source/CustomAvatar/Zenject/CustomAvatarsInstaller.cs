@@ -77,7 +77,7 @@ namespace CustomAvatar.Zenject
 
             _logger.LogInformation($"Current Unity XR device: '{XRSettings.loadedDeviceName}'");
 
-            if (XRSettings.loadedDeviceName.IndexOf("OpenXR", StringComparison.OrdinalIgnoreCase) >= 0)
+            if (XRSettings.loadedDeviceName.IndexOf("OpenXR", StringComparison.OrdinalIgnoreCase) >= 0 || XRSettings.loadedDeviceName.IndexOf("OpenVR", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 Container.Bind(typeof(IDeviceProvider), typeof(IInitializable), typeof(IDisposable)).To<UnityXRDeviceProvider>().AsSingle();
 
