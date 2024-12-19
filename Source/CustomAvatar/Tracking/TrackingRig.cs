@@ -199,11 +199,6 @@ namespace CustomAvatar.Tracking
             leftFoot.transform.SetParent(fullBodyTracking, false);
             rightFoot.transform.SetParent(fullBodyTracking, false);
 
-            VRControllersValueSettingsOffsets localPlayerControllerOffset = _container.InstantiateComponent<VRControllersValueSettingsOffsets>(gameObject);
-
-            SetUpVRController(leftHand, XRNode.LeftHand, localPlayerControllerOffset);
-            SetUpVRController(rightHand, XRNode.RightHand, localPlayerControllerOffset);
-
             if (_renderModelProvider != null)
             {
                 _leftHandRenderModel = CreateRenderModelObject("Left Hand Render Model");
@@ -258,6 +253,12 @@ namespace CustomAvatar.Tracking
 
         protected void Start()
         {
+            VRControllersValueSettingsOffsets localPlayerControllerOffset = _container.InstantiateComponent<VRControllersValueSettingsOffsets>(gameObject);
+
+            // UnityXRHelper sets things up in Start(), so we have to wait until then for VRController since it calls IVRPlatformHelper stuff in OnEnable().
+            SetUpVRController(leftHand, XRNode.LeftHand, localPlayerControllerOffset);
+            SetUpVRController(rightHand, XRNode.RightHand, localPlayerControllerOffset);
+
             if (_fpfcSettings != null)
             {
                 _fpfcSettings.Changed += OnFpfcSettingsChanged;
