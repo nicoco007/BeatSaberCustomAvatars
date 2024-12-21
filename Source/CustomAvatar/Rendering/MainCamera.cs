@@ -28,7 +28,6 @@ using Zenject;
 namespace CustomAvatar.Rendering
 {
     [RequireComponent(typeof(Camera))]
-    [RequireComponent(typeof(TrackedPoseDriver))]
     [DisallowMultipleComponent]
     internal class MainCamera : MonoBehaviour
     {
