@@ -154,7 +154,7 @@ namespace CustomAvatar.Zenject
             if (OpenVRHelper.Initialize())
             {
                 Container.Bind(typeof(OpenVRRenderModelLoader), typeof(IDisposable)).To<OpenVRRenderModelLoader>().AsSingle();
-                Container.Bind(typeof(IRenderModelProvider), typeof(IInitializable)).To<OpenVRRenderModelProvider>().AsSingle();
+                Container.Bind(typeof(IRenderModelProvider)).To<OpenVRRenderModelProvider>().AsSingle();
             }
         }
     }

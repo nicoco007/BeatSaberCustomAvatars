@@ -33,9 +33,9 @@ namespace CustomAvatar.Tracking.OpenVR
     internal class OpenVRRenderModelLoader : IDisposable
     {
         private static readonly uint kRenderModelVertexStructSize = (uint)Marshal.SizeOf(typeof(RenderModel_Vertex_t));
-        private static readonly string[] kOffsetComponentNames = new[] { "openxr_grip", "grip" };
+        private static readonly string[] kOffsetComponentNames = ["openxr_grip", "grip"];
 
-        private readonly Dictionary<string, RenderModel> _renderModelCache = new();
+        private readonly Dictionary<string, RenderModel> _renderModelCache = [];
         private readonly SemaphoreSlim _renderModelSemaphore = new(1);
 
         private readonly ILogger<OpenVRRenderModelLoader> _logger;
@@ -78,7 +78,11 @@ namespace CustomAvatar.Tracking.OpenVR
                 if (!_renderModelCache.TryGetValue(renderModelName, out RenderModel renderModel))
                 {
                     renderModel = await LoadRenderModelAsync(renderModelName);
-                    _renderModelCache[renderModelName] = renderModel;
+
+                    if (renderModel != null)
+                    {
+                        _renderModelCache[renderModelName] = renderModel;
+                    }
                 }
 
                 return renderModel;

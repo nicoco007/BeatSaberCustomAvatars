@@ -14,12 +14,12 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using CustomAvatar.Logging;
 using Valve.VR;
-using Zenject;
 
 namespace CustomAvatar.Tracking.OpenVR
 {
@@ -27,14 +27,12 @@ namespace CustomAvatar.Tracking.OpenVR
     using OpenVR = Valve.VR.OpenVR;
 #pragma warning restore IDE0065
 
-    internal class OpenVRRenderModelProvider : IRenderModelProvider, IInitializable
+    internal class OpenVRRenderModelProvider : IRenderModelProvider
     {
         private static readonly uint kInputOriginInfoStructSize = (uint)Marshal.SizeOf(typeof(InputOriginInfo_t));
 
         private readonly ILogger<OpenVRRenderModelProvider> _logger;
         private readonly OpenVRRenderModelLoader _openVRRenderModelLoader;
-
-        private readonly ulong[] _handles = new ulong[6];
 
         public OpenVRRenderModelProvider(ILogger<OpenVRRenderModelProvider> logger, OpenVRRenderModelLoader openVRRenderModelLoader)
         {
@@ -42,19 +40,15 @@ namespace CustomAvatar.Tracking.OpenVR
             _openVRRenderModelLoader = openVRRenderModelLoader;
         }
 
-        public void Initialize()
-        {
-            _handles[(int)DeviceUse.Head] = GetDeviceHandle(OpenVR.k_pchPathUserHead);
-            _handles[(int)DeviceUse.LeftHand] = GetDeviceHandle(OpenVR.k_pchPathUserHandLeft);
-            _handles[(int)DeviceUse.RightHand] = GetDeviceHandle(OpenVR.k_pchPathUserHandRight);
-            _handles[(int)DeviceUse.Waist] = GetDeviceHandle(OpenVR.k_pchPathUserWaist);
-            _handles[(int)DeviceUse.LeftFoot] = GetDeviceHandle(OpenVR.k_pchPathUserFootLeft);
-            _handles[(int)DeviceUse.RightFoot] = GetDeviceHandle(OpenVR.k_pchPathUserFootRight);
-        }
-
         public Task<RenderModel> GetRenderModelAsync(DeviceUse deviceUse)
         {
             InputOriginInfo_t originInfo = GetOriginInfo(deviceUse);
+
+            if (originInfo.devicePath == default)
+            {
+                return Task.FromResult<RenderModel>(null);
+            }
+
             string renderModelName = GetStringTrackedDeviceProperty(originInfo.trackedDeviceIndex, ETrackedDeviceProperty.Prop_RenderModelName_String);
 
             if (string.IsNullOrEmpty(renderModelName))
@@ -65,15 +59,31 @@ namespace CustomAvatar.Tracking.OpenVR
             return _openVRRenderModelLoader.GetRenderModelAsync(renderModelName);
         }
 
-        private ulong GetDeviceHandle(string devicePath)
+        private ulong GetDeviceHandle(DeviceUse deviceUse)
         {
+            if (OpenVR.Input == null)
+            {
+                return default;
+            }
+
+            string devicePath = deviceUse switch
+            {
+                DeviceUse.Head => OpenVR.k_pchPathUserHead,
+                DeviceUse.LeftHand => OpenVR.k_pchPathUserHandLeft,
+                DeviceUse.RightHand => OpenVR.k_pchPathUserHandRight,
+                DeviceUse.Waist => OpenVR.k_pchPathUserWaist,
+                DeviceUse.LeftFoot => OpenVR.k_pchPathUserFootLeft,
+                DeviceUse.RightFoot => OpenVR.k_pchPathUserFootRight,
+                _ => throw new ArgumentException("Invalid device use", nameof(deviceUse)),
+            };
+
             ulong handle = 0;
             EVRInputError error = OpenVR.Input.GetInputSourceHandle(devicePath, ref handle);
 
             if (error != EVRInputError.None)
             {
                 _logger.LogError($"Failed to get input source handle for '{devicePath}': {error}");
-                return 0;
+                return default;
             }
 
             return handle;
@@ -81,9 +91,14 @@ namespace CustomAvatar.Tracking.OpenVR
 
         private InputOriginInfo_t GetOriginInfo(DeviceUse deviceUse)
         {
-            ulong handle = _handles[(int)deviceUse];
+            if (OpenVR.Input == null)
+            {
+                return default;
+            }
 
-            if (handle == 0)
+            ulong handle = GetDeviceHandle(deviceUse);
+
+            if (handle == default)
             {
                 return default;
             }
@@ -108,7 +123,7 @@ namespace CustomAvatar.Tracking.OpenVR
         {
             if (OpenVR.System == null)
             {
-                throw new System.InvalidOperationException("OpenVR is not running");
+                throw new InvalidOperationException("OpenVR is not running");
             }
 
             ETrackedPropertyError error = ETrackedPropertyError.TrackedProp_Success;
