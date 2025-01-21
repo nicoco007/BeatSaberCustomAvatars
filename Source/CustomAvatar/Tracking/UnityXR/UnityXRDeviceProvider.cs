@@ -192,15 +192,7 @@ namespace CustomAvatar.Tracking.UnityXR
                     return default;
                 }
 
-                bool isTracked = isTrackedAction.ReadValue<float>() > 0.5f;
-
-                // If we don't check isTracked here, positionAction.ReadValue below throws an InvalidOperationException when the OpenXR loader is disabled.
-                if (!isTracked)
-                {
-                    return new DeviceState(isConnected, isTracked, Vector3.zero, Quaternion.identity);
-                }
-
-                return new DeviceState(isConnected, isTracked, positionAction.ReadValue<Vector3>(), orientationAction.ReadValue<Quaternion>());
+                return new DeviceState(isConnected, isTrackedAction.IsPressed(), positionAction.ReadValue<Vector3>(), orientationAction.ReadValue<Quaternion>());
             }
         }
     }
