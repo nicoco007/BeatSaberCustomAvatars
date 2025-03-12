@@ -16,7 +16,9 @@
 
 using System.IO;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace CustomAvatar.Editor
 {
@@ -32,10 +34,19 @@ namespace CustomAvatar.Editor
 
         #region Behaviour Lifecycle
 
+        protected void OnEnable()
+        {
+            EditorSceneManager.sceneOpened += OnSceneOpened;
+        }
+
+        protected void OnDisable()
+        {
+            EditorSceneManager.sceneOpened -= OnSceneOpened;
+        }
+
         protected void OnFocus()
         {
-            _avatars = FindObjectsOfType<AvatarDescriptor>();
-            Repaint();
+            UpdateList();
         }
 
         protected void OnGUI()
@@ -82,6 +93,17 @@ namespace CustomAvatar.Editor
 
         #endregion
 
+        private void OnSceneOpened(Scene scene, OpenSceneMode mode)
+        {
+            UpdateList();
+        }
+
+        private void UpdateList()
+        {
+            _avatars = FindObjectsOfType<AvatarDescriptor>();
+            Repaint();
+        }
+
         private void SaveAvatar(AvatarDescriptor avatar)
         {
             string destinationPath = EditorUtility.SaveFilePanel("Save avatar file", null, avatar.name + ".avatar", "avatar");
@@ -100,13 +122,13 @@ namespace CustomAvatar.Editor
                 var assetBundleBuild = new AssetBundleBuild
                 {
                     assetBundleName = destinationFileName,
-                    assetNames = new[] { prefabPath }
+                    assetNames = [prefabPath]
                 };
 
                 BuildTargetGroup selectedBuildTargetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
                 BuildTarget activeBuildTarget = EditorUserBuildSettings.activeBuildTarget;
 
-                manifest = BuildPipeline.BuildAssetBundles(tempFolder, new[] { assetBundleBuild }, BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.StandaloneWindows64);
+                manifest = BuildPipeline.BuildAssetBundles(tempFolder, [assetBundleBuild], BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.StandaloneWindows64);
 
                 // switch back to what it was before creating the asset bundle
                 EditorUserBuildSettings.SwitchActiveBuildTarget(selectedBuildTargetGroup, activeBuildTarget);
