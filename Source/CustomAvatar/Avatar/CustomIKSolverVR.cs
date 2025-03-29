@@ -243,9 +243,15 @@ namespace CustomAvatar.Avatar
         [HarmonyPatch]
         internal class CustomArm : Arm
         {
-            private static readonly FieldInfo kPitchOffsetAngleField = AccessTools.DeclaredField(typeof(CustomArm), nameof(shoulderPitchOffset));
+            private static readonly MethodInfo kFromMethod = AccessTools.DeclaredMethod(typeof(CustomArm), nameof(From));
+            private static readonly MethodInfo kToMethod = AccessTools.DeclaredMethod(typeof(CustomArm), nameof(To));
 
-            public float shoulderPitchOffset = -30f;
+            // The extra 15 degrees here comes from the pitchOffsetAngle expecting the vector from the shoulder bone to the upper arm bone to be 15 degrees under the horizon.
+            // We could instead adjust the pitch math to compensate but it seems to make the shoulder rotate in a slightly different way when compared to the original method.
+            private static Vector3 From(Arm self, bool isLeft) => Quaternion.AngleAxis(isLeft ? 15 : -15, self.chestForward) * self.chestRotation * (isLeft ? Vector3.left : Vector3.right);
+
+            // The return value of this method is `workingSpace` without `yOA` added to the angle.
+            private static Quaternion To(Arm self, bool isLeft) => Quaternion.AngleAxis(isLeft ? -90f : 90f, self.chestUp) * self.chestRotation;
 
             /// <summary>
             /// A patched version of <see cref="IKSolverVR.Arm.Solve"/> that assumes the shoulder is initially at its relaxed position instead of forcing the relaxed position that is flat on the XY plane and 15 degrees under the horizon.
@@ -260,48 +266,61 @@ namespace CustomAvatar.Avatar
                 IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
                 {
                     return new CodeMatcher(instructions)
-                        /* Quaternion.AngleAxis(isLeft ? pitchOffsetAngle : -pitchOffsetAngle, chestForward) */
-                        .MatchForward(false,
-                            new CodeMatch(i => i.Equals(OpCodes.Ldc_R4, 30f)),
-                            new CodeMatch(i => i.Branches(out Label? _)),
-                            new CodeMatch(i => i.Equals(OpCodes.Ldc_R4, -30f)))
-                        .SetAndAdvance(OpCodes.Ldarg_0, null)
-                        .InsertAndAdvance(
-                            new CodeInstruction(OpCodes.Ldfld, kPitchOffsetAngleField),
-                            new CodeInstruction(OpCodes.Neg))
+                        // Add `+ yOA` after `Mathf.Atan2(sDirWorking.x, sDirWorking.z) * Mathf.Rad2Deg`
+                        .MatchForward(true,
+                            new CodeMatch(i => i.Equals(OpCodes.Ldc_R4, Mathf.Rad2Deg)),
+                            new CodeMatch(OpCodes.Mul))
+                        .ThrowIfInvalid("Initial yaw calculation not found")
                         .Advance(1)
-                        .SetAndAdvance(OpCodes.Ldarg_0, null)
                         .InsertAndAdvance(
-                            new CodeInstruction(OpCodes.Ldfld, kPitchOffsetAngleField))
-
-                        /* pitch -= pitchOffsetAngle */
+                            new CodeInstruction(OpCodes.Ldloc_2),
+                            new CodeInstruction(OpCodes.Add))
+                        // Remove `yaw -= yOA`
                         .MatchForward(false,
-                            new CodeMatch(i => i.LoadsLocal(11)),
-                            new CodeMatch(i => i.opcode == OpCodes.Ldc_R4 && (float)i.operand == -30f),
+                            new CodeMatch(i => i.LoadsLocal(5)),
+                            new CodeMatch(OpCodes.Ldloc_2),
                             new CodeMatch(OpCodes.Sub),
-                            new CodeMatch(i => i.SetsLocal(11)))
-                        .ThrowIfInvalid("`pitch -= pitchOffsetAngle` not found")
+                            new CodeMatch(i => i.SetsLocal(5)))
+                        .ThrowIfInvalid("`yaw -= yOA` not found")
+                        .RemoveInstructions(4)
+                        // Remove `- yOA` from `yawLimitMin` in call to `DamperValue`
+                        .MatchForward(false,
+                            new CodeMatch(OpCodes.Ldloc_2),
+                            new CodeMatch(OpCodes.Sub))
+                        .RemoveInstructions(2)
+                        // Remove `- yOA` from `yawLimitMax` in call to `DamperValue`
+                        .MatchForward(false,
+                            new CodeMatch(OpCodes.Ldloc_2),
+                            new CodeMatch(OpCodes.Sub))
+                        .RemoveInstructions(2)
+                        // Replace `shoulder.solverRotation * shoulder.axis` with `From(this, isLeft)`
+                        .MatchForward(false,
+                            new CodeMatch(OpCodes.Ldarg_0),
+                            new CodeMatch(OpCodes.Call),
+                            new CodeMatch(OpCodes.Ldfld),
+                            new CodeMatch(OpCodes.Ldarg_0),
+                            new CodeMatch(OpCodes.Call),
+                            new CodeMatch(OpCodes.Ldfld),
+                            new CodeMatch(OpCodes.Call))
+                        .ThrowIfInvalid("From calculation not found")
                         .Advance(1)
+                        .SetAndAdvance(OpCodes.Ldarg_1, null)
+                        .SetAndAdvance(OpCodes.Call, kFromMethod)
+                        .RemoveInstructions(4)
+                        // Replace `workingSpace` with `To(this, isLeft)`
+                        .MatchForward(false,
+                            new CodeMatch(OpCodes.Ldloc_3),
+                            new CodeMatch(i => i.LoadsLocal(5)),
+                            new CodeMatch(OpCodes.Call),
+                            new CodeMatch(OpCodes.Call),
+                            new CodeMatch(OpCodes.Call),
+                            new CodeMatch(OpCodes.Call),
+                            new CodeMatch(OpCodes.Call))
+                        .ThrowIfInvalid("To calculation not found")
                         .SetAndAdvance(OpCodes.Ldarg_0, null)
                         .InsertAndAdvance(
-                            new CodeInstruction(OpCodes.Ldfld, kPitchOffsetAngleField))
-
-                        /* DamperValue(pitch, -45f - pitchOffsetAngle, 45f - pitchOffsetAngle) */
-                        .MatchForward(false,
-                            new CodeMatch(i => i.LoadsLocal(11)),
-                            new CodeMatch(i => i.Equals(OpCodes.Ldc_R4, -15f)),
-                            new CodeMatch(i => i.Equals(OpCodes.Ldc_R4, 75f)))
-                        .Advance(1)
-                        .SetOperandAndAdvance(-45f)
-                        .InsertAndAdvance(
-                            new CodeInstruction(OpCodes.Ldarg_0, null),
-                            new CodeInstruction(OpCodes.Ldfld, kPitchOffsetAngleField),
-                            new CodeInstruction(OpCodes.Sub))
-                        .SetOperandAndAdvance(45f)
-                        .InsertAndAdvance(
-                            new CodeInstruction(OpCodes.Ldarg_0, null),
-                            new CodeInstruction(OpCodes.Ldfld, kPitchOffsetAngleField),
-                            new CodeInstruction(OpCodes.Sub))
+                            new CodeInstruction(OpCodes.Ldarg_1),
+                            new CodeInstruction(OpCodes.Call, kToMethod))
                         .InstructionEnumeration();
                 }
             }
