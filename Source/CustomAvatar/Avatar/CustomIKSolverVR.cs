@@ -280,7 +280,7 @@ namespace CustomAvatar.Avatar
                             new CodeMatch(i => i.LoadsLocal(5)),
                             new CodeMatch(OpCodes.Ldloc_2),
                             new CodeMatch(OpCodes.Sub),
-                            new CodeMatch(i => i.SetsLocal(5)))
+                            new CodeMatch(i => i.StoresLocal(5)))
                         .ThrowIfInvalid("`yaw -= yOA` not found")
                         .RemoveInstructions(4)
                         // Remove `- yOA` from `yawLimitMin` in call to `DamperValue`

@@ -30,7 +30,7 @@ namespace CustomAvatar.Utilities
             OpCodes.Ldloc,
         };
 
-        private static readonly OpCode[] kSetLocalCodes =
+        private static readonly OpCode[] kStoreLocalCodes =
         {
             OpCodes.Stloc,
             OpCodes.Stloc_S,
@@ -51,9 +51,9 @@ namespace CustomAvatar.Utilities
             };
         }
 
-        internal static bool SetsLocal(this CodeInstruction instruction, int index)
+        internal static bool StoresLocal(this CodeInstruction instruction, int index)
         {
-            if (!kSetLocalCodes.Contains(instruction.opcode))
+            if (!kStoreLocalCodes.Contains(instruction.opcode))
             {
                 return false;
             }
