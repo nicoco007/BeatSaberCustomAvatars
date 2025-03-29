@@ -59,6 +59,11 @@ namespace CustomAvatar.Avatar
         private bool _hasPelvisTarget;
         private bool _hasBothLegTargets;
 
+        public AvatarIK() : base()
+        {
+            solver = new CustomIKSolverVR();
+        }
+
         #region Behaviour Lifecycle
 
         protected void Awake()
@@ -343,7 +348,7 @@ namespace CustomAvatar.Avatar
             vrik.solver.spine.maintainPelvisPosition = vrikManager.solver_spine_maintainPelvisPosition;
             vrik.solver.spine.maxRootAngle = vrikManager.solver_spine_maxRootAngle;
 
-            var leftArm = (IKSolverVR_Arm)vrik.solver.leftArm;
+            var leftArm = (CustomIKSolverVR.CustomArm)vrik.solver.leftArm;
             leftArm.shoulderPitchOffset = CalculatePitchOffset(true, vrik.references.root, vrik.references.leftShoulder, vrik.references.leftUpperArm);
             leftArm.target = vrikManager.solver_leftArm_target;
             leftArm.bendGoal = vrikManager.solver_leftArm_bendGoal;
@@ -359,7 +364,7 @@ namespace CustomAvatar.Avatar
             leftArm.armLengthMlp = vrikManager.solver_leftArm_armLengthMlp;
             leftArm.stretchCurve = vrikManager.solver_leftArm_stretchCurve;
 
-            var rightArm = (IKSolverVR_Arm)vrik.solver.rightArm;
+            var rightArm = (CustomIKSolverVR.CustomArm)vrik.solver.rightArm;
             rightArm.shoulderPitchOffset = CalculatePitchOffset(false, vrik.references.root, vrik.references.rightShoulder, vrik.references.rightUpperArm);
             rightArm.target = vrikManager.solver_rightArm_target;
             rightArm.bendGoal = vrikManager.solver_rightArm_bendGoal;
