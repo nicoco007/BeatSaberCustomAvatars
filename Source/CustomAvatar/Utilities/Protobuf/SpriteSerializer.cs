@@ -40,7 +40,7 @@ namespace CustomAvatar.Utilities.Protobuf
                 }
             }
 
-            return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+            return texture != null ? Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f)) : null;
         }
 
         public void Write(ref ProtoWriter.State state, Sprite value)
