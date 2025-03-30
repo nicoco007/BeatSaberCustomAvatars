@@ -333,7 +333,7 @@ namespace CustomAvatar.Player
                 cancellationToken.ThrowIfCancellationRequested();
             }
 
-            var info = new AvatarInfo(avatar, fullPath);
+            AvatarInfo info = new(avatar, fullPath);
 
             _avatarCacheStore[info.fileName] = info;
 

@@ -40,7 +40,7 @@ namespace CustomAvatar.Zenject.Internal
 
         public static void AddComponentAlongsideExisting<TExisting, TAdd>(string childTransformName = null, Func<GameObject, bool> condition = null) where TExisting : MonoBehaviour where TAdd : MonoBehaviour
         {
-            var componentRegistration = new ComponentRegistration(typeof(TAdd), childTransformName, condition);
+            ComponentRegistration componentRegistration = new(typeof(TAdd), childTransformName, condition);
 
             if (kComponentsToAdd.TryGetValue(typeof(TExisting), out List<ComponentRegistration> types))
             {
@@ -55,7 +55,7 @@ namespace CustomAvatar.Zenject.Internal
         private static void GetInjectableMonoBehaviours(List<MonoBehaviour> injectableMonoBehaviours)
         {
 #if DEBUG
-            var stopwatch = Stopwatch.StartNew();
+            Stopwatch stopwatch = Stopwatch.StartNew();
 #endif
 
             List<MonoBehaviour> newMonoBehaviours = new();

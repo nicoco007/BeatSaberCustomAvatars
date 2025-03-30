@@ -141,7 +141,7 @@ namespace CustomAvatar.Tracking.OpenVR
 
             if (length > 0)
             {
-                var stringBuilder = new StringBuilder((int)length);
+                StringBuilder stringBuilder = new((int)length);
                 OpenVR.System.GetStringTrackedDeviceProperty(deviceIndex, property, stringBuilder, length, ref error);
 
                 if (error != ETrackedPropertyError.TrackedProp_Success)

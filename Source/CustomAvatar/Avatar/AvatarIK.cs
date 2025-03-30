@@ -204,7 +204,7 @@ namespace CustomAvatar.Avatar
             Vector3 up = hasParent ? parent.up : Vector3.up;
             root.rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(pelvisTarget.rotation * _avatar.prefab.pelvisRootForward, up), up);
 
-            var position = Vector3.ProjectOnPlane(pelvisTarget.position - root.TransformVector(_avatar.prefab.pelvisRootOffset), up);
+            Vector3 position = Vector3.ProjectOnPlane(pelvisTarget.position - root.TransformVector(_avatar.prefab.pelvisRootOffset), up);
 
             if (hasParent)
             {

@@ -116,7 +116,7 @@ namespace CustomAvatar
         // Unity will deserialize any event into a UnityEvent so we can simply extract the calls from the UnityEvent and assign them to the proper class with type parameters.
         private static T DeserializeGenericEvent<T>(UnityEvent evt) where T : UnityEventBase, new()
         {
-            var newEvent = new T();
+            T newEvent = new();
             kPersistentCallsField.SetValue(newEvent, kPersistentCallsField.GetValue(evt));
             ((ISerializationCallbackReceiver)newEvent).OnAfterDeserialize();
             return newEvent;

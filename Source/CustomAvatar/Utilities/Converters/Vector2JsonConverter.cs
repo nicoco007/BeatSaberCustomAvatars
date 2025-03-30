@@ -25,7 +25,7 @@ namespace CustomAvatar.Utilities.Converters
     {
         public override void WriteJson(JsonWriter writer, Vector2 value, JsonSerializer serializer)
         {
-            var obj = new JObject
+            JObject obj = new()
             {
                 {"x", value.x},
                 {"y", value.y}

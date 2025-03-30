@@ -132,7 +132,7 @@ namespace CustomAvatar.Avatar
                 }
 
                 AssetBundleRequest assetBundleRequest = await assetBundle.LoadAssetWithSubAssetsAsync<GameObject>(kGameObjectName);
-                var prefabObject = (GameObject)assetBundleRequest.asset;
+                GameObject prefabObject = (GameObject)assetBundleRequest.asset;
 
                 if (!prefabObject)
                 {

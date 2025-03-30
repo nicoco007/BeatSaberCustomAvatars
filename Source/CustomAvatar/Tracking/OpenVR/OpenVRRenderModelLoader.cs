@@ -124,9 +124,9 @@ namespace CustomAvatar.Tracking.OpenVR
 
             RenderModel_t renderModel = Marshal.PtrToStructure<RenderModel_t>(pRenderModel);
 
-            var vertices = new Vector3[renderModel.unVertexCount];
-            var normals = new Vector3[renderModel.unVertexCount];
-            var uv = new Vector2[renderModel.unVertexCount];
+            Vector3[] vertices = new Vector3[renderModel.unVertexCount];
+            Vector3[] normals = new Vector3[renderModel.unVertexCount];
+            Vector2[] uv = new Vector2[renderModel.unVertexCount];
 
             for (int j = 0; j < renderModel.unVertexCount; ++j)
             {
@@ -230,7 +230,7 @@ namespace CustomAvatar.Tracking.OpenVR
                 byte[] textureMapData = new byte[diffuseTexture.unWidth * diffuseTexture.unHeight * 4]; // RGBA
                 Marshal.Copy(diffuseTexture.rubTextureMapData, textureMapData, 0, textureMapData.Length);
 
-                var colors = new Color32[diffuseTexture.unWidth * diffuseTexture.unHeight];
+                Color32[] colors = new Color32[diffuseTexture.unWidth * diffuseTexture.unHeight];
                 int iColor = 0;
 
                 for (int iHeight = 0; iHeight < diffuseTexture.unHeight; iHeight++)
@@ -293,7 +293,7 @@ namespace CustomAvatar.Tracking.OpenVR
             // The component pose is the offset between the raw tracking position and the grip position used by OpenXR. Therefore,
             // we need to invert the pose so we get the raw position (render model origin) from the in-game tracked position.
             Vector3 position = -matrix.GetPosition();
-            var rotation = Quaternion.Inverse(matrix.GetRotation());
+            Quaternion rotation = Quaternion.Inverse(matrix.GetRotation());
             return new Pose(rotation * position, rotation);
         }
     }

@@ -60,8 +60,8 @@ namespace CustomAvatar.Configuration
 
             _logger.LogInformation($"Loading settings from '{kSettingsPath}'");
 
-            using (var reader = new StreamReader(kSettingsPath))
-            using (var jsonReader = new JsonTextReader(reader))
+            using (StreamReader reader = new(kSettingsPath))
+            using (JsonTextReader jsonReader = new(reader))
             {
                 settings = _jsonSerializer.Deserialize<Settings>(jsonReader) ?? new Settings();
             }
@@ -71,8 +71,8 @@ namespace CustomAvatar.Configuration
         {
             _logger.LogInformation($"Saving settings to '{kSettingsPath}'");
 
-            using (var writer = new StreamWriter(kSettingsPath))
-            using (var jsonWriter = new JsonTextWriter(writer))
+            using (StreamWriter writer = new(kSettingsPath))
+            using (JsonTextWriter jsonWriter = new(writer))
             {
                 _jsonSerializer.Serialize(jsonWriter, settings);
                 jsonWriter.Flush();

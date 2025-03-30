@@ -79,7 +79,7 @@ namespace CustomAvatar.Avatar
             icon = avatar.descriptor.cover ? avatar.descriptor.cover : null;
 
             // TODO: this should probably be created and stored in AvatarPrefab when the avatar is loaded
-            var fileInfo = new FileInfo(fullPath);
+            FileInfo fileInfo = new(fullPath);
 
             fileName = fileInfo.Name;
             fileSize = fileInfo.Length;
@@ -93,7 +93,7 @@ namespace CustomAvatar.Avatar
         {
             if (!File.Exists(filePath)) return false;
 
-            var fileInfo = new FileInfo(filePath);
+            FileInfo fileInfo = new(filePath);
 
             return fileName == fileInfo.Name && fileSize == fileInfo.Length && created == fileInfo.CreationTimeUtc && lastModified == fileInfo.LastWriteTimeUtc;
         }

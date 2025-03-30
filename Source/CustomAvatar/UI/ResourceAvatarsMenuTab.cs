@@ -29,7 +29,7 @@ namespace CustomAvatar.UI
         public string GetContent()
         {
             using Stream stream = GetType().Assembly.GetManifestResourceStream(resourceName);
-            using var reader = new StreamReader(stream);
+            using StreamReader reader = new(stream);
             return reader.ReadToEnd();
         }
     }

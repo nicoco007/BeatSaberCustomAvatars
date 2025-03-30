@@ -48,7 +48,7 @@ namespace CustomAvatar.UI.CustomTags
         {
             base.HandleType(componentType, parserParams);
 
-            var component = (ValuePickerController)componentType.Component;
+            ValuePickerController component = (ValuePickerController)componentType.Component;
 
             if (componentType.Data.TryGetValue("formatter", out string formatterId))
             {

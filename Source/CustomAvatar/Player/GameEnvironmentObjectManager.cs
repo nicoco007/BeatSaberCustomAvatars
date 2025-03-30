@@ -55,7 +55,7 @@ namespace CustomAvatar.Player
 
         public void Initialize()
         {
-            var environment = GameObject.Find(kEnvironmentObjectPath);
+            GameObject environment = GameObject.Find(kEnvironmentObjectPath);
 
             if (environment != null)
             {
@@ -92,7 +92,7 @@ namespace CustomAvatar.Player
 
         private void HandleScoreSaberSpectatorCamera()
         {
-            var spectatorParent = GameObject.Find(kSpectatorObjectPath);
+            GameObject spectatorParent = GameObject.Find(kSpectatorObjectPath);
 
             if (spectatorParent == null)
             {
@@ -110,7 +110,7 @@ namespace CustomAvatar.Player
             Transform playerSpace = spectatorParent.transform;
 
             // assuming roomCenter and roomRotation won't change while spectating
-            var inverseRotation = Quaternion.Inverse(_beatSaberUtilities.roomRotation);
+            Quaternion inverseRotation = Quaternion.Inverse(_beatSaberUtilities.roomRotation);
             origin.SetLocalPositionAndRotation(inverseRotation * -_beatSaberUtilities.roomCenter, inverseRotation);
             origin.SetParent(playerSpace, false);
 
@@ -126,8 +126,8 @@ namespace CustomAvatar.Player
                 return;
             }
 
-            var controller = (Component)_container.TryResolve(BeatLeaderReflection.kCameraControllerType);
-            var originComponent = (Component)_container.TryResolve(BeatLeaderReflection.kOriginComponentType);
+            Component controller = (Component)_container.TryResolve(BeatLeaderReflection.kCameraControllerType);
+            Component originComponent = (Component)_container.TryResolve(BeatLeaderReflection.kOriginComponentType);
 
             if (controller == null || originComponent == null)
             {

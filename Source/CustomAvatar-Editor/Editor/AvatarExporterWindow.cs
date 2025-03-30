@@ -51,12 +51,12 @@ namespace CustomAvatar.Editor
 
         protected void OnGUI()
         {
-            var titleLabelStyle = new GUIStyle(EditorStyles.largeLabel)
+            GUIStyle titleLabelStyle = new(EditorStyles.largeLabel)
             {
                 fontSize = 16
             };
 
-            var textureStyle = new GUIStyle(EditorStyles.label)
+            GUIStyle textureStyle = new(EditorStyles.label)
             {
                 alignment = TextAnchor.UpperRight
             };
@@ -119,7 +119,7 @@ namespace CustomAvatar.Editor
 
             try
             {
-                var assetBundleBuild = new AssetBundleBuild
+                AssetBundleBuild assetBundleBuild = new()
                 {
                     assetBundleName = destinationFileName,
                     assetNames = [prefabPath]

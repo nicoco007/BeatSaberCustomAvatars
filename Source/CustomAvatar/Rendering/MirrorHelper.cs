@@ -43,9 +43,9 @@ namespace CustomAvatar.Rendering
             }
 
             // plane is 10 m in size at scale 1, width is x and height is z
-            var scale = new Vector3(size.x / 10, 1, size.y / 10);
+            Vector3 scale = new(size.x / 10, 1, size.y / 10);
 
-            var mirrorPlane = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            GameObject mirrorPlane = GameObject.CreatePrimitive(PrimitiveType.Plane);
             mirrorPlane.layer = 5;
             Object.Destroy(mirrorPlane.GetComponent<Collider>());
             mirrorPlane.transform.SetParent(container);

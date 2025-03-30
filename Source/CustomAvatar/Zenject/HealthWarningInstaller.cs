@@ -38,7 +38,7 @@ namespace CustomAvatar.Zenject
 
         private void TryAddEnvironmentObject(string name)
         {
-            var gameObject = GameObject.Find(name);
+            GameObject gameObject = GameObject.Find(name);
 
             if (gameObject)
             {

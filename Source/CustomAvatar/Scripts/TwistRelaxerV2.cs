@@ -163,7 +163,7 @@ namespace CustomAvatar.Scripts
             }
 
             Quaternion rotation = transform.rotation;
-            var twistOffset = Quaternion.AngleAxis(twistAngleOffset, rotation * _twistAxis);
+            Quaternion twistOffset = Quaternion.AngleAxis(twistAngleOffset, rotation * _twistAxis);
             rotation = twistOffset * rotation;
 
             // Find the world space relaxed axes of the parent and child
@@ -171,10 +171,10 @@ namespace CustomAvatar.Scripts
             Vector3 relaxedAxisChild = twistOffset * children[0].rotation * _axisRelativeToChildDefault;
 
             // Cross-fade between the parent and child
-            var relaxedAxis = Vector3.Slerp(relaxedAxisParent, relaxedAxisChild, parentChildCrossfade);
+            Vector3 relaxedAxis = Vector3.Slerp(relaxedAxisParent, relaxedAxisChild, parentChildCrossfade);
 
             // Convert relaxedAxis to (axis, twistAxis) space so we could calculate the twist angle
-            var rotationInAxisSpace = Quaternion.LookRotation(rotation * _axis, rotation * _twistAxis);
+            Quaternion rotationInAxisSpace = Quaternion.LookRotation(rotation * _axis, rotation * _twistAxis);
             relaxedAxis = Quaternion.Inverse(rotationInAxisSpace) * relaxedAxis;
 
             // Calculate the angle by which we need to rotate this Transform around the twist axis.

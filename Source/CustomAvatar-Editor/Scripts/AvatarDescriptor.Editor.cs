@@ -35,12 +35,12 @@ namespace CustomAvatar
 
         private Mesh LoadMesh(Stream stream)
         {
-            var mesh = new Mesh();
+            Mesh mesh = new();
 
-            using (var reader = new BinaryReader(stream))
+            using (BinaryReader reader = new(stream))
             {
                 int length = reader.ReadInt32();
-                var vertices = new Vector3[length];
+                Vector3[] vertices = new Vector3[length];
 
                 for (int i = 0; i < length; i++)
                 {
@@ -48,7 +48,7 @@ namespace CustomAvatar
                 }
 
                 length = reader.ReadInt32();
-                var normals = new Vector3[length];
+                Vector3[] normals = new Vector3[length];
 
                 for (int i = 0; i < length; i++)
                 {
@@ -73,7 +73,7 @@ namespace CustomAvatar
 
         internal void SaveMesh(Mesh mesh)
         {
-            using (var writer = new BinaryWriter(File.OpenWrite("mesh.dat")))
+            using (BinaryWriter writer = new(File.OpenWrite("mesh.dat")))
             {
                 writer.Write(mesh.vertices.Length);
 

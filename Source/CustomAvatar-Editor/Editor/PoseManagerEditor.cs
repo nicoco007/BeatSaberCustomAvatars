@@ -27,16 +27,30 @@ namespace CustomAvatar.Editor
         private const string kLocalPositionSerializedPropertyName = "m_LocalPosition";
         private const string kLocalRotationSerializedPropertyName = "m_LocalRotation";
 
+        private static readonly HumanBodyBones[] kAllFingerBones =
+        [
+            HumanBodyBones.LeftThumbProximal, HumanBodyBones.LeftThumbIntermediate, HumanBodyBones.LeftThumbDistal,
+            HumanBodyBones.LeftIndexProximal, HumanBodyBones.LeftIndexIntermediate, HumanBodyBones.LeftIndexDistal,
+            HumanBodyBones.LeftMiddleProximal, HumanBodyBones.LeftMiddleIntermediate, HumanBodyBones.LeftMiddleDistal,
+            HumanBodyBones.LeftRingProximal, HumanBodyBones.LeftRingIntermediate, HumanBodyBones.LeftRingDistal,
+            HumanBodyBones.LeftLittleProximal, HumanBodyBones.LeftLittleIntermediate, HumanBodyBones.LeftLittleDistal,
+            HumanBodyBones.RightThumbProximal, HumanBodyBones.RightThumbIntermediate, HumanBodyBones.RightThumbDistal,
+            HumanBodyBones.RightIndexProximal, HumanBodyBones.RightIndexIntermediate, HumanBodyBones.RightIndexDistal,
+            HumanBodyBones.RightMiddleProximal, HumanBodyBones.RightMiddleIntermediate, HumanBodyBones.RightMiddleDistal,
+            HumanBodyBones.RightRingProximal, HumanBodyBones.RightRingIntermediate, HumanBodyBones.RightRingDistal,
+            HumanBodyBones.RightLittleProximal, HumanBodyBones.RightLittleIntermediate, HumanBodyBones.RightLittleDistal,
+        ];
+
         private float _sliderValue;
 
         public override void OnInspectorGUI()
         {
-            var richLabel = new GUIStyle(EditorStyles.label)
+            GUIStyle richLabel = new(EditorStyles.label)
             {
                 richText = true
             };
 
-            var poseManager = (PoseManager)target;
+            PoseManager poseManager = (PoseManager)target;
             GameObject poseManagerObject = poseManager.gameObject;
 
             if (!poseManager.animator.isHuman)
@@ -198,35 +212,21 @@ namespace CustomAvatar.Editor
             Transform fromTransform = animator.GetBoneTransform(fromBone);
             Transform toTransform = animator.GetBoneTransform(toBone);
 
-            fromTransform.rotation.ToAngleAxis(out float angle, out Vector3 axis); // get angle and axis
+            fromTransform.rotation.ToAngleAxis(out float angle, out Vector3 axis);
 
-            // mirror the axis about the plane YZ
+            // mirror the axis across the YZ plane
             axis.y *= -1;
             axis.z *= -1;
 
-            toTransform.rotation = Quaternion.AngleAxis(angle, axis); // assign it back
+            toTransform.rotation = Quaternion.AngleAxis(angle, axis);
         }
 
         private void ResetHands(Animator animator, bool position = true, bool rotation = true)
         {
-            var fingers = new HumanBodyBones[]
-            {
-                HumanBodyBones.LeftThumbProximal, HumanBodyBones.LeftThumbIntermediate, HumanBodyBones.LeftThumbDistal,
-                HumanBodyBones.LeftIndexProximal, HumanBodyBones.LeftIndexIntermediate, HumanBodyBones.LeftIndexDistal,
-                HumanBodyBones.LeftMiddleProximal, HumanBodyBones.LeftMiddleIntermediate, HumanBodyBones.LeftMiddleDistal,
-                HumanBodyBones.LeftRingProximal, HumanBodyBones.LeftRingIntermediate, HumanBodyBones.LeftRingDistal,
-                HumanBodyBones.LeftLittleProximal, HumanBodyBones.LeftLittleIntermediate, HumanBodyBones.LeftLittleDistal,
-                HumanBodyBones.RightThumbProximal, HumanBodyBones.RightThumbIntermediate, HumanBodyBones.RightThumbDistal,
-                HumanBodyBones.RightIndexProximal, HumanBodyBones.RightIndexIntermediate, HumanBodyBones.RightIndexDistal,
-                HumanBodyBones.RightMiddleProximal, HumanBodyBones.RightMiddleIntermediate, HumanBodyBones.RightMiddleDistal,
-                HumanBodyBones.RightRingProximal, HumanBodyBones.RightRingIntermediate, HumanBodyBones.RightRingDistal,
-                HumanBodyBones.RightLittleProximal, HumanBodyBones.RightLittleIntermediate, HumanBodyBones.RightLittleDistal
-            };
-
-            foreach (HumanBodyBones finger in fingers)
+            foreach (HumanBodyBones finger in kAllFingerBones)
             {
                 Transform transform = animator.GetBoneTransform(finger);
-                var serializedObject = new SerializedObject(transform);
+                SerializedObject serializedObject = new(transform);
 
                 if (position)
                 {

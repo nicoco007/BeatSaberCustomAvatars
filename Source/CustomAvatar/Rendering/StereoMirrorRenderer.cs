@@ -129,7 +129,7 @@ namespace CustomAvatar.Rendering
 
             Transform cameraTransform = camera.transform;
             cameraTransform.GetPositionAndRotation(out Vector3 cameraPosition, out Quaternion cameraRotation);
-            var plane = new Plane(reflectionPlaneNormal, reflectionPlanePosition);
+            Plane plane = new(reflectionPlaneNormal, reflectionPlanePosition);
 
             // don't render if the camera is too close to the mirror to prevent errors
             if (plane.GetDistanceToPoint(cameraPosition) <= Mathf.Epsilon || (camera.orthographic && Mathf.Abs(Vector3.Dot(camera.transform.forward, reflectionPlaneNormal)) <= Mathf.Epsilon))

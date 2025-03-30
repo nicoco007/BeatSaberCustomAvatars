@@ -88,11 +88,11 @@ namespace CustomAvatar.Avatar
             {
                 _spawnedAvatar.body.position = _spawnedAvatar.head.position - _spawnedAvatar.head.up * 0.1f;
 
-                var vel = new Vector3(_spawnedAvatar.body.localPosition.x - _prevBodyLocalPosition.x, 0.0f,
+                Vector3 vel = new(_spawnedAvatar.body.localPosition.x - _prevBodyLocalPosition.x, 0.0f,
                     _spawnedAvatar.body.localPosition.z - _prevBodyLocalPosition.z);
 
-                var rot = Quaternion.Euler(0.0f, _spawnedAvatar.head.localEulerAngles.y, 0.0f);
-                var tiltAxis = Vector3.Cross(transform.up, vel);
+                Quaternion rot = Quaternion.Euler(0.0f, _spawnedAvatar.head.localEulerAngles.y, 0.0f);
+                Vector3 tiltAxis = Vector3.Cross(transform.up, vel);
 
                 _spawnedAvatar.body.localRotation = Quaternion.Lerp(_spawnedAvatar.body.localRotation,
                     Quaternion.AngleAxis(vel.magnitude * 1250.0f, tiltAxis) * rot,

@@ -59,7 +59,7 @@ namespace CustomAvatar.Tracking.UnityXR
                 return;
             }
 
-            var subsystems = (List<XRHandSubsystem>)_subsystems;
+            List<XRHandSubsystem> subsystems = (List<XRHandSubsystem>)_subsystems;
             SubsystemManager.GetSubsystems(subsystems);
             XRHandSubsystem subsystem = subsystems.FirstOrDefault(s => s.running);
 
@@ -111,7 +111,7 @@ namespace CustomAvatar.Tracking.UnityXR
 
             for (int fingerIndex = (int)XRHandFingerID.Thumb; fingerIndex <= (int)XRHandFingerID.Little; ++fingerIndex)
             {
-                var fingerId = (XRHandFingerID)fingerIndex;
+                XRHandFingerID fingerId = (XRHandFingerID)fingerIndex;
                 int jointIndexBack = fingerId.GetBackJointID().ToIndex();
                 int jointIndexFront = fingerId.GetFrontJointID().ToIndex();
 

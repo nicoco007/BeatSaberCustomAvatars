@@ -177,7 +177,7 @@ namespace CustomAvatar.Tracking
 
             // We want the user's head rotation to match the avatar's head directly rather than assuming whatever
             // position they're in is forward. I'm not sure how I feel about doing that, but it's what VRChat does.
-            var rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(head.forward, parent.up), parent.up);
+            Quaternion rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(head.forward, parent.up), parent.up);
             head.rotation = rotation;
 
             center.SetParent(parent, false);

@@ -119,7 +119,7 @@ namespace CustomAvatar.Utilities.Protobuf
                         useMipMap = value.mipmapCount > 1,
                     };
 
-                    var renderTexture = RenderTexture.GetTemporary(renderTextureDescriptor);
+                    RenderTexture renderTexture = RenderTexture.GetTemporary(renderTextureDescriptor);
 
                     RenderTexture previous = RenderTexture.active;
                     Graphics.Blit(value, renderTexture);
@@ -162,7 +162,7 @@ namespace CustomAvatar.Utilities.Protobuf
         private byte[] FetchTextureDataSync(Texture texture)
         {
             uint totalSize = 0;
-            var requests = new AsyncGPUReadbackRequest[texture.mipmapCount];
+            AsyncGPUReadbackRequest[] requests = new AsyncGPUReadbackRequest[texture.mipmapCount];
 
             for (int i = 0; i < texture.mipmapCount; i++)
             {

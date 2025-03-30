@@ -85,7 +85,7 @@ namespace CustomAvatar.Avatar
 
             GameObject avatarInstance = SpawnBareAvatar(avatar, parent);
 
-            var subContainer = new DiContainer(_container);
+            DiContainer subContainer = new(_container);
             subContainer.Bind<AvatarPrefab>().FromInstance(avatar);
             subContainer.Bind<IAvatarInput>().FromInstance(input);
 

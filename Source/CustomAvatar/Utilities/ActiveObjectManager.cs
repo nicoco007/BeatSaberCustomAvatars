@@ -83,7 +83,7 @@ namespace CustomAvatar.Utilities
 
         private string GetTransformPath(Component component)
         {
-            var parts = new List<string>();
+            List<string> parts = [];
 
             Transform transform = component.transform;
 

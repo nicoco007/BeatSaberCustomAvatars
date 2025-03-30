@@ -139,7 +139,7 @@ namespace CustomAvatar.UI
 
             if (addedToHierarchy)
             {
-                var mirrorSize = new Vector2(4, 2);
+                Vector2 mirrorSize = new(4, 2);
                 _mirror = _mirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, _hierarchyManager.transform.Find("TopScreen").position.z), Quaternion.Euler(-90f, 0, 0), mirrorSize, null);
 
                 if (!_mirror) return;
@@ -151,7 +151,7 @@ namespace CustomAvatar.UI
 
             if (firstActivation)
             {
-                var containerTransform = (RectTransform)Instantiate(_platformLeaderboardViewController.transform.Find("Container/LeaderboardTableView/LoadingControl/DownloadingContainer"));
+                RectTransform containerTransform = (RectTransform)Instantiate(_platformLeaderboardViewController.transform.Find("Container/LeaderboardTableView/LoadingControl/DownloadingContainer"));
                 containerTransform.SetParent(gameObject.transform, false);
                 containerTransform.name = "ProgressContainer";
                 containerTransform.anchorMin = new Vector2(0.3f, 0.5f);
@@ -160,16 +160,16 @@ namespace CustomAvatar.UI
                 GameObject containerGameObject = containerTransform.gameObject;
                 _progressObject = containerGameObject;
 
-                var progressBarTransform = (RectTransform)containerTransform.Find("DownloadingProgress");
+                RectTransform progressBarTransform = (RectTransform)containerTransform.Find("DownloadingProgress");
                 progressBarTransform.name = "ProgressBar";
                 _progressBar = progressBarTransform.GetComponent<Image>();
 
-                var progressBackgroundTransform = (RectTransform)containerTransform.Find("DownloadingBG");
+                RectTransform progressBackgroundTransform = (RectTransform)containerTransform.Find("DownloadingBG");
                 progressBackgroundTransform.name = "ProgressBG";
                 Image progressBackgroundImage = progressBackgroundTransform.GetComponent<Image>();
                 progressBackgroundImage.color = new Color(1, 1, 1, 0.2f);
 
-                var progressTitleTransform = (RectTransform)containerTransform.Find("DownloadingText");
+                RectTransform progressTitleTransform = (RectTransform)containerTransform.Find("DownloadingText");
                 progressTitleTransform.name = "ProgressTitle";
                 Destroy(progressTitleTransform.GetComponent<LocalizedTextMeshProUGUI>());
                 _progressTitle = progressTitleTransform.GetComponent<TextMeshProUGUI>();
@@ -177,8 +177,8 @@ namespace CustomAvatar.UI
                 // CurvedTextMeshPro doesn't save fontSize properly when inactive
                 containerGameObject.SetActive(true);
 
-                var progressTextObject = new GameObject("ProgressText", typeof(RectTransform));
-                var progressTextTransform = (RectTransform)progressTextObject.transform;
+                GameObject progressTextObject = new("ProgressText", typeof(RectTransform));
+                RectTransform progressTextTransform = (RectTransform)progressTextObject.transform;
                 progressTextTransform.SetParent(containerTransform, false);
                 progressTextTransform.anchorMin = new Vector2(1, 0.5f);
                 progressTextTransform.anchorMax = new Vector2(0, 0.5f);

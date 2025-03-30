@@ -83,7 +83,7 @@ namespace CustomAvatar.UI
             _nameText.rectTransform.offsetMax = new Vector2(0, _nameText.rectTransform.offsetMax.y);
             _authorText.rectTransform.offsetMax = new Vector2(0, _authorText.rectTransform.offsetMax.y);
 
-            var containerTransform = (RectTransform)Instantiate(platformLeaderboardViewController.transform.Find("Container/LeaderboardTableView/LoadingControl/DownloadingContainer"));
+            RectTransform containerTransform = (RectTransform)Instantiate(platformLeaderboardViewController.transform.Find("Container/LeaderboardTableView/LoadingControl/DownloadingContainer"));
             containerTransform.SetParent(gameObject.transform, false);
             containerTransform.name = "ProgressContainer";
             containerTransform.anchorMin = new Vector2(0, 0.5f);
@@ -94,23 +94,23 @@ namespace CustomAvatar.UI
             _progressObject = containerTransform.gameObject;
             _progressObject.SetActive(true);
 
-            var progressBarTransform = (RectTransform)containerTransform.Find("DownloadingProgress");
+            RectTransform progressBarTransform = (RectTransform)containerTransform.Find("DownloadingProgress");
             progressBarTransform.name = "ProgressBar";
             progressBarTransform.offsetMin = new Vector2(4, -0.75f);
             progressBarTransform.offsetMax = new Vector2(-10, 0.75f);
             _progressBar = progressBarTransform.GetComponent<Image>();
             _progressBar.fillAmount = 0;
 
-            var progressBackgroundTransform = (RectTransform)containerTransform.Find("DownloadingBG");
+            RectTransform progressBackgroundTransform = (RectTransform)containerTransform.Find("DownloadingBG");
             progressBackgroundTransform.name = "ProgressBG";
             progressBackgroundTransform.offsetMin = new Vector2(4, -0.75f);
             progressBackgroundTransform.offsetMax = new Vector2(-10, 0.75f);
 
-            var progressTitleTransform = (RectTransform)containerTransform.Find("DownloadingText");
+            RectTransform progressTitleTransform = (RectTransform)containerTransform.Find("DownloadingText");
             DestroyImmediate(progressTitleTransform.gameObject);
 
-            var progressTextObject = new GameObject("ProgressText", typeof(RectTransform));
-            var progressTextTransform = (RectTransform)progressTextObject.transform;
+            GameObject progressTextObject = new("ProgressText", typeof(RectTransform));
+            RectTransform progressTextTransform = (RectTransform)progressTextObject.transform;
             progressTextTransform.SetParent(containerTransform, false);
             _progressText = progressTextObject.AddComponent<CurvedTextMeshPro>();
             _progressText.font = _nameText.font;

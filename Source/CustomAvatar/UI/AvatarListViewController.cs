@@ -233,13 +233,13 @@ namespace CustomAvatar.UI
             avatars.Add(new AvatarListItem("No Avatar", _noAvatarSprite, null, true));
 
             List<string> fileNames = _avatarManager.GetAvatarFileNames();
-            var avatarsToLoad = new List<AvatarListItem>();
+            List<AvatarListItem> avatarsToLoad = [];
 
             foreach (string fileName in fileNames)
             {
                 if (_avatarManager.TryGetCachedAvatarInfo(fileName, out AvatarInfo avatarInfo))
                 {
-                    var item = new AvatarListItem(avatarInfo, !force, _blankAvatarSprite);
+                    AvatarListItem item = new(avatarInfo, !force, _blankAvatarSprite);
                     avatars.Add(item);
 
                     if (force)
@@ -249,7 +249,7 @@ namespace CustomAvatar.UI
                 }
                 else
                 {
-                    var item = new AvatarListItem(Path.GetFileNameWithoutExtension(fileName), _blankAvatarSprite, fileName, false);
+                    AvatarListItem item = new(Path.GetFileNameWithoutExtension(fileName), _blankAvatarSprite, fileName, false);
                     avatars.Add(item);
                     avatarsToLoad.Add(item);
                 }
@@ -257,9 +257,9 @@ namespace CustomAvatar.UI
 
             ReloadData();
 
-            var tasks = new List<Task>();
+            List<Task> tasks = [];
 
-            using (var semaphore = new SemaphoreSlim(kMaxNumberOfConcurrentLoadingTasks))
+            using (SemaphoreSlim semaphore = new(kMaxNumberOfConcurrentLoadingTasks))
             {
                 foreach (AvatarListItem avatarToLoad in avatarsToLoad)
                 {
@@ -328,7 +328,7 @@ namespace CustomAvatar.UI
 
         public TableCell CellForIdx(TableView tableView, int idx)
         {
-            var tableCell = _tableView.DequeueReusableCellForIdentifier(kTableCellReuseIdentifier) as AvatarListTableCell;
+            AvatarListTableCell tableCell = (AvatarListTableCell)_tableView.DequeueReusableCellForIdentifier(kTableCellReuseIdentifier);
 
             if (!tableCell)
             {
