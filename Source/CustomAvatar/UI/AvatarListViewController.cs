@@ -171,10 +171,13 @@ namespace CustomAvatar.UI
             UpdateSelectedRow();
 
             string fileName = _avatarManager.currentAvatarFileName;
-            AvatarListItem item = avatars.Find(a => a.fileName == fileName);
-            if (item != null && _avatarManager.TryGetCachedAvatarInfo(fileName, out AvatarInfo avatarInfo))
+            if (fileName != null)
             {
-                item.SetLoadedInfo(avatarInfo, _blankAvatarSprite);
+                AvatarListItem item = avatars.Find(a => a.fileName == fileName);
+                if (item != null && _avatarManager.TryGetCachedAvatarInfo(fileName, out AvatarInfo avatarInfo))
+                {
+                    item.SetLoadedInfo(avatarInfo, _blankAvatarSprite);
+                }
             }
         }
 
