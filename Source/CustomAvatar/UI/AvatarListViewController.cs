@@ -169,6 +169,13 @@ namespace CustomAvatar.UI
         private void OnAvatarChanged(SpawnedAvatar avatar)
         {
             UpdateSelectedRow();
+
+            string fileName = _avatarManager.currentAvatarFileName;
+            AvatarListItem item = avatars.Find(a => a.fileName == fileName);
+            if (item != null && _avatarManager.TryGetCachedAvatarInfo(fileName, out AvatarInfo avatarInfo))
+            {
+                item.SetLoadedInfo(avatarInfo, _blankAvatarSprite);
+            }
         }
 
         private async void OnAvatarFileCreatedOrChanged(object sender, FileSystemEventArgs e)

@@ -105,6 +105,11 @@ namespace CustomAvatar.Avatar
             return name == other.name && author == other.author && fileName == other.fileName && fileSize == other.fileSize && created == other.created && lastModified == other.lastModified && other.timestamp == timestamp;
         }
 
+        public override string ToString()
+        {
+            return $"{nameof(AvatarInfo)}{{{nameof(name)}={name}, {nameof(author)}={author}, {nameof(fileName)}={fileName}}}";
+        }
+
         public override int GetHashCode()
         {
             return (name, author, icon, fileName, fileSize, created, lastModified, timestamp).GetHashCode();

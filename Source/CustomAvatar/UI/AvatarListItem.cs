@@ -97,6 +97,11 @@ namespace CustomAvatar.UI
             NotifyPropertyChanged(string.Empty);
         }
 
+        public override string ToString()
+        {
+            return $"{nameof(AvatarListItem)}{{{nameof(name)}={name}, {nameof(author)}={author}, {nameof(fileName)}={fileName}, {nameof(isLoaded)}={isLoaded}}}";
+        }
+
         private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
