@@ -26,23 +26,18 @@ namespace CustomAvatar.Player
     /// </summary>
     internal class VRPlayerInput : IInitializable, IDisposable, IAvatarInput
     {
-        private readonly PlayerAvatarManager _avatarManager;
         private readonly TrackingRig _trackingRig;
         private readonly IFingerTrackingProvider _fingerTrackingProvider;
 
         internal VRPlayerInput(
-            PlayerAvatarManager avatarManager,
             TrackingRig trackingRig,
             IFingerTrackingProvider fingerTrackingProvider)
         {
-            _avatarManager = avatarManager;
             _trackingRig = trackingRig;
             _fingerTrackingProvider = fingerTrackingProvider;
         }
 
         public event Action inputChanged;
-
-        public bool allowMaintainPelvisPosition => _avatarManager.currentAvatarSettings?.allowMaintainPelvisPosition ?? false;
 
         public void Initialize()
         {

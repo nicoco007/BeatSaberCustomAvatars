@@ -21,8 +21,6 @@ namespace CustomAvatar.Tracking
 {
     public interface IAvatarInput
     {
-        bool allowMaintainPelvisPosition { get; }
-
         event Action inputChanged;
 
         bool TryGetTransform(DeviceUse use, out Transform transform);

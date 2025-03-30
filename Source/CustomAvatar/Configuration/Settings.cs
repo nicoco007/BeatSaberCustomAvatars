@@ -84,8 +84,6 @@ namespace CustomAvatar.Configuration
             public CalibrationMode calibrationMode { get; set; } = CalibrationMode.Automatic;
 
             public bool ignoreExclusions { get; set; } = false;
-
-            public bool allowMaintainPelvisPosition { get; set; } = false;
         }
 
         public AvatarSpecificSettings GetAvatarSettings(string fileName)
