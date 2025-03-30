@@ -3,184 +3,57 @@
   <Import Project="$(ProjectDir)..\Common.props" />
 
   <ItemGroup>
-    <Reference Include="0Harmony">
-      <HintPath>$(BeatSaberDir)Libs\0Harmony.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="AssetBundleLoadingTools">
-      <HintPath>$(BeatSaberDir)Plugins\AssetBundleLoadingTools.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="BeatmapCore">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="BeatSaber.GameSettings">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="BeatSaber.Settings">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="BeatSaber.ViewSystem">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="BGLib.AppFlow">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="BGLib.Polyglot">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="BGLib.SaveDataCore">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="BGLib.UnityExtension">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="BGNetCore">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="BSML">
-      <HintPath>$(BeatSaberDir)Plugins\BSML.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="DataModels">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="DynamicBone">
-      <HintPath>$(BeatSaberDir)Libs\DynamicBone.dll</HintPath>
-      <Private>False</Private>
-      <Publicize>True</Publicize>
-      <Aliases>BeatSaberDynamicBone</Aliases>
-    </Reference>
-    <Reference Include="FinalIK">
-      <HintPath>$(BeatSaberDir)Libs\FinalIK.dll</HintPath>
-      <Private>False</Private>
-      <Publicize>True</Publicize>
-      <Aliases>BeatSaberFinalIK</Aliases>
-    </Reference>
-    <Reference Include="GameplayCore">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Helpers">
-      <Private>False</Private>
-      <Publicize>True</Publicize>
-    </Reference>
-    <Reference Include="Hive.Versioning">
-      <HintPath>$(BeatSaberDir)Libs\Hive.Versioning.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="HMLib">
-      <Private>False</Private>
-      <Publicize>True</Publicize>
-    </Reference>
-    <Reference Include="HMRendering">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="HMUI">
-      <Private>False</Private>
-      <Publicize>True</Publicize>
-    </Reference>
-    <Reference Include="Interactable">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Menu.CommonLib">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Main">
-      <Private>False</Private>
-      <Publicize>True</Publicize>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>$(BeatSaberDir)Libs\Newtonsoft.Json.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="OpenVR">
-      <HintPath>$(BeatSaberDir)Libs\OpenVR.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.XR.Hands">
-      <HintPath>$(BeatSaberDir)Libs\Unity.XR.Hands.dll</HintPath>
-      <Private>False</Private>
-      <Publicize>True</Publicize>
-    </Reference>
-    <Reference Include="protobuf-net">
-      <HintPath>$(BeatSaberDir)Libs\protobuf-net.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Rendering">
-      <Private>False</Private>
-      <Publicize>True</Publicize>
-    </Reference>
-    <Reference Include="SiraUtil">
-      <HintPath>$(BeatSaberDir)Plugins\SiraUtil.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.InputSystem">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.Mathematics">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.TextMeshPro">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.XR.OpenXR">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.AnimationModule">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.AssetBundleModule">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.AudioModule">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <Private>False</Private>
-      <Publicize>True</Publicize>
-    </Reference>
-    <Reference Include="UnityEngine.ImageConversionModule">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.InputLegacyModule">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.PhysicsModule">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.SpatialTracking">
-      <Private>False</Private>
-      <Publicize>True</Publicize>
-      <SkipOverridableMethods>False</SkipOverridableMethods>
-    </Reference>
-    <Reference Include="UnityEngine.SubsystemsModule">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.UI">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.UIModule">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.VRModule">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.XRModule">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="VRUI">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Zenject">
-      <Private>False</Private>
-      <Publicize>True</Publicize>
-    </Reference>
-    <Reference Include="Zenject-usage">
-      <Private>False</Private>
-    </Reference>
+    <Reference Include="0Harmony" HintPath="$(BeatSaberDir)Libs\0Harmony.dll" Private="False" />
+    <Reference Include="AssetBundleLoadingTools" HintPath="$(BeatSaberDir)Plugins\AssetBundleLoadingTools.dll" Private="False" />
+    <Reference Include="BeatmapCore" />
+    <Reference Include="BeatSaber.GameSettings" />
+    <Reference Include="BeatSaber.Settings" />
+    <Reference Include="BeatSaber.ViewSystem" />
+    <Reference Include="BGLib.AppFlow" />
+    <Reference Include="BGLib.Polyglot" />
+    <Reference Include="BGLib.SaveDataCore" />
+    <Reference Include="BGLib.UnityExtension" />
+    <Reference Include="BGNetCore" />
+    <Reference Include="BSML" HintPath="$(BeatSaberDir)Plugins\BSML.dll" Private="False" />
+    <Reference Include="DataModels" />
+    <Reference Include="DynamicBone" HintPath="$(BeatSaberDir)Libs\DynamicBone.dll" Private="False" Publicize="True" Aliases="BeatSaberDynamicBone" />
+    <Reference Include="FinalIK" HintPath="$(BeatSaberDir)Libs\FinalIK.dll" Private="False" Publicize="True" Aliases="BeatSaberFinalIK" />
+    <Reference Include="GameplayCore" />
+    <Reference Include="Helpers" Publicize="True" />
+    <Reference Include="Hive.Versioning" HintPath="$(BeatSaberDir)Libs\Hive.Versioning.dll" Private="False" />
+    <Reference Include="HMLib" Publicize="True" />
+    <Reference Include="HMRendering" />
+    <Reference Include="HMUI" Publicize="True" />
+    <Reference Include="Interactable" />
+    <Reference Include="Menu.CommonLib" />
+    <Reference Include="Main" Publicize="True" />
+    <Reference Include="Newtonsoft.Json" />
+    <Reference Include="OpenVR" HintPath="$(BeatSaberDir)Libs\OpenVR.dll" Private="False" />
+    <Reference Include="protobuf-net" HintPath="$(BeatSaberDir)Libs\protobuf-net.dll" Private="False" />
+    <Reference Include="Rendering" Publicize="True" />
+    <Reference Include="SiraUtil" HintPath="$(BeatSaberDir)Plugins\SiraUtil.dll" Private="False" />
+    <Reference Include="Unity.InputSystem" />
+    <Reference Include="Unity.Mathematics" />
+    <Reference Include="Unity.TextMeshPro" />
+    <Reference Include="Unity.XR.Hands" HintPath="$(BeatSaberDir)Libs\Unity.XR.Hands.dll" Private="False" Publicize="True" />
+    <Reference Include="Unity.XR.OpenXR" />
+    <Reference Include="UnityEngine" />
+    <Reference Include="UnityEngine.AnimationModule" />
+    <Reference Include="UnityEngine.AssetBundleModule" />
+    <Reference Include="UnityEngine.AudioModule" />
+    <Reference Include="UnityEngine.CoreModule" Publicize="True" />
+    <Reference Include="UnityEngine.ImageConversionModule" />
+    <Reference Include="UnityEngine.InputLegacyModule" />
+    <Reference Include="UnityEngine.PhysicsModule" />
+    <Reference Include="UnityEngine.SpatialTracking" Private="False" Publicize="True" SkipOverridableMethods="False" />
+    <Reference Include="UnityEngine.SubsystemsModule" />
+    <Reference Include="UnityEngine.UI" />
+    <Reference Include="UnityEngine.UIModule" />
+    <Reference Include="UnityEngine.VRModule" />
+    <Reference Include="UnityEngine.XRModule" />
+    <Reference Include="VRUI" />
+    <Reference Include="Zenject" Publicize="True" />
+    <Reference Include="Zenject-usage" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="UI\Views\**\*.bsml" />
