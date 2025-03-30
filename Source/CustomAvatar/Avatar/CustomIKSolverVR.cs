@@ -83,6 +83,50 @@ namespace CustomAvatar.Avatar
         [HarmonyPatch]
         internal class CustomSpine : Spine
         {
+            private static readonly MethodInfo kMathfSqrtMethod = AccessTools.DeclaredMethod(typeof(Mathf), nameof(Mathf.Sqrt));
+            private static readonly MethodInfo kMathfClampMethod = AccessTools.DeclaredMethod(typeof(Mathf), nameof(Mathf.Clamp), [typeof(float), typeof(float), typeof(float)]);
+            private static readonly MethodInfo kVector3DistanceMethod = AccessTools.DeclaredMethod(typeof(Vector3), nameof(Vector3.Distance));
+            private static readonly FieldInfo kVirtualBoneSolverPositionField = AccessTools.DeclaredField(typeof(VirtualBone), nameof(VirtualBone.solverPosition));
+
+            /// <summary>
+            /// A patched version of <see cref="IKSolverVR.VirtualBone.SolveTrigonometric"/> where the
+            /// target distance between the bones is clamped to their resting distance. This prevents the bones from being straightened more than they are in the rest pose.
+            /// </summary>
+            [HarmonyPatch(typeof(VirtualBone), nameof(VirtualBone.SolveTrigonometric))]
+            [HarmonyReversePatch]
+#pragma warning disable IDE0060, IDE0062, CS8321
+            private static void SolveTrigonometric(VirtualBone[] bones, int first, int second, int third, Vector3 targetPosition, Vector3 bendNormal, float weight)
+            {
+                // Replace `float directionMag = Mathf.Sqrt(sqrMagnitude);`
+                // with `float directionMag = Mathf.Clamp(Mathf.Sqrt(sqrMagnitude), 0, Vector3.Distance(bones[third].solverPosition, bones[first].solverPosition));`
+                IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+                {
+                    return new CodeMatcher(instructions)
+                        .MatchForward(
+                            true,
+                            new CodeMatch(i => i.Calls(kMathfSqrtMethod)))
+                        .Advance(1)
+                        .InsertAndAdvance(
+                            new CodeInstruction(OpCodes.Ldc_R4, 0f),
+                            // bones[first].solverPosition
+                            new CodeInstruction(OpCodes.Ldarg_0),
+                            new CodeInstruction(OpCodes.Ldarg_1),
+                            new CodeInstruction(OpCodes.Ldelem_Ref),
+                            new CodeInstruction(OpCodes.Ldfld, kVirtualBoneSolverPositionField),
+                            // bones[third].solverPosition
+                            new CodeInstruction(OpCodes.Ldarg_0),
+                            new CodeInstruction(OpCodes.Ldarg_3),
+                            new CodeInstruction(OpCodes.Ldelem_Ref),
+                            new CodeInstruction(OpCodes.Ldfld, kVirtualBoneSolverPositionField),
+                            // Vector3.Distance(bones[third].solverPosition, bones[first].solverPosition)
+                            new CodeInstruction(OpCodes.Call, kVector3DistanceMethod),
+                            // Mathf.Clamp(Mathf.Sqrt(sqrMag), 0, Vector3.Distance(bones[third].solverPosition, bones[first].solverPosition));
+                            new CodeInstruction(OpCodes.Call, kMathfClampMethod))
+                        .InstructionEnumeration();
+                }
+            }
+#pragma warning restore IDE0060, IDE0062, CS8321
+
             private static readonly FieldInfo kBonesField = AccessTools.DeclaredField(typeof(BodyPart), nameof(bones));
             private static readonly FieldInfo kPelvisIndexField = AccessTools.DeclaredField(typeof(Spine), nameof(pelvisIndex));
             private static readonly FieldInfo kSpineIndexField = AccessTools.DeclaredField(typeof(Spine), nameof(spineIndex));
@@ -191,50 +235,6 @@ namespace CustomAvatar.Avatar
                         .SetOperandAndAdvance(kNewSolveTrigonometricMethod)
 
                         .Instructions();
-                }
-            }
-#pragma warning restore IDE0060, IDE0062, CS8321
-
-            private static readonly MethodInfo kMathfSqrtMethod = AccessTools.DeclaredMethod(typeof(Mathf), nameof(Mathf.Sqrt));
-            private static readonly MethodInfo kMathfClampMethod = AccessTools.DeclaredMethod(typeof(Mathf), nameof(Mathf.Clamp), [typeof(float), typeof(float), typeof(float)]);
-            private static readonly MethodInfo kVector3DistanceMethod = AccessTools.DeclaredMethod(typeof(Vector3), nameof(Vector3.Distance));
-            private static readonly FieldInfo kVirtualBoneSolverPositionField = AccessTools.DeclaredField(typeof(VirtualBone), nameof(VirtualBone.solverPosition));
-
-            /// <summary>
-            /// A patched version of <see cref="IKSolverVR.VirtualBone.SolveTrigonometric"/> where the
-            /// target distance between the bones is clamped to their resting distance. This prevents the bones from being straightened more than they are in the rest pose.
-            /// </summary>
-            [HarmonyPatch(typeof(VirtualBone), nameof(VirtualBone.SolveTrigonometric))]
-            [HarmonyReversePatch]
-#pragma warning disable IDE0060, IDE0062, CS8321
-            private static void SolveTrigonometric(VirtualBone[] bones, int first, int second, int third, Vector3 targetPosition, Vector3 bendNormal, float weight)
-            {
-                // Replace `float directionMag = Mathf.Sqrt(sqrMagnitude);`
-                // with `float directionMag = Mathf.Clamp(Mathf.Sqrt(sqrMagnitude), 0, Vector3.Distance(bones[third].solverPosition, bones[first].solverPosition));`
-                IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-                {
-                    return new CodeMatcher(instructions)
-                        .MatchForward(
-                            true,
-                            new CodeMatch(i => i.Calls(kMathfSqrtMethod)))
-                        .Advance(1)
-                        .InsertAndAdvance(
-                            new CodeInstruction(OpCodes.Ldc_R4, 0f),
-                            // bones[first].solverPosition
-                            new CodeInstruction(OpCodes.Ldarg_0),
-                            new CodeInstruction(OpCodes.Ldarg_1),
-                            new CodeInstruction(OpCodes.Ldelem_Ref),
-                            new CodeInstruction(OpCodes.Ldfld, kVirtualBoneSolverPositionField),
-                            // bones[third].solverPosition
-                            new CodeInstruction(OpCodes.Ldarg_0),
-                            new CodeInstruction(OpCodes.Ldarg_3),
-                            new CodeInstruction(OpCodes.Ldelem_Ref),
-                            new CodeInstruction(OpCodes.Ldfld, kVirtualBoneSolverPositionField),
-                            // Vector3.Distance(bones[third].solverPosition, bones[first].solverPosition)
-                            new CodeInstruction(OpCodes.Call, kVector3DistanceMethod),
-                            // Mathf.Clamp(Mathf.Sqrt(sqrMag), 0, Vector3.Distance(bones[third].solverPosition, bones[first].solverPosition));
-                            new CodeInstruction(OpCodes.Call, kMathfClampMethod))
-                        .InstructionEnumeration();
                 }
             }
 #pragma warning restore IDE0060, IDE0062, CS8321
