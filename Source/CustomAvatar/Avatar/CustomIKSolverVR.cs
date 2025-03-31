@@ -178,9 +178,6 @@ namespace CustomAvatar.Avatar
                         .Advance(1)
                         .SetOperandAndAdvance(kSpineIndexField)
 
-                        // replace `* 0.6f` with `* 0.9f`
-                        .MatchForward(false, new CodeMatch(OpCodes.Ldc_R4), new CodeMatch(OpCodes.Mul)).SetOperandAndAdvance(0.9f)
-
                         // call new method
                         .MatchForward(false, new CodeMatch(i => i.Calls(kSolveTrigonometricMethod)))
                         .SetOperandAndAdvance(kNewSolveTrigonometricMethod)
