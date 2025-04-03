@@ -188,28 +188,38 @@ namespace CustomAvatar.UI
 
             await UnityMainThreadTaskScheduler.Factory.StartNew(async () =>
             {
-                AvatarListItem item = avatars.Find(a => a.fileName == fileName);
+                AvatarListItem avatar;
+                int index = avatars.FindIndex(a => a.fileName == fileName);
 
-                if (item != null)
+                if (index >= 0)
                 {
-                    item.isLoaded = false;
+                    avatar = avatars[index];
+                    avatar.isLoaded = false;
+
+                    if (_tableView._selectedCellIdxs.Contains(index))
+                    {
+                        await SwitchToAvatarAsync(avatar);
+                    }
+                    else
+                    {
+                        await GetAvatarInfoAsync(avatar, true);
+                    }
                 }
                 else
                 {
                     if (_avatarManager.TryGetCachedAvatarInfo(fileName, out AvatarInfo avatarInfo))
                     {
-                        item = new AvatarListItem(avatarInfo, false, _blankAvatarSprite);
+                        avatar = new AvatarListItem(avatarInfo, false, _blankAvatarSprite);
                     }
                     else
                     {
-                        item = new AvatarListItem(Path.GetFileNameWithoutExtension(fileName), _blankAvatarSprite, fileName, false);
+                        avatar = new AvatarListItem(Path.GetFileNameWithoutExtension(fileName), _blankAvatarSprite, fileName, false);
                     }
 
-                    avatars.Add(item);
+                    avatars.Add(avatar);
                     ReloadData();
+                    await GetAvatarInfoAsync(avatar, true);
                 }
-
-                await GetAvatarInfoAsync(item, true);
             });
         }
 
@@ -274,6 +284,25 @@ namespace CustomAvatar.UI
                 }
 
                 await Task.WhenAll(tasks);
+            }
+        }
+
+        private async Task SwitchToAvatarAsync(AvatarListItem avatar)
+        {
+            try
+            {
+                await _avatarManager.SwitchToAvatarAsync(avatar.fileName, avatar);
+
+                if (_avatarManager.TryGetCachedAvatarInfo(avatar.fileName, out AvatarInfo avatarInfo))
+                {
+                    avatar.SetLoadedInfo(avatarInfo, _blankAvatarSprite);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to load avatar '{avatar.fileName}'\n{ex}");
+
+                avatar.SetException(ex, _loadErrorSprite);
             }
         }
 
