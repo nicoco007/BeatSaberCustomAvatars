@@ -23,6 +23,7 @@ using CustomAvatar.Utilities;
 using SiraUtil.Tools.FPFC;
 using UnityEngine;
 using UnityEngine.SpatialTracking;
+using UnityEngine.XR;
 using Zenject;
 
 namespace CustomAvatar.Rendering
@@ -170,6 +171,12 @@ namespace CustomAvatar.Rendering
             {
                 _trackedPoseDriver.UseRelativeTransform = true;
                 _trackedPoseDriver.PerformUpdate();
+
+                if (_camera.stereoEnabled && XRSettings.stereoRenderingMode == XRSettings.StereoRenderingMode.MultiPass)
+                {
+                    _camera.transform.position = _camera.ViewportToWorldPoint(Vector3.zero, _camera.stereoActiveEye);
+                }
+
                 _camera.ResetWorldToCameraMatrix();
                 _camera.cullingMask |= AvatarLayers.kOnlyInThirdPersonMask;
             }
