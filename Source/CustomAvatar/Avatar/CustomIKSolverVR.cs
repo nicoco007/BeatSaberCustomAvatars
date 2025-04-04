@@ -16,7 +16,6 @@
 
 extern alias BeatSaberFinalIK;
 
-using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -41,11 +40,12 @@ namespace CustomAvatar.Avatar
         private static readonly FieldInfo kVirtualBoneSolverPositionField = AccessTools.DeclaredField(typeof(VirtualBone), nameof(VirtualBone.solverPosition));
         private static readonly FieldInfo kSpineField = AccessTools.DeclaredField(typeof(IKSolverVR), nameof(spine));
         private static readonly FieldInfo kSpinePelvisTargetField = AccessTools.DeclaredField(typeof(Spine), nameof(Spine.pelvisTarget));
-        private static readonly MethodInfo kUnityObjectEqualsMethod = AccessTools.DeclaredMethod(typeof(UnityEngine.Object), "op_Equality");
+        private static readonly MethodInfo kUnityObjectEqualsMethod = AccessTools.DeclaredMethod(typeof(Object), "op_Equality");
 
         /// <summary>
         /// This patch prevents locomotion from fighting against the position we set in <see cref="AvatarIK"/> when the pelvis target exists.
         /// </summary>
+        /// <param name="self">The solver to solve (<see langword="this" />).</param>
         [HarmonyPatch(typeof(IKSolverVR), nameof(IKSolverVR.Solve))]
         [HarmonyReversePatch]
 #pragma warning disable IDE0060, IDE0062, CS8321
@@ -92,6 +92,7 @@ namespace CustomAvatar.Avatar
             /// A patched version of <see cref="IKSolverVR.VirtualBone.SolveTrigonometric"/> where the
             /// target distance between the bones is clamped to their resting distance. This prevents the bones from being straightened more than they are in the rest pose.
             /// </summary>
+            /// <remarks>This method must stay above the <see cref="SolvePelvis"/> patch below that uses it or else this method won't be populated when the patch is compiled and it will be inlined as an empty method!</remarks>
             [HarmonyPatch(typeof(VirtualBone), nameof(VirtualBone.SolveTrigonometric))]
             [HarmonyReversePatch]
 #pragma warning disable IDE0060, IDE0062, CS8321
@@ -138,7 +139,7 @@ namespace CustomAvatar.Avatar
             private static readonly MethodInfo kNewSolveTrigonometricMethod = AccessTools.DeclaredMethod(typeof(CustomSpine), nameof(SolveTrigonometric));
 
             /// <summary>
-            /// Patch <see cref="IKSolverVR.Spine.SolvePelvis"/> so it has the pelvis bending fix from FinalIK v2.0+.
+            /// Patch <see cref="IKSolverVR.Spine.SolvePelvis"/> so it has the pelvis bending fix from FinalIK v2.0+ (i.e. the pelvis bone actually follows the pelvis tracker's rotation).
             /// </summary>
             [HarmonyPatch(typeof(Spine), nameof(Spine.SolvePelvis))]
             [HarmonyReversePatch]
@@ -251,14 +252,12 @@ namespace CustomAvatar.Avatar
             private static Quaternion To(Arm self, bool isLeft) => Quaternion.AngleAxis(isLeft ? -90f : 90f, self.chestUp) * self.chestRotation;
 
             /// <summary>
-            /// A patched version of <see cref="IKSolverVR.Arm.Solve"/> that assumes the shoulder is initially at its relaxed position instead of forcing the relaxed position that is flat on the XY plane and 15 degrees under the horizon.
+            /// A patched version of <see cref="IKSolverVR.Arm.Solve"/> that assumes the shoulder is initially at its relaxed position instead of forcing a relaxed position that is flat on the XY plane and 15 degrees under the horizon.
             /// </summary>
-            /// <param name="arm">The arm to solve (<see langword="this" />).</param>
-            /// <param name="isLeft">Whether or not this is the left arm.</param>
             [HarmonyPatch(typeof(Arm), nameof(Arm.Solve))]
             [HarmonyReversePatch]
 #pragma warning disable IDE0060, IDE0062, CS8321
-            internal static void Solve(Arm arm, bool isLeft)
+            internal static void Solve(Arm self, bool isLeft)
             {
                 IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
                 {
