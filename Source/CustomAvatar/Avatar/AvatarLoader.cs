@@ -20,7 +20,6 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using AssetBundleLoadingTools.Utilities;
-using CustomAvatar.Configuration;
 using CustomAvatar.Exceptions;
 using CustomAvatar.Logging;
 using CustomAvatar.Utilities;
@@ -40,15 +39,13 @@ namespace CustomAvatar.Avatar
 
         private readonly ILogger<AvatarLoader> _logger;
         private readonly DiContainer _container;
-        private readonly Settings _settings;
 
-        private readonly Dictionary<string, Task<AvatarPrefab>> _tasks = new();
+        private readonly Dictionary<string, Task<AvatarPrefab>> _tasks = [];
 
-        internal AvatarLoader(ILogger<AvatarLoader> logger, DiContainer container, Settings settings)
+        internal AvatarLoader(ILogger<AvatarLoader> logger, DiContainer container)
         {
             _logger = logger;
             _container = container;
-            _settings = settings;
         }
 
         /// <summary>
