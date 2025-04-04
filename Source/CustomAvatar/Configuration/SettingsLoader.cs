@@ -14,6 +14,7 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.IO;
 using CustomAvatar.Logging;
 using CustomAvatar.Utilities.Converters;
@@ -24,14 +25,14 @@ using Newtonsoft.Json.Serialization;
 
 namespace CustomAvatar.Configuration
 {
-    internal class SettingsManager
+    internal class SettingsLoader : IDisposable
     {
         public static readonly string kSettingsPath = Path.Join(UnityGame.UserDataPath, "CustomAvatars.json");
 
-        private readonly ILogger<SettingsManager> _logger;
+        private readonly ILogger<SettingsLoader> _logger;
         private readonly JsonSerializer _jsonSerializer;
 
-        public SettingsManager(ILogger<SettingsManager> logger)
+        public SettingsLoader(ILogger<SettingsLoader> logger)
         {
             _logger = logger;
             _jsonSerializer = JsonSerializer.CreateDefault(new JsonSerializerSettings
@@ -52,30 +53,45 @@ namespace CustomAvatar.Configuration
 
         public void Load()
         {
-            if (!File.Exists(kSettingsPath))
+            try
             {
-                settings = new Settings();
-                return;
+                if (!File.Exists(kSettingsPath))
+                {
+                    settings = new Settings();
+                    return;
+                }
+
+                _logger.LogInformation($"Loading settings from '{kSettingsPath}'");
+
+                using (StreamReader reader = new(kSettingsPath))
+                using (JsonTextReader jsonReader = new(reader))
+                {
+                    settings = _jsonSerializer.Deserialize<Settings>(jsonReader) ?? new Settings();
+                }
             }
-
-            _logger.LogInformation($"Loading settings from '{kSettingsPath}'");
-
-            using (StreamReader reader = new(kSettingsPath))
-            using (JsonTextReader jsonReader = new(reader))
+            catch (Exception ex)
             {
-                settings = _jsonSerializer.Deserialize<Settings>(jsonReader) ?? new Settings();
+                _logger.LogError($"Failed to load settings\n{ex}");
+                settings = new Settings();
             }
         }
 
-        public void Save()
+        public void Dispose()
         {
-            _logger.LogInformation($"Saving settings to '{kSettingsPath}'");
-
-            using (StreamWriter writer = new(kSettingsPath))
-            using (JsonTextWriter jsonWriter = new(writer))
+            try
             {
-                _jsonSerializer.Serialize(jsonWriter, settings);
-                jsonWriter.Flush();
+                _logger.LogInformation($"Saving settings to '{kSettingsPath}'");
+
+                using (StreamWriter writer = new(kSettingsPath))
+                using (JsonTextWriter jsonWriter = new(writer))
+                {
+                    _jsonSerializer.Serialize(jsonWriter, settings);
+                    jsonWriter.Flush();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to save settings\n{ex}");
             }
         }
 

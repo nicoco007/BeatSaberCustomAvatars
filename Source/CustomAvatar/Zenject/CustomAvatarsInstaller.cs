@@ -66,14 +66,13 @@ namespace CustomAvatar.Zenject
             Container.Bind(typeof(ILogger<>)).FromMethodUntyped(CreateLogger).AsTransient();
 
             // settings
-            Configuration.SettingsManager settingsManager = Container.Instantiate<Configuration.SettingsManager>();
+            Container.Bind(typeof(SettingsLoader), typeof(IDisposable)).To<SettingsLoader>().AsSingle();
+            SettingsLoader settingsManager = Container.Resolve<SettingsLoader>();
             settingsManager.Load();
+            Container.Bind<Settings>().FromInstance(settingsManager.settings).AsSingle();
+            Container.Bind(typeof(CalibrationData), typeof(IInitializable), typeof(IDisposable)).To<CalibrationData>().AsSingle();
 
             Container.Bind<PluginMetadata>().FromInstance(_pluginMetadata).When(InjectedIntoThisAssembly);
-
-            Container.Bind<Configuration.SettingsManager>().FromInstance(settingsManager).AsSingle();
-            Container.Bind<Settings>().FromMethod((ctx) => ctx.Container.Resolve<Configuration.SettingsManager>().settings).AsTransient();
-            Container.Bind(typeof(CalibrationData), typeof(IInitializable), typeof(IDisposable)).To<CalibrationData>().AsSingle();
 
             _logger.LogInformation($"Current Unity XR device: '{XRSettings.loadedDeviceName}'");
 

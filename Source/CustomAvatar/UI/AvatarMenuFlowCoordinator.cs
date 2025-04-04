@@ -30,7 +30,6 @@ namespace CustomAvatar.UI
         private AvatarListViewController _avatarListViewController;
         private MirrorViewController _mirrorViewController;
         private SettingsViewController _settingsViewController;
-        private Configuration.SettingsManager _settingsManager;
         private MenuButtons _menuButtons;
 
         private MenuButton _menuButton;
@@ -59,7 +58,6 @@ namespace CustomAvatar.UI
             AvatarListViewController avatarListViewController,
             MirrorViewController mirrorViewController,
             SettingsViewController settingsViewController,
-            Configuration.SettingsManager settingsManager,
             MenuButtons menuButtons)
         {
             _logger = logger;
@@ -67,7 +65,6 @@ namespace CustomAvatar.UI
             _avatarListViewController = avatarListViewController;
             _mirrorViewController = mirrorViewController;
             _settingsViewController = settingsViewController;
-            _settingsManager = settingsManager;
             _menuButtons = menuButtons;
         }
 
@@ -88,16 +85,6 @@ namespace CustomAvatar.UI
 
         protected override void BackButtonWasPressed(ViewController topViewController)
         {
-            try
-            {
-                _settingsManager.Save();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("Failed to write settings to file");
-                _logger.LogError(ex);
-            }
-
             BeatSaberUI.MainFlowCoordinator.DismissFlowCoordinator(this);
         }
     }
