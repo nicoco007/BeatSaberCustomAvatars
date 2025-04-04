@@ -263,15 +263,6 @@ namespace CustomAvatar.Avatar
                 IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
                 {
                     return new CodeMatcher(instructions)
-                        // Add `+ yOA` after `Mathf.Atan2(sDirWorking.x, sDirWorking.z) * Mathf.Rad2Deg`
-                        .MatchForward(true,
-                            new CodeMatch(i => i.Equals(OpCodes.Ldc_R4, Mathf.Rad2Deg)),
-                            new CodeMatch(OpCodes.Mul))
-                        .ThrowIfInvalid("Initial yaw calculation not found")
-                        .Advance(1)
-                        .InsertAndAdvance(
-                            new CodeInstruction(OpCodes.Ldloc_2),
-                            new CodeInstruction(OpCodes.Add))
                         // Remove `yaw -= yOA`
                         .MatchForward(false,
                             new CodeMatch(i => i.LoadsLocal(5)),
@@ -284,11 +275,13 @@ namespace CustomAvatar.Avatar
                         .MatchForward(false,
                             new CodeMatch(OpCodes.Ldloc_2),
                             new CodeMatch(OpCodes.Sub))
+                        .ThrowIfInvalid("`yawLimitMin - yOA` not found")
                         .RemoveInstructions(2)
                         // Remove `- yOA` from `yawLimitMax` in call to `DamperValue`
                         .MatchForward(false,
                             new CodeMatch(OpCodes.Ldloc_2),
                             new CodeMatch(OpCodes.Sub))
+                        .ThrowIfInvalid("`yawLimitMax - yOA` not found")
                         .RemoveInstructions(2)
                         // Replace `shoulder.solverRotation * shoulder.axis` with `From(this, isLeft)`
                         .MatchForward(false,
