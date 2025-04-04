@@ -168,16 +168,12 @@ namespace CustomAvatar.UI
 
         private void OnAvatarChanged(SpawnedAvatar avatar)
         {
-            UpdateSelectedRow();
+            int index = UpdateSelectedRow();
+            AvatarListItem selectedItem = avatars[index];
 
-            string fileName = _avatarManager.currentAvatarFileName;
-            if (fileName != null)
+            if (_avatarManager.TryGetCachedAvatarInfo(selectedItem.fileName, out AvatarInfo avatarInfo))
             {
-                AvatarListItem item = avatars.Find(a => a.fileName == fileName);
-                if (item != null && _avatarManager.TryGetCachedAvatarInfo(fileName, out AvatarInfo avatarInfo))
-                {
-                    item.SetLoadedInfo(avatarInfo, _blankAvatarSprite);
-                }
+                selectedItem.SetLoadedInfo(avatarInfo, _blankAvatarSprite);
             }
         }
 
@@ -339,13 +335,19 @@ namespace CustomAvatar.UI
             _tableView.ReloadDataKeepingPosition();
         }
 
-        private void UpdateSelectedRow(bool scroll = false)
+        private int UpdateSelectedRow()
         {
-            int currentRow = _avatarManager.currentlySpawnedAvatar ? avatars.FindIndex(a => a.fileName == _avatarManager.currentAvatarFileName) : 0;
+            int index = avatars.FindIndex(a => a.fileName == _avatarManager.currentAvatarFileName);
 
-            if (scroll) _tableView.ScrollToCellWithIdx(currentRow, TableView.ScrollPositionType.Center, false);
+            if (index < 0)
+            {
+                index = 0;
+            }
 
-            _tableView.SelectCellWithIdx(currentRow);
+            _tableView.SelectCellWithIdx(index);
+            _tableView.ScrollToCellWithIdx(index, TableView.ScrollPositionType.Center, false);
+
+            return index;
         }
 
         public float CellSize(int idx)
@@ -368,8 +370,7 @@ namespace CustomAvatar.UI
                 tableCell.reuseIdentifier = kTableCellReuseIdentifier;
             }
 
-            AvatarListItem avatar = avatars[idx];
-            tableCell.listItem = avatar;
+            tableCell.listItem = avatars[idx];
 
             return tableCell;
         }
