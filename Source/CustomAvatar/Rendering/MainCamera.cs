@@ -204,9 +204,11 @@ namespace CustomAvatar.Rendering
 
         private void OnFocusChanged(bool hasFocus)
         {
+            Quaternion rotation = Quaternion.Euler(0, 180, 0);
+
             _trackedPoseDriver.originPose = hasFocus ? Pose.identity : new Pose(
-                Vector3.Project(Quaternion.Euler(0, 180, 0) * -transform.localPosition * 2, Vector3.right) + new Vector3(0, 0, 1.5f),
-                Quaternion.Euler(0, 180, 0));
+                Vector3.ProjectOnPlane(rotation * -transform.localPosition * 2, Vector3.up) + Vector3.ProjectOnPlane(transform.localRotation * Vector3.forward, Vector3.up).normalized,
+                rotation);
             _trackedPoseDriver.UseRelativeTransform = _settings.hmdCameraBehaviour == HmdCameraBehaviour.AllCameras;
 
             UpdateCameraMask();
