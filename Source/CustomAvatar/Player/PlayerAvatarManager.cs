@@ -237,6 +237,12 @@ namespace CustomAvatar.Player
 
         internal bool TryGetCachedAvatarInfo(string fileName, out AvatarInfo avatarInfo)
         {
+            if (string.IsNullOrEmpty(fileName))
+            {
+                avatarInfo = default;
+                return false;
+            }
+
             return _avatarCacheStore.TryGetValue(fileName, out avatarInfo);
         }
 
