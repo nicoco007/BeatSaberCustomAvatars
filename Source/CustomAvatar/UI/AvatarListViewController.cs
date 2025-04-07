@@ -344,8 +344,11 @@ namespace CustomAvatar.UI
                 index = 0;
             }
 
-            _tableView.SelectCellWithIdx(index);
-            _tableView.ScrollToCellWithIdx(index, TableView.ScrollPositionType.Center, false);
+            if (!_tableView._selectedCellIdxs.Contains(index))
+            {
+                _tableView.SelectCellWithIdx(index);
+                _tableView.ScrollToCellWithIdx(index, TableView.ScrollPositionType.Center, false);
+            }
 
             return index;
         }
