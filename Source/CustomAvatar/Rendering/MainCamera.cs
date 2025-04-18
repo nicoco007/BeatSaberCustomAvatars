@@ -22,8 +22,6 @@ using CustomAvatar.Player;
 using CustomAvatar.Utilities;
 using SiraUtil.Tools.FPFC;
 using UnityEngine;
-using UnityEngine.SpatialTracking;
-using UnityEngine.XR;
 using Zenject;
 
 namespace CustomAvatar.Rendering
@@ -41,11 +39,23 @@ namespace CustomAvatar.Rendering
         private Transform _playerSpace;
         private Transform _origin;
         private Camera _camera;
-        private TrackedPoseDriver _trackedPoseDriver;
 
         protected IFPFCSettings fpfcSettings { get; private set; }
 
         protected BeatSaberUtilities beatSaberUtilities { get; private set; }
+
+        internal void UpdateCameraMask()
+        {
+            if (_logger == null || _settings == null || fpfcSettings == null)
+            {
+                return;
+            }
+
+            _logger.LogTrace($"Setting avatar culling mask and near clip plane on '{_camera.name}'");
+
+            _camera.cullingMask = GetCameraMask(_camera.cullingMask);
+            _camera.nearClipPlane = _settings.cameraNearClipPlane;
+        }
 
         protected virtual (Transform playerSpace, Transform origin) GetPlayerSpaceAndOrigin()
         {
@@ -82,7 +92,6 @@ namespace CustomAvatar.Rendering
         protected void Awake()
         {
             _camera = GetComponent<Camera>();
-            _trackedPoseDriver = GetComponent<TrackedPoseDriver>();
         }
 
         protected void OnEnable()
@@ -97,13 +106,6 @@ namespace CustomAvatar.Rendering
             {
                 fpfcSettings.Changed -= OnFpfcSettingsChanged;
                 fpfcSettings.Changed += OnFpfcSettingsChanged;
-            }
-
-            if (beatSaberUtilities != null)
-            {
-                beatSaberUtilities.focusChanged -= OnFocusChanged;
-                beatSaberUtilities.focusChanged += OnFocusChanged;
-                OnFocusChanged(beatSaberUtilities.hasFocus);
             }
 
             UpdateCameraMask();
@@ -153,43 +155,11 @@ namespace CustomAvatar.Rendering
             {
                 fpfcSettings.Changed -= OnFpfcSettingsChanged;
             }
-
-            if (beatSaberUtilities != null)
-            {
-                beatSaberUtilities.focusChanged -= OnFocusChanged;
-            }
         }
 
         protected void OnDestroy()
         {
             RemoveFromPlayerSpaceManager();
-        }
-
-        protected void OnPreCull()
-        {
-            if (_settings.hmdCameraBehaviour == HmdCameraBehaviour.HmdOnly && !beatSaberUtilities.hasFocus)
-            {
-                _trackedPoseDriver.UseRelativeTransform = true;
-                _trackedPoseDriver.PerformUpdate();
-
-                if (_camera.stereoEnabled && XRSettings.stereoRenderingMode == XRSettings.StereoRenderingMode.MultiPass)
-                {
-                    _camera.transform.position = _camera.ViewportToWorldPoint(Vector3.zero, _camera.stereoActiveEye);
-                }
-
-                _camera.ResetWorldToCameraMatrix();
-                _camera.cullingMask |= AvatarLayers.kOnlyInThirdPersonMask;
-            }
-        }
-
-        protected void OnPostRender()
-        {
-            if (_settings.hmdCameraBehaviour == HmdCameraBehaviour.HmdOnly && !beatSaberUtilities.hasFocus)
-            {
-                // the VR camera seems to always be rendered last so we don't need to re-update the camera pose/matrix
-                _trackedPoseDriver.UseRelativeTransform = false;
-                UpdateCameraMask();
-            }
         }
 
         private void OnCameraNearClipPlaneChanged(float value)
@@ -200,31 +170,6 @@ namespace CustomAvatar.Rendering
         private void OnFpfcSettingsChanged(IFPFCSettings fpfcSettings)
         {
             UpdateCameraMask();
-        }
-
-        private void OnFocusChanged(bool hasFocus)
-        {
-            Quaternion rotation = Quaternion.Euler(0, 180, 0);
-
-            _trackedPoseDriver.originPose = hasFocus ? Pose.identity : new Pose(
-                Vector3.ProjectOnPlane(rotation * -transform.localPosition * 2, Vector3.up) + Vector3.ProjectOnPlane(transform.localRotation * Vector3.forward, Vector3.up).normalized,
-                rotation);
-            _trackedPoseDriver.UseRelativeTransform = _settings.hmdCameraBehaviour == HmdCameraBehaviour.AllCameras;
-
-            UpdateCameraMask();
-        }
-
-        private void UpdateCameraMask()
-        {
-            if (_logger == null || _settings == null || fpfcSettings == null)
-            {
-                return;
-            }
-
-            _logger.LogTrace($"Setting avatar culling mask and near clip plane on '{_camera.name}'");
-
-            _camera.cullingMask = GetCameraMask(_camera.cullingMask);
-            _camera.nearClipPlane = _settings.cameraNearClipPlane;
         }
 
         private void AddToPlayerSpaceManager()
