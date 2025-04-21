@@ -20,9 +20,12 @@ namespace CustomAvatar.Avatar
     {
         public static readonly int kAlwaysVisible = 10; // Beat Saber's "Avatar" layer
         public static readonly int kOnlyInThirdPerson = 3; // technically reserved for Unity but changing it breaks compatibility with other mods and changing it just because Unity *might* use it someday isn't worth it right now
+        public static readonly int kMirror = 23;
 
         public static readonly int kAlwaysVisibleMask = 1 << kAlwaysVisible;
         public static readonly int kOnlyInThirdPersonMask = 1 << kOnlyInThirdPerson;
-        public static readonly int kAllLayersMask = kAlwaysVisibleMask | kOnlyInThirdPersonMask;
+        public static readonly int kMirrorMask = 1 << kMirror;
+        public static readonly int kNonMirrorMask = kAlwaysVisibleMask | kOnlyInThirdPersonMask;
+        public static readonly int kAllLayersMask = kAlwaysVisibleMask | kOnlyInThirdPersonMask | kMirror;
     }
 }

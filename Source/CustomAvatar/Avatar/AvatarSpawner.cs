@@ -83,7 +83,8 @@ namespace CustomAvatar.Avatar
                 _logger.LogInformation($"Spawning avatar '{avatar.descriptor.name}'");
             }
 
-            GameObject avatarInstance = SpawnBareAvatar(avatar, parent);
+            GameObject avatarInstance = Object.Instantiate(avatar, parent, false).gameObject;
+            Object.DestroyImmediate(avatarInstance.GetComponent<AvatarPrefab>());
 
             DiContainer subContainer = new(_container);
             subContainer.Bind<AvatarPrefab>().FromInstance(avatar);
@@ -106,13 +107,6 @@ namespace CustomAvatar.Avatar
             avatarInstance.SetActive(true);
 
             return spawnedAvatar;
-        }
-
-        internal GameObject SpawnBareAvatar(AvatarPrefab avatar, Transform parent = null)
-        {
-            GameObject avatarInstance = Object.Instantiate(avatar, parent, false).gameObject;
-            Object.DestroyImmediate(avatarInstance.GetComponent<AvatarPrefab>());
-            return avatarInstance;
         }
 
         private bool ShouldAddTransformTracking(AvatarPrefab avatarPrefab)
