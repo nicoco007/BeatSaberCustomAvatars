@@ -44,7 +44,7 @@ namespace CustomAvatar.Avatar
 
         internal VRIKManager vrikManager { get; private set; }
 
-        private readonly List<BeatSaberDynamicBone::DynamicBone> _dynamicBones = new();
+        private BeatSaberDynamicBone::DynamicBone[] _dynamicBones;
         private TwistRelaxer[] _twistRelaxers;
         private TwistRelaxerV2[] _twistRelaxersV2;
 
@@ -68,20 +68,14 @@ namespace CustomAvatar.Avatar
 
         protected void Awake()
         {
-            foreach (BeatSaberDynamicBone::DynamicBone dynamicBone in GetComponentsInChildren<BeatSaberDynamicBone::DynamicBone>())
-            {
-                if (!dynamicBone.enabled)
-                {
-                    continue;
-                }
-
-                dynamicBone.enabled = false;
-
-                _dynamicBones.Add(dynamicBone);
-            }
-
+            _dynamicBones = GetComponentsInChildren<BeatSaberDynamicBone::DynamicBone>();
             _twistRelaxers = GetComponentsInChildren<TwistRelaxer>();
             _twistRelaxersV2 = GetComponentsInChildren<TwistRelaxerV2>();
+
+            foreach (BeatSaberDynamicBone::DynamicBone dynamicBone in _dynamicBones)
+            {
+                dynamicBone.enabled = false;
+            }
 
             foreach (TwistRelaxer twistRelaxer in _twistRelaxers)
             {
