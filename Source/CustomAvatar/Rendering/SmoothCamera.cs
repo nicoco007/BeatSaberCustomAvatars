@@ -24,7 +24,6 @@ using Zenject;
 
 namespace CustomAvatar.Rendering
 {
-    [RequireComponent(typeof(SmoothCamera))]
     [RequireComponent(typeof(Camera))]
     [DisallowMultipleComponent]
     internal class SmoothCamera : MonoBehaviour
