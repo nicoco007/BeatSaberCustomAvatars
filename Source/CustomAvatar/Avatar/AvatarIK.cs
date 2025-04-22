@@ -17,7 +17,6 @@
 extern alias BeatSaberDynamicBone;
 extern alias BeatSaberFinalIK;
 
-using System.Collections.Generic;
 using BeatSaberFinalIK::RootMotion.FinalIK;
 using CustomAvatar.Logging;
 using CustomAvatar.Scripts;
