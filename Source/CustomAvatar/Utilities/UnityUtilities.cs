@@ -36,7 +36,7 @@ namespace CustomAvatar.Utilities
         {
             if (component == null)
             {
-                return "<null>";
+                return "null";
             }
 
             List<string> parts = [];
@@ -59,7 +59,7 @@ namespace CustomAvatar.Utilities
 
             parts.Reverse();
 
-            return string.Join("/", parts);
+            return $"'{string.Join("/", parts)}'";
         }
     }
 }

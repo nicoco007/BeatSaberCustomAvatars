@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using CustomAvatar.Logging;
+using CustomAvatar.Utilities;
 using UnityEngine;
 
 namespace CustomAvatar.Rendering
@@ -82,9 +83,15 @@ namespace CustomAvatar.Rendering
                 _logger.LogInformation("Changed to none");
             }
 
-                changed?.Invoke(obj);
+            changed?.Invoke(obj);
         }
 
-        internal record Element(Camera camera, Transform playerSpace, Transform origin, bool showAvatar);
+        internal record Element(Camera camera, Transform playerSpace, Transform origin, bool showAvatar)
+        {
+            public override string ToString()
+            {
+                return $"{{ {nameof(camera)} = {UnityUtilities.GetTransformPath(camera)}, {nameof(playerSpace)} = {UnityUtilities.GetTransformPath(playerSpace)}, {nameof(origin)} = {UnityUtilities.GetTransformPath(origin)}, {nameof(showAvatar)} = {showAvatar} }}";
+            }
+        }
     }
 }
