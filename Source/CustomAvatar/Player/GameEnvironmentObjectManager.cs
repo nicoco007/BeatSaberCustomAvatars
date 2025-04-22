@@ -20,6 +20,7 @@ using CustomAvatar.Logging;
 using CustomAvatar.Rendering;
 using CustomAvatar.Utilities;
 using UnityEngine;
+using UnityEngine.SpatialTracking;
 using Zenject;
 
 namespace CustomAvatar.Player
@@ -141,9 +142,16 @@ namespace CustomAvatar.Player
                 return;
             }
 
-            SpectatorCamera spectatorCameraController = _container.InstantiateComponent<SpectatorCamera>(camera.gameObject);
+            GameObject gameObject = camera.gameObject;
+
+            SpectatorCamera spectatorCameraController = _container.InstantiateComponent<SpectatorCamera>(gameObject);
             spectatorCameraController.origin = BeatLeaderReflection.kReplayerCoreGetter(originComponent);
             spectatorCameraController.playerSpace = BeatLeaderReflection.kReplayerCenterAdjustGetter(originComponent);
+
+            if (camera.TryGetComponent(out TrackedPoseDriver _))
+            {
+                _container.InstantiateComponent<CameraFlipper>(gameObject);
+            }
         }
     }
 }
