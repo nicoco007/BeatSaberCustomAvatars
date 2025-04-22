@@ -192,7 +192,7 @@ namespace CustomAvatar.Tracking.UnityXR
                     return default;
                 }
 
-                return new DeviceState(isConnected, isTrackedAction.IsPressed(), positionAction.ReadValue<Vector3>(), orientationAction.ReadValue<Quaternion>());
+                return new DeviceState(isConnected, isTrackedAction.ReadValue<float>() > 0.5f, positionAction.ReadValue<Vector3>(), orientationAction.ReadValue<Quaternion>());
             }
         }
     }
