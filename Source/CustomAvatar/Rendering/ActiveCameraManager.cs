@@ -14,16 +14,77 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Collections.Generic;
 using CustomAvatar.Logging;
-using CustomAvatar.Utilities;
 using UnityEngine;
 
 namespace CustomAvatar.Rendering
 {
-    internal class ActiveCameraManager : ActiveObjectManager<Camera>
+    internal class ActiveCameraManager
     {
-        internal ActiveCameraManager(ILogger<ActiveCameraManager> logger) : base(logger)
+        private readonly ILogger<ActiveCameraManager> _logger;
+        private readonly LinkedList<Element> _objects = new();
+
+        public Element current => _objects.Last?.Value;
+
+        public event Action<Element> changed;
+
+        internal ActiveCameraManager(ILogger<ActiveCameraManager> logger)
         {
+            _logger = logger;
         }
+
+        public Element Add(Camera camera, Transform playerSpace, Transform origin)
+        {
+            if (current?.camera == camera)
+            {
+                return current;
+            }
+
+            Element obj = new(camera, playerSpace, origin);
+
+            _objects.Remove(obj);
+            _objects.AddLast(obj);
+
+            InvokeChanged();
+
+            return obj;
+        }
+
+        public void Remove(Element obj)
+        {
+            bool notify = false;
+
+            if (current?.camera == obj.camera)
+            {
+                notify = true;
+            }
+
+            _objects.Remove(obj);
+
+            if (notify)
+            {
+                InvokeChanged();
+            }
+        }
+
+        private void InvokeChanged()
+        {
+            Element obj = current;
+
+            if (obj != null)
+            {
+                _logger.LogInformation($"Changed to {obj}");
+            }
+            else
+            {
+                _logger.LogInformation("Changed to none");
+            }
+
+            changed?.Invoke(obj);
+        }
+
+        internal record Element(Camera camera, Transform playerSpace, Transform origin);
     }
 }

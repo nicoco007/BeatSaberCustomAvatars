@@ -122,7 +122,7 @@ namespace CustomAvatar.Rendering
                 return Texture2D.blackTexture;
             }
 
-            if (!_settings.mirror.renderInExternalCameras && camera != _activeCameraManager.current)
+            if (!_settings.mirror.renderInExternalCameras && camera != _activeCameraManager.current.camera)
             {
                 return Texture2D.blackTexture;
             }

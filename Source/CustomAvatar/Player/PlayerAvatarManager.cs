@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
+using CustomAvatar.Rendering;
 using CustomAvatar.Utilities;
 using IPA.Utilities;
 using UnityEngine;
@@ -111,7 +112,7 @@ namespace CustomAvatar.Player
         private CalibrationData _calibrationData;
         private AvatarSpawner _spawner;
         private BeatSaberUtilities _beatSaberUtilities;
-        private ActiveOriginManager _activeOriginManager;
+        private ActiveCameraManager _activeCameraManager;
 
         private ParentConstraint _parentConstraint;
         private LossyScaleConstraint _scaleConstraint;
@@ -153,7 +154,7 @@ namespace CustomAvatar.Player
 
             _beatSaberUtilities.roomAdjustChanged += OnRoomAdjustChanged;
 
-            _activeOriginManager.changed += OnActiveOriginChanged;
+            _activeCameraManager.changed += OnActiveCameraChanged;
         }
 
         [Inject]
@@ -166,7 +167,7 @@ namespace CustomAvatar.Player
             CalibrationData calibrationData,
             AvatarSpawner spawner,
             BeatSaberUtilities beatSaberUtilities,
-            ActiveOriginManager activeOriginManager)
+            ActiveCameraManager activeCameraManager)
         {
             _container = container;
             _logger = logger;
@@ -175,7 +176,7 @@ namespace CustomAvatar.Player
             _calibrationData = calibrationData;
             _spawner = spawner;
             _beatSaberUtilities = beatSaberUtilities;
-            _activeOriginManager = activeOriginManager;
+            _activeCameraManager = activeCameraManager;
         }
 
         protected void Start()
@@ -219,7 +220,7 @@ namespace CustomAvatar.Player
 
             _beatSaberUtilities.roomAdjustChanged -= OnRoomAdjustChanged;
 
-            _activeOriginManager.changed -= OnActiveOriginChanged;
+            _activeCameraManager.changed -= OnActiveCameraChanged;
         }
 
         protected void OnDestroy()
@@ -422,7 +423,7 @@ namespace CustomAvatar.Player
             return Directory.GetFiles(kCustomAvatarsPath, "*.avatar", SearchOption.TopDirectoryOnly).Select(f => Path.GetFileName(f)).OrderBy(f => f).ToList();
         }
 
-        private void OnActiveOriginChanged(Transform origin)
+        private void OnActiveCameraChanged(ActiveCameraManager.Element element)
         {
             UpdateConstraints();
         }
@@ -452,10 +453,10 @@ namespace CustomAvatar.Player
         {
             _logger.LogTrace("Updating constraints");
 
-            if (_activeOriginManager.current != null)
+            if (_activeCameraManager.current != null)
             {
-                _parentConstraint.SetSources([new ConstraintSource { sourceTransform = _activeOriginManager.current, weight = 1 }]);
-                _scaleConstraint.sourceTransform = _activeOriginManager.current;
+                _parentConstraint.SetSources([new ConstraintSource { sourceTransform = _activeCameraManager.current.origin, weight = 1 }]);
+                _scaleConstraint.sourceTransform = _activeCameraManager.current.origin;
             }
             else
             {

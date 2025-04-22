@@ -19,6 +19,7 @@ extern alias BeatSaberFinalIK;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Player;
+using CustomAvatar.Rendering;
 using CustomAvatar.Utilities;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -34,16 +35,16 @@ namespace CustomAvatar.Tracking
         private readonly TrackingRig _trackingRig;
         private readonly CalibrationData _calibrationData;
         private readonly Settings _settings;
-        private readonly ActiveOriginManager _activeOriginManager;
+        private readonly ActiveCameraManager _activeCameraManager;
         private readonly BeatSaberUtilities _beatSaberUtilities;
         private readonly PlayerAvatarManager _playerAvatarManager;
 
-        internal HumanoidCalibrator(TrackingRig trackingRig, CalibrationData calibrationData, Settings settings, ActiveOriginManager activeOriginManager, BeatSaberUtilities beatSaberUtilities, PlayerAvatarManager playerAvatarManager)
+        internal HumanoidCalibrator(TrackingRig trackingRig, CalibrationData calibrationData, Settings settings, ActiveCameraManager activeCameraManager, BeatSaberUtilities beatSaberUtilities, PlayerAvatarManager playerAvatarManager)
         {
             _trackingRig = trackingRig;
             _calibrationData = calibrationData;
             _settings = settings;
-            _activeOriginManager = activeOriginManager;
+            _activeCameraManager = activeCameraManager;
             _beatSaberUtilities = beatSaberUtilities;
             _playerAvatarManager = playerAvatarManager;
         }
@@ -173,7 +174,7 @@ namespace CustomAvatar.Tracking
         {
             Transform center = new GameObject("Center").transform;
             Transform head = _trackingRig.head.transform;
-            Transform parent = _activeOriginManager.current;
+            Transform parent = _activeCameraManager.current.origin;
 
             // We want the user's head rotation to match the avatar's head directly rather than assuming whatever
             // position they're in is forward. I'm not sure how I feel about doing that, but it's what VRChat does.

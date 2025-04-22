@@ -44,8 +44,7 @@ namespace CustomAvatar.Tracking
         private IDeviceProvider _deviceProvider;
         private IRenderModelProvider _renderModelProvider;
         private PlayerAvatarManager _playerAvatarManager;
-        private ActivePlayerSpaceManager _activePlayerSpaceManager;
-        private ActiveOriginManager _activeOriginManager;
+        private ActiveCameraManager _activeCameraManager;
         private Settings _settings;
         private CalibrationData _calibrationData;
         private VRControllerVisualsManager _vrControllerVisualsManager;
@@ -75,7 +74,7 @@ namespace CustomAvatar.Tracking
         internal bool areAnyFullBodyTrackersTracking { get; private set; }
 
         // local to the current active origin (parent of VRCenterAdjust or world if no parent)
-        internal float eyeHeight => (_activeOriginManager.current != null ? _activeOriginManager.current.InverseTransformPoint(head.transform.position).y : head.transform.position.y) - (_settings.moveFloorWithRoomAdjust ? _beatSaberUtilities.roomCenter.y : 0);
+        internal float eyeHeight => (_activeCameraManager.current?.origin != null ? _activeCameraManager.current.origin.InverseTransformPoint(head.transform.position).y : head.transform.position.y) - (_settings.moveFloorWithRoomAdjust ? _beatSaberUtilities.roomCenter.y : 0);
 
         internal GenericNode head { get; private set; }
 
@@ -217,10 +216,10 @@ namespace CustomAvatar.Tracking
 
         protected void OnEnable()
         {
-            if (_activePlayerSpaceManager != null)
+            if (_activeCameraManager != null)
             {
-                _activePlayerSpaceManager.changed += OnActivePlayerSpaceChanged;
-                OnActivePlayerSpaceChanged(_activePlayerSpaceManager.current);
+                _activeCameraManager.changed += OnActiveCameraChanged;
+                OnActiveCameraChanged(_activeCameraManager.current);
             }
 
             if (_playerAvatarManager != null)
@@ -281,8 +280,7 @@ namespace CustomAvatar.Tracking
             IDeviceProvider deviceProvider,
             [InjectOptional] IRenderModelProvider renderModelProvider,
             PlayerAvatarManager playerAvatarManager,
-            ActivePlayerSpaceManager activePlayerSpaceManager,
-            ActiveOriginManager activeOriginManager,
+            ActiveCameraManager activeCameraManager,
             Settings settings,
             CalibrationData calibrationData,
             VRControllerVisualsManager vrControllerVisualsManager,
@@ -294,14 +292,13 @@ namespace CustomAvatar.Tracking
             _deviceProvider = deviceProvider;
             _renderModelProvider = renderModelProvider;
             _playerAvatarManager = playerAvatarManager;
-            _activePlayerSpaceManager = activePlayerSpaceManager;
-            _activeOriginManager = activeOriginManager;
+            _activeCameraManager = activeCameraManager;
             _settings = settings;
             _calibrationData = calibrationData;
             _vrControllerVisualsManager = vrControllerVisualsManager;
             _beatSaberUtilities = beatSaberUtilities;
             _fpfcSettings = fpfcSettings;
-            _humanoidCalibrator = new HumanoidCalibrator(this, calibrationData, settings, activeOriginManager, beatSaberUtilities, playerAvatarManager);
+            _humanoidCalibrator = new HumanoidCalibrator(this, calibrationData, settings, activeCameraManager, beatSaberUtilities, playerAvatarManager);
         }
 
         protected void Update()
@@ -340,10 +337,10 @@ namespace CustomAvatar.Tracking
 
         protected void OnDisable()
         {
-            if (_activePlayerSpaceManager != null)
+            if (_activeCameraManager != null)
             {
-                _activePlayerSpaceManager.changed -= OnActivePlayerSpaceChanged;
-                OnActivePlayerSpaceChanged(null);
+                _activeCameraManager.changed -= OnActiveCameraChanged;
+                OnActiveCameraChanged(null);
             }
 
             if (_playerAvatarManager != null)
@@ -539,14 +536,14 @@ namespace CustomAvatar.Tracking
             transform.SetLocalPositionAndRotation(offset.position * scale, offset.rotation);
         }
 
-        private void OnActivePlayerSpaceChanged(Transform transform)
+        private void OnActiveCameraChanged(ActiveCameraManager.Element element)
         {
             _logger.LogTrace("Updating constraints");
 
-            if (transform != null)
+            if (element?.playerSpace != null)
             {
-                _parentConstraint.SetSources([new ConstraintSource { sourceTransform = transform, weight = 1 }]);
-                _scaleConstraint.sourceTransform = transform;
+                _parentConstraint.SetSources([new ConstraintSource { sourceTransform = element.playerSpace, weight = 1 }]);
+                _scaleConstraint.sourceTransform = element.playerSpace;
             }
             else
             {

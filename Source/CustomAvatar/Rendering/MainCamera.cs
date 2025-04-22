@@ -18,7 +18,6 @@ using System.Diagnostics.CodeAnalysis;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
-using CustomAvatar.Player;
 using CustomAvatar.Utilities;
 using SiraUtil.Tools.FPFC;
 using UnityEngine;
@@ -32,13 +31,10 @@ namespace CustomAvatar.Rendering
     {
         private ILogger<MainCamera> _logger;
         private Settings _settings;
-        private ActivePlayerSpaceManager _activePlayerSpaceManager;
-        private ActiveOriginManager _activeOriginManager;
         private ActiveCameraManager _activeCameraManager;
 
-        private Transform _playerSpace;
-        private Transform _origin;
         private Camera _camera;
+        private ActiveCameraManager.Element _element;
 
         protected IFPFCSettings fpfcSettings { get; private set; }
 
@@ -116,16 +112,12 @@ namespace CustomAvatar.Rendering
         private void Construct(
             ILogger<MainCamera> logger,
             Settings settings,
-            ActivePlayerSpaceManager activePlayerSpaceManager,
-            ActiveOriginManager activeOriginManager,
             ActiveCameraManager activeCameraManager,
             IFPFCSettings fpfcSettings,
             BeatSaberUtilities beatSaberUtilities)
         {
             _logger = logger;
             _settings = settings;
-            _activePlayerSpaceManager = activePlayerSpaceManager;
-            _activeOriginManager = activeOriginManager;
             _activeCameraManager = activeCameraManager;
             this.fpfcSettings = fpfcSettings;
             this.beatSaberUtilities = beatSaberUtilities;
@@ -174,17 +166,16 @@ namespace CustomAvatar.Rendering
 
         private void AddToPlayerSpaceManager()
         {
-            (_playerSpace, _origin) = GetPlayerSpaceAndOrigin();
-            _activePlayerSpaceManager?.Add(_playerSpace);
-            _activeOriginManager?.Add(_origin);
-            _activeCameraManager?.Add(_camera);
+            (Transform playerSpace, Transform origin) = GetPlayerSpaceAndOrigin();
+            _element = _activeCameraManager?.Add(_camera, playerSpace, origin);
         }
 
         private void RemoveFromPlayerSpaceManager()
         {
-            _activePlayerSpaceManager?.Remove(_playerSpace);
-            _activeOriginManager?.Remove(_origin);
-            _activeCameraManager?.Remove(_camera);
+            if (_element != null)
+            {
+                _activeCameraManager.Remove(_element);
+            }
         }
     }
 }
