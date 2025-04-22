@@ -71,7 +71,7 @@ namespace CustomAvatar.Utilities
 
             if (obj != null)
             {
-                _logger.LogInformation($"Changed to '{GetTransformPath(obj)}'");
+                _logger.LogInformation($"Changed to '{UnityUtilities.GetTransformPath(obj)}'");
             }
             else
             {
@@ -79,23 +79,6 @@ namespace CustomAvatar.Utilities
             }
 
             changed?.Invoke(obj);
-        }
-
-        private string GetTransformPath(Component component)
-        {
-            List<string> parts = [];
-
-            Transform transform = component.transform;
-
-            while (transform != null)
-            {
-                parts.Add(transform.name);
-                transform = transform.parent;
-            }
-
-            parts.Reverse();
-
-            return string.Join("/", parts);
         }
     }
 }

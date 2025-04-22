@@ -14,6 +14,7 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -29,6 +30,36 @@ namespace CustomAvatar.Utilities
         internal static void SetLocalPose(this Transform transform, Pose pose)
         {
             transform.SetLocalPositionAndRotation(pose.position, pose.rotation);
+        }
+
+        internal static string GetTransformPath(Component component)
+        {
+            if (component == null)
+            {
+                return "<null>";
+            }
+
+            List<string> parts = [];
+
+            if (component is not Transform transform)
+            {
+                transform = component.transform;
+            }
+
+            Transform parent;
+
+            while ((parent = transform.parent) != null)
+            {
+                parts.Add(transform.name);
+                transform = parent;
+            }
+
+            parts.Add(transform.name);
+            parts.Add(transform.gameObject.scene.name);
+
+            parts.Reverse();
+
+            return string.Join("/", parts);
         }
     }
 }
