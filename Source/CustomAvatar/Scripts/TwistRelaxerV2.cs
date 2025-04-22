@@ -15,7 +15,7 @@ namespace CustomAvatar.Scripts
         public Transform parent;
 
         [Tooltip("If the transform on which this component is placed is the forearm roll bone, the child should be the hand bone. If null, will attempt to find automatically. Assign the hand manually if the hand bone is not a child of the roll bone.")]
-        public Transform[] children = new Transform[0];
+        public Transform[] children = [];
 
         [Tooltip("The weight of relaxing the twist of this transform.")]
         [Range(0f, 1f)] public float weight = 1f;
@@ -54,6 +54,11 @@ namespace CustomAvatar.Scripts
 
         internal void FixTransforms()
         {
+            if (!_inititated)
+            {
+                return;
+            }
+
             transform.localRotation = _defaultLocalRotation;
 
             for (int i = 0; i < children.Length; i++)
@@ -83,14 +88,14 @@ namespace CustomAvatar.Scripts
                     {
                         if (children[i] != transform)
                         {
-                            this.children = new Transform[1] { children[i] };
+                            this.children = [children[i]];
                             break;
                         }
                     }
                 }
                 else
                 {
-                    children = new Transform[1] { transform.GetChild(0) };
+                    children = [transform.GetChild(0)];
                 }
             }
 
