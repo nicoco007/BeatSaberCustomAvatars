@@ -117,6 +117,9 @@ namespace CustomAvatar.Player
         private ParentConstraint _parentConstraint;
         private LossyScaleConstraint _scaleConstraint;
 
+        private GameObject _containerObject;
+        private Transform _containerTransform;
+
         private CancellationTokenSource _avatarLoadCancellationTokenSource;
 
         internal bool ignoreFirstPersonExclusions
@@ -140,6 +143,10 @@ namespace CustomAvatar.Player
             _parentConstraint.constraintActive = true;
 
             _scaleConstraint = gameObject.AddComponent<LossyScaleConstraint>();
+
+            _containerObject = new GameObject("Container");
+            _containerTransform = _containerObject.transform;
+            _containerTransform.SetParent(transform, false);
         }
 
         protected void OnEnable()
@@ -362,7 +369,7 @@ namespace CustomAvatar.Player
             // cache avatar info since loading asset bundles is expensive
             _avatarCacheStore[avatarInfo.fileName] = avatarInfo;
 
-            currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, _container.Resolve<VRPlayerInput>(), transform);
+            currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, _container.Resolve<VRPlayerInput>(), _containerTransform);
             currentAvatarSettings = _settings.GetAvatarSettings(avatarInfo.fileName);
             currentManualCalibration = _calibrationData.GetAvatarManualCalibration(avatarInfo.fileName);
 
@@ -463,6 +470,8 @@ namespace CustomAvatar.Player
                 _parentConstraint.SetSources(kEmptyConstraintSources);
                 _scaleConstraint.sourceTransform = null;
             }
+
+            _containerObject.SetActive(_activeCameraManager.current?.showAvatar ?? false);
 
             UpdateAvatarVerticalPosition();
         }

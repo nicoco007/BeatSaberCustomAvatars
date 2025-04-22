@@ -86,9 +86,7 @@ namespace CustomAvatar.Avatar
                 twistRelaxer.ik = this;
             }
 
-            vrikManager = GetComponentInChildren<VRIKManager>();
             _defaultRootPose = new Pose(vrikManager.references_root.localPosition, vrikManager.references_root.localRotation);
-            CopyManagerFieldsToVRIK(vrikManager, this);
         }
 
         protected void OnEnable()
@@ -152,6 +150,9 @@ namespace CustomAvatar.Avatar
             _input = input;
             _avatar = avatar;
             _logger = loggerFactory.CreateLogger<AvatarIK>(_avatar.prefab.descriptor.name);
+
+            vrikManager = GetComponentInChildren<VRIKManager>();
+            CopyManagerFieldsToVRIK(vrikManager, this);
         }
 
         private void OnPreUpdate()

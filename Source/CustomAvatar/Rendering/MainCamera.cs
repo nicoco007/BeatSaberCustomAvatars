@@ -36,6 +36,8 @@ namespace CustomAvatar.Rendering
         private Camera _camera;
         private ActiveCameraManager.Element _element;
 
+        protected virtual bool showAvatar => true;
+
         protected IFPFCSettings fpfcSettings { get; private set; }
 
         protected BeatSaberUtilities beatSaberUtilities { get; private set; }
@@ -167,7 +169,7 @@ namespace CustomAvatar.Rendering
         private void AddToPlayerSpaceManager()
         {
             (Transform playerSpace, Transform origin) = GetPlayerSpaceAndOrigin();
-            _element = _activeCameraManager?.Add(_camera, playerSpace, origin);
+            _element = _activeCameraManager?.Add(_camera, playerSpace, origin, showAvatar);
         }
 
         private void RemoveFromPlayerSpaceManager()

@@ -35,14 +35,14 @@ namespace CustomAvatar.Rendering
             _logger = logger;
         }
 
-        public Element Add(Camera camera, Transform playerSpace, Transform origin)
+        public Element Add(Camera camera, Transform playerSpace, Transform origin, bool showAvatar)
         {
             if (current?.camera == camera)
             {
                 return current;
             }
 
-            Element obj = new(camera, playerSpace, origin);
+            Element obj = new(camera, playerSpace, origin, showAvatar);
 
             _objects.Remove(obj);
             _objects.AddLast(obj);
@@ -82,9 +82,9 @@ namespace CustomAvatar.Rendering
                 _logger.LogInformation("Changed to none");
             }
 
-            changed?.Invoke(obj);
+                changed?.Invoke(obj);
         }
 
-        internal record Element(Camera camera, Transform playerSpace, Transform origin);
+        internal record Element(Camera camera, Transform playerSpace, Transform origin, bool showAvatar);
     }
 }

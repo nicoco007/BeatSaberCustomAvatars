@@ -26,6 +26,8 @@ namespace CustomAvatar.Rendering
 
         internal Transform origin { get; set; }
 
+        protected override bool showAvatar => !fpfcSettings.Enabled;
+
         protected override (Transform playerSpace, Transform origin) GetPlayerSpaceAndOrigin()
         {
             return (playerSpace, origin);
@@ -33,14 +35,7 @@ namespace CustomAvatar.Rendering
 
         protected override int GetCameraMask(int mask)
         {
-            if (fpfcSettings.Enabled)
-            {
-                mask &= ~AvatarLayers.kAllLayersMask;
-            }
-            else
-            {
-                mask |= AvatarLayers.kAlwaysVisibleMask;
-            }
+            mask |= AvatarLayers.kAlwaysVisibleMask;
 
             if (beatSaberUtilities.hasFocus)
             {

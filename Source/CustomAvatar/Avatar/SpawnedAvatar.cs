@@ -78,8 +78,15 @@ namespace CustomAvatar.Avatar
         #region Behaviour Lifecycle
 #pragma warning disable IDE0051
 
-        protected void Awake()
+        [Inject]
+        private void Construct(ILoggerFactory loggerFactory, AvatarPrefab avatarPrefab, IAvatarInput avatarInput)
         {
+            prefab = avatarPrefab;
+            input = avatarInput;
+            name = $"SpawnedAvatar({prefab.descriptor.name})";
+
+            _logger = loggerFactory.CreateLogger<SpawnedAvatar>(prefab.descriptor.name);
+
             _firstPersonExclusions = GetComponentsInChildren<FirstPersonExclusion>();
             _renderers = GetComponentsInChildren<Renderer>();
 
@@ -96,16 +103,6 @@ namespace CustomAvatar.Avatar
             transformTracking = GetComponent<AvatarTransformTracking>();
             ik = GetComponent<AvatarIK>();
             fingerTracking = GetComponent<AvatarFingerTracking>();
-        }
-
-        [Inject]
-        private void Construct(ILoggerFactory loggerFactory, AvatarPrefab avatarPrefab, IAvatarInput avatarInput)
-        {
-            prefab = avatarPrefab;
-            input = avatarInput;
-            name = $"SpawnedAvatar({prefab.descriptor.name})";
-
-            _logger = loggerFactory.CreateLogger<SpawnedAvatar>(prefab.descriptor.name);
         }
 
         protected void OnDestroy()
