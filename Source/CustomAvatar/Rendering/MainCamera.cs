@@ -72,7 +72,7 @@ namespace CustomAvatar.Rendering
 
         protected virtual int GetCameraMask(int mask)
         {
-            mask |= AvatarLayers.kAlwaysVisibleMask;
+            mask |= AvatarLayers.kAlwaysVisibleMask | AvatarLayers.kMirrorMask;
 
             // FPFC basically ends up being a 3rd person camera
             if (fpfcSettings.Enabled || (!beatSaberUtilities.hasFocus && _settings.hmdCameraBehaviour == HmdCameraBehaviour.AllCameras))
