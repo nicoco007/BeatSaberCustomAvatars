@@ -19,6 +19,7 @@ extern alias BeatSaberFinalIK;
 using BeatSaberFinalIK::RootMotion.FinalIK;
 using CustomAvatar.Avatar;
 using HarmonyLib;
+using UnityEngine;
 
 namespace CustomAvatar.Patches
 {
@@ -64,6 +65,37 @@ namespace CustomAvatar.Patches
 
             CustomIKSolverVR.CustomArm.Solve(arm, isLeft);
             return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(IKSolverVR.Locomotion))]
+    internal static class IKSolverVR_Locomotion
+    {
+        [HarmonyPatch(nameof(IKSolverVR.Locomotion.centerOfMass), MethodType.Setter)]
+        [HarmonyPostfix]
+        public static void set_centerOfMass(IKSolverVR.Locomotion __instance, Vector3 value)
+        {
+            if (__instance is not CustomIKSolverVR.CustomLocomotion locomotion)
+            {
+                return;
+            }
+
+            if (locomotion.firstCenterOfMassCalculation)
+            {
+                locomotion.lastComPosition = value;
+            }
+        }
+
+        [HarmonyPatch(nameof(IKSolverVR.Locomotion.Solve))]
+        [HarmonyPostfix]
+        public static void Solve(IKSolverVR.Locomotion __instance)
+        {
+            if (__instance is not CustomIKSolverVR.CustomLocomotion locomotion)
+            {
+                return;
+            }
+
+            locomotion.firstCenterOfMassCalculation = false;
         }
     }
 }

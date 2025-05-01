@@ -115,6 +115,12 @@ namespace CustomAvatar.Avatar
             }
         }
 
+        protected override void InitiateSolver()
+        {
+            base.InitiateSolver();
+            _previousParentPose = GetParentPose();
+        }
+
         protected new void OnDisable()
         {
             references.root.SetLocalPose(_defaultRootPose);
@@ -210,26 +216,32 @@ namespace CustomAvatar.Avatar
 
         private void ApplyPlatformMotion()
         {
+            Pose pose = GetParentPose();
+
+            if (_previousParentPose.position == pose.position && _previousParentPose.rotation == pose.rotation)
+            {
+                return;
+            }
+
+            Vector3 deltaPosition = pose.position - _previousParentPose.position;
+            Quaternion deltaRotation = Quaternion.Inverse(_previousParentPose.rotation) * pose.rotation;
+
+            solver.AddPlatformMotion(deltaPosition, deltaRotation, pose.position);
+
+            _previousParentPose = pose;
+        }
+
+        private Pose GetParentPose()
+        {
             Transform parent = references.root.parent;
 
             if (parent == null)
             {
-                return;
+                return Pose.identity;
             }
 
-            parent.GetPositionAndRotation(out Vector3 parentPosition, out Quaternion parentRotation);
-
-            if (_previousParentPose.position == parentPosition && _previousParentPose.rotation == parentRotation)
-            {
-                return;
-            }
-
-            Vector3 deltaPosition = parentPosition - _previousParentPose.position;
-            Quaternion deltaRotation = Quaternion.Inverse(_previousParentPose.rotation) * parentRotation;
-
-            solver.AddPlatformMotion(deltaPosition, deltaRotation, parentPosition);
-
-            _previousParentPose = new Pose(parentPosition, parentRotation);
+            parent.GetPositionAndRotation(out Vector3 position, out Quaternion rotation);
+            return new Pose(position, rotation);
         }
 
         private void UpdateLocomotion()

@@ -34,6 +34,7 @@ namespace CustomAvatar.Avatar
             spine = new CustomSpine();
             leftArm = new CustomArm();
             rightArm = new CustomArm();
+            locomotion = new CustomLocomotion();
         }
 
         private static readonly MethodInfo kRootBonePropertyGetter = AccessTools.DeclaredPropertyGetter(typeof(IKSolverVR), nameof(rootBone));
@@ -314,6 +315,11 @@ namespace CustomAvatar.Avatar
                 }
             }
 #pragma warning restore IDE0060, IDE0062, CS8321
+        }
+
+        internal class CustomLocomotion : Locomotion
+        {
+            public bool firstCenterOfMassCalculation = true;
         }
     }
 }
