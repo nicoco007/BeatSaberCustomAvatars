@@ -66,9 +66,7 @@ namespace CustomAvatar.Replays
                 return;
             }
 
-            SpectatorCamera spectatorCameraController = _container.InstantiateComponent<SpectatorCamera>(gameObject);
-            spectatorCameraController.origin = playerSpace.parent;
-            spectatorCameraController.playerSpace = playerSpace;
+            _container.InstantiateComponent<SpectatorCamera>(gameObject).Init(playerSpace, playerSpace.parent);
 
             if (camera.TryGetComponent(out TrackedPoseDriver _))
             {

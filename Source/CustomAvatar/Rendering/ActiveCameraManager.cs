@@ -17,54 +17,43 @@
 using System;
 using System.Collections.Generic;
 using CustomAvatar.Logging;
-using CustomAvatar.Utilities;
-using UnityEngine;
 
 namespace CustomAvatar.Rendering
 {
     internal class ActiveCameraManager
     {
         private readonly ILogger<ActiveCameraManager> _logger;
-        private readonly LinkedList<Element> _objects = new();
+        private readonly LinkedList<MainCamera> _objects = new();
 
-        public Element current => _objects.Last?.Value;
+        public MainCamera current => _objects.Last?.Value;
 
-        public event Action<Element> changed;
+        public event Action<MainCamera> changed;
 
         internal ActiveCameraManager(ILogger<ActiveCameraManager> logger)
         {
             _logger = logger;
         }
 
-        public Element Add(Camera camera, Transform playerSpace, Transform origin, bool showAvatar)
+        public void Add(MainCamera camera)
         {
-            if (current?.camera == camera)
+            if (current == camera)
             {
-                return current;
+                return;
             }
 
-            Element obj = new(camera, playerSpace, origin, showAvatar);
-
-            _objects.Remove(obj);
-            _objects.AddLast(obj);
+            _objects.Remove(camera);
+            _objects.AddLast(camera);
 
             InvokeChanged();
-
-            return obj;
         }
 
-        public void Remove(Element obj)
+        public void Remove(MainCamera camera)
         {
-            bool notify = false;
+            bool notify = current == camera;
 
-            if (current?.camera == obj.camera)
-            {
-                notify = true;
-            }
+            _objects.Remove(camera);
 
-            _objects.Remove(obj);
-
-            if (notify)
+            if (notify || _objects.Count == 0)
             {
                 InvokeChanged();
             }
@@ -72,26 +61,18 @@ namespace CustomAvatar.Rendering
 
         private void InvokeChanged()
         {
-            Element obj = current;
+            MainCamera camera = current;
 
-            if (obj != null)
+            if (camera != null)
             {
-                _logger.LogInformation($"Changed to {obj}");
+                _logger.LogInformation($"Changed to {camera}");
             }
             else
             {
                 _logger.LogInformation("Changed to none");
             }
 
-            changed?.Invoke(obj);
-        }
-
-        internal record Element(Camera camera, Transform playerSpace, Transform origin, bool showAvatar)
-        {
-            public override string ToString()
-            {
-                return $"{{ {nameof(camera)} = {UnityUtilities.GetTransformPath(camera)}, {nameof(playerSpace)} = {UnityUtilities.GetTransformPath(playerSpace)}, {nameof(origin)} = {UnityUtilities.GetTransformPath(origin)}, {nameof(showAvatar)} = {showAvatar} }}";
-            }
+            changed?.Invoke(camera);
         }
     }
 }

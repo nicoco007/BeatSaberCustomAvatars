@@ -74,7 +74,7 @@ namespace CustomAvatar.Tracking
         internal bool areAnyFullBodyTrackersTracking { get; private set; }
 
         // local to the current active origin (parent of VRCenterAdjust or world if no parent)
-        internal float eyeHeight => (_activeCameraManager.current?.origin != null ? _activeCameraManager.current.origin.InverseTransformPoint(head.transform.position).y : head.transform.position.y) - (_settings.moveFloorWithRoomAdjust ? _beatSaberUtilities.roomCenter.y : 0);
+        internal float eyeHeight => (_activeCameraManager.current != null && _activeCameraManager.current.origin != null ? _activeCameraManager.current.origin.InverseTransformPoint(head.transform.position).y : head.transform.position.y) - (_settings.moveFloorWithRoomAdjust ? _beatSaberUtilities.roomCenter.y : 0);
 
         internal GenericNode head { get; private set; }
 
@@ -536,14 +536,14 @@ namespace CustomAvatar.Tracking
             transform.SetLocalPositionAndRotation(offset.position * scale, offset.rotation);
         }
 
-        private void OnActiveCameraChanged(ActiveCameraManager.Element element)
+        private void OnActiveCameraChanged(Rendering.MainCamera activeCamera)
         {
             _logger.LogTrace("Updating constraints");
 
-            if (element?.playerSpace != null)
+            if (activeCamera != null && activeCamera.playerSpace != null)
             {
-                _parentConstraint.SetSources([new ConstraintSource { sourceTransform = element.playerSpace, weight = 1 }]);
-                _scaleConstraint.sourceTransform = element.playerSpace;
+                _parentConstraint.SetSources([new ConstraintSource { sourceTransform = activeCamera.playerSpace, weight = 1 }]);
+                _scaleConstraint.sourceTransform = activeCamera.playerSpace;
             }
             else
             {

@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using CustomAvatar.Avatar;
@@ -27,6 +28,7 @@ using CustomAvatar.Logging;
 using CustomAvatar.Rendering;
 using CustomAvatar.Utilities;
 using IPA.Utilities;
+using SiraUtil.Tools.FPFC;
 using UnityEngine;
 using UnityEngine.Animations;
 using Zenject;
@@ -113,6 +115,7 @@ namespace CustomAvatar.Player
         private AvatarSpawner _spawner;
         private BeatSaberUtilities _beatSaberUtilities;
         private ActiveCameraManager _activeCameraManager;
+        private IFPFCSettings _fpfcSettings;
 
         private ParentConstraint _parentConstraint;
         private LossyScaleConstraint _scaleConstraint;
@@ -162,6 +165,8 @@ namespace CustomAvatar.Player
             _beatSaberUtilities.roomAdjustChanged += OnRoomAdjustChanged;
 
             _activeCameraManager.changed += OnActiveCameraChanged;
+
+            _fpfcSettings.Changed += OnFpfcSettingsChanged;
         }
 
         [Inject]
@@ -174,7 +179,8 @@ namespace CustomAvatar.Player
             CalibrationData calibrationData,
             AvatarSpawner spawner,
             BeatSaberUtilities beatSaberUtilities,
-            ActiveCameraManager activeCameraManager)
+            ActiveCameraManager activeCameraManager,
+            IFPFCSettings fpfcSettings)
         {
             _container = container;
             _logger = logger;
@@ -184,6 +190,7 @@ namespace CustomAvatar.Player
             _spawner = spawner;
             _beatSaberUtilities = beatSaberUtilities;
             _activeCameraManager = activeCameraManager;
+            _fpfcSettings = fpfcSettings;
         }
 
         protected void Start()
@@ -228,6 +235,8 @@ namespace CustomAvatar.Player
             _beatSaberUtilities.roomAdjustChanged -= OnRoomAdjustChanged;
 
             _activeCameraManager.changed -= OnActiveCameraChanged;
+
+            _fpfcSettings.Changed -= OnFpfcSettingsChanged;
         }
 
         protected void OnDestroy()
@@ -430,7 +439,7 @@ namespace CustomAvatar.Player
             return Directory.GetFiles(kCustomAvatarsPath, "*.avatar", SearchOption.TopDirectoryOnly).Select(f => Path.GetFileName(f)).OrderBy(f => f).ToList();
         }
 
-        private void OnActiveCameraChanged(ActiveCameraManager.Element element)
+        private void OnActiveCameraChanged(Rendering.MainCamera activeCamera)
         {
             UpdateConstraints();
         }
@@ -456,6 +465,11 @@ namespace CustomAvatar.Player
             UpdateLocomotionEnabled();
         }
 
+        private void OnFpfcSettingsChanged(IFPFCSettings fpfcSettings)
+        {
+            UpdateAvatarActive();
+        }
+
         private void UpdateConstraints()
         {
             _logger.LogTrace("Updating constraints");
@@ -471,8 +485,7 @@ namespace CustomAvatar.Player
                 _scaleConstraint.sourceTransform = null;
             }
 
-            _containerObject.SetActive(_activeCameraManager.current?.showAvatar ?? false);
-
+            UpdateAvatarActive();
             UpdateAvatarVerticalPosition();
         }
 
@@ -596,6 +609,13 @@ namespace CustomAvatar.Player
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void UpdateAvatarActive()
+        {
+            _containerObject.SetActive(_activeCameraManager.current != null && _activeCameraManager.current.showAvatar);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void UpdateAvatarVerticalPosition() => UpdateAvatarVerticalPosition(_settings.playerEyeHeight);
 
         private void UpdateAvatarVerticalPosition(float eyeHeight)

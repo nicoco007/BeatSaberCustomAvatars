@@ -33,10 +33,13 @@ namespace CustomAvatar.Rendering
         private Settings _settings;
         private ActiveCameraManager _activeCameraManager;
 
-        private Camera _camera;
-        private ActiveCameraManager.Element _element;
+        internal Camera camera { get; private set; }
 
-        protected virtual bool showAvatar => true;
+        internal Transform playerSpace { get; private protected set; }
+
+        internal Transform origin { get; private protected set; }
+
+        internal virtual bool showAvatar => true;
 
         protected IFPFCSettings fpfcSettings { get; private set; }
 
@@ -49,25 +52,10 @@ namespace CustomAvatar.Rendering
                 return;
             }
 
-            _logger.LogTrace($"Setting avatar culling mask and near clip plane on '{_camera.name}'");
+            _logger.LogTrace($"Setting avatar culling mask and near clip plane on '{camera.name}'");
 
-            _camera.cullingMask = GetCameraMask(_camera.cullingMask);
-            _camera.nearClipPlane = _settings.cameraNearClipPlane;
-        }
-
-        protected virtual (Transform playerSpace, Transform origin) GetPlayerSpaceAndOrigin()
-        {
-            VRCenterAdjust center = transform.GetComponentInParent<VRCenterAdjust>();
-
-            if (center != null)
-            {
-                Transform centerTransform = center.transform;
-                return (centerTransform, centerTransform.parent);
-            }
-            else
-            {
-                return (transform.parent, transform.parent);
-            }
+            camera.cullingMask = GetCameraMask(camera.cullingMask);
+            camera.nearClipPlane = _settings.cameraNearClipPlane;
         }
 
         protected virtual int GetCameraMask(int mask)
@@ -89,7 +77,20 @@ namespace CustomAvatar.Rendering
 
         protected void Awake()
         {
-            _camera = GetComponent<Camera>();
+            camera = GetComponent<Camera>();
+
+            VRCenterAdjust center = transform.GetComponentInParent<VRCenterAdjust>();
+
+            if (center != null)
+            {
+                Transform centerTransform = center.transform;
+                playerSpace = centerTransform;
+                origin = centerTransform.parent;
+            }
+            else
+            {
+                playerSpace = origin = transform.parent;
+            }
         }
 
         protected void OnEnable()
@@ -105,6 +106,8 @@ namespace CustomAvatar.Rendering
                 fpfcSettings.Changed -= OnFpfcSettingsChanged;
                 fpfcSettings.Changed += OnFpfcSettingsChanged;
             }
+
+            _activeCameraManager?.Add(this);
 
             UpdateCameraMask();
         }
@@ -135,7 +138,6 @@ namespace CustomAvatar.Rendering
             }
 
             OnEnable();
-            AddToPlayerSpaceManager();
         }
 
         protected void OnDisable()
@@ -149,11 +151,8 @@ namespace CustomAvatar.Rendering
             {
                 fpfcSettings.Changed -= OnFpfcSettingsChanged;
             }
-        }
 
-        protected void OnDestroy()
-        {
-            RemoveFromPlayerSpaceManager();
+            _activeCameraManager?.Remove(this);
         }
 
         private void OnCameraNearClipPlaneChanged(float value)
@@ -166,18 +165,9 @@ namespace CustomAvatar.Rendering
             UpdateCameraMask();
         }
 
-        private void AddToPlayerSpaceManager()
+        public override string ToString()
         {
-            (Transform playerSpace, Transform origin) = GetPlayerSpaceAndOrigin();
-            _element = _activeCameraManager?.Add(_camera, playerSpace, origin, showAvatar);
-        }
-
-        private void RemoveFromPlayerSpaceManager()
-        {
-            if (_element != null)
-            {
-                _activeCameraManager.Remove(_element);
-            }
+            return $"{{ {nameof(camera)} = {UnityUtilities.GetTransformPath(camera)}, {nameof(playerSpace)} = {UnityUtilities.GetTransformPath(playerSpace)}, {nameof(origin)} = {UnityUtilities.GetTransformPath(origin)} }}";
         }
     }
 }

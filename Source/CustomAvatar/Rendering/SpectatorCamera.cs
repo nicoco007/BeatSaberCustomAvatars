@@ -21,15 +21,12 @@ namespace CustomAvatar.Rendering
     [DisallowMultipleComponent]
     internal class SpectatorCamera : MainCamera
     {
-        internal Transform playerSpace { get; set; }
+        internal override bool showAvatar => !fpfcSettings.Enabled;
 
-        internal Transform origin { get; set; }
-
-        protected override bool showAvatar => !fpfcSettings.Enabled;
-
-        protected override (Transform playerSpace, Transform origin) GetPlayerSpaceAndOrigin()
+        internal void Init(Transform playerSpace, Transform origin)
         {
-            return (playerSpace, origin);
+            this.playerSpace = playerSpace;
+            this.origin = origin;
         }
     }
 }
