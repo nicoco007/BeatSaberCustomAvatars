@@ -17,7 +17,9 @@
 using System;
 using CustomAvatar.Avatar;
 using CustomAvatar.Player;
+using CustomAvatar.Replays;
 using CustomAvatar.Utilities;
+using Hive.Versioning;
 using Zenject;
 
 namespace CustomAvatar.Zenject
@@ -32,6 +34,18 @@ namespace CustomAvatar.Zenject
             Container.Bind(typeof(BeatmapObjectEventFilter), typeof(IInitializable), typeof(IDisposable)).To<BeatmapObjectEventFilter>().AsSingle();
 
             Container.BindExecutionOrder<GameEnvironmentObjectManager>(1000);
+
+            if (IsPluginLoadedAndMatchesVersion("ScoreSaber", new VersionRange("^3.0.0")))
+            {
+                Container.Bind(typeof(IInitializable)).To<ScoreSaberReplayHandler>().AsSingle();
+                Container.BindInitializableExecutionOrder<ScoreSaberReplayHandler>(1000);
+            }
+
+            if (IsPluginLoadedAndMatchesVersion("BeatLeader", new VersionRange(">= 0.9.0 < 0.11.0")))
+            {
+                Container.Bind(typeof(IInitializable)).To<BeatLeaderReplayHandler>().AsSingle();
+                Container.BindInitializableExecutionOrder<BeatLeaderReplayHandler>(1000);
+            }
         }
     }
 }
