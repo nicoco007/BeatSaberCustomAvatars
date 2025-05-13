@@ -14,24 +14,18 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using CustomAvatar.Avatar;
-using CustomAvatar.Player;
-using CustomAvatar.Utilities;
+using Hive.Versioning;
+using IPA.Loader;
 using Zenject;
 
 namespace CustomAvatar.Zenject
 {
-    internal class GameInstaller : BaseInstaller
+    internal abstract class BaseInstaller : Installer
     {
-        public override void InstallBindings()
+        protected static bool IsPluginLoadedAndMatchesVersion(string id, VersionRange versionRange)
         {
-            Container.Bind(typeof(IInitializable), typeof(IDisposable)).To<AvatarGameplayEventsPlayer>().AsSingle().NonLazy();
-            Container.Bind(typeof(IInitializable)).To<GameEnvironmentObjectManager>().AsSingle().NonLazy();
-
-            Container.Bind(typeof(BeatmapObjectEventFilter), typeof(IInitializable), typeof(IDisposable)).To<BeatmapObjectEventFilter>().AsSingle();
-
-            Container.BindExecutionOrder<GameEnvironmentObjectManager>(1000);
+            PluginMetadata plugin = PluginManager.GetPluginFromId(id);
+            return plugin != null && versionRange.Matches(plugin.HVersion);
         }
     }
 }

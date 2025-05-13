@@ -35,7 +35,7 @@ using Logger = IPA.Logging.Logger;
 
 namespace CustomAvatar.Zenject
 {
-    internal class CustomAvatarsInstaller : Installer
+    internal class CustomAvatarsInstaller : BaseInstaller
     {
         private const string kXRHandsID = "Unity.XR.Hands";
         private const string kOpenVRID = "OpenVR";
@@ -119,12 +119,6 @@ namespace CustomAvatar.Zenject
             Container.Bind(typeof(IAffinity)).To<Patches.MirrorRendererSO>().AsSingle();
 
             Container.Bind<TrackingRig>().FromNewComponentOnNewGameObject().AsSingle();
-        }
-
-        private bool IsPluginLoadedAndMatchesVersion(string id, VersionRange versionRange)
-        {
-            PluginMetadata plugin = PluginManager.GetPluginFromId(id);
-            return plugin != null && versionRange.Matches(plugin.HVersion);
         }
 
         private object CreateLogger(InjectContext context)

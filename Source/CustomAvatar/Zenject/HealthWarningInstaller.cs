@@ -17,11 +17,10 @@
 using CustomAvatar.Logging;
 using CustomAvatar.Player;
 using UnityEngine;
-using Zenject;
 
 namespace CustomAvatar.Zenject
 {
-    internal class HealthWarningInstaller : Installer
+    internal class HealthWarningInstaller : BaseInstaller
     {
         private readonly ILogger<HealthWarningInstaller> _logger;
 

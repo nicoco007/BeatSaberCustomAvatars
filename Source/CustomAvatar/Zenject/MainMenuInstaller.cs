@@ -27,7 +27,7 @@ using Zenject;
 
 namespace CustomAvatar.Zenject
 {
-    internal class MainMenuInstaller : Installer
+    internal class MainMenuInstaller : BaseInstaller
     {
         private const float kCenterViewControllerWidth = 160;
         private const float kSideViewControllerWidth = 120;
