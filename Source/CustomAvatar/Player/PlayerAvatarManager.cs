@@ -439,7 +439,7 @@ namespace CustomAvatar.Player
             return Directory.GetFiles(kCustomAvatarsPath, "*.avatar", SearchOption.TopDirectoryOnly).Select(f => Path.GetFileName(f)).OrderBy(f => f).ToList();
         }
 
-        private void OnActiveCameraChanged(Rendering.MainCamera activeCamera)
+        private void OnActiveCameraChanged(CameraTracker activeCamera)
         {
             UpdateConstraints();
         }

@@ -23,18 +23,18 @@ namespace CustomAvatar.Rendering
     internal class ActiveCameraManager
     {
         private readonly ILogger<ActiveCameraManager> _logger;
-        private readonly LinkedList<MainCamera> _objects = new();
+        private readonly LinkedList<CameraTracker> _objects = new();
 
-        public MainCamera current => _objects.Last?.Value;
+        public CameraTracker current => _objects.Last?.Value;
 
-        public event Action<MainCamera> changed;
+        public event Action<CameraTracker> changed;
 
         internal ActiveCameraManager(ILogger<ActiveCameraManager> logger)
         {
             _logger = logger;
         }
 
-        public void Add(MainCamera camera)
+        public void Add(CameraTracker camera)
         {
             if (current == camera)
             {
@@ -47,7 +47,7 @@ namespace CustomAvatar.Rendering
             InvokeChanged();
         }
 
-        public void Remove(MainCamera camera)
+        public void Remove(CameraTracker camera)
         {
             bool notify = current == camera;
 
@@ -61,7 +61,7 @@ namespace CustomAvatar.Rendering
 
         private void InvokeChanged()
         {
-            MainCamera camera = current;
+            CameraTracker camera = current;
 
             if (camera != null)
             {

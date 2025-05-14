@@ -56,7 +56,7 @@ namespace CustomAvatar.Replays
             origin.SetLocalPositionAndRotation(inverseRotation * -_beatSaberUtilities.roomCenter, inverseRotation);
             origin.SetParent(playerSpace, false);
 
-            _container.InstantiateComponent<SpectatorCamera>(spectatorCamera.gameObject).Init(playerSpace, origin);
+            _container.InstantiateComponent<SpectatorCameraTracker>(spectatorCamera.gameObject).Init(playerSpace, origin);
             _container.InstantiateComponent<CameraFlipper>(spectatorCamera.gameObject);
         }
     }

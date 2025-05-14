@@ -36,13 +36,13 @@ namespace CustomAvatar.Rendering
 
         private Camera _camera;
         private TrackedPoseDriver _trackedPoseDriver;
-        private MainCamera _mainCamera;
+        private CameraTracker _mainCamera;
 
         protected void Awake()
         {
             _camera = GetComponent<Camera>();
             _trackedPoseDriver = GetComponent<TrackedPoseDriver>();
-            _mainCamera = GetComponent<MainCamera>();
+            _mainCamera = GetComponent<CameraTracker>();
         }
 
         protected void OnEnable()

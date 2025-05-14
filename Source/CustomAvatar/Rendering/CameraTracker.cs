@@ -14,22 +14,20 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Diagnostics.CodeAnalysis;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Utilities;
 using SiraUtil.Tools.FPFC;
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 using Zenject;
 
 namespace CustomAvatar.Rendering
 {
-    [RequireComponent(typeof(Camera))]
-    [DisallowMultipleComponent]
-    internal class MainCamera : MonoBehaviour
+    internal abstract class CameraTracker : MonoBehaviour
     {
-        private ILogger<MainCamera> _logger;
+        private ILogger<CameraTracker> _logger;
         private Settings _settings;
         private ActiveCameraManager _activeCameraManager;
 
@@ -39,7 +37,7 @@ namespace CustomAvatar.Rendering
 
         internal Transform origin { get; private protected set; }
 
-        internal virtual bool showAvatar => true;
+        internal abstract bool showAvatar { get; }
 
         protected IFPFCSettings fpfcSettings { get; private set; }
 
@@ -75,25 +73,12 @@ namespace CustomAvatar.Rendering
             return mask;
         }
 
-        protected void Awake()
+        protected virtual void Awake()
         {
             camera = GetComponent<Camera>();
-
-            VRCenterAdjust center = transform.GetComponentInParent<VRCenterAdjust>();
-
-            if (center != null)
-            {
-                Transform centerTransform = center.transform;
-                playerSpace = centerTransform;
-                origin = centerTransform.parent;
-            }
-            else
-            {
-                playerSpace = origin = transform.parent;
-            }
         }
 
-        protected void OnEnable()
+        protected virtual void OnEnable()
         {
             if (_settings != null)
             {
@@ -115,7 +100,7 @@ namespace CustomAvatar.Rendering
         [Inject]
         [SuppressMessage("CodeQuality", "IDE0051", Justification = "Used by Zenject")]
         private void Construct(
-            ILogger<MainCamera> logger,
+            ILogger<CameraTracker> logger,
             Settings settings,
             ActiveCameraManager activeCameraManager,
             IFPFCSettings fpfcSettings,
@@ -128,7 +113,7 @@ namespace CustomAvatar.Rendering
             this.beatSaberUtilities = beatSaberUtilities;
         }
 
-        protected void Start()
+        protected virtual void Start()
         {
             // prevent errors if this is instantiated via Object.Instantiate
             if (_logger == null)
@@ -140,7 +125,7 @@ namespace CustomAvatar.Rendering
             OnEnable();
         }
 
-        protected void OnDisable()
+        protected virtual void OnDisable()
         {
             if (_settings != null)
             {

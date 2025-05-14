@@ -536,7 +536,7 @@ namespace CustomAvatar.Tracking
             transform.SetLocalPositionAndRotation(offset.position * scale, offset.rotation);
         }
 
-        private void OnActiveCameraChanged(Rendering.MainCamera activeCamera)
+        private void OnActiveCameraChanged(CameraTracker activeCamera)
         {
             _logger.LogTrace("Updating constraints");
 

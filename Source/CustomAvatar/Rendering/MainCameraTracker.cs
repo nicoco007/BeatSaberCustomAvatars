@@ -18,15 +18,28 @@ using UnityEngine;
 
 namespace CustomAvatar.Rendering
 {
+    [RequireComponent(typeof(Camera))]
     [DisallowMultipleComponent]
-    internal class SpectatorCamera : MainCamera
+    internal class MainCameraTracker : CameraTracker
     {
-        internal override bool showAvatar => !fpfcSettings.Enabled;
+        internal override bool showAvatar => true;
 
-        internal void Init(Transform playerSpace, Transform origin)
+        protected override void Start()
         {
-            this.playerSpace = playerSpace;
-            this.origin = origin;
+            VRCenterAdjust center = transform.GetComponentInParent<VRCenterAdjust>();
+
+            if (center != null)
+            {
+                Transform centerTransform = center.transform;
+                playerSpace = centerTransform;
+                origin = centerTransform.parent;
+            }
+            else
+            {
+                playerSpace = origin = transform.parent;
+            }
+
+            base.Start();
         }
     }
 }
