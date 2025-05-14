@@ -15,12 +15,14 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 extern alias BeatSaberFinalIK;
+
 using System.Linq;
 using AvatarScriptPack;
 using CustomAvatar.Exceptions;
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using CustomAvatar.Utilities;
+using JetBrains.Annotations;
 using UnityEngine;
 using Zenject;
 using VRIK = BeatSaberFinalIK::RootMotion.FinalIK.VRIK;
@@ -94,7 +96,8 @@ namespace CustomAvatar.Avatar
         private ILogger<AvatarPrefab> _logger;
 
         [Inject]
-        internal void Construct(ILoggerFactory loggerFactory, DiContainer container)
+        [UsedImplicitly]
+        private void Construct(ILoggerFactory loggerFactory, DiContainer container)
         {
             descriptor = GetComponent<AvatarDescriptor>();
 

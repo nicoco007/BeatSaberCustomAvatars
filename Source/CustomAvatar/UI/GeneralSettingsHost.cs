@@ -24,13 +24,9 @@ namespace CustomAvatar.UI
 {
     internal class GeneralSettingsHost : ViewControllerHost
     {
-        #region Values
-
         protected readonly AvatarResizeMode[] resizeModeOptions = [AvatarResizeMode.None, AvatarResizeMode.Height, AvatarResizeMode.ArmSpan];
         protected readonly FloorHeightAdjustMode[] floorHeightAdjustOptions = [FloorHeightAdjustMode.Off, FloorHeightAdjustMode.PlayersPlaceOnly, FloorHeightAdjustMode.EntireEnvironment];
         protected readonly float[] nearClipPlaneValues = [0.001f, 0.01f, 0.02f, 0.03f, 0.04f, 0.05f, 0.06f, 0.07f, 0.08f, 0.09f, 0.1f];
-
-        #endregion
 
         private readonly Settings _settings;
         private readonly TrackingRig _trackingRig;
@@ -38,7 +34,7 @@ namespace CustomAvatar.UI
 
         private float _armSpan;
 
-        internal GeneralSettingsHost(Settings settings, TrackingRig trackingRig, ArmSpanMeasurer armSpanMeasurer)
+        protected GeneralSettingsHost(Settings settings, TrackingRig trackingRig, ArmSpanMeasurer armSpanMeasurer)
         {
             _settings = settings;
             _trackingRig = trackingRig;
@@ -196,6 +192,68 @@ namespace CustomAvatar.UI
             _trackingRig.EndCalibration();
         }
 
+        protected string ResizeModeFormatter(object value)
+        {
+            if (value is not AvatarResizeMode avatarResizeMode)
+            {
+                return null;
+            }
+
+            return avatarResizeMode switch
+            {
+                AvatarResizeMode.Height => "Height",
+                AvatarResizeMode.ArmSpan => "Arm Span",
+                AvatarResizeMode.None => "Don't Resize",
+                _ => null,
+            };
+        }
+
+        protected string FloorHeightAdjustFormatter(object value)
+        {
+            if (value is not FloorHeightAdjustMode floorHeightAdjustMode)
+            {
+                return null;
+            }
+
+            return floorHeightAdjustMode switch
+            {
+                FloorHeightAdjustMode.Off => "Off",
+                FloorHeightAdjustMode.PlayersPlaceOnly => "Player's Place Only",
+                FloorHeightAdjustMode.EntireEnvironment => "Entire Environment",
+                _ => null,
+            };
+        }
+
+        protected string CentimeterFormatter(float value)
+        {
+            return $"{value * 100:0.#} cm";
+        }
+
+        protected string HeightFormatter(float value) => CentimeterFormatter(value + BeatSaberUtilities.kHeadPosToPlayerHeightOffset);
+
+        protected string ArmSpanFormatter(float value) => _armSpanMeasurer.isMeasuring ? $"Measuring... {CentimeterFormatter(value)}" : CentimeterFormatter(value);
+
+        protected void OnMeasureHeightButtonClicked()
+        {
+            this.height = _trackingRig.eyeHeight;
+        }
+
+        protected void OnMeasureArmSpanButtonClicked()
+        {
+            if (_armSpanMeasurer.isMeasuring)
+            {
+                _armSpanMeasurer.Cancel();
+                this.armSpan = _settings.playerArmSpan;
+            }
+            else
+            {
+                _armSpanMeasurer.MeasureArmSpan();
+            }
+
+            NotifyPropertyChanged(nameof(isHeightAdjustInteractable));
+            NotifyPropertyChanged(nameof(measureButtonIcon));
+        }
+
         private void OnTrackingChanged()
         {
             NotifyPropertyChanged(nameof(isMeasureButtonEnabled));
@@ -220,73 +278,5 @@ namespace CustomAvatar.UI
         {
             NotifyPropertyChanged(nameof(height));
         }
-
-        #region Actions
-#pragma warning disable IDE0051
-
-        private string ResizeModeFormatter(object value)
-        {
-            if (value is not AvatarResizeMode avatarResizeMode)
-            {
-                return null;
-            }
-
-            return avatarResizeMode switch
-            {
-                AvatarResizeMode.Height => "Height",
-                AvatarResizeMode.ArmSpan => "Arm Span",
-                AvatarResizeMode.None => "Don't Resize",
-                _ => null,
-            };
-        }
-
-        private string FloorHeightAdjustFormatter(object value)
-        {
-            if (value is not FloorHeightAdjustMode floorHeightAdjustMode)
-            {
-                return null;
-            }
-
-            return floorHeightAdjustMode switch
-            {
-                FloorHeightAdjustMode.Off => "Off",
-                FloorHeightAdjustMode.PlayersPlaceOnly => "Player's Place Only",
-                FloorHeightAdjustMode.EntireEnvironment => "Entire Environment",
-                _ => null,
-            };
-        }
-
-        private string CentimeterFormatter(float value)
-        {
-            return $"{value * 100:0.#} cm";
-        }
-
-        private string HeightFormatter(float value) => CentimeterFormatter(value + BeatSaberUtilities.kHeadPosToPlayerHeightOffset);
-
-        private string ArmSpanFormatter(float value) => _armSpanMeasurer.isMeasuring ? $"Measuring... {CentimeterFormatter(value)}" : CentimeterFormatter(value);
-
-        private void OnMeasureHeightButtonClicked()
-        {
-            this.height = _trackingRig.eyeHeight;
-        }
-
-        private void OnMeasureArmSpanButtonClicked()
-        {
-            if (_armSpanMeasurer.isMeasuring)
-            {
-                _armSpanMeasurer.Cancel();
-                this.armSpan = _settings.playerArmSpan;
-            }
-            else
-            {
-                _armSpanMeasurer.MeasureArmSpan();
-            }
-
-            NotifyPropertyChanged(nameof(isHeightAdjustInteractable));
-            NotifyPropertyChanged(nameof(measureButtonIcon));
-        }
-
-#pragma warning restore IDE0051
-        #endregion
     }
 }

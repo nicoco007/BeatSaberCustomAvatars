@@ -63,8 +63,6 @@ namespace CustomAvatar.Avatar
             solver = new CustomIKSolverVR();
         }
 
-        #region Behaviour Lifecycle
-
         protected void Awake()
         {
             _dynamicBones = GetComponentsInChildren<BeatSaberDynamicBone::DynamicBone>();
@@ -146,8 +144,6 @@ namespace CustomAvatar.Avatar
 
             _input.inputChanged -= OnInputChanged;
         }
-
-        #endregion
 
         [Inject]
         [UsedImplicitly]

@@ -18,6 +18,7 @@ using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Utilities;
+using JetBrains.Annotations;
 using SiraUtil.Tools.FPFC;
 using UnityEngine;
 using Zenject;
@@ -39,7 +40,8 @@ namespace CustomAvatar.Rendering
         private Camera _camera;
 
         [Inject]
-        public void Construct(ILogger<SmoothCamera> logger, Settings settings, IFPFCSettings fpfcSettings, BeatSaberUtilities beatSaberUtilities)
+        [UsedImplicitly]
+        private void Construct(ILogger<SmoothCamera> logger, Settings settings, IFPFCSettings fpfcSettings, BeatSaberUtilities beatSaberUtilities)
         {
             _logger = logger;
             _settings = settings;

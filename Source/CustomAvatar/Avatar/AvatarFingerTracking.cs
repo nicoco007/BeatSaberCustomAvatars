@@ -15,6 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using CustomAvatar.Tracking;
+using JetBrains.Annotations;
 using UnityEngine;
 using Zenject;
 
@@ -26,11 +27,9 @@ namespace CustomAvatar.Avatar
         private PoseManager _poseManager;
         private IAvatarInput _input;
 
-        #region Behaviour Lifecycle
-#pragma warning disable IDE0051
-
         [Inject]
-        private void Inject(IAvatarInput input)
+        [UsedImplicitly]
+        private void Construct(IAvatarInput input)
         {
             _input = input;
         }
@@ -44,9 +43,6 @@ namespace CustomAvatar.Avatar
         {
             ApplyFingerTracking();
         }
-
-#pragma warning restore IDE0051
-        #endregion
 
         private void ApplyFingerTracking()
         {

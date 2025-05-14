@@ -20,6 +20,7 @@ using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Utilities;
+using JetBrains.Annotations;
 using UnityEngine;
 using Zenject;
 
@@ -56,7 +57,8 @@ namespace CustomAvatar.Player
         }
 
         [Inject]
-        internal void Construct(ILogger<EnvironmentObject> logger, PlayerAvatarManager playerAvatarManager, Settings settings, BeatSaberUtilities beatSaberUtilities)
+        [UsedImplicitly]
+        private void Construct(ILogger<EnvironmentObject> logger, PlayerAvatarManager playerAvatarManager, Settings settings, BeatSaberUtilities beatSaberUtilities)
         {
             _logger = logger;
             this.playerAvatarManager = playerAvatarManager;

@@ -15,7 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+using JetBrains.Annotations;
 using UnityEngine;
 using Zenject;
 
@@ -52,7 +52,7 @@ namespace CustomAvatar.Rendering
         }
 
         [Inject]
-        [SuppressMessage("CodeQuality", "IDE0051", Justification = "Used by Zenject")]
+        [UsedImplicitly]
         private void Construct(VRControllerVisualsManager vrControllerVisualsManager)
         {
             _vrControllerVisualsManager = vrControllerVisualsManager;

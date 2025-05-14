@@ -29,7 +29,7 @@ namespace CustomAvatar.Rendering
 
         public event Action<CameraTracker> changed;
 
-        internal ActiveCameraManager(ILogger<ActiveCameraManager> logger)
+        protected ActiveCameraManager(ILogger<ActiveCameraManager> logger)
         {
             _logger = logger;
         }

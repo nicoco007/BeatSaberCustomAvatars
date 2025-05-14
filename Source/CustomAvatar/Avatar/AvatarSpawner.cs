@@ -35,7 +35,7 @@ namespace CustomAvatar.Avatar
 
         private readonly List<(Type type, Func<AvatarPrefab, bool> condition)> _componentsToAdd = new();
 
-        internal AvatarSpawner(DiContainer container, ILogger<AvatarSpawner> logger)
+        private protected AvatarSpawner(DiContainer container, ILogger<AvatarSpawner> logger)
         {
             _container = container;
             _logger = logger;

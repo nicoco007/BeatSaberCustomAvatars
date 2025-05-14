@@ -32,8 +32,6 @@ namespace CustomAvatar.Editor
             GetWindow(typeof(AvatarExporterWindow), false, "Avatar Exporter");
         }
 
-        #region Behaviour Lifecycle
-
         protected void OnEnable()
         {
             EditorSceneManager.sceneOpened += OnSceneOpened;
@@ -90,8 +88,6 @@ namespace CustomAvatar.Editor
                 GUILayout.Space(20);
             }
         }
-
-        #endregion
 
         private void OnSceneOpened(Scene scene, OpenSceneMode mode)
         {

@@ -15,8 +15,8 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using CustomAvatar.Tracking;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Animations;
 using Zenject;
@@ -58,7 +58,7 @@ namespace CustomAvatar.Avatar
         }
 
         [Inject]
-        [SuppressMessage("CodeQuality", "IDE0051", Justification = "Used by Zenject")]
+        [UsedImplicitly]
         private void Construct(SpawnedAvatar spawnedAvatar, IAvatarInput avatarInput)
         {
             _spawnedAvatar = spawnedAvatar;

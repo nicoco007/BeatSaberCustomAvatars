@@ -16,7 +16,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Zenject;
 
@@ -37,8 +36,7 @@ namespace CustomAvatar.Utilities
 
         public event Action<NoteController> noteMissed;
 
-        [SuppressMessage("CodeQuality", "IDE0051", Justification = "Used by Zenject")]
-        private BeatmapObjectEventFilter(BeatmapObjectManager beatmapObjectManager, IReadonlyBeatmapData beatmapData, AudioTimeSyncController audioTimeSyncController)
+        protected BeatmapObjectEventFilter(BeatmapObjectManager beatmapObjectManager, IReadonlyBeatmapData beatmapData, AudioTimeSyncController audioTimeSyncController)
         {
             _beatmapObjectManager = beatmapObjectManager;
             _beatmapData = beatmapData;

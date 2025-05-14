@@ -24,17 +24,13 @@ namespace CustomAvatar.UI
 {
     internal class AutomaticFbtCalibrationHost : ViewControllerHost
     {
-        #region Values
-
         protected readonly TrackerStatusHost trackerStatusHost;
-
-        #endregion
 
         private readonly PlayerAvatarManager _avatarManager;
         private readonly CalibrationData _calibrationData;
         private readonly TrackingRig _trackingRig;
 
-        internal AutomaticFbtCalibrationHost(TrackerStatusHost trackerStatusHost, PlayerAvatarManager avatarManager, CalibrationData calibrationData, TrackingRig trackingRig)
+        protected AutomaticFbtCalibrationHost(TrackerStatusHost trackerStatusHost, PlayerAvatarManager avatarManager, CalibrationData calibrationData, TrackingRig trackingRig)
         {
             this.trackerStatusHost = trackerStatusHost;
 

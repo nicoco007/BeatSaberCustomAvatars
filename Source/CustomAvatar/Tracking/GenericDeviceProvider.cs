@@ -15,7 +15,6 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 using UnityEngine.XR;
 using Zenject;
@@ -26,8 +25,7 @@ namespace CustomAvatar.Tracking
     {
         private readonly IVRPlatformHelper _platformHelper;
 
-        [SuppressMessage("CodeQuality", "IDE0051", Justification = "Used by Zenject")]
-        private GenericDeviceProvider(IVRPlatformHelper platformHelper)
+        protected GenericDeviceProvider(IVRPlatformHelper platformHelper)
         {
             _platformHelper = platformHelper;
         }

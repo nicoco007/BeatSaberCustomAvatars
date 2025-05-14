@@ -25,19 +25,15 @@ namespace CustomAvatar.UI
 {
     internal class AvatarSpecificSettingsHost : ViewControllerHost
     {
-        #region Values
-
         protected readonly List<object> calibrationModeOptions = new() { CalibrationMode.None, CalibrationMode.Automatic, CalibrationMode.Manual };
         protected readonly TrackerStatusHost trackerStatusHost;
-
-        #endregion
 
         private readonly PlayerAvatarManager _avatarManager;
         private readonly TrackingRig _trackingRig;
 
         private bool _isLoaderActive;
 
-        internal AvatarSpecificSettingsHost(TrackerStatusHost trackerStatusHost, PlayerAvatarManager avatarManager, TrackingRig trackingRig)
+        protected AvatarSpecificSettingsHost(TrackerStatusHost trackerStatusHost, PlayerAvatarManager avatarManager, TrackingRig trackingRig)
         {
             this.trackerStatusHost = trackerStatusHost;
 

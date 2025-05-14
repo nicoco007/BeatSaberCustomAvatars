@@ -14,11 +14,11 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Diagnostics.CodeAnalysis;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Utilities;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.SpatialTracking;
 using UnityEngine.XR;
@@ -56,7 +56,7 @@ namespace CustomAvatar.Rendering
         }
 
         [Inject]
-        [SuppressMessage("CodeQuality", "IDE0051", Justification = "Used by Zenject")]
+        [UsedImplicitly]
         private void Construct(
             ILogger<CameraFlipper> logger,
             Settings settings,

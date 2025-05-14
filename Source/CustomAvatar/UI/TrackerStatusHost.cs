@@ -14,12 +14,10 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CustomAvatar.Tracking;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Utilities;
-using Zenject;
 
 namespace CustomAvatar.UI
 {
@@ -29,9 +27,7 @@ namespace CustomAvatar.UI
 
         private readonly TrackingRig _trackingRig;
 
-        [Inject]
-        [SuppressMessage("CodeQuality", "IDE0051", Justification = "Used by Zenject")]
-        private TrackerStatusHost(TrackingRig trackingRig)
+        protected TrackerStatusHost(TrackingRig trackingRig)
         {
             _trackingRig = trackingRig;
         }

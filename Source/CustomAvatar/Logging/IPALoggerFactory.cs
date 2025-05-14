@@ -22,7 +22,7 @@ namespace CustomAvatar.Logging
     {
         private readonly Logger _baseLogger;
 
-        internal IPALoggerFactory(Logger logger)
+        protected IPALoggerFactory(Logger logger)
         {
             _baseLogger = logger;
         }

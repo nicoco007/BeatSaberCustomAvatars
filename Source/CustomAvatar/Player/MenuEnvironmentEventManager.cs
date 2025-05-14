@@ -30,7 +30,7 @@ namespace CustomAvatar.Player
         private readonly MenuEnvironmentManager.MenuEnvironmentObjects[] _data;
         private readonly List<EventTrigger> _eventTriggers = new();
 
-        internal MenuEnvironmentEventManager(PlayerAvatarManager playerAvatarManager, GameScenesManager gameScenesManager, MenuEnvironmentManager menuEnvironmentManager)
+        protected MenuEnvironmentEventManager(PlayerAvatarManager playerAvatarManager, GameScenesManager gameScenesManager, MenuEnvironmentManager menuEnvironmentManager)
         {
             _playerAvatarManager = playerAvatarManager;
             _gameScenesManager = gameScenesManager;

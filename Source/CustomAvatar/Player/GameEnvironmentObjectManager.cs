@@ -29,7 +29,7 @@ namespace CustomAvatar.Player
         private readonly ILogger<GameEnvironmentObjectManager> _logger;
         private readonly Settings _settings;
 
-        internal GameEnvironmentObjectManager(DiContainer container, ILogger<GameEnvironmentObjectManager> logger, Settings settings)
+        protected GameEnvironmentObjectManager(DiContainer container, ILogger<GameEnvironmentObjectManager> logger, Settings settings)
         {
             _container = container;
             _logger = logger;

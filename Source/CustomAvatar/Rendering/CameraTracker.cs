@@ -18,8 +18,8 @@ using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Utilities;
+using JetBrains.Annotations;
 using SiraUtil.Tools.FPFC;
-using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 using Zenject;
 
@@ -98,7 +98,7 @@ namespace CustomAvatar.Rendering
         }
 
         [Inject]
-        [SuppressMessage("CodeQuality", "IDE0051", Justification = "Used by Zenject")]
+        [UsedImplicitly]
         private void Construct(
             ILogger<CameraTracker> logger,
             Settings settings,

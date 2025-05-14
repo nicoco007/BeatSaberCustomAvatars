@@ -16,7 +16,6 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CustomAvatar.Utilities;
 using Unity.Collections;
@@ -46,8 +45,7 @@ namespace CustomAvatar.Tracking.UnityXR
         private bool _leftJointsTracked;
         private bool _rightJointsTracked;
 
-        [SuppressMessage("CodeQuality", "IDE0051", Justification = "Used by Zenject")]
-        private UnityXRFingerTrackingProvider(BeatSaberUtilities beatSaberUtilities)
+        protected UnityXRFingerTrackingProvider(BeatSaberUtilities beatSaberUtilities)
         {
             _beatSaberUtilities = beatSaberUtilities;
         }

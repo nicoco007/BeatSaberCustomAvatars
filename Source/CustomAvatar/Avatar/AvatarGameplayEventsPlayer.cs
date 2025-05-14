@@ -43,7 +43,7 @@ namespace CustomAvatar.Avatar
         private int _lastCombo = -1;
         private int _lastMultiplier = -1;
 
-        public AvatarGameplayEventsPlayer(
+        protected AvatarGameplayEventsPlayer(
             ILogger<AvatarGameplayEventsPlayer> logger,
             PlayerAvatarManager avatarManager,
             ScoreController scoreController,

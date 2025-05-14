@@ -20,6 +20,7 @@ using System.Linq;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Utilities;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.XR;
 using Zenject;
@@ -66,11 +67,9 @@ namespace CustomAvatar.Rendering
             }
         }
 
-        #region Behaviour Lifecycle
-#pragma warning disable IDE0051
-
         [Inject]
-        private void Inject(AssetLoader assetLoader, ActiveCameraManager activeCameraManager, Settings settings)
+        [UsedImplicitly]
+        private void Construct(AssetLoader assetLoader, ActiveCameraManager activeCameraManager, Settings settings)
         {
             _assetLoader = assetLoader;
             _activeCameraManager = activeCameraManager;
@@ -99,9 +98,6 @@ namespace CustomAvatar.Rendering
 
             _renderer.material.SetTexture(kTexturePropertyId, mirrorTexture);
         }
-
-#pragma warning restore IDE0051
-        #endregion
 
         private void PrepareForNextFrame()
         {

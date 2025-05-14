@@ -25,7 +25,7 @@ namespace CustomAvatar.Patches
     {
         private readonly Settings _settings;
 
-        internal MirrorRendererSO(Settings settings)
+        protected MirrorRendererSO(Settings settings)
         {
             _settings = settings;
         }

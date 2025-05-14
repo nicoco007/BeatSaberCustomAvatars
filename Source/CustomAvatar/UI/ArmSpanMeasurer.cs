@@ -14,9 +14,10 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using CustomAvatar.Player;
 using CustomAvatar.Tracking;
-using System;
+using JetBrains.Annotations;
 using UnityEngine;
 using Zenject;
 
@@ -39,7 +40,8 @@ namespace CustomAvatar.UI
         public bool isMeasuring { get; private set; }
 
         [Inject]
-        internal void Construct(VRPlayerInput playerInput)
+        [UsedImplicitly]
+        private void Construct(VRPlayerInput playerInput)
         {
             _playerInput = playerInput;
         }

@@ -16,7 +16,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -41,8 +40,7 @@ namespace CustomAvatar.Tracking.OpenVR
         private readonly ILogger<OpenVRRenderModelLoader> _logger;
         private readonly AssetLoader _assetLoader;
 
-        [SuppressMessage("CodeQuality", "IDE0051", Justification = "Used by Zenject")]
-        private OpenVRRenderModelLoader(ILogger<OpenVRRenderModelLoader> logger, AssetLoader assetLoader)
+        protected OpenVRRenderModelLoader(ILogger<OpenVRRenderModelLoader> logger, AssetLoader assetLoader)
         {
             _logger = logger;
             _assetLoader = assetLoader;

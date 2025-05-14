@@ -23,6 +23,7 @@ using BeatSaberMarkupLanguage.ViewControllers;
 using CustomAvatar.Tracking;
 using HMUI;
 using IPA.Loader;
+using JetBrains.Annotations;
 using UnityEngine;
 using Zenject;
 
@@ -32,8 +33,6 @@ namespace CustomAvatar.UI
     [HotReload(RelativePathToLayout = "Views/Settings.bsml")]
     internal class SettingsViewController : BSMLAutomaticViewController
     {
-        #region Values
-
         protected GeneralSettingsHost generalSettingsHost;
         protected AvatarSpecificSettingsHost avatarSpecificSettingsHost;
         protected AutomaticFbtCalibrationHost automaticFbtCalibrationHost;
@@ -41,15 +40,14 @@ namespace CustomAvatar.UI
         protected AdditionalTab[] additionalMenuTabs;
         protected string versionText;
 
-        #endregion
-
         private List<IAvatarsMenuTab> _avatarsMenuTabs;
         private PluginMetadata _pluginMetadata;
         private TrackingRig _trackingRig;
         private BSMLParser _bsmlParser;
 
         [Inject]
-        internal void Construct(
+        [UsedImplicitly]
+        private void Construct(
             List<IAvatarsMenuTab> avatarsMenuTabs,
             PluginMetadata pluginMetadata,
             TrackingRig trackingRig,

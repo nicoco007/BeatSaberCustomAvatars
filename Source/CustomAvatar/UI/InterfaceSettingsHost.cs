@@ -23,7 +23,7 @@ namespace CustomAvatar.UI
     {
         private readonly Settings _settings;
 
-        internal InterfaceSettingsHost(Settings settings)
+        protected InterfaceSettingsHost(Settings settings)
         {
             _settings = settings;
         }

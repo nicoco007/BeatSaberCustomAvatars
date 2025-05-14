@@ -28,6 +28,7 @@ using CustomAvatar.Player;
 using CustomAvatar.Utilities;
 using HMUI;
 using IPA.Utilities.Async;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.U2D;
 using Zenject;
@@ -66,7 +67,8 @@ namespace CustomAvatar.UI
         protected Sprite reloadSprite { get; set; }
 
         [Inject]
-        internal void Construct(ILogger<AvatarListViewController> logger, PlayerAvatarManager avatarManager, MirrorViewController mirrorViewController, LevelCollectionViewController levelCollectionViewController, PlatformLeaderboardViewController leaderboardViewController, AssetLoader assetLoader)
+        [UsedImplicitly]
+        private void Construct(ILogger<AvatarListViewController> logger, PlayerAvatarManager avatarManager, MirrorViewController mirrorViewController, LevelCollectionViewController levelCollectionViewController, PlatformLeaderboardViewController leaderboardViewController, AssetLoader assetLoader)
         {
             _logger = logger;
             _avatarManager = avatarManager;

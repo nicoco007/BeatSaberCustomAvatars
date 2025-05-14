@@ -85,10 +85,9 @@ namespace CustomAvatar.UI
 
         protected bool isCalibrationMessageVisible => _trackingRig.activeCalibrationMode != CalibrationMode.None;
 
-        #region Behaviour Lifecycle
-
         [Inject]
-        internal void Construct(
+        [UsedImplicitly]
+        private void Construct(
             DiContainer container,
             MirrorHelper mirrorHelper,
             Settings settings,
@@ -158,8 +157,6 @@ namespace CustomAvatar.UI
 
             _trackingRig.activeCalibrationModeChanged += OnActiveCalibrationModeChanged;
         }
-
-        #endregion
 
         private void CreateProgressBar()
         {

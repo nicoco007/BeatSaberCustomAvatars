@@ -29,7 +29,7 @@ namespace CustomAvatar.Player
         private readonly TrackingRig _trackingRig;
         private readonly IFingerTrackingProvider _fingerTrackingProvider;
 
-        internal VRPlayerInput(
+        protected VRPlayerInput(
             TrackingRig trackingRig,
             IFingerTrackingProvider fingerTrackingProvider)
         {

@@ -33,7 +33,7 @@ namespace CustomAvatar.Utilities
         private readonly ILogger<AssetLoader> _logger;
         private readonly TaskCompletionSource<VoidResult> _taskCompletionSource = new();
 
-        internal AssetLoader(ILogger<AssetLoader> logger)
+        protected AssetLoader(ILogger<AssetLoader> logger)
         {
             _logger = logger;
         }

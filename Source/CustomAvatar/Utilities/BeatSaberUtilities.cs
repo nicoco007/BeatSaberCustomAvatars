@@ -31,7 +31,7 @@ namespace CustomAvatar.Utilities
         private readonly SettingsApplicatorSO _settingsApplicator;
         private readonly IVRPlatformHelper _vrPlatformHelper;
 
-        internal BeatSaberUtilities(SettingsManager settingsManager, SettingsApplicatorSO settingsApplicator, IVRPlatformHelper vrPlatformHelper)
+        protected BeatSaberUtilities(SettingsManager settingsManager, SettingsApplicatorSO settingsApplicator, IVRPlatformHelper vrPlatformHelper)
         {
             _settingsManager = settingsManager;
             _settingsApplicator = settingsApplicator;

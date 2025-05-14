@@ -15,10 +15,11 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 extern alias BeatSaberFinalIK;
+
 using System;
-using System.Diagnostics.CodeAnalysis;
 using BeatSaberFinalIK::RootMotion;
 using CustomAvatar.Logging;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Events;
 using static BeatSaberFinalIK::RootMotion.FinalIK.IKSolverVR.Arm;
@@ -415,7 +416,7 @@ namespace CustomAvatar
 #if !UNITY_EDITOR
         [Inject]
 #endif
-        [SuppressMessage("CodeQuality", "IDE0051", Justification = "Used by Zenject")]
+        [UsedImplicitly]
         private void Construct(ILogger<VRIKManager> logger)
         {
             _logger = logger;

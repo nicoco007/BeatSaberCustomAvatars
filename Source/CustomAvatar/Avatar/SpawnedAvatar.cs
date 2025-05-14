@@ -15,8 +15,10 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 extern alias BeatSaberFinalIK;
+
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
+using JetBrains.Annotations;
 using UnityEngine;
 using Zenject;
 
@@ -75,10 +77,8 @@ namespace CustomAvatar.Avatar
             }
         }
 
-        #region Behaviour Lifecycle
-#pragma warning disable IDE0051
-
         [Inject]
+        [UsedImplicitly]
         private void Construct(ILoggerFactory loggerFactory, AvatarPrefab avatarPrefab, IAvatarInput avatarInput)
         {
             prefab = avatarPrefab;
@@ -109,9 +109,6 @@ namespace CustomAvatar.Avatar
         {
             Destroy(gameObject);
         }
-
-#pragma warning restore IDE0051
-        #endregion
 
         private void SetChildrenToLayer(int layer)
         {

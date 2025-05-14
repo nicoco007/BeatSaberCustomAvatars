@@ -38,7 +38,7 @@ namespace CustomAvatar.Tracking.UnityXR
         private readonly UnityXRDevice _leftFoot;
         private readonly UnityXRDevice _rightFoot;
 
-        internal UnityXRDeviceProvider()
+        protected UnityXRDeviceProvider()
         {
             _head = CreateDevice("Head", nameof(XRHMD));
             _leftHand = CreateDevice("LeftHand", nameof(XRController), CommonUsages.LeftHand);

@@ -18,7 +18,6 @@ extern alias BeatSaberFinalIK;
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
@@ -26,6 +25,7 @@ using CustomAvatar.Logging;
 using CustomAvatar.Player;
 using CustomAvatar.Rendering;
 using CustomAvatar.Utilities;
+using JetBrains.Annotations;
 using SiraUtil.Tools.FPFC;
 using UnityEngine;
 using UnityEngine.Animations;
@@ -273,7 +273,7 @@ namespace CustomAvatar.Tracking
         }
 
         [Inject]
-        [SuppressMessage("CodeQuality", "IDE0051", Justification = "Used by Zenject")]
+        [UsedImplicitly]
         private void Construct(
             ILogger<TrackingRig> logger,
             DiContainer container,

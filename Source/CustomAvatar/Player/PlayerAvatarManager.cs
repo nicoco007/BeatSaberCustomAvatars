@@ -16,7 +16,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -28,6 +27,7 @@ using CustomAvatar.Logging;
 using CustomAvatar.Rendering;
 using CustomAvatar.Utilities;
 using IPA.Utilities;
+using JetBrains.Annotations;
 using SiraUtil.Tools.FPFC;
 using UnityEngine;
 using UnityEngine.Animations;
@@ -170,7 +170,7 @@ namespace CustomAvatar.Player
         }
 
         [Inject]
-        [SuppressMessage("CodeQuality", "IDE0051", Justification = "Used by Zenject")]
+        [UsedImplicitly]
         private void Construct(
             DiContainer container,
             ILogger<PlayerAvatarManager> logger,

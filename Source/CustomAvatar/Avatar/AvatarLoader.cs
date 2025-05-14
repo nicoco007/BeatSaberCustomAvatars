@@ -42,7 +42,7 @@ namespace CustomAvatar.Avatar
 
         private readonly Dictionary<string, Task<AvatarPrefab>> _tasks = [];
 
-        internal AvatarLoader(ILogger<AvatarLoader> logger, DiContainer container)
+        private protected AvatarLoader(ILogger<AvatarLoader> logger, DiContainer container)
         {
             _logger = logger;
             _container = container;

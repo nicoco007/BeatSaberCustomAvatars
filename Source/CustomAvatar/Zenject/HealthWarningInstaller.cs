@@ -24,7 +24,7 @@ namespace CustomAvatar.Zenject
     {
         private readonly ILogger<HealthWarningInstaller> _logger;
 
-        internal HealthWarningInstaller(ILogger<HealthWarningInstaller> logger)
+        protected HealthWarningInstaller(ILogger<HealthWarningInstaller> logger)
         {
             _logger = logger;
         }
