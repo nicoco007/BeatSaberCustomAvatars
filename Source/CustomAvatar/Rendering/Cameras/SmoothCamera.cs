@@ -23,7 +23,7 @@ using SiraUtil.Tools.FPFC;
 using UnityEngine;
 using Zenject;
 
-namespace CustomAvatar.Rendering
+namespace CustomAvatar.Rendering.Cameras
 {
     [RequireComponent(typeof(Camera))]
     [DisallowMultipleComponent]
@@ -119,14 +119,14 @@ namespace CustomAvatar.Rendering
                 _camera.cullingMask &= ~AvatarLayers.kAllLayersMask;
                 _camera.nearClipPlane = kCameraDefaultNearClipMask;
             }
-            else if (_smoothCamera._thirdPersonEnabled || _fpfcSettings.Enabled || (!_beatSaberUtilities.hasFocus && _settings.hmdCameraBehaviour == HmdCameraBehaviour.AllCameras)) // TODO: consolidate these conditions with the ones in MainCamera
+            else if (_smoothCamera._thirdPersonEnabled || _fpfcSettings.Enabled || !_beatSaberUtilities.hasFocus && _settings.hmdCameraBehaviour == HmdCameraBehaviour.AllCameras) // TODO: consolidate these conditions with the ones in MainCamera
             {
                 _camera.cullingMask = _camera.cullingMask | AvatarLayers.kOnlyInThirdPersonMask | AvatarLayers.kAlwaysVisibleMask;
                 _camera.nearClipPlane = kCameraDefaultNearClipMask;
             }
             else
             {
-                _camera.cullingMask = (_camera.cullingMask & ~AvatarLayers.kOnlyInThirdPersonMask) | AvatarLayers.kAlwaysVisibleMask;
+                _camera.cullingMask = _camera.cullingMask & ~AvatarLayers.kOnlyInThirdPersonMask | AvatarLayers.kAlwaysVisibleMask;
                 _camera.nearClipPlane = _settings.cameraNearClipPlane;
             }
         }

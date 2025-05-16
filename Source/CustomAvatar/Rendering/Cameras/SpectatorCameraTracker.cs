@@ -19,7 +19,7 @@ using JetBrains.Annotations;
 using UnityEngine;
 using Zenject;
 
-namespace CustomAvatar.Rendering
+namespace CustomAvatar.Rendering.Cameras
 {
     [DisallowMultipleComponent]
     internal class SpectatorCameraTracker : CameraTracker

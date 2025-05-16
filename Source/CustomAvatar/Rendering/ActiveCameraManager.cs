@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using CustomAvatar.Logging;
+using CustomAvatar.Rendering.Cameras;
 
 namespace CustomAvatar.Rendering
 {

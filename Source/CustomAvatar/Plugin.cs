@@ -17,6 +17,7 @@
 using CustomAvatar.Logging;
 using CustomAvatar.Player;
 using CustomAvatar.Rendering;
+using CustomAvatar.Rendering.Cameras;
 using CustomAvatar.Zenject;
 using CustomAvatar.Zenject.Internal;
 using HarmonyLib;
@@ -43,7 +44,7 @@ namespace CustomAvatar
             ZenjectHelper.Init(ipaLogger);
 
             ZenjectHelper.AddComponentAlongsideExisting<MainCamera, MainCameraTracker>();
-            ZenjectHelper.AddComponentAlongsideExisting<SmoothCamera, Rendering.SmoothCamera>();
+            ZenjectHelper.AddComponentAlongsideExisting<SmoothCamera, Rendering.Cameras.SmoothCamera>();
             ZenjectHelper.AddComponentAlongsideExisting<MenuEnvironmentManager, EnvironmentObject>();
             ZenjectHelper.AddComponentAlongsideExisting<MultiplayerLocalActivePlayerFacade, EnvironmentObject>("IsActiveObjects/Lasers");
             ZenjectHelper.AddComponentAlongsideExisting<MultiplayerLocalActivePlayerFacade, EnvironmentObject>("IsActiveObjects/Construction");

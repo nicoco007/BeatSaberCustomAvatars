@@ -25,6 +25,7 @@ using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Rendering;
+using CustomAvatar.Rendering.Cameras;
 using CustomAvatar.Utilities;
 using IPA.Utilities;
 using JetBrains.Annotations;

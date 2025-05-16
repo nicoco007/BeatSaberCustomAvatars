@@ -16,7 +16,7 @@
 
 using UnityEngine;
 
-namespace CustomAvatar.Rendering
+namespace CustomAvatar.Rendering.Cameras
 {
     [RequireComponent(typeof(Camera))]
     [DisallowMultipleComponent]

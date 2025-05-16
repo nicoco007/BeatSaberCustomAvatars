@@ -24,6 +24,7 @@ using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
 using CustomAvatar.Player;
 using CustomAvatar.Rendering;
+using CustomAvatar.Rendering.Cameras;
 using CustomAvatar.Utilities;
 using JetBrains.Annotations;
 using SiraUtil.Tools.FPFC;

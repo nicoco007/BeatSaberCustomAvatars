@@ -25,7 +25,7 @@ using UnityEngine.SpatialTracking;
 using UnityEngine.XR;
 using Zenject;
 
-namespace CustomAvatar.Rendering
+namespace CustomAvatar.Rendering.Cameras
 {
     internal abstract class CameraTracker : MonoBehaviour
     {
@@ -62,7 +62,7 @@ namespace CustomAvatar.Rendering
             mask |= AvatarLayers.kAlwaysVisibleMask | AvatarLayers.kMirrorMask;
 
             // FPFC basically ends up being a 3rd person camera
-            if (fpfcSettings.Enabled || (!beatSaberUtilities.hasFocus && _settings.hmdCameraBehaviour == HmdCameraBehaviour.AllCameras))
+            if (fpfcSettings.Enabled || !beatSaberUtilities.hasFocus && _settings.hmdCameraBehaviour == HmdCameraBehaviour.AllCameras)
             {
                 mask |= AvatarLayers.kOnlyInThirdPersonMask;
             }
