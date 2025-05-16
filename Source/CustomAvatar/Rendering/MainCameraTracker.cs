@@ -22,8 +22,6 @@ namespace CustomAvatar.Rendering
     [DisallowMultipleComponent]
     internal class MainCameraTracker : CameraTracker
     {
-        internal override bool showAvatar => true;
-
         protected override void Start()
         {
             VRCenterAdjust center = transform.GetComponentInParent<VRCenterAdjust>();

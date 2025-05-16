@@ -28,7 +28,6 @@ using CustomAvatar.Rendering;
 using CustomAvatar.Utilities;
 using IPA.Utilities;
 using JetBrains.Annotations;
-using SiraUtil.Tools.FPFC;
 using UnityEngine;
 using UnityEngine.Animations;
 using Zenject;
@@ -115,7 +114,6 @@ namespace CustomAvatar.Player
         private AvatarSpawner _spawner;
         private BeatSaberUtilities _beatSaberUtilities;
         private ActiveCameraManager _activeCameraManager;
-        private IFPFCSettings _fpfcSettings;
 
         private ParentConstraint _parentConstraint;
         private LossyScaleConstraint _scaleConstraint;
@@ -165,8 +163,6 @@ namespace CustomAvatar.Player
             _beatSaberUtilities.roomAdjustChanged += OnRoomAdjustChanged;
 
             _activeCameraManager.changed += OnActiveCameraChanged;
-
-            _fpfcSettings.Changed += OnFpfcSettingsChanged;
         }
 
         [Inject]
@@ -179,8 +175,7 @@ namespace CustomAvatar.Player
             CalibrationData calibrationData,
             AvatarSpawner spawner,
             BeatSaberUtilities beatSaberUtilities,
-            ActiveCameraManager activeCameraManager,
-            IFPFCSettings fpfcSettings)
+            ActiveCameraManager activeCameraManager)
         {
             _container = container;
             _logger = logger;
@@ -190,7 +185,6 @@ namespace CustomAvatar.Player
             _spawner = spawner;
             _beatSaberUtilities = beatSaberUtilities;
             _activeCameraManager = activeCameraManager;
-            _fpfcSettings = fpfcSettings;
         }
 
         protected void Start()
@@ -235,8 +229,6 @@ namespace CustomAvatar.Player
             _beatSaberUtilities.roomAdjustChanged -= OnRoomAdjustChanged;
 
             _activeCameraManager.changed -= OnActiveCameraChanged;
-
-            _fpfcSettings.Changed -= OnFpfcSettingsChanged;
         }
 
         protected void OnDestroy()
@@ -465,11 +457,6 @@ namespace CustomAvatar.Player
             UpdateLocomotionEnabled();
         }
 
-        private void OnFpfcSettingsChanged(IFPFCSettings fpfcSettings)
-        {
-            UpdateAvatarActive();
-        }
-
         private void UpdateConstraints()
         {
             _logger.LogTrace("Updating constraints");
@@ -478,14 +465,15 @@ namespace CustomAvatar.Player
             {
                 _parentConstraint.SetSources([new ConstraintSource { sourceTransform = _activeCameraManager.current.origin, weight = 1 }]);
                 _scaleConstraint.sourceTransform = _activeCameraManager.current.origin;
+                _containerObject.SetActive(true);
             }
             else
             {
                 _parentConstraint.SetSources(kEmptyConstraintSources);
                 _scaleConstraint.sourceTransform = null;
+                _containerObject.SetActive(false);
             }
 
-            UpdateAvatarActive();
             UpdateAvatarVerticalPosition();
         }
 
@@ -505,6 +493,31 @@ namespace CustomAvatar.Player
         {
             scale = CalculateAvatarScale(playerEyeHeight);
             UpdateAvatarVerticalPosition(playerEyeHeight);
+        }
+
+        internal void UpdateFirstPersonVisibility()
+        {
+            if (currentlySpawnedAvatar == null)
+            {
+                return;
+            }
+
+            FirstPersonVisibility visibility = FirstPersonVisibility.Hidden;
+
+            if (_settings.isAvatarVisibleInFirstPerson)
+            {
+                visibility = ignoreFirstPersonExclusions ? FirstPersonVisibility.Visible : FirstPersonVisibility.VisibleWithExclusionsApplied;
+            }
+
+            currentlySpawnedAvatar.SetFirstPersonVisibility(visibility);
+        }
+
+        internal void HideAvatar()
+        {
+            if (currentlySpawnedAvatar != null)
+            {
+                currentlySpawnedAvatar.Hide();
+            }
         }
 
         private float CalculateAvatarScale(float playerEyeHeight)
@@ -561,23 +574,6 @@ namespace CustomAvatar.Player
             return scale;
         }
 
-        private void UpdateFirstPersonVisibility()
-        {
-            if (!currentlySpawnedAvatar)
-            {
-                return;
-            }
-
-            FirstPersonVisibility visibility = FirstPersonVisibility.Hidden;
-
-            if (_settings.isAvatarVisibleInFirstPerson)
-            {
-                visibility = ignoreFirstPersonExclusions ? FirstPersonVisibility.Visible : FirstPersonVisibility.VisibleWithExclusionsApplied;
-            }
-
-            currentlySpawnedAvatar.SetFirstPersonVisibility(visibility);
-        }
-
         private void OnEnableLocomotionChanged(bool enable)
         {
             UpdateLocomotionEnabled();
@@ -607,12 +603,6 @@ namespace CustomAvatar.Player
             {
                 ResizeCurrentAvatar();
             }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void UpdateAvatarActive()
-        {
-            _containerObject.SetActive(_activeCameraManager.current != null && _activeCameraManager.current.showAvatar);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

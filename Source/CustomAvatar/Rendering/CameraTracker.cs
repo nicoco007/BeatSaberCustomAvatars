@@ -21,6 +21,8 @@ using CustomAvatar.Utilities;
 using JetBrains.Annotations;
 using SiraUtil.Tools.FPFC;
 using UnityEngine;
+using UnityEngine.SpatialTracking;
+using UnityEngine.XR;
 using Zenject;
 
 namespace CustomAvatar.Rendering
@@ -30,14 +32,13 @@ namespace CustomAvatar.Rendering
         private ILogger<CameraTracker> _logger;
         private Settings _settings;
         private ActiveCameraManager _activeCameraManager;
+        private TrackedPoseDriver _trackedPoseDriver;
 
         internal Camera camera { get; private set; }
 
         internal Transform playerSpace { get; private protected set; }
 
         internal Transform origin { get; private protected set; }
-
-        internal abstract bool showAvatar { get; }
 
         protected IFPFCSettings fpfcSettings { get; private set; }
 
@@ -76,6 +77,7 @@ namespace CustomAvatar.Rendering
         protected virtual void Awake()
         {
             camera = GetComponent<Camera>();
+            _trackedPoseDriver = GetComponent<TrackedPoseDriver>();
         }
 
         protected virtual void OnEnable()
@@ -92,25 +94,42 @@ namespace CustomAvatar.Rendering
                 fpfcSettings.Changed += OnFpfcSettingsChanged;
             }
 
+            if (beatSaberUtilities != null)
+            {
+                beatSaberUtilities.focusChanged -= OnFocusChanged;
+                beatSaberUtilities.focusChanged += OnFocusChanged;
+            }
+
             _activeCameraManager?.Add(this);
 
             UpdateCameraMask();
         }
 
-        [Inject]
-        [UsedImplicitly]
-        private void Construct(
-            ILogger<CameraTracker> logger,
-            Settings settings,
-            ActiveCameraManager activeCameraManager,
-            IFPFCSettings fpfcSettings,
-            BeatSaberUtilities beatSaberUtilities)
+        protected virtual void OnPreCull()
         {
-            _logger = logger;
-            _settings = settings;
-            _activeCameraManager = activeCameraManager;
-            this.fpfcSettings = fpfcSettings;
-            this.beatSaberUtilities = beatSaberUtilities;
+            if (_settings.hmdCameraBehaviour == HmdCameraBehaviour.HmdOnly && !beatSaberUtilities.hasFocus)
+            {
+                _trackedPoseDriver.UseRelativeTransform = true;
+                _trackedPoseDriver.PerformUpdate();
+
+                if (camera.stereoEnabled && XRSettings.stereoRenderingMode == XRSettings.StereoRenderingMode.MultiPass)
+                {
+                    camera.transform.position = camera.ViewportToWorldPoint(Vector3.zero, camera.stereoActiveEye);
+                }
+
+                camera.ResetWorldToCameraMatrix();
+                camera.cullingMask |= AvatarLayers.kOnlyInThirdPersonMask;
+            }
+        }
+
+        protected virtual void OnPostRender()
+        {
+            if (_settings.hmdCameraBehaviour == HmdCameraBehaviour.HmdOnly && !beatSaberUtilities.hasFocus)
+            {
+                // the VR camera seems to always be rendered last so we don't need to re-update the camera pose/matrix
+                _trackedPoseDriver.UseRelativeTransform = false;
+                UpdateCameraMask();
+            }
         }
 
         protected virtual void Start()
@@ -137,7 +156,40 @@ namespace CustomAvatar.Rendering
                 fpfcSettings.Changed -= OnFpfcSettingsChanged;
             }
 
+            if (beatSaberUtilities != null)
+            {
+                beatSaberUtilities.focusChanged -= OnFocusChanged;
+            }
+
             _activeCameraManager?.Remove(this);
+        }
+
+        [Inject]
+        [UsedImplicitly]
+        private void Construct(
+            ILogger<CameraTracker> logger,
+            Settings settings,
+            ActiveCameraManager activeCameraManager,
+            IFPFCSettings fpfcSettings,
+            BeatSaberUtilities beatSaberUtilities)
+        {
+            _logger = logger;
+            _settings = settings;
+            _activeCameraManager = activeCameraManager;
+            this.fpfcSettings = fpfcSettings;
+            this.beatSaberUtilities = beatSaberUtilities;
+        }
+
+        private void OnFocusChanged(bool hasFocus)
+        {
+            Quaternion rotation = Quaternion.Euler(0, 180, 0);
+
+            _trackedPoseDriver.originPose = hasFocus ? Pose.identity : new Pose(
+                Vector3.ProjectOnPlane(rotation * -transform.localPosition * 2, Vector3.up) + Vector3.ProjectOnPlane(transform.localRotation * Vector3.forward, Vector3.up).normalized,
+                rotation);
+            _trackedPoseDriver.UseRelativeTransform = _settings.hmdCameraBehaviour == HmdCameraBehaviour.AllCameras;
+
+            UpdateCameraMask();
         }
 
         private void OnCameraNearClipPlaneChanged(float value)

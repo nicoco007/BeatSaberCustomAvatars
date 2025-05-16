@@ -14,19 +14,47 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using CustomAvatar.Player;
+using JetBrains.Annotations;
 using UnityEngine;
+using Zenject;
 
 namespace CustomAvatar.Rendering
 {
     [DisallowMultipleComponent]
     internal class SpectatorCameraTracker : CameraTracker
     {
-        internal override bool showAvatar => !fpfcSettings.Enabled;
+        private PlayerAvatarManager _playerAvatarManager;
 
         internal void Init(Transform playerSpace, Transform origin)
         {
             this.playerSpace = playerSpace;
             this.origin = origin;
+        }
+
+        protected override void OnPreCull()
+        {
+            base.OnPreCull();
+            _playerAvatarManager.UpdateFirstPersonVisibility();
+        }
+
+        protected override void OnPostRender()
+        {
+            base.OnPostRender();
+            _playerAvatarManager.HideAvatar();
+        }
+
+        protected override void OnDisable()
+        {
+            _playerAvatarManager.UpdateFirstPersonVisibility();
+            base.OnDisable();
+        }
+
+        [Inject]
+        [UsedImplicitly]
+        private void Construct(PlayerAvatarManager playerAvatarManager)
+        {
+            _playerAvatarManager = playerAvatarManager;
         }
     }
 }

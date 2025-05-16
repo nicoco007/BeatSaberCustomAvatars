@@ -17,7 +17,7 @@
 using CustomAvatar.Logging;
 using CustomAvatar.Rendering;
 using UnityEngine;
-using UnityEngine.InputSystem.XR;
+using UnityEngine.SpatialTracking;
 using Zenject;
 
 namespace CustomAvatar.Replays
@@ -52,6 +52,11 @@ namespace CustomAvatar.Replays
                 return;
             }
 
+            if (!camera.TryGetComponent(out TrackedPoseDriver _))
+            {
+                return;
+            }
+
             GameObject gameObject = camera.gameObject;
             Transform playerSpace = camera.transform.parent;
 
@@ -67,11 +72,6 @@ namespace CustomAvatar.Replays
             }
 
             _container.InstantiateComponent<SpectatorCameraTracker>(gameObject).Init(playerSpace, playerSpace.parent);
-
-            if (camera.TryGetComponent(out TrackedPoseDriver _))
-            {
-                _container.InstantiateComponent<CameraFlipper>(gameObject);
-            }
         }
     }
 }

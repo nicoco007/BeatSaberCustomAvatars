@@ -57,7 +57,6 @@ namespace CustomAvatar.Replays
             origin.SetParent(playerSpace, false);
 
             _container.InstantiateComponent<SpectatorCameraTracker>(spectatorCamera.gameObject).Init(playerSpace, origin);
-            _container.InstantiateComponent<CameraFlipper>(spectatorCamera.gameObject);
         }
     }
 }

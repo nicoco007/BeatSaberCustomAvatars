@@ -77,6 +77,9 @@ namespace CustomAvatar.Avatar
             }
         }
 
+        // this assumes no cameras render layer 31, which is the case for base-game cameras
+        internal void Hide() => SetChildrenToLayer(AvatarLayers.kEditorReserved);
+
         [Inject]
         [UsedImplicitly]
         private void Construct(ILoggerFactory loggerFactory, AvatarPrefab avatarPrefab, IAvatarInput avatarInput)
