@@ -19,7 +19,7 @@ jobs:
     - name: Set up Beat Saber
       uses: nicoco007/setup-beat-saber@v1
       with:
-        access-token: ${{ secrets.PRIVATE_GITHUB_TOKEN }}
+        access-token: ${{ secrets.GITHUB_TOKEN }}
         additional-dependencies: '{ "XR Hands": "^1.1.0", "OpenVR API": "^2.0.0" }'
         aliases: '{ "DynamicBone": "Dynamic Bone", "FinalIK": "Final IK" }'
         project-path: ${{ github.workspace }}\Source\CustomAvatar\CustomAvatar.csproj

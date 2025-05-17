@@ -3,8 +3,8 @@
   <Import Project="$(ProjectDir)..\Common.props" />
 
   <ItemGroup>
-    <Reference Include="0Harmony" HintPath="$(BeatSaberDir)Libs\0Harmony.dll" Private="False" />
-    <Reference Include="AssetBundleLoadingTools" HintPath="$(BeatSaberDir)Plugins\AssetBundleLoadingTools.dll" Private="False" />
+    <Reference Include="0Harmony" />
+    <Reference Include="AssetBundleLoadingTools" />
     <Reference Include="BeatmapCore" />
     <Reference Include="BeatSaber.GameSettings" />
     <Reference Include="BeatSaber.Settings" />
@@ -14,28 +14,29 @@
     <Reference Include="BGLib.SaveDataCore" />
     <Reference Include="BGLib.UnityExtension" />
     <Reference Include="BGNetCore" />
-    <Reference Include="BSML" HintPath="$(BeatSaberDir)Plugins\BSML.dll" Private="False" />
+    <Reference Include="BSML" />
     <Reference Include="DataModels" />
-    <Reference Include="DynamicBone" HintPath="$(BeatSaberDir)Libs\DynamicBone.dll" Private="False" Publicize="True" Aliases="BeatSaberDynamicBone" />
-    <Reference Include="FinalIK" HintPath="$(BeatSaberDir)Libs\FinalIK.dll" Private="False" Publicize="True" Aliases="BeatSaberFinalIK" />
+    <Reference Include="DynamicBone" Publicize="True" Aliases="BeatSaberDynamicBone" />
+    <Reference Include="FinalIK" Publicize="True" Aliases="BeatSaberFinalIK" />
     <Reference Include="GameplayCore" />
     <Reference Include="Helpers" Publicize="True" />
-    <Reference Include="Hive.Versioning" HintPath="$(BeatSaberDir)Libs\Hive.Versioning.dll" Private="False" />
+    <Reference Include="Hive.Versioning" />
     <Reference Include="HMLib" Publicize="True" />
     <Reference Include="HMRendering" />
     <Reference Include="HMUI" Publicize="True" />
     <Reference Include="Interactable" />
+    <Reference Include="IPA.Loader" />
     <Reference Include="Menu.CommonLib" />
     <Reference Include="Main" Publicize="True" />
     <Reference Include="Newtonsoft.Json" />
-    <Reference Include="OpenVR" HintPath="$(BeatSaberDir)Libs\OpenVR.dll" Private="False" />
-    <Reference Include="protobuf-net" HintPath="$(BeatSaberDir)Libs\protobuf-net.dll" Private="False" />
+    <Reference Include="OpenVR" />
+    <Reference Include="protobuf-net" />
     <Reference Include="Rendering" Publicize="True" />
-    <Reference Include="SiraUtil" HintPath="$(BeatSaberDir)Plugins\SiraUtil.dll" Private="False" />
+    <Reference Include="SiraUtil" />
     <Reference Include="Unity.InputSystem" />
     <Reference Include="Unity.Mathematics" />
     <Reference Include="Unity.TextMeshPro" />
-    <Reference Include="Unity.XR.Hands" HintPath="$(BeatSaberDir)Libs\Unity.XR.Hands.dll" Private="False" Publicize="True" />
+    <Reference Include="Unity.XR.Hands" Publicize="True" />
     <Reference Include="Unity.XR.OpenXR" />
     <Reference Include="UnityEngine" />
     <Reference Include="UnityEngine.AnimationModule" />
@@ -45,7 +46,7 @@
     <Reference Include="UnityEngine.ImageConversionModule" />
     <Reference Include="UnityEngine.InputLegacyModule" />
     <Reference Include="UnityEngine.PhysicsModule" />
-    <Reference Include="UnityEngine.SpatialTracking" Private="False" Publicize="True" SkipOverridableMethods="False" />
+    <Reference Include="UnityEngine.SpatialTracking" Publicize="True" SkipOverridableMethods="False" />
     <Reference Include="UnityEngine.SubsystemsModule" />
     <Reference Include="UnityEngine.UI" />
     <Reference Include="UnityEngine.UIModule" />
@@ -60,16 +61,6 @@
     <EmbeddedResource Include="Resources\**\*" />
   </ItemGroup>
   <ItemGroup>
-    <AdditionalArtifactFiles Include="$(ProjectDir)..\..\Packaging\CustomAvatar\**\*.*" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="BSIPA.AssemblyPublicizer.MSBuild" Version="0.5.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="IsExternalInit" Version="1.0.3">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <ArtifactFiles Include="$(ProjectDir)..\..\Packaging\CustomAvatar\**\*.*" />
   </ItemGroup>
 </Project>

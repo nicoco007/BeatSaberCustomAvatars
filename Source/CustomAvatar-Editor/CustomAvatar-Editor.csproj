@@ -5,50 +5,25 @@
   <PropertyGroup>
     <DefineConstants>$(DefineConstants);UNITY_EDITOR</DefineConstants>
     <UnityProjectDir>$(ProjectDir)..\..\Unity\BeatSaberCustomAvatars</UnityProjectDir>
+    <BeatSaberOutputType>None</BeatSaberOutputType>
   </PropertyGroup>
   
   <ItemGroup>
-    <Reference Include="FinalIK">
-      <HintPath>$(BeatSaberDir)\Libs\FinalIK.dll</HintPath>
-      <Private>false</Private>
-      <Aliases>BeatSaberFinalIK</Aliases>
-    </Reference>
-    <Reference Include="UnityEditor">
-      <HintPath>..\..\Libraries\UnityEditor.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="UnityEngine">
-      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="UnityEngine.AnimationModule">
-      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="UnityEngine.AssetBundleModule">
-      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule" Publicize="true">
-      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
+    <Reference Include="FinalIK" Aliases="BeatSaberFinalIK" />
+    <Reference Include="UnityEditor" HintPath="..\..\Libraries\UnityEditor.dll" Private="False" />
+    <Reference Include="UnityEngine" />
+    <Reference Include="UnityEngine.AnimationModule" />
+    <Reference Include="UnityEngine.AssetBundleModule" />
+    <Reference Include="UnityEngine.CoreModule" Publicize="True" />
+    <Reference Include="UnityEngine.IMGUIModule" />
+    <Reference Include="UnityEngine.PhysicsModule" />
+    <Reference Include="UnityEngine.TextRenderingModule" />
   </ItemGroup>
+  
   <ItemGroup>
     <None Include="$(ProjectName).csproj.user" />
   </ItemGroup>
+  
   <ItemGroup>
     <Compile Include="..\CustomAvatar\Scripts\AvatarDescriptor.cs" Link="Scripts\AvatarDescriptor.cs" />
     <Compile Include="..\CustomAvatar\Scripts\ComboReachedEvent.cs" Link="Scripts\ComboReachedEvent.cs" />
@@ -63,18 +38,15 @@
     <Compile Include="..\CustomAvatar\Utilities\UnityUtilities.cs" Link="Utilities\UnityUtilities.cs" />
     <Compile Include="..\CustomAvatar\Scripts\VRIKManager.cs" Link="Scripts\VRIKManager.cs" />
   </ItemGroup>
+  
   <ItemGroup>
-    <AdditionalArtifactFiles Include="$(ProjectDir)..\..\Packaging\CustomAvatar-Editor\**\*.*" />
+    <ArtifactFiles Include="$(ProjectDir)..\..\Packaging\CustomAvatar-Editor\**\*.*" />
   </ItemGroup>
+  
   <ItemGroup>
     <EmbeddedResource Include="Resources\**\*.*" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="BSIPA.AssemblyPublicizer.MSBuild" Version="0.5.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
+
   <!-- Copy the assembly and PDB to the Unity Project's folder -->
   <Target Name="CopyToUnityProject" AfterTargets="CopyToArtifact" Condition="'$(UnityProjectDir)' != ''">
     <Message Text="$(MSBuildProjectName) -&gt; $(UnityProjectDir)" Importance="high" />
@@ -82,5 +54,11 @@
       <FilesToCopy Include="$(ArtifactDir)\**\*" />
     </ItemGroup>
     <Copy SourceFiles="@(FilesToCopy)" DestinationFiles="@(FilesToCopy->'$(UnityProjectDir)\Assets\Libraries\%(RecursiveDir)%(Filename)%(Extension)')" Condition="!Exists('$(UnityProjectDir)\Assets\Libraries\%(RecursiveDir)%(Filename)%(Extension)') OR '%(Extension)' != '.meta'" />
+  </Target>
+
+  <Target Name="UnityProjectOutput" BeforeTargets="SetGitHubActionsOutput">
+    <ItemGroup>
+      <GitHubActionsOutput Include="unity-project-name" Value="$(ArtifactName.Replace('Editor', 'UnityProject'))" />
+    </ItemGroup>
   </Target>
 </Project>

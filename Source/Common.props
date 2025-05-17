@@ -4,6 +4,8 @@
     <AssemblyName>CustomAvatar</AssemblyName>
     <Platforms>x64</Platforms>
     <DefineConstants>$(DefineConstants);UNITY_5_3_OR_NEWER</DefineConstants>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>12</LangVersion>
   </PropertyGroup>
   
   <PropertyGroup>
@@ -25,5 +27,28 @@
     <DependsOn Include="FinalIK" Version="^1.9.0" />
     <DependsOn Include="protobuf-net" Version="^3.0.0" />
     <DependsOn Include="SiraUtil" Version="^3.1.3" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="BSIPA.AssemblyPublicizer.MSBuild" Version="0.5.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="IsExternalInit" Version="1.0.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="nicoco007.BeatSaberModdingTools.Tasks" Version="0.1.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="4.11.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Unity.Analyzers" Version="1.22.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 </Project>
