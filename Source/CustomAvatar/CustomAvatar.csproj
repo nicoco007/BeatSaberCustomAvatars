@@ -52,7 +52,7 @@
     <Reference Include="UnityEngine.UIModule" />
     <Reference Include="UnityEngine.VRModule" />
     <Reference Include="UnityEngine.XRModule" />
-    <Reference Include="VRUI" />
+    <Reference Include="VRUI" Publicize="True" />
     <Reference Include="Zenject" Publicize="True" />
     <Reference Include="Zenject-usage" />
   </ItemGroup>

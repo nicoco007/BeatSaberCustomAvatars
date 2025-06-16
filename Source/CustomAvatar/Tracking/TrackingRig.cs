@@ -31,6 +31,7 @@ using SiraUtil.Tools.FPFC;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.XR;
+using VRUIControls;
 using Zenject;
 
 namespace CustomAvatar.Tracking
@@ -38,6 +39,8 @@ namespace CustomAvatar.Tracking
     [DisallowMultipleComponent]
     internal class TrackingRig : MonoBehaviour
     {
+        private const float kMinPressValue = VRInputModule.kMinPressValue;
+
         private static readonly List<ConstraintSource> kEmptyConstraintSources = new(0);
 
         private ILogger<TrackingRig> _logger;
@@ -316,7 +319,7 @@ namespace CustomAvatar.Tracking
                 // need to use trigger rather than triggerButton since the latter is not bound on all controller types with SteamVR
                 if (InputDevices.GetDeviceAtXRNode(XRNode.LeftHand).TryGetFeatureValue(CommonUsages.trigger, out float leftTriggerValue) &&
                     InputDevices.GetDeviceAtXRNode(XRNode.RightHand).TryGetFeatureValue(CommonUsages.trigger, out float rightTriggerValue) &&
-                    leftTriggerValue == 1 && rightTriggerValue == 1)
+                    leftTriggerValue >= kMinPressValue && rightTriggerValue >= kMinPressValue)
                 {
                     switch (activeCalibrationMode)
                     {
