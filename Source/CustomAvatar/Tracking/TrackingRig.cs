@@ -28,6 +28,7 @@ using CustomAvatar.Utilities;
 using JetBrains.Annotations;
 using SiraUtil.Tools.FPFC;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.XR;
 using VRUIControls;
 using Zenject;
@@ -230,6 +231,8 @@ namespace CustomAvatar.Tracking
             UpdateNodeStates();
             UpdateRenderModels();
             UpdateRenderModelsVisibility();
+
+            InputSystem.onAfterUpdate += OnAfterUpdate;
         }
 
         protected void Start()
@@ -277,7 +280,7 @@ namespace CustomAvatar.Tracking
             _humanoidCalibrator = new HumanoidCalibrator(this, calibrationData, settings, activeCameraManager, beatSaberUtilities, playerAvatarManager);
         }
 
-        protected void Update()
+        protected void OnAfterUpdate()
         {
             UpdateTransform(DeviceUse.Head, head);
             UpdateTransform(DeviceUse.Waist, pelvis);
@@ -289,8 +292,8 @@ namespace CustomAvatar.Tracking
                 _playerAvatarManager.ResizeCurrentAvatar(eyeHeight);
 
                 // need to use trigger rather than triggerButton since the latter is not bound on all controller types with SteamVR
-                if (InputDevices.GetDeviceAtXRNode(XRNode.LeftHand).TryGetFeatureValue(CommonUsages.trigger, out float leftTriggerValue) &&
-                    InputDevices.GetDeviceAtXRNode(XRNode.RightHand).TryGetFeatureValue(CommonUsages.trigger, out float rightTriggerValue) &&
+                if (InputDevices.GetDeviceAtXRNode(XRNode.LeftHand).TryGetFeatureValue(UnityEngine.XR.CommonUsages.trigger, out float leftTriggerValue) &&
+                    InputDevices.GetDeviceAtXRNode(XRNode.RightHand).TryGetFeatureValue(UnityEngine.XR.CommonUsages.trigger, out float rightTriggerValue) &&
                     leftTriggerValue >= kMinPressValue && rightTriggerValue >= kMinPressValue)
                 {
                     switch (activeCalibrationMode)
@@ -340,6 +343,8 @@ namespace CustomAvatar.Tracking
             {
                 _deviceProvider.devicesChanged -= OnDevicesChanged;
             }
+
+            InputSystem.onAfterUpdate -= OnAfterUpdate;
         }
 
         protected void OnDestroy()
