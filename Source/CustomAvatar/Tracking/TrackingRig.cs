@@ -197,17 +197,11 @@ namespace CustomAvatar.Tracking
 
             if (_renderModelProvider != null)
             {
-                _leftHandRenderModel = CreateRenderModelObject("Left Hand Render Model");
-                _rightHandRenderModel = CreateRenderModelObject("Right Hand Render Model");
-                _pelvisRenderModel = CreateRenderModelObject("Pelvis Render Model");
-                _leftFootRenderModel = CreateRenderModelObject("Left Foot Render Model");
-                _rightFootRenderModel = CreateRenderModelObject("Right Foot Render Model");
-
-                _leftHandRenderModel.transform.SetParent(leftHand.transform, false);
-                _rightHandRenderModel.transform.SetParent(rightHand.transform, false);
-                _pelvisRenderModel.transform.SetParent(pelvis.transform, false);
-                _leftFootRenderModel.transform.SetParent(leftFoot.transform, false);
-                _rightFootRenderModel.transform.SetParent(rightFoot.transform, false);
+                _leftHandRenderModel = TrackedRenderModel.Create(leftHand.transform);
+                _rightHandRenderModel = TrackedRenderModel.Create(rightHand.transform);
+                _pelvisRenderModel = TrackedRenderModel.Create(pelvis.transform);
+                _leftFootRenderModel = TrackedRenderModel.Create(leftFoot.transform);
+                _rightFootRenderModel = TrackedRenderModel.Create(rightFoot.transform);
             }
         }
 
@@ -637,13 +631,6 @@ namespace CustomAvatar.Tracking
             return !pose.Equals(Pose.identity);
         }
 
-        private TrackedRenderModel CreateRenderModelObject(string name)
-        {
-            GameObject renderModelGo = new(name);
-            renderModelGo.SetActive(false);
-            return new TrackedRenderModel(renderModelGo, renderModelGo.AddComponent<MeshFilter>(), renderModelGo.AddComponent<MeshRenderer>());
-        }
-
         private void UpdateRenderModelsVisibility()
         {
             if (_renderModelProvider == null)
@@ -652,11 +639,11 @@ namespace CustomAvatar.Tracking
             }
 
             bool show = _showRenderModels && _settings.showRenderModels && _beatSaberUtilities.hasFocus;
-            _leftHandRenderModel?.SetActive(show);
-            _rightHandRenderModel?.SetActive(show);
-            _pelvisRenderModel?.SetActive(show);
-            _leftFootRenderModel?.SetActive(show);
-            _rightFootRenderModel?.SetActive(show);
+            _leftHandRenderModel.gameObject.SetActive(show);
+            _rightHandRenderModel.gameObject.SetActive(show);
+            _pelvisRenderModel.gameObject.SetActive(show);
+            _leftFootRenderModel.gameObject.SetActive(show);
+            _rightFootRenderModel.gameObject.SetActive(show);
             _vrControllerVisualsManager.SetHandlesActive(!show);
         }
 
@@ -688,15 +675,11 @@ namespace CustomAvatar.Tracking
 
             if (trackedNode.isTracking && (renderModel = await _renderModelProvider.GetRenderModelAsync(deviceUse)) != null)
             {
-                trackedRenderModel.transform.SetLocalPositionAndRotation(renderModel.localOrigin.position, renderModel.localOrigin.rotation);
-                trackedRenderModel.meshFilter.sharedMesh = renderModel.mesh;
-                trackedRenderModel.meshRenderer.sharedMaterial = renderModel.material;
+                trackedRenderModel.SetRenderModel(renderModel);
             }
             else
             {
-                trackedRenderModel.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-                trackedRenderModel.meshFilter.sharedMesh = null;
-                trackedRenderModel.meshRenderer.sharedMaterial = null;
+                trackedRenderModel.SetRenderModel(null);
             }
         }
     }

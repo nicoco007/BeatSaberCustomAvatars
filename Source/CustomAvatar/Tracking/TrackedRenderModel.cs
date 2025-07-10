@@ -14,28 +14,33 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using CustomAvatar.Utilities;
 using UnityEngine;
 
 namespace CustomAvatar.Tracking
 {
-    internal class TrackedRenderModel
+    internal class TrackedRenderModel : MonoBehaviour
     {
-        private readonly GameObject _gameObject;
+        private MeshFilter _meshFilter;
+        private MeshRenderer _meshRenderer;
 
-        public TrackedRenderModel(GameObject gameObject, MeshFilter meshFilter, MeshRenderer meshRenderer)
+        internal static TrackedRenderModel Create(Transform parent)
         {
-            _gameObject = gameObject;
-            this.transform = gameObject.transform;
-            this.meshFilter = meshFilter;
-            this.meshRenderer = meshRenderer;
+            GameObject gameObject = new("Render Model");
+            gameObject.transform.SetParent(parent, false);
+
+            TrackedRenderModel trackedRenderModel = gameObject.AddComponent<TrackedRenderModel>();
+            trackedRenderModel._meshFilter = gameObject.AddComponent<MeshFilter>();
+            trackedRenderModel._meshRenderer = gameObject.AddComponent<MeshRenderer>();
+
+            return trackedRenderModel;
         }
 
-        public Transform transform { get; }
-
-        public MeshFilter meshFilter { get; }
-
-        public MeshRenderer meshRenderer { get; }
-
-        public void SetActive(bool value) => _gameObject.SetActive(value);
+        public void SetRenderModel(RenderModel renderModel)
+        {
+            transform.SetLocalPose(renderModel?.localOrigin ?? Pose.identity);
+            _meshFilter.sharedMesh = renderModel?.mesh;
+            _meshRenderer.sharedMaterial = renderModel?.material;
+        }
     }
 }
