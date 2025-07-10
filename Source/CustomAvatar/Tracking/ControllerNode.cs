@@ -18,27 +18,29 @@ using UnityEngine;
 
 namespace CustomAvatar.Tracking
 {
-    internal class ControllerNode : ITrackedNode
+    internal class ControllerNode : MonoBehaviour, ITrackedNode
     {
-        public ControllerNode(string name)
+        internal static ControllerNode Create(string name, Transform parent)
         {
-            gameObject = new GameObject(name);
-            transform = gameObject.transform;
+            GameObject gameObject = new(name);
 
-            controllerOffset = new GameObject($"{name} Controller Offset").transform;
-            controllerOffset.SetParent(transform, false);
+            Transform transform = gameObject.transform;
+            transform.SetParent(parent, false);
 
-            offset = new GameObject($"{name} Offset").transform;
-            offset.SetParent(controllerOffset, false);
+            ControllerNode controllerNode = gameObject.AddComponent<ControllerNode>();
+
+            controllerNode.viewTransform = new GameObject("View Transform").transform;
+            controllerNode.viewTransform.SetParent(transform, false);
+
+            controllerNode.offset = new GameObject("Offset").transform;
+            controllerNode.offset.SetParent(controllerNode.viewTransform, false);
+
+            return controllerNode;
         }
 
-        public GameObject gameObject { get; protected set; }
+        public Transform offset { get; private set; }
 
-        public Transform transform { get; protected set; }
-
-        public Transform offset { get; protected set; }
-
-        public Transform controllerOffset { get; }
+        public Transform viewTransform { get; private set; }
 
         public VRController controller { get; set; }
 

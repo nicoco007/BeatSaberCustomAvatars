@@ -184,23 +184,16 @@ namespace CustomAvatar.Tracking
 
             _scaleConstraint = gameObject.AddComponent<LossyScaleConstraint>();
 
-            head = new("Head");
-            leftHand = new ControllerNode("Left Hand");
-            rightHand = new ControllerNode("Right Hand");
-            fullBodyTracking = new GameObject("Full Body Tracking").transform;
+            head = GenericNode.Create("Head", transform);
+            leftHand = ControllerNode.Create("Left Hand", transform);
+            rightHand = ControllerNode.Create("Right Hand", transform);
 
-            head.transform.SetParent(transform, false);
-            leftHand.transform.SetParent(transform, false);
-            rightHand.transform.SetParent(transform, false);
+            fullBodyTracking = new GameObject("Full Body Tracking").transform;
             fullBodyTracking.SetParent(transform, false);
 
-            pelvis = new("Pelvis");
-            leftFoot = new("Left Foot");
-            rightFoot = new("Right Foot");
-
-            pelvis.transform.SetParent(fullBodyTracking, false);
-            leftFoot.transform.SetParent(fullBodyTracking, false);
-            rightFoot.transform.SetParent(fullBodyTracking, false);
+            pelvis = GenericNode.Create("Pelvis", fullBodyTracking);
+            leftFoot = GenericNode.Create("Left Foot", fullBodyTracking);
+            rightFoot = GenericNode.Create("Right Foot", fullBodyTracking);
 
             if (_renderModelProvider != null)
             {
@@ -389,7 +382,7 @@ namespace CustomAvatar.Tracking
 
             VRController vrController = _container.InstantiateComponent<VRController>(trackedNode.gameObject);
             vrController._node = node;
-            vrController._viewAnchorTransform = trackedNode.controllerOffset;
+            vrController._viewAnchorTransform = trackedNode.viewTransform;
             vrController._transformOffset = transformOffset;
 
             trackedNode.controller = vrController;

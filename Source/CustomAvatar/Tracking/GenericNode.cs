@@ -18,27 +18,29 @@ using UnityEngine;
 
 namespace CustomAvatar.Tracking
 {
-    internal class GenericNode : ITrackedNode
+    internal class GenericNode : MonoBehaviour, ITrackedNode
     {
-        public GenericNode(string name)
+        internal static GenericNode Create(string name, Transform parent)
         {
-            gameObject = new GameObject(name);
-            transform = gameObject.transform;
+            GameObject gameObject = new(name);
 
-            calibration = new GameObject($"{name} Calibration").transform;
-            calibration.SetParent(transform, false);
+            Transform transform = gameObject.transform;
+            transform.SetParent(parent, false);
 
-            offset = new GameObject($"{name} Offset").transform;
-            offset.SetParent(calibration, false);
+            GenericNode genericNode = gameObject.AddComponent<GenericNode>();
+
+            genericNode.calibration = new GameObject("Calibration").transform;
+            genericNode.calibration.SetParent(transform, false);
+
+            genericNode.offset = new GameObject("Offset").transform;
+            genericNode.offset.SetParent(genericNode.calibration, false);
+
+            return genericNode;
         }
 
-        public GameObject gameObject { get; protected set; }
+        public Transform offset { get; private set; }
 
-        public Transform transform { get; protected set; }
-
-        public Transform offset { get; protected set; }
-
-        public Transform calibration { get; }
+        public Transform calibration { get; private set; }
 
         public bool isTracking { get; set; }
 
