@@ -1,4 +1,5 @@
-﻿//  Beat Saber Custom Avatars - Custom player models for body presence in Beat Saber.
+﻿extern alias BeatSaberFinalIK;
+//  Beat Saber Custom Avatars - Custom player models for body presence in Beat Saber.
 //  Copyright © 2018-2025  Nicolas Gnyra and Beat Saber Custom Avatars Contributors
 //
 //  This library is free software: you can redistribute it and/or
@@ -15,14 +16,17 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using UnityEngine;
+using UnityEngine.XR;
+using Zenject;
 
 namespace CustomAvatar.Tracking
 {
     internal class ControllerNode : MonoBehaviour, ITrackedNode
     {
-        internal static ControllerNode Create(string name, Transform parent)
+        internal static ControllerNode Create(DiContainer container, string name, Transform parent, XRNode node)
         {
             GameObject gameObject = new(name);
+            gameObject.SetActive(false);
 
             Transform transform = gameObject.transform;
             transform.SetParent(parent, false);
@@ -35,14 +39,29 @@ namespace CustomAvatar.Tracking
             controllerNode.offset = new GameObject("Offset").transform;
             controllerNode.offset.SetParent(controllerNode.viewTransform, false);
 
+            VRController vrController = container.InstantiateComponent<VRController>(gameObject);
+            vrController.enabled = false;
+            vrController._node = node;
+            vrController._viewAnchorTransform = controllerNode.viewTransform;
+            vrController._transformOffset = container.InstantiateComponent<VRControllersValueSettingsOffsets>(gameObject);
+
+            controllerNode.controller = vrController;
+
+            gameObject.SetActive(true);
+
             return controllerNode;
+        }
+
+        protected void Start()
+        {
+            controller.enabled = true;
         }
 
         public Transform offset { get; private set; }
 
         public Transform viewTransform { get; private set; }
 
-        public VRController controller { get; set; }
+        public VRController controller { get; private set; }
 
         public bool isTracking { get; set; }
 

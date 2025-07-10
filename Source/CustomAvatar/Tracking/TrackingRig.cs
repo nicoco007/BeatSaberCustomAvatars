@@ -185,8 +185,8 @@ namespace CustomAvatar.Tracking
             _scaleConstraint = gameObject.AddComponent<LossyScaleConstraint>();
 
             head = GenericNode.Create("Head", transform);
-            leftHand = ControllerNode.Create("Left Hand", transform);
-            rightHand = ControllerNode.Create("Right Hand", transform);
+            leftHand = ControllerNode.Create(_container, "Left Hand", transform, XRNode.LeftHand);
+            rightHand = ControllerNode.Create(_container, "Right Hand", transform, XRNode.RightHand);
 
             fullBodyTracking = new GameObject("Full Body Tracking").transform;
             fullBodyTracking.SetParent(transform, false);
@@ -243,12 +243,6 @@ namespace CustomAvatar.Tracking
 
         protected void Start()
         {
-            VRControllersValueSettingsOffsets localPlayerControllerOffset = _container.InstantiateComponent<VRControllersValueSettingsOffsets>(gameObject);
-
-            // UnityXRHelper sets things up in Start(), so we have to wait until then for VRController since it calls IVRPlatformHelper stuff in OnEnable().
-            SetUpVRController(leftHand, XRNode.LeftHand, localPlayerControllerOffset);
-            SetUpVRController(rightHand, XRNode.RightHand, localPlayerControllerOffset);
-
             if (_fpfcSettings != null)
             {
                 _fpfcSettings.Changed += OnFpfcSettingsChanged;
@@ -368,21 +362,6 @@ namespace CustomAvatar.Tracking
             {
                 _beatSaberUtilities.focusChanged -= OnFocusChanged;
             }
-        }
-
-        private VRController SetUpVRController(ControllerNode trackedNode, XRNode node, VRControllerTransformOffset transformOffset)
-        {
-            trackedNode.gameObject.SetActive(false);
-
-            VRController vrController = _container.InstantiateComponent<VRController>(trackedNode.gameObject);
-            vrController._node = node;
-            vrController._viewAnchorTransform = trackedNode.viewTransform;
-            vrController._transformOffset = transformOffset;
-
-            trackedNode.controller = vrController;
-            trackedNode.gameObject.SetActive(true);
-
-            return vrController;
         }
 
         private void OnAvatarChanged(SpawnedAvatar spawnedAvatar)
