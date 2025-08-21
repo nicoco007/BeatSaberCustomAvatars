@@ -14,8 +14,8 @@
     <Authors>Custom Avatars Contributors</Authors>
     <Copyright>Copyright © 2018-2025 Nicolas Gnyra and Beat Saber Custom Avatars Contributors</Copyright>
     <Description>Allows the use of custom player models for body presence.</Description>
-    <GameVersion>1.40.0</GameVersion>
-    <Version>5.4.11</Version>
+    <GameVersion>1.40.9</GameVersion>
+    <Version>5.4.12</Version>
     <RepositoryUrl>https://github.com/nicoco007/BeatSaberCustomAvatars</RepositoryUrl>
   </PropertyGroup>
 

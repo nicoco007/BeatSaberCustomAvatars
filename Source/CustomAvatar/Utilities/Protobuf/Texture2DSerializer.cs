@@ -100,7 +100,7 @@ namespace CustomAvatar.Utilities.Protobuf
             // TODO: this conversion should be done somewhere else (maybe during avatar load?)
             if (!value.isReadable || width > kMaxTextureSize || height > kMaxTextureSize)
             {
-                if (SystemInfo.IsFormatSupported(value.graphicsFormat, FormatUsage.ReadPixels) && width <= kMaxTextureSize && height <= kMaxTextureSize)
+                if (SystemInfo.IsFormatSupported(value.graphicsFormat, GraphicsFormatUsage.ReadPixels) && width <= kMaxTextureSize && height <= kMaxTextureSize)
                 {
                     textureBytes = FetchTextureDataSync(value);
                 }
@@ -110,7 +110,7 @@ namespace CustomAvatar.Utilities.Protobuf
                     width = Mathf.RoundToInt(value.width * scale);
                     height = Mathf.RoundToInt(value.height * scale);
                     mipmapCount = Math.Min(value.mipmapCount, (int)Math.Ceiling(Log2(Math.Max(width, height))) + 1);
-                    graphicsFormat = SystemInfo.GetCompatibleFormat(value.graphicsFormat, FormatUsage.Render);
+                    graphicsFormat = SystemInfo.GetCompatibleFormat(value.graphicsFormat, GraphicsFormatUsage.Render);
 
                     RenderTextureDescriptor renderTextureDescriptor = new(width, height)
                     {

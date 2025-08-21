@@ -32,7 +32,6 @@ namespace CustomAvatar.Player
         private static readonly Dictionary<MirrorRendererSO, MirrorRendererSO> kReplacedMirrorRenderers = new();
 
         private SaberBurnMarkSparkles[] _saberBurnMarkSparkles;
-        private SaberBurnMarkArea[] _saberBurnMarkAreas;
 
         private ILogger<EnvironmentObject> _logger;
         private float _originalY;
@@ -53,7 +52,6 @@ namespace CustomAvatar.Player
             }
 
             _saberBurnMarkSparkles = GetComponentsInChildren<SaberBurnMarkSparkles>();
-            _saberBurnMarkAreas = GetComponentsInChildren<SaberBurnMarkArea>();
         }
 
         [Inject]
@@ -92,11 +90,6 @@ namespace CustomAvatar.Player
             foreach (SaberBurnMarkSparkles saberBurnMarkSparkles in _saberBurnMarkSparkles)
             {
                 saberBurnMarkSparkles._plane = new Plane(saberBurnMarkSparkles.transform.up, saberBurnMarkSparkles.transform.position);
-            }
-
-            foreach (SaberBurnMarkArea saberBurnMarkArea in _saberBurnMarkAreas)
-            {
-                saberBurnMarkArea._plane = new Plane(saberBurnMarkArea.transform.up, saberBurnMarkArea.transform.position);
             }
         }
 
