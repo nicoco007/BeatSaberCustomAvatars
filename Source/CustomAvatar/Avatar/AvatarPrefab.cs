@@ -310,6 +310,12 @@ namespace CustomAvatar.Avatar
                 return;
             }
 
+            if (!tracker)
+            {
+                _logger.LogWarning($"Could not find tracker transform for {name} reference");
+                return;
+            }
+
             Vector3 offset = target.position - reference.position;
 
             // only warn if offset is larger than 1 mm
