@@ -22,7 +22,7 @@ namespace CustomAvatar.Rendering.Cameras
     [DisallowMultipleComponent]
     internal class MainCameraTracker : CameraTracker
     {
-        protected override void Start()
+        protected override void Awake()
         {
             VRCenterAdjust center = transform.GetComponentInParent<VRCenterAdjust>();
 
@@ -37,7 +37,7 @@ namespace CustomAvatar.Rendering.Cameras
                 playerSpace = origin = transform.parent;
             }
 
-            base.Start();
+            base.Awake();
         }
     }
 }
