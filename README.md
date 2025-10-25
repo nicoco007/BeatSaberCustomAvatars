@@ -12,10 +12,17 @@ Full-body tracking requires [OpenXR Tracker Profiles](https://github.com/nicoco0
 ### Creating your own avatar
 To get started, check out [the avatars guide on the BSMG wiki](https://bsmg.wiki/models/avatars-guide.html). If you have questions, join the [the BSMG Discord server](https://discord.gg/beatsabermods) and ask in the [#pc-3d-modeling](https://discord.com/channels/441805394323439646/468249466865057802) channel.
 
-## Contributing
+## Building Custom Avatars
+### GitHub Packages
+Modern editors will prompt you to enter a username and password for GitHub packages on first build. You can follow [GitHub's Authenticating to GitHub Packages](https://docs.github.com/en/packages/learn-github-packages/introduction-to-github-packages#authenticating-to-github-packages) instructions to generate a token you can use as the password in such a prompt. If you use `dotnet build`, you can set the username and password via CLI:
+```
+$ dotnet nuget update source "nicoco007 GitHub Packages" --username "your GitHub username or email" --password "your GitHub access token"
+```
+
+### Setting the path to your Beat Saber installation folder
 To resolve references and automatically copy the compiled DLL into Beat Saber's installation directory, first create files called `CustomAvatar.csproj.user` and `CustomAvatar-Editor.csproj.user` next to `Source\CustomAvatar\CustomAvatar.csproj` and `Source\CustomAvatar-Editor\CustomAvatar-Editor.csproj` respectively. Then paste in the following contents:
 
-### CustomAvatar.csproj.user
+#### CustomAvatar.csproj.user
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
@@ -26,7 +33,7 @@ To resolve references and automatically copy the compiled DLL into Beat Saber's 
 </Project>
 ```
 
-### CustomAvatar-Editor.csproj.user
+#### CustomAvatar-Editor.csproj.user
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
@@ -39,3 +46,5 @@ To resolve references and automatically copy the compiled DLL into Beat Saber's 
   </PropertyGroup>
 </Project>
 ```
+
+Note that if you have Beat Saber Modding Tools installed it should automatically set `BeatSaberDir` for you but will not set `UnityProjectDir` for the Editor project.
