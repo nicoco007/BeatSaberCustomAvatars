@@ -6,6 +6,7 @@
     <Reference Include="0Harmony" />
     <Reference Include="AssetBundleLoadingTools" />
     <Reference Include="BeatmapCore" />
+    <Reference Include="BeatSaber.Multiplayer.Core" />
     <Reference Include="BeatSaber.GameSettings" />
     <Reference Include="BeatSaber.Settings" />
     <Reference Include="BeatSaber.ViewSystem" />

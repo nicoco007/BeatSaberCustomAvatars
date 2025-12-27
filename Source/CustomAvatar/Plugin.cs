@@ -57,7 +57,7 @@ namespace CustomAvatar
 
             zenjector.Install<CustomAvatarsInstaller>(Location.App, ipaLogger, pluginMetadata);
             zenjector.Install<MainMenuInstaller>(Location.Menu);
-            zenjector.Install<HealthWarningInstaller, HealthWarningSceneSetup>();
+            zenjector.Install<HealthWarningInstaller>(Location.HealthWarning | Location.Credits);
             zenjector.Install<GameInstaller>(Location.Player);
         }
 
