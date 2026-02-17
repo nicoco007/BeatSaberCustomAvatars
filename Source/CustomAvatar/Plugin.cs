@@ -19,11 +19,12 @@ using CustomAvatar.Player;
 using CustomAvatar.Rendering;
 using CustomAvatar.Rendering.Cameras;
 using CustomAvatar.Zenject;
-using CustomAvatar.Zenject.Internal;
 using HarmonyLib;
 using IPA;
 using IPA.Loader;
 using SiraUtil.Zenject;
+using UnityEngine;
+using Zenject;
 using Logger = IPA.Logging.Logger;
 
 namespace CustomAvatar
@@ -41,19 +42,20 @@ namespace CustomAvatar
 
             logger.LogInformation("Initializing Custom Avatars");
 
-            ZenjectHelper.Init(ipaLogger);
-
-            ZenjectHelper.AddComponentAlongsideExisting<MainCamera, MainCameraTracker>();
-            ZenjectHelper.AddComponentAlongsideExisting<SmoothCamera, Rendering.Cameras.SmoothCamera>();
-            ZenjectHelper.AddComponentAlongsideExisting<MenuEnvironmentManager, EnvironmentObject>();
-            ZenjectHelper.AddComponentAlongsideExisting<MultiplayerLocalActivePlayerFacade, EnvironmentObject>("IsActiveObjects/Lasers");
-            ZenjectHelper.AddComponentAlongsideExisting<MultiplayerLocalActivePlayerFacade, EnvironmentObject>("IsActiveObjects/Construction");
-            ZenjectHelper.AddComponentAlongsideExisting<MultiplayerLocalActivePlayerFacade, EnvironmentObject>("IsActiveObjects/CenterRings");
-            ZenjectHelper.AddComponentAlongsideExisting<MultiplayerLocalInactivePlayerFacade, EnvironmentObject>("MultiplayerLocalInactivePlayerPlayerPlace/CirclePlayerPlace");
-            ZenjectHelper.AddComponentAlongsideExisting<MultiplayerConnectedPlayerFacade, EnvironmentObject>();
-            ZenjectHelper.AddComponentAlongsideExisting<VRController, VRControllerVisuals>();
-
-            zenjector.Expose<ObstacleSaberSparkleEffectManager>("Gameplay");
+            zenjector.Mutate<MainCamera, MainCameraTracker>();
+            zenjector.Mutate<SmoothCamera, Rendering.Cameras.SmoothCamera>();
+            zenjector.Mutate<MenuEnvironmentManager, EnvironmentObject>();
+            zenjector.Mutate<MultiplayerLocalActivePlayerFacade>((ctx, inst) =>
+            {
+                Transform transform = inst.transform.Find("IsActiveObjects");
+                DiContainer container = ctx.Container;
+                container.QueueForInject(transform.Find("Lasers").gameObject.AddComponent<EnvironmentObject>());
+                container.QueueForInject(transform.Find("Construction").gameObject.AddComponent<EnvironmentObject>());
+                container.QueueForInject(transform.Find("CenterRings").gameObject.AddComponent<EnvironmentObject>());
+            });
+            zenjector.Mutate<MultiplayerLocalInactivePlayerFacade, EnvironmentObject>(gameObjectGetter: (ctx, m) => m.transform.Find("MultiplayerLocalInactivePlayerPlayerPlace/CirclePlayerPlace").gameObject);
+            zenjector.Mutate<MultiplayerConnectedPlayerFacade, EnvironmentObject>();
+            zenjector.Mutate<VRController, VRControllerVisuals>();
 
             zenjector.Install<CustomAvatarsInstaller>(Location.App, ipaLogger, pluginMetadata);
             zenjector.Install<MainMenuInstaller>(Location.Menu);
