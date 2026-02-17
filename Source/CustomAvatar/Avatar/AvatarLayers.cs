@@ -27,6 +27,6 @@ namespace CustomAvatar.Avatar
         public static readonly int kOnlyInThirdPersonMask = 1 << kOnlyInThirdPerson;
         public static readonly int kMirrorMask = 1 << kMirror;
         public static readonly int kNonMirrorMask = kAlwaysVisibleMask | kOnlyInThirdPersonMask;
-        public static readonly int kAllLayersMask = kAlwaysVisibleMask | kOnlyInThirdPersonMask | kMirror;
+        public static readonly int kAllLayersMask = kAlwaysVisibleMask | kOnlyInThirdPersonMask | kMirrorMask;
     }
 }
