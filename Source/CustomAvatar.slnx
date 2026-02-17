@@ -1,0 +1,17 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+  </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path="../NuGet.config" />
+    <File Path="../README.md" />
+    <File Path=".editorconfig" />
+    <File Path="Common.props" />
+  </Folder>
+  <Project Path="CustomAvatar-Editor/CustomAvatar-Editor.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="CustomAvatar/CustomAvatar.csproj">
+    <Platform Project="x64" />
+  </Project>
+</Solution>
