@@ -14,7 +14,7 @@ jobs:
     runs-on: windows-latest
     steps:
     - name: Check out
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Set up Beat Saber
       uses: nicoco007/setup-beat-saber@v1
@@ -32,7 +32,7 @@ jobs:
       run: dotnet build ${{ github.workspace }}\Source\CustomAvatar\CustomAvatar.csproj -c Release
 
     - name: Upload Release
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: ${{ steps.build-release.outputs.artifact-name }}
         path: ${{ steps.build-release.outputs.artifact-path }}
@@ -42,13 +42,13 @@ jobs:
       run: dotnet build ${{ github.workspace }}\Source\CustomAvatar-Editor\CustomAvatar-Editor.csproj -c Release
 
     - name: Upload Editor
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: ${{ steps.build-editor.outputs.artifact-name }}
         path: ${{ steps.build-editor.outputs.artifact-path }}
     
     - name: Upload Unity Project
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: ${{ steps.build-editor.outputs.unity-project-name }}
         path: ${{ github.workspace }}\Unity\BeatSaberCustomAvatars
