@@ -59,33 +59,40 @@ namespace CustomAvatar.Editor
                 alignment = TextAnchor.UpperRight
             };
 
-            foreach (AvatarDescriptor avatar in _avatars)
+            if (_avatars.Length == 0)
             {
-                if (!avatar || !avatar.gameObject) continue;
-
-                GUILayout.BeginHorizontal();
-                GUILayout.BeginVertical();
-
-                GUILayout.Label(avatar.name, titleLabelStyle);
-
-                GUILayout.Label("Properties", EditorStyles.largeLabel);
-
-                EditorGUILayout.LabelField("Game Object: ", avatar.gameObject.name);
-                EditorGUILayout.LabelField("Author: ", avatar.author);
-
-                GUILayout.EndVertical();
-
-                Texture2D texture = AssetPreview.GetAssetPreview(avatar.cover);
-                GUILayout.Label(texture, textureStyle, GUILayout.MaxWidth(80), GUILayout.MaxHeight(80));
-
-                GUILayout.EndHorizontal();
-
-                if (GUILayout.Button("Export " + avatar.name))
+                EditorGUILayout.HelpBox("No AvatarDescriptors found in current scene. Add one to an avatar GameObject to get started.", MessageType.Info);
+            }
+            else
+            {
+                foreach (AvatarDescriptor avatar in _avatars)
                 {
-                    SaveAvatar(avatar);
-                }
+                    if (!avatar || !avatar.gameObject) continue;
 
-                GUILayout.Space(20);
+                    GUILayout.BeginHorizontal();
+                    GUILayout.BeginVertical();
+
+                    GUILayout.Label(avatar.name, titleLabelStyle);
+
+                    GUILayout.Label("Properties", EditorStyles.largeLabel);
+
+                    EditorGUILayout.LabelField("Game Object: ", avatar.gameObject.name);
+                    EditorGUILayout.LabelField("Author: ", avatar.author);
+
+                    GUILayout.EndVertical();
+
+                    Texture2D texture = AssetPreview.GetAssetPreview(avatar.cover);
+                    GUILayout.Label(texture, textureStyle, GUILayout.MaxWidth(80), GUILayout.MaxHeight(80));
+
+                    GUILayout.EndHorizontal();
+
+                    if (GUILayout.Button("Export " + avatar.name))
+                    {
+                        SaveAvatar(avatar);
+                    }
+
+                    GUILayout.Space(20);
+                }
             }
         }
 
