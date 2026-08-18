@@ -14,7 +14,6 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Player;
 using HMUI;
@@ -23,79 +22,55 @@ using Zenject;
 
 namespace CustomAvatar.Rendering
 {
-    internal class RealMirrorProvider : IMirrorProvider
+    internal class RealMirrorProvider : MonoBehaviour
     {
         private StereoMirrorRenderer _mirror;
-        private GameObject _mirrorGameObject;
 
-        private readonly DiContainer _container;
-        private readonly SettingsManager _settingsManager;
-        private readonly MirrorHelper _mirrorHelper;
-        private readonly HierarchyManager _hierarchyManager;
-        private readonly Settings _settings;
+        private IInstantiator _instantiator;
+        private SettingsManager _settingsManager;
+        private MirrorHelper _mirrorHelper;
+        private HierarchyManager _hierarchyManager;
+        private Settings _settings;
 
-        internal RealMirrorProvider(DiContainer container, MirrorHelper mirrorHelper, Settings settings, SettingsManager settingsManager, HierarchyManager hierarchyManager)
+        [Inject]
+        protected void Construct(IInstantiator instantiator, MirrorHelper mirrorHelper, Settings settings, SettingsManager settingsManager, HierarchyManager hierarchyManager)
         {
-            _container = container;
+            _instantiator = instantiator;
             _mirrorHelper = mirrorHelper;
             _settings = settings;
             _settingsManager = settingsManager;
             _hierarchyManager = hierarchyManager;
         }
 
-        public void Initialize()
+        protected void Awake()
         {
             Vector2 mirrorSize = new(4, 2);
-            _mirror = _mirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, _hierarchyManager.GetComponent<ScreenSystem>().topScreen.transform.position.z), Quaternion.Euler(-90f, 0, 0), mirrorSize, null);
+            _mirror = _mirrorHelper.CreateMirror(new Vector3(0, mirrorSize.y / 2, _hierarchyManager.GetComponent<ScreenSystem>().topScreen.transform.position.z), Quaternion.Euler(-90f, 0, 0), mirrorSize, transform);
 
             if (_mirror == null)
             {
                 return;
             }
 
-            _mirrorGameObject = _mirror.gameObject;
-            _mirrorGameObject.SetActive(false);
-            _container.InstantiateComponent<AutoResizeMirror>(_mirrorGameObject);
+            _instantiator.InstantiateComponent<AutoResizeMirror>(_mirror.gameObject);
         }
 
-        public void Destroy()
-        {
-            Object.Destroy(_mirrorGameObject);
-        }
-
-        public void Enable()
+        protected void OnEnable()
         {
             _settings.mirror.renderScale.changed += OnMirrorRenderScaleChanged;
             _settings.mirror.antiAliasingLevel.changed += OnMirrorAntiAliasingLevelChanged;
 
-            OnMirrorRenderScaleChanged(_settings.mirror.renderScale);
-
-            _mirrorGameObject.SetActive(true);
+            UpdateMirrorRenderSettings(_settings.mirror.renderScale, _settings.mirror.antiAliasingLevel);
         }
 
-        public void Disable()
+        protected void OnDisable()
         {
             _settings.mirror.renderScale.changed -= OnMirrorRenderScaleChanged;
             _settings.mirror.antiAliasingLevel.changed -= OnMirrorAntiAliasingLevelChanged;
-
-            _mirrorGameObject.SetActive(false);
-        }
-
-        public void ShowAvatar(SpawnedAvatar avatar)
-        {
-        }
-
-        public void HideAvatar()
-        {
         }
 
         private void UpdateMirrorRenderSettings(float scale, int antiAliasingLevel)
         {
-            if (_mirror == null)
-            {
-                return;
-            }
-
             _mirror.renderScale = scale * _settingsManager.settings.quality.vrResolutionScale;
             _mirror.antiAliasing = antiAliasingLevel;
         }

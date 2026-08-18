@@ -34,7 +34,7 @@ namespace CustomAvatar.UI
 {
     [ViewDefinition("CustomAvatar.UI.Views.Mirror.bsml")]
     [HotReload(RelativePathToLayout = "Views/Mirror.bsml")]
-    internal class MirrorViewController : BSMLAutomaticViewController
+    internal class MirrorViewController : BSMLAutomaticViewController, IProgress<float>
     {
         private Settings _settings;
         private PlayerAvatarManager _avatarManager;
@@ -49,9 +49,10 @@ namespace CustomAvatar.UI
         private TextMeshProUGUI _progressTitle;
         private TextMeshProUGUI _progressText;
 
-        private IMirrorProvider _currentMirrorProvider;
-        private FakeMirrorProvider _fakeMirrorProvider;
-        private RealMirrorProvider _realMirrorProvider;
+        private IInstantiator _instantiator;
+
+        private GameObject _fakeMirror;
+        private GameObject _realMirror;
 
         protected bool isLoaderActive
         {
@@ -88,24 +89,20 @@ namespace CustomAvatar.UI
         [Inject]
         [UsedImplicitly]
         private void Construct(
-            DiContainer container,
-            MirrorHelper mirrorHelper,
+            IInstantiator instantiator,
             Settings settings,
-            SettingsManager settingsManager,
             PlayerAvatarManager avatarManager,
-            HierarchyManager hierarchyManager,
             PlatformLeaderboardViewController platformLeaderboardViewController,
             TrackingRig trackingRig)
         {
+            _instantiator = instantiator;
             _settings = settings;
             _avatarManager = avatarManager;
             _platformLeaderboardViewController = platformLeaderboardViewController;
             _trackingRig = trackingRig;
-            _fakeMirrorProvider = new FakeMirrorProvider();
-            _realMirrorProvider = new RealMirrorProvider(container, mirrorHelper, settings, settingsManager, hierarchyManager);
         }
 
-        internal void UpdateProgress(float progress)
+        public void Report(float progress)
         {
             _progressBar.fillAmount = progress;
             _progressText.text = $"{progress * 100:0}%";
@@ -123,13 +120,16 @@ namespace CustomAvatar.UI
 
             _trackingRig.activeCalibrationModeChanged += OnActiveCalibrationModeChanged;
 
-            if (addedToHierarchy)
-            {
-                _realMirrorProvider.Initialize();
-            }
-
             if (firstActivation)
             {
+                _fakeMirror = new("FakeMirror");
+                _fakeMirror.SetActive(false);
+                _instantiator.InstantiateComponent<FakeMirrorProvider>(_fakeMirror);
+
+                _realMirror = new("RealMirror");
+                _realMirror.SetActive(false);
+                _instantiator.InstantiateComponent<RealMirrorProvider>(_realMirror);
+
                 CreateProgressBar();
             }
 
@@ -141,13 +141,8 @@ namespace CustomAvatar.UI
         {
             base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
 
-            _currentMirrorProvider?.HideAvatar();
-            _currentMirrorProvider?.Disable();
-
-            if (removedFromHierarchy)
-            {
-                _realMirrorProvider.Destroy();
-            }
+            _fakeMirror.SetActive(false);
+            _realMirror.SetActive(false);
 
             _avatarManager.avatarLoading -= OnAvatarLoading;
             _avatarManager.avatarChanged -= OnAvatarChanged;
@@ -158,10 +153,18 @@ namespace CustomAvatar.UI
             _trackingRig.activeCalibrationModeChanged += OnActiveCalibrationModeChanged;
         }
 
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            Destroy(_fakeMirror);
+            Destroy(_realMirror);
+        }
+
         private void CreateProgressBar()
         {
             RectTransform containerTransform = (RectTransform)Instantiate(_platformLeaderboardViewController.transform.Find("Container/LeaderboardTableView/LoadingControl/DownloadingContainer"));
-            containerTransform.SetParent(gameObject.transform, false);
+            containerTransform.SetParent(transform, false);
             containerTransform.name = "ProgressContainer";
             containerTransform.anchorMin = new Vector2(0.3f, 0.5f);
             containerTransform.anchorMax = new Vector2(0.7f, 0.5f);
@@ -205,13 +208,11 @@ namespace CustomAvatar.UI
         {
             _progressTitle.text = $"Loading {name}";
             SetLoading(true);
-            _currentMirrorProvider.HideAvatar();
         }
 
         private void OnAvatarChanged(SpawnedAvatar avatar)
         {
             SetLoading(false);
-            _currentMirrorProvider.ShowAvatar(avatar);
         }
 
         private void OnAvatarLoadFailed(Exception exception)
@@ -223,13 +224,8 @@ namespace CustomAvatar.UI
 
         private void OnUseFakeMirrorChanged(bool value)
         {
-            _currentMirrorProvider?.HideAvatar();
-            _currentMirrorProvider?.Disable();
-
-            _currentMirrorProvider = value ? _fakeMirrorProvider : _realMirrorProvider;
-
-            _currentMirrorProvider.Enable();
-            _currentMirrorProvider.ShowAvatar(_avatarManager.currentlySpawnedAvatar);
+            _fakeMirror.SetActive(value);
+            _realMirror.SetActive(!value);
         }
 
         private void OnActiveCalibrationModeChanged(CalibrationMode calibrationMode)

@@ -18,66 +18,101 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using CustomAvatar.Avatar;
+using CustomAvatar.Player;
 using CustomAvatar.Utilities;
 using UnityEngine;
-using Object = UnityEngine.Object;
+using Zenject;
 
 namespace CustomAvatar.Rendering
 {
-    internal class FakeMirrorProvider : IMirrorProvider
+    internal class FakeMirrorProvider : MonoBehaviour
     {
         private static readonly Dictionary<Type, Type[]> kRequireComponentCache = [];
 
-        private GameObject _mirroredAvatarContainer;
+        private PlayerAvatarManager _playerAvatarManager;
 
-        public void ShowAvatar(SpawnedAvatar avatar)
+        private GameObject _mirroredAvatar;
+        private FakeMirror _fakeMirror;
+
+        [Inject]
+        protected void Construct(PlayerAvatarManager playerAvatarManager)
         {
-            HideAvatar();
+            _playerAvatarManager = playerAvatarManager;
+        }
 
+        protected void Awake()
+        {
+            // mirrored at the line where the player platform usually ends (i.e. 0.75 m in front of the player)
+            Transform mirroredAvatarContainerTransform = transform;
+            mirroredAvatarContainerTransform.SetPositionAndRotation(new Vector3(0, 0, 0.75f), Quaternion.identity);
+            mirroredAvatarContainerTransform.localScale = new Vector3(1, 1, -1f); // mirrored across XY plane
+
+            _fakeMirror = gameObject.AddComponent<FakeMirror>();
+            _fakeMirror.enabled = false;
+        }
+
+        protected void OnEnable()
+        {
+            _playerAvatarManager.avatarLoading += OnAvatarLoading;
+            _playerAvatarManager.avatarChanged += OnAvatarChanged;
+
+            DestroyAvatar();
+            CreateAvatar(_playerAvatarManager.currentlySpawnedAvatar);
+        }
+
+        protected void OnDisable()
+        {
+            _playerAvatarManager.avatarLoading -= OnAvatarLoading;
+            _playerAvatarManager.avatarChanged -= OnAvatarChanged;
+        }
+
+        private void OnAvatarLoading(string fullPath, string name)
+        {
+            DestroyAvatar();
+        }
+
+        private void OnAvatarChanged(SpawnedAvatar avatar)
+        {
+            CreateAvatar(avatar);
+        }
+
+        private void CreateAvatar(SpawnedAvatar avatar)
+        {
             if (avatar == null)
             {
                 return;
             }
 
-            _mirroredAvatarContainer = new GameObject("MirroredAvatarContainer");
-            _mirroredAvatarContainer.SetActive(false);
-
-            // mirrored at the line where the player platform usually ends (i.e. mirror plane is 0.75 m in front of the player)
-            Transform mirroredAvatarTransform = _mirroredAvatarContainer.transform;
-            mirroredAvatarTransform.SetPositionAndRotation(new Vector3(0, 0, 1.5f), Quaternion.identity);
-
-            GameObject mirroredAvatar = Object.Instantiate(avatar.gameObject, mirroredAvatarTransform);
+            _mirroredAvatar = new GameObject("MirroredAvatar");
+            _mirroredAvatar.SetActive(false);
+            Transform mirroredAvatarTransform = _mirroredAvatar.transform;
+            mirroredAvatarTransform.SetParent(transform);
+            GameObject mirroredAvatar = Instantiate(avatar.gameObject, mirroredAvatarTransform);
 
             foreach (GameObject gameObject in mirroredAvatar.GetComponentsInChildren<Transform>().Select(t => t.gameObject))
             {
                 SafeDestroyImmediate(gameObject);
             }
 
-            FakeMirror fakeMirror = _mirroredAvatarContainer.AddComponent<FakeMirror>();
-            fakeMirror.root = avatar.transform.parent;
-            fakeMirror.from = [.. Traverse(avatar.transform)];
-            fakeMirror.to = [.. Traverse(mirroredAvatar.transform)];
+            _fakeMirror.fromRoot = avatar.transform.parent;
+            _fakeMirror.toRoot = mirroredAvatarTransform;
+            _fakeMirror.from = [.. Traverse(avatar.transform)];
+            _fakeMirror.to = [.. Traverse(mirroredAvatar.transform)];
+            _fakeMirror.enabled = true;
 
-            foreach (Transform transform in fakeMirror.to)
+            foreach (Transform transform in _fakeMirror.to)
             {
                 transform.gameObject.layer = AvatarLayers.kMirror;
             }
 
-            _mirroredAvatarContainer.SetActive(true);
             mirroredAvatar.SetActive(true);
+            _mirroredAvatar.SetActive(true);
         }
 
-        public void HideAvatar()
+        private void DestroyAvatar()
         {
-            Object.Destroy(_mirroredAvatarContainer);
-        }
-
-        public void Enable()
-        {
-        }
-
-        public void Disable()
-        {
+            _fakeMirror.enabled = false;
+            Destroy(_mirroredAvatar);
         }
 
         private void SafeDestroyImmediate(GameObject gameObject)
@@ -102,7 +137,7 @@ namespace CustomAvatar.Rendering
 
             foreach (MonoBehaviour monoBehaviour in monoBehaviours)
             {
-                Object.DestroyImmediate(monoBehaviour);
+                DestroyImmediate(monoBehaviour);
             }
         }
 
@@ -166,7 +201,8 @@ namespace CustomAvatar.Rendering
         // TODO: blend shapes and possibly other things
         private class FakeMirror : MonoBehaviour
         {
-            public Transform root;
+            public Transform fromRoot;
+            public Transform toRoot;
             public Transform[] from;
             public Transform[] to;
 
@@ -182,8 +218,11 @@ namespace CustomAvatar.Rendering
 
             private void OnBeforeRender()
             {
-                Vector3 scale = root.lossyScale;
-                transform.localScale = new Vector3(scale.x, scale.y, -scale.z); // mirrored across XY plane
+                transform.GetPositionAndRotation(out Vector3 containerPosition, out Quaternion containerRotation);
+                Quaternion inverseContainerRotation = Quaternion.Inverse(containerRotation);
+                fromRoot.GetPositionAndRotation(out Vector3 position, out Quaternion rotation);
+                toRoot.SetLocalPositionAndRotation(inverseContainerRotation * (position - containerPosition), inverseContainerRotation * rotation);
+                toRoot.localScale = fromRoot.lossyScale;
 
                 foreach ((Transform from, Transform to) in from.Zip(to))
                 {
