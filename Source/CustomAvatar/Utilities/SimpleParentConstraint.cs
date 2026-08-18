@@ -23,13 +23,22 @@ namespace CustomAvatar.Utilities
     /// <see cref="ScaleConstraint"/> tends to be slightly off from the source transform scale when its components aren't integers.
     /// We don't expect the player space to be scaled/skewed non-uniformly so using <see cref="Transform.lossyScale"/> instead is good enough.
     /// </summary>
-    internal class LossyScaleConstraint : MonoBehaviour
+    internal class SimpleParentConstraint : MonoBehaviour
     {
+        public Vector3 translationOffset
+        {
+            get => _translationOffset;
+            set => _translationOffset = value;
+        }
+
         public float scaleOffset
         {
             get => _scaleOffset;
             set => _scaleOffset = value;
         }
+
+        [SerializeField]
+        private Vector3 _translationOffset = Vector3.zero;
 
         [SerializeField]
         private float _scaleOffset = 1;
@@ -56,8 +65,10 @@ namespace CustomAvatar.Utilities
             }
         }
 
-        protected void Update()
+        protected void LateUpdate()
         {
+            sourceTransform.GetPositionAndRotation(out Vector3 position, out Quaternion rotation);
+            transform.SetPositionAndRotation(position + _translationOffset, rotation);
             transform.localScale = sourceTransform.lossyScale * _scaleOffset;
         }
     }

@@ -17,7 +17,6 @@
 extern alias BeatSaberFinalIK;
 
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
@@ -29,7 +28,6 @@ using CustomAvatar.Utilities;
 using JetBrains.Annotations;
 using SiraUtil.Tools.FPFC;
 using UnityEngine;
-using UnityEngine.Animations;
 using UnityEngine.XR;
 using VRUIControls;
 using Zenject;
@@ -40,8 +38,6 @@ namespace CustomAvatar.Tracking
     internal class TrackingRig : MonoBehaviour
     {
         private const float kMinPressValue = VRInputModule.kMinPressValue;
-
-        private static readonly List<ConstraintSource> kEmptyConstraintSources = new(0);
 
         private ILogger<TrackingRig> _logger;
         private DiContainer _container;
@@ -56,8 +52,7 @@ namespace CustomAvatar.Tracking
         private IFPFCSettings _fpfcSettings;
         private HumanoidCalibrator _humanoidCalibrator;
 
-        private ParentConstraint _parentConstraint;
-        private LossyScaleConstraint _scaleConstraint;
+        private SimpleParentConstraint _parentConstraint;
         private CalibrationMode _activeCalibrationMode;
 
         private bool _showRenderModels;
@@ -178,11 +173,7 @@ namespace CustomAvatar.Tracking
 
         protected void Awake()
         {
-            _parentConstraint = gameObject.AddComponent<ParentConstraint>();
-            _parentConstraint.weight = 1;
-            _parentConstraint.constraintActive = true;
-
-            _scaleConstraint = gameObject.AddComponent<LossyScaleConstraint>();
+            _parentConstraint = gameObject.AddComponent<SimpleParentConstraint>();
 
             head = GenericNode.Create("Head", transform);
             leftHand = ControllerNode.Create(_container, "Left Hand", transform, XRNode.LeftHand);
@@ -512,13 +503,11 @@ namespace CustomAvatar.Tracking
 
             if (activeCamera != null && activeCamera.playerSpace != null)
             {
-                _parentConstraint.SetSources([new ConstraintSource { sourceTransform = activeCamera.playerSpace, weight = 1 }]);
-                _scaleConstraint.sourceTransform = activeCamera.playerSpace;
+                _parentConstraint.sourceTransform = activeCamera.playerSpace;
             }
             else
             {
-                _parentConstraint.SetSources(kEmptyConstraintSources);
-                _scaleConstraint.sourceTransform = null;
+                _parentConstraint.sourceTransform = null;
             }
         }
 

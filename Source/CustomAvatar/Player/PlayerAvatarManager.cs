@@ -30,7 +30,6 @@ using CustomAvatar.Utilities;
 using IPA.Utilities;
 using JetBrains.Annotations;
 using UnityEngine;
-using UnityEngine.Animations;
 using Zenject;
 
 namespace CustomAvatar.Player
@@ -42,8 +41,6 @@ namespace CustomAvatar.Player
     public class PlayerAvatarManager : MonoBehaviour
     {
         public static readonly string kCustomAvatarsPath = Path.Join(UnityGame.InstallPath, "CustomAvatars");
-
-        private static readonly List<ConstraintSource> kEmptyConstraintSources = new(0);
 
         /// <summary>
         /// Delegate for <see cref="avatarLoading"/>.
@@ -63,8 +60,8 @@ namespace CustomAvatar.Player
 
         public float scale
         {
-            get => _scaleConstraint.scaleOffset;
-            private set => _scaleConstraint.scaleOffset = value;
+            get => _parentConstraint.scaleOffset;
+            private set => _parentConstraint.scaleOffset = value;
         }
 
         /// <summary>
@@ -116,8 +113,7 @@ namespace CustomAvatar.Player
         private BeatSaberUtilities _beatSaberUtilities;
         private ActiveCameraManager _activeCameraManager;
 
-        private ParentConstraint _parentConstraint;
-        private LossyScaleConstraint _scaleConstraint;
+        private SimpleParentConstraint _parentConstraint;
 
         private GameObject _containerObject;
         private Transform _containerTransform;
@@ -140,11 +136,7 @@ namespace CustomAvatar.Player
 
         protected void Awake()
         {
-            _parentConstraint = gameObject.AddComponent<ParentConstraint>();
-            _parentConstraint.weight = 1;
-            _parentConstraint.constraintActive = true;
-
-            _scaleConstraint = gameObject.AddComponent<LossyScaleConstraint>();
+            _parentConstraint = gameObject.AddComponent<SimpleParentConstraint>();
 
             _containerObject = new GameObject("Container");
             _containerTransform = _containerObject.transform;
@@ -464,14 +456,12 @@ namespace CustomAvatar.Player
 
             if (_activeCameraManager.current != null)
             {
-                _parentConstraint.SetSources([new ConstraintSource { sourceTransform = _activeCameraManager.current.origin, weight = 1 }]);
-                _scaleConstraint.sourceTransform = _activeCameraManager.current.origin;
+                _parentConstraint.sourceTransform = _activeCameraManager.current.origin;
                 _containerObject.SetActive(true);
             }
             else
             {
-                _parentConstraint.SetSources(kEmptyConstraintSources);
-                _scaleConstraint.sourceTransform = null;
+                _parentConstraint.sourceTransform = null;
                 _containerObject.SetActive(false);
             }
 
@@ -611,10 +601,7 @@ namespace CustomAvatar.Player
 
         private void UpdateAvatarVerticalPosition(float eyeHeight)
         {
-            if (_parentConstraint.sourceCount > 0)
-            {
-                _parentConstraint.SetTranslationOffset(0, new Vector3(0, GetFloorOffset(eyeHeight), 0));
-            }
+            _parentConstraint.translationOffset = new Vector3(0, GetFloorOffset(eyeHeight), 0);
         }
     }
 }
