@@ -55,7 +55,6 @@ namespace CustomAvatar.UI
 
         private GameObject _container;
         private GameObject _floatingScreen;
-        private GameObject _currentMirror;
         private GameObject _fakeMirror;
         private GameObject _realMirror;
 
@@ -303,16 +302,10 @@ namespace CustomAvatar.UI
 
         private void OnUseFakeMirrorChanged(bool value)
         {
-            if (_currentMirror != null)
-            {
-                _currentMirror.SetActive(false);
-            }
-
-            _currentMirror = value ? _fakeMirror : _realMirror;
-
-            _currentMirror.SetActive(true);
-
+            _fakeMirror.SetActive(value);
             _floatingScreen.SetActive(value);
+
+            _realMirror.SetActive(!value);
             _container.SetActive(!value);
         }
 

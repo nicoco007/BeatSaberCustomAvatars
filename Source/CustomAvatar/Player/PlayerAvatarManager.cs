@@ -141,6 +141,8 @@ namespace CustomAvatar.Player
             _containerObject = new GameObject("Container");
             _containerTransform = _containerObject.transform;
             _containerTransform.SetParent(transform, false);
+
+            _container.InstantiateComponent<HeadFollower>(_containerObject);
         }
 
         protected void OnEnable()

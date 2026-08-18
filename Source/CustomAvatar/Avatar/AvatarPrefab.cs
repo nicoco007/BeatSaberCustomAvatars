@@ -93,6 +93,8 @@ namespace CustomAvatar.Avatar
 
         internal Vector3 pelvisRootOffset { get; private set; }
 
+        internal Pose headToRoot { get; set; }
+
         private ILogger<AvatarPrefab> _logger;
 
         [Inject]
@@ -193,6 +195,15 @@ namespace CustomAvatar.Avatar
 
                 pelvisRootForward = Quaternion.Inverse(vrikManager.references_pelvis.rotation) * vrikManager.references_root.forward;
                 pelvisRootOffset = vrikManager.references_root.InverseTransformPoint(vrikManager.references_pelvis.position);
+            }
+
+            if (vrikManager != null && vrikManager.references_head != null)
+            {
+                headToRoot = new Pose(-(vrikManager.references_head.position - headOffset.position), Quaternion.Inverse(vrikManager.references_head.rotation * Quaternion.Inverse(headOffset.rotation)));
+            }
+            else if (head != null)
+            {
+                headToRoot = new Pose(-head.position, Quaternion.Inverse(head.rotation));
             }
         }
 
