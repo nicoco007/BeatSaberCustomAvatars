@@ -228,7 +228,7 @@ namespace CustomAvatar.Avatar
 
         private Pose GetCalibrationOffset(Transform target, Pose targetLocalPose, params Transform[] references)
         {
-            target.SetPositionAndRotation(targetLocalPose.position, targetLocalPose.rotation);
+            target.SetPose(targetLocalPose);
             return GetOffset(target, references);
         }
 

@@ -236,8 +236,7 @@ namespace CustomAvatar.Avatar
                 return Pose.identity;
             }
 
-            parent.GetPositionAndRotation(out Vector3 position, out Quaternion rotation);
-            return new Pose(position, rotation);
+            return parent.GetPose();
         }
 
         private void UpdateLocomotion()

@@ -187,8 +187,7 @@ namespace CustomAvatar.Rendering
 
                 foreach ((Transform from, Transform to) in from.Zip(to))
                 {
-                    from.GetLocalPositionAndRotation(out Vector3 position, out Quaternion rotation);
-                    to.SetLocalPositionAndRotation(position, rotation);
+                    to.SetLocalPose(from.GetLocalPose());
                     to.localScale = from.localScale;
                 }
             }

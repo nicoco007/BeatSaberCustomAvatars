@@ -124,18 +124,18 @@ namespace CustomAvatar.Tracking
 
         internal void ReadCalibrationTransforms(CalibrationData.FullBodyCalibration calibration)
         {
-            _trackingRig.head.calibration.SetLocalPositionAndRotation(calibration.head.position, calibration.head.rotation);
-            _trackingRig.pelvis.calibration.SetLocalPositionAndRotation(calibration.waist.position, calibration.waist.rotation);
-            _trackingRig.leftFoot.calibration.SetLocalPositionAndRotation(calibration.leftFoot.position, calibration.leftFoot.rotation);
-            _trackingRig.rightFoot.calibration.SetLocalPositionAndRotation(calibration.rightFoot.position, calibration.rightFoot.rotation);
+            _trackingRig.head.calibration.SetLocalPose(calibration.head);
+            _trackingRig.pelvis.calibration.SetLocalPose(calibration.waist);
+            _trackingRig.leftFoot.calibration.SetLocalPose(calibration.leftFoot);
+            _trackingRig.rightFoot.calibration.SetLocalPose(calibration.rightFoot);
         }
 
         private void WriteCalibrationTransforms(CalibrationData.FullBodyCalibration calibration)
         {
-            calibration.head = new Pose(_trackingRig.head.calibration.localPosition, _trackingRig.head.calibration.localRotation);
-            calibration.waist = new Pose(_trackingRig.pelvis.calibration.localPosition, _trackingRig.pelvis.calibration.localRotation);
-            calibration.leftFoot = new Pose(_trackingRig.leftFoot.calibration.localPosition, _trackingRig.leftFoot.calibration.localRotation);
-            calibration.rightFoot = new Pose(_trackingRig.rightFoot.calibration.localPosition, _trackingRig.rightFoot.calibration.localRotation);
+            calibration.head = _trackingRig.head.calibration.GetLocalPose();
+            calibration.waist = _trackingRig.pelvis.calibration.GetLocalPose();
+            calibration.leftFoot = _trackingRig.leftFoot.calibration.GetLocalPose();
+            calibration.rightFoot = _trackingRig.rightFoot.calibration.GetLocalPose();
         }
 
         private void WriteIdentity(CalibrationData.FullBodyCalibration calibration)

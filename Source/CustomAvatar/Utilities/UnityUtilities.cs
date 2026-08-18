@@ -27,6 +27,26 @@ namespace CustomAvatar.Utilities
         internal static T FirstNonNullUnityObject<T>(params T[] objects) where T : Object => objects.FirstOrDefault(o => o != null);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static Pose GetPose(this Transform transform)
+        {
+            transform.GetPositionAndRotation(out Vector3 position, out Quaternion rotation);
+            return new Pose(position, rotation);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static Pose GetLocalPose(this Transform transform)
+        {
+            transform.GetLocalPositionAndRotation(out Vector3 position, out Quaternion rotation);
+            return new Pose(position, rotation);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void SetPose(this Transform transform, Pose pose)
+        {
+            transform.SetPositionAndRotation(pose.position, pose.rotation);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void SetLocalPose(this Transform transform, Pose pose)
         {
             transform.SetLocalPositionAndRotation(pose.position, pose.rotation);
