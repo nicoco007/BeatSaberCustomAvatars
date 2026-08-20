@@ -10,7 +10,7 @@
     <Reference Include="BeatSaber.GameSettings" />
     <Reference Include="BeatSaber.Settings" />
     <Reference Include="BeatSaber.ViewSystem" />
-    <Reference Include="BGLib.AppFlow" />
+    <Reference Include="BGLib.AppFlow" Publicize="True" />
     <Reference Include="BGLib.Polyglot" />
     <Reference Include="BGLib.SaveDataCore" />
     <Reference Include="BGLib.UnityExtension" />

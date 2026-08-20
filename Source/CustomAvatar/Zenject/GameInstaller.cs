@@ -24,7 +24,7 @@ using Zenject;
 
 namespace CustomAvatar.Zenject
 {
-    internal class GameInstaller : BaseInstaller
+    internal class GameInstaller : Installer
     {
         public override void InstallBindings()
         {
@@ -35,13 +35,13 @@ namespace CustomAvatar.Zenject
 
             Container.BindExecutionOrder<GameEnvironmentObjectManager>(1000);
 
-            if (IsPluginLoadedAndMatchesVersion("ScoreSaber", new VersionRange("^3.0.0")))
+            if (PluginUtilities.IsPluginLoadedAndMatchesVersion("ScoreSaber", new VersionRange("^3.0.0")))
             {
                 Container.Bind(typeof(IInitializable)).To<ScoreSaberReplayHandler>().AsSingle();
                 Container.BindInitializableExecutionOrder<ScoreSaberReplayHandler>(1000);
             }
 
-            if (IsPluginLoadedAndMatchesVersion("BeatLeader", new VersionRange(">= 0.9.0 < 0.11.0")))
+            if (PluginUtilities.IsPluginLoadedAndMatchesVersion("BeatLeader", new VersionRange(">= 0.9.0 < 0.11.0")))
             {
                 Container.Bind(typeof(IInitializable)).To<BeatLeaderReplayHandler>().AsSingle();
                 Container.BindInitializableExecutionOrder<BeatLeaderReplayHandler>(1000);

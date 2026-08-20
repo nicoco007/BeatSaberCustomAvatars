@@ -16,6 +16,7 @@
 
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using CustomAvatar.Logging;
 using CustomAvatar.Utilities.Converters;
 using IPA.Utilities;
@@ -51,7 +52,7 @@ namespace CustomAvatar.Configuration
 
         public Settings settings { get; private set; }
 
-        public void Load()
+        public async Task LoadAsync()
         {
             try
             {
@@ -66,7 +67,7 @@ namespace CustomAvatar.Configuration
                 using (StreamReader reader = new(kSettingsPath))
                 using (JsonTextReader jsonReader = new(reader))
                 {
-                    settings = _jsonSerializer.Deserialize<Settings>(jsonReader) ?? new Settings();
+                    settings = await Task.Run(() => _jsonSerializer.Deserialize<Settings>(jsonReader)) ?? new Settings();
                 }
             }
             catch (Exception ex)

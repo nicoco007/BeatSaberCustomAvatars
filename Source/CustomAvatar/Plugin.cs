@@ -14,6 +14,9 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Collections.Generic;
+using BGLib.AppFlow.Initialization;
 using CustomAvatar.Logging;
 using CustomAvatar.Player;
 using CustomAvatar.Rendering;
@@ -30,13 +33,23 @@ using Logger = IPA.Logging.Logger;
 namespace CustomAvatar
 {
     [Plugin(RuntimeOptions.DynamicInit)]
+    [HarmonyPatch]
     internal class Plugin
     {
+        private static event Action<ProjectContext> _projectContextInstalling;
+
         private readonly Harmony _harmony = new("com.nicoco007.beatsabercustomavatars");
+
+        private readonly Logger _ipaLogger;
+
+        private readonly PluginMetadata _pluginMetadata;
 
         [Init]
         public Plugin(Logger ipaLogger, PluginMetadata pluginMetadata, Zenjector zenjector)
         {
+            _ipaLogger = ipaLogger;
+            _pluginMetadata = pluginMetadata;
+
             // can't inject at this point so just create it
             ILogger<Plugin> logger = new IPALogger<Plugin>(ipaLogger);
 
@@ -57,7 +70,6 @@ namespace CustomAvatar
             zenjector.Mutate<MultiplayerConnectedPlayerFacade, EnvironmentObject>();
             zenjector.Mutate<VRController, VRControllerVisuals>();
 
-            zenjector.Install<CustomAvatarsInstaller>(Location.App, ipaLogger, pluginMetadata);
             zenjector.Install<MainMenuInstaller>(Location.Menu);
             zenjector.Install<HealthWarningInstaller>(Location.HealthWarning | Location.Credits);
             zenjector.Install<GameInstaller>(Location.Player);
@@ -66,6 +78,7 @@ namespace CustomAvatar
         [OnEnable]
         public void OnEnable()
         {
+            _projectContextInstalling += ProjectContextInstalling;
             _harmony.PatchAll();
         }
 
@@ -73,6 +86,34 @@ namespace CustomAvatar
         public void OnDisable()
         {
             _harmony.UnpatchSelf();
+            _projectContextInstalling -= ProjectContextInstalling;
+        }
+
+        private void ProjectContextInstalling(ProjectContext projectContext)
+        {
+            projectContext._normalInstallers.Add(projectContext.Container.Instantiate<ProjectInstaller>([_ipaLogger, _pluginMetadata]));
+        }
+
+        [HarmonyPatch(typeof(Context), nameof(Context.InstallInstallers), [typeof(List<InstallerBase>), typeof(List<Type>), typeof(List<ScriptableObjectInstaller>), typeof(List<MonoInstaller>), typeof(List<MonoInstaller>)])]
+        [HarmonyPrefix]
+        private static void Context_InstallInstallers(Context __instance)
+        {
+            if (__instance is ProjectContext projectContext)
+            {
+                _projectContextInstalling?.Invoke(projectContext);
+            }
+        }
+
+        [HarmonyPatch(typeof(AsyncSceneContext), nameof(AsyncSceneContext.LoadInstallersAsync))]
+        [HarmonyPrefix]
+        private static void Prefix(AsyncSceneContext __instance)
+        {
+            if (__instance.name != "AppCoreSceneContext")
+            {
+                return;
+            }
+
+            __instance._asyncInstallers.Add(__instance.gameObject.AddComponent<CustomAvatarsInstaller>());
         }
     }
 }

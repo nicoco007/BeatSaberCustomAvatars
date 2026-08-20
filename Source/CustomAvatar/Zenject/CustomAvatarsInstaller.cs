@@ -15,10 +15,10 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Reflection;
+using System.Threading.Tasks;
+using BGLib.AppFlow.Initialization;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
-using CustomAvatar.Logging;
 using CustomAvatar.Player;
 using CustomAvatar.Rendering;
 using CustomAvatar.Tracking;
@@ -26,16 +26,14 @@ using CustomAvatar.Tracking.OpenVR;
 using CustomAvatar.Tracking.UnityXR;
 using CustomAvatar.Utilities;
 using Hive.Versioning;
-using IPA.Loader;
 using SiraUtil.Affinity;
 using UnityEngine.XR;
 using Valve.VR;
 using Zenject;
-using Logger = IPA.Logging.Logger;
 
 namespace CustomAvatar.Zenject
 {
-    internal class CustomAvatarsInstaller : BaseInstaller
+    internal class CustomAvatarsInstaller : AsyncInstaller
     {
         private const string kXRHandsID = "Unity.XR.Hands";
         private const string kOpenVRID = "OpenVR";
@@ -45,42 +43,21 @@ namespace CustomAvatar.Zenject
         private static readonly VersionRange kXRHandsVersionRange = new("^1.1.0");
         private static readonly VersionRange kOpenVRVersionRange = new("^2.0.0");
 
-        private static readonly MethodInfo kCreateLoggerMethod = typeof(ILoggerFactory).GetMethod(nameof(ILoggerFactory.CreateLogger), BindingFlags.Public | BindingFlags.Instance);
-        private static readonly Assembly kAssembly = Assembly.GetExecutingAssembly();
-
-        private readonly Logger _ipaLogger;
-        private readonly ILogger<CustomAvatarsInstaller> _logger;
-        private readonly PluginMetadata _pluginMetadata;
-
-        public CustomAvatarsInstaller(Logger ipaLogger, PluginMetadata pluginMetadata)
-        {
-            _ipaLogger = ipaLogger;
-            _logger = new IPALogger<CustomAvatarsInstaller>(ipaLogger);
-            _pluginMetadata = pluginMetadata;
-        }
+        private AssetLoader _assetLoader;
+        private SettingsLoader _settingsLoader;
 
         public override void InstallBindings()
         {
-            // logging
-            Container.Bind(typeof(ILoggerFactory)).To<IPALoggerFactory>().AsTransient().WithArguments(_ipaLogger);
-            Container.Bind(typeof(ILogger<>)).FromMethodUntyped(CreateLogger).AsTransient();
-
             // settings
-            Container.Bind(typeof(SettingsLoader), typeof(IDisposable)).To<SettingsLoader>().AsSingle();
-            SettingsLoader settingsManager = Container.Resolve<SettingsLoader>();
-            settingsManager.Load();
-            Container.Bind<Settings>().FromInstance(settingsManager.settings).AsSingle();
+            Container.Bind<IDisposable>().To<SettingsLoader>().FromInstance(_settingsLoader);
+            Container.Bind<Settings>().FromInstance(_settingsLoader.settings);
             Container.Bind(typeof(CalibrationData), typeof(IInitializable), typeof(IDisposable)).To<CalibrationData>().AsSingle();
-
-            Container.Bind<PluginMetadata>().FromInstance(_pluginMetadata).When(InjectedIntoThisAssembly);
-
-            _logger.LogInformation($"Current Unity XR device: '{XRSettings.loadedDeviceName}'");
 
             if (XRSettings.loadedDeviceName.IndexOf("OpenXR", StringComparison.OrdinalIgnoreCase) >= 0 || XRSettings.loadedDeviceName.IndexOf("OpenVR", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 Container.Bind(typeof(IDeviceProvider), typeof(IInitializable), typeof(IDisposable)).To<UnityXRDeviceProvider>().AsSingle();
 
-                if (IsPluginLoadedAndMatchesVersion(kXRHandsID, kXRHandsVersionRange))
+                if (PluginUtilities.IsPluginLoadedAndMatchesVersion(kXRHandsID, kXRHandsVersionRange))
                 {
                     Container.Bind(typeof(IFingerTrackingProvider), typeof(ITickable)).To<UnityXRFingerTrackingProvider>().AsSingle();
                 }
@@ -90,7 +67,7 @@ namespace CustomAvatar.Zenject
                 }
 
                 // SteamVR doesn't yet support render models through OpenXR so we need this workaround
-                if (IsPluginLoadedAndMatchesVersion(kOpenVRID, kOpenVRVersionRange))
+                if (PluginUtilities.IsPluginLoadedAndMatchesVersion(kOpenVRID, kOpenVRVersionRange))
                 {
                     BindOpenVR();
                 }
@@ -103,7 +80,7 @@ namespace CustomAvatar.Zenject
 
             // managers
             Container.Bind<PlayerAvatarManager>().FromNewComponentOnNewGameObject().AsSingle();
-            Container.Bind(typeof(AssetLoader), typeof(IInitializable), typeof(IDisposable)).To<AssetLoader>().AsSingle().NonLazy();
+            Container.Bind(typeof(AssetLoader), typeof(IDisposable)).FromInstance(_assetLoader);
 
             Container.Bind<AvatarLoader>().AsSingle();
             Container.Bind<AvatarSpawner>().AsSingle();
@@ -121,23 +98,15 @@ namespace CustomAvatar.Zenject
             Container.Bind<TrackingRig>().FromNewComponentOnNewGameObject().AsSingle();
         }
 
-        private object CreateLogger(InjectContext context)
+        protected override void LoadResourcesBeforeInstall(IInstallerRegistry registry, DiContainer container)
         {
-            Type genericType = context.MemberType.GenericTypeArguments[0];
-
-            if (!genericType.IsAssignableFrom(context.ObjectType))
-            {
-                throw new InvalidOperationException($"Cannot create logger with generic type '{genericType}' for type '{context.ObjectType}'");
-            }
-
-            ILoggerFactory instance = context.Container.Resolve<ILoggerFactory>();
-
-            return kCreateLoggerMethod.MakeGenericMethod(context.ObjectType).Invoke(instance, new object[] { null });
         }
 
-        private bool InjectedIntoThisAssembly(InjectContext context)
+        protected override Task LoadResourcesBeforeInstallAsync(IInstallerRegistry registry, DiContainer container)
         {
-            return context.ObjectType.Assembly == kAssembly;
+            _assetLoader = container.Instantiate<AssetLoader>();
+            _settingsLoader = container.Instantiate<SettingsLoader>();
+            return Task.WhenAll(_assetLoader.LoadAssetsAsync(), _settingsLoader.LoadAsync());
         }
 
         private void BindOpenVR()

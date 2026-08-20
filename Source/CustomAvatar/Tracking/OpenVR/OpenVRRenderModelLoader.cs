@@ -248,8 +248,6 @@ namespace CustomAvatar.Tracking.OpenVR
                 texture.Apply();
             }
 
-            await _assetLoader.WaitForAssetsLoadedAsync();
-
             Material material = new(_assetLoader.unlitShader)
             {
                 name = renderModelName,

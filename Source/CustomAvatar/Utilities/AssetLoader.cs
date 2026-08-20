@@ -21,17 +21,15 @@ using System.Threading.Tasks;
 using CustomAvatar.Logging;
 using UnityEngine;
 using UnityEngine.U2D;
-using Zenject;
 using Object = UnityEngine.Object;
 
 namespace CustomAvatar.Utilities
 {
-    internal class AssetLoader : IInitializable, IDisposable
+    internal class AssetLoader : IDisposable
     {
         private struct VoidResult { }
 
         private readonly ILogger<AssetLoader> _logger;
-        private readonly TaskCompletionSource<VoidResult> _taskCompletionSource = new();
 
         protected AssetLoader(ILogger<AssetLoader> logger)
         {
@@ -44,22 +42,6 @@ namespace CustomAvatar.Utilities
 
         internal SpriteAtlas uiSpriteAtlas { get; private set; }
 
-        public Task WaitForAssetsLoadedAsync() => _taskCompletionSource.Task;
-
-        public async void Initialize()
-        {
-            try
-            {
-                await LoadAssetsAsync();
-                _taskCompletionSource.SetResult(default);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Failed to load assets\n{ex}");
-                _taskCompletionSource.SetException(ex);
-            }
-        }
-
         public void Dispose()
         {
             Object.Destroy(stereoMirrorShader);
@@ -67,7 +49,7 @@ namespace CustomAvatar.Utilities
             Object.Destroy(uiSpriteAtlas);
         }
 
-        private async Task LoadAssetsAsync()
+        internal async Task LoadAssetsAsync()
         {
             using Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("CustomAvatar.Resources.Assets");
             AssetBundleCreateRequest assetBundleCreateRequest = await AssetBundle.LoadFromStreamAsync(stream);
