@@ -184,15 +184,11 @@ namespace CustomAvatar.Avatar
                 if (head != null)
                 {
                     Vector3 centerPosition = head.position;
-                    GameObject targetObj = new("Target");
-                    Transform target = targetObj.transform;
 
-                    headCalibrationOffset = GetCalibrationOffset(target, new Pose(centerPosition, Quaternion.identity), vrikManager.references_head);
-                    pelvisCalibrationOffset = GetCalibrationOffset(target, new Pose(new Vector3(centerPosition.x, centerPosition.y * HumanoidCalibrator.kEyeHeightToPelvisHeightRatio, centerPosition.z), Quaternion.identity), vrikManager.references_pelvis);
-                    leftFootCalibrationOffset = GetCalibrationOffset(target, GetFootTarget(centerPosition, vrikManager.references_leftFoot, vrikManager.references_leftToes), vrikManager.references_leftToes, vrikManager.references_leftFoot);
-                    rightFootCalibrationOffset = GetCalibrationOffset(target, GetFootTarget(centerPosition, vrikManager.references_rightFoot, vrikManager.references_rightToes), vrikManager.references_rightToes, vrikManager.references_rightFoot);
-
-                    Destroy(targetObj);
+                    headCalibrationOffset = GetOffset("Head Calibration", new Pose(centerPosition, Quaternion.identity), vrikManager.references_head);
+                    pelvisCalibrationOffset = GetOffset("Pelvis Calibration", new Pose(new Vector3(centerPosition.x, centerPosition.y * HumanoidCalibrator.kEyeHeightToPelvisHeightRatio, centerPosition.z), Quaternion.identity), vrikManager.references_pelvis);
+                    leftFootCalibrationOffset = GetOffset("Left Foot Calibration", GetFootTarget(centerPosition, vrikManager.references_leftFoot, vrikManager.references_leftToes), vrikManager.references_leftToes, vrikManager.references_leftFoot);
+                    rightFootCalibrationOffset = GetOffset("Right Foot Calibration", GetFootTarget(centerPosition, vrikManager.references_rightFoot, vrikManager.references_rightToes), vrikManager.references_rightToes, vrikManager.references_rightFoot);
                 }
 
                 pelvisRootForward = Quaternion.Inverse(vrikManager.references_pelvis.rotation) * vrikManager.references_root.forward;
@@ -200,36 +196,26 @@ namespace CustomAvatar.Avatar
             }
         }
 
+        private Pose GetOffset(Transform target, params Transform[] references) => target != null ? GetOffset(target.name, target.GetPose(), references) : Pose.identity;
+
         /// <summary>
         /// Gets the offset between <paramref name="target"/> and the first non-null <paramref name="references"/> in the prefab root transform's space.
         /// </summary>
+        /// <param name="name">The name of the target for logging purposes.</param>
         /// <param name="target">The target to which the offset should point.</param>
         /// <param name="references">The reference(s) from which to derive the offset.</param>
         /// <returns>The offset between <paramref name="target"/> and the first non-null <paramref name="references"/>.</returns>
-        private Pose GetOffset(Transform target, params Transform[] references)
+        private Pose GetOffset(string name, Pose target, params Transform[] references)
         {
-            if (target == null)
-            {
-                return Pose.identity;
-            }
-
             Transform reference = references.FirstOrDefault(r => r != null);
 
             if (reference == null)
             {
-                _logger.LogError($"No valid reference found for '{target.name}'");
+                _logger.LogError($"No valid reference found for '{name}'");
                 return Pose.identity;
             }
 
-            return new Pose(
-                target.InverseTransformPoint(reference.position),
-                Quaternion.Inverse(target.rotation) * reference.rotation);
-        }
-
-        private Pose GetCalibrationOffset(Transform target, Pose targetLocalPose, params Transform[] references)
-        {
-            target.SetPose(targetLocalPose);
-            return GetOffset(target, references);
+            return target.InverseTransformPose(reference.GetPose());
         }
 
         /// <summary>

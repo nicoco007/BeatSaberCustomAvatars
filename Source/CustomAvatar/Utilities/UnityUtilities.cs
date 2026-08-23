@@ -52,6 +52,23 @@ namespace CustomAvatar.Utilities
             transform.SetLocalPositionAndRotation(pose.position, pose.rotation);
         }
 
+        /// <summary>
+        /// Transforms <paramref name="pose"/> from world space to this instance's local space.
+        /// </summary>
+        /// <remarks>
+        /// Similar to <see cref="Transform.InverseTransformPoint(Vector3)"/>.
+        /// </remarks>
+        /// <param name="self"></param>
+        /// <param name="pose"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static Pose InverseTransformPose(this Pose self, Pose pose)
+        {
+            Quaternion inverseRotation = Quaternion.Inverse(self.rotation);
+            return new Pose(
+                inverseRotation * (pose.position - self.position),
+                inverseRotation * pose.rotation);
+        }
+
         internal static string GetTransformPath(Component component)
         {
             if (component == null)
