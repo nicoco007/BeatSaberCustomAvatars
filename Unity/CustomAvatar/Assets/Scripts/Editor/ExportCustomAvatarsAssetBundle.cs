@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class ExportCustomAvatarsAssetBundle
 {
+    private const string assetBundleName = "custom_avatars_assets";
+
     [MenuItem("Assets/Export Custom Avatars Asset Bundle", priority = 1100)]
     public static void BuildAssetBundle()
     {
@@ -17,15 +19,11 @@ public class ExportCustomAvatarsAssetBundle
 
         AssetBundleBuild assetBundleBuild = new()
         {
-            assetBundleName = "CustomAvatarsAssets",
-            assetNames = new[] {
-                "Assets/Shaders/StereoRender.shader",
-                "Assets/Shaders/UnlitOverlay.shader",
-                "Assets/Sprites/UI.spriteatlasv2",
-            },
+            assetBundleName = assetBundleName,
+            assetNames = AssetDatabase.GetAssetPathsFromAssetBundle(assetBundleName),
         };
 
-        AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(Application.temporaryCachePath, new AssetBundleBuild[] { assetBundleBuild }, BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.StandaloneWindows64);
+        AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(Application.temporaryCachePath, new AssetBundleBuild[] { assetBundleBuild }, BuildAssetBundleOptions.ForceRebuildAssetBundle, EditorUserBuildSettings.activeBuildTarget);
 
         if (manifest == null)
         {
