@@ -61,36 +61,25 @@ namespace CustomAvatar.Utilities
                 return;
             }
 
-            AssetBundleRequest assetsRequest = await assetBundle.LoadAllAssetsAsync();
-            Object[] assets = assetsRequest.allAssets;
-            string[] assetNames = assetBundle.GetAllAssetNames();
-
-            for (int i = 0; i < assets.Length; i++)
+            try
             {
-                Object asset = assets[i];
-                string name = assetNames[i];
+                AssetBundleRequest assetsRequest = await assetBundle.LoadAllAssetsAsync();
 
-                switch (name)
+                if (assetsRequest.allAssets == null || assetsRequest.allAssets.Length == 0)
                 {
-                    case "assets/shaders/stereorender.shader":
-                        stereoMirrorShader = (Shader)asset;
-                        break;
-
-                    case "assets/shaders/unlitoverlay.shader":
-                        unlitShader = (Shader)asset;
-                        break;
-
-                    case "assets/sprites/ui.spriteatlasv2":
-                        uiSpriteAtlas = (SpriteAtlas)asset;
-                        break;
-
-                    default:
-                        _logger.LogError($"Unexpected asset '{name}'");
-                        break;
+                    _logger.LogError("Failed to load assets");
+                    return;
                 }
-            }
 
-            await assetBundle.UnloadAsync(false);
+                // since we called LoadAllAssetsAsync these are nearly instant lookups
+                stereoMirrorShader = assetBundle.LoadAsset<Shader>("Assets/Shaders/StereoRender.shader");
+                unlitShader = assetBundle.LoadAsset<Shader>("Assets/Shaders/UnlitOverlay.shader");
+                uiSpriteAtlas = assetBundle.LoadAsset<SpriteAtlas>("Assets/Sprites/UI.spriteatlasv2");
+            }
+            finally
+            {
+                await assetBundle.UnloadAsync(false);
+            }
         }
     }
 }
