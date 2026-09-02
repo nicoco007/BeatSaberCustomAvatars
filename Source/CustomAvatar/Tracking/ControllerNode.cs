@@ -1,5 +1,4 @@
-﻿extern alias BeatSaberFinalIK;
-//  Beat Saber Custom Avatars - Custom player models for body presence in Beat Saber.
+﻿//  Beat Saber Custom Avatars - Custom player models for body presence in Beat Saber.
 //  Copyright © 2018-2026  Nicolas Gnyra and Beat Saber Custom Avatars Contributors
 //
 //  This library is free software: you can redistribute it and/or
@@ -14,6 +13,8 @@
 //
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+extern alias BeatSaberFinalIK;
 
 using UnityEngine;
 using UnityEngine.XR;
