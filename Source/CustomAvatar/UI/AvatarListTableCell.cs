@@ -117,7 +117,7 @@ namespace CustomAvatar.UI
             _progressText.fontMaterial = _nameText.fontMaterial;
             _progressText.fontSize = 3;
             _progressText.alignment = TextAlignmentOptions.BaselineRight;
-            _progressText.enableWordWrapping = false;
+            _progressText.textWrappingMode = TextWrappingModes.NoWrap;
             _progressText.text = "0%";
             _progressText.fontStyle = FontStyles.Italic;
             _progressText.autoSizeTextContainer = false;
@@ -148,7 +148,7 @@ namespace CustomAvatar.UI
             RefreshVisuals();
         }
 
-        protected void OnDestroy()
+        protected override void OnDestroy()
         {
             if (_listItem != null)
             {

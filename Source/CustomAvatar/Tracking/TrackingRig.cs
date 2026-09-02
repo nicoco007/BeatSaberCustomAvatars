@@ -17,6 +17,7 @@
 extern alias BeatSaberFinalIK;
 
 using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
@@ -239,7 +240,7 @@ namespace CustomAvatar.Tracking
         {
             if (_fpfcSettings != null)
             {
-                _fpfcSettings.Changed += OnFpfcSettingsChanged;
+                _fpfcSettings.PropertyChanged += OnFpfcSettingsPropertyChanged;
             }
 
             if (_beatSaberUtilities != null)
@@ -351,7 +352,7 @@ namespace CustomAvatar.Tracking
         {
             if (_fpfcSettings != null)
             {
-                _fpfcSettings.Changed -= OnFpfcSettingsChanged;
+                _fpfcSettings.PropertyChanged -= OnFpfcSettingsPropertyChanged;
             }
 
             if (_beatSaberUtilities != null)
@@ -395,7 +396,7 @@ namespace CustomAvatar.Tracking
             trackingChanged?.Invoke();
         }
 
-        private void OnFpfcSettingsChanged(IFPFCSettings fpfcSettings)
+        private void OnFpfcSettingsPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             UpdateBehaviourEnabled();
         }

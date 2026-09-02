@@ -14,6 +14,7 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.ComponentModel;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
@@ -64,7 +65,7 @@ namespace CustomAvatar.Rendering.Cameras
             _settings.cameraNearClipPlane.changed += OnCameraNearClipPlaneChanged;
             _settings.showAvatarInSmoothCamera.changed += OnShowAvatarInSmoothCameraChanged;
 
-            _fpfcSettings.Changed += OnFpfcSettingsChanged;
+            _fpfcSettings.PropertyChanged += OnFpfcSettingsPropertyChanged;
 
             _beatSaberUtilities.focusChanged += OnFocusChanged;
 
@@ -81,7 +82,7 @@ namespace CustomAvatar.Rendering.Cameras
 
             if (_fpfcSettings != null)
             {
-                _fpfcSettings.Changed -= OnFpfcSettingsChanged;
+                _fpfcSettings.PropertyChanged -= OnFpfcSettingsPropertyChanged;
             }
 
             if (_beatSaberUtilities != null)
@@ -100,7 +101,7 @@ namespace CustomAvatar.Rendering.Cameras
             UpdateSmoothCamera();
         }
 
-        private void OnFpfcSettingsChanged(IFPFCSettings fpfcSettings)
+        private void OnFpfcSettingsPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             UpdateSmoothCamera();
         }

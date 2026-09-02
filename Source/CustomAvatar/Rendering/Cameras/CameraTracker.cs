@@ -14,6 +14,7 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.ComponentModel;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Logging;
@@ -90,8 +91,8 @@ namespace CustomAvatar.Rendering.Cameras
 
             if (fpfcSettings != null)
             {
-                fpfcSettings.Changed -= OnFpfcSettingsChanged;
-                fpfcSettings.Changed += OnFpfcSettingsChanged;
+                fpfcSettings.PropertyChanged -= OnFpfcSettingsPropertyChanged;
+                fpfcSettings.PropertyChanged += OnFpfcSettingsPropertyChanged;
             }
 
             if (beatSaberUtilities != null)
@@ -153,7 +154,7 @@ namespace CustomAvatar.Rendering.Cameras
 
             if (fpfcSettings != null)
             {
-                fpfcSettings.Changed -= OnFpfcSettingsChanged;
+                fpfcSettings.PropertyChanged -= OnFpfcSettingsPropertyChanged;
             }
 
             if (beatSaberUtilities != null)
@@ -197,7 +198,7 @@ namespace CustomAvatar.Rendering.Cameras
             UpdateCameraMask();
         }
 
-        private void OnFpfcSettingsChanged(IFPFCSettings fpfcSettings)
+        private void OnFpfcSettingsPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             UpdateCameraMask();
         }

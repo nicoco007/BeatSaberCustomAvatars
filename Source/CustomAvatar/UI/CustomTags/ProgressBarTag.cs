@@ -77,7 +77,7 @@ namespace CustomAvatar.UI.CustomTags
             description.fontMaterial = title.fontMaterial;
             description.fontSize = 3;
             description.alignment = TextAlignmentOptions.Center;
-            description.enableWordWrapping = false;
+            description.textWrappingMode = TextWrappingModes.NoWrap;
             description.fontStyle = FontStyles.Italic;
 
             containerGameObject.SetActive(false);
