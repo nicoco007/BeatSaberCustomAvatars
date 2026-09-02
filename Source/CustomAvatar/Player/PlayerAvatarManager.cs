@@ -302,6 +302,7 @@ namespace CustomAvatar.Player
 
             if (string.IsNullOrEmpty(fileName))
             {
+                avatarLoading?.Invoke(null, null);
                 currentAvatarFileName = null;
                 SwitchToAvatar(null, null);
                 return;
