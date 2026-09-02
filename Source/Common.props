@@ -22,7 +22,7 @@
   <ItemGroup>
     <DependsOn Include="AssetBundleLoadingTools" Version="^1.0.0" />
     <DependsOn Include="BeatSaberMarkupLanguage" Version="^1.12.0" />
-    <DependsOn Include="BSIPA" Version="^4.3.0" />
+    <DependsOn Include="BSIPA" Version="^4.3.7" />
     <DependsOn Include="DynamicBone" Version="^1.2.0" />
     <DependsOn Include="FinalIK" Version="^1.9.0" />
     <DependsOn Include="protobuf-net" Version="^3.0.0" />
