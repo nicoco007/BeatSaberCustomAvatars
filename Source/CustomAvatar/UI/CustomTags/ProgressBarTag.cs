@@ -37,22 +37,30 @@ namespace CustomAvatar.UI.CustomTags
 
             RectTransform containerTransform = (RectTransform)Object.Instantiate(_platformLeaderboardViewController.transform.Find("Container/LeaderboardTableView/LoadingControl/DownloadingContainer"));
             containerTransform.name = "ProgressContainer";
-            containerTransform.anchorMin = new Vector2(0.3f, 0.5f);
-            containerTransform.anchorMax = new Vector2(0.7f, 0.5f);
+            containerTransform.anchorMin = new Vector2(0.5f, 1);
+            containerTransform.anchorMax = new Vector2(0.5f, 0);
+            containerTransform.sizeDelta = new Vector2(120, 0);
 
             RectTransform progressBarTransform = (RectTransform)containerTransform.Find("DownloadingProgress");
             progressBarTransform.name = "ProgressBar";
-            Image bar = progressBarTransform.GetComponent<Image>();
+            progressBarTransform.anchorMin = new Vector2(0.2f, 0.5f);
+            progressBarTransform.anchorMax = new Vector2(0.8f, 0.5f);
 
             RectTransform progressBackgroundTransform = (RectTransform)containerTransform.Find("DownloadingBG");
             progressBackgroundTransform.name = "ProgressBG";
+            progressBackgroundTransform.anchorMin = new Vector2(0.2f, 0.5f);
+            progressBackgroundTransform.anchorMax = new Vector2(0.8f, 0.5f);
+
             Image progressBackgroundImage = progressBackgroundTransform.GetComponent<Image>();
             progressBackgroundImage.color = new Color(1, 1, 1, 0.2f);
 
             RectTransform progressTitleTransform = (RectTransform)containerTransform.Find("DownloadingText");
             progressTitleTransform.name = "ProgressTitle";
+
             Object.Destroy(progressTitleTransform.GetComponent<LocalizedTextMeshProUGUI>());
+
             TextMeshProUGUI title = progressTitleTransform.GetComponent<TextMeshProUGUI>();
+            title.overflowMode = TextOverflowModes.Ellipsis;
 
             GameObject progressTextObject = new("ProgressText", typeof(RectTransform));
             RectTransform progressTextTransform = (RectTransform)progressTextObject.transform;
@@ -70,10 +78,11 @@ namespace CustomAvatar.UI.CustomTags
             description.fontSize = 3;
             description.alignment = TextAlignmentOptions.Center;
             description.enableWordWrapping = false;
+            description.fontStyle = FontStyles.Italic;
 
             containerGameObject.SetActive(false);
 
-            containerGameObject.AddComponent<ProgressBar>().Init(bar, title, description);
+            containerGameObject.AddComponent<ProgressBar>().Init(progressBarTransform.GetComponent<Image>(), title, description);
 
             _prefab = containerGameObject;
         }
