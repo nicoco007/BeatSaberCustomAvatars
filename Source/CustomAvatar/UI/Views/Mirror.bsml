@@ -1,4 +1,5 @@
 ﻿<bg>
+  <ca.progress-bar active="~progressActive" progress="~progress" title="~progressTitle" />
   <loading-indicator active="~isLoaderActive" />
   <vertical pref-width="140" anchor-min-y="0.5" anchor-max-y="0.5">
     <text text="~errorMessage" active="~isErrorMessageVisible" color="#FF8080" align="Center" font-size="6" />

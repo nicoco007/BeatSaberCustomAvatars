@@ -15,22 +15,17 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.ComponentModel;
 using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.FloatingScreen;
 using BeatSaberMarkupLanguage.ViewControllers;
-using BGLib.Polyglot;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Player;
 using CustomAvatar.Rendering;
 using CustomAvatar.Tracking;
-using HMUI;
 using JetBrains.Annotations;
-using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 using Zenject;
 
 namespace CustomAvatar.UI
@@ -41,14 +36,12 @@ namespace CustomAvatar.UI
     {
         private Settings _settings;
         private PlayerAvatarManager _avatarManager;
-        private PlatformLeaderboardViewController _platformLeaderboardViewController;
         private TrackingRig _trackingRig;
 
         private bool _isLoaderActive;
         private string _errorMessage;
         private bool _progressActive;
         private float _progress;
-        private string _progressText;
         private string _progressTitle;
 
         private IInstantiator _instantiator;
@@ -99,16 +92,6 @@ namespace CustomAvatar.UI
             }
         }
 
-        protected string progressText
-        {
-            get => _progressText;
-            set
-            {
-                _progressText = value;
-                NotifyPropertyChanged();
-            }
-        }
-
         protected string progressTitle
         {
             get => _progressTitle;
@@ -136,20 +119,17 @@ namespace CustomAvatar.UI
             IInstantiator instantiator,
             Settings settings,
             PlayerAvatarManager avatarManager,
-            PlatformLeaderboardViewController platformLeaderboardViewController,
             TrackingRig trackingRig)
         {
             _instantiator = instantiator;
             _settings = settings;
             _avatarManager = avatarManager;
-            _platformLeaderboardViewController = platformLeaderboardViewController;
             _trackingRig = trackingRig;
         }
 
         public void Report(float progress)
         {
             this.progress = progress;
-            this.progressText = $"{progress * 100:0}%";
         }
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
@@ -184,14 +164,11 @@ namespace CustomAvatar.UI
                     transform.SetParent(rectTransform, true);
                 }
 
-                CreateProgressBar(rectTransform);
-
                 _floatingScreen = FloatingScreen.CreateFloatingScreen(new Vector2(160, 80), false, new Vector3(0, 1f, 0.75f), Quaternion.Euler(0, 0, 0)).gameObject;
                 BSMLParser.Instance.Parse(Content, _floatingScreen, this);
 
                 Transform floatingScreenTransform = _floatingScreen.transform;
                 floatingScreenTransform.localScale *= 0.5f;
-                CreateProgressBar(floatingScreenTransform);
             }
 
             SetLoading(false);
@@ -225,61 +202,6 @@ namespace CustomAvatar.UI
             Destroy(_realMirror);
 
             Destroy(_floatingScreen);
-        }
-
-        private void CreateProgressBar(Transform container)
-        {
-            GameObject progressViewObject = new(nameof(ProgressView));
-
-            RectTransform progressViewTransform = progressViewObject.AddComponent<RectTransform>();
-            progressViewTransform.SetParent(container, false);
-
-            RectTransform containerTransform = (RectTransform)Instantiate(_platformLeaderboardViewController.transform.Find("Container/LeaderboardTableView/LoadingControl/DownloadingContainer"));
-            containerTransform.SetParent(progressViewTransform, false);
-            containerTransform.name = "ProgressContainer";
-            containerTransform.anchorMin = new Vector2(0.3f, 0.5f);
-            containerTransform.anchorMax = new Vector2(0.7f, 0.5f);
-
-            RectTransform progressBarTransform = (RectTransform)containerTransform.Find("DownloadingProgress");
-            progressBarTransform.name = "ProgressBar";
-            Image bar = progressBarTransform.GetComponent<Image>();
-
-            RectTransform progressBackgroundTransform = (RectTransform)containerTransform.Find("DownloadingBG");
-            progressBackgroundTransform.name = "ProgressBG";
-            Image progressBackgroundImage = progressBackgroundTransform.GetComponent<Image>();
-            progressBackgroundImage.color = new Color(1, 1, 1, 0.2f);
-
-            RectTransform progressTitleTransform = (RectTransform)containerTransform.Find("DownloadingText");
-            progressTitleTransform.name = "ProgressTitle";
-            Destroy(progressTitleTransform.GetComponent<LocalizedTextMeshProUGUI>());
-            TextMeshProUGUI title = progressTitleTransform.GetComponent<TextMeshProUGUI>();
-
-            // CurvedTextMeshPro doesn't save fontSize properly when inactive
-            GameObject containerGameObject = containerTransform.gameObject;
-            containerGameObject.SetActive(true);
-
-            GameObject progressTextObject = new("ProgressText", typeof(RectTransform));
-            RectTransform progressTextTransform = (RectTransform)progressTextObject.transform;
-            progressTextTransform.SetParent(containerTransform, false);
-            progressTextTransform.anchorMin = new Vector2(1, 0.5f);
-            progressTextTransform.anchorMax = new Vector2(0, 0.5f);
-            progressTextTransform.anchoredPosition = new Vector2(0, -4);
-            CurvedTextMeshPro description = progressTextObject.AddComponent<CurvedTextMeshPro>();
-            description.fontMaterial = title.fontMaterial;
-            description.fontSize = 3;
-            description.alignment = TextAlignmentOptions.Center;
-            description.enableWordWrapping = false;
-
-            progressViewObject.SetActive(false);
-
-            ProgressView progressView = progressViewObject.AddComponent<ProgressView>();
-            progressView.viewController = this;
-            progressView.container = containerGameObject;
-            progressView.bar = bar;
-            progressView.title = title;
-            progressView.text = description;
-
-            progressViewObject.SetActive(true);
         }
 
         private void OnAvatarLoading(string filePath, string name)
@@ -333,47 +255,6 @@ namespace CustomAvatar.UI
         private void OnCancelButtonClicked()
         {
             _trackingRig.EndCalibration();
-        }
-
-        private class ProgressView : MonoBehaviour
-        {
-            internal MirrorViewController viewController;
-            internal GameObject container;
-            internal Image bar;
-            internal TextMeshProUGUI title;
-            internal TextMeshProUGUI text;
-
-            protected void OnEnable()
-            {
-                viewController.PropertyChanged += MirrorViewController_PropertyChanged;
-            }
-
-            protected void OnDisable()
-            {
-                viewController.PropertyChanged -= MirrorViewController_PropertyChanged;
-            }
-
-            private void MirrorViewController_PropertyChanged(object sender, PropertyChangedEventArgs e)
-            {
-                switch (e.PropertyName)
-                {
-                    case nameof(progressActive):
-                        container.SetActive(viewController.progressActive);
-                        break;
-
-                    case nameof(progress):
-                        bar.fillAmount = viewController.progress;
-                        break;
-
-                    case nameof(progressText):
-                        text.text = viewController.progressText;
-                        break;
-
-                    case nameof(progressTitle):
-                        title.text = viewController.progressTitle;
-                        break;
-                }
-            }
         }
     }
 }
