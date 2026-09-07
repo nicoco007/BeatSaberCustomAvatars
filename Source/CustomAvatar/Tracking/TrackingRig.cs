@@ -287,7 +287,10 @@ namespace CustomAvatar.Tracking
             UpdateTransform(DeviceUse.Waist, pelvis);
             UpdateTransform(DeviceUse.LeftFoot, leftFoot);
             UpdateTransform(DeviceUse.RightFoot, rightFoot);
+        }
 
+        protected void Update()
+        {
             if (activeCalibrationMode != CalibrationMode.None)
             {
                 _playerAvatarManager.ResizeCurrentAvatar(eyeHeight);
