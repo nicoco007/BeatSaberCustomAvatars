@@ -169,6 +169,13 @@ namespace CustomAvatar.Avatar
             ApplyPlatformMotion();
         }
 
+#if DEBUG
+        protected void OnGUI()
+        {
+            ((CustomIKSolverVR.CustomLocomotion)solver.locomotion).OnGUI();
+        }
+#endif
+
         private void OnPostUpdate()
         {
             foreach (BeatSaberDynamicBone::DynamicBone dynamicBone in _dynamicBones)

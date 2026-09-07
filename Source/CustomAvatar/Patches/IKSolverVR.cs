@@ -120,15 +120,17 @@ namespace CustomAvatar.Patches
         }
 
         [HarmonyPatch(nameof(IKSolverVR.Locomotion.Solve))]
-        [HarmonyPostfix]
-        public static void Solve(IKSolverVR.Locomotion __instance)
+        [HarmonyPrefix]
+        public static bool Solve(IKSolverVR.Locomotion __instance, IKSolverVR.VirtualBone rootBone, IKSolverVR.Spine spine, IKSolverVR.Leg leftLeg, IKSolverVR.Leg rightLeg, IKSolverVR.Arm leftArm, IKSolverVR.Arm rightArm, int supportLegIndex, ref Vector3 leftFootPosition, ref Vector3 rightFootPosition, ref Quaternion leftFootRotation, ref Quaternion rightFootRotation, ref float leftFootOffset, ref float rightFootOffset, ref float leftHeelOffset, ref float rightHeelOffset)
         {
             if (__instance is not CustomIKSolverVR.CustomLocomotion locomotion)
             {
-                return;
+                return true;
             }
 
+            CustomIKSolverVR.CustomLocomotion.Solve(locomotion, rootBone, spine, leftLeg, rightLeg, leftArm, rightArm, supportLegIndex, ref leftFootPosition, ref rightFootPosition, ref leftFootRotation, ref rightFootRotation, ref leftFootOffset, ref rightFootOffset, ref leftHeelOffset, ref rightHeelOffset);
             locomotion.firstCenterOfMassCalculation = false;
+            return false;
         }
     }
 }

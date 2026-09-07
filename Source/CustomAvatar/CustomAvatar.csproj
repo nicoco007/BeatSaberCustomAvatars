@@ -45,6 +45,7 @@
     <Reference Include="UnityEngine.AudioModule" />
     <Reference Include="UnityEngine.CoreModule" Publicize="True" />
     <Reference Include="UnityEngine.ImageConversionModule" />
+    <Reference Include="UnityEngine.IMGUIModule" />
     <Reference Include="UnityEngine.InputLegacyModule" />
     <Reference Include="UnityEngine.PhysicsModule" />
     <Reference Include="UnityEngine.SpatialTracking" Publicize="True" SkipOverridableMethods="False" />

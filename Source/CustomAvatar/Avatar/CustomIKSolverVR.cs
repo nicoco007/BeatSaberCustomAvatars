@@ -328,9 +328,162 @@ namespace CustomAvatar.Avatar
 #pragma warning restore IDE0060, IDE0062, CS8321
         }
 
+        [HarmonyPatch]
         internal class CustomLocomotion : Locomotion
         {
+            private const float kMaxVelocity = 0.5f; // m/s
+            private const float kMaxAngularVelocity = 20; // degrees/s
+            private const float kDecay = 1;
+            private const float kMinStepThreshold = 0.03f;
+
+            private readonly List<(double time, Vector3 position, Quaternion rotation, Vector3 velocity, Vector3 angularVelocity)> _history = new(100); // slightly more than common frame rate (90 hz) + only double once (i.e. allocate once) to cover basically any other higher framerate
+
+            private float _averageWeight = 0;
+
             public bool firstCenterOfMassCalculation = true;
+
+#if DEBUG
+            private Vector3 _averagePosition;
+            private Quaternion _averageRotation;
+            private Vector3 _averageVelocity;
+            private Vector3 _averageAngularVelocity;
+#endif
+
+            /// <summary>
+            /// A patched version of <see cref="IKSolverVR.Locomotion.Solve"/> that interpolates between actual and average position and rotation and adjusts step threshold based on how much/little the pelvis is moving around.
+            /// </summary>
+            [HarmonyPatch(typeof(Locomotion), nameof(Locomotion.Solve))]
+            [HarmonyReversePatch]
+#pragma warning disable IDE0060, IDE0062, CS8321
+            internal static void Solve(CustomLocomotion __instance, VirtualBone rootBone, Spine spine, Leg leftLeg, Leg rightLeg, Arm leftArm, Arm rightArm, int supportLegIndex, ref Vector3 leftFootPosition, ref Vector3 rightFootPosition, ref Quaternion leftFootRotation, ref Quaternion rightFootRotation, ref float leftFootOffset, ref float rightFootOffset, ref float leftHeelOffset, ref float rightHeelOffset)
+            {
+                IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
+                {
+                    return new CodeMatcher(instructions, generator)
+                        .DeclareLocal(typeof(float), out LocalBuilder stepThreshold)
+                        .MatchForward(false, new CodeMatch(i => i.StoresLocal(10))) // centerOfMassVGroundLevel
+                        .Advance(1)
+                        .InsertAndAdvance(
+                            new CodeInstruction(OpCodes.Ldarg_0),
+                            new CodeInstruction(OpCodes.Ldloca_S, 10),
+                            new CodeInstruction(OpCodes.Ldloca_S, 4),
+                            new CodeInstruction(OpCodes.Ldloca_S, stepThreshold),
+                            new CodeInstruction(OpCodes.Call, AccessTools.DeclaredMethod(typeof(CustomLocomotion), nameof(CalculateAveragePose))))
+                        .MatchForward(false, new CodeMatch(OpCodes.Ldarg_0), new CodeMatch(OpCodes.Ldfld, AccessTools.DeclaredField(typeof(Locomotion), nameof(Locomotion.stepThreshold))))
+                        .Repeat(cm => cm.RemoveInstruction().SetAndAdvance(OpCodes.Ldloc, stepThreshold))
+                        .End()
+                        .InsertAndAdvance(
+                            new CodeInstruction(OpCodes.Ldarg_0),
+                            new CodeInstruction(OpCodes.Ldarg_S, 12),
+                            new CodeInstruction(OpCodes.Ldarg_S, 13),
+                            new CodeInstruction(OpCodes.Ldarg_S, 14),
+                            new CodeInstruction(OpCodes.Ldarg_S, 15),
+                            new CodeInstruction(OpCodes.Call, AccessTools.DeclaredMethod(typeof(CustomLocomotion), nameof(AdjustStepOffsets))))
+                        .Instructions();
+                }
+            }
+#pragma warning restore IDE0060, IDE0062, CS8321
+
+#if DEBUG
+            internal void OnGUI()
+            {
+                Color c = GUI.color;
+                GUI.color = Color.Lerp(Color.green, Color.red, Mathf.InverseLerp(0, kMaxVelocity, _averageVelocity.magnitude));
+                GUILayout.Label("Average Velocity: " + _averageVelocity.magnitude);
+                GUI.color = Color.Lerp(Color.green, Color.red, Mathf.InverseLerp(0, kMaxAngularVelocity, _averageAngularVelocity.magnitude));
+                GUILayout.Label("Average Angular Velocity: " + _averageAngularVelocity.magnitude);
+                GUI.color = Color.Lerp(Color.green, Color.red, _averageWeight);
+                GUILayout.Label("Average Weight: " + _averageWeight);
+                GUI.color = c;
+                GUILayout.Label("Average Position: " + _averagePosition);
+                GUILayout.Label("Average Rotation: " + _averageRotation.eulerAngles);
+            }
+#endif
+
+            private void CalculateAveragePose(ref Vector3 position, ref Quaternion rotation, out float stepThreshold)
+            {
+                double time = Time.timeAsDouble;
+                Vector3 velocity = Vector3.zero;
+                Vector3 angularVelocity = Vector3.zero;
+
+                if (_history.Count > 0)
+                {
+                    (double prevTime, Vector3 prevPosition, Quaternion prevRotation, _, _) = _history[^1];
+                    float deltaTime = (float)(time - prevTime);
+                    velocity = (position - prevPosition) / deltaTime;
+                    (rotation * Quaternion.Inverse(prevRotation)).ToAngleAxis(out float angle, out Vector3 axis);
+                    angularVelocity = angle / deltaTime * axis;
+                }
+
+                _history.Add((time, position, rotation, velocity, angularVelocity));
+
+                int idx = 0;
+
+                while (time - _history[idx].time > 1)
+                {
+                    idx++;
+                }
+
+                _history.RemoveRange(0, idx);
+
+                Vector3 averagePosition = _history[0].position;
+                Quaternion averageRotation = _history[0].rotation;
+                Vector3 averageVelocity = _history[0].velocity;
+                Vector3 averageAngularVelocity = _history[0].angularVelocity;
+
+                int count = _history.Count;
+
+                for (int i = 1; i < count; i++)
+                {
+                    averagePosition += _history[i].position;
+
+                    Quaternion q = _history[i].rotation;
+
+                    if (Quaternion.Dot(averageRotation, q) < 0f)
+                    {
+                        q = new Quaternion(-q.x, -q.y, -q.z, -q.w);
+                    }
+
+                    averageRotation = Quaternion.Slerp(averageRotation, q, 1f / (i + 1));
+
+                    averageVelocity += _history[i].velocity;
+                    averageAngularVelocity += _history[i].angularVelocity;
+                }
+
+                averagePosition /= count;
+                averageRotation.Normalize();
+                averageVelocity /= count;
+                averageAngularVelocity /= count;
+
+                _averageWeight = Mathf.MoveTowards(_averageWeight, 0, Time.deltaTime * kDecay);
+
+                float fVelocity = Mathf.InverseLerp(0, kMaxVelocity, averageVelocity.magnitude);
+                float fAngularVelocity = Mathf.InverseLerp(0, kMaxAngularVelocity, averageAngularVelocity.magnitude);
+                _averageWeight = Mathf.Min(Mathf.Max(Mathf.Max(fVelocity, fAngularVelocity), _averageWeight), 1);
+
+#if DEBUG
+                this._averagePosition = averagePosition;
+                this._averageRotation = averageRotation;
+                this._averageVelocity = averageVelocity;
+                this._averageAngularVelocity = averageAngularVelocity;
+#endif
+
+                position = Vector3.Lerp(averagePosition, position, _averageWeight);
+                rotation = Quaternion.Lerp(averageRotation, rotation, _averageWeight);
+                stepThreshold = Mathf.Lerp(kMinStepThreshold, this.stepThreshold, _averageWeight);
+            }
+
+            private void AdjustStepOffsets(ref float leftFootOffset, ref float rightFootOffset, ref float leftHeelOffset, ref float rightHeelOffset)
+            {
+                float facLeft = Mathf.Clamp01(Vector3.Distance(footsteps[0].stepFrom, footsteps[0].stepTo) / stepThreshold);
+                float facRight = Mathf.Clamp01(Vector3.Distance(footsteps[1].stepFrom, footsteps[1].stepTo) / stepThreshold);
+
+                leftFootOffset *= facLeft;
+                rightFootOffset *= facRight;
+
+                leftHeelOffset *= facLeft;
+                rightHeelOffset *= facRight;
+            }
         }
     }
 }
