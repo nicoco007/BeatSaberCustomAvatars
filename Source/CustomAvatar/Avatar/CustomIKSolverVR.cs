@@ -89,6 +89,17 @@ namespace CustomAvatar.Avatar
             private static readonly MethodInfo kVector3DistanceMethod = AccessTools.DeclaredMethod(typeof(Vector3), nameof(Vector3.Distance));
             private static readonly FieldInfo kVirtualBoneSolverPositionField = AccessTools.DeclaredField(typeof(VirtualBone), nameof(VirtualBone.solverPosition));
 
+            private Vector4 _determinant;
+
+            internal void RotateRoot(VirtualBone rootBone, Vector3 faceDirection)
+            {
+                Quaternion currentRotation = rootBone.solverRotation;
+                Vector3 rootDirection = Quaternion.Inverse(currentRotation) * faceDirection;
+                float angle = Mathf.Atan2(rootDirection.x, rootDirection.z) * Mathf.Rad2Deg;
+                Quaternion targetRotation = Quaternion.AngleAxis(angle, rootBone.readRotation * Vector3.up) * rootBone.solverRotation;
+                rootBone.solverRotation = QuaternionExtensions.SmoothDamp(currentRotation, targetRotation, ref _determinant, 0.15f, float.PositiveInfinity, Time.deltaTime);
+            }
+
             /// <summary>
             /// A patched version of <see cref="IKSolverVR.VirtualBone.SolveTrigonometric"/> where the
             /// target distance between the bones is clamped to their resting distance. This prevents the bones from being straightened more than they are in the rest pose.

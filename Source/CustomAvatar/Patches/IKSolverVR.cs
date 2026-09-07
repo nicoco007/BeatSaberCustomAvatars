@@ -16,8 +16,11 @@
 
 extern alias BeatSaberFinalIK;
 
+using System.Collections.Generic;
+using System.Reflection.Emit;
 using BeatSaberFinalIK::RootMotion.FinalIK;
 using CustomAvatar.Avatar;
+using CustomAvatar.Utilities;
 using HarmonyLib;
 using UnityEngine;
 
@@ -38,10 +41,40 @@ namespace CustomAvatar.Patches
         }
     }
 
-    [HarmonyPatch(typeof(IKSolverVR.Spine), nameof(IKSolverVR.Spine.SolvePelvis))]
+    [HarmonyPatch(typeof(IKSolverVR.Spine))]
     internal static class IKSolverVR_Spine_SolvePelvis
     {
-        public static bool Prefix(IKSolverVR.Spine __instance)
+        [HarmonyPatch(nameof(IKSolverVR.Spine.Solve))]
+        [HarmonyTranspiler]
+        public static IEnumerable<CodeInstruction> Solve_Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
+        {
+            Label? maxRootAngle = null;
+            Label? rootHeadingOffset = null;
+
+            return new CodeMatcher(instructions, generator)
+                .MatchForward(false, new CodeMatch(OpCodes.Ldc_R4, 180f), new CodeMatch(i => i.Branches(out maxRootAngle)))
+                .ThrowIfInvalid("`maxRootAngle > 180` branch not found")
+                .MatchForward(false, new CodeMatch(OpCodes.Ldc_R4, 0f), new CodeMatch(i => i.Branches(out rootHeadingOffset)))
+                .ThrowIfInvalid("`rootHeadingOffset != 0` branch not found")
+                .MatchForward(false, new CodeMatch(OpCodes.Ldarg_1), new CodeMatch(OpCodes.Ldfld), new CodeMatch(OpCodes.Call, AccessTools.DeclaredMethod(typeof(Quaternion), nameof(Quaternion.Inverse))))
+                .RemoveLabels(out List<Label> labels)
+                .ThrowIfInvalid("rootHeadingOffset result not found")
+                .Insert(
+                    new CodeInstruction(OpCodes.Ldarg_0),
+                    new CodeInstruction(OpCodes.Isinst, typeof(CustomIKSolverVR.CustomSpine)),
+                    new CodeInstruction(OpCodes.Brfalse, rootHeadingOffset),
+                    new CodeInstruction(OpCodes.Ldarg_0),
+                    new CodeInstruction(OpCodes.Ldarg_1),
+                    new CodeInstruction(OpCodes.Ldloc_2),
+                    new CodeInstruction(OpCodes.Call, AccessTools.DeclaredMethod(typeof(CustomIKSolverVR.CustomSpine), nameof(CustomIKSolverVR.CustomSpine.RotateRoot))),
+                    new CodeInstruction(OpCodes.Br, maxRootAngle))
+                .AddLabels(labels)
+                .InstructionEnumeration();
+        }
+
+        [HarmonyPatch(nameof(IKSolverVR.Spine.SolvePelvis))]
+        [HarmonyPrefix]
+        public static bool SolvePelvis_Prefix(IKSolverVR.Spine __instance)
         {
             if (__instance is not CustomIKSolverVR.CustomSpine spine)
             {
