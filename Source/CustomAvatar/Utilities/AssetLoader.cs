@@ -36,6 +36,10 @@ namespace CustomAvatar.Utilities
             _logger = logger;
         }
 
+        internal GameObject playerAvatarManager { get; private set; }
+
+        internal GameObject trackingRig { get; private set; }
+
         internal Shader stereoMirrorShader { get; private set; }
 
         internal Shader unlitShader { get; private set; }
@@ -72,6 +76,8 @@ namespace CustomAvatar.Utilities
                 }
 
                 // since we called LoadAllAssetsAsync these are nearly instant lookups
+                playerAvatarManager = assetBundle.LoadAsset<GameObject>("Assets/Prefabs/PlayerAvatarManager.prefab");
+                trackingRig = assetBundle.LoadAsset<GameObject>("Assets/Prefabs/TrackingRig.prefab");
                 stereoMirrorShader = assetBundle.LoadAsset<Shader>("Assets/Shaders/StereoRender.shader");
                 unlitShader = assetBundle.LoadAsset<Shader>("Assets/Shaders/UnlitOverlay.shader");
                 uiSpriteAtlas = assetBundle.LoadAsset<SpriteAtlas>("Assets/Sprites/UI.spriteatlasv2");

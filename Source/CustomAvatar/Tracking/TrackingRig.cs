@@ -41,8 +41,14 @@ namespace CustomAvatar.Tracking
     {
         private const float kMinPressValue = VRInputModule.kMinPressValue;
 
+        [SerializeField] private SimpleParentConstraint _parentConstraint;
+        [SerializeField] private TrackedRenderModel _leftHandRenderModel;
+        [SerializeField] private TrackedRenderModel _rightHandRenderModel;
+        [SerializeField] private TrackedRenderModel _pelvisRenderModel;
+        [SerializeField] private TrackedRenderModel _leftFootRenderModel;
+        [SerializeField] private TrackedRenderModel _rightFootRenderModel;
+
         private ILogger<TrackingRig> _logger;
-        private DiContainer _container;
         private IDeviceProvider _deviceProvider;
         private IRenderModelProvider _renderModelProvider;
         private PlayerAvatarManager _playerAvatarManager;
@@ -53,16 +59,9 @@ namespace CustomAvatar.Tracking
         private BeatSaberUtilities _beatSaberUtilities;
         private IFPFCSettings _fpfcSettings;
         private HumanoidCalibrator _humanoidCalibrator;
-
-        private SimpleParentConstraint _parentConstraint;
         private CalibrationMode _activeCalibrationMode;
 
         private bool _showRenderModels;
-        private TrackedRenderModel _leftHandRenderModel;
-        private TrackedRenderModel _rightHandRenderModel;
-        private TrackedRenderModel _pelvisRenderModel;
-        private TrackedRenderModel _leftFootRenderModel;
-        private TrackedRenderModel _rightFootRenderModel;
 
         internal event Action trackingChanged;
 
@@ -77,18 +76,25 @@ namespace CustomAvatar.Tracking
         // local to the current active origin (parent of VRCenterAdjust or world if no parent)
         internal float eyeHeight => (_activeCameraManager.current != null && _activeCameraManager.current.origin != null ? _activeCameraManager.current.origin.InverseTransformPoint(head.transform.position).y : head.transform.position.y) - (_settings.moveFloorWithRoomAdjust ? _beatSaberUtilities.roomCenter.y : 0);
 
+        [field: SerializeField]
         internal GenericNode head { get; private set; }
 
+        [field: SerializeField]
         internal ControllerNode leftHand { get; private set; }
 
+        [field: SerializeField]
         internal ControllerNode rightHand { get; private set; }
 
+        [field: SerializeField]
         internal GenericNode pelvis { get; private set; }
 
+        [field: SerializeField]
         internal GenericNode leftFoot { get; private set; }
 
+        [field: SerializeField]
         internal GenericNode rightFoot { get; private set; }
 
+        [field: SerializeField]
         internal Transform fullBodyTracking { get; private set; }
 
         internal CalibrationMode activeCalibrationMode
@@ -173,31 +179,6 @@ namespace CustomAvatar.Tracking
             UpdateNodeStates();
         }
 
-        protected void Awake()
-        {
-            _parentConstraint = gameObject.AddComponent<SimpleParentConstraint>();
-
-            head = GenericNode.Create("Head", transform);
-            leftHand = ControllerNode.Create(_container, "Left Hand", transform, XRNode.LeftHand);
-            rightHand = ControllerNode.Create(_container, "Right Hand", transform, XRNode.RightHand);
-
-            fullBodyTracking = new GameObject("Full Body Tracking").transform;
-            fullBodyTracking.SetParent(transform, false);
-
-            pelvis = GenericNode.Create("Pelvis", fullBodyTracking);
-            leftFoot = GenericNode.Create("Left Foot", fullBodyTracking);
-            rightFoot = GenericNode.Create("Right Foot", fullBodyTracking);
-
-            if (_renderModelProvider != null)
-            {
-                _leftHandRenderModel = TrackedRenderModel.Create(leftHand.transform);
-                _rightHandRenderModel = TrackedRenderModel.Create(rightHand.transform);
-                _pelvisRenderModel = TrackedRenderModel.Create(pelvis.transform);
-                _leftFootRenderModel = TrackedRenderModel.Create(leftFoot.transform);
-                _rightFootRenderModel = TrackedRenderModel.Create(rightFoot.transform);
-            }
-        }
-
         protected void OnEnable()
         {
             if (_activeCameraManager != null)
@@ -256,7 +237,6 @@ namespace CustomAvatar.Tracking
         [UsedImplicitly]
         private void Construct(
             ILogger<TrackingRig> logger,
-            DiContainer container,
             IDeviceProvider deviceProvider,
             [InjectOptional] IRenderModelProvider renderModelProvider,
             PlayerAvatarManager playerAvatarManager,
@@ -267,7 +247,6 @@ namespace CustomAvatar.Tracking
             BeatSaberUtilities beatSaberUtilities,
             IFPFCSettings fpfcSettings)
         {
-            _container = container;
             _logger = logger;
             _deviceProvider = deviceProvider;
             _renderModelProvider = renderModelProvider;

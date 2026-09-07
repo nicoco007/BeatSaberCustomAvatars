@@ -11,6 +11,7 @@
   <Project Path="CustomAvatar-Editor/CustomAvatar-Editor.csproj">
     <Platform Project="x64" />
   </Project>
+  <Project Path="CustomAvatar.Tasks/CustomAvatar.Tasks.csproj" />
   <Project Path="CustomAvatar/CustomAvatar.csproj">
     <Platform Project="x64" />
   </Project>

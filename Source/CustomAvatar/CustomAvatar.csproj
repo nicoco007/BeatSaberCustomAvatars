@@ -64,4 +64,24 @@
   <ItemGroup>
     <ArtifactFiles Include="$(ProjectDir)..\..\Packaging\CustomAvatar\**\*.*" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CustomAvatar.Tasks\CustomAvatar.Tasks.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <TypesToGenerate Include="CustomAvatar.Player.HeadFollower" />
+    <TypesToGenerate Include="CustomAvatar.Player.PlayerAvatarManager" />
+    <TypesToGenerate Include="CustomAvatar.Tracking.TrackingRig" />
+    <TypesToGenerate Include="VRControllersValueSettingsOffsets" AssemblyName="DataModels" />
+  </ItemGroup>
+  <ItemGroup>
+    <SearchDirectories Include="$(BeatSaberDir)Beat Saber_Data\Managed" />
+    <SearchDirectories Include="$(BeatSaberDir)Libs" />
+    <SearchDirectories Include="$(BeatSaberDir)Plugins" />
+  </ItemGroup>
+  <UsingTask TaskName="GenerateClasses" TaskFactory="TaskHostFactory" AssemblyFile="$(MSBuildThisFileDirectory)..\CustomAvatar.Tasks\bin\$(Configuration)\netstandard2.0\CustomAvatar.Tasks.dll" />
+  <Target Name="GenerateClasses" AfterTargets="AfterBuild">
+    <GenerateClasses AssemblyFile="$(TargetPath)" Types="@(TypesToGenerate)" SearchDirectories="@(SearchDirectories)" OutputDirectory="$(ProjectDir)..\..\Unity\CustomAvatar\Assets\Generated" />
+  </Target>
 </Project>

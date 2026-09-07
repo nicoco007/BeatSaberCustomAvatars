@@ -113,10 +113,9 @@ namespace CustomAvatar.Player
         private BeatSaberUtilities _beatSaberUtilities;
         private ActiveCameraManager _activeCameraManager;
 
-        private SimpleParentConstraint _parentConstraint;
-
-        private GameObject _containerObject;
-        private Transform _containerTransform;
+        [SerializeField] private SimpleParentConstraint _parentConstraint;
+        [SerializeField] private GameObject _containerObject;
+        [SerializeField] private Transform _containerTransform;
 
         private CancellationTokenSource _avatarLoadCancellationTokenSource;
 
@@ -132,17 +131,6 @@ namespace CustomAvatar.Player
 
                 UpdateFirstPersonVisibility();
             }
-        }
-
-        protected void Awake()
-        {
-            _parentConstraint = gameObject.AddComponent<SimpleParentConstraint>();
-
-            _containerObject = new GameObject("Container");
-            _containerTransform = _containerObject.transform;
-            _containerTransform.SetParent(transform, false);
-
-            _container.InstantiateComponent<HeadFollower>(_containerObject);
         }
 
         protected void OnEnable()

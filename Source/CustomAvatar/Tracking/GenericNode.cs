@@ -20,27 +20,9 @@ namespace CustomAvatar.Tracking
 {
     internal class GenericNode : MonoBehaviour, ITrackedNode
     {
-        internal static GenericNode Create(string name, Transform parent)
-        {
-            GameObject gameObject = new(name);
+        [field: SerializeField] public Transform offset { get; private set; }
 
-            Transform transform = gameObject.transform;
-            transform.SetParent(parent, false);
-
-            GenericNode genericNode = gameObject.AddComponent<GenericNode>();
-
-            genericNode.calibration = new GameObject("Calibration").transform;
-            genericNode.calibration.SetParent(transform, false);
-
-            genericNode.offset = new GameObject("Offset").transform;
-            genericNode.offset.SetParent(genericNode.calibration, false);
-
-            return genericNode;
-        }
-
-        public Transform offset { get; private set; }
-
-        public Transform calibration { get; private set; }
+        [field: SerializeField] public Transform calibration { get; private set; }
 
         public bool isTracking { get; set; }
 

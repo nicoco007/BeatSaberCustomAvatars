@@ -21,20 +21,8 @@ namespace CustomAvatar.Tracking
 {
     internal class TrackedRenderModel : MonoBehaviour
     {
-        private MeshFilter _meshFilter;
-        private MeshRenderer _meshRenderer;
-
-        internal static TrackedRenderModel Create(Transform parent)
-        {
-            GameObject gameObject = new("Render Model");
-            gameObject.transform.SetParent(parent, false);
-
-            TrackedRenderModel trackedRenderModel = gameObject.AddComponent<TrackedRenderModel>();
-            trackedRenderModel._meshFilter = gameObject.AddComponent<MeshFilter>();
-            trackedRenderModel._meshRenderer = gameObject.AddComponent<MeshRenderer>();
-
-            return trackedRenderModel;
-        }
+        [SerializeField] private MeshFilter _meshFilter;
+        [SerializeField] private MeshRenderer _meshRenderer;
 
         public void SetRenderModel(RenderModel renderModel)
         {

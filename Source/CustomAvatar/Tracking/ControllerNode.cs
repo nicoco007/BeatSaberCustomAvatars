@@ -17,52 +17,14 @@
 extern alias BeatSaberFinalIK;
 
 using UnityEngine;
-using UnityEngine.XR;
-using Zenject;
 
 namespace CustomAvatar.Tracking
 {
     internal class ControllerNode : MonoBehaviour, ITrackedNode
     {
-        internal static ControllerNode Create(DiContainer container, string name, Transform parent, XRNode node)
-        {
-            GameObject gameObject = new(name);
-            gameObject.SetActive(false);
+        [field: SerializeField] public Transform offset { get; private set; }
 
-            Transform transform = gameObject.transform;
-            transform.SetParent(parent, false);
-
-            ControllerNode controllerNode = gameObject.AddComponent<ControllerNode>();
-
-            controllerNode.viewTransform = new GameObject("View Transform").transform;
-            controllerNode.viewTransform.SetParent(transform, false);
-
-            controllerNode.offset = new GameObject("Offset").transform;
-            controllerNode.offset.SetParent(controllerNode.viewTransform, false);
-
-            VRController vrController = container.InstantiateComponent<VRController>(gameObject);
-            vrController.enabled = false;
-            vrController._node = node;
-            vrController._viewAnchorTransform = controllerNode.viewTransform;
-            vrController._transformOffset = container.InstantiateComponent<VRControllersValueSettingsOffsets>(gameObject);
-
-            controllerNode.controller = vrController;
-
-            gameObject.SetActive(true);
-
-            return controllerNode;
-        }
-
-        protected void Start()
-        {
-            controller.enabled = true;
-        }
-
-        public Transform offset { get; private set; }
-
-        public Transform viewTransform { get; private set; }
-
-        public VRController controller { get; private set; }
+        [field: SerializeField] public VRController controller { get; private set; }
 
         public bool isTracking { get; set; }
 

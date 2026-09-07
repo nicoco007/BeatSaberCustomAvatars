@@ -78,8 +78,9 @@ namespace CustomAvatar.Zenject
                 Container.Bind(typeof(IFingerTrackingProvider)).To<DevicelessFingerTrackingProvider>().AsSingle();
             }
 
-            // managers
-            Container.Bind<PlayerAvatarManager>().FromNewComponentOnNewGameObject().AsSingle();
+            Container.Bind<TrackingRig>().FromComponentInNewPrefab(_assetLoader.trackingRig).AsSingle();
+            Container.Bind<PlayerAvatarManager>().FromComponentInNewPrefab(_assetLoader.playerAvatarManager).AsSingle();
+
             Container.Bind(typeof(AssetLoader), typeof(IDisposable)).FromInstance(_assetLoader);
 
             Container.Bind<AvatarLoader>().AsSingle();
@@ -94,8 +95,6 @@ namespace CustomAvatar.Zenject
             Container.Bind<MirrorHelper>().AsTransient();
 
             Container.Bind(typeof(IAffinity)).To<Patches.MirrorRendererSO>().AsSingle();
-
-            Container.Bind<TrackingRig>().FromNewComponentOnNewGameObject().AsSingle();
         }
 
         protected override void LoadResourcesBeforeInstall(IInstallerRegistry registry, DiContainer container)
