@@ -47,7 +47,8 @@ namespace CustomAvatar.Player
             Transform parent = transform.parent;
             Vector3 up = parent != null ? parent.up : Vector3.up;
             _trackingRig.head.transform.GetPositionAndRotation(out Vector3 position, out Quaternion rotation);
-            transform.SetPositionAndRotation(position + Vector3.Scale(transform.lossyScale, _playerAvatarManager.currentlySpawnedAvatar.prefab.headToRoot.position), Quaternion.LookRotation(Vector3.ProjectOnPlane(rotation * Vector3.forward, up), up));
+            rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(rotation * Vector3.forward, up), up);
+            transform.SetPositionAndRotation(position + rotation * Vector3.Scale(transform.lossyScale, _playerAvatarManager.currentlySpawnedAvatar.prefab.headToRoot.position), rotation);
         }
 
         protected void OnDestroy()
