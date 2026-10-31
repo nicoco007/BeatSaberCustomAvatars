@@ -14,24 +14,20 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using CustomAvatar.Avatar;
 using CustomAvatar.Player;
-using CustomAvatar.Utilities;
+using Unity.Profiling;
 using UnityEngine;
+using UnityEngine.Profiling;
 using Zenject;
 
 namespace CustomAvatar.Rendering
 {
     internal class FakeMirrorProvider : MonoBehaviour
     {
-        private static readonly Dictionary<Type, Type[]> kRequireComponentCache = [];
-
         private PlayerAvatarManager _playerAvatarManager;
 
-        private GameObject _mirroredAvatar;
         private FakeMirror _fakeMirror;
 
         [Inject]
@@ -43,12 +39,14 @@ namespace CustomAvatar.Rendering
         protected void Awake()
         {
             // mirrored at the line where the player platform usually ends (i.e. 0.75 m in front of the player)
-            Transform mirroredAvatarContainerTransform = transform;
-            mirroredAvatarContainerTransform.SetPositionAndRotation(new Vector3(0, 0, 0.75f), Quaternion.identity);
-            mirroredAvatarContainerTransform.localScale = new Vector3(1, 1, -1f); // mirrored across XY plane
+            Transform transform = this.transform;
+            transform.SetPositionAndRotation(new Vector3(0, 0, 0.75f), Quaternion.identity);
+            transform.localScale = new Vector3(1, 1, -1f); // mirrored across XY plane
 
+            GameObject gameObject = new("MirroredAvatar");
+            gameObject.SetActive(false);
+            gameObject.transform.SetParent(transform, false);
             _fakeMirror = gameObject.AddComponent<FakeMirror>();
-            _fakeMirror.enabled = false;
         }
 
         protected void OnEnable()
@@ -83,128 +81,60 @@ namespace CustomAvatar.Rendering
                 return;
             }
 
-            _mirroredAvatar = new GameObject("MirroredAvatar");
-            _mirroredAvatar.SetActive(false);
-            Transform mirroredAvatarTransform = _mirroredAvatar.transform;
-            mirroredAvatarTransform.SetParent(transform);
-            GameObject mirroredAvatar = Instantiate(avatar.gameObject, mirroredAvatarTransform);
-
-            foreach (GameObject gameObject in mirroredAvatar.GetComponentsInChildren<Transform>().Select(t => t.gameObject))
-            {
-                SafeDestroyImmediate(gameObject);
-            }
-
-            _fakeMirror.fromRoot = avatar.transform.parent;
-            _fakeMirror.toRoot = mirroredAvatarTransform;
-            _fakeMirror.from = [.. Traverse(avatar.transform)];
-            _fakeMirror.to = [.. Traverse(mirroredAvatar.transform)];
-            _fakeMirror.enabled = true;
-
-            foreach (Transform transform in _fakeMirror.to)
-            {
-                transform.gameObject.layer = AvatarLayers.kMirror;
-            }
-
-            mirroredAvatar.SetActive(true);
-            _mirroredAvatar.SetActive(true);
+            _fakeMirror.Set(avatar.transform);
         }
 
         private void DestroyAvatar()
         {
-            _fakeMirror.enabled = false;
-            Destroy(_mirroredAvatar);
-        }
-
-        private void SafeDestroyImmediate(GameObject gameObject)
-        {
-            MonoBehaviour[] monoBehaviours = gameObject.GetComponents<MonoBehaviour>();
-
-            Array.Sort(monoBehaviours, (a, b) =>
-            {
-                if (DependsOn(a, b))
-                {
-                    return -1;
-                }
-                else if (DependsOn(b, a))
-                {
-                    return 1;
-                }
-                else
-                {
-                    return 0;
-                }
-            });
-
-            foreach (MonoBehaviour monoBehaviour in monoBehaviours)
-            {
-                DestroyImmediate(monoBehaviour);
-            }
-        }
-
-        private bool DependsOn(MonoBehaviour dependent, MonoBehaviour dependency)
-        {
-            if (dependent == null || dependency == null)
-            {
-                return false;
-            }
-
-            Type dependentType = dependent.GetType();
-
-            if (!kRequireComponentCache.TryGetValue(dependentType, out Type[] dependencies))
-            {
-                dependencies = CacheRequiredComponents(dependentType);
-                kRequireComponentCache.Add(dependentType, dependencies);
-            }
-
-            return dependencies.Any(rc => rc.IsAssignableFrom(dependency.GetType()));
-        }
-
-        private Type[] CacheRequiredComponents(Type type)
-        {
-            RequireComponent[] requireComponents = (RequireComponent[])Attribute.GetCustomAttributes(type, typeof(RequireComponent), true);
-            List<Type> list = new(requireComponents.Length * 3);
-
-            foreach (RequireComponent requireComponent in requireComponents)
-            {
-                if (requireComponent.m_Type0 != null)
-                {
-                    list.Add(requireComponent.m_Type0);
-                }
-
-                if (requireComponent.m_Type1 != null)
-                {
-                    list.Add(requireComponent.m_Type1);
-                }
-
-                if (requireComponent.m_Type2 != null)
-                {
-                    list.Add(requireComponent.m_Type2);
-                }
-            }
-
-            return [.. list];
-        }
-
-        private IEnumerable<Transform> Traverse(Transform transform)
-        {
-            yield return transform;
-
-            for (int i = 0; i < transform.childCount; i++)
-            {
-                foreach (Transform child in Traverse(transform.GetChild(i)))
-                {
-                    yield return child;
-                }
-            }
+            _fakeMirror.Clear();
         }
 
         // TODO: blend shapes and possibly other things
         private class FakeMirror : MonoBehaviour
         {
-            public Transform fromRoot;
-            public Transform toRoot;
-            public Transform[] from;
-            public Transform[] to;
+            private static readonly ProfilerMarker kOnBeforeRenderProfilerMarker = new($"{nameof(FakeMirror)}.{nameof(OnBeforeRender)}");
+
+            private readonly List<Transform> _from = new(64);
+            private readonly List<Transform> _to = new(64);
+
+            public void Set(Transform from)
+            {
+                gameObject.SetActive(false);
+
+                GameObject to = Instantiate(from.gameObject, Vector3.zero, Quaternion.identity, new InstantiateParameters() { worldSpace = false, parent = transform });
+
+                List<MonoBehaviour> monoBehaviours = [];
+                to.GetComponentsInChildren(true, monoBehaviours);
+                monoBehaviours.Reverse(); // so Unity doesn't complain about required components being destroyed first
+
+                foreach (MonoBehaviour monoBehaviour in monoBehaviours)
+                {
+                    DestroyImmediate(monoBehaviour);
+                }
+
+                from.GetComponentsInChildren(true, _from);
+                to.GetComponentsInChildren(true, _to);
+
+                for (int i = 0; i < _to.Count; i++)
+                {
+                    _to[i].gameObject.layer = AvatarLayers.kMirror;
+                }
+
+                gameObject.SetActive(true);
+            }
+
+            public void Clear()
+            {
+                if (_to.Count > 0)
+                {
+                    Destroy(_to[0].gameObject);
+                }
+
+                _from.Clear();
+                _to.Clear();
+
+                gameObject.SetActive(false);
+            }
 
             protected void OnEnable()
             {
@@ -218,16 +148,33 @@ namespace CustomAvatar.Rendering
 
             private void OnBeforeRender()
             {
-                transform.GetPositionAndRotation(out Vector3 containerPosition, out Quaternion containerRotation);
-                Quaternion inverseContainerRotation = Quaternion.Inverse(containerRotation);
-                fromRoot.GetPositionAndRotation(out Vector3 position, out Quaternion rotation);
-                toRoot.SetLocalPositionAndRotation(inverseContainerRotation * (position - containerPosition), inverseContainerRotation * rotation);
-                toRoot.localScale = fromRoot.lossyScale;
+                kOnBeforeRenderProfilerMarker.Begin(this);
 
-                foreach ((Transform from, Transform to) in from.Zip(to))
+                try
                 {
-                    to.SetLocalPose(from.GetLocalPose());
-                    to.localScale = from.localScale;
+                    transform.GetPositionAndRotation(out Vector3 containerPosition, out Quaternion containerRotation);
+                    Quaternion inverseContainerRotation = Quaternion.Inverse(containerRotation);
+
+                    Transform fromRoot = _from[0];
+                    Transform toRoot = _to[0];
+
+                    fromRoot.GetPositionAndRotation(out Vector3 position, out Quaternion rotation);
+                    toRoot.SetLocalPositionAndRotation(inverseContainerRotation * (position - containerPosition), inverseContainerRotation * rotation);
+                    toRoot.localScale = fromRoot.lossyScale;
+
+                    for (int i = 1; i < _from.Count; i++)
+                    {
+                        Transform from = _from[i];
+                        Transform to = _to[i];
+
+                        from.GetLocalPositionAndRotation(out position, out rotation);
+                        to.SetLocalPositionAndRotation(position, rotation);
+                        to.localScale = from.localScale;
+                    }
+                }
+                finally
+                {
+                    kOnBeforeRenderProfilerMarker.End();
                 }
             }
         }
