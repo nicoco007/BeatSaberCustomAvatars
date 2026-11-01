@@ -21,7 +21,6 @@ using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
 using CustomAvatar.Tracking;
-using HMUI;
 using IPA.Loader;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -111,11 +110,6 @@ namespace CustomAvatar.UI
             }
 
             _trackingRig.showRenderModels = true;
-        }
-
-        public override void __Init(HMUI.Screen screen, ViewController parentViewController, ContainerViewController containerViewController)
-        {
-            base.__Init(screen, parentViewController, containerViewController);
         }
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
