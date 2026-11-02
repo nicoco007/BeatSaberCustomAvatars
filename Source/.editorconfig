@@ -1,5 +1,8 @@
 root = true
 
+[*]
+insert_final_newline = true
+
 [*.{bsml,csproj,csproj.user,props,targets}]
 indent_size = 2
 indent_style = space
