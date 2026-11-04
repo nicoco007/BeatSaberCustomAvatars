@@ -50,5 +50,6 @@ namespace CustomAvatar.Tracking
         public CustomAvatar.Tracking.TrackedRenderModel _pelvisRenderModel;
         public CustomAvatar.Tracking.TrackedRenderModel _leftFootRenderModel;
         public CustomAvatar.Tracking.TrackedRenderModel _rightFootRenderModel;
+        public CustomAvatar.Tracking.HumanoidCalibrator _humanoidCalibrator;
     }
 }

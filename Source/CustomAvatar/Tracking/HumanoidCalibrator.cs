@@ -19,32 +19,30 @@ extern alias BeatSaberFinalIK;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Player;
-using CustomAvatar.Rendering;
 using CustomAvatar.Utilities;
 using UnityEngine;
-using Object = UnityEngine.Object;
+using Zenject;
 
 namespace CustomAvatar.Tracking
 {
-    internal class HumanoidCalibrator
+    internal class HumanoidCalibrator : MonoBehaviour
     {
         // Average human is 7.5 heads tall. Eyes are at 7 heads from the floor (middle of the head) and pelvis is at 4 heads from the floor.
         // Note that the actual value doesn't really matter that much, it's mostly to make the positioning easier to understand.
         internal const float kEyeHeightToPelvisHeightRatio = 4f / 7f;
 
-        private readonly TrackingRig _trackingRig;
-        private readonly CalibrationData _calibrationData;
-        private readonly Settings _settings;
-        private readonly ActiveCameraManager _activeCameraManager;
-        private readonly BeatSaberUtilities _beatSaberUtilities;
-        private readonly PlayerAvatarManager _playerAvatarManager;
+        private TrackingRig _trackingRig;
+        private CalibrationData _calibrationData;
+        private Settings _settings;
+        private BeatSaberUtilities _beatSaberUtilities;
+        private PlayerAvatarManager _playerAvatarManager;
 
-        internal HumanoidCalibrator(TrackingRig trackingRig, CalibrationData calibrationData, Settings settings, ActiveCameraManager activeCameraManager, BeatSaberUtilities beatSaberUtilities, PlayerAvatarManager playerAvatarManager)
+        [Inject]
+        internal void Construct(TrackingRig trackingRig, CalibrationData calibrationData, Settings settings, BeatSaberUtilities beatSaberUtilities, PlayerAvatarManager playerAvatarManager)
         {
             _trackingRig = trackingRig;
             _calibrationData = calibrationData;
             _settings = settings;
-            _activeCameraManager = activeCameraManager;
             _beatSaberUtilities = beatSaberUtilities;
             _playerAvatarManager = playerAvatarManager;
         }
@@ -76,7 +74,23 @@ namespace CustomAvatar.Tracking
             _trackingRig.fullBodyTracking.localScale = Vector3.one;
             _trackingRig.fullBodyTracking.localPosition = Vector3.zero;
 
-            Transform center = CreateCenter();
+            Transform center = transform;
+            Transform head = _trackingRig.head.transform;
+
+            // We want the user's head rotation to match the avatar's head directly rather than assuming whatever
+            // position they're in is forward. I'm not sure how I feel about doing that, but it's what VRChat does.
+            Quaternion rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(head.forward, center.up), center.up);
+            head.rotation = rotation;
+
+            center.SetPositionAndRotation(head.position, rotation);
+
+            // put center on the ground
+            center.localPosition = new Vector3(center.localPosition.x, 0, center.localPosition.z);
+
+            if (_settings.moveFloorWithRoomAdjust)
+            {
+                center.position += center.TransformVector(0, _beatSaberUtilities.roomCenter.y, 0);
+            }
 
             Vector3 leftFootPos = center.InverseTransformPoint(_trackingRig.leftFoot.transform.position);
             Vector3 rightFootPos = center.InverseTransformPoint(_trackingRig.rightFoot.transform.position);
@@ -87,8 +101,6 @@ namespace CustomAvatar.Tracking
             ApplyCalibration(center, _trackingRig.rightFoot, new Vector3(rightFootPos.x, 0, 0), Quaternion.Euler(0, 10f, 0));
 
             WriteCalibrationTransforms(_calibrationData.automaticCalibration);
-
-            Object.Destroy(center.gameObject);
         }
 
         internal void CalibrateManually()
@@ -168,31 +180,6 @@ namespace CustomAvatar.Tracking
             {
                 device.calibration.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             }
-        }
-
-        private Transform CreateCenter()
-        {
-            Transform center = new GameObject("Center").transform;
-            Transform head = _trackingRig.head.transform;
-            Transform parent = _activeCameraManager.current.origin;
-
-            // We want the user's head rotation to match the avatar's head directly rather than assuming whatever
-            // position they're in is forward. I'm not sure how I feel about doing that, but it's what VRChat does.
-            Quaternion rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(head.forward, parent.up), parent.up);
-            head.rotation = rotation;
-
-            center.SetParent(parent, false);
-            center.SetPositionAndRotation(head.position, rotation);
-
-            // put center on the ground
-            center.localPosition = new Vector3(center.localPosition.x, 0, center.localPosition.z);
-
-            if (_settings.moveFloorWithRoomAdjust)
-            {
-                center.position += center.TransformVector(0, _beatSaberUtilities.roomCenter.y, 0);
-            }
-
-            return center;
         }
     }
 }

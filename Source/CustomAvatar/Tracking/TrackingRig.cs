@@ -47,6 +47,7 @@ namespace CustomAvatar.Tracking
         [SerializeField] private TrackedRenderModel _pelvisRenderModel;
         [SerializeField] private TrackedRenderModel _leftFootRenderModel;
         [SerializeField] private TrackedRenderModel _rightFootRenderModel;
+        [SerializeField] private HumanoidCalibrator _humanoidCalibrator;
 
         private ILogger<TrackingRig> _logger;
         private IDeviceProvider _deviceProvider;
@@ -58,7 +59,6 @@ namespace CustomAvatar.Tracking
         private VRControllerVisualsManager _vrControllerVisualsManager;
         private BeatSaberUtilities _beatSaberUtilities;
         private IFPFCSettings _fpfcSettings;
-        private HumanoidCalibrator _humanoidCalibrator;
         private CalibrationMode _activeCalibrationMode;
 
         private bool _showRenderModels;
@@ -257,7 +257,6 @@ namespace CustomAvatar.Tracking
             _vrControllerVisualsManager = vrControllerVisualsManager;
             _beatSaberUtilities = beatSaberUtilities;
             _fpfcSettings = fpfcSettings;
-            _humanoidCalibrator = new HumanoidCalibrator(this, calibrationData, settings, activeCameraManager, beatSaberUtilities, playerAvatarManager);
         }
 
         protected void OnAfterUpdate()
