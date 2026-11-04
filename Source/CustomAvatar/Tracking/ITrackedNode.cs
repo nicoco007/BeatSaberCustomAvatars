@@ -20,9 +20,11 @@ namespace CustomAvatar.Tracking
 {
     internal interface ITrackedNode
     {
+        public Transform transform { get; }
+
         public Transform offset { get; }
 
-        public bool isTracking { get; }
+        public bool isTracking { get; set; }
 
         public bool isCalibrated { get; }
     }

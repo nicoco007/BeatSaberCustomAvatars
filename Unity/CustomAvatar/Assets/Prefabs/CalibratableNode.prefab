@@ -190,7 +190,7 @@ GameObject:
   - component: {fileID: 2276763775719868163}
   - component: {fileID: 1126225178876185681}
   m_Layer: 0
-  m_Name: GenericNode
+  m_Name: CalibratableNode
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

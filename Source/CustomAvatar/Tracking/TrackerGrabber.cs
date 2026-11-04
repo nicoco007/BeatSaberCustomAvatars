@@ -32,7 +32,7 @@ namespace CustomAvatar.Tracking
 
         private TrackingRig _trackingRig;
 
-        private GenericNode _grabbed;
+        private CalibratableNode _grabbed;
         private Pose _offset;
 
         private bool _active
@@ -55,7 +55,7 @@ namespace CustomAvatar.Tracking
 
         protected void Update()
         {
-            GenericNode closest = null;
+            CalibratableNode closest = null;
 
             if (_grabbed != null)
             {
@@ -127,7 +127,7 @@ namespace CustomAvatar.Tracking
             }
         }
 
-        private void SetIfCloser(GenericNode node, Vector3 self, ref float distance, ref GenericNode closest)
+        private void SetIfCloser(CalibratableNode node, Vector3 self, ref float distance, ref CalibratableNode closest)
         {
             if (!node.isGrabbable)
             {

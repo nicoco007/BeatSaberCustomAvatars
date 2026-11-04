@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Generic Node Default
+  m_Name: Calibratable Node Default
   m_Shader: {fileID: 4800000, guid: 2742c940e5cdf87448fe67d1d580a154, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0

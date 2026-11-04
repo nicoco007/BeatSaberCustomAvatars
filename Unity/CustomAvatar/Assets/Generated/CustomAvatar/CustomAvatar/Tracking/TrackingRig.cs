@@ -4,7 +4,7 @@ namespace CustomAvatar.Tracking
     public class TrackingRig : UnityEngine.MonoBehaviour
     {
         [field: UnityEngine.SerializeField]
-        public CustomAvatar.Tracking.GenericNode head { get; set; }
+        public CustomAvatar.Tracking.SimpleNode head { get; set; }
 
         [field: UnityEngine.SerializeField]
         public CustomAvatar.Tracking.ControllerNode leftHand { get; set; }
@@ -13,13 +13,13 @@ namespace CustomAvatar.Tracking
         public CustomAvatar.Tracking.ControllerNode rightHand { get; set; }
 
         [field: UnityEngine.SerializeField]
-        public CustomAvatar.Tracking.GenericNode pelvis { get; set; }
+        public CustomAvatar.Tracking.CalibratableNode pelvis { get; set; }
 
         [field: UnityEngine.SerializeField]
-        public CustomAvatar.Tracking.GenericNode leftFoot { get; set; }
+        public CustomAvatar.Tracking.CalibratableNode leftFoot { get; set; }
 
         [field: UnityEngine.SerializeField]
-        public CustomAvatar.Tracking.GenericNode rightFoot { get; set; }
+        public CustomAvatar.Tracking.CalibratableNode rightFoot { get; set; }
 
         [field: UnityEngine.SerializeField]
         public UnityEngine.Transform fullBodyTracking { get; set; }

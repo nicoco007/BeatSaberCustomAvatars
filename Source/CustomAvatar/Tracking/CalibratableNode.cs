@@ -18,7 +18,7 @@ using UnityEngine;
 
 namespace CustomAvatar.Tracking
 {
-    internal class GenericNode : MonoBehaviour, ITrackedNode
+    internal class CalibratableNode : MonoBehaviour, ITrackedNode
     {
         [SerializeField] private Renderer _renderer;
         [SerializeField] private Transform _grabSphereTransform;
