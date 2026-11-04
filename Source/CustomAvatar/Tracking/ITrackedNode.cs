@@ -20,6 +20,8 @@ namespace CustomAvatar.Tracking
 {
     internal interface ITrackedNode
     {
+        public DeviceUse deviceUse { get; }
+
         public Transform transform { get; }
 
         public Transform offset { get; }

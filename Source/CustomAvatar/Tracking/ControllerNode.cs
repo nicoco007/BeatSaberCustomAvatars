@@ -22,6 +22,8 @@ namespace CustomAvatar.Tracking
 {
     internal class ControllerNode : MonoBehaviour, ITrackedNode
     {
+        [field: SerializeField] public DeviceUse deviceUse { get; private set; }
+
         [field: SerializeField] public Transform offset { get; private set; }
 
         [field: SerializeField] public Transform viewTransform { get; private set; }

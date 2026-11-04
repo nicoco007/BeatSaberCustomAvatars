@@ -225,6 +225,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 908874b78e3c39642aac78a65b2022d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <deviceUse>k__BackingField: 6
   <offset>k__BackingField: {fileID: 6820598604649610693}
   <manualOffset>k__BackingField: {fileID: 390561698211856370}
   <calibration>k__BackingField: {fileID: 6139911882339622368}

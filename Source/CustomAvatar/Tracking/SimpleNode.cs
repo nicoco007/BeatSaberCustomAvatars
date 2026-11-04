@@ -25,6 +25,9 @@ namespace CustomAvatar.Tracking
         public bool isCalibrated => true;
 
         [field: SerializeField]
+        public DeviceUse deviceUse { get; private set; }
+
+        [field: SerializeField]
         public Transform offset { get; private set; }
     }
 }

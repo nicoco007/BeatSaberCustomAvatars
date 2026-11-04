@@ -273,6 +273,10 @@ PrefabInstance:
       propertyPath: _node
       value: 4
       objectReference: {fileID: 0}
+    - target: {fileID: 4893189719852196524, guid: 58e59e0b005c762409c52f5dd2e367a3, type: 3}
+      propertyPath: <deviceUse>k__BackingField
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6297725819033684484, guid: 58e59e0b005c762409c52f5dd2e367a3, type: 3}
       propertyPath: m_Name
       value: Left Hand
@@ -450,6 +454,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 6264472093780425725}
     m_Modifications:
+    - target: {fileID: 1126225178876185681, guid: c185fb4347af7e34faa727c4375c317f, type: 3}
+      propertyPath: <deviceUse>k__BackingField
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 2276763775719868163, guid: c185fb4347af7e34faa727c4375c317f, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -534,6 +542,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 6264472093780425725}
     m_Modifications:
+    - target: {fileID: 1126225178876185681, guid: c185fb4347af7e34faa727c4375c317f, type: 3}
+      propertyPath: <deviceUse>k__BackingField
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 2276763775719868163, guid: c185fb4347af7e34faa727c4375c317f, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -618,6 +630,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 6264472093780425725}
     m_Modifications:
+    - target: {fileID: 1126225178876185681, guid: c185fb4347af7e34faa727c4375c317f, type: 3}
+      propertyPath: <deviceUse>k__BackingField
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 2276763775719868163, guid: c185fb4347af7e34faa727c4375c317f, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -705,6 +721,10 @@ PrefabInstance:
     - target: {fileID: 268560833866901219, guid: 58e59e0b005c762409c52f5dd2e367a3, type: 3}
       propertyPath: _node
       value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4893189719852196524, guid: 58e59e0b005c762409c52f5dd2e367a3, type: 3}
+      propertyPath: <deviceUse>k__BackingField
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 6297725819033684484, guid: 58e59e0b005c762409c52f5dd2e367a3, type: 3}
       propertyPath: m_Name

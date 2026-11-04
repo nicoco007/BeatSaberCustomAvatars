@@ -28,6 +28,9 @@ namespace CustomAvatar.Tracking
         [SerializeField] private Material _activeMaterial;
 
         [field: SerializeField]
+        public DeviceUse deviceUse { get; private set; }
+
+        [field: SerializeField]
         public Transform offset { get; private set; }
 
         [field: SerializeField]

@@ -271,10 +271,10 @@ namespace CustomAvatar.Tracking
 
         protected void OnAfterUpdate()
         {
-            UpdateTransform(DeviceUse.Head, head);
-            UpdateTransform(DeviceUse.Waist, pelvis);
-            UpdateTransform(DeviceUse.LeftFoot, leftFoot);
-            UpdateTransform(DeviceUse.RightFoot, rightFoot);
+            UpdateTransform(head);
+            UpdateTransform(pelvis);
+            UpdateTransform(leftFoot);
+            UpdateTransform(rightFoot);
         }
 
         protected void OnDisable()
@@ -444,9 +444,9 @@ namespace CustomAvatar.Tracking
             }
         }
 
-        private void UpdateTransform(DeviceUse deviceUse, ITrackedNode trackedNode)
+        private void UpdateTransform(ITrackedNode trackedNode)
         {
-            if (_deviceProvider.TryGetDeviceState(deviceUse, out DeviceState deviceState) && deviceState.isTracking)
+            if (_deviceProvider.TryGetDeviceState(trackedNode.deviceUse, out DeviceState deviceState) && deviceState.isTracking)
             {
                 trackedNode.transform.SetLocalPositionAndRotation(deviceState.position, deviceState.rotation);
             }
@@ -473,12 +473,12 @@ namespace CustomAvatar.Tracking
 
             _logger.LogTrace("Updating active transforms");
 
-            UpdateNodeState(head, DeviceUse.Head);
-            UpdateNodeState(leftHand, DeviceUse.LeftHand);
-            UpdateNodeState(rightHand, DeviceUse.RightHand);
-            UpdateNodeState(pelvis, DeviceUse.Waist);
-            UpdateNodeState(leftFoot, DeviceUse.LeftFoot);
-            UpdateNodeState(rightFoot, DeviceUse.RightFoot);
+            UpdateNodeState(head);
+            UpdateNodeState(leftHand);
+            UpdateNodeState(rightHand);
+            UpdateNodeState(pelvis);
+            UpdateNodeState(leftFoot);
+            UpdateNodeState(rightFoot);
 
             areBothHandsTracking = leftHand.isTracking && rightHand.isTracking;
             areAnyFullBodyTrackersTracking = pelvis.isTracking || leftFoot.isTracking || rightFoot.isTracking;
@@ -486,9 +486,9 @@ namespace CustomAvatar.Tracking
             trackingChanged?.Invoke();
         }
 
-        private void UpdateNodeState(CalibratableNode calibratableNode, DeviceUse deviceUse)
+        private void UpdateNodeState(CalibratableNode calibratableNode)
         {
-            if (_deviceProvider.TryGetDeviceState(deviceUse, out DeviceState deviceState))
+            if (_deviceProvider.TryGetDeviceState(calibratableNode.deviceUse, out DeviceState deviceState))
             {
                 calibratableNode.isTracking = deviceState.isTracking;
                 calibratableNode.gameObject.SetActive(deviceState.isTracking);
@@ -499,25 +499,25 @@ namespace CustomAvatar.Tracking
                 calibratableNode.gameObject.SetActive(false);
             }
 
-            UpdateCalibrationState(calibratableNode, deviceUse);
+            UpdateCalibrationState(calibratableNode);
         }
 
         private void UpdateCalibrationStates()
         {
-            UpdateCalibrationState(pelvis, DeviceUse.Waist);
-            UpdateCalibrationState(leftFoot, DeviceUse.LeftFoot);
-            UpdateCalibrationState(rightFoot, DeviceUse.RightFoot);
+            UpdateCalibrationState(pelvis);
+            UpdateCalibrationState(leftFoot);
+            UpdateCalibrationState(rightFoot);
         }
 
-        private void UpdateCalibrationState(CalibratableNode calibratableNode, DeviceUse deviceUse)
+        private void UpdateCalibrationState(CalibratableNode calibratableNode)
         {
-            calibratableNode.isCalibrated = IsCurrentlyCalibrated(deviceUse);
+            calibratableNode.isCalibrated = IsCurrentlyCalibrated(calibratableNode.deviceUse);
         }
 
-        private void UpdateNodeState(ITrackedNode trackedNode, DeviceUse deviceUse)
+        private void UpdateNodeState(ITrackedNode trackedNode)
         {
             // To mimic what VRController does, we only check if the device is connected.
-            trackedNode.isTracking = _deviceProvider.TryGetDeviceState(deviceUse, out DeviceState deviceState) && deviceState.isConnected;
+            trackedNode.isTracking = _deviceProvider.TryGetDeviceState(trackedNode.deviceUse, out DeviceState deviceState) && deviceState.isConnected;
         }
 
         private bool IsCurrentlyCalibrated(DeviceUse deviceUse)
@@ -571,18 +571,18 @@ namespace CustomAvatar.Tracking
             _logger.LogTrace("Updating render models");
 
             return Task.WhenAll(
-                UpdateRenderModelAsync(DeviceUse.LeftHand, leftHand, _leftHandRenderModel),
-                UpdateRenderModelAsync(DeviceUse.RightHand, rightHand, _rightHandRenderModel),
-                UpdateRenderModelAsync(DeviceUse.Waist, pelvis, _pelvisRenderModel),
-                UpdateRenderModelAsync(DeviceUse.LeftFoot, leftFoot, _leftFootRenderModel),
-                UpdateRenderModelAsync(DeviceUse.RightFoot, rightFoot, _rightFootRenderModel));
+                UpdateRenderModelAsync(leftHand, _leftHandRenderModel),
+                UpdateRenderModelAsync(rightHand, _rightHandRenderModel),
+                UpdateRenderModelAsync(pelvis, _pelvisRenderModel),
+                UpdateRenderModelAsync(leftFoot, _leftFootRenderModel),
+                UpdateRenderModelAsync(rightFoot, _rightFootRenderModel));
         }
 
-        private async Task UpdateRenderModelAsync(DeviceUse deviceUse, ITrackedNode trackedNode, TrackedRenderModel trackedRenderModel)
+        private async Task UpdateRenderModelAsync(ITrackedNode trackedNode, TrackedRenderModel trackedRenderModel)
         {
             RenderModel renderModel;
 
-            if (trackedNode.isTracking && (renderModel = await _renderModelProvider.GetRenderModelAsync(deviceUse)) != null)
+            if (trackedNode.isTracking && (renderModel = await _renderModelProvider.GetRenderModelAsync(trackedNode.deviceUse)) != null)
             {
                 trackedRenderModel.SetRenderModel(renderModel);
             }

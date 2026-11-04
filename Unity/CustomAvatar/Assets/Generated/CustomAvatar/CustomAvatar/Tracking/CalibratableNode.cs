@@ -23,6 +23,9 @@ namespace CustomAvatar.Tracking
         }
 
         [field: UnityEngine.SerializeField]
+        public CustomAvatar.Tracking.DeviceUse deviceUse { get; set; }
+
+        [field: UnityEngine.SerializeField]
         public UnityEngine.Transform offset { get; set; }
 
         [field: UnityEngine.SerializeField]
