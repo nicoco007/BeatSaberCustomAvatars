@@ -3,5 +3,25 @@ namespace CustomAvatar.Tracking
 {
     public class HumanoidCalibrator : UnityEngine.MonoBehaviour
     {
+        [field: UnityEngine.SerializeField]
+        public CustomAvatar.Tracking.CalibrationPoint pelvis { get; set; }
+
+        [field: UnityEngine.SerializeField]
+        public CustomAvatar.Tracking.CalibrationPoint leftFoot { get; set; }
+
+        [field: UnityEngine.SerializeField]
+        public CustomAvatar.Tracking.CalibrationPoint rightFoot { get; set; }
+
+        void OnEnable()
+        {
+        }
+
+        void Update()
+        {
+        }
+
+        void OnDisable()
+        {
+        }
     }
 }

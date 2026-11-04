@@ -30,8 +30,6 @@ using JetBrains.Annotations;
 using SiraUtil.Tools.FPFC;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.XR;
-using VRUIControls;
 using Zenject;
 
 namespace CustomAvatar.Tracking
@@ -39,8 +37,6 @@ namespace CustomAvatar.Tracking
     [DisallowMultipleComponent]
     internal class TrackingRig : MonoBehaviour
     {
-        private const float kMinPressValue = VRInputModule.kMinPressValue;
-
         [SerializeField] private SimpleParentConstraint _parentConstraint;
         [SerializeField] private TrackedRenderModel _leftHandRenderModel;
         [SerializeField] private TrackedRenderModel _rightHandRenderModel;
@@ -102,6 +98,7 @@ namespace CustomAvatar.Tracking
             private set
             {
                 field = value;
+                _humanoidCalibrator.gameObject.SetActive(value);
                 isCalibratingChanged?.Invoke(value);
             }
         }
@@ -277,24 +274,6 @@ namespace CustomAvatar.Tracking
             UpdateTransform(DeviceUse.Waist, pelvis);
             UpdateTransform(DeviceUse.LeftFoot, leftFoot);
             UpdateTransform(DeviceUse.RightFoot, rightFoot);
-        }
-
-        protected void Update()
-        {
-            if (isCalibrating)
-            {
-                _playerAvatarManager.ResizeCurrentAvatar(eyeHeight);
-
-                // need to use trigger rather than triggerButton since the latter is not bound on all controller types with SteamVR
-                if (InputDevices.GetDeviceAtXRNode(XRNode.LeftHand).TryGetFeatureValue(UnityEngine.XR.CommonUsages.trigger, out float leftTriggerValue) &&
-                    InputDevices.GetDeviceAtXRNode(XRNode.RightHand).TryGetFeatureValue(UnityEngine.XR.CommonUsages.trigger, out float rightTriggerValue) &&
-                    leftTriggerValue >= kMinPressValue && rightTriggerValue >= kMinPressValue)
-                {
-                    _humanoidCalibrator.Calibrate();
-
-                    EndCalibration();
-                }
-            }
         }
 
         protected void OnDisable()

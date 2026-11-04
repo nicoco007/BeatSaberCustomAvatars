@@ -32,10 +32,6 @@ namespace CustomAvatar.Tracking
         {
         }
 
-        void Update()
-        {
-        }
-
         void OnDisable()
         {
         }

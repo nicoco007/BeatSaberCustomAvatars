@@ -17,8 +17,11 @@
 extern alias BeatSaberFinalIK;
 
 using CustomAvatar.Configuration;
+using CustomAvatar.Player;
 using CustomAvatar.Utilities;
 using UnityEngine;
+using UnityEngine.XR;
+using VRUIControls;
 using Zenject;
 
 namespace CustomAvatar.Tracking
@@ -29,18 +32,31 @@ namespace CustomAvatar.Tracking
         // Note that the actual value doesn't really matter that much, it's mostly to make the positioning easier to understand.
         internal const float kEyeHeightToPelvisHeightRatio = 4f / 7f;
 
+        private const float kMinPressValue = VRInputModule.kMinPressValue;
+
+        [field: SerializeField]
+        internal CalibrationPoint pelvis { get; private set; }
+
+        [field: SerializeField]
+        internal CalibrationPoint leftFoot { get; private set; }
+
+        [field: SerializeField]
+        internal CalibrationPoint rightFoot { get; private set; }
+
         private TrackingRig _trackingRig;
         private CalibrationData _calibrationData;
         private Settings _settings;
         private BeatSaberUtilities _beatSaberUtilities;
+        private PlayerAvatarManager _playerAvatarManager;
 
         [Inject]
-        internal void Construct(TrackingRig trackingRig, CalibrationData calibrationData, Settings settings, BeatSaberUtilities beatSaberUtilities)
+        internal void Construct(TrackingRig trackingRig, CalibrationData calibrationData, Settings settings, BeatSaberUtilities beatSaberUtilities, PlayerAvatarManager playerAvatarManager)
         {
             _trackingRig = trackingRig;
             _calibrationData = calibrationData;
             _settings = settings;
             _beatSaberUtilities = beatSaberUtilities;
+            _playerAvatarManager = playerAvatarManager;
         }
 
         internal void ApplyCalibration()
@@ -51,43 +67,6 @@ namespace CustomAvatar.Tracking
         internal void ApplyAdjust()
         {
             ReadAdjustTransforms(_calibrationData.manualOffset);
-        }
-
-        internal void Calibrate()
-        {
-            _settings.playerEyeHeight.value = _trackingRig.eyeHeight;
-            float playerEyeHeight = _trackingRig.eyeHeight;
-
-            // temporarily reset tracking rig scale
-            _trackingRig.fullBodyTracking.localScale = Vector3.one;
-            _trackingRig.fullBodyTracking.localPosition = Vector3.zero;
-
-            Transform center = transform;
-            Transform head = _trackingRig.head.transform;
-
-            // We want the user's head rotation to match the avatar's head directly rather than assuming whatever
-            // position they're in is forward. I'm not sure how I feel about doing that, but it's what VRChat does.
-            Quaternion rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(head.forward, center.up), center.up);
-            head.rotation = rotation;
-
-            center.SetPositionAndRotation(head.position, rotation);
-
-            // put center on the ground
-            center.localPosition = new Vector3(center.localPosition.x, 0, center.localPosition.z);
-
-            if (_settings.moveFloorWithRoomAdjust)
-            {
-                center.position += center.TransformVector(0, _beatSaberUtilities.roomCenter.y, 0);
-            }
-
-            Vector3 leftFootPos = center.InverseTransformPoint(_trackingRig.leftFoot.transform.position);
-            Vector3 rightFootPos = center.InverseTransformPoint(_trackingRig.rightFoot.transform.position);
-
-            ApplyCalibration(center, _trackingRig.pelvis, new Vector3(0, playerEyeHeight * kEyeHeightToPelvisHeightRatio, 0), Quaternion.identity);
-            ApplyCalibration(center, _trackingRig.leftFoot, new Vector3(leftFootPos.x, 0, 0), Quaternion.Euler(0, -10f, 0));
-            ApplyCalibration(center, _trackingRig.rightFoot, new Vector3(rightFootPos.x, 0, 0), Quaternion.Euler(0, 10f, 0));
-
-            WriteCalibrationTransforms(_calibrationData.calibration);
         }
 
         internal void Adjust()
@@ -115,6 +94,87 @@ namespace CustomAvatar.Tracking
             _trackingRig.rightFoot.manualOffset.SetLocalPose(calibration.rightFoot);
         }
 
+        protected void OnEnable()
+        {
+            _trackingRig.trackingChanged += OnTrackingChanged;
+
+            OnTrackingChanged();
+        }
+
+        protected void Update()
+        {
+            float playerEyeHeight = _trackingRig.eyeHeight;
+
+            _playerAvatarManager.ResizeCurrentAvatar(playerEyeHeight);
+
+            Transform center = transform;
+            Transform head = _trackingRig.head.transform;
+
+            // We want the user's head rotation to match the avatar's head directly rather than assuming whatever
+            // position they're in is forward. I'm not sure how I feel about doing that, but it's what VRChat does.
+            Quaternion rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(head.forward, center.up), center.up);
+            head.rotation = rotation;
+
+            center.SetPositionAndRotation(head.position, rotation);
+
+            // put center on the ground
+            center.localPosition = new Vector3(center.localPosition.x, 0, center.localPosition.z);
+
+            if (_settings.moveFloorWithRoomAdjust)
+            {
+                center.position += center.TransformVector(0, _beatSaberUtilities.roomCenter.y, 0);
+            }
+
+            Vector3 leftFootPos = center.InverseTransformPoint(_trackingRig.leftFoot.transform.position);
+            Vector3 rightFootPos = center.InverseTransformPoint(_trackingRig.rightFoot.transform.position);
+
+            UpdateCalibrationPoint(pelvis, new Vector3(0, playerEyeHeight * kEyeHeightToPelvisHeightRatio, 0), Quaternion.identity);
+            UpdateCalibrationPoint(leftFoot, new Vector3(leftFootPos.x, 0, 0), Quaternion.Euler(0, -10f, 0));
+            UpdateCalibrationPoint(rightFoot, new Vector3(rightFootPos.x, 0, 0), Quaternion.Euler(0, 10f, 0));
+
+            // need to use trigger rather than triggerButton since the latter is not bound on all controller types with SteamVR
+            if (InputDevices.GetDeviceAtXRNode(XRNode.LeftHand).TryGetFeatureValue(CommonUsages.trigger, out float leftTriggerValue) &&
+                InputDevices.GetDeviceAtXRNode(XRNode.RightHand).TryGetFeatureValue(CommonUsages.trigger, out float rightTriggerValue) &&
+                leftTriggerValue >= kMinPressValue && rightTriggerValue >= kMinPressValue)
+            {
+                _settings.playerEyeHeight.value = playerEyeHeight;
+
+                // temporarily reset tracking rig scale
+                _trackingRig.fullBodyTracking.localScale = Vector3.one;
+                _trackingRig.fullBodyTracking.localPosition = Vector3.zero;
+
+                ApplyCalibration(pelvis);
+                ApplyCalibration(leftFoot);
+                ApplyCalibration(rightFoot);
+
+                WriteCalibrationTransforms(_calibrationData.calibration);
+
+                _trackingRig.EndCalibration();
+            }
+        }
+
+        protected void OnDisable()
+        {
+            _trackingRig.trackingChanged -= OnTrackingChanged;
+        }
+
+        private void OnTrackingChanged()
+        {
+            SetActive(pelvis);
+            SetActive(leftFoot);
+            SetActive(rightFoot);
+        }
+
+        private void SetActive(CalibrationPoint calibrationPoint)
+        {
+            calibrationPoint.gameObject.SetActive(calibrationPoint.node.isTracking);
+        }
+
+        private void UpdateCalibrationPoint(CalibrationPoint calibrationPoint, Vector3 targetPosition, Quaternion targetRotation)
+        {
+            calibrationPoint.transform.SetLocalPositionAndRotation(targetPosition, targetRotation);
+        }
+
         private void WriteCalibrationTransforms(CalibrationData.FullBodyCalibration calibration)
         {
             calibration.waist = _trackingRig.pelvis.calibration.GetLocalPose();
@@ -136,15 +196,18 @@ namespace CustomAvatar.Tracking
             calibration.rightFoot = Pose.identity;
         }
 
-        private void ApplyCalibration(Transform center, CalibratableNode device, Vector3 target, Quaternion targetRotation)
+        private void ApplyCalibration(CalibrationPoint calibrationPoint)
         {
-            if (device.isTracking)
+            CalibratableNode node = calibrationPoint.node;
+
+            if (node.isTracking)
             {
-                device.calibration.SetPositionAndRotation(center.TransformPoint(target), center.rotation * targetRotation);
+                calibrationPoint.transform.GetPositionAndRotation(out Vector3 position, out Quaternion rotation);
+                node.calibration.SetPositionAndRotation(position, rotation);
             }
             else
             {
-                device.calibration.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+                node.calibration.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             }
         }
     }
