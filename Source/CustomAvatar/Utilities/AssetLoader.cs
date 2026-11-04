@@ -36,6 +36,8 @@ namespace CustomAvatar.Utilities
             _logger = logger;
         }
 
+        internal GameObject fakeMirror { get; set; }
+
         internal GameObject playerAvatarManager { get; private set; }
 
         internal GameObject trackingRig { get; private set; }
@@ -48,6 +50,9 @@ namespace CustomAvatar.Utilities
 
         public void Dispose()
         {
+            Object.Destroy(fakeMirror);
+            Object.Destroy(playerAvatarManager);
+            Object.Destroy(trackingRig);
             Object.Destroy(stereoMirrorShader);
             Object.Destroy(unlitShader);
             Object.Destroy(uiSpriteAtlas);
@@ -76,6 +81,7 @@ namespace CustomAvatar.Utilities
                 }
 
                 // since we called LoadAllAssetsAsync these are nearly instant lookups
+                fakeMirror = assetBundle.LoadAsset<GameObject>("Assets/Prefabs/FakeMirror.prefab");
                 playerAvatarManager = assetBundle.LoadAsset<GameObject>("Assets/Prefabs/PlayerAvatarManager.prefab");
                 trackingRig = assetBundle.LoadAsset<GameObject>("Assets/Prefabs/TrackingRig.prefab");
                 stereoMirrorShader = assetBundle.LoadAsset<Shader>("Assets/Shaders/StereoRender.shader");

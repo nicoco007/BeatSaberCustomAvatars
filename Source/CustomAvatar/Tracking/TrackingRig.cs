@@ -513,10 +513,10 @@ namespace CustomAvatar.Tracking
             calibratableNode.isCalibrated = IsCurrentlyCalibrated(deviceUse);
         }
 
-        private void UpdateNodeState(ITrackedNode trackedController, DeviceUse deviceUse)
+        private void UpdateNodeState(ITrackedNode trackedNode, DeviceUse deviceUse)
         {
             // To mimic what VRController does, we only check if the device is connected.
-            trackedController.isTracking = _deviceProvider.TryGetDeviceState(deviceUse, out DeviceState deviceState) && deviceState.isConnected;
+            trackedNode.isTracking = _deviceProvider.TryGetDeviceState(deviceUse, out DeviceState deviceState) && deviceState.isConnected;
         }
 
         private bool IsCurrentlyCalibrated(DeviceUse deviceUse)

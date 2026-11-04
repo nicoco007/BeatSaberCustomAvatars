@@ -24,6 +24,7 @@ using CustomAvatar.Configuration;
 using CustomAvatar.Player;
 using CustomAvatar.Rendering;
 using CustomAvatar.Tracking;
+using CustomAvatar.Utilities;
 using JetBrains.Annotations;
 using UnityEngine;
 using Zenject;
@@ -37,6 +38,7 @@ namespace CustomAvatar.UI
         private Settings _settings;
         private PlayerAvatarManager _avatarManager;
         private TrackingRig _trackingRig;
+        private AssetLoader _assetLoader;
 
         private bool _isLoaderActive;
         private string _errorMessage;
@@ -112,12 +114,14 @@ namespace CustomAvatar.UI
             IInstantiator instantiator,
             Settings settings,
             PlayerAvatarManager avatarManager,
-            TrackingRig trackingRig)
+            TrackingRig trackingRig,
+            AssetLoader assetLoader)
         {
             _instantiator = instantiator;
             _settings = settings;
             _avatarManager = avatarManager;
             _trackingRig = trackingRig;
+            _assetLoader = assetLoader;
         }
 
         public void Report(float progress)
@@ -140,9 +144,8 @@ namespace CustomAvatar.UI
 
             if (firstActivation)
             {
-                _fakeMirror = new("FakeMirror");
-                _fakeMirror.SetActive(false);
-                _instantiator.InstantiateComponent<FakeMirrorProvider>(_fakeMirror);
+                _fakeMirror = _instantiator.InstantiatePrefab(_assetLoader.fakeMirror, new Vector3(0, 0, 0.75f), Quaternion.identity, null);
+                _fakeMirror.transform.localScale = new Vector3(1, 1, -1);
 
                 _realMirror = new("RealMirror");
                 _realMirror.SetActive(false);
