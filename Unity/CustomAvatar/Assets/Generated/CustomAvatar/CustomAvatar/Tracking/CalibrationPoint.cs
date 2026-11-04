@@ -3,6 +3,13 @@ namespace CustomAvatar.Tracking
 {
     public class CalibrationPoint : UnityEngine.MonoBehaviour
     {
+        public class Mirrored : UnityEngine.MonoBehaviour
+        {
+            public UnityEngine.Transform _sphere;
+            public UnityEngine.Transform _cone;
+            public UnityEngine.Transform _endCap;
+        }
+
         [field: UnityEngine.SerializeField]
         public CustomAvatar.Tracking.CalibratableNode node { get; set; }
 

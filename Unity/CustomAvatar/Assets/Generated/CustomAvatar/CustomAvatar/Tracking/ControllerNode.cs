@@ -3,6 +3,11 @@ namespace CustomAvatar.Tracking
 {
     public class ControllerNode : UnityEngine.MonoBehaviour
     {
+        public class Mirrored : UnityEngine.MonoBehaviour
+        {
+            public CustomAvatar.Rendering.MirroredTrackerGrabber _mirroredTrackerGrabber;
+        }
+
         [field: UnityEngine.SerializeField]
         public UnityEngine.Transform offset { get; set; }
 

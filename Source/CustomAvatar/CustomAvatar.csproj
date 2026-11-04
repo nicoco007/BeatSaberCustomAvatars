@@ -75,6 +75,7 @@
     <TypesToGenerate Include="CustomAvatar.Player.HeadFollower" />
     <TypesToGenerate Include="CustomAvatar.Player.PlayerAvatarManager" />
     <TypesToGenerate Include="CustomAvatar.Rendering.FakeMirrorProvider" />
+    <TypesToGenerate Include="CustomAvatar.Rendering.MirroredTrackingRig" />
     <TypesToGenerate Include="CustomAvatar.Tracking.TrackingRig" />
     <TypesToGenerate Include="VRControllersValueSettingsOffsets" AssemblyName="DataModels" />
   </ItemGroup>

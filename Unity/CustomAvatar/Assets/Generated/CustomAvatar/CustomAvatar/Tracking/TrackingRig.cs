@@ -3,6 +3,32 @@ namespace CustomAvatar.Tracking
 {
     public class TrackingRig : UnityEngine.MonoBehaviour
     {
+        public class Mirrored : UnityEngine.MonoBehaviour
+        {
+            void Awake()
+            {
+            }
+
+            void OnEnable()
+            {
+            }
+
+            void OnDisable()
+            {
+            }
+
+            public CustomAvatar.Rendering.MirroredControllerNode _leftHand;
+            public CustomAvatar.Rendering.MirroredControllerNode _rightHand;
+            public UnityEngine.Transform _fullBodyTracking;
+            public CustomAvatar.Rendering.MirroredCalibratableNode _pelvis;
+            public CustomAvatar.Rendering.MirroredCalibratableNode _leftFoot;
+            public CustomAvatar.Rendering.MirroredCalibratableNode _rightFoot;
+            public UnityEngine.Transform _humanoidCalibrator;
+            public CustomAvatar.Rendering.MirroredCalibrationPoint _pelvisCalibration;
+            public CustomAvatar.Rendering.MirroredCalibrationPoint _leftFootCalibration;
+            public CustomAvatar.Rendering.MirroredCalibrationPoint _rightFootCalibration;
+        }
+
         [field: UnityEngine.SerializeField]
         public CustomAvatar.Tracking.SimpleNode head { get; set; }
 

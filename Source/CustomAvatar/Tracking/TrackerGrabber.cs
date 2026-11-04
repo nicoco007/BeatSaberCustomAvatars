@@ -14,6 +14,8 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using CustomAvatar.Rendering;
 using UnityEngine;
 using UnityEngine.XR;
 using VRUIControls;
@@ -35,22 +37,43 @@ namespace CustomAvatar.Tracking
         private CalibratableNode _grabbed;
         private Pose _offset;
 
-        private bool _active
+        private bool _isActive
         {
+            get;
             set
             {
                 if (field != value)
                 {
                     _cylinderObject.SetActive(value);
                     field = value;
+                    _isActiveChanged?.Invoke(value);
                 }
             }
         }
+
+        private bool _isGrabbed
+        {
+            get;
+            set
+            {
+                field = value;
+                _isGrabbedChanged?.Invoke(value);
+            }
+        }
+
+        private event Action<bool> _isActiveChanged;
+
+        private event Action<bool> _isGrabbedChanged;
 
         [Inject]
         protected void Construct(TrackingRig trackingRig)
         {
             _trackingRig = trackingRig;
+        }
+
+        protected void Awake()
+        {
+            _cylinder.sharedMaterial = _defaultMaterial;
         }
 
         protected void Update()
@@ -89,12 +112,12 @@ namespace CustomAvatar.Tracking
 
                 if (closest == null)
                 {
-                    _active = false;
+                    _isActive = false;
                     return;
                 }
             }
 
-            _active = true;
+            _isActive = true;
 
             Transform target = closest.manualOffset;
             _cylinder.target = target;
@@ -103,15 +126,17 @@ namespace CustomAvatar.Tracking
 
             if (device.TryGetFeatureValue(CommonUsages.trigger, out float triggerValue) && triggerValue >= VRInputModule.kMinPressValue)
             {
-                if (_grabbed == null)
+                if (!_isGrabbed)
                 {
+                    _grabbed = closest;
                     _grabbed.Grab();
                     _offset = new Pose(transform.InverseTransformPoint(target.position), Quaternion.Inverse(transform.rotation) * target.rotation);
                     _cylinder.sharedMaterial = _activeMaterial;
                     _cylinderTransform.localScale = Vector3.one * 0.015f;
+                    _isGrabbed = true;
                 }
             }
-            else if (_grabbed != null)
+            else if (_isGrabbed)
             {
                 Release();
             }
@@ -119,9 +144,9 @@ namespace CustomAvatar.Tracking
 
         protected void OnDisable()
         {
-            _active = false;
+            _isActive = false;
 
-            if (_grabbed != null)
+            if (_isGrabbed)
             {
                 Release();
             }
@@ -149,6 +174,56 @@ namespace CustomAvatar.Tracking
             _grabbed = null;
             _cylinder.sharedMaterial = _defaultMaterial;
             _cylinderTransform.localScale = Vector3.one * 0.01f;
+            _isGrabbed = false;
+        }
+
+        internal class Mirrored : MonoBehaviour
+        {
+            [SerializeField]
+            private GameObject _cylinderObject;
+
+            [SerializeField]
+            private Transform _cylinderTransform;
+
+            [SerializeField]
+            private MirroredCylinder _cylinder;
+
+            private TrackerGrabber _trackerGrabber;
+
+            internal void Init(TrackerGrabber trackerGrabber)
+            {
+                _trackerGrabber = trackerGrabber;
+                _cylinder.Init(trackerGrabber._cylinder);
+            }
+
+            internal void OnBeforeRender()
+            {
+                _cylinder.OnBeforeRender();
+            }
+
+            protected void OnEnable()
+            {
+                _trackerGrabber._isActiveChanged += OnTrackerGrabberIsActiveChanged;
+                _trackerGrabber._isGrabbedChanged += OnTrackerGrabberIsGrabbedChanged;
+
+                OnTrackerGrabberIsActiveChanged(_trackerGrabber._isActive);
+            }
+
+            protected void OnDisable()
+            {
+                _trackerGrabber._isActiveChanged -= OnTrackerGrabberIsActiveChanged;
+                _trackerGrabber._isGrabbedChanged -= OnTrackerGrabberIsGrabbedChanged;
+            }
+
+            private void OnTrackerGrabberIsActiveChanged(bool isActive)
+            {
+                _cylinderObject.SetActive(isActive);
+            }
+
+            private void OnTrackerGrabberIsGrabbedChanged(bool isGrabbed)
+            {
+                _cylinderTransform.localScale = _trackerGrabber._cylinderTransform.localScale;
+            }
         }
     }
 }

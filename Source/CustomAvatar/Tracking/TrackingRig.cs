@@ -28,6 +28,7 @@ using CustomAvatar.Rendering.Cameras;
 using CustomAvatar.Utilities;
 using JetBrains.Annotations;
 using SiraUtil.Tools.FPFC;
+using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Zenject;
@@ -588,6 +589,116 @@ namespace CustomAvatar.Tracking
             else
             {
                 trackedRenderModel.SetRenderModel(null);
+            }
+        }
+
+        internal class Mirrored : MonoBehaviour
+        {
+            private static readonly ProfilerMarker kOnBeforeRenderProfilerMarker = new($"{nameof(MirroredTrackingRig)}.{nameof(OnBeforeRender)}");
+
+            [SerializeField] private MirroredControllerNode _leftHand;
+            [SerializeField] private MirroredControllerNode _rightHand;
+            [SerializeField] private Transform _fullBodyTracking;
+            [SerializeField] private MirroredCalibratableNode _pelvis;
+            [SerializeField] private MirroredCalibratableNode _leftFoot;
+            [SerializeField] private MirroredCalibratableNode _rightFoot;
+            [SerializeField] private Transform _humanoidCalibrator;
+            [SerializeField] private MirroredCalibrationPoint _pelvisCalibration;
+            [SerializeField] private MirroredCalibrationPoint _leftFootCalibration;
+            [SerializeField] private MirroredCalibrationPoint _rightFootCalibration;
+
+            private TrackingRig _trackingRig;
+
+            [Inject]
+            protected void Construct(TrackingRig trackingRig)
+            {
+                _trackingRig = trackingRig;
+            }
+
+            protected void Awake()
+            {
+                _leftHand.Init(_trackingRig.leftHand);
+                _rightHand.Init(_trackingRig.rightHand);
+                _pelvis.Init(_trackingRig.pelvis);
+                _leftFoot.Init(_trackingRig.leftFoot);
+                _rightFoot.Init(_trackingRig.rightFoot);
+            }
+
+            protected void OnEnable()
+            {
+                Application.onBeforeRender += OnBeforeRender;
+
+                _trackingRig.trackingChanged += OnTrackingChanged;
+                _trackingRig.isCalibratingChanged += OnIsCalibratingChanged;
+                _trackingRig.isAdjustingChanged += OnIsAdjustingChanged;
+
+                OnTrackingChanged();
+                OnIsCalibratingChanged(_trackingRig.isCalibrating);
+                OnIsAdjustingChanged(_trackingRig.isAdjusting);
+            }
+
+            protected void OnDisable()
+            {
+                Application.onBeforeRender -= OnBeforeRender;
+
+                _trackingRig.trackingChanged -= OnTrackingChanged;
+                _trackingRig.isCalibratingChanged -= OnIsCalibratingChanged;
+                _trackingRig.isAdjustingChanged -= OnIsAdjustingChanged;
+            }
+
+            private void OnTrackingChanged()
+            {
+                SetActive(_pelvis, _pelvisCalibration, _trackingRig.pelvis.isTracking);
+                SetActive(_leftFoot, _leftFootCalibration, _trackingRig.leftFoot.isTracking);
+                SetActive(_rightFoot, _rightFootCalibration, _trackingRig.rightFoot.isTracking);
+            }
+
+            private void OnIsCalibratingChanged(bool isCalibrating)
+            {
+                _humanoidCalibrator.gameObject.SetActive(isCalibrating);
+            }
+
+            private void OnIsAdjustingChanged(bool isAdjusting)
+            {
+                _pelvis.grabSphere.SetActive(_trackingRig.pelvis.grabSphere.activeSelf);
+                _leftFoot.grabSphere.SetActive(_trackingRig.leftFoot.grabSphere.activeSelf);
+                _rightFoot.grabSphere.SetActive(_trackingRig.rightFoot.grabSphere.activeSelf);
+            }
+
+            private void SetActive(MirroredCalibratableNode node, MirroredCalibrationPoint point, bool active)
+            {
+                node.gameObject.SetActive(active);
+                point.gameObject.SetActive(active);
+            }
+
+            private void OnBeforeRender()
+            {
+                kOnBeforeRenderProfilerMarker.Begin(this);
+
+                try
+                {
+                    transform.CopyMirroredPoseFrom(_trackingRig.transform, transform.parent);
+
+                    _leftHand.OnBeforeRender();
+                    _rightHand.OnBeforeRender();
+
+                    _fullBodyTracking.localPosition = _trackingRig.fullBodyTracking.localPosition;
+                    _fullBodyTracking.localScale = _trackingRig.fullBodyTracking.localScale;
+
+                    _pelvis.OnBeforeRender();
+                    _leftFoot.OnBeforeRender();
+                    _rightFoot.OnBeforeRender();
+
+                    _humanoidCalibrator.CopyLocalPositionAndRotationFrom(_trackingRig._humanoidCalibrator.transform);
+
+                    _pelvisCalibration.CopyFrom(_trackingRig._humanoidCalibrator.pelvis);
+                    _leftFootCalibration.CopyFrom(_trackingRig._humanoidCalibrator.leftFoot);
+                    _rightFootCalibration.CopyFrom(_trackingRig._humanoidCalibrator.rightFoot);
+                }
+                finally
+                {
+                    kOnBeforeRenderProfilerMarker.End();
+                }
             }
         }
     }

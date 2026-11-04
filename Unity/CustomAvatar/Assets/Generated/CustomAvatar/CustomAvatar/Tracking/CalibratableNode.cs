@@ -3,6 +3,25 @@ namespace CustomAvatar.Tracking
 {
     public class CalibratableNode : UnityEngine.MonoBehaviour
     {
+        public class Mirrored : UnityEngine.MonoBehaviour
+        {
+            [field: UnityEngine.SerializeField]
+            public UnityEngine.GameObject grabSphere { get; set; }
+
+            void OnEnable()
+            {
+            }
+
+            void OnDisable()
+            {
+            }
+
+            public UnityEngine.Transform _calibration;
+            public UnityEngine.Transform _manualOffset;
+            public UnityEngine.Transform _sphereTransform;
+            public UnityEngine.Renderer _sphereRenderer;
+        }
+
         [field: UnityEngine.SerializeField]
         public UnityEngine.Transform offset { get; set; }
 

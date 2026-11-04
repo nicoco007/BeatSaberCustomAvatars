@@ -52,6 +52,32 @@ namespace CustomAvatar.Utilities
             transform.SetLocalPositionAndRotation(pose.position, pose.rotation);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void CopyLocalPositionAndRotationFrom(this Transform transform, Transform from)
+        {
+            from.GetLocalPositionAndRotation(out Vector3 position, out Quaternion rotation);
+            transform.SetLocalPositionAndRotation(position, rotation);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void CopyLocalTransformFrom(this Transform transform, Transform from)
+        {
+            from.GetLocalPositionAndRotation(out Vector3 position, out Quaternion rotation);
+            transform.SetLocalPositionAndRotation(position, rotation);
+            transform.localScale = from.localScale;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void CopyMirroredPoseFrom(this Transform toRoot, Transform fromRoot, Transform container)
+        {
+            container.GetPositionAndRotation(out Vector3 containerPosition, out Quaternion containerRotation);
+            Quaternion inverseContainerRotation = Quaternion.Inverse(containerRotation);
+
+            fromRoot.GetPositionAndRotation(out Vector3 position, out Quaternion rotation);
+            toRoot.SetLocalPositionAndRotation(inverseContainerRotation * (position - containerPosition), inverseContainerRotation * rotation);
+            toRoot.localScale = fromRoot.lossyScale;
+        }
+
         /// <summary>
         /// Transforms <paramref name="pose"/> from world space to this instance's local space.
         /// </summary>

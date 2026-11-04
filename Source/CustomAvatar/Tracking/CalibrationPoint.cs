@@ -14,6 +14,7 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using CustomAvatar.Utilities;
 using UnityEngine;
 
 namespace CustomAvatar.Tracking
@@ -44,6 +45,27 @@ namespace CustomAvatar.Tracking
             _endCap.localPosition = new Vector3(0, 0, distance);
             transform.LookAt(target);
             _sphere.localScale = (2 * distance + 1) * Vector3.one;
+        }
+
+        internal class Mirrored : MonoBehaviour
+        {
+            [SerializeField]
+            private Transform _sphere;
+
+            [SerializeField]
+            private Transform _cone;
+
+            [SerializeField]
+            private Transform _endCap;
+
+            internal void CopyFrom(CalibrationPoint calibrationPoint)
+            {
+                transform.CopyLocalPositionAndRotationFrom(calibrationPoint.transform);
+                _cone.localPosition = calibrationPoint._cone.localPosition;
+                _cone.localScale = calibrationPoint._cone.localScale;
+                _endCap.localPosition = calibrationPoint._endCap.localPosition;
+                _sphere.localScale = calibrationPoint._sphere.localScale;
+            }
         }
     }
 }

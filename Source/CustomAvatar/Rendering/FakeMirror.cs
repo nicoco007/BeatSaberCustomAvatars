@@ -16,6 +16,7 @@
 
 using System.Collections.Generic;
 using CustomAvatar.Avatar;
+using CustomAvatar.Utilities;
 using Unity.Profiling;
 using UnityEngine;
 
@@ -84,24 +85,11 @@ namespace CustomAvatar.Rendering
 
             try
             {
-                transform.GetPositionAndRotation(out Vector3 containerPosition, out Quaternion containerRotation);
-                Quaternion inverseContainerRotation = Quaternion.Inverse(containerRotation);
-
-                Transform fromRoot = _from[0];
-                Transform toRoot = _to[0];
-
-                fromRoot.GetPositionAndRotation(out Vector3 position, out Quaternion rotation);
-                toRoot.SetLocalPositionAndRotation(inverseContainerRotation * (position - containerPosition), inverseContainerRotation * rotation);
-                toRoot.localScale = fromRoot.lossyScale;
+                _to[0].CopyMirroredPoseFrom(_from[0], transform);
 
                 for (int i = 1; i < _from.Count; i++)
                 {
-                    Transform from = _from[i];
-                    Transform to = _to[i];
-
-                    from.GetLocalPositionAndRotation(out position, out rotation);
-                    to.SetLocalPositionAndRotation(position, rotation);
-                    to.localScale = from.localScale;
+                    _to[i].CopyLocalTransformFrom(_from[i]);
                 }
             }
             finally

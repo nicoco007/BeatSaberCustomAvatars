@@ -14,8 +14,8 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-extern alias BeatSaberFinalIK;
-
+using CustomAvatar.Rendering;
+using CustomAvatar.Utilities;
 using UnityEngine;
 
 namespace CustomAvatar.Tracking
@@ -34,5 +34,24 @@ namespace CustomAvatar.Tracking
 
         // We don't have to calibrate controllers
         public bool isCalibrated => true;
+
+        internal class Mirrored : MonoBehaviour
+        {
+            [SerializeField] private MirroredTrackerGrabber _mirroredTrackerGrabber;
+
+            private ControllerNode _controllerNode;
+
+            internal void Init(ControllerNode controllerNode)
+            {
+                _controllerNode = controllerNode;
+                _mirroredTrackerGrabber.Init(controllerNode.trackerGrabber);
+            }
+
+            internal void OnBeforeRender()
+            {
+                transform.CopyLocalPositionAndRotationFrom(_controllerNode.transform);
+                _mirroredTrackerGrabber.OnBeforeRender();
+            }
+        }
     }
 }

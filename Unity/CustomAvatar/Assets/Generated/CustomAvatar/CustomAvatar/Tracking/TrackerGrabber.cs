@@ -3,6 +3,25 @@ namespace CustomAvatar.Tracking
 {
     public class TrackerGrabber : UnityEngine.MonoBehaviour
     {
+        public class Mirrored : UnityEngine.MonoBehaviour
+        {
+            void OnEnable()
+            {
+            }
+
+            void OnDisable()
+            {
+            }
+
+            public UnityEngine.GameObject _cylinderObject;
+            public UnityEngine.Transform _cylinderTransform;
+            public CustomAvatar.Rendering.MirroredCylinder _cylinder;
+        }
+
+        void Awake()
+        {
+        }
+
         void Update()
         {
         }

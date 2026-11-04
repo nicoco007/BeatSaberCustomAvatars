@@ -133,12 +133,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f990431aa2be78448b8916ca4e474193, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _cylinder: {fileID: 6562577191705116706}
   _cylinderTransform: {fileID: 3279764199733516180}
   _cylinderObject: {fileID: 4586602870872654015}
   _node: 8
   _defaultMaterial: {fileID: 2100000, guid: 28d9f9122c5e97c44ade65cabe535ecb, type: 2}
   _activeMaterial: {fileID: 2100000, guid: 72014687f07c92344bf60d6783cf1749, type: 2}
+  _cylinder: {fileID: 6562577191705116706}
 --- !u!1 &7718201131796645975
 GameObject:
   m_ObjectHideFlags: 0

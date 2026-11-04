@@ -3,6 +3,20 @@ namespace CustomAvatar.Tracking
 {
     public class Cylinder : UnityEngine.MonoBehaviour
     {
+        public class Mirrored : UnityEngine.MonoBehaviour
+        {
+            void OnEnable()
+            {
+            }
+
+            void OnDisable()
+            {
+            }
+
+            public UnityEngine.Renderer[] _renderers;
+            public UnityEngine.Transform _cylinderTransform;
+        }
+
         void LateUpdate()
         {
         }

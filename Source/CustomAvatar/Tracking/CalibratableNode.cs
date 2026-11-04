@@ -14,6 +14,8 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using CustomAvatar.Utilities;
 using UnityEngine;
 
 namespace CustomAvatar.Tracking
@@ -43,20 +45,75 @@ namespace CustomAvatar.Tracking
 
         public bool isGrabbable => isTracking && isCalibrated && !isGrabbed;
 
-        public bool isGrabbed { get; private set; }
+        public bool isGrabbed
+        {
+            get;
+            set
+            {
+                field = value;
+                _isGrabbedChanged?.Invoke(value);
+            }
+        }
+
+        private event Action<bool> _isGrabbedChanged;
 
         internal void Grab()
         {
-            isGrabbed = true;
             _renderer.sharedMaterial = _activeMaterial;
             _grabSphereTransform.localScale = Vector3.one * 0.03f;
+            isGrabbed = true;
         }
 
         internal void Release()
         {
-            isGrabbed = false;
             _renderer.sharedMaterial = _defaultMaterial;
             _grabSphereTransform.localScale = Vector3.one * 0.05f;
+            isGrabbed = false;
+        }
+
+        internal class Mirrored : MonoBehaviour
+        {
+            [SerializeField] private Transform _calibration;
+
+            [SerializeField] private Transform _manualOffset;
+
+            [SerializeField] private Transform _sphereTransform;
+
+            [SerializeField] private Renderer _sphereRenderer;
+
+            [field: SerializeField] internal GameObject grabSphere { get; private set; }
+
+            private CalibratableNode _calibratableNode;
+
+            internal void Init(CalibratableNode calibratableNode)
+            {
+                _calibratableNode = calibratableNode;
+            }
+
+            internal void OnBeforeRender()
+            {
+                transform.CopyLocalPositionAndRotationFrom(_calibratableNode.transform);
+                _calibration.CopyLocalPositionAndRotationFrom(_calibratableNode.calibration);
+                _manualOffset.CopyLocalPositionAndRotationFrom(_calibratableNode.manualOffset);
+            }
+
+            protected void OnEnable()
+            {
+                _calibratableNode._isGrabbedChanged += OnIsGrabbedChanged;
+
+                OnIsGrabbedChanged(_calibratableNode.isGrabbed);
+            }
+
+            protected void OnDisable()
+            {
+                _calibratableNode._isGrabbedChanged -= OnIsGrabbedChanged;
+            }
+
+            private void OnIsGrabbedChanged(bool grabbed)
+            {
+                _sphereTransform.localScale = _calibratableNode._grabSphereTransform.localScale;
+                _sphereRenderer.sharedMaterial = _calibratableNode._renderer.sharedMaterial;
+            }
         }
     }
 }
