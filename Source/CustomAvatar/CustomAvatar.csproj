@@ -33,6 +33,7 @@
     <Reference Include="OpenVR" />
     <Reference Include="protobuf-net" />
     <Reference Include="Rendering" Publicize="True" />
+    <Reference Include="SegmentedControl" />
     <Reference Include="SiraUtil" />
     <Reference Include="Unity.InputSystem" />
     <Reference Include="Unity.Mathematics" />

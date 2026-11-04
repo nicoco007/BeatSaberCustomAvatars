@@ -7,6 +7,12 @@ namespace CustomAvatar.Tracking
         public UnityEngine.Transform offset { get; set; }
 
         [field: UnityEngine.SerializeField]
+        public UnityEngine.Transform viewTransform { get; set; }
+
+        [field: UnityEngine.SerializeField]
         public VRController controller { get; set; }
+
+        [field: UnityEngine.SerializeField]
+        public CustomAvatar.Tracking.TrackerGrabber trackerGrabber { get; set; }
     }
 }

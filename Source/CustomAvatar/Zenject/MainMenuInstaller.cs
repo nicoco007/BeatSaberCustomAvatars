@@ -43,7 +43,7 @@ namespace CustomAvatar.Zenject
             Container.Bind<TrackerStatusHost>().AsSingle();
             Container.Bind<GeneralSettingsHost>().AsSingle();
             Container.Bind<AvatarSpecificSettingsHost>().AsSingle();
-            Container.Bind<AutomaticFbtCalibrationHost>().AsSingle();
+            Container.Bind<FullBodyTrackingCalibrationHost>().AsSingle();
             Container.Bind<InterfaceSettingsHost>().AsSingle();
 
             Container.Bind<ArmSpanMeasurer>().FromNewComponentOn(settingsViewController.gameObject).AsSingle();

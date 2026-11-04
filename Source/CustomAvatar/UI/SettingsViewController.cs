@@ -34,7 +34,7 @@ namespace CustomAvatar.UI
     {
         protected GeneralSettingsHost generalSettingsHost;
         protected AvatarSpecificSettingsHost avatarSpecificSettingsHost;
-        protected AutomaticFbtCalibrationHost automaticFbtCalibrationHost;
+        protected FullBodyTrackingCalibrationHost fullBodyTrackingCalibrationHost;
         protected InterfaceSettingsHost interfaceSettingsHost;
         protected AdditionalTab[] additionalMenuTabs;
         protected string versionText;
@@ -52,7 +52,7 @@ namespace CustomAvatar.UI
             TrackingRig trackingRig,
             GeneralSettingsHost generalSettingsHost,
             AvatarSpecificSettingsHost avatarSpecificSettingsHost,
-            AutomaticFbtCalibrationHost automaticFbtCalibrationHost,
+            FullBodyTrackingCalibrationHost fullBodyTrackingCalibrationHost,
             InterfaceSettingsHost interfaceSettingsHost,
             BSMLParser bsmlParser)
         {
@@ -62,7 +62,7 @@ namespace CustomAvatar.UI
             _bsmlParser = bsmlParser;
             this.generalSettingsHost = generalSettingsHost;
             this.avatarSpecificSettingsHost = avatarSpecificSettingsHost;
-            this.automaticFbtCalibrationHost = automaticFbtCalibrationHost;
+            this.fullBodyTrackingCalibrationHost = fullBodyTrackingCalibrationHost;
             this.interfaceSettingsHost = interfaceSettingsHost;
         }
 
@@ -102,7 +102,7 @@ namespace CustomAvatar.UI
 
             generalSettingsHost.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
             avatarSpecificSettingsHost.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
-            automaticFbtCalibrationHost.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
+            fullBodyTrackingCalibrationHost.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
 
             foreach (IViewControllerHost viewControllerHost in _avatarsMenuTabs.Select(t => t.host).OfType<IViewControllerHost>())
             {
@@ -118,7 +118,7 @@ namespace CustomAvatar.UI
 
             generalSettingsHost.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
             avatarSpecificSettingsHost.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
-            automaticFbtCalibrationHost.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
+            fullBodyTrackingCalibrationHost.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
 
             foreach (IViewControllerHost viewControllerHost in _avatarsMenuTabs.Select(t => t.host).OfType<IViewControllerHost>())
             {

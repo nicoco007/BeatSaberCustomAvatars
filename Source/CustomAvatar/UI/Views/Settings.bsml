@@ -37,9 +37,9 @@
         <list-setting value="cameraNearClipPlane" bind-value="true" apply-on-change="true" text="Camera Near Clip Plane" hover-hint="Distance from your eyes at which objets start being visible." options="nearClipPlaneValues" formatter="CentimeterFormatter" />
       </macro.as-host>
 
-      <text color="#808080" text="Automatic Calibration (beta)" font-size="4" italics="true" align="Capline" anchor-min="0 0.5" anchor-max="1 0.5" size-delta="0 7" />
+      <text color="#808080" text="Full Body Tracking Calibration" font-size="4" italics="true" align="Capline" anchor-min="0 0.5" anchor-max="1 0.5" size-delta="0 7" />
 
-      <macro.as-host host="automaticFbtCalibrationHost">
+      <macro.as-host host="fullBodyTrackingCalibrationHost">
         <macro.as-host host="trackerStatusHost">
           <horizontal pad-top="2">
             <text active="~trackersNotSupported" color="#FF8080" text="Tracker support is not available. Please install OpenXRTrackerProfiles." font-size="3" italics="true" align="Center" />
@@ -49,9 +49,19 @@
         </macro.as-host>
 
         <horizontal child-align="MiddleLeft" child-expand-width="true" child-control-width="true" pad-top="1" pad-bottom="1">
-          <button text="Calibrate" hover-hint="~calibrateButtonHoverHint" interactable="~isCalibrateButtonEnabled" on-click="OnCalibrateAutoFullBodyTrackingClicked" />
-          <button text="Reset" interactable="~isClearButtonEnabled" on-click="OnClearAutoFullBodyTrackingCalibrationDataClicked" />
+          <button text="Calibrate" hover-hint="~calibrateButtonHoverHint" interactable="~isCalibrateButtonEnabled" on-click="OnCalibrateClicked" />
         </horizontal>
+
+        <text color="#808080" text="Adjust" font-size="3.5" italics="true" align="Capline" anchor-min="0 0.5" anchor-max="1 0.5" size-delta="0 6" />
+
+        <macro.as-host host="adjustHost">
+          <text-segments id="adjustModeTextSegmentControl" data="adjustModes" select-cell="AdjustModeTabSelected" size-delta="90 5" child-expand-width="true" child-control-width="true" />
+          <horizontal child-align="MiddleLeft" child-expand-width="true" child-control-width="true" pad-top="1" pad-bottom="1">
+            <button text="Adjust" interactable="~isAdjustEnabled" hover-hint="Starts Adjust FBT mode, allowing you to grab parts of your avatar to reposition calibration by hand." on-click="AdjustClicked" />
+            <button text="Save" interactable="~isSaveEnabled" on-click="SaveClicked" />
+            <button text="Clear" interactable="~isClearEnabled" on-click="ClearClicked" />
+          </horizontal>
+        </macro.as-host>
       </macro.as-host>
     </settings-container>
   </tab>
@@ -61,21 +71,7 @@
       <loading-indicator active="~isLoaderActive" />
     
       <settings-container size-delta-x="-20" anchored-position-x="4">
-        <dropdown-list-setting text="Calibration Mode" value="calibrationMode" bind-value="true" apply-on-change="true" interactable="~areCurrentAvatarSettingsLoaded" options="calibrationModeOptions" formatter="CalibrationModeFormatter" />
         <toggle-setting text="Ignore first person exclusions" value="ignoreExclusions" bind-value="true" apply-on-change="true" interactable="~areCurrentAvatarSettingsLoaded" hover-hint="Show the entire model in first person, even if some parts were configured to be hidden in first person. This may cause issues on certain avatars." />
-
-        <macro.as-host host="trackerStatusHost">
-          <horizontal pad-top="2">
-            <text active="~trackersNotSupported" color="#FF8080" text="Tracker support is not available. Please install OpenXRTrackerProfiles." font-size="3" italics="true" align="Center" />
-            <text active="~noTrackersDetected" color="#FFFF80" text="~noTrackersDetectedMessage" font-size="3" italics="true" align="Center" />
-            <text active="~showOpenXRHint" color="#00BFFF" text="~openXRHint" font-size="3" italics="true" align="Center" />
-          </horizontal>
-        </macro.as-host>
-
-        <horizontal child-align="MiddleLeft" child-expand-width="true" child-control-width="true" pad-top="1" pad-bottom="1">
-          <button text="Calibrate" interactable="~isCalibrateButtonEnabled" hover-hint="~calibrateButtonHoverHint" on-click="OnCalibrateFullBodyTrackingClicked" />
-          <button text="Reset" interactable="~isClearButtonEnabled" hover-hint="Clear calibration data" on-click="OnClearFullBodyTrackingCalibrationDataClicked" />
-        </horizontal>
       </settings-container>
     </macro.as-host>
   </tab>

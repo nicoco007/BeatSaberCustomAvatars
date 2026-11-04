@@ -5,7 +5,7 @@
     <Platforms>x64</Platforms>
     <DefineConstants>$(DefineConstants);UNITY_5_3_OR_NEWER</DefineConstants>
     <TargetFramework>net472</TargetFramework>
-    <LangVersion>12</LangVersion>
+    <LangVersion>14</LangVersion>
   </PropertyGroup>
   
   <PropertyGroup>

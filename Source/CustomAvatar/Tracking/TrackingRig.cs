@@ -59,15 +59,14 @@ namespace CustomAvatar.Tracking
         private VRControllerVisualsManager _vrControllerVisualsManager;
         private BeatSaberUtilities _beatSaberUtilities;
         private IFPFCSettings _fpfcSettings;
-        private CalibrationMode _activeCalibrationMode;
 
         private bool _showRenderModels;
 
         internal event Action trackingChanged;
 
-        internal event Action<CalibrationMode> activeCalibrationModeChanged;
+        internal event Action<bool> isCalibratingChanged;
 
-        internal event Action<CalibrationMode> calibrationModeChanged;
+        internal event Action<bool> isAdjustingChanged;
 
         internal bool areBothHandsTracking { get; private set; }
 
@@ -97,31 +96,27 @@ namespace CustomAvatar.Tracking
         [field: SerializeField]
         internal Transform fullBodyTracking { get; private set; }
 
-        internal CalibrationMode activeCalibrationMode
+        internal bool isCalibrating
         {
-            get => _activeCalibrationMode;
+            get;
             private set
             {
-                _activeCalibrationMode = value;
-                activeCalibrationModeChanged?.Invoke(value);
+                field = value;
+                isCalibratingChanged?.Invoke(value);
             }
         }
 
-        internal CalibrationMode calibrationMode
+        internal bool isAdjusting
         {
-            get => _playerAvatarManager != null && _playerAvatarManager.currentAvatarSettings != null ? _playerAvatarManager.currentAvatarSettings.calibrationMode : CalibrationMode.None;
-            set
+            get;
+            private set
             {
-                if (_playerAvatarManager != null && _playerAvatarManager.currentAvatarSettings != null)
-                {
-                    _playerAvatarManager.currentAvatarSettings.calibrationMode = value;
-                }
-
-                UpdateOffsets();
-                UpdateNodeStates();
-                calibrationModeChanged?.Invoke(value);
+                field = value;
+                isAdjustingChanged?.Invoke(value);
             }
         }
+
+        internal AdjustMode adjustMode { get; set; }
 
         internal bool areRenderModelsAvailable => _renderModelProvider != null;
 
@@ -135,48 +130,65 @@ namespace CustomAvatar.Tracking
             }
         }
 
-        internal void BeginCalibration(CalibrationMode calibrationMode)
+        internal void BeginCalibration()
         {
-            if (calibrationMode == CalibrationMode.None)
+            if (isAdjusting)
             {
                 return;
             }
 
-            SetIKEnabled(false);
+            isCalibrating = true;
 
-            activeCalibrationMode = calibrationMode;
+            SetIKEnabled(false);
         }
 
         internal void EndCalibration()
         {
+            isCalibrating = false;
+
             SetIKEnabled(true);
 
-            activeCalibrationMode = CalibrationMode.None;
-
             _playerAvatarManager.ResizeCurrentAvatar();
+
+            UpdateCalibrationStates();
 
             trackingChanged?.Invoke();
         }
 
-        internal void ClearCalibrationData(CalibrationMode calibrationMode)
+        internal void BeginAdjust()
         {
-            switch (calibrationMode)
+            if (isCalibrating)
             {
-                case CalibrationMode.Automatic:
-                    _humanoidCalibrator.ClearAutomaticFullBodyTrackingData();
-                    break;
-
-                case CalibrationMode.Manual:
-                    if (_playerAvatarManager.currentlySpawnedAvatar != null)
-                    {
-                        _humanoidCalibrator.ClearManualFullBodyTrackingData();
-                    }
-
-                    break;
+                return;
             }
 
-            UpdateOffsets();
-            UpdateNodeStates();
+            leftHand.trackerGrabber.enabled = true;
+            rightHand.trackerGrabber.enabled = true;
+
+            pelvis.grabSphere.SetActive(pelvis.isCalibrated);
+            leftFoot.grabSphere.SetActive(leftFoot.isCalibrated);
+            rightFoot.grabSphere.SetActive(rightFoot.isCalibrated);
+
+            isAdjusting = true;
+        }
+
+        internal void EndAdjust()
+        {
+            leftHand.trackerGrabber.enabled = false;
+            rightHand.trackerGrabber.enabled = false;
+
+            pelvis.grabSphere.SetActive(false);
+            leftFoot.grabSphere.SetActive(false);
+            rightFoot.grabSphere.SetActive(false);
+
+            _humanoidCalibrator.Adjust();
+
+            isAdjusting = false;
+        }
+
+        internal void ClearAdjust()
+        {
+            _humanoidCalibrator.ClearAdjust();
         }
 
         protected void OnEnable()
@@ -269,7 +281,7 @@ namespace CustomAvatar.Tracking
 
         protected void Update()
         {
-            if (activeCalibrationMode != CalibrationMode.None)
+            if (isCalibrating)
             {
                 _playerAvatarManager.ResizeCurrentAvatar(eyeHeight);
 
@@ -278,18 +290,7 @@ namespace CustomAvatar.Tracking
                     InputDevices.GetDeviceAtXRNode(XRNode.RightHand).TryGetFeatureValue(UnityEngine.XR.CommonUsages.trigger, out float rightTriggerValue) &&
                     leftTriggerValue >= kMinPressValue && rightTriggerValue >= kMinPressValue)
                 {
-                    switch (activeCalibrationMode)
-                    {
-                        case CalibrationMode.Automatic:
-                            _humanoidCalibrator.CalibrateAutomatically();
-                            break;
-
-                        case CalibrationMode.Manual:
-                            _humanoidCalibrator.CalibrateManually();
-                            break;
-                    }
-
-                    calibrationMode = activeCalibrationMode;
+                    _humanoidCalibrator.Calibrate();
 
                     EndCalibration();
                 }
@@ -347,7 +348,6 @@ namespace CustomAvatar.Tracking
             EndCalibration();
             UpdateOffsets();
             UpdateNodeStates();
-            calibrationModeChanged?.Invoke(calibrationMode);
         }
 
         private void OnAvatarScaleChanged(float scale)
@@ -418,64 +418,30 @@ namespace CustomAvatar.Tracking
             float fullBodyScale = _playerAvatarManager.scaledEyeHeight / _settings.playerEyeHeight;
             float trackerScale = _playerAvatarManager.scale / fullBodyScale;
 
-            CalibrationData.FullBodyCalibration automaticCalibration = _calibrationData.automaticCalibration;
-            CalibrationData.FullBodyCalibration manualCalibration = _playerAvatarManager.currentManualCalibration;
+            CalibrationData.FullBodyCalibration calibration = _calibrationData.calibration;
 
-            UpdateOffset(head.offset, spawnedAvatar.prefab.headOffset, spawnedAvatar.prefab.headCalibrationOffset, _playerAvatarManager.scale, manualCalibration.head, automaticCalibration.head);
-            UpdateOffset(pelvis.offset, spawnedAvatar.prefab.pelvisOffset, spawnedAvatar.prefab.pelvisCalibrationOffset, trackerScale, manualCalibration.waist, automaticCalibration.waist);
-            UpdateOffset(leftFoot.offset, spawnedAvatar.prefab.leftLegOffset, spawnedAvatar.prefab.leftFootCalibrationOffset, trackerScale, manualCalibration.leftFoot, automaticCalibration.leftFoot);
-            UpdateOffset(rightFoot.offset, spawnedAvatar.prefab.rightLegOffset, spawnedAvatar.prefab.rightFootCalibrationOffset, trackerScale, manualCalibration.rightFoot, automaticCalibration.rightFoot);
+            AvatarPrefab avatarPrefab = spawnedAvatar.prefab;
+            UpdateOffset(head.offset, avatarPrefab.headOffset, _playerAvatarManager.scale);
+            UpdateOffset(pelvis.offset, avatarPrefab.pelvisOffset, avatarPrefab.pelvisCalibrationOffset, trackerScale, calibration.waist);
+            UpdateOffset(leftFoot.offset, avatarPrefab.leftLegOffset, avatarPrefab.leftFootCalibrationOffset, trackerScale, calibration.leftFoot);
+            UpdateOffset(rightFoot.offset, avatarPrefab.rightLegOffset, avatarPrefab.rightFootCalibrationOffset, trackerScale, calibration.rightFoot);
 
-            switch (calibrationMode)
-            {
-                case CalibrationMode.None:
-                    _humanoidCalibrator.ApplyNoCalibration();
-                    break;
-
-                case CalibrationMode.Manual:
-                    _humanoidCalibrator.ApplyManualCalibration();
-                    break;
-
-                case CalibrationMode.Automatic:
-                    _humanoidCalibrator.ApplyAutomaticCalibration();
-                    break;
-            }
+            _humanoidCalibrator.ApplyCalibration();
+            _humanoidCalibrator.ApplyAdjust();
 
             fullBodyTracking.localPosition = new Vector3(0, _settings.playerEyeHeight - _playerAvatarManager.scaledEyeHeight, 0);
             fullBodyTracking.localScale = new Vector3(1, fullBodyScale, 1);
         }
 
-        private void UpdateOffset(Transform transform, Pose manualOffset, Pose automaticOffset, float scale, Pose manualCalibration, Pose automaticCalibration)
+        private void UpdateOffset(Transform transform, Pose offset, Pose calibrationOffset, float scale, Pose calibration)
         {
-            switch (calibrationMode)
+            if (!calibration.Equals(Pose.identity))
             {
-                case CalibrationMode.None:
-                    UpdateOffset(transform, manualOffset, scale);
-                    break;
-
-                case CalibrationMode.Manual:
-                    if (!manualCalibration.Equals(Pose.identity))
-                    {
-                        UpdateOffset(transform, Pose.identity, 1);
-                    }
-                    else
-                    {
-                        UpdateOffset(transform, manualOffset, scale);
-                    }
-
-                    break;
-
-                case CalibrationMode.Automatic:
-                    if (!automaticCalibration.Equals(Pose.identity))
-                    {
-                        UpdateOffset(transform, automaticOffset, scale);
-                    }
-                    else
-                    {
-                        UpdateOffset(transform, manualOffset, scale);
-                    }
-
-                    break;
+                UpdateOffset(transform, calibrationOffset, scale);
+            }
+            else
+            {
+                UpdateOffset(transform, offset, scale);
             }
         }
 
@@ -542,7 +508,29 @@ namespace CustomAvatar.Tracking
 
         private void UpdateNodeState(GenericNode trackedNode, DeviceUse deviceUse)
         {
-            trackedNode.isTracking = _deviceProvider.TryGetDeviceState(deviceUse, out DeviceState deviceState) && deviceState.isTracking;
+            if (_deviceProvider.TryGetDeviceState(deviceUse, out DeviceState deviceState))
+            {
+                trackedNode.isTracking = deviceState.isTracking;
+                trackedNode.gameObject.SetActive(deviceState.isTracking);
+            }
+            else
+            {
+                trackedNode.isTracking = false;
+                trackedNode.gameObject.SetActive(false);
+            }
+
+            UpdateCalibrationState(trackedNode, deviceUse);
+        }
+
+        private void UpdateCalibrationStates()
+        {
+            UpdateCalibrationState(pelvis, DeviceUse.Waist);
+            UpdateCalibrationState(leftFoot, DeviceUse.LeftFoot);
+            UpdateCalibrationState(rightFoot, DeviceUse.RightFoot);
+        }
+
+        private void UpdateCalibrationState(GenericNode trackedNode, DeviceUse deviceUse)
+        {
             trackedNode.isCalibrated = IsCurrentlyCalibrated(deviceUse);
         }
 
@@ -559,21 +547,7 @@ namespace CustomAvatar.Tracking
                 return true;
             }
 
-            CalibrationData.FullBodyCalibration calibration;
-
-            switch (calibrationMode)
-            {
-                case CalibrationMode.Automatic:
-                    calibration = _calibrationData.automaticCalibration;
-                    break;
-
-                case CalibrationMode.Manual:
-                    calibration = _playerAvatarManager.currentManualCalibration;
-                    break;
-
-                default:
-                    return true;
-            }
+            CalibrationData.FullBodyCalibration calibration = _calibrationData.calibration;
 
             Pose pose = deviceUse switch
             {

@@ -81,8 +81,6 @@ namespace CustomAvatar.Configuration
 
         public class AvatarSpecificSettings
         {
-            public CalibrationMode calibrationMode { get; set; } = CalibrationMode.Automatic;
-
             public bool ignoreExclusions { get; set; } = false;
         }
 

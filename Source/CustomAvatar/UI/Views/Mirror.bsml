@@ -6,7 +6,7 @@
   </vertical>
   <vertical active="~isCalibrationMessageVisible" child-expand-height="false" child-expand-width="false" child-control-height="false" child-control-width="false" child-align="MiddleCenter">
     <horizontal>
-      <text color="#808080" text="~calibrationMessage" font-size="5" italics="true" auto-size="true" align="Center" />
+      <text color="#808080" text="Stand up straight with your whole body and head facing the same direction.\nPress both triggers simultaneously to save." font-size="5" italics="true" auto-size="true" align="Center" />
     </horizontal>
     <button text="Cancel" on-click="OnCancelButtonClicked" />
   </vertical>

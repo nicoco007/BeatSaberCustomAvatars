@@ -71,8 +71,6 @@ namespace CustomAvatar.Player
 
         internal Settings.AvatarSpecificSettings currentAvatarSettings { get; private set; }
 
-        internal CalibrationData.FullBodyCalibration currentManualCalibration { get; private set; }
-
         internal string currentAvatarFileName
         {
             get => _settings.previousAvatarPath;
@@ -108,7 +106,6 @@ namespace CustomAvatar.Player
         private ILogger<PlayerAvatarManager> _logger;
         private AvatarLoader _avatarLoader;
         private Settings _settings;
-        private CalibrationData _calibrationData;
         private AvatarSpawner _spawner;
         private BeatSaberUtilities _beatSaberUtilities;
         private ActiveCameraManager _activeCameraManager;
@@ -155,7 +152,6 @@ namespace CustomAvatar.Player
             ILogger<PlayerAvatarManager> logger,
             AvatarLoader avatarLoader,
             Settings settings,
-            CalibrationData calibrationData,
             AvatarSpawner spawner,
             BeatSaberUtilities beatSaberUtilities,
             ActiveCameraManager activeCameraManager)
@@ -164,7 +160,6 @@ namespace CustomAvatar.Player
             _logger = logger;
             _avatarLoader = avatarLoader;
             _settings = settings;
-            _calibrationData = calibrationData;
             _spawner = spawner;
             _beatSaberUtilities = beatSaberUtilities;
             _activeCameraManager = activeCameraManager;
@@ -356,7 +351,6 @@ namespace CustomAvatar.Player
 
             currentlySpawnedAvatar = _spawner.SpawnAvatar(avatar, _container.Resolve<VRPlayerInput>(), _containerTransform);
             currentAvatarSettings = _settings.GetAvatarSettings(avatarInfo.fileName);
-            currentManualCalibration = _calibrationData.GetAvatarManualCalibration(avatarInfo.fileName);
 
             ResizeCurrentAvatar();
             UpdateFirstPersonVisibility();

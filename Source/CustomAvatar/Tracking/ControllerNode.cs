@@ -24,7 +24,11 @@ namespace CustomAvatar.Tracking
     {
         [field: SerializeField] public Transform offset { get; private set; }
 
+        [field: SerializeField] public Transform viewTransform { get; private set; }
+
         [field: SerializeField] public VRController controller { get; private set; }
+
+        [field: SerializeField] public TrackerGrabber trackerGrabber { get; private set; }
 
         public bool isTracking { get; set; }
 

@@ -7,6 +7,17 @@ namespace CustomAvatar.Tracking
         public UnityEngine.Transform offset { get; set; }
 
         [field: UnityEngine.SerializeField]
+        public UnityEngine.Transform manualOffset { get; set; }
+
+        [field: UnityEngine.SerializeField]
         public UnityEngine.Transform calibration { get; set; }
+
+        [field: UnityEngine.SerializeField]
+        public UnityEngine.GameObject grabSphere { get; set; }
+
+        public UnityEngine.Renderer _renderer;
+        public UnityEngine.Transform _grabSphereTransform;
+        public UnityEngine.Material _defaultMaterial;
+        public UnityEngine.Material _activeMaterial;
     }
 }

@@ -104,14 +104,7 @@ namespace CustomAvatar.UI
 
         protected bool isErrorMessageVisible => !string.IsNullOrEmpty(errorMessage);
 
-        protected string calibrationMessage => _trackingRig.activeCalibrationMode switch
-        {
-            CalibrationMode.Automatic => "Stand up straight with your whole body and head facing the same direction.\nPress both triggers simultaneously to save.",
-            CalibrationMode.Manual => "Align your body with the avatar and\npress both triggers simultaneously to save.",
-            _ => null,
-        };
-
-        protected bool isCalibrationMessageVisible => _trackingRig.activeCalibrationMode != CalibrationMode.None;
+        protected bool isCalibrationMessageVisible => _trackingRig.isCalibrating;
 
         [Inject]
         [UsedImplicitly]
@@ -143,7 +136,7 @@ namespace CustomAvatar.UI
             _settings.mirror.useFakeMirrorBeta.changed += OnUseFakeMirrorChanged;
             _settings.playerEyeHeight.changed += OnEyeHeightChanged;
 
-            _trackingRig.activeCalibrationModeChanged += OnActiveCalibrationModeChanged;
+            _trackingRig.isCalibratingChanged += OnIsCalibratingChanged;
 
             if (firstActivation)
             {
@@ -191,7 +184,7 @@ namespace CustomAvatar.UI
 
             _settings.mirror.useFakeMirrorBeta.changed -= OnUseFakeMirrorChanged;
 
-            _trackingRig.activeCalibrationModeChanged += OnActiveCalibrationModeChanged;
+            _trackingRig.isCalibratingChanged -= OnIsCalibratingChanged;
         }
 
         protected override void OnDestroy()
@@ -239,10 +232,9 @@ namespace CustomAvatar.UI
             transform.position = position;
         }
 
-        private void OnActiveCalibrationModeChanged(CalibrationMode calibrationMode)
+        private void OnIsCalibratingChanged(bool isCalibrating)
         {
             NotifyPropertyChanged(nameof(isCalibrationMessageVisible));
-            NotifyPropertyChanged(nameof(calibrationMessage));
         }
 
         private void SetLoading(bool loading)

@@ -15,7 +15,6 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using CustomAvatar.Avatar;
-using CustomAvatar.Configuration;
 using CustomAvatar.Tracking;
 using UnityEngine;
 using Zenject;
@@ -36,7 +35,7 @@ namespace CustomAvatar.Player
 
         protected void Start()
         {
-            _trackingRig.activeCalibrationModeChanged += OnActiveCalibrationModeChanged;
+            _trackingRig.isCalibratingChanged += OnIsCalibratingChanged;
             _playerAvatarManager.avatarChanged += OnAvatarChanged;
 
             UpdateState();
@@ -53,11 +52,11 @@ namespace CustomAvatar.Player
 
         protected void OnDestroy()
         {
-            _trackingRig.activeCalibrationModeChanged -= OnActiveCalibrationModeChanged;
+            _trackingRig.isCalibratingChanged -= OnIsCalibratingChanged;
             _playerAvatarManager.avatarChanged -= OnAvatarChanged;
         }
 
-        private void OnActiveCalibrationModeChanged(CalibrationMode calibrationMode)
+        private void OnIsCalibratingChanged(bool isCalibrating)
         {
             UpdateState();
         }
@@ -69,7 +68,7 @@ namespace CustomAvatar.Player
 
         private void UpdateState()
         {
-            enabled = _trackingRig.activeCalibrationMode is not CalibrationMode.None && _playerAvatarManager.currentlySpawnedAvatar != null;
+            enabled = _trackingRig.isCalibrating;
         }
     }
 }

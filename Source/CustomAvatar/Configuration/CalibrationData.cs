@@ -15,12 +15,8 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using CustomAvatar.Logging;
-using CustomAvatar.Player;
-using CustomAvatar.Utilities;
 using IPA.Utilities;
 using ProtoBuf;
 using ProtoBuf.Meta;
@@ -38,7 +34,9 @@ namespace CustomAvatar.Configuration
 
         private CalibrationState _calibrationState = new();
 
-        public FullBodyCalibration automaticCalibration => _calibrationState.automaticCalibration;
+        public FullBodyCalibration calibration => _calibrationState.calibration;
+
+        public FullBodyCalibration manualOffset => _calibrationState.manualOffset;
 
         private CalibrationData(ILogger<CalibrationData> logger)
         {
@@ -75,22 +73,6 @@ namespace CustomAvatar.Configuration
             }
         }
 
-        public FullBodyCalibration GetAvatarManualCalibration(string fileName)
-        {
-            if (!PathHelpers.IsValidFileName(fileName))
-            {
-                throw new ArgumentException("Invalid file name", nameof(fileName));
-            }
-
-            if (!_calibrationState.manualCalibrations.TryGetValue(fileName, out FullBodyCalibration fullBodyCalibration))
-            {
-                fullBodyCalibration = new FullBodyCalibration();
-                _calibrationState.manualCalibrations.Add(fileName, fullBodyCalibration);
-            }
-
-            return fullBodyCalibration;
-        }
-
         private void Load()
         {
             if (!File.Exists(kCalibrationDataFilePath)) return;
@@ -101,15 +83,11 @@ namespace CustomAvatar.Configuration
             {
                 _calibrationState = _runtimeTypeModel.Deserialize<CalibrationState>(fileStream);
             }
-
-            Prune();
         }
 
         private void Save()
         {
             _logger.LogInformation($"Saving calibration data to '{kCalibrationDataFilePath}'");
-
-            Prune();
 
             using (FileStream fileStream = File.OpenWrite(kCalibrationDataFilePath))
             {
@@ -120,42 +98,19 @@ namespace CustomAvatar.Configuration
             File.SetAttributes(kCalibrationDataFilePath, FileAttributes.Hidden);
         }
 
-        private void Prune()
-        {
-            foreach (string fileName in _calibrationState.manualCalibrations.Keys.ToList())
-            {
-                if (!PathHelpers.IsValidFileName(fileName))
-                {
-                    _logger.LogTrace($"'{fileName}' is not a valid file name");
-                    _calibrationState.manualCalibrations.Remove(fileName);
-                }
-
-                string fullPath = Path.Join(PlayerAvatarManager.kCustomAvatarsPath, fileName);
-
-                if (!File.Exists(fullPath))
-                {
-                    _logger.LogTrace($"'{fileName}' no longer exists");
-                    _calibrationState.manualCalibrations.Remove(fileName);
-                }
-            }
-        }
-
         [ProtoContract]
         internal class CalibrationState
         {
             [ProtoMember(1)]
-            internal FullBodyCalibration automaticCalibration { get; } = new FullBodyCalibration();
+            internal FullBodyCalibration calibration { get; } = new FullBodyCalibration();
 
-            [ProtoMember(2)]
-            internal Dictionary<string, FullBodyCalibration> manualCalibrations { get; set; } = new();
+            [ProtoMember(3)]
+            internal FullBodyCalibration manualOffset { get; } = new();
         }
 
         [ProtoContract]
         internal class FullBodyCalibration
         {
-            [ProtoMember(1)]
-            internal Pose head { get; set; } = Pose.identity;
-
             [ProtoMember(2)]
             internal Pose waist { get; set; } = Pose.identity;
 
@@ -165,7 +120,7 @@ namespace CustomAvatar.Configuration
             [ProtoMember(4)]
             internal Pose rightFoot { get; set; } = Pose.identity;
 
-            internal bool isCalibrated => !head.Equals(Pose.identity) || !waist.Equals(Pose.identity) || !leftFoot.Equals(Pose.identity) || !rightFoot.Equals(Pose.identity);
+            internal bool isSet => !waist.Equals(Pose.identity) || !leftFoot.Equals(Pose.identity) || !rightFoot.Equals(Pose.identity);
         }
     }
 }

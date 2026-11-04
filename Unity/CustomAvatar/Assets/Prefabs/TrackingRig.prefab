@@ -178,6 +178,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2036258311757538743}
     m_Modifications:
+    - target: {fileID: 268560833866901219, guid: 58e59e0b005c762409c52f5dd2e367a3, type: 3}
+      propertyPath: _node
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 6297725819033684484, guid: 58e59e0b005c762409c52f5dd2e367a3, type: 3}
       propertyPath: m_Name
       value: Left Hand
@@ -596,6 +600,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2036258311757538743}
     m_Modifications:
+    - target: {fileID: 268560833866901219, guid: 58e59e0b005c762409c52f5dd2e367a3, type: 3}
+      propertyPath: _node
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 6297725819033684484, guid: 58e59e0b005c762409c52f5dd2e367a3, type: 3}
       propertyPath: m_Name
       value: Right Hand

@@ -14,95 +14,74 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
-using CustomAvatar.Player;
 using CustomAvatar.Tracking;
 using JetBrains.Annotations;
 
 namespace CustomAvatar.UI
 {
-    internal class AutomaticFbtCalibrationHost : ViewControllerHost
+    internal class FullBodyTrackingCalibrationHost : ViewControllerHost
     {
         protected readonly TrackerStatusHost trackerStatusHost;
+        protected readonly AdjustHost adjustHost;
 
-        private readonly PlayerAvatarManager _avatarManager;
-        private readonly CalibrationData _calibrationData;
         private readonly TrackingRig _trackingRig;
 
-        protected AutomaticFbtCalibrationHost(TrackerStatusHost trackerStatusHost, PlayerAvatarManager avatarManager, CalibrationData calibrationData, TrackingRig trackingRig)
+        protected FullBodyTrackingCalibrationHost(TrackerStatusHost trackerStatusHost, CalibrationData calibrationData, TrackingRig trackingRig)
         {
             this.trackerStatusHost = trackerStatusHost;
+            this.adjustHost = new AdjustHost(trackingRig, calibrationData);
 
-            _avatarManager = avatarManager;
-            _calibrationData = calibrationData;
             _trackingRig = trackingRig;
         }
 
-        protected bool isCalibrateButtonEnabled => _trackingRig.areAnyFullBodyTrackersTracking && _trackingRig.activeCalibrationMode != CalibrationMode.Automatic;
+        protected bool isCalibrateButtonEnabled => _trackingRig.areAnyFullBodyTrackersTracking && !_trackingRig.isCalibrating && !_trackingRig.isAdjusting;
 
         protected string calibrateButtonHoverHint => _trackingRig.areAnyFullBodyTrackersTracking ? "Start full body calibration" : "No trackers detected";
 
-        protected bool isClearButtonEnabled => _calibrationData.automaticCalibration.isCalibrated;
-
         public override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
-            _avatarManager.avatarLoading += OnAvatarLoading;
-            _avatarManager.avatarChanged += OnAvatarChanged;
             _trackingRig.trackingChanged += OnTrackingChanged;
-            _trackingRig.activeCalibrationModeChanged += OnActiveCalibrationModeChanged;
+            _trackingRig.isCalibratingChanged += OnIsCalibratingChanged;
+            _trackingRig.isAdjustingChanged += OnIsAdjustingChanged;
 
-            OnAvatarChanged(_avatarManager.currentlySpawnedAvatar);
             OnTrackingChanged();
 
+            adjustHost.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
             trackerStatusHost.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
         }
 
         public override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
-            _avatarManager.avatarLoading -= OnAvatarLoading;
-            _avatarManager.avatarChanged -= OnAvatarChanged;
             _trackingRig.trackingChanged -= OnTrackingChanged;
-            _trackingRig.activeCalibrationModeChanged -= OnActiveCalibrationModeChanged;
+            _trackingRig.isCalibratingChanged -= OnIsCalibratingChanged;
+            _trackingRig.isAdjustingChanged -= OnIsAdjustingChanged;
 
+            adjustHost.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
             trackerStatusHost.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
-        }
-
-        private void OnAvatarLoading(string filePath, string name)
-        {
-            NotifyPropertyChanged(nameof(isCalibrateButtonEnabled));
-        }
-
-        private void OnAvatarChanged(SpawnedAvatar avatar)
-        {
-            NotifyPropertyChanged(nameof(isCalibrateButtonEnabled));
         }
 
         private void OnTrackingChanged()
         {
             NotifyPropertyChanged(nameof(isCalibrateButtonEnabled));
-            NotifyPropertyChanged(nameof(isClearButtonEnabled));
         }
 
-        private void OnActiveCalibrationModeChanged(CalibrationMode calibrationMode)
+        private void OnIsCalibratingChanged(bool isCalibrating)
+        {
+            NotifyPropertyChanged(nameof(isCalibrateButtonEnabled));
+        }
+
+        private void OnIsAdjustingChanged(bool isAdjusting)
         {
             NotifyPropertyChanged(nameof(isCalibrateButtonEnabled));
         }
 
         [UsedImplicitly]
-        private void OnCalibrateAutoFullBodyTrackingClicked()
+        private void OnCalibrateClicked()
         {
-            _trackingRig.BeginCalibration(CalibrationMode.Automatic);
+            _trackingRig.BeginCalibration();
 
-            NotifyPropertyChanged(nameof(isClearButtonEnabled));
-        }
-
-        [UsedImplicitly]
-        private void OnClearAutoFullBodyTrackingCalibrationDataClicked()
-        {
-            _trackingRig.ClearCalibrationData(CalibrationMode.Automatic);
-
-            NotifyPropertyChanged(nameof(isClearButtonEnabled));
+            NotifyPropertyChanged(nameof(isCalibrateButtonEnabled));
         }
     }
 }

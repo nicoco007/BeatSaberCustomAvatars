@@ -14,31 +14,20 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
 using CustomAvatar.Avatar;
-using CustomAvatar.Configuration;
 using CustomAvatar.Player;
-using CustomAvatar.Tracking;
-using JetBrains.Annotations;
 
 namespace CustomAvatar.UI
 {
     internal class AvatarSpecificSettingsHost : ViewControllerHost
     {
-        protected readonly List<object> calibrationModeOptions = new() { CalibrationMode.None, CalibrationMode.Automatic, CalibrationMode.Manual };
-        protected readonly TrackerStatusHost trackerStatusHost;
-
         private readonly PlayerAvatarManager _avatarManager;
-        private readonly TrackingRig _trackingRig;
 
         private bool _isLoaderActive;
 
-        protected AvatarSpecificSettingsHost(TrackerStatusHost trackerStatusHost, PlayerAvatarManager avatarManager, TrackingRig trackingRig)
+        protected AvatarSpecificSettingsHost(PlayerAvatarManager avatarManager)
         {
-            this.trackerStatusHost = trackerStatusHost;
-
             _avatarManager = avatarManager;
-            _trackingRig = trackingRig;
         }
 
         protected bool areCurrentAvatarSettingsLoaded => _avatarManager.currentlySpawnedAvatar != null;
@@ -63,42 +52,18 @@ namespace CustomAvatar.UI
             }
         }
 
-        protected CalibrationMode calibrationMode
-        {
-            get => _trackingRig.calibrationMode;
-            set
-            {
-                _trackingRig.calibrationMode = value;
-                NotifyPropertyChanged();
-            }
-        }
-
-        protected bool isCalibrateButtonEnabled => _avatarManager.currentlySpawnedAvatar != null && _trackingRig.activeCalibrationMode != CalibrationMode.Manual && _trackingRig.areAnyFullBodyTrackersTracking;
-
-        protected string calibrateButtonHoverHint => _avatarManager.currentlySpawnedAvatar != null ? (_trackingRig.areAnyFullBodyTrackersTracking ? "Start full body calibration" : "No trackers detected") : "No avatar selected";
-
-        protected bool isClearButtonEnabled => _avatarManager.currentlySpawnedAvatar != null && _avatarManager.currentManualCalibration.isCalibrated;
-
         public override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             _avatarManager.avatarLoading += OnAvatarLoading;
             _avatarManager.avatarChanged += OnAvatarChanged;
-            _trackingRig.trackingChanged += OnTrackingChanged;
-            _trackingRig.calibrationModeChanged += OnCalibrationModeChanged;
 
             OnAvatarChanged(_avatarManager.currentlySpawnedAvatar);
-            OnTrackingChanged();
-
-            trackerStatusHost.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
         }
 
         public override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
             _avatarManager.avatarLoading -= OnAvatarLoading;
             _avatarManager.avatarChanged -= OnAvatarChanged;
-            _trackingRig.trackingChanged -= OnTrackingChanged;
-
-            trackerStatusHost.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
         }
 
         private void OnAvatarLoading(string fullPath, string name)
@@ -106,11 +71,7 @@ namespace CustomAvatar.UI
             isLoaderActive = true;
 
             NotifyPropertyChanged(nameof(ignoreExclusions));
-            NotifyPropertyChanged(nameof(calibrationMode));
             NotifyPropertyChanged(nameof(areCurrentAvatarSettingsLoaded));
-            NotifyPropertyChanged(nameof(isCalibrateButtonEnabled));
-            NotifyPropertyChanged(nameof(calibrateButtonHoverHint));
-            NotifyPropertyChanged(nameof(isClearButtonEnabled));
         }
 
         private void OnAvatarChanged(SpawnedAvatar avatar)
@@ -118,51 +79,7 @@ namespace CustomAvatar.UI
             isLoaderActive = false;
 
             NotifyPropertyChanged(nameof(ignoreExclusions));
-            NotifyPropertyChanged(nameof(calibrationMode));
             NotifyPropertyChanged(nameof(areCurrentAvatarSettingsLoaded));
-            NotifyPropertyChanged(nameof(isCalibrateButtonEnabled));
-            NotifyPropertyChanged(nameof(calibrateButtonHoverHint));
-            NotifyPropertyChanged(nameof(isClearButtonEnabled));
-        }
-
-        private void OnTrackingChanged()
-        {
-            NotifyPropertyChanged(nameof(isCalibrateButtonEnabled));
-            NotifyPropertyChanged(nameof(calibrateButtonHoverHint));
-            NotifyPropertyChanged(nameof(isClearButtonEnabled));
-        }
-
-        private void OnCalibrationModeChanged(CalibrationMode _)
-        {
-            NotifyPropertyChanged(nameof(isCalibrateButtonEnabled));
-            NotifyPropertyChanged(nameof(calibrationMode));
-        }
-
-        [UsedImplicitly]
-        private string CalibrationModeFormatter(object value) => value switch
-        {
-            CalibrationMode.None => "None",
-            CalibrationMode.Automatic => "Automatic",
-            CalibrationMode.Manual => "Manual",
-            _ => null,
-        };
-
-        [UsedImplicitly]
-        private void OnCalibrateFullBodyTrackingClicked()
-        {
-            _trackingRig.BeginCalibration(CalibrationMode.Manual);
-
-            NotifyPropertyChanged(nameof(calibrateButtonHoverHint));
-            NotifyPropertyChanged(nameof(isClearButtonEnabled));
-        }
-
-        [UsedImplicitly]
-        private void OnClearFullBodyTrackingCalibrationDataClicked()
-        {
-            _trackingRig.ClearCalibrationData(CalibrationMode.Manual);
-
-            NotifyPropertyChanged(nameof(calibrateButtonHoverHint));
-            NotifyPropertyChanged(nameof(isClearButtonEnabled));
         }
     }
 }
