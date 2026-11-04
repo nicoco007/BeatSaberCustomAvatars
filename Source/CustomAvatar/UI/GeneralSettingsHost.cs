@@ -113,16 +113,6 @@ namespace CustomAvatar.UI
             }
         }
 
-        public bool moveFloorWithRoomAdjust
-        {
-            get => _settings.moveFloorWithRoomAdjust;
-            set
-            {
-                _settings.moveFloorWithRoomAdjust.value = value;
-                NotifyPropertyChanged();
-            }
-        }
-
         public float cameraNearClipPlane
         {
             get => _settings.cameraNearClipPlane;

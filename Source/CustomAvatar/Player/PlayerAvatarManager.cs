@@ -132,7 +132,6 @@ namespace CustomAvatar.Player
 
         protected void OnEnable()
         {
-            _settings.moveFloorWithRoomAdjust.changed += OnMoveFloorWithRoomAdjustChanged;
             _settings.resizeMode.changed += OnResizeModeChanged;
             _settings.floorHeightAdjust.changed += OnFloorHeightAdjustChanged;
             _settings.isAvatarVisibleInFirstPerson.changed += OnAvatarVisibleInFirstPersonChanged;
@@ -196,7 +195,6 @@ namespace CustomAvatar.Player
 
         protected void OnDisable()
         {
-            _settings.moveFloorWithRoomAdjust.changed -= OnMoveFloorWithRoomAdjustChanged;
             _settings.resizeMode.changed -= OnResizeModeChanged;
             _settings.floorHeightAdjust.changed -= OnFloorHeightAdjustChanged;
             _settings.isAvatarVisibleInFirstPerson.changed -= OnAvatarVisibleInFirstPersonChanged;
@@ -392,14 +390,7 @@ namespace CustomAvatar.Player
                 return 0;
             }
 
-            float offset = eyeHeight - scaledEyeHeight;
-
-            if (_settings.moveFloorWithRoomAdjust)
-            {
-                offset += _beatSaberUtilities.roomCenter.y;
-            }
-
-            return offset;
+            return eyeHeight - scaledEyeHeight;
         }
 
         internal List<string> GetAvatarFileNames()
@@ -561,11 +552,6 @@ namespace CustomAvatar.Player
             {
                 currentlySpawnedAvatar.ik.isLocomotionEnabled = _settings.enableLocomotion;
             }
-        }
-
-        private void OnMoveFloorWithRoomAdjustChanged(bool value)
-        {
-            ResizeCurrentAvatar();
         }
 
         private void OnPlayerHeightChanged(float height)

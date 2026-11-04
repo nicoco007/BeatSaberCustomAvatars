@@ -48,16 +48,14 @@ namespace CustomAvatar.Tracking
         private TrackingRig _trackingRig;
         private CalibrationData _calibrationData;
         private Settings _settings;
-        private BeatSaberUtilities _beatSaberUtilities;
         private PlayerAvatarManager _playerAvatarManager;
 
         [Inject]
-        internal void Construct(TrackingRig trackingRig, CalibrationData calibrationData, Settings settings, BeatSaberUtilities beatSaberUtilities, PlayerAvatarManager playerAvatarManager)
+        internal void Construct(TrackingRig trackingRig, CalibrationData calibrationData, Settings settings, PlayerAvatarManager playerAvatarManager)
         {
             _trackingRig = trackingRig;
             _calibrationData = calibrationData;
             _settings = settings;
-            _beatSaberUtilities = beatSaberUtilities;
             _playerAvatarManager = playerAvatarManager;
         }
 
@@ -121,11 +119,6 @@ namespace CustomAvatar.Tracking
 
             // put center on the ground
             center.localPosition = new Vector3(center.localPosition.x, 0, center.localPosition.z);
-
-            if (_settings.moveFloorWithRoomAdjust)
-            {
-                center.position += center.TransformVector(0, _beatSaberUtilities.roomCenter.y, 0);
-            }
 
             UpdateCalibrationPoint(pelvis, new Vector3(0, playerEyeHeight * kEyeHeightToPelvisHeightRatio, 0));
             UpdateCalibrationPoint(leftFoot, new Vector3(playerEyeHeight * -kCenterToFoot, 0, 0));

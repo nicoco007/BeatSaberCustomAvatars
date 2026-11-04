@@ -32,7 +32,6 @@
 
         <text color="#808080" text="Advanced" font-size="4" italics="true" align="Capline" anchor-min="0 0.5" anchor-max="1 0.5" size-delta="0 7" />
 
-        <toggle-setting value="moveFloorWithRoomAdjust" bind-value="true" apply-on-change="true" text="Move Floor with Room Adjust" hover-hint="Move the floor/environment along with the game's built-in vertical room adjust." />
         <toggle-setting value="enableLocomotion" bind-value="true" apply-on-change="true" text="Enable locomotion" hover-hint="Allow feet and waist to be moved automatically to follow your head/body when not using dedicated trackers. Only affects full body avatars." />
         <list-setting value="cameraNearClipPlane" bind-value="true" apply-on-change="true" text="Camera Near Clip Plane" hover-hint="Distance from your eyes at which objets start being visible." options="nearClipPlaneValues" formatter="CentimeterFormatter" />
       </macro.as-host>

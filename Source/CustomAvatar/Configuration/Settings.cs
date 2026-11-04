@@ -30,7 +30,6 @@ namespace CustomAvatar.Configuration
     internal class Settings
     {
         public ObservableValue<bool> isAvatarVisibleInFirstPerson { get; } = new ObservableValue<bool>();
-        public ObservableValue<bool> moveFloorWithRoomAdjust { get; } = new ObservableValue<bool>();
         public ObservableValue<AvatarResizeMode> resizeMode { get; } = new ObservableValue<AvatarResizeMode>(AvatarResizeMode.Height);
         public ObservableValue<FloorHeightAdjustMode> floorHeightAdjust { get; } = new ObservableValue<FloorHeightAdjustMode>(FloorHeightAdjustMode.Off);
         public string previousAvatarPath { get; set; }

@@ -70,7 +70,7 @@ namespace CustomAvatar.Tracking
         internal bool areAnyFullBodyTrackersTracking { get; private set; }
 
         // local to the current active origin (parent of VRCenterAdjust or world if no parent)
-        internal float eyeHeight => (_activeCameraManager.current != null && _activeCameraManager.current.origin != null ? _activeCameraManager.current.origin.InverseTransformPoint(head.transform.position).y : head.transform.position.y) - (_settings.moveFloorWithRoomAdjust ? _beatSaberUtilities.roomCenter.y : 0);
+        internal float eyeHeight => _activeCameraManager.current != null && _activeCameraManager.current.origin != null ? _activeCameraManager.current.origin.InverseTransformPoint(head.transform.position).y : head.transform.position.y;
 
         [field: SerializeField]
         internal SimpleNode head { get; private set; }
