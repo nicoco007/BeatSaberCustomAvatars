@@ -32,6 +32,8 @@ namespace CustomAvatar.Tracking
         // Note that the actual value doesn't really matter that much, it's mostly to make the positioning easier to understand.
         internal const float kEyeHeightToPelvisHeightRatio = 4f / 7f;
 
+        private const float kCenterToFoot = 0.08f;
+
         private const float kMinPressValue = VRInputModule.kMinPressValue;
 
         [field: SerializeField]
@@ -125,12 +127,9 @@ namespace CustomAvatar.Tracking
                 center.position += center.TransformVector(0, _beatSaberUtilities.roomCenter.y, 0);
             }
 
-            Vector3 leftFootPos = center.InverseTransformPoint(_trackingRig.leftFoot.transform.position);
-            Vector3 rightFootPos = center.InverseTransformPoint(_trackingRig.rightFoot.transform.position);
-
-            UpdateCalibrationPoint(pelvis, new Vector3(0, playerEyeHeight * kEyeHeightToPelvisHeightRatio, 0), Quaternion.identity);
-            UpdateCalibrationPoint(leftFoot, new Vector3(leftFootPos.x, 0, 0), Quaternion.Euler(0, -10f, 0));
-            UpdateCalibrationPoint(rightFoot, new Vector3(rightFootPos.x, 0, 0), Quaternion.Euler(0, 10f, 0));
+            UpdateCalibrationPoint(pelvis, new Vector3(0, playerEyeHeight * kEyeHeightToPelvisHeightRatio, 0));
+            UpdateCalibrationPoint(leftFoot, new Vector3(playerEyeHeight * -kCenterToFoot, 0, 0));
+            UpdateCalibrationPoint(rightFoot, new Vector3(playerEyeHeight * kCenterToFoot, 0, 0));
 
             // need to use trigger rather than triggerButton since the latter is not bound on all controller types with SteamVR
             if (InputDevices.GetDeviceAtXRNode(XRNode.LeftHand).TryGetFeatureValue(CommonUsages.trigger, out float leftTriggerValue) &&
@@ -170,9 +169,9 @@ namespace CustomAvatar.Tracking
             calibrationPoint.gameObject.SetActive(calibrationPoint.node.isTracking);
         }
 
-        private void UpdateCalibrationPoint(CalibrationPoint calibrationPoint, Vector3 targetPosition, Quaternion targetRotation)
+        private void UpdateCalibrationPoint(CalibrationPoint calibrationPoint, Vector3 targetPosition)
         {
-            calibrationPoint.transform.SetLocalPositionAndRotation(targetPosition, targetRotation);
+            calibrationPoint.transform.SetLocalPositionAndRotation(targetPosition, Quaternion.identity);
         }
 
         private void WriteCalibrationTransforms(CalibrationData.FullBodyCalibration calibration)
