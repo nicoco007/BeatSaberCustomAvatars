@@ -31,6 +31,7 @@ namespace CustomAvatar.Player
     internal class VRPlayerInput : IInitializable, IDisposable, IAvatarInput, IAvatarInputExtended
     {
         private readonly TrackingRig _trackingRig;
+        private readonly PlayerAvatarManager _playerAvatarManager;
         private readonly IFingerTrackingProvider _fingerTrackingProvider;
         private readonly IFPFCSettings _fpfcSettings;
         private readonly Settings _settings;
@@ -42,14 +43,18 @@ namespace CustomAvatar.Player
 
         public bool enableLocomotion => _settings.enableLocomotion;
 
+        public float scale => _playerAvatarManager.scale;
+
         protected VRPlayerInput(
             TrackingRig trackingRig,
+            PlayerAvatarManager playerAvatarManager,
             IFingerTrackingProvider fingerTrackingProvider,
             IFPFCSettings fpfcSettings,
             Settings settings,
             BeatSaberUtilities beatSaberUtilities)
         {
             _trackingRig = trackingRig;
+            _playerAvatarManager = playerAvatarManager;
             _fingerTrackingProvider = fingerTrackingProvider;
             _fpfcSettings = fpfcSettings;
             _settings = settings;
@@ -62,6 +67,7 @@ namespace CustomAvatar.Player
         {
             _trackingRig.trackingChanged += OnTrackingRigChanged;
             _trackingRig.isCalibratingChanged += OnIsCalibratingChanged;
+            _playerAvatarManager.avatarScaleChanged += OnAvatarScaleChanged;
             _fpfcSettings.PropertyChanged += OnFpfcSettingsPropertyChanged;
             _settings.enableLocomotion.changed += OnEnableLocomotionChanged;
             _beatSaberUtilities.focusChanged += OnFocusChanged;
@@ -71,6 +77,7 @@ namespace CustomAvatar.Player
         {
             _trackingRig.trackingChanged -= OnTrackingRigChanged;
             _trackingRig.isCalibratingChanged -= OnIsCalibratingChanged;
+            _playerAvatarManager.avatarScaleChanged -= OnAvatarScaleChanged;
             _fpfcSettings.PropertyChanged -= OnFpfcSettingsPropertyChanged;
             _settings.enableLocomotion.changed -= OnEnableLocomotionChanged;
             _beatSaberUtilities.focusChanged -= OnFocusChanged;
@@ -117,6 +124,11 @@ namespace CustomAvatar.Player
         }
 
         private void OnFocusChanged(bool hasFocus)
+        {
+            inputChanged?.Invoke();
+        }
+
+        private void OnAvatarScaleChanged(float scale)
         {
             inputChanged?.Invoke();
         }

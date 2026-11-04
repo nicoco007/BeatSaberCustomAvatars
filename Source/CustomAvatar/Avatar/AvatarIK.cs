@@ -161,7 +161,7 @@ namespace CustomAvatar.Avatar
             _logger = loggerFactory.CreateLogger<AvatarIK>(_avatar.prefab.descriptor.name);
 
             vrikManager = GetComponentInChildren<VRIKManager>();
-            CopyManagerFieldsToVRIK(vrikManager, this);
+            CopyManagerFieldsToVRIK(vrikManager);
         }
 
         private void OnPreUpdate()
@@ -273,6 +273,14 @@ namespace CustomAvatar.Avatar
         {
             UpdateSolverTargets();
             UpdateLocomotion();
+
+            if (_extendedInput != null && vrikManager.useScale)
+            {
+                float scale = _extendedInput.scale;
+                solver.locomotion.footDistance = scale * vrikManager.solver_locomotion_footDistance;
+                solver.locomotion.stepThreshold = scale * vrikManager.solver_locomotion_stepThreshold;
+                solver.locomotion.offset = scale * vrikManager.solver_locomotion_offset;
+            }
         }
 
         private void UpdateSolverTargets()
@@ -319,9 +327,9 @@ namespace CustomAvatar.Avatar
             }
         }
 
-        private static void CopyManagerFieldsToVRIK(VRIKManager vrikManager, VRIK vrik)
+        private void CopyManagerFieldsToVRIK(VRIKManager vrikManager)
         {
-            References references = vrik.references;
+            References references = this.references;
             references.root = vrikManager.references_root;
             references.pelvis = vrikManager.references_pelvis;
             references.spine = vrikManager.references_spine;
@@ -345,7 +353,7 @@ namespace CustomAvatar.Avatar
             references.rightFoot = vrikManager.references_rightFoot;
             references.rightToes = vrikManager.references_rightToes;
 
-            IKSolverVR solver = vrik.solver;
+            IKSolverVR solver = this.solver;
             solver.plantFeet = vrikManager.solver_plantFeet;
 
             IKSolverVR.Spine spine = solver.spine;
@@ -420,10 +428,11 @@ namespace CustomAvatar.Avatar
             rightLeg.legLengthMlp = vrikManager.solver_rightLeg_legLengthMlp;
             rightLeg.stretchCurve = vrikManager.solver_rightLeg_stretchCurve;
 
+            float scale = _extendedInput?.scale ?? 1;
             IKSolverVR.Locomotion locomotion = solver.locomotion;
             locomotion.weight = vrikManager.solver_locomotion_weight;
-            locomotion.footDistance = vrikManager.solver_locomotion_footDistance;
-            locomotion.stepThreshold = vrikManager.solver_locomotion_stepThreshold;
+            locomotion.footDistance = scale * vrikManager.solver_locomotion_footDistance;
+            locomotion.stepThreshold = scale * vrikManager.solver_locomotion_stepThreshold;
             locomotion.angleThreshold = vrikManager.solver_locomotion_angleThreshold;
             locomotion.comAngleMlp = vrikManager.solver_locomotion_comAngleMlp;
             locomotion.maxVelocity = vrikManager.solver_locomotion_maxVelocity;
@@ -436,7 +445,7 @@ namespace CustomAvatar.Avatar
             locomotion.relaxLegTwistMinAngle = vrikManager.solver_locomotion_relaxLegTwistMinAngle;
             locomotion.relaxLegTwistSpeed = vrikManager.solver_locomotion_relaxLegTwistSpeed;
             locomotion.stepInterpolation = vrikManager.solver_locomotion_stepInterpolation;
-            locomotion.offset = vrikManager.solver_locomotion_offset;
+            locomotion.offset = scale * vrikManager.solver_locomotion_offset;
             locomotion.onLeftFootstep = vrikManager.solver_locomotion_onLeftFootstep;
             locomotion.onRightFootstep = vrikManager.solver_locomotion_onRightFootstep;
         }

@@ -18,6 +18,8 @@ namespace CustomAvatar.Tracking
 {
     public interface IAvatarInputExtended : IAvatarInput
     {
+        float scale { get; }
+
         bool shouldProcessInput { get; }
 
         bool shouldResetTransforms { get; }

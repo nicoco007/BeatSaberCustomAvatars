@@ -405,6 +405,13 @@ namespace CustomAvatar
 
         #endregion
 
+        [HideInInspector]
+#if UNITY_EDITOR
+        public bool useScale = true;
+#else
+        public bool useScale = false;
+#endif
+
         private ILogger<VRIKManager> _logger = new UnityDebugLogger<VRIKManager>();
 
         public bool areReferencesFilled => references_root != null &&
