@@ -413,16 +413,20 @@ namespace CustomAvatar.Tracking
 
             _logger.LogTrace("Updating offsets");
 
-            UpdateOffset(leftHand.offset, spawnedAvatar.prefab.leftHandOffset, _playerAvatarManager.scale);
-            UpdateOffset(rightHand.offset, spawnedAvatar.prefab.rightHandOffset, _playerAvatarManager.scale);
+            AvatarPrefab avatarPrefab = spawnedAvatar.prefab;
+            float scale = _playerAvatarManager.scale;
 
-            float fullBodyScale = _playerAvatarManager.scaledEyeHeight / _settings.playerEyeHeight;
-            float trackerScale = _playerAvatarManager.scale / fullBodyScale;
+            UpdateOffset(head.offset, avatarPrefab.headOffset, scale);
+            UpdateOffset(leftHand.offset, avatarPrefab.leftHandOffset, scale);
+            UpdateOffset(rightHand.offset, avatarPrefab.rightHandOffset, scale);
+
+            float scaledEyeHeight = _playerAvatarManager.scaledEyeHeight;
+            float playerEyeHeight = _settings.playerEyeHeight;
+            float fullBodyScale = scaledEyeHeight / playerEyeHeight;
+            float trackerScale = scale / fullBodyScale;
 
             CalibrationData.FullBodyCalibration calibration = _calibrationData.calibration;
 
-            AvatarPrefab avatarPrefab = spawnedAvatar.prefab;
-            UpdateOffset(head.offset, avatarPrefab.headOffset, _playerAvatarManager.scale);
             UpdateOffset(pelvis.offset, avatarPrefab.pelvisOffset, avatarPrefab.pelvisCalibrationOffset, trackerScale, calibration.waist);
             UpdateOffset(leftFoot.offset, avatarPrefab.leftLegOffset, avatarPrefab.leftFootCalibrationOffset, trackerScale, calibration.leftFoot);
             UpdateOffset(rightFoot.offset, avatarPrefab.rightLegOffset, avatarPrefab.rightFootCalibrationOffset, trackerScale, calibration.rightFoot);
@@ -430,7 +434,7 @@ namespace CustomAvatar.Tracking
             _humanoidCalibrator.ApplyCalibration();
             _humanoidCalibrator.ApplyAdjust();
 
-            fullBodyTracking.localPosition = new Vector3(0, _settings.playerEyeHeight - _playerAvatarManager.scaledEyeHeight, 0);
+            fullBodyTracking.localPosition = new Vector3(0, playerEyeHeight - scaledEyeHeight, 0);
             fullBodyTracking.localScale = new Vector3(1, fullBodyScale, 1);
         }
 
