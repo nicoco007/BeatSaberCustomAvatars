@@ -189,8 +189,8 @@ namespace CustomAvatar.Avatar
 
                     headCalibrationOffset = GetOffset("Head Calibration", new Pose(centerPosition, Quaternion.identity), vrikManager.references_head);
                     pelvisCalibrationOffset = GetOffset("Pelvis Calibration", new Pose(new Vector3(centerPosition.x, centerPosition.y * HumanoidCalibrator.kEyeHeightToPelvisHeightRatio, centerPosition.z), Quaternion.identity), vrikManager.references_pelvis);
-                    leftFootCalibrationOffset = GetOffset("Left Foot Calibration", GetFootTarget(centerPosition, vrikManager.references_leftFoot, vrikManager.references_leftToes), vrikManager.references_leftToes, vrikManager.references_leftFoot);
-                    rightFootCalibrationOffset = GetOffset("Right Foot Calibration", GetFootTarget(centerPosition, vrikManager.references_rightFoot, vrikManager.references_rightToes), vrikManager.references_rightToes, vrikManager.references_rightFoot);
+                    leftFootCalibrationOffset = GetOffset("Left Foot Calibration", GetFootTargetPose(centerPosition, vrikManager.references_leftFoot), vrikManager.references_leftToes, vrikManager.references_leftFoot);
+                    rightFootCalibrationOffset = GetOffset("Right Foot Calibration", GetFootTargetPose(centerPosition, vrikManager.references_rightFoot), vrikManager.references_rightToes, vrikManager.references_rightFoot);
                 }
 
                 pelvisRootForward = Quaternion.Inverse(vrikManager.references_pelvis.rotation) * vrikManager.references_root.forward;
@@ -232,34 +232,10 @@ namespace CustomAvatar.Avatar
         /// <summary>
         /// Gets the pose of the foot target <b>in world space</b>.
         /// </summary>
-        /// <param name="centerLocalPosition"></param>
-        /// <param name="foot"></param>
-        /// <param name="toes"></param>
-        /// <returns></returns>
-        private Pose GetFootTarget(Vector3 centerLocalPosition, Transform foot, Transform toes)
+        private Pose GetFootTargetPose(Vector3 centerPosition, Transform foot)
         {
-            if (toes != null)
-            {
-                Vector3 localFootPosition = foot.position;
-                Vector3 localToesPosition = toes.position;
-
-                float a = localFootPosition.x;
-                float b = localToesPosition.x;
-
-                // find the point on the vector between the foot and the toes that crosses centerLocalPosition.z
-                // centerLocalPosition.z = localFootPosition.z + (localToesPosition.z - localFootPosition.z) * t
-                float t = (centerLocalPosition.z - localFootPosition.z) / (localToesPosition.z - localFootPosition.z);
-
-                return new Pose(
-                    new Vector3(Mathf.Lerp(a, b, t), 0, centerLocalPosition.z),
-                    Quaternion.LookRotation(Vector3.ProjectOnPlane(toes.position - foot.position, transform.up), transform.up));
-            }
-            else
-            {
-                return new Pose(
-                    new Vector3(centerLocalPosition.x + foot.position.x, 0, centerLocalPosition.z),
-                    Quaternion.identity);
-            }
+            Vector3 floorPosition = Vector3.ProjectOnPlane(centerPosition, transform.up);
+            return new Pose(Vector3.Project(foot.position - floorPosition, transform.right) + floorPosition, Quaternion.identity);
         }
 
         private float GetEyeHeight()
