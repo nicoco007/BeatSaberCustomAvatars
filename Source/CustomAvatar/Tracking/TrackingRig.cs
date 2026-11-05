@@ -146,6 +146,11 @@ namespace CustomAvatar.Tracking
 
         internal void EndCalibration()
         {
+            if (!isCalibrating)
+            {
+                return;
+            }
+
             isCalibrating = false;
 
             SetIKEnabled(true);
@@ -176,6 +181,11 @@ namespace CustomAvatar.Tracking
 
         internal void EndAdjust()
         {
+            if (!isAdjusting)
+            {
+                return;
+            }
+
             leftHand.trackerGrabber.enabled = false;
             rightHand.trackerGrabber.enabled = false;
 
@@ -203,6 +213,7 @@ namespace CustomAvatar.Tracking
 
             if (_playerAvatarManager != null)
             {
+                _playerAvatarManager.avatarLoading += OnAvatarLoading;
                 _playerAvatarManager.avatarChanged += OnAvatarChanged;
                 _playerAvatarManager.avatarScaleChanged += OnAvatarScaleChanged;
             }
@@ -291,6 +302,7 @@ namespace CustomAvatar.Tracking
 
             if (_playerAvatarManager != null)
             {
+                _playerAvatarManager.avatarLoading -= OnAvatarLoading;
                 _playerAvatarManager.avatarChanged -= OnAvatarChanged;
                 _playerAvatarManager.avatarScaleChanged -= OnAvatarScaleChanged;
             }
@@ -327,9 +339,14 @@ namespace CustomAvatar.Tracking
             }
         }
 
-        private void OnAvatarChanged(SpawnedAvatar spawnedAvatar)
+        private void OnAvatarLoading(string fullPath, string name)
         {
             EndCalibration();
+            EndAdjust();
+        }
+
+        private void OnAvatarChanged(SpawnedAvatar spawnedAvatar)
+        {
             UpdateOffsets();
             UpdateNodeStates();
         }
