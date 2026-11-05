@@ -36,25 +36,6 @@ namespace CustomAvatar.UI
 
         protected bool noTrackersDetected => !trackersNotSupported && !_trackingRig.areAnyFullBodyTrackersTracking;
 
-        protected string noTrackersDetectedMessage
-        {
-            get
-            {
-                string message = "No trackers detected. Did you assign roles to your trackers in SteamVR?";
-
-                if (_isOpenXR)
-                {
-                    message += "\n" + openXRHint;
-                }
-
-                return message;
-            }
-        }
-
-        protected bool showOpenXRHint => _isOpenXR && !trackersNotSupported && !noTrackersDetected;
-
-        protected string openXRHint { get; } = "If you turned on your tracker(s) after launching the game, you will need to restart the game.";
-
         private bool _isOpenXR => UnityEngine.XR.XRSettings.loadedDeviceName.IndexOf("OpenXR", System.StringComparison.OrdinalIgnoreCase) != -1;
 
         public override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
@@ -72,15 +53,12 @@ namespace CustomAvatar.UI
         private void OnTrackingChanged()
         {
             NotifyPropertyChanged(nameof(noTrackersDetected));
-            NotifyPropertyChanged(nameof(showOpenXRHint));
         }
 
         private void OnInputSystemDeviceChange(InputDevice inputDevice, InputDeviceChange inputDeviceChange)
         {
             NotifyPropertyChanged(nameof(trackersNotSupported));
             NotifyPropertyChanged(nameof(noTrackersDetected));
-            NotifyPropertyChanged(nameof(noTrackersDetectedMessage));
-            NotifyPropertyChanged(nameof(showOpenXRHint));
         }
     }
 }
