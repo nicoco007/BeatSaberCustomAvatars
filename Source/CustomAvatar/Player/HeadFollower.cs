@@ -68,7 +68,7 @@ namespace CustomAvatar.Player
 
         private void UpdateState()
         {
-            enabled = _trackingRig.isCalibrating;
+            enabled = _trackingRig.isCalibrating && _playerAvatarManager.currentlySpawnedAvatar != null;
         }
     }
 }
