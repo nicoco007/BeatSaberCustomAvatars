@@ -15,7 +15,6 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using CustomAvatar.Utilities;
 using UnityEngine;
 
 namespace CustomAvatar.Tracking
@@ -38,9 +37,6 @@ namespace CustomAvatar.Tracking
 
         [field: SerializeField]
         public Transform calibration { get; private set; }
-
-        [field: SerializeField]
-        internal GameObject grabSphere { get; private set; }
 
         public bool isTracking { get; set; }
 
@@ -76,28 +72,15 @@ namespace CustomAvatar.Tracking
 
         internal class Mirrored : MonoBehaviour
         {
-            [SerializeField] private Transform _calibration;
-
-            [SerializeField] private Transform _manualOffset;
-
             [SerializeField] private Transform _sphereTransform;
 
             [SerializeField] private Renderer _sphereRenderer;
-
-            [field: SerializeField] internal GameObject grabSphere { get; private set; }
 
             private CalibratableNode _calibratableNode;
 
             internal void Init(CalibratableNode calibratableNode)
             {
                 _calibratableNode = calibratableNode;
-            }
-
-            internal void OnBeforeRender()
-            {
-                transform.CopyLocalPositionAndRotationFrom(_calibratableNode.transform);
-                _calibration.CopyLocalPositionAndRotationFrom(_calibratableNode.calibration);
-                _manualOffset.CopyLocalPositionAndRotationFrom(_calibratableNode.manualOffset);
             }
 
             protected void OnEnable()

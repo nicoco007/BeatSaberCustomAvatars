@@ -3,6 +3,18 @@ namespace CustomAvatar.Tracking
 {
     public class HumanoidCalibrator : UnityEngine.MonoBehaviour
     {
+        public class Mirrored : UnityEngine.MonoBehaviour
+        {
+            [field: UnityEngine.SerializeField]
+            public CustomAvatar.Rendering.MirroredCalibrationPoint pelvis { get; set; }
+
+            [field: UnityEngine.SerializeField]
+            public CustomAvatar.Rendering.MirroredCalibrationPoint leftFoot { get; set; }
+
+            [field: UnityEngine.SerializeField]
+            public CustomAvatar.Rendering.MirroredCalibrationPoint rightFoot { get; set; }
+        }
+
         [field: UnityEngine.SerializeField]
         public CustomAvatar.Tracking.CalibrationPoint pelvis { get; set; }
 
@@ -23,5 +35,8 @@ namespace CustomAvatar.Tracking
         void OnDisable()
         {
         }
+
+        public UnityEngine.Transform _parent;
+        public UnityEngine.Transform _center;
     }
 }

@@ -5,9 +5,6 @@ namespace CustomAvatar.Tracking
     {
         public class Mirrored : UnityEngine.MonoBehaviour
         {
-            [field: UnityEngine.SerializeField]
-            public UnityEngine.GameObject grabSphere { get; set; }
-
             void OnEnable()
             {
             }
@@ -16,8 +13,6 @@ namespace CustomAvatar.Tracking
             {
             }
 
-            public UnityEngine.Transform _calibration;
-            public UnityEngine.Transform _manualOffset;
             public UnityEngine.Transform _sphereTransform;
             public UnityEngine.Renderer _sphereRenderer;
         }
@@ -33,9 +28,6 @@ namespace CustomAvatar.Tracking
 
         [field: UnityEngine.SerializeField]
         public UnityEngine.Transform calibration { get; set; }
-
-        [field: UnityEngine.SerializeField]
-        public UnityEngine.GameObject grabSphere { get; set; }
 
         public UnityEngine.Renderer _renderer;
         public UnityEngine.Transform _grabSphereTransform;

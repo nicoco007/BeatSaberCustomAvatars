@@ -53,6 +53,13 @@ namespace CustomAvatar.Utilities
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void CopyPositionAndRotationFrom(this Transform transform, Transform from)
+        {
+            from.GetPositionAndRotation(out Vector3 position, out Quaternion rotation);
+            transform.SetPositionAndRotation(position, rotation);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void CopyLocalPositionAndRotationFrom(this Transform transform, Transform from)
         {
             from.GetLocalPositionAndRotation(out Vector3 position, out Quaternion rotation);

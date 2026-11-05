@@ -18,6 +18,7 @@ extern alias BeatSaberFinalIK;
 
 using CustomAvatar.Configuration;
 using CustomAvatar.Player;
+using CustomAvatar.Rendering;
 using CustomAvatar.Utilities;
 using UnityEngine;
 using UnityEngine.XR;
@@ -36,6 +37,14 @@ namespace CustomAvatar.Tracking
 
         private const float kMinPressValue = VRInputModule.kMinPressValue;
 
+        [SerializeField] private Transform _parent;
+        [SerializeField] private Transform _center;
+
+        private TrackingRig _trackingRig;
+        private CalibrationData _calibrationData;
+        private Settings _settings;
+        private PlayerAvatarManager _playerAvatarManager;
+
         [field: SerializeField]
         internal CalibrationPoint pelvis { get; private set; }
 
@@ -44,11 +53,6 @@ namespace CustomAvatar.Tracking
 
         [field: SerializeField]
         internal CalibrationPoint rightFoot { get; private set; }
-
-        private TrackingRig _trackingRig;
-        private CalibrationData _calibrationData;
-        private Settings _settings;
-        private PlayerAvatarManager _playerAvatarManager;
 
         [Inject]
         internal void Construct(TrackingRig trackingRig, CalibrationData calibrationData, Settings settings, PlayerAvatarManager playerAvatarManager)
@@ -107,18 +111,17 @@ namespace CustomAvatar.Tracking
 
             _playerAvatarManager.ResizeCurrentAvatar(playerEyeHeight);
 
-            Transform center = transform;
+            Transform center = _center;
             Transform head = _trackingRig.head.transform;
 
             // We want the user's head rotation to match the avatar's head directly rather than assuming whatever
             // position they're in is forward. I'm not sure how I feel about doing that, but it's what VRChat does.
-            Quaternion rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(head.forward, center.up), center.up);
-            head.rotation = rotation;
+            Vector3 up = _parent.up;
+            Vector3 position = _parent.position;
 
-            center.SetPositionAndRotation(head.position, rotation);
-
-            // put center on the ground
-            center.localPosition = new Vector3(center.localPosition.x, 0, center.localPosition.z);
+            center.SetPositionAndRotation(
+                Vector3.ProjectOnPlane(head.position - position, up) + position,
+                Quaternion.LookRotation(Vector3.ProjectOnPlane(head.forward, up), up));
 
             UpdateCalibrationPoint(pelvis, new Vector3(0, playerEyeHeight * kEyeHeightToPelvisHeightRatio, 0));
             UpdateCalibrationPoint(leftFoot, new Vector3(playerEyeHeight * -kCenterToFoot, 0, 0));
@@ -130,10 +133,6 @@ namespace CustomAvatar.Tracking
                 leftTriggerValue >= kMinPressValue && rightTriggerValue >= kMinPressValue)
             {
                 _settings.playerEyeHeight.value = playerEyeHeight;
-
-                // temporarily reset tracking rig scale
-                _trackingRig.fullBodyTracking.localScale = Vector3.one;
-                _trackingRig.fullBodyTracking.localPosition = Vector3.zero;
 
                 ApplyCalibration(pelvis);
                 ApplyCalibration(leftFoot);
@@ -164,7 +163,7 @@ namespace CustomAvatar.Tracking
 
         private void UpdateCalibrationPoint(CalibrationPoint calibrationPoint, Vector3 targetPosition)
         {
-            calibrationPoint.transform.SetLocalPositionAndRotation(targetPosition, Quaternion.identity);
+            calibrationPoint.transform.SetPositionAndRotation(_center.TransformPoint(targetPosition), _center.rotation);
         }
 
         private void WriteCalibrationTransforms(CalibrationData.FullBodyCalibration calibration)
@@ -200,6 +199,34 @@ namespace CustomAvatar.Tracking
             else
             {
                 node.calibration.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            }
+        }
+
+        internal class Mirrored : MonoBehaviour
+        {
+            [field: SerializeField]
+            internal MirroredCalibrationPoint pelvis { get; private set; }
+
+            [field: SerializeField]
+            internal MirroredCalibrationPoint leftFoot { get; private set; }
+
+            [field: SerializeField]
+            internal MirroredCalibrationPoint rightFoot { get; private set; }
+
+            private HumanoidCalibrator _humanoidCalibrator;
+
+            internal void Init(HumanoidCalibrator humanoidCalibrator)
+            {
+                _humanoidCalibrator = humanoidCalibrator;
+            }
+
+            internal void OnBeforeRender()
+            {
+                transform.CopyLocalPositionAndRotationFrom(_humanoidCalibrator.transform);
+
+                pelvis.CopyFrom(_humanoidCalibrator.pelvis);
+                leftFoot.CopyFrom(_humanoidCalibrator.leftFoot);
+                rightFoot.CopyFrom(_humanoidCalibrator.rightFoot);
             }
         }
     }

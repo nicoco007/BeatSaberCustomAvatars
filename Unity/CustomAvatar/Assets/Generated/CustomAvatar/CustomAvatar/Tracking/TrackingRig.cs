@@ -19,14 +19,10 @@ namespace CustomAvatar.Tracking
 
             public CustomAvatar.Rendering.MirroredControllerNode _leftHand;
             public CustomAvatar.Rendering.MirroredControllerNode _rightHand;
-            public UnityEngine.Transform _fullBodyTracking;
-            public CustomAvatar.Rendering.MirroredCalibratableNode _pelvis;
-            public CustomAvatar.Rendering.MirroredCalibratableNode _leftFoot;
-            public CustomAvatar.Rendering.MirroredCalibratableNode _rightFoot;
-            public UnityEngine.Transform _humanoidCalibrator;
-            public CustomAvatar.Rendering.MirroredCalibrationPoint _pelvisCalibration;
-            public CustomAvatar.Rendering.MirroredCalibrationPoint _leftFootCalibration;
-            public CustomAvatar.Rendering.MirroredCalibrationPoint _rightFootCalibration;
+            public CustomAvatar.Rendering.MirroredCalibratableNodeVisuals _pelvis;
+            public CustomAvatar.Rendering.MirroredCalibratableNodeVisuals _leftFoot;
+            public CustomAvatar.Rendering.MirroredCalibratableNodeVisuals _rightFoot;
+            public CustomAvatar.Rendering.MirroredHumanoidCalibrator _humanoidCalibrator;
         }
 
         [field: UnityEngine.SerializeField]
@@ -73,5 +69,8 @@ namespace CustomAvatar.Tracking
         public CustomAvatar.Tracking.TrackedRenderModel _leftFootRenderModel;
         public CustomAvatar.Tracking.TrackedRenderModel _rightFootRenderModel;
         public CustomAvatar.Tracking.HumanoidCalibrator _humanoidCalibrator;
+        public CustomAvatar.Tracking.CalibratableNodeVisuals _pelvisVisuals;
+        public CustomAvatar.Tracking.CalibratableNodeVisuals _leftFootVisuals;
+        public CustomAvatar.Tracking.CalibratableNodeVisuals _rightFootVisuals;
     }
 }

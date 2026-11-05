@@ -46,6 +46,10 @@ namespace CustomAvatar.Tracking
         [SerializeField] private TrackedRenderModel _rightFootRenderModel;
         [SerializeField] private HumanoidCalibrator _humanoidCalibrator;
 
+        [SerializeField] private CalibratableNodeVisuals _pelvisVisuals;
+        [SerializeField] private CalibratableNodeVisuals _leftFootVisuals;
+        [SerializeField] private CalibratableNodeVisuals _rightFootVisuals;
+
         private ILogger<TrackingRig> _logger;
         private IDeviceProvider _deviceProvider;
         private IRenderModelProvider _renderModelProvider;
@@ -163,9 +167,9 @@ namespace CustomAvatar.Tracking
             leftHand.trackerGrabber.enabled = true;
             rightHand.trackerGrabber.enabled = true;
 
-            pelvis.grabSphere.SetActive(pelvis.isCalibrated);
-            leftFoot.grabSphere.SetActive(leftFoot.isCalibrated);
-            rightFoot.grabSphere.SetActive(rightFoot.isCalibrated);
+            _pelvisVisuals.grabSphere.SetActive(pelvis.isCalibrated);
+            _leftFootVisuals.grabSphere.SetActive(leftFoot.isCalibrated);
+            _rightFootVisuals.grabSphere.SetActive(rightFoot.isCalibrated);
 
             isAdjusting = true;
         }
@@ -175,9 +179,9 @@ namespace CustomAvatar.Tracking
             leftHand.trackerGrabber.enabled = false;
             rightHand.trackerGrabber.enabled = false;
 
-            pelvis.grabSphere.SetActive(false);
-            leftFoot.grabSphere.SetActive(false);
-            rightFoot.grabSphere.SetActive(false);
+            _pelvisVisuals.grabSphere.SetActive(false);
+            _leftFootVisuals.grabSphere.SetActive(false);
+            _rightFootVisuals.grabSphere.SetActive(false);
 
             _humanoidCalibrator.Adjust();
 
@@ -476,9 +480,9 @@ namespace CustomAvatar.Tracking
             UpdateNodeState(head);
             UpdateNodeState(leftHand);
             UpdateNodeState(rightHand);
-            UpdateNodeState(pelvis);
-            UpdateNodeState(leftFoot);
-            UpdateNodeState(rightFoot);
+            UpdateNodeState(pelvis, _pelvisVisuals);
+            UpdateNodeState(leftFoot, _leftFootVisuals);
+            UpdateNodeState(rightFoot, _rightFootVisuals);
 
             areBothHandsTracking = leftHand.isTracking && rightHand.isTracking;
             areAnyFullBodyTrackersTracking = pelvis.isTracking || leftFoot.isTracking || rightFoot.isTracking;
@@ -486,17 +490,17 @@ namespace CustomAvatar.Tracking
             trackingChanged?.Invoke();
         }
 
-        private void UpdateNodeState(CalibratableNode calibratableNode)
+        private void UpdateNodeState(CalibratableNode calibratableNode, CalibratableNodeVisuals visuals)
         {
             if (_deviceProvider.TryGetDeviceState(calibratableNode.deviceUse, out DeviceState deviceState))
             {
                 calibratableNode.isTracking = deviceState.isTracking;
-                calibratableNode.gameObject.SetActive(deviceState.isTracking);
+                visuals.gameObject.SetActive(deviceState.isTracking);
             }
             else
             {
                 calibratableNode.isTracking = false;
-                calibratableNode.gameObject.SetActive(false);
+                visuals.gameObject.SetActive(false);
             }
 
             UpdateCalibrationState(calibratableNode);
@@ -598,14 +602,10 @@ namespace CustomAvatar.Tracking
 
             [SerializeField] private MirroredControllerNode _leftHand;
             [SerializeField] private MirroredControllerNode _rightHand;
-            [SerializeField] private Transform _fullBodyTracking;
-            [SerializeField] private MirroredCalibratableNode _pelvis;
-            [SerializeField] private MirroredCalibratableNode _leftFoot;
-            [SerializeField] private MirroredCalibratableNode _rightFoot;
-            [SerializeField] private Transform _humanoidCalibrator;
-            [SerializeField] private MirroredCalibrationPoint _pelvisCalibration;
-            [SerializeField] private MirroredCalibrationPoint _leftFootCalibration;
-            [SerializeField] private MirroredCalibrationPoint _rightFootCalibration;
+            [SerializeField] private MirroredCalibratableNodeVisuals _pelvis;
+            [SerializeField] private MirroredCalibratableNodeVisuals _leftFoot;
+            [SerializeField] private MirroredCalibratableNodeVisuals _rightFoot;
+            [SerializeField] private MirroredHumanoidCalibrator _humanoidCalibrator;
 
             private TrackingRig _trackingRig;
 
@@ -619,9 +619,10 @@ namespace CustomAvatar.Tracking
             {
                 _leftHand.Init(_trackingRig.leftHand);
                 _rightHand.Init(_trackingRig.rightHand);
-                _pelvis.Init(_trackingRig.pelvis);
-                _leftFoot.Init(_trackingRig.leftFoot);
-                _rightFoot.Init(_trackingRig.rightFoot);
+                _pelvis.Init(_trackingRig._pelvisVisuals);
+                _leftFoot.Init(_trackingRig._leftFootVisuals);
+                _rightFoot.Init(_trackingRig._rightFootVisuals);
+                _humanoidCalibrator.Init(_trackingRig._humanoidCalibrator);
             }
 
             protected void OnEnable()
@@ -634,7 +635,6 @@ namespace CustomAvatar.Tracking
 
                 OnTrackingChanged();
                 OnIsCalibratingChanged(_trackingRig.isCalibrating);
-                OnIsAdjustingChanged(_trackingRig.isAdjusting);
             }
 
             protected void OnDisable()
@@ -648,9 +648,9 @@ namespace CustomAvatar.Tracking
 
             private void OnTrackingChanged()
             {
-                SetActive(_pelvis, _pelvisCalibration, _trackingRig.pelvis.isTracking);
-                SetActive(_leftFoot, _leftFootCalibration, _trackingRig.leftFoot.isTracking);
-                SetActive(_rightFoot, _rightFootCalibration, _trackingRig.rightFoot.isTracking);
+                SetActive(_pelvis, _humanoidCalibrator.pelvis, _trackingRig.pelvis.isTracking);
+                SetActive(_leftFoot, _humanoidCalibrator.leftFoot, _trackingRig.leftFoot.isTracking);
+                SetActive(_rightFoot, _humanoidCalibrator.rightFoot, _trackingRig.rightFoot.isTracking);
             }
 
             private void OnIsCalibratingChanged(bool isCalibrating)
@@ -660,12 +660,12 @@ namespace CustomAvatar.Tracking
 
             private void OnIsAdjustingChanged(bool isAdjusting)
             {
-                _pelvis.grabSphere.SetActive(_trackingRig.pelvis.grabSphere.activeSelf);
-                _leftFoot.grabSphere.SetActive(_trackingRig.leftFoot.grabSphere.activeSelf);
-                _rightFoot.grabSphere.SetActive(_trackingRig.rightFoot.grabSphere.activeSelf);
+                _pelvis.grabSphere.SetActive(_trackingRig._pelvisVisuals.grabSphere.activeSelf);
+                _leftFoot.grabSphere.SetActive(_trackingRig._leftFootVisuals.grabSphere.activeSelf);
+                _rightFoot.grabSphere.SetActive(_trackingRig._rightFootVisuals.grabSphere.activeSelf);
             }
 
-            private void SetActive(MirroredCalibratableNode node, MirroredCalibrationPoint point, bool active)
+            private void SetActive(MirroredCalibratableNodeVisuals node, MirroredCalibrationPoint point, bool active)
             {
                 node.gameObject.SetActive(active);
                 point.gameObject.SetActive(active);
@@ -681,19 +681,11 @@ namespace CustomAvatar.Tracking
 
                     _leftHand.OnBeforeRender();
                     _rightHand.OnBeforeRender();
-
-                    _fullBodyTracking.localPosition = _trackingRig.fullBodyTracking.localPosition;
-                    _fullBodyTracking.localScale = _trackingRig.fullBodyTracking.localScale;
-
                     _pelvis.OnBeforeRender();
                     _leftFoot.OnBeforeRender();
                     _rightFoot.OnBeforeRender();
 
-                    _humanoidCalibrator.CopyLocalPositionAndRotationFrom(_trackingRig._humanoidCalibrator.transform);
-
-                    _pelvisCalibration.CopyFrom(_trackingRig._humanoidCalibrator.pelvis);
-                    _leftFootCalibration.CopyFrom(_trackingRig._humanoidCalibrator.leftFoot);
-                    _rightFootCalibration.CopyFrom(_trackingRig._humanoidCalibrator.rightFoot);
+                    _humanoidCalibrator.OnBeforeRender();
                 }
                 finally
                 {
