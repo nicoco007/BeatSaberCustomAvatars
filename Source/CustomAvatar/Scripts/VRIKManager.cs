@@ -28,13 +28,22 @@ using static BeatSaberFinalIK::RootMotion.FinalIK.IKSolverVR.Arm;
 using Zenject;
 #endif
 
-
 // keeping root namespace for compatibility
 namespace CustomAvatar
 {
     [Serializable]
     public partial class VRIKManager : MonoBehaviour
     {
+        private static AnimationCurve _defaultArmStretchCurve => new(
+            new Keyframe(0.90f, 0.00f, 1f / 2, 0f),
+            new Keyframe(1.00f, 0.02f, 2f / 3, 2f / 3),
+            new Keyframe(1.20f, 0.20f, 5f / 6, 5f / 6));
+
+        private static AnimationCurve _defaultLegStretchCurve => new(
+            new Keyframe(0.95f, 0.00f, 1f / 2, 0f),
+            new Keyframe(1.00f, 0.01f, 2f / 3, 2f / 3),
+            new Keyframe(1.10f, 0.10f, 5f / 6, 5f / 6));
+
         [Tooltip("If true, will fix all the Transforms used by the solver to their initial state in each Update. This prevents potential problems with unanimated bones and animator culling with a small cost of performance. Not recommended for CCD and FABRIK solvers.")]
         public bool fixTransforms = true;
 
@@ -225,7 +234,7 @@ namespace CustomAvatar
         public float solver_leftArm_armLengthMlp = 1f;
 
         [Tooltip("Evaluates stretching of the arm by target distance relative to arm length. Value at time 1 represents stretching amount at the point where distance to the target is equal to arm length. Value at time 2 represents stretching amount at the point where distance to the target is double the arm length. Value represents the amount of stretching. Linear stretching would be achieved with a linear curve going up by 45 degrees. Increase the range of stretching by moving the last key up and right at the same amount. Smoothing in the curve can help reduce elbow snapping (start stretching the arm slightly before target distance reaches arm length).")]
-        public AnimationCurve solver_leftArm_stretchCurve = new();
+        public AnimationCurve solver_leftArm_stretchCurve = _defaultArmStretchCurve;
 
         #endregion
 
@@ -269,7 +278,7 @@ namespace CustomAvatar
         public float solver_rightArm_armLengthMlp = 1f;
 
         [Tooltip("Evaluates stretching of the arm by target distance relative to arm length. Value at time 1 represents stretching amount at the point where distance to the target is equal to arm length. Value at time 2 represents stretching amount at the point where distance to the target is double the arm length. Value represents the amount of stretching. Linear stretching would be achieved with a linear curve going up by 45 degrees. Increase the range of stretching by moving the last key up and right at the same amount. Smoothing in the curve can help reduce elbow snapping (start stretching the arm slightly before target distance reaches arm length).")]
-        public AnimationCurve solver_rightArm_stretchCurve = new();
+        public AnimationCurve solver_rightArm_stretchCurve = _defaultArmStretchCurve;
 
         #endregion
 
@@ -301,7 +310,7 @@ namespace CustomAvatar
         public float solver_leftLeg_legLengthMlp = 1f;
 
         [Tooltip("Evaluates stretching of the leg by target distance relative to leg length. Value at time 1 represents stretching amount at the point where distance to the target is equal to leg length. Value at time 1 represents stretching amount at the point where distance to the target is double the leg length. Value represents the amount of stretching. Linear stretching would be achieved with a linear curve going up by 45 degrees. Increase the range of stretching by moving the last key up and right at the same amount. Smoothing in the curve can help reduce knee snapping (start stretching the arm slightly before target distance reaches leg length).")]
-        public AnimationCurve solver_leftLeg_stretchCurve = new();
+        public AnimationCurve solver_leftLeg_stretchCurve = _defaultLegStretchCurve;
 
         #endregion
 
@@ -333,7 +342,7 @@ namespace CustomAvatar
         public float solver_rightLeg_legLengthMlp = 1f;
 
         [Tooltip("Evaluates stretching of the leg by target distance relative to leg length. Value at time 1 represents stretching amount at the point where distance to the target is equal to leg length. Value at time 1 represents stretching amount at the point where distance to the target is double the leg length. Value represents the amount of stretching. Linear stretching would be achieved with a linear curve going up by 45 degrees. Increase the range of stretching by moving the last key up and right at the same amount. Smoothing in the curve can help reduce knee snapping (start stretching the arm slightly before target distance reaches leg length).")]
-        public AnimationCurve solver_rightLeg_stretchCurve = new();
+        public AnimationCurve solver_rightLeg_stretchCurve = _defaultLegStretchCurve;
 
         #endregion
 
