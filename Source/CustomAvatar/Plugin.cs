@@ -57,6 +57,7 @@ namespace CustomAvatar
 
             zenjector.Mutate<MainCamera, MainCameraTracker>();
             zenjector.Mutate<SmoothCamera, Rendering.Cameras.SmoothCamera>();
+            zenjector.Mutate<BloomFogEnvironment, EnvironmentObject>();
             zenjector.Mutate<MenuEnvironmentManager, EnvironmentObject>();
             zenjector.Mutate<MultiplayerLocalActivePlayerFacade>((ctx, inst) =>
             {
