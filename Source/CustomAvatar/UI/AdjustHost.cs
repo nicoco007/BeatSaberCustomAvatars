@@ -16,7 +16,9 @@
 
 using System.Collections;
 using BeatSaberMarkupLanguage.Attributes;
+using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
+using CustomAvatar.Player;
 using CustomAvatar.Tracking;
 using HMUI;
 using TMPro;
@@ -28,18 +30,20 @@ namespace CustomAvatar.UI
     internal class AdjustHost : ViewControllerHost
     {
         private readonly TrackingRig _trackingRig;
+        private readonly PlayerAvatarManager _playerAvatarManager;
         private readonly CalibrationData _calibrationData;
 
         [UIComponent(nameof(adjustModeTextSegmentControl))]
         protected TextSegmentedControl adjustModeTextSegmentControl;
 
-        internal AdjustHost(TrackingRig trackingRig, CalibrationData calibrationData)
+        internal AdjustHost(TrackingRig trackingRig, PlayerAvatarManager playerAvatarManager, CalibrationData calibrationData)
         {
             _trackingRig = trackingRig;
+            _playerAvatarManager = playerAvatarManager;
             _calibrationData = calibrationData;
         }
 
-        protected bool isAdjustEnabled => _trackingRig.areAnyFullBodyTrackersTracking && !_trackingRig.isAdjusting && !_trackingRig.isCalibrating;
+        protected bool isAdjustEnabled => _trackingRig.areAnyFullBodyTrackersTracking && !_trackingRig.isCalibrating && !_trackingRig.isAdjusting && _playerAvatarManager.currentlySpawnedAvatar != null && _playerAvatarManager.currentlySpawnedAvatar.prefab.isIKAvatar;
 
         protected bool isSaveEnabled => _trackingRig.isAdjusting;
 
@@ -52,6 +56,10 @@ namespace CustomAvatar.UI
             _trackingRig.trackingChanged += OnTrackingChanged;
             _trackingRig.isCalibratingChanged += OnIsCalibratingChanged;
             _trackingRig.isAdjustingChanged += OnIsAdjustingChanged;
+
+            _playerAvatarManager.avatarChanged += OnAvatarChanged;
+
+            OnTrackingChanged();
         }
 
         public override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
@@ -59,6 +67,8 @@ namespace CustomAvatar.UI
             _trackingRig.trackingChanged -= OnTrackingChanged;
             _trackingRig.isCalibratingChanged -= OnIsCalibratingChanged;
             _trackingRig.isAdjustingChanged -= OnIsAdjustingChanged;
+
+            _playerAvatarManager.avatarChanged -= OnAvatarChanged;
 
             SaveClicked();
         }
@@ -105,6 +115,11 @@ namespace CustomAvatar.UI
         }
 
         private void OnTrackingChanged()
+        {
+            NotifyPropertyChanged(nameof(isAdjustEnabled));
+        }
+
+        private void OnAvatarChanged(SpawnedAvatar spawnedAvatar)
         {
             NotifyPropertyChanged(nameof(isAdjustEnabled));
         }

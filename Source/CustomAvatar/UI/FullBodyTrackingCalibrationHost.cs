@@ -14,7 +14,9 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
+using CustomAvatar.Player;
 using CustomAvatar.Tracking;
 using JetBrains.Annotations;
 
@@ -26,16 +28,18 @@ namespace CustomAvatar.UI
         protected readonly AdjustHost adjustHost;
 
         private readonly TrackingRig _trackingRig;
+        private readonly PlayerAvatarManager _playerAvatarManager;
 
-        protected FullBodyTrackingCalibrationHost(TrackerStatusHost trackerStatusHost, CalibrationData calibrationData, TrackingRig trackingRig)
+        protected FullBodyTrackingCalibrationHost(TrackerStatusHost trackerStatusHost, CalibrationData calibrationData, TrackingRig trackingRig, PlayerAvatarManager playerAvatarManager)
         {
             this.trackerStatusHost = trackerStatusHost;
-            this.adjustHost = new AdjustHost(trackingRig, calibrationData);
+            this.adjustHost = new AdjustHost(trackingRig, playerAvatarManager, calibrationData);
 
             _trackingRig = trackingRig;
+            _playerAvatarManager = playerAvatarManager;
         }
 
-        protected bool isCalibrateButtonEnabled => _trackingRig.areAnyFullBodyTrackersTracking && !_trackingRig.isCalibrating && !_trackingRig.isAdjusting;
+        protected bool isCalibrateButtonEnabled => _trackingRig.areAnyFullBodyTrackersTracking && !_trackingRig.isCalibrating && !_trackingRig.isAdjusting && _playerAvatarManager.currentlySpawnedAvatar != null && _playerAvatarManager.currentlySpawnedAvatar.prefab.isIKAvatar;
 
         protected string calibrateButtonHoverHint => _trackingRig.areAnyFullBodyTrackersTracking ? "Start full body calibration" : "No trackers detected";
 
@@ -44,6 +48,8 @@ namespace CustomAvatar.UI
             _trackingRig.trackingChanged += OnTrackingChanged;
             _trackingRig.isCalibratingChanged += OnIsCalibratingChanged;
             _trackingRig.isAdjustingChanged += OnIsAdjustingChanged;
+
+            _playerAvatarManager.avatarChanged += OnAvatarChanged;
 
             OnTrackingChanged();
 
@@ -56,6 +62,8 @@ namespace CustomAvatar.UI
             _trackingRig.trackingChanged -= OnTrackingChanged;
             _trackingRig.isCalibratingChanged -= OnIsCalibratingChanged;
             _trackingRig.isAdjustingChanged -= OnIsAdjustingChanged;
+
+            _playerAvatarManager.avatarChanged -= OnAvatarChanged;
 
             adjustHost.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
             trackerStatusHost.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
@@ -72,6 +80,11 @@ namespace CustomAvatar.UI
         }
 
         private void OnIsAdjustingChanged(bool isAdjusting)
+        {
+            NotifyPropertyChanged(nameof(isCalibrateButtonEnabled));
+        }
+
+        private void OnAvatarChanged(SpawnedAvatar spawnedAvatar)
         {
             NotifyPropertyChanged(nameof(isCalibrateButtonEnabled));
         }
