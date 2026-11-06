@@ -33,8 +33,10 @@ namespace CustomAvatar.UI
         private readonly PlayerAvatarManager _playerAvatarManager;
         private readonly CalibrationData _calibrationData;
 
+#pragma warning disable CS0649
         [UIComponent(nameof(adjustModeTextSegmentControl))]
         protected TextSegmentedControl adjustModeTextSegmentControl;
+#pragma warning disable CS0649
 
         internal AdjustHost(TrackingRig trackingRig, PlayerAvatarManager playerAvatarManager, CalibrationData calibrationData)
         {
