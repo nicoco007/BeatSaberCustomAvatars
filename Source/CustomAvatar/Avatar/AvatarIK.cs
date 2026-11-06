@@ -17,6 +17,7 @@
 extern alias BeatSaberDynamicBone;
 extern alias BeatSaberFinalIK;
 
+using System;
 using BeatSaberFinalIK::RootMotion.FinalIK;
 using CustomAvatar.Logging;
 using CustomAvatar.Scripts;
@@ -31,6 +32,7 @@ namespace CustomAvatar.Avatar
     [DisallowMultipleComponent]
     public class AvatarIK : VRIK
     {
+        [Obsolete]
         public bool isLocomotionEnabled
         {
             get => _isLocomotionEnabled;
@@ -48,6 +50,7 @@ namespace CustomAvatar.Avatar
         private TwistRelaxerV2[] _twistRelaxersV2;
 
         private IAvatarInput _input;
+        private IAvatarInputExtended _extendedInput;
         private SpawnedAvatar _avatar;
         private ILogger<AvatarIK> _logger;
 
@@ -61,6 +64,27 @@ namespace CustomAvatar.Avatar
         public AvatarIK() : base()
         {
             solver = new CustomIKSolverVR();
+        }
+
+        internal void ResetTransforms()
+        {
+            if (!didAwake)
+            {
+                return;
+            }
+
+            references.root.SetLocalPose(_defaultRootPose);
+            solver.FixTransforms();
+
+            foreach (TwistRelaxerV2 twistRelaxer in _twistRelaxersV2)
+            {
+                twistRelaxer.FixTransforms();
+            }
+
+            foreach (BeatSaberDynamicBone::DynamicBone dynamicBone in _dynamicBones)
+            {
+                dynamicBone.InitTransforms();
+            }
         }
 
         protected void Awake()
@@ -85,6 +109,9 @@ namespace CustomAvatar.Avatar
             }
 
             _defaultRootPose = new Pose(vrikManager.references_root.localPosition, vrikManager.references_root.localRotation);
+
+            solver.OnPreUpdate += OnPreUpdate;
+            solver.OnPostUpdate += OnPostUpdate;
         }
 
         protected void OnEnable()
@@ -93,22 +120,17 @@ namespace CustomAvatar.Avatar
             {
                 dynamicBone.OnEnable();
             }
+
+            _input.inputChanged += OnInputChanged;
+            OnInputChanged();
         }
 
         protected new void Start()
         {
-            solver.OnPreUpdate += OnPreUpdate;
-            solver.OnPostUpdate += OnPostUpdate;
-
-            _input.inputChanged += OnInputChanged;
-
-            UpdateSolverTargets();
-
             base.Start();
 
             foreach (BeatSaberDynamicBone::DynamicBone dynamicBone in _dynamicBones)
             {
-                dynamicBone.OnEnable();
                 dynamicBone.Start();
             }
         }
@@ -121,24 +143,8 @@ namespace CustomAvatar.Avatar
 
         protected new void OnDisable()
         {
-            references.root.SetLocalPose(_defaultRootPose);
-            solver.FixTransforms();
-
-            foreach (TwistRelaxerV2 twistRelaxer in _twistRelaxersV2)
-            {
-                twistRelaxer.FixTransforms();
-            }
-
-            foreach (BeatSaberDynamicBone::DynamicBone dynamicBone in _dynamicBones)
-            {
-                dynamicBone.OnDisable();
-            }
-
             base.OnDisable();
-        }
 
-        protected void OnDestroy()
-        {
             solver.OnPreUpdate -= OnPreUpdate;
             solver.OnPostUpdate -= OnPostUpdate;
 
@@ -150,6 +156,7 @@ namespace CustomAvatar.Avatar
         private void Construct(IAvatarInput input, SpawnedAvatar avatar, ILoggerFactory loggerFactory)
         {
             _input = input;
+            _extendedInput = input as IAvatarInputExtended;
             _avatar = avatar;
             _logger = loggerFactory.CreateLogger<AvatarIK>(_avatar.prefab.descriptor.name);
 
@@ -189,7 +196,7 @@ namespace CustomAvatar.Avatar
         {
             // don't move the root if locomotion is disabled and both feet aren't being tracked
             // (i.e. keep previous behaviour of sticking to the origin when locomotion is disabled and we're missing one or more FBT trackers)
-            if (!_isLocomotionEnabled && !_hasBothLegTargets)
+            if ((!_extendedInput?.enableLocomotion ?? !_isLocomotionEnabled) && !_hasBothLegTargets)
             {
                 return;
             }
@@ -249,7 +256,7 @@ namespace CustomAvatar.Avatar
         private void UpdateLocomotion()
         {
             // don't enable locomotion if FBT is applied
-            bool shouldEnableLocomotion = _isLocomotionEnabled && !(_hasPelvisTarget && _hasBothLegTargets);
+            bool shouldEnableLocomotion = (_extendedInput?.enableLocomotion ?? _isLocomotionEnabled) && !(_hasPelvisTarget && _hasBothLegTargets);
 
             if (shouldEnableLocomotion)
             {
@@ -265,6 +272,7 @@ namespace CustomAvatar.Avatar
         private void OnInputChanged()
         {
             UpdateSolverTargets();
+            UpdateLocomotion();
         }
 
         private void UpdateSolverTargets()

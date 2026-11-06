@@ -15,7 +15,11 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.ComponentModel;
+using CustomAvatar.Configuration;
 using CustomAvatar.Tracking;
+using CustomAvatar.Utilities;
+using SiraUtil.Tools.FPFC;
 using UnityEngine;
 using Zenject;
 
@@ -24,17 +28,32 @@ namespace CustomAvatar.Player
     /// <summary>
     /// The player's <see cref="IAvatarInput"/> with calibration and other settings applied.
     /// </summary>
-    internal class VRPlayerInput : IInitializable, IDisposable, IAvatarInput
+    internal class VRPlayerInput : IInitializable, IDisposable, IAvatarInput, IAvatarInputExtended
     {
         private readonly TrackingRig _trackingRig;
         private readonly IFingerTrackingProvider _fingerTrackingProvider;
+        private readonly IFPFCSettings _fpfcSettings;
+        private readonly Settings _settings;
+        private readonly BeatSaberUtilities _beatSaberUtilities;
+
+        public bool shouldProcessInput => _beatSaberUtilities.hasFocus && !_fpfcSettings.Enabled && !_trackingRig.isCalibrating;
+
+        public bool shouldResetTransforms => _fpfcSettings.Enabled || _trackingRig.isCalibrating;
+
+        public bool enableLocomotion => _settings.enableLocomotion;
 
         protected VRPlayerInput(
             TrackingRig trackingRig,
-            IFingerTrackingProvider fingerTrackingProvider)
+            IFingerTrackingProvider fingerTrackingProvider,
+            IFPFCSettings fpfcSettings,
+            Settings settings,
+            BeatSaberUtilities beatSaberUtilities)
         {
             _trackingRig = trackingRig;
             _fingerTrackingProvider = fingerTrackingProvider;
+            _fpfcSettings = fpfcSettings;
+            _settings = settings;
+            _beatSaberUtilities = beatSaberUtilities;
         }
 
         public event Action inputChanged;
@@ -42,11 +61,19 @@ namespace CustomAvatar.Player
         public void Initialize()
         {
             _trackingRig.trackingChanged += OnTrackingRigChanged;
+            _trackingRig.isCalibratingChanged += OnIsCalibratingChanged;
+            _fpfcSettings.PropertyChanged += OnFpfcSettingsPropertyChanged;
+            _settings.enableLocomotion.changed += OnEnableLocomotionChanged;
+            _beatSaberUtilities.focusChanged += OnFocusChanged;
         }
 
         public void Dispose()
         {
             _trackingRig.trackingChanged -= OnTrackingRigChanged;
+            _trackingRig.isCalibratingChanged -= OnIsCalibratingChanged;
+            _fpfcSettings.PropertyChanged -= OnFpfcSettingsPropertyChanged;
+            _settings.enableLocomotion.changed -= OnEnableLocomotionChanged;
+            _beatSaberUtilities.focusChanged -= OnFocusChanged;
         }
 
         public bool TryGetTransform(DeviceUse use, out Transform transform)
@@ -70,6 +97,26 @@ namespace CustomAvatar.Player
         public bool TryGetFingerCurl(DeviceUse use, out FingerCurl curl) => _fingerTrackingProvider.TryGetFingerCurl(use, out curl);
 
         private void OnTrackingRigChanged()
+        {
+            inputChanged?.Invoke();
+        }
+
+        private void OnIsCalibratingChanged(bool isCalibrating)
+        {
+            inputChanged?.Invoke();
+        }
+
+        private void OnFpfcSettingsPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            inputChanged?.Invoke();
+        }
+
+        private void OnEnableLocomotionChanged(bool enable)
+        {
+            inputChanged?.Invoke();
+        }
+
+        private void OnFocusChanged(bool hasFocus)
         {
             inputChanged?.Invoke();
         }

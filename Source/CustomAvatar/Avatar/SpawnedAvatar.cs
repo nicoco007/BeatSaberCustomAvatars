@@ -54,7 +54,7 @@ namespace CustomAvatar.Avatar
         internal EventManager eventManager { get; private set; }
 
         private ILogger<SpawnedAvatar> _logger;
-
+        private IAvatarInputExtended _extendedInput;
         private FirstPersonExclusion[] _firstPersonExclusions;
         private Renderer[] _renderers;
 
@@ -89,6 +89,7 @@ namespace CustomAvatar.Avatar
             name = $"SpawnedAvatar({prefab.descriptor.name})";
 
             _logger = loggerFactory.CreateLogger<SpawnedAvatar>(prefab.descriptor.name);
+            _extendedInput = avatarInput as IAvatarInputExtended;
 
             _firstPersonExclusions = GetComponentsInChildren<FirstPersonExclusion>();
             _renderers = GetComponentsInChildren<Renderer>();
@@ -108,9 +109,61 @@ namespace CustomAvatar.Avatar
             fingerTracking = GetComponent<AvatarFingerTracking>();
         }
 
+        protected void OnEnable()
+        {
+            Debug.Log("SpawnedAvatar OnEnable");
+
+            if (_extendedInput != null)
+            {
+                _extendedInput.inputChanged += OnInputChanged;
+                OnInputChanged();
+            }
+        }
+
+        protected void OnDisable()
+        {
+            _extendedInput?.inputChanged -= OnInputChanged;
+        }
+
         protected void OnDestroy()
         {
             Destroy(gameObject);
+        }
+
+        private void OnInputChanged()
+        {
+            bool enabled = _extendedInput.shouldProcessInput;
+            bool reset = _extendedInput.shouldResetTransforms;
+
+            if (transformTracking != null)
+            {
+                transformTracking.enabled = enabled;
+
+                if (reset)
+                {
+                    transformTracking.ResetTransforms();
+                }
+            }
+
+            if (ik != null)
+            {
+                ik.enabled = enabled;
+
+                if (reset)
+                {
+                    ik.ResetTransforms();
+                }
+            }
+
+            if (fingerTracking != null)
+            {
+                fingerTracking.enabled = enabled;
+
+                if (reset)
+                {
+                    fingerTracking.ResetTransforms();
+                }
+            }
         }
 
         private void SetChildrenToLayer(int layer)

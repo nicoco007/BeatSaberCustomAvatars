@@ -1,4 +1,4 @@
-﻿//  Beat Saber Custom Avatars - Custom player models for body presence in Beat Saber.
+//  Beat Saber Custom Avatars - Custom player models for body presence in Beat Saber.
 //  Copyright © 2018-2026  Nicolas Gnyra and Beat Saber Custom Avatars Contributors
 //
 //  This library is free software: you can redistribute it and/or
@@ -16,6 +16,7 @@
 
 using System.Collections.Generic;
 using CustomAvatar.Tracking;
+using CustomAvatar.Utilities;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Animations;
@@ -26,7 +27,14 @@ namespace CustomAvatar.Avatar
     [DisallowMultipleComponent]
     internal class AvatarTransformTracking : MonoBehaviour
     {
-        private static readonly List<ConstraintSource> kEmptyConstraintSources = new(0);
+        private static readonly List<ConstraintSource> kEmptyConstraintSources = [];
+
+        private Pose _initialHead;
+        private Pose _initialLeftHand;
+        private Pose _initialRightHand;
+        private Pose _initialPelvis;
+        private Pose _initialLeftFoot;
+        private Pose _initialRightFoot;
 
         private ParentConstraint _head;
         private ParentConstraint _leftHand;
@@ -38,14 +46,48 @@ namespace CustomAvatar.Avatar
         private SpawnedAvatar _spawnedAvatar;
         private IAvatarInput _avatarInput;
 
+        private bool _hasBody;
         private Vector3 _prevBodyLocalPosition;
+
+        [Inject]
+        [UsedImplicitly]
+        private void Construct(SpawnedAvatar spawnedAvatar, IAvatarInput avatarInput)
+        {
+            _spawnedAvatar = spawnedAvatar;
+            _avatarInput = avatarInput;
+        }
+
+        internal void ResetTransforms()
+        {
+            if (!didAwake)
+            {
+                return;
+            }
+
+            if (_spawnedAvatar.head != null) _spawnedAvatar.head.SetLocalPose(_initialHead);
+            if (_spawnedAvatar.leftHand != null) _spawnedAvatar.leftHand.SetLocalPose(_initialLeftHand);
+            if (_spawnedAvatar.rightHand != null) _spawnedAvatar.rightHand.SetLocalPose(_initialRightHand);
+            if (_spawnedAvatar.pelvis != null) _spawnedAvatar.pelvis.SetLocalPose(_initialPelvis);
+            if (_spawnedAvatar.leftLeg != null) _spawnedAvatar.leftLeg.SetLocalPose(_initialLeftFoot);
+            if (_spawnedAvatar.rightLeg != null) _spawnedAvatar.rightLeg.SetLocalPose(_initialRightFoot);
+        }
+
+        protected void Awake()
+        {
+            _head = CreateConstraint(_spawnedAvatar.head, ref _initialHead);
+            _leftHand = CreateConstraint(_spawnedAvatar.leftHand, ref _initialLeftHand);
+            _rightHand = CreateConstraint(_spawnedAvatar.rightHand, ref _initialRightHand);
+            _pelvis = CreateConstraint(_spawnedAvatar.pelvis, ref _initialPelvis);
+            _leftFoot = CreateConstraint(_spawnedAvatar.leftLeg, ref _initialLeftFoot);
+            _rightFoot = CreateConstraint(_spawnedAvatar.rightLeg, ref _initialRightFoot);
+
+            _hasBody = _spawnedAvatar.body != null;
+        }
 
         protected void OnEnable()
         {
-            if (_avatarInput != null)
-            {
-                _avatarInput.inputChanged += OnInputChanged;
-            }
+            _avatarInput.inputChanged += OnInputChanged;
+            OnInputChanged();
 
             if (_head != null) _head.constraintActive = true;
             if (_leftHand != null) _leftHand.constraintActive = true;
@@ -57,48 +99,26 @@ namespace CustomAvatar.Avatar
             UpdateConstraints();
         }
 
-        [Inject]
-        [UsedImplicitly]
-        private void Construct(SpawnedAvatar spawnedAvatar, IAvatarInput avatarInput)
-        {
-            _spawnedAvatar = spawnedAvatar;
-            _avatarInput = avatarInput;
-        }
-
-        protected void Start()
-        {
-            if (_avatarInput != null)
-            {
-                _avatarInput.inputChanged += OnInputChanged;
-            }
-
-            _head = CreateConstraint(_spawnedAvatar.head);
-            _leftHand = CreateConstraint(_spawnedAvatar.leftHand);
-            _rightHand = CreateConstraint(_spawnedAvatar.rightHand);
-            _pelvis = CreateConstraint(_spawnedAvatar.pelvis);
-            _leftFoot = CreateConstraint(_spawnedAvatar.leftLeg);
-            _rightFoot = CreateConstraint(_spawnedAvatar.rightLeg);
-
-            UpdateConstraints();
-        }
-
         protected void Update()
         {
-            if (_spawnedAvatar.body)
+            if (_hasBody)
             {
-                _spawnedAvatar.body.position = _spawnedAvatar.head.position - _spawnedAvatar.head.up * 0.1f;
+                Transform head = _spawnedAvatar.head;
+                Transform body = _spawnedAvatar.body;
 
-                Vector3 vel = new(_spawnedAvatar.body.localPosition.x - _prevBodyLocalPosition.x, 0.0f,
-                    _spawnedAvatar.body.localPosition.z - _prevBodyLocalPosition.z);
+                body.position = head.position - head.up * 0.1f;
 
-                Quaternion rot = Quaternion.Euler(0.0f, _spawnedAvatar.head.localEulerAngles.y, 0.0f);
+                Vector3 vel = new(body.localPosition.x - _prevBodyLocalPosition.x, 0.0f,
+                    body.localPosition.z - _prevBodyLocalPosition.z);
+
+                Quaternion rot = Quaternion.Euler(0.0f, head.localEulerAngles.y, 0.0f);
                 Vector3 tiltAxis = Vector3.Cross(transform.up, vel);
 
-                _spawnedAvatar.body.localRotation = Quaternion.Lerp(_spawnedAvatar.body.localRotation,
+                body.localRotation = Quaternion.Lerp(body.localRotation,
                     Quaternion.AngleAxis(vel.magnitude * 1250.0f, tiltAxis) * rot,
                     Time.deltaTime * 10.0f);
 
-                _prevBodyLocalPosition = _spawnedAvatar.body.localPosition;
+                _prevBodyLocalPosition = body.localPosition;
             }
         }
 
@@ -111,10 +131,7 @@ namespace CustomAvatar.Avatar
             if (_leftFoot != null) _leftFoot.constraintActive = false;
             if (_rightFoot != null) _rightFoot.constraintActive = false;
 
-            if (_avatarInput != null)
-            {
-                _avatarInput.inputChanged -= OnInputChanged;
-            }
+            _avatarInput.inputChanged -= OnInputChanged;
         }
 
         private void OnInputChanged()
@@ -122,12 +139,14 @@ namespace CustomAvatar.Avatar
             UpdateConstraints();
         }
 
-        private ParentConstraint CreateConstraint(Transform transform)
+        private ParentConstraint CreateConstraint(Transform transform, ref Pose initialPose)
         {
             if (transform == null)
             {
                 return null;
             }
+
+            initialPose = transform.GetLocalPose();
 
             ParentConstraint parentConstraint = transform.gameObject.AddComponent<ParentConstraint>();
             parentConstraint.weight = 1;

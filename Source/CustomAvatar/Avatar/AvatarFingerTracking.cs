@@ -34,7 +34,18 @@ namespace CustomAvatar.Avatar
             _input = input;
         }
 
-        protected void Start()
+        internal void ResetTransforms()
+        {
+            if (!didAwake)
+            {
+                return;
+            }
+
+            _poseManager.ApplyLeftHandFingerPoses(0, 0, 0, 0, 0);
+            _poseManager.ApplyRightHandFingerPoses(0, 0, 0, 0, 0);
+        }
+
+        protected void Awake()
         {
             _poseManager = GetComponentInChildren<PoseManager>();
         }

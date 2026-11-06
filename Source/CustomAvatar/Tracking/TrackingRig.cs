@@ -140,8 +140,6 @@ namespace CustomAvatar.Tracking
             }
 
             isCalibrating = true;
-
-            SetIKEnabled(false);
         }
 
         internal void EndCalibration()
@@ -152,8 +150,6 @@ namespace CustomAvatar.Tracking
             }
 
             isCalibrating = false;
-
-            SetIKEnabled(true);
 
             _playerAvatarManager.ResizeCurrentAvatar();
 
@@ -478,14 +474,6 @@ namespace CustomAvatar.Tracking
             else
             {
                 trackedNode.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-            }
-        }
-
-        private void SetIKEnabled(bool enabled)
-        {
-            if (_playerAvatarManager != null && _playerAvatarManager.currentlySpawnedAvatar != null && _playerAvatarManager.currentlySpawnedAvatar.ik != null)
-            {
-                _playerAvatarManager.currentlySpawnedAvatar.ik.enabled = enabled;
             }
         }
 

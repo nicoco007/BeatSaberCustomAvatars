@@ -137,7 +137,6 @@ namespace CustomAvatar.Player
             _settings.isAvatarVisibleInFirstPerson.changed += OnAvatarVisibleInFirstPersonChanged;
             _settings.playerEyeHeight.changed += OnPlayerHeightChanged;
             _settings.playerArmSpan.changed += OnPlayerArmSpanChanged;
-            _settings.enableLocomotion.changed += OnEnableLocomotionChanged;
 
             _beatSaberUtilities.roomAdjustChanged += OnRoomAdjustChanged;
 
@@ -200,7 +199,6 @@ namespace CustomAvatar.Player
             _settings.isAvatarVisibleInFirstPerson.changed -= OnAvatarVisibleInFirstPersonChanged;
             _settings.playerEyeHeight.changed -= OnPlayerHeightChanged;
             _settings.playerArmSpan.changed -= OnPlayerArmSpanChanged;
-            _settings.enableLocomotion.changed -= OnEnableLocomotionChanged;
 
             _beatSaberUtilities.roomAdjustChanged -= OnRoomAdjustChanged;
 
@@ -352,7 +350,6 @@ namespace CustomAvatar.Player
 
             ResizeCurrentAvatar();
             UpdateFirstPersonVisibility();
-            UpdateLocomotionEnabled();
 
             avatarChanged?.Invoke(currentlySpawnedAvatar);
         }
@@ -423,7 +420,6 @@ namespace CustomAvatar.Player
         private void OnRoomAdjustChanged(Vector3 roomCenter, Quaternion roomRotation)
         {
             UpdateAvatarVerticalPosition();
-            UpdateLocomotionEnabled();
         }
 
         private void UpdateConstraints()
@@ -539,19 +535,6 @@ namespace CustomAvatar.Player
             }
 
             return scale;
-        }
-
-        private void OnEnableLocomotionChanged(bool enable)
-        {
-            UpdateLocomotionEnabled();
-        }
-
-        private void UpdateLocomotionEnabled()
-        {
-            if (currentlySpawnedAvatar != null && currentlySpawnedAvatar.ik != null)
-            {
-                currentlySpawnedAvatar.ik.isLocomotionEnabled = _settings.enableLocomotion;
-            }
         }
 
         private void OnPlayerHeightChanged(float height)
