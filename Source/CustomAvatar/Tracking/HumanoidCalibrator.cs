@@ -103,6 +103,9 @@ namespace CustomAvatar.Tracking
             _trackingRig.trackingChanged += OnTrackingChanged;
 
             OnTrackingChanged();
+
+            // UI interactions unfortunately seem to enable this behaviour too late for Update to run in the same frame
+            Update();
         }
 
         protected void Update()
