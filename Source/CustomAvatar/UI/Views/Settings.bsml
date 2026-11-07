@@ -74,10 +74,10 @@
     <macro.as-host host="interfaceSettingsHost">
       <settings-container size-delta-x="-20" anchored-position-x="4">
         <text color="#808080" text="Mirror" font-size="4" italics="true" align="Capline" anchor-min="0 0.5" anchor-max="1 0.5" size-delta="0 7" />
-        <increment-setting text="Render Scale" value="renderScale" bind-value="true" apply-on-change="true" min="0.5" max="2" increment="0.1" formatter="SingleDecimalFloatFormatter" />
-        <list-setting text="Anti Aliasing" value="antiAliasingLevel" bind-value="true" apply-on-change="true" options="antiAliasingLevelOptions" formatter="AntiAliasingLevelFormatter" />
         <toggle-setting text="Use Fake Mirror (beta)" value="useFakeMirror" bind-value="true" apply-on-change="true" hover-hint="Show a mirrored version of the current avatar rather than rendering a full mirror. Improves performance and allows the avatar to be closer to you, but may not accurately reflect all avatar features." />
-        <toggle-setting text="Show in non-VR cameras" value="renderInExternalCameras" bind-value="true" apply-on-change="true" hover-hint="Disable this setting to improve performance in this menu when multiple cameras are used (e.g. smooth camera or Camera2)." />
+        <increment-setting active="~useRealMirror" text="Render Scale" value="renderScale" bind-value="true" apply-on-change="true" min="0.5" max="2" increment="0.1" formatter="SingleDecimalFloatFormatter" />
+        <list-setting active="~useRealMirror" text="Anti Aliasing" value="antiAliasingLevel" bind-value="true" apply-on-change="true" options="antiAliasingLevelOptions" formatter="AntiAliasingLevelFormatter" />
+        <toggle-setting active="~useRealMirror" text="Show in non-VR cameras" value="renderInExternalCameras" bind-value="true" apply-on-change="true" hover-hint="Disable this setting to improve performance in this menu when multiple cameras are used (e.g. smooth camera or Camera2)." />
 
         <text color="#808080" text="Other" font-size="4" italics="true" align="Capline" anchor-min="0 0.5" anchor-max="1 0.5" size-delta="0 7" />
         <dropdown-list-setting text="Flip camera when focus is lost" value="hmdCameraBehaviour" bind-value="true" apply-on-change="true" options="hmdCameraBehaviourOptions" formatter="HmdCameraBehaviourFormatter" hover-hint="Flip the camera to face your avatar when the system (SteamVR, Oculus, etc.) dashboard is opened or when you remove your headset." />

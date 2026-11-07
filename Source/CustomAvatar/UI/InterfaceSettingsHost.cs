@@ -14,12 +14,14 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using CustomAvatar.Configuration;
 using CustomAvatar.Rendering;
 
 namespace CustomAvatar.UI
 {
-    internal class InterfaceSettingsHost
+    internal class InterfaceSettingsHost : INotifyPropertyChanged
     {
         private readonly Settings _settings;
 
@@ -43,8 +45,14 @@ namespace CustomAvatar.UI
         internal bool useFakeMirror
         {
             get => _settings.mirror.useFakeMirrorBeta;
-            set => _settings.mirror.useFakeMirrorBeta.value = value;
+            set
+            {
+                _settings.mirror.useFakeMirrorBeta.value = value;
+                NotifyPropertyChanged(nameof(useRealMirror));
+            }
         }
+
+        internal bool useRealMirror => !_settings.mirror.useFakeMirrorBeta;
 
         internal bool renderInExternalCameras
         {
@@ -58,9 +66,11 @@ namespace CustomAvatar.UI
             set => _settings.hmdCameraBehaviour.value = value;
         }
 
-        internal int[] antiAliasingLevelOptions = [1, 2, 4, 8];
+        internal int[] antiAliasingLevelOptions { get; } = [1, 2, 4, 8];
 
-        internal HmdCameraBehaviour[] hmdCameraBehaviourOptions = [HmdCameraBehaviour.Off, HmdCameraBehaviour.HmdOnly, HmdCameraBehaviour.AllCameras];
+        internal HmdCameraBehaviour[] hmdCameraBehaviourOptions { get; } = [HmdCameraBehaviour.Off, HmdCameraBehaviour.HmdOnly, HmdCameraBehaviour.AllCameras];
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         protected string SingleDecimalFloatFormatter(float value) => value.ToString("0.0");
 
@@ -85,6 +95,11 @@ namespace CustomAvatar.UI
                 HmdCameraBehaviour.AllCameras => "All HMD Cameras",
                 _ => "?",
             };
+        }
+
+        protected void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }
