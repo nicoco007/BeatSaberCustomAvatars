@@ -15,15 +15,11 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections;
-using BeatSaberMarkupLanguage.Attributes;
 using CustomAvatar.Avatar;
 using CustomAvatar.Configuration;
 using CustomAvatar.Player;
 using CustomAvatar.Tracking;
 using HMUI;
-using TMPro;
-using UnityEngine;
-using UnityEngine.UI;
 
 namespace CustomAvatar.UI
 {
@@ -32,11 +28,6 @@ namespace CustomAvatar.UI
         private readonly TrackingRig _trackingRig;
         private readonly PlayerAvatarManager _playerAvatarManager;
         private readonly CalibrationData _calibrationData;
-
-#pragma warning disable CS0649
-        [UIComponent(nameof(adjustModeTextSegmentControl))]
-        protected TextSegmentedControl adjustModeTextSegmentControl;
-#pragma warning disable CS0649
 
         internal AdjustHost(TrackingRig trackingRig, PlayerAvatarManager playerAvatarManager, CalibrationData calibrationData)
         {
@@ -73,25 +64,6 @@ namespace CustomAvatar.UI
             _playerAvatarManager.avatarChanged -= OnAvatarChanged;
 
             SaveClicked();
-        }
-
-        [UIAction("#post-parse")]
-        protected void PostParse()
-        {
-            HorizontalLayoutGroup horizontalLayoutGroup = adjustModeTextSegmentControl.GetComponent<HorizontalLayoutGroup>();
-            horizontalLayoutGroup.childForceExpandWidth = false;
-            horizontalLayoutGroup.childForceExpandHeight = false;
-
-            ContentSizeFitter contentSizeFitter = adjustModeTextSegmentControl.gameObject.AddComponent<ContentSizeFitter>();
-            contentSizeFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-            foreach (SegmentedControlCell cell in adjustModeTextSegmentControl.cells)
-            {
-                cell.transform.Find("BG").gameObject.SetActive(true);
-                cell.gameObject.AddComponent<StackLayoutGroup>();
-                TextMeshProUGUI text = cell.transform.Find("Text").GetComponent<TextMeshProUGUI>();
-                text.margin = new Vector4(2, 0, 2, 0);
-            }
         }
 
         protected void AdjustClicked()

@@ -53,6 +53,7 @@ namespace CustomAvatar.Zenject
             Container.Bind(typeof(IInitializable), typeof(IDisposable)).To<AvatarMenuFlowCoordinator>().FromNewComponentOnNewGameObject().AsSingle();
 
             Container.Bind<BSMLTag>().To<ProgressBarTag>().AsSingle();
+            Container.Bind<BSMLTag>().To<SmallTextSegmentedControlTag>().AsSingle();
             Container.Bind<BSMLTag>().To<ValuePickerTag>().AsSingle();
             Container.Bind<TypeHandler>().To<ProgressBarHandler>().AsSingle();
             Container.Bind<TypeHandler>().To<ValuePickerHandler>().AsSingle();
