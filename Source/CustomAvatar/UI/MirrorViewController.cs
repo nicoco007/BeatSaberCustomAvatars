@@ -170,6 +170,7 @@ namespace CustomAvatar.UI
             SetLoading(false);
             OnUseFakeMirrorChanged(_settings.mirror.useFakeMirrorBeta);
             OnEyeHeightChanged(_settings.playerEyeHeight);
+            OnIsCalibratingChanged(_trackingRig.isCalibrating);
         }
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
