@@ -130,6 +130,7 @@ GameObject:
   - component: {fileID: 2771747624199801148}
   - component: {fileID: 1484770019512835712}
   - component: {fileID: 7341870048920001921}
+  - component: {fileID: -6202371345489554044}
   m_Layer: 0
   m_Name: TrackingRig
   m_TagString: Untagged
@@ -216,6 +217,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e7c3fc8ca994ab4da4775f756a9dbce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!210 &-6202371345489554044
+SortingGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9210973690963640638}
+  m_Enabled: 1
+  m_SortingLayerID: -418025761
+  m_SortingLayer: 1
+  m_SortingOrder: 100
+  m_SortAtRoot: 0
 --- !u!1001 &97244398822591029
 PrefabInstance:
   m_ObjectHideFlags: 0
