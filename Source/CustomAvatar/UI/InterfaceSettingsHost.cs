@@ -62,6 +62,8 @@ namespace CustomAvatar.UI
 
         internal HmdCameraBehaviour[] hmdCameraBehaviourOptions = [HmdCameraBehaviour.Off, HmdCameraBehaviour.HmdOnly, HmdCameraBehaviour.AllCameras];
 
+        protected string SingleDecimalFloatFormatter(float value) => value.ToString("0.0");
+
         protected string AntiAliasingLevelFormatter(int value)
         {
             if (value > 1)
