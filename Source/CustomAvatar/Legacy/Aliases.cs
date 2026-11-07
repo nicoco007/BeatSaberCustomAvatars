@@ -16,6 +16,7 @@
 
 extern alias BeatSaberFinalIK;
 extern alias BeatSaberDynamicBone;
+
 using System;
 
 namespace AvatarScriptPack

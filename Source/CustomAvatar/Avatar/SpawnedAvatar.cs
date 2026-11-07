@@ -14,8 +14,6 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-extern alias BeatSaberFinalIK;
-
 using CustomAvatar.Logging;
 using CustomAvatar.Tracking;
 using JetBrains.Annotations;
