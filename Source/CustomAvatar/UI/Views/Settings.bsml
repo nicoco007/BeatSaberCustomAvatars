@@ -49,7 +49,7 @@
         <text color="#808080" text="Adjust" font-size="3.5" italics="true" align="Capline" anchor-min="0 0.5" anchor-max="1 0.5" size-delta="0 6" />
 
         <macro.as-host host="adjustHost">
-          <ca.small-text-segments id="adjustModeTextSegmentControl" data="adjustModes" select-cell="AdjustModeTabSelected" size-delta="90 5" child-expand-width="true" child-control-width="true" />
+          <ca.small-text-segments data="adjustModes" select-cell="AdjustModeTabSelected" size-delta="90 5" child-expand-width="true" child-control-width="true" />
           <horizontal child-align="MiddleLeft" child-expand-width="true" child-control-width="true" pad-top="1" pad-bottom="1">
             <button text="Adjust" interactable="~isAdjustEnabled" hover-hint="Starts Adjust FBT mode, allowing you to grab parts of your avatar to reposition calibration by hand." on-click="AdjustClicked" />
             <button text="Save" interactable="~isSaveEnabled" on-click="SaveClicked" />
