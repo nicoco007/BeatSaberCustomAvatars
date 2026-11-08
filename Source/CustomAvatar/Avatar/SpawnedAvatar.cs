@@ -109,8 +109,6 @@ namespace CustomAvatar.Avatar
 
         protected void OnEnable()
         {
-            Debug.Log("SpawnedAvatar OnEnable");
-
             if (_extendedInput != null)
             {
                 _extendedInput.inputChanged += OnInputChanged;
